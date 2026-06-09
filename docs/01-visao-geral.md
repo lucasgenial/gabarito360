@@ -185,7 +185,7 @@ A estrategia recomendada e hibrida:
 - [Requisitos nao funcionais](03-requisitos-nao-funcionais.md)
 - [Regras de negocio](04-regras-de-negocio.md)
 - [Casos de uso](05-casos-de-uso.md)
-- [Banco de dados](06-banco-de-dados.md)
+- [Modelagem do banco de dados](06-modelagem-banco.md)
 - [API REST](07-api.md)
 - [Aplicativo Android](08-mobile-android.md)
 - [Modulo OMR](09-modulo-omr.md)

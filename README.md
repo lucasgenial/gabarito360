@@ -201,7 +201,7 @@ Versoes posteriores incluem modo offline, dashboards consolidados, relatorios PD
 | [Requisitos nao funcionais](docs/03-requisitos-nao-funcionais.md) | Seguranca, desempenho, disponibilidade e qualidade |
 | [Regras de negocio](docs/04-regras-de-negocio.md) | Regras de integridade, acesso e operacao |
 | [Casos de uso](docs/05-casos-de-uso.md) | Atores, fluxos e matriz resumida de permissoes |
-| [Banco de dados](docs/06-banco-de-dados.md) | Modelagem relacional detalhada para PostgreSQL |
+| [Modelagem do banco](docs/06-modelagem-banco.md) | Modelagem relacional detalhada para PostgreSQL |
 | [API REST](docs/07-api.md) | Contratos e endpoints iniciais |
 | [Aplicativo Android](docs/08-mobile-android.md) | Telas, navegacao, fluxos e sincronizacao |
 | [Modulo OMR](docs/09-modulo-omr.md) | Pipeline, confianca, calibracao e testes |
@@ -221,6 +221,7 @@ gabarito360/
     |-- 04-regras-de-negocio.md
     |-- 05-casos-de-uso.md
     |-- 06-banco-de-dados.md
+    |-- 06-modelagem-banco.md
     |-- 07-api.md
     |-- 08-mobile-android.md
     |-- 09-modulo-omr.md

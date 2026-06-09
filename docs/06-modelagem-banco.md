@@ -1,10 +1,10 @@
 # Gabarito360 - Modelagem Relacional PostgreSQL
 
-> **Documento legado:** a versao canonica e refinada desta modelagem esta em [06-modelagem-banco.md](06-modelagem-banco.md). Este arquivo foi preservado para nao quebrar referencias historicas.
-
 ## 1. Objetivo
 
-Este documento define a modelagem relacional inicial do Gabarito360 para PostgreSQL. O modelo cobre organizacao, controle de acesso, provas, aplicacoes, leitura OMR, correcao, auditoria, arquivos e sincronizacao mobile.
+Este e o documento canonico da modelagem relacional do Gabarito360 para PostgreSQL. O modelo cobre organizacao, controle de acesso, provas, aplicacoes, leitura OMR, correcao, auditoria, arquivos e sincronizacao mobile.
+
+O documento especifica tabelas, campos, tipos, chaves, indices, relacionamentos e regras de integridade. Ele orientara a criacao futura das migrations, mas **nao implementa migrations ou SQL de schema nesta etapa**. Os trechos SQL apresentados sao exemplos de restricoes e indices recomendados.
 
 A modelagem prioriza:
 
@@ -143,7 +143,40 @@ dispositivos_mobile 1 --- N logs_sincronizacao
 
 `nucleos`, `escolas`, `usuarios`, `perfis`, `turmas`, `alunos`, `provas`, `questoes`, `gabaritos_oficiais`, `modelos_cartao`, `aplicacoes`, `aplicadores_turmas`, `leituras_cartao`, `respostas_detectadas`, `resultados`, `auditorias`, `arquivos` e `logs_sincronizacao`.
 
-### 5.2 Tabelas associativas e de suporte necessarias
+Cada tabela principal possui uma secao propria com:
+
+- finalidade;
+- campos e tipos PostgreSQL;
+- chave primaria;
+- chaves estrangeiras;
+- indices e restricoes;
+- relacionamentos;
+- regras importantes.
+
+### 5.2 Matriz das tabelas obrigatorias
+
+| Tabela | PK | Principais FKs | Relacionamentos principais | Regra critica |
+|---|---|---|---|---|
+| `nucleos` | `id` | Nenhuma | 1:N escolas e provas | Codigo ativo deve ser unico |
+| `escolas` | `id` | `nucleo_id` | N:1 nucleo; 1:N turmas e alunos | Escola pertence a um unico nucleo |
+| `usuarios` | `id` | Nenhuma obrigatoria | N:N perfis, turmas e aplicacoes | Usuario inativo nao pode autenticar |
+| `perfis` | `id` | Nenhuma | N:N usuarios e permissoes | Codigo do perfil deve ser unico |
+| `turmas` | `id` | `escola_id` | N:1 escola; N:N alunos e aplicadores | Codigo unico por escola e ano letivo |
+| `alunos` | `id` | `escola_id` | N:1 escola; N:N turmas; 1:N resultados | Matricula unica no escopo definido |
+| `provas` | `id` | `nucleo_id` ou `escola_id`, `modelo_cartao_id` | 1:N questoes, gabaritos e aplicacoes | Exatamente um proprietario organizacional |
+| `questoes` | `id` | `prova_id` | N:1 prova; 1:N respostas oficiais/detectadas | Numero unico dentro da prova |
+| `gabaritos_oficiais` | `id` | `prova_id`, atores usuarios | N:1 prova; 1:N respostas oficiais | Apenas uma versao vigente por prova |
+| `modelos_cartao` | `id` | `nucleo_id`, `arquivo_base_id`, `criado_por` | 1:N provas, aplicacoes e leituras | Versao homologada deve ser imutavel |
+| `aplicacoes` | `id` | prova, escola, turma, gabarito e modelo | N:1 prova/turma; N:N usuarios/alunos | So recebe confirmacoes enquanto em andamento |
+| `aplicadores_turmas` | `id` | `turma_id`, `usuario_id` | N:N entre usuarios e turmas | Um vinculo ativo equivalente por vez |
+| `leituras_cartao` | `id` | aplicacao, cartao, modelo, arquivos e usuarios | N:1 cartao; 1:N respostas detectadas | Cada tentativa deve ser preservada |
+| `respostas_detectadas` | `id` | `leitura_cartao_id`, `questao_id`, usuario | N:1 leitura e questao | Deteccao original e resposta final sao preservadas |
+| `resultados` | `id` | cartao, leitura, prova, aplicacao, aluno e gabarito | N:1 cartao; 1:N respostas corrigidas | Apenas um resultado vigente por cartao |
+| `auditorias` | `id` | usuario, nucleo e escola | N:1 ator/escopo; referencia entidade auditada | Registros sao imutaveis para usuarios operacionais |
+| `arquivos` | `id` | `criado_por` | Referenciado por modelos e leituras | Retencao e acesso devem respeitar LGPD |
+| `logs_sincronizacao` | `id` | dispositivo, usuario e aplicacao | N:1 dispositivo/usuario/aplicacao | `operacao_id` garante idempotencia |
+
+### 5.3 Tabelas associativas e de suporte necessarias
 
 | Tabela | Necessidade |
 |---|---|
@@ -187,6 +220,8 @@ dispositivos_mobile 1 --- N logs_sincronizacao
 
 **Relacionamentos:** possui muitas `escolas`, `provas`, `modelos_cartao` e atribuicoes em `usuario_perfis`.
 
+**Regras importantes:** nucleos devem ser inativados, nao apagados, quando possuirem escolas ou historico associado. O codigo identifica o nucleo nas integracoes e deve permanecer estavel.
+
 ### 6.2 `escolas`
 
 **Finalidade:** armazenar escolas pertencentes a um nucleo.
@@ -217,6 +252,8 @@ dispositivos_mobile 1 --- N logs_sincronizacao
 
 **Relacionamentos:** pertence a um nucleo; possui turmas, alunos, aplicacoes e perfis de usuario no escopo escolar.
 
+**Regras importantes:** a escola nao pode ser movida de nucleo sem processo administrativo auditado. A inativacao impede novos cadastros e aplicacoes, preservando o historico.
+
 ### 6.3 `usuarios`
 
 **Finalidade:** armazenar identidades autenticaveis.
@@ -245,6 +282,8 @@ dispositivos_mobile 1 --- N logs_sincronizacao
 
 **Relacionamentos:** recebe perfis, vinculos de turma, aplicacoes, leituras, auditorias e dispositivos mobile.
 
+**Regras importantes:** inativar ou bloquear um usuario deve revogar sessoes e impedir novas operacoes. Dados de identificacao devem seguir minimizacao e politica LGPD.
+
 ### 6.4 `perfis`
 
 **Finalidade:** catalogar papeis como administrador, gestor, responsavel escolar, professor, aplicador, consulta e suporte.
@@ -265,6 +304,8 @@ dispositivos_mobile 1 --- N logs_sincronizacao
 
 - `uq_perfis_codigo`: unico em `lower(codigo)`.
 - `idx_perfis_status`: `(status)`.
+
+**Relacionamentos e regras importantes:** perfis associam-se a usuarios por `usuario_perfis` e a permissoes por `perfil_permissoes`. Perfis de sistema nao devem ser removidos ou ter seu significado alterado sem migration e auditoria.
 
 ### 6.5 `permissoes`
 
@@ -336,6 +377,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_turmas_escola_ano_status`: `(escola_id, ano_letivo, status)`.
 - `ck_turmas_ano_letivo`: limite operacional configurado, por exemplo entre `2000` e `2100`.
 
+**Relacionamentos e regras importantes:** a turma pertence a uma escola, recebe matriculas de alunos, aplicadores e aplicacoes. A transferencia ou encerramento da turma deve preservar todos os vinculos historicos.
+
 ### 7.2 `alunos`
 
 **Finalidade:** armazenar alunos no escopo da escola.
@@ -361,6 +404,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_alunos_escola_nome`: `(escola_id, nome)` onde `deleted_at IS NULL`.
 - `idx_alunos_escola_status`: `(escola_id, status)`.
 - `documento` nao deve ser unico ate a politica de coleta ser aprovada.
+
+**Relacionamentos e regras importantes:** o aluno pertence a uma escola, possui historico em turmas e participa de aplicacoes e resultados. Aluno inativo permanece consultavel no historico; dados pessoais devem ser minimizados.
 
 ### 7.3 `matriculas_turmas`
 
@@ -407,6 +452,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_aplicadores_turmas_usuario_ativo`: `(usuario_id, turma_id)` onde `fim_em IS NULL`.
 - `idx_aplicadores_turmas_turma_ativo`: `(turma_id)` onde `fim_em IS NULL`.
 
+**Relacionamentos e regras importantes:** implementa o relacionamento N:N entre usuarios e turmas. Apenas vinculos ativos autorizam a visualizacao operacional; encerrar um vinculo nao apaga aplicacoes ou leituras anteriores.
+
 ## 8. Provas, questoes, gabaritos e modelos
 
 ### 8.1 `modelos_cartao`
@@ -437,6 +484,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_modelos_cartao_nucleo_status`: `(nucleo_id, status)`.
 - Checks para `versao > 0`, quantidades positivas e `jsonb_typeof(alternativas) = 'array'`.
 - Versao homologada usada em aplicacao deve ser tratada como imutavel.
+
+**Relacionamentos e regras importantes:** modelos sao referenciados por provas, aplicacoes e leituras. Qualquer alteracao geometrica ou de limiar exige nova versao; leituras historicas mantem a referencia da versao usada.
 
 ### 8.2 `provas`
 
@@ -475,6 +524,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - Checks para quantidades positivas e alternativas em formato de array.
 - Trigger valida compatibilidade entre quantidades da prova e do modelo.
 
+**Relacionamentos e regras importantes:** a prova pertence exatamente a um nucleo ou escola, possui questoes, versoes de gabarito, turmas autorizadas e aplicacoes. Prova arquivada permanece consultavel, mas nao aceita novas aplicacoes.
+
 ### 8.3 `questoes`
 
 **Finalidade:** representar as questoes da prova para gabarito, correcao e analise.
@@ -496,6 +547,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `uq_questoes_id_prova`: unico em `(id, prova_id)`, usado por FKs compostas.
 - `idx_questoes_prova_status`: `(prova_id, status)`.
 - Check `numero > 0` e `peso_padrao >= 0`.
+
+**Relacionamentos e regras importantes:** cada questao pertence a uma prova e e referenciada por respostas oficiais, detectadas e corrigidas. O numero nao pode repetir dentro da prova; questoes usadas em aplicacoes nao devem ser apagadas.
 
 ### 8.4 `gabaritos_oficiais`
 
@@ -520,6 +573,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `uq_gabaritos_oficiais_vigente`: unico em `(prova_id)` onde `status = 'vigente'`.
 - `uq_gabaritos_oficiais_id_prova`: unico em `(id, prova_id)`, usado por FKs compostas.
 - `idx_gabaritos_oficiais_prova_status`: `(prova_id, status)`.
+
+**Relacionamentos e regras importantes:** cada versao pertence a uma prova, possui respostas oficiais e e referenciada por aplicacoes e resultados. Uma versao publicada e imutavel; alteracoes exigem nova versao, justificativa, auditoria e recorrection.
 
 ### 8.5 `gabarito_respostas`
 
@@ -606,6 +661,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_aplicacoes_turma_status`: `(turma_id, status)`.
 - `idx_aplicacoes_escola_status`: `(escola_id, status)`.
 - `idx_aplicacoes_data_status`: `(data_prevista, status)`.
+
+**Relacionamentos e regras importantes:** a aplicacao vincula prova, escola, turma, versao do gabarito, modelo, aplicadores e alunos previstos. Apenas aplicacoes em andamento aceitam confirmacoes; reabertura exige permissao, motivo e auditoria.
 
 ### 9.2 `aplicacao_aplicadores`
 
@@ -716,6 +773,8 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - Check `tamanho_bytes >= 0`.
 - Download deve ocorrer por autorizacao e URL temporaria; `caminho` nao deve ser exposto ao cliente.
 
+**Relacionamentos e regras importantes:** arquivos sao referenciados por modelos, leituras, importacoes e relatorios. O objeto fisico fica fora do PostgreSQL; acesso, descarte e retencao devem ser autorizados e auditados.
+
 ### 10.3 `leituras_cartao`
 
 **Finalidade:** manter cada captura, tentativa ou reprocessamento OMR sem apagar historico.
@@ -759,6 +818,8 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - `(aplicacao_id, prova_id) -> aplicacoes(id, prova_id)`.
 - Trigger valida que o modelo da leitura corresponde ao modelo congelado na aplicacao.
 
+**Relacionamentos e regras importantes:** cada leitura pertence a uma aplicacao e modelo, pode ser associada ao cartao confirmado e possui respostas detectadas. Nova captura ou reprocessamento sempre cria nova leitura; tentativas anteriores nao sao sobrescritas.
+
 ### 10.4 `respostas_detectadas`
 
 **Finalidade:** registrar deteccao original, revisao humana e resposta final por questao.
@@ -789,6 +850,8 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - `idx_respostas_detectadas_alteradas`: `(leitura_cartao_id)` onde `alterada_manualmente`.
 - Check de confianca entre `0` e `1`.
 - Check exige `alterada_por` e `alterada_at` quando `alterada_manualmente = true`.
+
+**Relacionamentos e regras importantes:** cada resposta pertence a uma leitura e questao. A resposta detectada nunca e substituida pela resposta final; alteracoes manuais devem preservar ambas e registrar ator, horario e motivo aplicavel.
 
 ## 11. Correcao e resultados
 
@@ -831,6 +894,8 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - `(gabarito_oficial_id, prova_id) -> gabaritos_oficiais(id, prova_id)`.
 - Checks impedem totais e pontos negativos.
 - Trigger valida coerencia entre cartao, leitura, prova, aplicacao e aluno.
+
+**Relacionamentos e regras importantes:** cada resultado pertence a um cartao, leitura, aluno, aplicacao, prova e versao de gabarito; possui respostas corrigidas detalhadas. Recorrection cria nova versao e torna a anterior nao vigente, sem apagamento.
 
 ### 11.2 `resultado_respostas`
 
@@ -887,6 +952,8 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - Revogar `UPDATE` e `DELETE` para papeis operacionais.
 - Avaliar particionamento mensal por `created_at` quando o volume justificar.
 
+**Relacionamentos e regras importantes:** auditorias relacionam o ator e o escopo organizacional a uma entidade logica auditada. Nao devem conter segredos ou dados pessoais desnecessarios e sao imutaveis para usuarios operacionais.
+
 ### 12.2 `dispositivos_mobile`
 
 **Finalidade:** identificar instalacoes autorizadas do aplicativo Android.
@@ -940,6 +1007,8 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - Check `tentativas > 0`.
 - Reenvio com mesmo `operacao_id` e mesmo `payload_hash` retorna o resultado anterior.
 - Reenvio com mesmo `operacao_id` e hash diferente retorna conflito.
+
+**Relacionamentos e regras importantes:** cada log pertence a dispositivo e usuario, podendo apontar para a aplicacao e entidade resultante. O registro e a fonte de idempotencia e diagnostico da sincronizacao; conflitos nunca devem ser resolvidos silenciosamente.
 
 ## 13. Relacionamentos resumidos e cardinalidades
 
@@ -1086,3 +1155,18 @@ Particionamento deve ser introduzido somente com testes de consultas, manutencao
 6. Definir se uma prova pode possuir mais de um modelo de cartao simultaneamente.
 7. Definir se professores podem criar provas no escopo escolar.
 8. Homologar os checks e limiares que fazem parte de `configuracao_omr`.
+
+## 21. Limites entre banco e aplicacao
+
+O PostgreSQL deve garantir unicidade, referencias, dominios simples, historico vigente e idempotencia por constraints, FKs, checks e indices parciais. Regras que dependem de autorizacao, estado de varias entidades ou efeitos externos devem ser executadas por servicos transacionais do backend.
+
+| Responsabilidade do PostgreSQL | Responsabilidade do backend |
+|---|---|
+| PKs, FKs e checks locais | Autorizacao por perfil e escopo |
+| Unicidade de matricula, codigo e versoes vigentes | Validacao do fluxo de estados |
+| Idempotencia por `operacao_id` | Conversao de conflitos em erros de API estaveis |
+| Preservacao de historico por referencias e status | Calculo e recorrection de resultados |
+| Transacao atomica da confirmacao | Publicacao de eventos somente apos commit |
+| Indices para consultas operacionais | Retencao, descarte e anonimizacao orquestrados |
+
+Triggers devem ser usados apenas nas regras de coerencia que nao podem ser representadas por constraints declarativas e que precisam ser garantidas independentemente do cliente.
