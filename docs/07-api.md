@@ -1,0 +1,324 @@
+# Gabarito360 - Especificacao Inicial da API REST
+
+## 1. Padroes gerais
+
+- Prefixo inicial: `/api/v1`.
+- Formato: JSON, exceto uploads e downloads.
+- Autenticacao mobile: tokens revogaveis por dispositivo.
+- Autenticacao web: sessao segura ou token conforme arquitetura escolhida.
+- Datas: ISO 8601 com fuso.
+- IDs: UUID.
+- Listagens: paginacao, filtros e ordenacao permitida explicitamente.
+- Toda autorizacao e validacao deve ocorrer no backend.
+- Operacoes offline ou repetiveis devem aceitar `Idempotency-Key`.
+
+## 2. Formato de resposta
+
+### 2.1 Sucesso
+
+```json
+{
+  "data": {},
+  "meta": {
+    "request_id": "uuid"
+  }
+}
+```
+
+### 2.2 Erro
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Os dados informados sao invalidos.",
+    "details": {
+      "campo": ["Mensagem de validacao."]
+    }
+  },
+  "meta": {
+    "request_id": "uuid"
+  }
+}
+```
+
+### 2.3 Codigos HTTP principais
+
+| Codigo | Uso |
+|---|---|
+| 200 | Consulta ou alteracao concluida |
+| 201 | Recurso criado |
+| 202 | Tarefa assincrona aceita |
+| 204 | Operacao sem corpo de resposta |
+| 400 | Requisicao malformada |
+| 401 | Nao autenticado |
+| 403 | Sem permissao ou fora do escopo |
+| 404 | Recurso inexistente no escopo |
+| 409 | Conflito de estado, duplicidade ou sincronizacao |
+| 422 | Falha de validacao |
+| 429 | Limite de requisicoes excedido |
+
+## 3. Autenticacao e contexto
+
+| Metodo | Endpoint | Acesso | Finalidade |
+|---|---|---|---|
+| POST | `/auth/login` | Publico | Autenticar usuario |
+| POST | `/auth/logout` | Autenticado | Revogar sessao/token atual |
+| POST | `/auth/refresh` | Token valido | Renovar token quando aplicavel |
+| POST | `/auth/forgot-password` | Publico | Solicitar recuperacao |
+| POST | `/auth/reset-password` | Publico com token | Redefinir senha |
+| GET | `/me` | Autenticado | Consultar usuario, perfis, escopos e permissoes |
+| GET | `/me/aplicacoes` | Professor/Aplicador | Listar aplicacoes autorizadas para o app |
+| GET | `/me/sessoes` | Autenticado | Listar sessoes ativas na V2 |
+| DELETE | `/me/sessoes/{id}` | Autenticado | Revogar sessao na V2 |
+
+**Validacoes de login:** credenciais obrigatorias, usuario ativo, rate limit e dispositivo identificavel no mobile.
+
+## 4. Nucleos, escolas e usuarios
+
+| Metodo | Endpoint | Acesso |
+|---|---|---|
+| GET | `/nucleos` | Administrador; gestor no proprio escopo |
+| POST | `/nucleos` | Administrador |
+| GET | `/nucleos/{id}` | Administrador; gestor do nucleo |
+| PATCH | `/nucleos/{id}` | Administrador; gestor autorizado |
+| DELETE | `/nucleos/{id}` | Administrador, como inativacao |
+| GET | `/escolas` | Conforme escopo |
+| POST | `/escolas` | Administrador; gestor do nucleo |
+| GET | `/escolas/{id}` | Conforme escopo |
+| PATCH | `/escolas/{id}` | Administrador; gestor do nucleo/escola autorizado |
+| DELETE | `/escolas/{id}` | Usuario autorizado, como inativacao |
+| GET | `/usuarios` | Gestores no escopo |
+| POST | `/usuarios` | Gestores autorizados |
+| GET | `/usuarios/{id}` | Gestores no escopo; proprio usuario |
+| PATCH | `/usuarios/{id}` | Gestores autorizados; campos limitados no proprio usuario |
+| POST | `/usuarios/{id}/perfis` | Administrador/gestor autorizado |
+| DELETE | `/usuarios/{id}/perfis/{vinculoId}` | Administrador/gestor autorizado |
+| POST | `/usuarios/{id}/inativar` | Administrador/gestor autorizado |
+
+**Filtros comuns:** `status`, `nucleo_id`, `escola_id`, `search`, `page`, `per_page`.
+
+## 5. Turmas e alunos
+
+| Metodo | Endpoint | Acesso | Observacao |
+|---|---|---|---|
+| GET | `/turmas` | Conforme escopo | Aplicador recebe apenas vinculadas |
+| POST | `/turmas` | Gestor da escola | Valida ano letivo e codigo |
+| GET | `/turmas/{id}` | Conforme escopo | Inclui resumo autorizado |
+| PATCH | `/turmas/{id}` | Gestor da escola | Mantem historico |
+| DELETE | `/turmas/{id}` | Gestor da escola | Inativacao |
+| POST | `/turmas/{id}/aplicadores` | Gestor da escola | Vincula usuario autorizado |
+| DELETE | `/turmas/{id}/aplicadores/{usuarioId}` | Gestor da escola | Encerra vinculo |
+| GET | `/turmas/{id}/alunos` | Conforme escopo | Lista alunos e status |
+| GET | `/alunos` | Conforme escopo | Filtros por escola/turma |
+| POST | `/alunos` | Gestor da escola | Cadastro individual |
+| GET | `/alunos/{id}` | Conforme escopo | Dados minimos por perfil |
+| PATCH | `/alunos/{id}` | Gestor da escola | Auditar campos sensiveis |
+| DELETE | `/alunos/{id}` | Gestor da escola | Inativacao |
+| POST | `/alunos/importacoes` | Gestor da escola | Upload e validacao; retorna job |
+| GET | `/alunos/importacoes/{id}` | Solicitante/gestor | Consulta validacao e estado |
+| POST | `/alunos/importacoes/{id}/confirmar` | Solicitante/gestor | Confirma lote validado |
+
+## 6. Avaliacoes, gabaritos e modelos
+
+| Metodo | Endpoint | Acesso |
+|---|---|---|
+| GET | `/avaliacoes` | Conforme escopo |
+| POST | `/avaliacoes` | Gestor autorizado |
+| GET | `/avaliacoes/{id}` | Conforme escopo |
+| PATCH | `/avaliacoes/{id}` | Gestor autorizado; conforme status |
+| DELETE | `/avaliacoes/{id}` | Gestor autorizado; arquivamento |
+| POST | `/avaliacoes/{id}/publicar` | Gestor autorizado |
+| POST | `/avaliacoes/{id}/finalizar` | Gestor autorizado |
+| POST | `/avaliacoes/{id}/turmas` | Gestor autorizado |
+| DELETE | `/avaliacoes/{id}/turmas/{turmaId}` | Gestor autorizado; se permitido |
+| GET | `/avaliacoes/{id}/gabaritos` | Conforme escopo |
+| POST | `/avaliacoes/{id}/gabaritos` | Gestor autorizado |
+| POST | `/avaliacoes/{id}/gabaritos/{versaoId}/publicar` | Gestor autorizado |
+| POST | `/avaliacoes/{id}/gabaritos/{versaoId}/recorrigir` | Permissao especial; V2 |
+| GET | `/modelos-cartao` | Conforme escopo |
+| POST | `/modelos-cartao` | Administrador/gestor autorizado |
+| GET | `/modelos-cartao/{id}` | Conforme escopo |
+
+### 6.1 Exemplo de criacao de avaliacao
+
+```json
+{
+  "titulo": "Simulado de Matematica - Nivel 1",
+  "tipo": "simulado",
+  "nivel": "6o e 7o anos",
+  "numero_questoes": 20,
+  "alternativas": ["A", "B", "C", "D", "E"],
+  "proprietario": {
+    "tipo": "nucleo",
+    "id": "uuid"
+  },
+  "modelo_cartao_id": "uuid"
+}
+```
+
+## 7. Aplicacoes
+
+| Metodo | Endpoint | Acesso |
+|---|---|---|
+| GET | `/aplicacoes` | Conforme escopo |
+| POST | `/aplicacoes` | Gestor autorizado |
+| GET | `/aplicacoes/{id}` | Conforme escopo |
+| GET | `/aplicacoes/{id}/alunos` | Gestor/aplicador vinculado |
+| GET | `/aplicacoes/{id}/status` | Conforme escopo |
+| POST | `/aplicacoes/{id}/iniciar` | Gestor/aplicador vinculado |
+| POST | `/aplicacoes/{id}/finalizar` | Gestor/aplicador vinculado |
+| POST | `/aplicacoes/{id}/reabrir` | Permissao especial; V2 |
+| PATCH | `/aplicacoes/{id}/alunos/{alunoId}/presenca` | Gestor/aplicador vinculado; V2 |
+
+**Validacoes de inicio:** avaliacao publicada, gabarito vigente, modelo definido, turma autorizada e usuario vinculado.
+
+## 8. Cartoes e leituras OMR
+
+| Metodo | Endpoint | Acesso | Observacao |
+|---|---|---|---|
+| POST | `/aplicacoes/{id}/leituras` | Aplicador vinculado | Upload/processamento inicial |
+| GET | `/leituras/{id}` | Conforme escopo | Retorna deteccoes e alertas |
+| POST | `/leituras/{id}/confirmar` | Aplicador vinculado | Operacao transacional e idempotente |
+| POST | `/leituras/{id}/reprocessar` | Usuario autorizado; V2 | Gera nova tentativa |
+| GET | `/cartoes/{id}` | Conforme escopo | Historico autorizado |
+| POST | `/cartoes/{id}/cancelar` | Permissao especial | Exige motivo |
+| POST | `/cartoes/{id}/substituir` | Permissao especial | Mantem historico |
+
+### 8.1 Criar leitura
+
+`POST /aplicacoes/{id}/leituras` usa `multipart/form-data`:
+
+- `imagem`: arquivo de imagem.
+- `operacao_mobile_id`: UUID para idempotencia.
+- `modelo_cartao_id`: UUID esperado.
+- `aluno_id`: opcional nessa etapa.
+- `capturada_at`: data da captura.
+- `dispositivo_id`: identificador autorizado.
+- `localizacao`: opcional e somente com consentimento.
+
+Resposta esperada:
+
+```json
+{
+  "data": {
+    "id": "uuid",
+    "status": "parcial",
+    "codigo_detectado": "CARTAO-000123",
+    "confianca_geral": 0.93,
+    "respostas": [
+      {
+        "questao": 1,
+        "detectada": "B",
+        "tipo": "marcada",
+        "confianca": 0.98
+      },
+      {
+        "questao": 2,
+        "detectada": null,
+        "tipo": "dupla",
+        "confianca": 0.42
+      }
+    ],
+    "requer_revisao": true
+  }
+}
+```
+
+### 8.2 Confirmar leitura
+
+`POST /leituras/{id}/confirmar`
+
+Headers obrigatorios no mobile:
+
+```text
+Idempotency-Key: uuid
+```
+
+Payload:
+
+```json
+{
+  "aluno_id": "uuid",
+  "codigo_cartao": "CARTAO-000123",
+  "aceita_alertas": true,
+  "respostas_finais": [
+    {
+      "questao_id": "uuid",
+      "alternativa": "B",
+      "motivo_alteracao": null
+    },
+    {
+      "questao_id": "uuid",
+      "alternativa": "D",
+      "motivo_alteracao": "Marcacao revisada na imagem"
+    }
+  ]
+}
+```
+
+**Conflitos `409`:**
+
+- `ALUNO_JA_CONFIRMADO`
+- `CODIGO_CARTAO_JA_VINCULADO`
+- `APLICACAO_FINALIZADA`
+- `OPERACAO_IDEMPOTENTE_DIVERGENTE`
+- `LEITURA_JA_CANCELADA`
+
+## 9. Resultados, dashboards e relatorios
+
+| Metodo | Endpoint | Acesso |
+|---|---|---|
+| GET | `/resultados` | Conforme escopo e filtros |
+| GET | `/resultados/{id}` | Conforme escopo |
+| GET | `/alunos/{id}/resultados` | Conforme escopo |
+| GET | `/turmas/{id}/resultados` | Conforme escopo |
+| GET | `/avaliacoes/{id}/resultados` | Conforme escopo |
+| GET | `/dashboards/nucleo/{id}` | Gestor do nucleo/consulta autorizada |
+| GET | `/dashboards/escola/{id}` | Gestor da escola/nucleo |
+| GET | `/dashboards/aplicacao/{id}` | Gestor/aplicador/consulta autorizada |
+| POST | `/relatorios` | Usuario autorizado |
+| GET | `/relatorios/{id}` | Solicitante/gestor autorizado |
+| GET | `/relatorios/{id}/download` | Solicitante/gestor autorizado |
+
+**Filtros de resultados:** `avaliacao_id`, `aplicacao_id`, `nucleo_id`, `escola_id`, `turma_id`, `aluno_id`, `status`, `periodo`.
+
+## 10. Auditoria e sincronizacao
+
+| Metodo | Endpoint | Acesso |
+|---|---|---|
+| GET | `/auditoria` | Usuario autorizado |
+| GET | `/auditoria/{id}` | Usuario autorizado no escopo |
+| POST | `/sincronizacoes/lote` | App autenticado; V2 |
+| GET | `/sincronizacoes/{operacaoId}` | App/usuario proprietario; V2 |
+| GET | `/me/dispositivos` | Usuario autenticado; V2 |
+| DELETE | `/me/dispositivos/{id}` | Usuario autenticado; V2 |
+
+## 11. Tempo real
+
+O backend publica eventos apos a confirmacao da transacao. Canais devem aplicar autorizacao no momento da assinatura.
+
+| Canal conceitual | Eventos principais |
+|---|---|
+| `nucleo.{id}` | Progresso agregado, escola atualizada |
+| `escola.{id}` | Aplicacao atualizada, indicadores alterados |
+| `aplicacao.{id}` | Leitura confirmada, aluno atualizado, alerta criado, aplicacao finalizada |
+
+Eventos nao devem expor dados pessoais alem do necessario ao cliente autorizado.
+
+## 12. Validacao, autorizacao e auditoria
+
+- Requests validam estrutura, tipos, limites e existencia no escopo.
+- Policies validam permissao e relacionamento organizacional.
+- Endpoints criticos registram auditoria com `request_id`.
+- Uploads validam MIME real, tamanho, extensao e, quando aplicavel, malware.
+- Downloads usam autorizacao e URL temporaria.
+- Endpoints de listagem limitam `per_page` e campos de ordenacao.
+- Erros internos retornam codigo generico ao cliente e detalhes somente nos logs protegidos.
+
+## 13. Versionamento e documentacao
+
+- Mudancas incompativeis geram nova versao da API.
+- OpenAPI deve ser mantido junto da implementacao a partir do inicio do backend.
+- Campos novos devem ser preferencialmente opcionais para clientes antigos.
+- O app deve informar sua versao; o backend pode exigir atualizacao minima por motivo de seguranca.
