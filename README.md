@@ -4,7 +4,7 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
-> **Status do projeto:** fase de especificacao e planejamento tecnico. A implementacao ainda nao foi iniciada.
+> **Status do projeto:** documentacao inicial concluida e base tecnica do backend em Laravel criada. Regras de negocio ainda nao foram implementadas.
 
 ## Sobre o sistema
 
@@ -208,12 +208,19 @@ Versoes posteriores incluem modo offline, dashboards consolidados, relatorios PD
 | [Dashboards e relatorios](docs/10-dashboard-relatorios.md) | Indicadores, filtros e exportacoes |
 | [Roadmap e MVP](docs/11-roadmap-mvp.md) | Etapas, backlog e criterios de conclusao |
 
+## Backend
+
+A base tecnica da API Laravel esta em [`backend/`](backend/README.md). Ela inclui a estrutura inicial para API REST, PostgreSQL, Sanctum, filas, policies, requests, resources, services e o endpoint `GET /api/health`.
+
+Consulte o [README do backend](backend/README.md) para requisitos e comandos de execucao local.
+
 ## Estrutura atual do repositorio
 
 ```text
 gabarito360/
 |-- AGENTS.md
 |-- README.md
+|-- backend/
 \-- docs/
     |-- 01-visao-geral.md
     |-- 02-requisitos-funcionais.md
