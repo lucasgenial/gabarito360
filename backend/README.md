@@ -8,7 +8,7 @@ Esta etapa contém a base técnica e o schema inicial de usuários, perfis e per
 
 - PHP 8.3 ou superior recomendado.
 - Composer 2.
-- Node.js 22 para validação local do contrato OpenAPI.
+- Node.js 24 para validação local do contrato OpenAPI e alinhamento com o pipeline.
 - PostgreSQL 14 ou superior.
 - Extensões PHP exigidas pelo Laravel.
 - Extensão PHP `pdo_pgsql` habilitada.
@@ -150,7 +150,7 @@ Valide o contrato localmente:
 npx --yes @redocly/cli@2.32.0 lint ../docs/openapi.yaml
 ```
 
-O workflow [`../.github/workflows/backend-ci.yml`](../.github/workflows/backend-ci.yml) executa em ambiente limpo com PHP 8.3, PostgreSQL 16 e Redis 7. O pipeline valida Composer e OpenAPI, aplica migrations técnicas, verifica Pint e executa a suíte completa. Falhas não são ignoradas.
+O workflow [`../.github/workflows/backend-ci.yml`](../.github/workflows/backend-ci.yml) executa em ambiente limpo com PHP 8.3, Node.js 24, PostgreSQL 16 e Redis 7. O pipeline valida Composer e OpenAPI, aplica migrations e seeders, verifica Pint e executa a suíte completa. Falhas não são ignoradas.
 
 ## Baseline validada
 

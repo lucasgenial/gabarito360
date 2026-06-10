@@ -183,19 +183,22 @@ Padronizar organizacao, revisao, testes, API e nomenclatura antes das funcionali
 Acoes:
 - Documentar convencoes Laravel, fronteiras entre Actions, Services, Policies, Requests e Resources.
 - Definir verificacoes obrigatorias por commit e por pull request.
+- Documentar convencoes obrigatorias para interfaces, Design System e acessibilidade.
 
 Arquivos envolvidos:
 - `CONTRIBUTING.md` (novo)
+- `AGENTS.md`
 - `backend/README.md`
 - `docs/07-api.md`
 
 Critérios de aceite:
 - Ha criterio objetivo para escolher a camada de cada regra.
 - Comandos minimos de formatacao, analise e testes estao documentados.
+- Interfaces possuem regras objetivas para reutilizacao de componentes, tokens e acessibilidade.
 
 Verificação:
 ```bash
-rg "Pint|test|Policy|Request|Resource|Service|Action" CONTRIBUTING.md backend/README.md
+rg "Pint|test|Policy|Request|Resource|Service|Action|Design System|WCAG" CONTRIBUTING.md backend/README.md AGENTS.md
 ```
 
 Dependências:
@@ -207,7 +210,7 @@ Não fazer nesta etapa:
 
 Commit sugerido:
 ```bash
-git add CONTRIBUTING.md backend/README.md docs/07-api.md
+git add AGENTS.md CONTRIBUTING.md backend/README.md docs/07-api.md docs/12-plano-executavel-codex.md
 git commit -m "documentacao: definir convencoes de desenvolvimento"
 git push
 ```
@@ -304,7 +307,7 @@ Arquivos envolvidos:
 - `backend/README.md`
 
 Critérios de aceite:
-- Laravel inicia e `GET /api/health` responde conforme contrato.
+- Laravel inicia e `GET /api/v1/health` responde conforme contrato.
 - Suite e formatacao passam sem regras de negocio.
 
 Verificação:
@@ -459,6 +462,7 @@ Automatizar as verificacoes minimas e manter contratos versionados.
 Acoes:
 - Configurar CI para Composer, Pint, testes e validacao do contrato OpenAPI.
 - Documentar o health check e os envelopes tecnicos.
+- Usar versoes suportadas das actions e do runtime Node.js do pipeline.
 
 Arquivos envolvidos:
 - `.github/workflows/backend-ci.yml` (novo)
@@ -468,12 +472,14 @@ Arquivos envolvidos:
 Critérios de aceite:
 - Pipeline executa em ambiente limpo.
 - OpenAPI representa corretamente a baseline da API.
+- Workflow nao apresenta avisos de runtime Node.js depreciado.
 
 Verificação:
 ```bash
 cd backend && composer validate --strict
 cd backend && php vendor/bin/pint --test
 cd backend && php artisan test
+cd backend && npx --yes @redocly/cli@2.32.0 lint ../docs/openapi.yaml
 ```
 
 Dependências:
