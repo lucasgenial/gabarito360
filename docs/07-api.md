@@ -330,8 +330,11 @@ Eventos nao devem expor dados pessoais alem do necessario ao cliente autorizado.
 
 ## 12. Validacao, autorizacao e auditoria
 
-- Requests validam estrutura, tipos, limites e existencia no escopo.
-- Policies validam permissao e relacionamento organizacional.
+- Requests validam estrutura, tipos, limites e coerencia dos dados de entrada, sem substituir a autorizacao.
+- Policies validam permissao, recurso e relacionamento organizacional.
+- Actions executam um caso de uso e coordenam regras, persistencia e transacoes.
+- Services oferecem capacidades reutilizaveis, algoritmos ou integracoes, sem orquestrar endpoints completos.
+- Resources definem e minimizam a representacao de saida, sem executar consultas ou alterar estado.
 - Endpoints criticos registram auditoria com `request_id`.
 - Uploads validam MIME real, tamanho, extensao e, quando aplicavel, malware.
 - Downloads usam autorizacao e URL temporaria.
@@ -344,3 +347,41 @@ Eventos nao devem expor dados pessoais alem do necessario ao cliente autorizado.
 - OpenAPI deve ser mantido junto da implementacao a partir do inicio do backend.
 - Campos novos devem ser preferencialmente opcionais para clientes antigos.
 - O app deve informar sua versao; o backend pode exigir atualizacao minima por motivo de seguranca.
+
+## 14. Convencoes de implementacao
+
+### 14.1 Fluxo por camada
+
+```text
+Route -> Form Request -> Policy -> Controller -> Action
+      -> DTO / Model / Service -> Resource -> Response
+```
+
+- Controllers adaptam HTTP, invocam autorizacao e caso de uso e devolvem resposta; nao contem regra de negocio ou transacao.
+- Form Requests nao sao barreira suficiente de escopo. A Policy e os filtros aplicados pelo caso de uso permanecem obrigatorios.
+- Uma Action representa um caso de uso nomeado e deve abrir a transacao quando a operacao exige atomicidade.
+- Services nao devem conhecer Request, Controller ou formato de resposta HTTP.
+- Resources nao devem disparar queries adicionais, autorizar ou expor campos pessoais sem necessidade.
+- Web, API e Jobs reutilizam as mesmas Actions e Policies quando executam o mesmo caso de uso.
+- Eventos, Jobs e notificacoes dependentes da persistencia devem ser publicados somente apos o commit.
+
+Os criterios completos para escolher cada camada e os gates de qualidade estao em [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+### 14.2 Contrato e erros
+
+- Todo endpoint funcional novo deve usar `/api/v1`.
+- O endpoint tecnico `/api/health` permanece temporariamente fora de `/api/v1`.
+- Sucesso e erro devem seguir os envelopes da secao 2 e incluir `meta.request_id`.
+- Codigos de erro estaveis usam `UPPER_SNAKE_CASE` e nao dependem da mensagem apresentada.
+- Erros `403` indicam acao conhecida fora da permissao; `404` pode ocultar recurso fora do escopo; `409` representa conflito de estado ou integridade esperado.
+- Nenhum endpoint deve criar formato de resposta proprio ou retornar excecao interna ao cliente.
+
+### 14.3 Transicao da base tecnica
+
+A base Laravel atual usa um envelope temporario com `success`, `message`, `data` e `errors` no health check. Esse formato nao e o contrato dos endpoints funcionais `/api/v1`.
+
+Antes da criacao dos endpoints funcionais, o componente central de resposta e os testes de contrato devem ser alinhados a secao 2 em micropasso proprio. Ate essa transicao:
+
+- o health check existente pode manter seu formato para preservar o aceite da base tecnica;
+- nenhum novo endpoint funcional deve copiar o envelope temporario;
+- qualquer mudanca no contrato deve atualizar testes e OpenAPI na mesma entrega.

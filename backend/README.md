@@ -110,6 +110,38 @@ Execute somente o teste do health check:
 php artisan test --filter=HealthTest
 ```
 
+## Convencoes e qualidade
+
+As convencoes obrigatorias de arquitetura, testes, branches, commits e revisao estao em [`../CONTRIBUTING.md`](../CONTRIBUTING.md). A especificacao do contrato REST esta em [`../docs/07-api.md`](../docs/07-api.md).
+
+Antes de um commit, execute a partir de `backend/`:
+
+```bash
+vendor/bin/pint --test
+php artisan test --filter=NomeDoTeste
+```
+
+No PowerShell, substitua `vendor/bin/pint` por `vendor\bin\pint.bat`.
+
+Antes de abrir um pull request:
+
+```bash
+composer validate --strict
+vendor/bin/pint --test
+php artisan test
+```
+
+Quando aplicavel:
+
+```bash
+php artisan route:list --except-vendor
+npm run build
+```
+
+- `route:list` e obrigatorio quando rotas forem alteradas.
+- `npm run build` e obrigatorio quando assets do painel forem alterados.
+- Analise estatica ainda nao esta configurada e nao deve ser simulada por comandos nao versionados.
+
 ## Rotas
 
 Liste as rotas da aplicação:
@@ -143,18 +175,22 @@ app/
 \-- Support/
 ```
 
-- `Actions`: operações de aplicação com responsabilidade única.
+- `Actions`: casos de uso unicos; coordenam regras, persistencia e transacao.
 - `DTOs`: transporte tipado de dados entre camadas.
 - `Enums`: valores controlados e reutilizáveis.
-- `Requests`: validação e autorização de entrada.
-- `Resources`: transformação de respostas da API.
-- `Jobs`: processamento assíncrono por filas.
-- `Services`: integrações e serviços compartilhados.
-- `Policies`: autorização por recurso.
-- `Observers`: observação de eventos de models.
+- `Requests`: validacao de formato, tipos, limites e coerencia da entrada.
+- `Resources`: representacao e minimizacao das respostas da API.
+- `Jobs`: processamento assincrono idempotente e posterior ao commit.
+- `Services`: capacidades reutilizaveis, algoritmos e integracoes.
+- `Policies`: autorizacao por acao, recurso e escopo.
+- `Observers`: reacoes simples e nao criticas a eventos de models.
 - `Support`: utilitários técnicos compartilhados.
 
+Controllers devem permanecer finos e reutilizar Actions, Policies e Resources. A tabela completa para decidir a camada correta esta no guia de contribuicao.
+
 ## Padrão de resposta JSON
+
+O formato abaixo e o envelope temporario usado pela base tecnica e pelo endpoint `/api/health`. Antes dos endpoints funcionais `/api/v1`, a resposta central sera alinhada ao contrato canonico definido em [`../docs/07-api.md`](../docs/07-api.md). Nao crie novos envelopes JSON ad hoc.
 
 Respostas de sucesso usam:
 
