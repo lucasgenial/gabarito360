@@ -85,7 +85,7 @@ CHECK (status IN ('rascunho', 'publicada', 'em_aplicacao', 'finalizada', 'arquiv
 
 ### 3.1 Cartao confirmado separado da tentativa OMR
 
-`cartoes_resposta` representa o vinculo confirmado entre prova, aplicacao, aluno e codigo do cartao. `leituras_cartao` representa cada captura ou reprocessamento OMR. Essa separacao permite varias tentativas sem criar varios resultados validos para o mesmo aluno.
+`cartoes_resposta` representa o vinculo confirmado entre prova, aplicacao e aluno, preservando separadamente o codigo impresso externo e o codigo do sistema. `leituras_cartao` representa cada captura ou reprocessamento OMR.
 
 ### 3.2 Gabarito oficial versionado
 
@@ -357,7 +357,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 
 **Indices e restricoes:**
 
-- Decisao inicial: `uq_alunos_escola_matricula` unico em `(escola_id, lower(matricula))` onde `deleted_at IS NULL`.
+- Regra do MVP: `uq_alunos_escola_matricula` unico em `(escola_id, lower(matricula))` onde `deleted_at IS NULL`.
 - `idx_alunos_escola_nome`: `(escola_id, nome)` onde `deleted_at IS NULL`.
 - `idx_alunos_escola_status`: `(escola_id, status)`.
 - `documento` nao deve ser unico ate a politica de coleta ser aprovada.
@@ -422,8 +422,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 | `quantidade_questoes` | `smallint` | Nao |  |
 | `quantidade_alternativas` | `smallint` | Nao |  |
 | `alternativas` | `jsonb` | Nao | Ex.: `["A","B","C","D","E"]` |
-| `tipo_codigo` | `varchar(30)` | Nao | `qr_code`, `codigo_barras`, `ocr`, `manual` |
-| `configuracao_omr` | `jsonb` | Nao | Regioes, marcadores e limiares |
+| `tipo_codigo` | `varchar(30)` | Nao | `qr_code`, `codigo_barras`, `ocr`, `manual`, `sem_codigo` |
+| `configuracao_omr` | `jsonb` | Nao | Regioes, marcadores, limiares e normalizacao do codigo impresso |
 | `arquivo_base_id` | `uuid` | Sim | FK `arquivos.id` |
 | `status` | `varchar(20)` | Nao / `rascunho` | `rascunho`, `homologado`, `inativo` |
 | `criado_por` | `uuid` | Sim | FK `usuarios.id` |
@@ -648,7 +648,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 
 ### 10.1 `cartoes_resposta`
 
-**Finalidade:** representar o vinculo logico e confirmado entre prova, aplicacao, aluno e codigo do cartao.
+**Finalidade:** representar o vinculo confirmado entre prova, aplicacao e aluno com identificadores externo e interno separados.
 
 | Campo | Tipo | Nulo/Padrao | Chave ou regra |
 |---|---|---|---|
@@ -656,7 +656,11 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 | `prova_id` | `uuid` | Nao | Parte da FK composta |
 | `aplicacao_id` | `uuid` | Nao | FK composta para aplicacao/prova |
 | `aluno_id` | `uuid` | Nao | FK com aluno previsto |
-| `codigo_cartao` | `varchar(120)` | Nao | Codigo confirmado |
+| `codigo_impresso` | `varchar(180)` | Sim | Codigo externo existente no papel |
+| `codigo_impresso_normalizado` | `varchar(180)` | Sim | Codigo externo normalizado pelo modelo |
+| `codigo_sistema` | `varchar(40)` | Sim | Codigo operacional adicional gerado pelo app ou backend |
+| `codigo_sistema_afixado` | `boolean` | Nao / `false` | Informa se o codigo do sistema foi afixado ao papel |
+| `motivo_sem_codigo_impresso` | `varchar(80)` | Sim | Motivo quando nao existe codigo impresso |
 | `status` | `varchar(30)` | Nao / `confirmado` | `confirmado`, `substituido`, `cancelado` |
 | `confirmado_por` | `uuid` | Sim | FK `usuarios.id` |
 | `confirmado_at` | `timestamptz` | Nao / `now()` |  |
@@ -679,14 +683,18 @@ CREATE UNIQUE INDEX uq_cartoes_resposta_prova_aluno_confirmado
 ON cartoes_resposta (prova_id, aluno_id)
 WHERE status = 'confirmado';
 
-CREATE UNIQUE INDEX uq_cartoes_resposta_prova_codigo_confirmado
-ON cartoes_resposta (prova_id, codigo_cartao)
-WHERE status = 'confirmado';
+CREATE UNIQUE INDEX uq_cartoes_resposta_prova_codigo_impresso_confirmado
+ON cartoes_resposta (prova_id, codigo_impresso_normalizado)
+WHERE status = 'confirmado' AND codigo_impresso_normalizado IS NOT NULL;
+
+CREATE UNIQUE INDEX uq_cartoes_resposta_codigo_sistema
+ON cartoes_resposta (codigo_sistema)
+WHERE codigo_sistema IS NOT NULL;
 ```
 
 Indices adicionais: `(aplicacao_id, status)`, `(aluno_id, prova_id)` e `(substitui_cartao_id)`.
 
-Esses indices implementam as regras de um cartao valido por aluno/prova e codigo unico dentro da prova.
+Esses indices implementam as regras de um cartao valido por aluno/prova, codigo impresso unico dentro da prova quando informado e codigo do sistema unico globalmente quando utilizado.
 
 ### 10.2 `arquivos`
 
@@ -731,8 +739,9 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 | `leitura_origem_id` | `uuid` | Sim | FK para leitura reprocessada |
 | `imagem_original_id` | `uuid` | Sim | FK `arquivos.id` |
 | `imagem_processada_id` | `uuid` | Sim | FK `arquivos.id` |
-| `codigo_detectado` | `varchar(120)` | Sim |  |
-| `confianca_codigo` | `numeric(5,4)` | Sim | Entre 0 e 1 |
+| `codigo_sistema_proposto` | `varchar(40)` | Sim | Codigo adicional proposto pelo app ou backend |
+| `codigo_impresso_detectado` | `varchar(180)` | Sim | Valor externo detectado na imagem |
+| `confianca_codigo_impresso` | `numeric(5,4)` | Sim | Entre 0 e 1 |
 | `confianca_geral` | `numeric(5,4)` | Sim | Entre 0 e 1 |
 | `status` | `varchar(30)` | Nao / `recebida` | `recebida`, `processando`, `sucesso`, `parcial`, `falha`, `confirmada`, `cancelada` |
 | `requer_revisao` | `boolean` | Nao / `false` |  |
@@ -775,7 +784,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 | `confianca` | `numeric(5,4)` | Sim | Entre 0 e 1 |
 | `preenchimentos` | `jsonb` | Sim | Metricas por alternativa |
 | `alterada_manualmente` | `boolean` | Nao / `false` |  |
-| `motivo_alteracao` | `text` | Sim | Obrigatorio conforme politica |
+| `motivo_alteracao` | `text` | Sim | Obrigatorio com 10 a 500 caracteres quando alterada manualmente |
 | `alterada_por` | `uuid` | Sim | FK `usuarios.id` |
 | `alterada_at` | `timestamptz` | Sim |  |
 | `created_at` | `timestamptz` | Nao / `now()` |  |
@@ -972,7 +981,8 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 Garantido pelos indices unicos parciais de `cartoes_resposta`:
 
 - `(prova_id, aluno_id)` onde `status = 'confirmado'`;
-- `(prova_id, codigo_cartao)` onde `status = 'confirmado'`.
+- `(prova_id, codigo_impresso_normalizado)` onde `status = 'confirmado'` e informado;
+- `codigo_sistema` globalmente unico quando informado.
 
 ### 14.2 Uma versao vigente
 
@@ -1021,7 +1031,7 @@ A confirmacao deve ocorrer em uma unica transacao PostgreSQL:
 12. Efetivar o commit.
 13. Publicar eventos WebSocket e jobs somente apos o commit.
 
-Conflitos de unicidade devem ser convertidos pela API em erros `409` estaveis, como `ALUNO_JA_CONFIRMADO` e `CODIGO_CARTAO_JA_VINCULADO`.
+Conflitos de unicidade devem ser convertidos pela API em erros `409` estaveis, como `ALUNO_JA_CONFIRMADO`, `CODIGO_IMPRESSO_JA_VINCULADO` e `CODIGO_SISTEMA_JA_UTILIZADO`.
 
 ## 16. Indices para dashboards e relatorios
 
@@ -1076,13 +1086,6 @@ Particionamento deve ser introduzido somente com testes de consultas, manutencao
 11. `dispositivos_mobile`, `logs_sincronizacao`, `auditorias`.
 12. Triggers de coerencia, indices parciais e permissoes de banco.
 
-## 20. Decisoes pendentes antes das migrations
+## 20. Decisoes adotadas antes das migrations
 
-1. Confirmar se a matricula e unica por escola ou por nucleo.
-2. Confirmar politica de pontuacao de questoes anuladas.
-3. Definir formatos validos para `codigo_cartao`.
-4. Definir prazos de retencao para imagens, auditorias e logs.
-5. Definir se a imagem original e obrigatoria no MVP.
-6. Definir se uma prova pode possuir mais de um modelo de cartao simultaneamente.
-7. Definir se professores podem criar provas no escopo escolar.
-8. Homologar os checks e limiares que fazem parte de `configuracao_omr`.
+As decisoes bloqueadoras foram resolvidas no MP-001. A versao canonica e atualizada esta em [06-modelagem-banco.md](06-modelagem-banco.md), e o registro completo esta em [decisoes/README.md](decisoes/README.md).

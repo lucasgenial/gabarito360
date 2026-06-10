@@ -165,8 +165,8 @@
 
 1. O aplicador revisa respostas e alertas.
 2. O aplicador seleciona ou confirma o aluno.
-3. O aplicador confirma ou informa o codigo do cartao.
-4. O app envia a operacao com identificador idempotente.
+3. O aplicador confirma ou informa o codigo impresso quando existente.
+4. O app gera ou confirma o codigo do sistema quando utilizado ou exigido e envia a operacao com identificador idempotente.
 5. O backend valida permissao, aplicacao, aluno, cartao e duplicidades.
 6. O backend persiste a leitura final, calcula o resultado e registra auditoria.
 7. O sistema atualiza pendencias e publica evento de tempo real.
@@ -175,7 +175,7 @@
 **Fluxos alternativos:**
 
 - Aluno ja possui cartao valido: rejeitar e orientar fluxo autorizado de substituicao.
-- Codigo ja vinculado: rejeitar e apresentar conflito.
+- Codigo impresso ja vinculado na prova ou codigo do sistema reutilizado: rejeitar e apresentar conflito especifico.
 - Alerta nao revisado: impedir confirmacao.
 - Falha de rede: manter operacao pendente para sincronizacao.
 
@@ -191,7 +191,7 @@
 
 1. O aplicador seleciona a questao sinalizada.
 2. Altera a resposta final.
-3. Informa motivo quando exigido.
+3. Informa motivo obrigatorio para a alteracao.
 4. O sistema conserva valor detectado e valor final.
 5. A alteracao e incluida na auditoria da confirmacao.
 

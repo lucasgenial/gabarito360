@@ -9,7 +9,7 @@ O modulo OMR (Optical Mark Recognition) transforma a imagem de um cartao-respost
 - Cartao padronizado semelhante ao modelo da OBMEP.
 - 20 questoes objetivas.
 - Alternativas A, B, C, D e E.
-- Codigo impresso legivel por QR Code, codigo de barras ou OCR definido no modelo.
+- Codigo impresso externo opcional, cujo tipo e formato sao definidos pelo modelo do cartao.
 - Marcadores de referencia para alinhamento.
 - Uma marcacao valida por questao.
 
@@ -21,7 +21,7 @@ Cada versao de modelo deve definir:
 
 - Dimensoes e proporcao esperadas.
 - Posicao e tipo dos marcadores de referencia.
-- Regiao do codigo identificador.
+- Regiao e regras do codigo impresso externo, quando existente.
 - Regioes de interesse das questoes e alternativas.
 - Ordem de leitura.
 - Limiar inicial de preenchimento.
@@ -69,13 +69,16 @@ O resultado confirmado pelo aplicador e a fonte utilizada para correcao. A detec
 
 Se os marcadores esperados nao forem encontrados com confianca suficiente, o status deve ser parcial ou falha.
 
-### 5.4 Leitura do codigo
+### 5.4 Leitura do codigo impresso
 
-1. Recortar a regiao do codigo.
-2. Tentar decodificar conforme o tipo configurado.
-3. Validar formato e digito verificador quando houver.
-4. Retornar codigo e confianca.
-5. Permitir digitacao manual no app quando a leitura falhar.
+1. Verificar se o modelo define regiao de codigo impresso.
+2. Recortar a regiao configurada.
+3. Tentar decodificar conforme o tipo configurado: QR Code, codigo de barras, OCR ou outro leitor homologado.
+4. Normalizar e validar conforme as regras do modelo, incluindo digito verificador quando o emissor externo o fornecer.
+5. Retornar o codigo impresso detectado e sua confianca.
+6. Permitir digitacao manual ou registro de cartao sem codigo impresso.
+
+O OMR nao gera nem detecta o codigo do sistema, exceto quando esse codigo tiver sido materialmente afixado ao cartao e o modelo declarar sua regiao.
 
 ### 5.5 Deteccao das marcacoes
 
@@ -124,7 +127,7 @@ A confianca geral deve considerar:
 - Qualidade global da imagem.
 - Confianca dos marcadores e perspectiva.
 - Percentual de questoes duvidosas.
-- Confianca da leitura do codigo.
+- Confianca da leitura do codigo impresso.
 
 Baixa confianca nao significa necessariamente resposta errada; significa que a leitura exige revisao.
 
@@ -137,7 +140,7 @@ Baixa confianca nao significa necessariamente resposta errada; significa que a l
     "versao": 1
   },
   "status": "parcial",
-  "codigo": {
+  "codigo_impresso": {
     "valor": "CARTAO-000123",
     "confianca": 0.91
   },

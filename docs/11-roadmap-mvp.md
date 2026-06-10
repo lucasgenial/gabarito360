@@ -101,19 +101,22 @@ As fases 7 e 8 podem avançar parcialmente em paralelo depois que os contratos d
 
 ## 4. Decisoes obrigatorias antes do desenvolvimento
 
-As seguintes decisoes bloqueiam ou afetam diretamente o MVP:
+As decisoes bloqueadoras foram registradas para o MVP em 10 de junho de 2026. Decisoes vigentes devem ser revalidadas nos gates indicados e decisoes substituidas permanecem como historico:
 
-| ID | Decisao | Responsavel sugerido | Fase limite |
-|---|---|---|---|
-| D001 | Aprovar o modelo fisico do cartao inicial | Produto + OMR | Fase 1 |
-| D002 | Definir unicidade da matricula: escola ou nucleo | Produto + Backend | Fase 1 |
-| D003 | Definir formato e validacao do codigo do cartao | Produto + OMR | Fase 1 |
-| D004 | Definir politica de questao anulada | Produto | Fase 5 |
-| D005 | Definir se motivo e obrigatorio em toda correcao manual | Produto + Auditoria | Fase 7 |
-| D006 | Definir retencao de imagens e logs | Seguranca + Produto | Fase 2 |
-| D007 | Definir dispositivos Android homologados | Produto + Mobile | Fase 1 |
-| D008 | Definir meta de qualidade OMR para o piloto | Produto + OMR + QA | Fase 1 |
-| D009 | Escolher abordagem do painel web no Laravel | Arquitetura | Fase 1 |
+| ID | Decisao | Responsaveis | Status | Registro |
+|---|---|---|---|---|
+| D001 | Modelo fisico do cartao inicial | Produto + OMR | Aceita | [ADR-D001](decisoes/ADR-D001-modelo-fisico-cartao.md) |
+| D002 | Unicidade da matricula por escola | Produto + Backend | Aceita | [ADR-D002](decisoes/ADR-D002-unicidade-matricula.md) |
+| D003 | Formato unico para o codigo do cartao | Produto + OMR + Backend | Substituida | [ADR-D003](decisoes/ADR-D003-codigo-cartao.md) |
+| D004 | Politica de questao anulada | Produto + Pedagogico | Aceita | [ADR-D004](decisoes/ADR-D004-questao-anulada.md) |
+| D005 | Motivo obrigatorio em correcao manual | Produto + Auditoria | Aceita | [ADR-D005](decisoes/ADR-D005-motivo-correcao-manual.md) |
+| D006 | Retencao de imagens, exportacoes e logs | Seguranca + Produto | Aceita | [ADR-D006](decisoes/ADR-D006-retencao-imagens-logs.md) |
+| D007 | Homologacao de dispositivos Android | Produto + Mobile + QA | Aceita | [ADR-D007](decisoes/ADR-D007-dispositivos-android.md) |
+| D008 | Metas de qualidade OMR para o piloto | Produto + OMR + QA | Aceita | [ADR-D008](decisoes/ADR-D008-metas-qualidade-omr.md) |
+| D009 | Painel web com Blade, Livewire e Tailwind | Arquitetura + Produto | Aceita | [ADR-D009](decisoes/ADR-D009-painel-web.md) |
+| D010 | Separar codigo impresso externo e codigo do sistema | Produto + OMR + Mobile + Backend | Aceita | [ADR-D010](decisoes/ADR-D010-identificacao-cartao.md) |
+
+O indice com prazos de revalidacao esta em [decisoes/README.md](decisoes/README.md).
 
 ## 5. Fase 1 - Preparacao do projeto
 
@@ -130,7 +133,7 @@ Nenhuma.
 | Ordem | ID | Tarefa pequena | Entregavel |
 |---:|---|---|---|
 | 1 | F1-T01 | Revisar e aprovar o escopo do MVP | Lista de funcionalidades dentro e fora do MVP |
-| 2 | F1-T02 | Resolver as decisoes `D001-D009` aplicaveis | Registro de decisoes tecnicas |
+| 2 | F1-T02 | Revalidar as decisoes `D001-D009` nos gates aplicaveis | Registro de decisoes tecnicas atualizado |
 | 3 | F1-T03 | Aprovar a matriz de perfis e permissoes do MVP | Matriz por acao e escopo |
 | 4 | F1-T04 | Revisar o modelo relacional e fechar decisoes bloqueadoras | Modelagem pronta para migrations |
 | 5 | F1-T05 | Revisar os endpoints necessarios ao fluxo do MVP | Contrato REST priorizado |
@@ -371,7 +374,7 @@ Controlar a execucao da prova em uma turma e implementar a transacao central de 
 | 11 | F6-T11 | Implementar confirmacao transacional do cartao | Cartao vinculado ao aluno |
 | 12 | F6-T12 | Implementar correcao automatica | Resultado e detalhes por questao |
 | 13 | F6-T13 | Atualizar aluno para lido apos commit | Progresso consistente |
-| 14 | F6-T14 | Rejeitar aluno ou codigo de cartao duplicado | Conflitos `409` estaveis |
+| 14 | F6-T14 | Rejeitar aluno, codigo impresso ou codigo do sistema duplicado | Conflitos `409` estaveis e distintos |
 | 15 | F6-T15 | Impedir confirmacao em aplicacao finalizada | Regra de estado |
 | 16 | F6-T16 | Publicar evento de leitura confirmada apos commit | Evento para dashboard |
 | 17 | F6-T17 | Auditar inicio, finalizacao, revisoes e confirmacao | Trilha operacional |
@@ -387,7 +390,8 @@ Controlar a execucao da prova em uma turma e implementar a transacao central de 
 - Confirmacao repetida com mesma chave retorna o mesmo resultado.
 - Reuso divergente da chave idempotente gera conflito.
 - Um aluno nao recebe dois cartoes validos na mesma prova.
-- Um codigo nao e vinculado a dois alunos na mesma prova.
+- Um codigo impresso nao e vinculado a dois alunos na mesma prova.
+- Um codigo do sistema nao e reutilizado em outro cartao quando informado.
 - Resposta detectada e resposta final permanecem armazenadas.
 - Resultado usa a versao correta do gabarito.
 - Progresso e evento sao atualizados somente apos commit.
@@ -425,7 +429,7 @@ Entregar o aplicativo Android online para o aplicador executar o fluxo da aplica
 | 11 | F7-T11 | Implementar tela de processamento | Estado de espera/erro |
 | 12 | F7-T12 | Implementar conferencia com resposta simulada | Grade de respostas |
 | 13 | F7-T13 | Implementar edicao manual e motivo | Revisao rastreavel |
-| 14 | F7-T14 | Implementar confirmacao de aluno e codigo | Tela de confirmacao |
+| 14 | F7-T14 | Implementar confirmacao de aluno, codigo impresso e codigo do sistema quando utilizado | Tela de confirmacao |
 | 15 | F7-T15 | Enviar `Idempotency-Key` na confirmacao | Reenvio seguro |
 | 16 | F7-T16 | Implementar resultado individual | Retorno da correcao |
 | 17 | F7-T17 | Atualizar pendencias apos sucesso | Fluxo repetitivo da turma |
@@ -478,7 +482,7 @@ Entregar e integrar o pipeline OMR para o modelo inicial de cartao, com qualidad
 | 8 | F8-T08 | Implementar calculo de preenchimento por alternativa | Metricas A-E |
 | 9 | F8-T09 | Classificar marcada, branca, dupla, duvidosa e falha | Resposta OMR |
 | 10 | F8-T10 | Calcular confianca por questao e geral | Indicadores de revisao |
-| 11 | F8-T11 | Implementar leitura do codigo configurado | Codigo e confianca |
+| 11 | F8-T11 | Implementar leitura do codigo impresso conforme o modelo | Codigo externo e confianca |
 | 12 | F8-T12 | Gerar imagem processada para diagnostico quando permitido | Artefato visual |
 | 13 | F8-T13 | Persistir metricas e versao do modelo | Rastreabilidade |
 | 14 | F8-T14 | Integrar o pipeline ao contrato da API | Leitura preliminar real |
@@ -625,7 +629,8 @@ Depois dos gates das 10 fases, executar uma validacao ponta a ponta antes do pil
 - Prova incompleta tenta ser publicada.
 - Aplicacao finalizada recebe nova confirmacao.
 - Mesmo aluno recebe duas confirmacoes concorrentes.
-- Mesmo codigo de cartao e usado para alunos diferentes.
+- Mesmo codigo impresso e usado para alunos diferentes na mesma prova.
+- Mesmo codigo do sistema e reutilizado em outro cartao.
 - Mesma chave idempotente e reenviada.
 - Chave idempotente e reutilizada com payload divergente.
 - Foto inadequada e enviada ao OMR.

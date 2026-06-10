@@ -37,7 +37,7 @@ Login
           -> Captura
           -> Processamento
           -> Conferencia
-          -> Confirmar aluno e codigo
+          -> Confirmar aluno e identificadores
           -> Resultado
         -> Pendencias
         -> Historico
@@ -116,9 +116,9 @@ Login
 
 **Objetivo:** revisar respostas e resolver alertas.
 
-**Elementos:** codigo detectado, confianca geral, grade de questoes, alternativa detectada/final, indicadores de branco, dupla ou duvida e recorte visual quando disponivel.
+**Elementos:** codigo impresso detectado, codigo do sistema quando utilizado, confianca geral, grade de questoes, alternativa detectada/final, indicadores de branco, dupla ou duvida e recorte visual quando disponivel.
 
-**Acoes:** alterar resposta, informar motivo, editar codigo, refazer foto e prosseguir.
+**Acoes:** alterar resposta, informar motivo, confirmar ou editar codigo impresso, registrar ausencia de codigo impresso, refazer foto e prosseguir.
 
 **Regra:** questoes sinalizadas exigem revisao explicita.
 
@@ -126,11 +126,11 @@ Login
 
 **Objetivo:** impedir vinculo incorreto.
 
-**Elementos:** aluno selecionado, turma, avaliacao, codigo do cartao, resumo dos alertas e declaracao de confirmacao.
+**Elementos:** aluno selecionado, turma, avaliacao, codigo impresso externo quando houver, codigo do sistema quando utilizado, resumo dos alertas e declaracao de confirmacao.
 
-**Acoes:** trocar aluno, corrigir codigo, confirmar lancamento ou voltar.
+**Acoes:** trocar aluno, corrigir codigo impresso, gerar ou conferir codigo do sistema quando utilizado ou exigido, confirmar lancamento ou voltar.
 
-**Validacoes:** aluno pertencente a aplicacao, codigo valido, alertas aceitos, operacao nao duplicada.
+**Validacoes:** aluno pertencente a aplicacao, codigo impresso valido conforme o modelo quando informado, motivo quando ausente, codigo do sistema valido quando utilizado ou exigido, alertas aceitos e operacao nao duplicada.
 
 ### 5.10 Resultado individual
 
@@ -150,7 +150,7 @@ Login
 
 **Objetivo:** consultar operacoes recentes do dispositivo/aplicador.
 
-**Elementos:** aluno, codigo, horario, estado, alertas e sincronizacao.
+**Elementos:** aluno, codigo impresso quando houver, codigo do sistema quando utilizado, horario, estado, alertas e sincronizacao.
 
 **Regra:** alteracao de leitura confirmada segue fluxo autorizado, nunca edicao silenciosa.
 
@@ -175,7 +175,7 @@ Login
 3. Captura o cartao e recebe validacao de qualidade.
 4. O app executa OMR e apresenta respostas detectadas.
 5. Aplicador revisa alertas e corrige quando necessario.
-6. Confirma aluno e codigo do cartao.
+6. Confirma aluno, codigo impresso quando houver e codigo do sistema quando utilizado ou exigido.
 7. App envia leitura com `Idempotency-Key`.
 8. Backend valida, persiste, corrige e retorna resultado.
 9. App marca o aluno como lido e oferece nova leitura.

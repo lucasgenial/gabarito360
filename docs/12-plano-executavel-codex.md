@@ -101,8 +101,8 @@ Objetivo:
 Resolver e registrar as decisoes que bloqueiam migrations, OMR, seguranca e experiencia do piloto.
 
 Acoes:
-- Definir unicidade da matricula, formato do codigo do cartao, politica de anulacao, motivo de correcao manual e retencao.
-- Registrar responsavel, data, decisao, justificativa e impacto de cada item `D001-D009`.
+- Definir unicidade da matricula, identificacao externa e interna do cartao, politica de anulacao, motivo de correcao manual e retencao.
+- Registrar responsavel, data, decisao, justificativa e impacto das decisoes; preservar decisoes substituidas e registrar suas sucessoras.
 
 Arquivos envolvidos:
 - `docs/decisoes/ADR-*.md` (novos)
@@ -115,7 +115,8 @@ Critérios de aceite:
 
 Verificação:
 ```bash
-rg "PENDENTE|A DEFINIR|D00[1-9]" docs
+rg "PENDENTE|A DEFINIR" docs -g "*.md" -g "!12-plano-executavel-codex.md"
+rg "D00[1-9]|D010" docs/decisoes/README.md docs/11-roadmap-mvp.md
 ```
 
 Dependências:
@@ -214,7 +215,7 @@ Estabelecer configuracoes seguras e responsabilidades por ambiente.
 
 Acoes:
 - Documentar `local`, `test`, `homologacao` e `producao`, incluindo PostgreSQL, Redis, storage e e-mail.
-- Definir politica de segredos, classificacao de arquivos, retencao e descarte.
+- Documentar a aplicacao da politica de segredos, classificacao, retencao e descarte definida no `ADR-D006`.
 
 Arquivos envolvidos:
 - `docs/infra/ambientes.md` (novo)
@@ -223,7 +224,7 @@ Arquivos envolvidos:
 
 Critérios de aceite:
 - Nenhum segredo real aparece em arquivos versionados.
-- Cada classe de arquivo possui acesso, retencao e descarte definidos.
+- Cada classe de arquivo aplica acesso, retencao e descarte coerentes com o `ADR-D006`.
 
 Verificação:
 ```bash
@@ -250,8 +251,8 @@ Objetivo:
 Reduzir antecipadamente o maior risco tecnico do projeto.
 
 Acoes:
-- Versionar a especificacao do cartao inicial e o formato de rotulagem do dataset.
-- Definir dispositivos homologados e metas mensuraveis de acuracia, revisao, falha e tempo.
+- Versionar a especificacao do cartao inicial e o formato de rotulagem do dataset conforme o `ADR-D001`.
+- Preparar a matriz de homologacao e o protocolo de medicao conforme `ADR-D007` e `ADR-D008`.
 
 Arquivos envolvidos:
 - `docs/omr/modelo-cartao-v1.md` (novo)
@@ -259,8 +260,8 @@ Arquivos envolvidos:
 - `docs/09-modulo-omr.md`
 
 Critérios de aceite:
-- O cartao possui marcadores, regioes e codigo definidos.
-- As metas do piloto podem ser verificadas por uma suite reproduzivel.
+- O cartao aprovado no `ADR-D001` possui especificacao versionada para marcadores e para a regiao do codigo impresso externo quando existente.
+- As metas do `ADR-D008` podem ser verificadas por uma suite reproduzivel nos dispositivos avaliados pelo `ADR-D007`.
 
 Verificação:
 ```bash
@@ -1006,6 +1007,7 @@ Persistir a configuracao OMR homologada sem permitir mutacao historica.
 Acoes:
 - Criar schema, model e endpoints de modelos de cartao.
 - Bloquear alteracao de versao homologada usada em prova ou aplicacao.
+- Definir por modelo o tipo, a regiao e a normalizacao do codigo impresso, incluindo a opcao `sem_codigo`.
 
 Arquivos envolvidos:
 - `backend/database/migrations/*create_modelos_cartao_table.php` (novo)
@@ -1015,6 +1017,7 @@ Arquivos envolvidos:
 
 Critérios de aceite:
 - Configuracao possui versao, marcadores, regioes e limiares.
+- Codigo impresso externo e codigo adicional do sistema possuem regras distintas conforme `ADR-D010`.
 - Versao homologada e imutavel.
 
 Verificação:
@@ -1276,7 +1279,7 @@ Estabilizar o contrato de leitura antes do OMR e do app real.
 
 Acoes:
 - Criar schema de arquivos, leituras e respostas detectadas.
-- Aceitar payload simulado de 20 respostas com confiancas e alertas.
+- Aceitar payload simulado de 20 respostas, confiancas, alertas, codigo impresso detectado e codigo do sistema proposto quando houver.
 
 Arquivos envolvidos:
 - `backend/database/migrations/*leituras_respostas_arquivos*.php` (novos)
@@ -1286,6 +1289,7 @@ Arquivos envolvidos:
 
 Critérios de aceite:
 - Cada tentativa e preservada e possui uma resposta por questao.
+- Codigo impresso detectado e codigo do sistema proposto permanecem em campos distintos.
 - Leitura simulada nao cria resultado valido.
 
 Verificação:
@@ -1314,7 +1318,7 @@ Implementar a transacao critica que vincula aluno, cartao e leitura.
 
 Acoes:
 - Criar cartoes, logs de sincronizacao e confirmacao por `Idempotency-Key`.
-- Aplicar locks, constraints e conflitos `409` estaveis.
+- Aplicar locks, constraints e conflitos `409` distintos para aluno, codigo impresso e codigo do sistema.
 
 Arquivos envolvidos:
 - `backend/database/migrations/*cartoes_logs_sincronizacao*.php` (novos)
@@ -1325,7 +1329,8 @@ Arquivos envolvidos:
 
 Critérios de aceite:
 - Reenvio igual retorna o resultado anterior.
-- Aluno ou codigo duplicado nunca geram dois cartoes validos.
+- Aluno, codigo impresso na prova ou codigo do sistema reutilizado nunca geram dois cartoes validos.
+- Codigo impresso e codigo do sistema nunca sobrescrevem um ao outro.
 
 Verificação:
 ```bash
@@ -1582,13 +1587,13 @@ git commit -m "omr: detectar marcacoes alertas e confianca"
 git push
 ```
 
-## MP-039 - Ler codigo e integrar OMR ao backend
+## MP-039 - Ler codigo impresso e integrar OMR ao backend
 
 Objetivo:
 Transformar upload autorizado em leitura preliminar real, rastreavel e revisavel.
 
 Acoes:
-- Implementar leitura do codigo configurado e fallback manual.
+- Implementar leitura do codigo impresso conforme o modelo, com fallback manual ou registro de ausencia.
 - Integrar storage, fila OMR, persistencia de metricas e suite de regressao ao backend.
 
 Arquivos envolvidos:
@@ -1600,6 +1605,7 @@ Arquivos envolvidos:
 
 Critérios de aceite:
 - Upload real gera leitura preliminar sem confirmar automaticamente.
+- OMR nao gera nem substitui o codigo do sistema.
 - Resultado e reproduzivel para mesma imagem, modelo e configuracao.
 
 Verificação:
@@ -1752,7 +1758,7 @@ Capturar uma imagem adequada e criar leitura preliminar no backend.
 
 Acoes:
 - Solicitar camera, exibir guia, validar qualidade basica e permitir refazer.
-- Fazer upload privado com identificador idempotente e estados de progresso.
+- Fazer upload privado com identificador idempotente, codigo do sistema proposto opcional e estados de progresso.
 
 Arquivos envolvidos:
 - `mobile/lib/features/capture/**` (novos)
@@ -1790,8 +1796,8 @@ Objetivo:
 Exigir revisao humana de respostas e alertas antes da confirmacao.
 
 Acoes:
-- Exibir 20 respostas, confiancas, codigo e alertas.
-- Permitir alteracao manual com motivo conforme politica.
+- Exibir 20 respostas, confiancas, codigo impresso detectado, codigo do sistema quando utilizado e alertas.
+- Permitir alteracao manual com motivo obrigatorio conforme o `ADR-D005`.
 
 Arquivos envolvidos:
 - `mobile/lib/features/review/**` (novos)
@@ -1800,6 +1806,7 @@ Arquivos envolvidos:
 Critérios de aceite:
 - Branco, dupla e baixa confianca sao destacados por texto, icone e cor.
 - Resposta detectada e final permanecem distintas no payload.
+- Codigo impresso e codigo do sistema aparecem em campos separados.
 
 Verificação:
 ```bash
@@ -1827,8 +1834,8 @@ Objetivo:
 Concluir o fluxo online real do aplicador em dispositivos homologados.
 
 Acoes:
-- Implementar confirmacao de aluno/codigo, resultado, pendencias e historico da sessao.
-- Testar idempotencia, conflitos, perda de rede e aparelhos homologados.
+- Implementar confirmacao de aluno, codigo impresso quando houver, codigo do sistema quando utilizado, resultado, pendencias e historico da sessao.
+- Testar idempotencia, conflitos independentes de identificadores, perda de rede e aparelhos homologados.
 
 Arquivos envolvidos:
 - `mobile/lib/features/confirmation/**` (novos)

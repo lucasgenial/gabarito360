@@ -70,7 +70,7 @@ O Gabarito360 centraliza esse fluxo, utilizando OMR (Optical Mark Recognition) p
 - Autenticacao do aplicador.
 - Selecao de escola, avaliacao, turma e aluno.
 - Captura orientada da imagem.
-- Processamento OMR e leitura do codigo do cartao.
+- Processamento OMR e leitura do codigo impresso do cartao, quando existente.
 - Revisao e correcao manual auditada.
 - Confirmacao e sincronizacao com o backend.
 - Operacao offline temporaria com fila local.
@@ -107,7 +107,7 @@ O Gabarito360 centraliza esse fluxo, utilizando OMR (Optical Mark Recognition) p
 5. O aplicador inicia a aplicacao no app Android.
 6. Para cada aluno, o aplicador fotografa o cartao-resposta.
 7. O modulo OMR processa a imagem e retorna respostas e confiancas.
-8. O aplicador revisa alertas, confirma o aluno e o codigo do cartao.
+8. O aplicador revisa alertas, confirma o aluno, preserva o codigo impresso quando houver e confirma o codigo do sistema quando utilizado ou exigido.
 9. O backend valida a operacao, corrige a prova e registra o resultado.
 10. Dashboards e pendencias sao atualizados em tempo real.
 11. A aplicacao e finalizada e os relatorios ficam disponiveis.
@@ -128,7 +128,7 @@ O Gabarito360 centraliza esse fluxo, utilizando OMR (Optical Mark Recognition) p
 
 ## 10. Estrategia OMR
 
-O MVP deve priorizar um modelo de cartao controlado, semelhante ao da OBMEP, inicialmente com 20 questoes e alternativas de A a E. O cartao deve conter marcadores de referencia e codigo identificador legivel.
+O MVP deve priorizar um modelo de cartao controlado, semelhante ao da OBMEP, inicialmente com 20 questoes e alternativas de A a E. O cartao deve conter marcadores de referencia e pode possuir codigo externo ja impresso, cuja regiao e formato dependem do modelo.
 
 A estrategia recomendada e hibrida:
 
@@ -145,13 +145,13 @@ A estrategia recomendada e hibrida:
 - Criptografar trafego com HTTPS/TLS.
 - Armazenar senhas apenas com hash forte.
 - Auditar leituras, correcoes manuais, alteracoes de gabarito e operacoes administrativas.
-- Definir retencao e descarte para imagens de cartoes.
+- Aplicar retencao e descarte definidos para imagens de cartoes.
 - Restringir suporte tecnico por necessidade e registrar acessos.
 - Obter autorizacao antes de coletar localizacao aproximada.
 
 ## 12. Premissas e restricoes
 
-- O codigo do cartao nao substitui o vinculo explicito com o aluno.
+- O codigo impresso e o codigo do sistema nao substituem o vinculo explicito com o aluno.
 - A conexao de internet pode ser instavel durante a aplicacao.
 - A qualidade das cameras e das fotos varia entre dispositivos.
 - O MVP utiliza um modelo de cartao padronizado.

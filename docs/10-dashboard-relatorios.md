@@ -163,7 +163,7 @@ Dar suporte operacional a aplicacao ativa.
 | Escola | Consolidado de turmas e aplicacoes | Escola e nucleo |
 | Nucleo | Consolidado e comparativo entre escolas | Gestor do nucleo |
 | Alunos pendentes | Alunos sem leitura valida ou ausentes | Aplicador e gestores |
-| Cartoes lidos | Codigo, aluno autorizado, horario, aplicador e status | Gestores autorizados |
+| Cartoes lidos | Codigo impresso quando houver, codigo do sistema quando utilizado, aluno autorizado, horario, aplicador e status | Gestores autorizados |
 | Inconsistencias | Baixa confianca, duplas, correcoes e conflitos | Gestores/suporte autorizado |
 | Desempenho por questao | Acertos, erros, brancos e distribuicao de alternativas | Perfis pedagogicos autorizados |
 | Auditoria operacional | Alteracoes manuais, reprocessamentos e cancelamentos | Perfis autorizados |

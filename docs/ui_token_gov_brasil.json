@@ -1,0 +1,205 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "name": "UI Tokens Gov Brasil",
+  "version": "1.0.0",
+  "description": "Tokens de interface para sistemas web e mobile inspirados no Manual de Marca do Governo Federal do Brasil 2026.",
+  "source": "Manual de Uso da Marca do Governo Federal v.1.3 - ABR/2026",
+  "brand": {
+    "colors": {
+      "verdeAmazonia": { "value": "#00D000", "type": "color" },
+      "amareloSol": { "value": "#FFD000", "type": "color" },
+      "azulAtlantico": { "value": "#183EFF", "type": "color" },
+      "vermelhoUrucum": { "value": "#FF0000", "type": "color" },
+      "cinzaHarpia": { "value": "#3C3C3C", "type": "color" },
+      "brancoPaz": { "value": "#FFFFFF", "type": "color" },
+      "pretoEbano": { "value": "#000000", "type": "color" }
+    },
+    "typography": {
+      "primary": { "value": "Rawline", "type": "fontFamily" },
+      "fallback": { "value": ["Verdana", "Arial", "sans-serif"], "type": "fontFamily" }
+    }
+  },
+  "themes": {
+    "light": {
+      "background": {
+        "body": { "value": "#F8FAFC", "type": "color" },
+        "surface": { "value": "#FFFFFF", "type": "color" },
+        "surfaceAlt": { "value": "#F1F5F9", "type": "color" },
+        "elevated": { "value": "#FFFFFF", "type": "color" }
+      },
+      "text": {
+        "primary": { "value": "#1E293B", "type": "color" },
+        "secondary": { "value": "#64748B", "type": "color" },
+        "muted": { "value": "#94A3B8", "type": "color" },
+        "inverse": { "value": "#FFFFFF", "type": "color" }
+      },
+      "border": {
+        "default": { "value": "#E2E8F0", "type": "color" },
+        "strong": { "value": "#CBD5E1", "type": "color" },
+        "focus": { "value": "#183EFF", "type": "color" }
+      },
+      "action": {
+        "primary": { "value": "#183EFF", "type": "color" },
+        "primaryHover": { "value": "#0F2CC9", "type": "color" },
+        "secondary": { "value": "#00D000", "type": "color" },
+        "secondaryHover": { "value": "#00A800", "type": "color" },
+        "warning": { "value": "#FFD000", "type": "color" },
+        "danger": { "value": "#FF0000", "type": "color" },
+        "neutral": { "value": "#3C3C3C", "type": "color" },
+        "disabled": { "value": "#CBD5E1", "type": "color" }
+      }
+    },
+    "dark": {
+      "background": {
+        "body": { "value": "#061806", "type": "color" },
+        "surface": { "value": "#0B240B", "type": "color" },
+        "surfaceAlt": { "value": "#0E1F3D", "type": "color" },
+        "elevated": { "value": "#123012", "type": "color" },
+        "modal": { "value": "#101F18", "type": "color" }
+      },
+      "text": {
+        "primary": { "value": "#F8FAFC", "type": "color" },
+        "secondary": { "value": "#CBD5E1", "type": "color" },
+        "muted": { "value": "#94A3B8", "type": "color" },
+        "inverse": { "value": "#061806", "type": "color" }
+      },
+      "border": {
+        "default": { "value": "#294529", "type": "color" },
+        "strong": { "value": "#3C623C", "type": "color" },
+        "focus": { "value": "#FFD000", "type": "color" }
+      },
+      "action": {
+        "primary": { "value": "#4566FF", "type": "color" },
+        "primaryHover": { "value": "#6F89FF", "type": "color" },
+        "secondary": { "value": "#00D000", "type": "color" },
+        "secondaryHover": { "value": "#48E548", "type": "color" },
+        "warning": { "value": "#FFD000", "type": "color" },
+        "danger": { "value": "#FF4A4A", "type": "color" },
+        "neutral": { "value": "#CBD5E1", "type": "color" },
+        "disabled": { "value": "#334155", "type": "color" }
+      }
+    }
+  },
+  "semantic": {
+    "success": { "value": "#00D000", "type": "color" },
+    "info": { "value": "#183EFF", "type": "color" },
+    "warning": { "value": "#FFD000", "type": "color" },
+    "danger": { "value": "#FF0000", "type": "color" },
+    "neutral": { "value": "#3C3C3C", "type": "color" }
+  },
+  "spacing": {
+    "0": { "value": "0px", "type": "dimension" },
+    "1": { "value": "4px", "type": "dimension" },
+    "2": { "value": "8px", "type": "dimension" },
+    "3": { "value": "12px", "type": "dimension" },
+    "4": { "value": "16px", "type": "dimension" },
+    "5": { "value": "20px", "type": "dimension" },
+    "6": { "value": "24px", "type": "dimension" },
+    "8": { "value": "32px", "type": "dimension" },
+    "10": { "value": "40px", "type": "dimension" },
+    "12": { "value": "48px", "type": "dimension" },
+    "16": { "value": "64px", "type": "dimension" }
+  },
+  "radius": {
+    "none": { "value": "0px", "type": "borderRadius" },
+    "sm": { "value": "6px", "type": "borderRadius" },
+    "md": { "value": "10px", "type": "borderRadius" },
+    "lg": { "value": "14px", "type": "borderRadius" },
+    "xl": { "value": "20px", "type": "borderRadius" },
+    "pill": { "value": "999px", "type": "borderRadius" }
+  },
+  "shadow": {
+    "sm": { "value": "0 1px 3px rgba(15, 23, 42, 0.08)", "type": "shadow" },
+    "md": { "value": "0 4px 12px rgba(15, 23, 42, 0.10)", "type": "shadow" },
+    "lg": { "value": "0 12px 32px rgba(15, 23, 42, 0.16)", "type": "shadow" },
+    "darkSm": { "value": "0 1px 3px rgba(0, 0, 0, 0.35)", "type": "shadow" },
+    "darkMd": { "value": "0 4px 18px rgba(0, 0, 0, 0.45)", "type": "shadow" }
+  },
+  "typography": {
+    "h1": { "fontSize": "48px", "fontWeight": 700, "lineHeight": "56px" },
+    "h2": { "fontSize": "36px", "fontWeight": 700, "lineHeight": "44px" },
+    "h3": { "fontSize": "28px", "fontWeight": 600, "lineHeight": "36px" },
+    "h4": { "fontSize": "24px", "fontWeight": 600, "lineHeight": "32px" },
+    "body": { "fontSize": "16px", "fontWeight": 400, "lineHeight": "24px" },
+    "bodySmall": { "fontSize": "14px", "fontWeight": 400, "lineHeight": "20px" },
+    "caption": { "fontSize": "12px", "fontWeight": 400, "lineHeight": "16px" },
+    "button": { "fontSize": "14px", "fontWeight": 700, "lineHeight": "20px", "letterSpacing": "0.02em" }
+  },
+  "components": {
+    "button": {
+      "height": { "sm": "36px", "md": "44px", "lg": "52px" },
+      "paddingX": { "sm": "12px", "md": "20px", "lg": "28px" },
+      "radius": "12px",
+      "fontWeight": 700
+    },
+    "input": {
+      "height": "48px",
+      "paddingX": "16px",
+      "radius": "12px",
+      "borderWidth": "1px",
+      "focusRing": "2px"
+    },
+    "card": {
+      "padding": "24px",
+      "radius": "16px",
+      "shadow": "md"
+    },
+    "modal": {
+      "width": "600px",
+      "radius": "20px",
+      "padding": "32px",
+      "overlay": "rgba(0, 0, 0, 0.55)"
+    },
+    "table": {
+      "headerHeight": "48px",
+      "rowHeight": "52px",
+      "radius": "12px"
+    },
+    "sidebar": {
+      "width": "280px",
+      "collapsedWidth": "80px"
+    },
+    "dashboardCard": {
+      "height": "120px",
+      "radius": "16px",
+      "iconSize": "48px",
+      "valueSize": "32px"
+    }
+  },
+  "charts": {
+    "series": [
+      "#183EFF",
+      "#00D000",
+      "#FFD000",
+      "#FF0000",
+      "#3C3C3C",
+      "#6F89FF",
+      "#48E548"
+    ],
+    "gridLight": "#E2E8F0",
+    "gridDark": "#294529",
+    "textLight": "#475569",
+    "textDark": "#CBD5E1"
+  },
+  "motion": {
+    "durationFast": { "value": "120ms", "type": "duration" },
+    "durationDefault": { "value": "200ms", "type": "duration" },
+    "durationSlow": { "value": "320ms", "type": "duration" },
+    "easing": { "value": "cubic-bezier(0.2, 0, 0, 1)", "type": "cubicBezier" }
+  },
+  "breakpoints": {
+    "xs": "360px",
+    "sm": "640px",
+    "md": "768px",
+    "lg": "1024px",
+    "xl": "1280px",
+    "2xl": "1536px"
+  },
+  "accessibility": {
+    "minContrastBodyText": "4.5:1",
+    "minContrastLargeText": "3:1",
+    "focusVisible": true,
+    "keyboardNavigation": true,
+    "reducedMotionSupport": true
+  }
+}

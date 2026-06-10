@@ -191,6 +191,7 @@
 
 - `imagem`: arquivo de imagem.
 - `operacao_mobile_id`: UUID para idempotencia.
+- `codigo_sistema_proposto`: identificador operacional adicional gerado pelo app; pode ser omitido quando o codigo impresso for suficiente.
 - `modelo_cartao_id`: UUID esperado.
 - `aluno_id`: opcional nessa etapa.
 - `capturada_at`: data da captura.
@@ -204,7 +205,8 @@ Resposta esperada:
   "data": {
     "id": "uuid",
     "status": "parcial",
-    "codigo_detectado": "CARTAO-000123",
+    "codigo_sistema_proposto": null,
+    "codigo_impresso_detectado": "CARTAO-000123",
     "confianca_geral": 0.93,
     "respostas": [
       {
@@ -240,7 +242,10 @@ Payload:
 ```json
 {
   "aluno_id": "uuid",
-  "codigo_cartao": "CARTAO-000123",
+  "codigo_sistema": null,
+  "codigo_impresso": "CARTAO-000123",
+  "codigo_sistema_afixado": false,
+  "motivo_sem_codigo_impresso": null,
   "aceita_alertas": true,
   "respostas_finais": [
     {
@@ -260,10 +265,27 @@ Payload:
 **Conflitos `409`:**
 
 - `ALUNO_JA_CONFIRMADO`
-- `CODIGO_CARTAO_JA_VINCULADO`
+- `CODIGO_IMPRESSO_JA_VINCULADO`
+- `CODIGO_SISTEMA_JA_UTILIZADO`
 - `APLICACAO_FINALIZADA`
 - `OPERACAO_IDEMPOTENTE_DIVERGENTE`
 - `LEITURA_JA_CANCELADA`
+
+O `codigo_impresso` preserva o valor existente no papel e pode ser nulo quando o cartao realmente nao possui identificador externo. Nesse caso, `motivo_sem_codigo_impresso` deve ser `cartao_sem_codigo_impresso` e o cartao persistido deve receber um `codigo_sistema`. No fluxo online, o backend pode gera-lo quando o cliente omitir; em operacao offline, o app deve gera-lo antes da sincronizacao. Quando houver codigo impresso suficiente, `codigo_sistema` e opcional e nunca substitui o valor externo.
+
+Exemplo para cartao sem codigo impresso:
+
+```json
+{
+  "aluno_id": "uuid",
+  "codigo_impresso": null,
+  "codigo_sistema": "G360-8JK4N2P7Q5MX-H",
+  "codigo_sistema_afixado": false,
+  "motivo_sem_codigo_impresso": "cartao_sem_codigo_impresso",
+  "aceita_alertas": true,
+  "respostas_finais": []
+}
+```
 
 ## 9. Resultados, dashboards e relatorios
 

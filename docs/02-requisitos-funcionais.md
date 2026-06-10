@@ -83,9 +83,9 @@
 | RF046 | MVP | O app deve orientar enquadramento e informar problemas de qualidade. |
 | RF047 | MVP | O app deve exibir as respostas detectadas antes da confirmacao. |
 | RF048 | MVP | O app deve destacar respostas em branco, duplas e de baixa confianca. |
-| RF049 | MVP | O app deve permitir informar ou confirmar o codigo do cartao. |
+| RF049 | MVP | O app deve permitir confirmar ou informar o codigo impresso externo e, quando utilizado ou exigido, gerar ou receber separadamente o codigo do sistema. |
 | RF050 | MVP | O app deve permitir corrigir manualmente uma resposta antes da confirmacao. |
-| RF051 | MVP | O app deve exigir motivo para correcoes manuais conforme politica configurada. |
+| RF051 | MVP | O app deve exigir motivo em toda correcao manual de resposta. |
 | RF052 | MVP | O app deve permitir refazer uma captura sem apagar o historico confirmado. |
 | RF053 | MVP | O app deve enviar a leitura confirmada ao backend de forma idempotente. |
 | RF054 | V2 | O app deve armazenar operacoes temporariamente quando estiver offline. |
@@ -101,7 +101,7 @@
 | RF059 | MVP | O modulo OMR deve detectar marcacoes de A a E no modelo inicial. |
 | RF060 | MVP | O modulo OMR deve identificar respostas em branco, duplas e duvidosas. |
 | RF061 | MVP | O modulo OMR deve retornar confianca por resposta e status geral. |
-| RF062 | MVP | O sistema deve vincular o codigo do cartao ao aluno na confirmacao. |
+| RF062 | MVP | O sistema deve vincular ao aluno o codigo impresso quando existente e o codigo do sistema quando utilizado, preservando ambos separadamente. |
 | RF063 | MVP | O sistema deve comparar respostas confirmadas com o gabarito oficial. |
 | RF064 | MVP | O sistema deve calcular acertos, erros, brancos, invalidas e nota. |
 | RF065 | MVP | O sistema deve manter historico das tentativas e reprocessamentos. |

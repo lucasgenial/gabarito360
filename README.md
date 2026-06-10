@@ -16,7 +16,7 @@ O Gabarito360 centraliza o processo de aplicacao e correcao de provas objetivas:
 - le cartoes-resposta fotografados pelo aplicativo Android;
 - destaca respostas em branco, duplas ou com baixa confianca;
 - permite revisao manual antes da confirmacao;
-- vincula o codigo do cartao ao aluno selecionado;
+- preserva o codigo impresso do cartao, quando existir, e vincula separadamente o codigo do sistema ao aluno selecionado;
 - corrige automaticamente as respostas confirmadas;
 - atualiza dashboards e relatorios em tempo real;
 - preserva historico e auditoria das operacoes criticas.
@@ -35,7 +35,7 @@ Aplicador seleciona a aplicacao e fotografa o cartao
 OMR corrige perspectiva e detecta as respostas
                          |
                          v
-Aplicador revisa alertas e confirma aluno e codigo
+Aplicador revisa alertas e confirma aluno e identificadores
                          |
                          v
 Backend valida, corrige e registra o resultado
@@ -82,7 +82,7 @@ O aplicativo sera utilizado durante a aplicacao real da prova. O fluxo principal
 4. Processamento OMR.
 5. Conferencia das respostas detectadas.
 6. Correcao manual, quando necessaria.
-7. Confirmacao do aluno e do codigo do cartao.
+7. Confirmacao do aluno, do codigo impresso quando houver e do codigo do sistema quando utilizado.
 8. Envio do resultado ao backend.
 9. Atualizacao dos alunos lidos e pendentes.
 
@@ -137,7 +137,7 @@ App Android e Workers ----> OpenCV / OMR
 ## Regras fundamentais
 
 - Um aluno pode possuir apenas um cartao valido por prova.
-- Um codigo de cartao pode ser vinculado a apenas um aluno dentro da prova.
+- Um codigo impresso pode ser vinculado a apenas um aluno dentro da prova, e o codigo do sistema, quando utilizado, e unico globalmente.
 - Novas leituras e reprocessamentos devem preservar o historico.
 - Alteracoes manuais nas respostas devem ser auditadas.
 - Leituras com baixa confianca exigem revisao explicita.
@@ -242,7 +242,7 @@ Antes de iniciar a implementacao, devem ser resolvidas as decisoes registradas n
 
 - modelo fisico inicial do cartao-resposta;
 - politica de pontuacao e anulacao de questoes;
-- unicidade de matricula e codigo do cartao;
+- unicidade de matricula, codigo impresso e codigo do sistema;
 - metas mensuraveis de qualidade do OMR;
 - dispositivos Android homologados;
 - politica LGPD e retencao de imagens;

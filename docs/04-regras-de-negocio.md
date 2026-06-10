@@ -23,7 +23,7 @@
 | ID | Regra |
 |---|---|
 | RN008 | Uma turma pertence a uma escola e a um ano letivo. |
-| RN009 | A matricula do aluno deve ser unica no escopo definido pela escola ou pelo nucleo. |
+| RN009 | A matricula do aluno deve ser unica por escola, comparada de forma normalizada e sem diferenca entre maiusculas e minusculas. |
 | RN010 | A transferencia de aluno deve preservar historico de aplicacoes e resultados. |
 | RN011 | Aluno inativo permanece visivel em registros historicos. |
 | RN012 | Importacoes so podem ser confirmadas depois da validacao de linhas invalidas e duplicadas. |
@@ -32,8 +32,8 @@
 
 | ID | Regra |
 |---|---|
-| RN013 | Uma avaliacao em rascunho pode ser editada por usuario autorizado. |
-| RN014 | Uma avaliacao so pode ser publicada com modelo de cartao e gabarito validos. |
+| RN013 | Uma avaliacao em rascunho pode ser criada e editada por gestor autorizado; professores e aplicadores nao criam avaliacoes no MVP. |
+| RN014 | Uma avaliacao so pode ser publicada com exatamente um modelo de cartao homologado e um gabarito valido. |
 | RN015 | A quantidade de respostas do gabarito deve corresponder a quantidade de questoes da avaliacao. |
 | RN016 | Cada questao possui no maximo uma alternativa correta, salvo modelo futuro explicitamente configurado. |
 | RN017 | O gabarito oficial deve ser bloqueado apos o inicio da primeira aplicacao. |
@@ -58,17 +58,17 @@
 | ID | Regra |
 |---|---|
 | RN028 | Um aluno pode ter apenas um cartao valido confirmado por avaliacao. |
-| RN029 | Um codigo de cartao pode estar vinculado a apenas um aluno dentro da mesma avaliacao. |
-| RN030 | O codigo do cartao deve ser vinculado ou confirmado no momento da confirmacao da leitura. |
+| RN029 | Um codigo impresso normalizado, quando informado, pode estar vinculado a apenas um aluno dentro da mesma avaliacao. |
+| RN030 | O codigo impresso deve ser preservado e confirmado quando existir; o codigo do sistema e adicional e deve ser gerado quando nao houver codigo impresso ou quando o fluxo autorizado exigir. |
 | RN031 | Uma nova tentativa de leitura nao apaga tentativas anteriores. |
 | RN032 | Reprocessar ou substituir uma leitura confirmada exige permissao, justificativa e auditoria. |
 | RN033 | Leituras de baixa confianca devem exigir revisao manual explicita. |
 | RN034 | Questoes em branco, duplas ou duvidosas devem ser destacadas antes da confirmacao. |
 | RN035 | Uma leitura com alertas pode ser confirmada somente apos aceite explicito do aplicador. |
-| RN036 | Toda alteracao manual de resposta deve registrar valor detectado, valor final, usuario, data e motivo quando exigido. |
+| RN036 | Toda alteracao manual de resposta deve registrar valor detectado, valor final, usuario, data e motivo obrigatorio entre 10 e 500 caracteres. |
 | RN037 | O resultado deve ser calculado com a versao de gabarito vigente registrada na correcao. |
 | RN038 | Questao em branco ou com dupla marcacao vale como incorreta, salvo regra especifica da avaliacao. |
-| RN039 | Questao anulada deve seguir a politica configurada na avaliacao e ser aplicada igualmente aos resultados. |
+| RN039 | No MVP, questao anulada concede pontuacao integral a todos os resultados validos, incrementa `anuladas` e nao incrementa acertos, erros, brancos ou duplas. |
 | RN040 | O backend deve rejeitar confirmacao duplicada, mesmo quando recebida repetidamente por sincronizacao. |
 | RN041 | Cancelar uma leitura confirmada invalida seu resultado vigente, mas preserva o historico. |
 
@@ -78,9 +78,12 @@
 |---|---|
 | RN042 | O OMR deve retornar confianca por questao e confianca geral. |
 | RN043 | Limiares de marcacao e confianca pertencem a versao do modelo de cartao. |
-| RN044 | Falha na identificacao automatica do codigo deve permitir digitacao manual validada. |
+| RN044 | Falha na identificacao automatica do codigo impresso deve permitir digitacao manual; trocar o valor detectado exige justificativa, e cartao sem codigo impresso exige o motivo `cartao_sem_codigo_impresso`. |
 | RN045 | Imagem que nao atenda aos criterios minimos deve ser recusada ou marcada para nova captura. |
 | RN046 | A resposta final confirmada prevalece sobre a detectada para correcao, mantendo ambas no historico. |
+| RN063 | O cartao inicial do MVP possui 20 questoes A-E, marcadores de referencia e nenhuma identificacao pessoal impressa; a regiao de codigo impresso depende do modelo. |
+| RN064 | O codigo impresso externo e o codigo do sistema sao campos distintos e nenhum deles pode sobrescrever o outro. |
+| RN067 | O codigo do sistema, quando utilizado, segue `G360-XXXXXXXXXXXX-C`, e unico globalmente e nao identifica fisicamente o papel sem ser afixado ao cartao. |
 
 ## 8. Offline e sincronizacao
 
@@ -99,9 +102,11 @@
 | RN052 | Devem ser auditadas alteracoes de gabarito, correcoes manuais, reprocessamentos, cancelamentos e mudancas de permissao. |
 | RN053 | Registros de auditoria nao podem ser editados por usuarios operacionais. |
 | RN054 | A coleta de localizacao aproximada depende de autorizacao e finalidade definida. |
-| RN055 | Imagens originais e processadas devem seguir prazo de retencao configurado. |
+| RN055 | Imagens originais confirmadas devem ser retidas por 180 dias apos a aplicacao; tentativas e artefatos processados por 30 dias; excecoes exigem retencao legal documentada. |
 | RN056 | Exclusao ou anonimizacao de dados deve respeitar obrigacoes legais e preservacao de evidencias necessarias. |
 | RN057 | Exportacoes devem respeitar o escopo de acesso do solicitante e ser auditadas. |
+| RN065 | Exportacoes expiram em 7 dias, logs tecnicos em 90 dias, logs de sincronizacao em 180 dias e auditorias em 5 anos. |
+| RN066 | A imagem original e obrigatoria para leituras online do MVP e deve permanecer em storage privado com acesso autorizado e auditado. |
 
 ## 10. Dashboards e relatorios
 
@@ -113,11 +118,17 @@
 | RN061 | Relatorios gerados devem registrar filtros, solicitante, data e versao dos dados quando aplicavel. |
 | RN062 | Rankings devem informar criterio de ordenacao e tratamento de empates. |
 
-## 11. Decisoes pendentes
+## 11. Decisoes adotadas para o MVP
 
-- Definir escopo exato de unicidade da matricula do aluno.
-- Definir politica de pontuacao para questoes anuladas.
-- Definir limiares iniciais de confianca do OMR por modelo.
-- Definir obrigatoriedade do motivo em toda correcao manual ou apenas em casos especificos.
-- Definir prazos de retencao para imagens, auditoria, exportacoes e logs.
-- Definir se professores podem criar avaliacoes locais no MVP.
+| Tema | Decisao |
+|---|---|
+| Matricula | Unica por escola, conforme [ADR-D002](decisoes/ADR-D002-unicidade-matricula.md). |
+| Identificacao do cartao | Preservar codigo impresso externo e codigo do sistema em campos separados, conforme [ADR-D010](decisoes/ADR-D010-identificacao-cartao.md). |
+| Questao anulada | Concede pontuacao integral a todos os resultados validos, conforme [ADR-D004](decisoes/ADR-D004-questao-anulada.md). |
+| Correcao manual | Motivo obrigatorio em toda alteracao de resposta, conforme [ADR-D005](decisoes/ADR-D005-motivo-correcao-manual.md). |
+| Retencao | Prazos definidos por classificacao, conforme [ADR-D006](decisoes/ADR-D006-retencao-imagens-logs.md). |
+| Criacao de prova | Professores e aplicadores nao criam provas no MVP; a acao fica restrita a gestores autorizados. |
+| Modelo por prova | Cada prova do MVP referencia exatamente um modelo de cartao homologado. |
+| Limiares OMR | Devem ser calibrados com dataset real e versionados no modelo; nao existem limiares globais fixos. |
+
+O registro completo de `D001-D009` esta em [decisoes/README.md](decisoes/README.md).

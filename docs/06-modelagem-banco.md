@@ -85,7 +85,7 @@ CHECK (status IN ('rascunho', 'publicada', 'em_aplicacao', 'finalizada', 'arquiv
 
 ### 3.1 Cartao confirmado separado da tentativa OMR
 
-`cartoes_resposta` representa o vinculo confirmado entre prova, aplicacao, aluno e codigo do cartao. `leituras_cartao` representa cada captura ou reprocessamento OMR. Essa separacao permite varias tentativas sem criar varios resultados validos para o mesmo aluno.
+`cartoes_resposta` representa o vinculo confirmado entre prova, aplicacao, aluno, codigo impresso externo e codigo do sistema. `leituras_cartao` representa cada captura ou reprocessamento OMR. Essa separacao permite varias tentativas sem criar varios resultados validos para o mesmo aluno.
 
 ### 3.2 Gabarito oficial versionado
 
@@ -400,7 +400,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 
 **Indices e restricoes:**
 
-- Decisao inicial: `uq_alunos_escola_matricula` unico em `(escola_id, lower(matricula))` onde `deleted_at IS NULL`.
+- Regra do MVP: `uq_alunos_escola_matricula` unico em `(escola_id, lower(matricula))` onde `deleted_at IS NULL`, conforme `ADR-D002`.
 - `idx_alunos_escola_nome`: `(escola_id, nome)` onde `deleted_at IS NULL`.
 - `idx_alunos_escola_status`: `(escola_id, status)`.
 - `documento` nao deve ser unico ate a politica de coleta ser aprovada.
@@ -469,8 +469,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 | `quantidade_questoes` | `smallint` | Nao |  |
 | `quantidade_alternativas` | `smallint` | Nao |  |
 | `alternativas` | `jsonb` | Nao | Ex.: `["A","B","C","D","E"]` |
-| `tipo_codigo` | `varchar(30)` | Nao | `qr_code`, `codigo_barras`, `ocr`, `manual` |
-| `configuracao_omr` | `jsonb` | Nao | Regioes, marcadores e limiares |
+| `tipo_codigo` | `varchar(30)` | Nao | `qr_code`, `codigo_barras`, `ocr`, `manual`, `sem_codigo` |
+| `configuracao_omr` | `jsonb` | Nao | Regioes, marcadores, limiares e regras de normalizacao do codigo impresso |
 | `arquivo_base_id` | `uuid` | Sim | FK `arquivos.id` |
 | `status` | `varchar(20)` | Nao / `rascunho` | `rascunho`, `homologado`, `inativo` |
 | `criado_por` | `uuid` | Sim | FK `usuarios.id` |
@@ -485,7 +485,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - Checks para `versao > 0`, quantidades positivas e `jsonb_typeof(alternativas) = 'array'`.
 - Versao homologada usada em aplicacao deve ser tratada como imutavel.
 
-**Relacionamentos e regras importantes:** modelos sao referenciados por provas, aplicacoes e leituras. Qualquer alteracao geometrica ou de limiar exige nova versao; leituras historicas mantem a referencia da versao usada.
+**Relacionamentos e regras importantes:** modelos sao referenciados por provas, aplicacoes e leituras. Qualquer alteracao geometrica ou de limiar exige nova versao; leituras historicas mantem a referencia da versao usada. O MVP utiliza exatamente um modelo homologado por prova, conforme [ADR-D001](decisoes/ADR-D001-modelo-fisico-cartao.md).
 
 ### 8.2 `provas`
 
@@ -603,6 +603,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_gabarito_respostas_questao`: `(questao_id)`.
 - Check: `(anulada AND alternativa_correta IS NULL) OR (NOT anulada AND alternativa_correta IS NOT NULL)`.
 - Check `peso >= 0`.
+- No calculo do MVP, uma resposta anulada concede seu peso integral, incrementa `anuladas` e nao incrementa acertos, erros, brancos ou duplas, conforme [ADR-D004](decisoes/ADR-D004-questao-anulada.md).
 
 ### 8.6 `prova_turmas`
 
@@ -705,7 +706,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 
 ### 10.1 `cartoes_resposta`
 
-**Finalidade:** representar o vinculo logico e confirmado entre prova, aplicacao, aluno e codigo do cartao.
+**Finalidade:** representar o vinculo logico e confirmado entre prova, aplicacao e aluno, preservando separadamente o codigo impresso no papel e o codigo operacional gerado pelo sistema.
 
 | Campo | Tipo | Nulo/Padrao | Chave ou regra |
 |---|---|---|---|
@@ -713,7 +714,11 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 | `prova_id` | `uuid` | Nao | Parte da FK composta |
 | `aplicacao_id` | `uuid` | Nao | FK composta para aplicacao/prova |
 | `aluno_id` | `uuid` | Nao | FK com aluno previsto |
-| `codigo_cartao` | `varchar(120)` | Nao | Codigo confirmado |
+| `codigo_impresso` | `varchar(180)` | Sim | Valor externo exatamente como confirmado pelo aplicador |
+| `codigo_impresso_normalizado` | `varchar(180)` | Sim | Valor normalizado conforme o modelo; usado para busca e unicidade |
+| `codigo_sistema` | `varchar(40)` | Sim | Identificador operacional adicional `G360-XXXXXXXXXXXX-C`, gerado pelo app ou backend |
+| `codigo_sistema_afixado` | `boolean` | Nao / `false` | Indica se o codigo do sistema foi materialmente afixado ao papel |
+| `motivo_sem_codigo_impresso` | `varchar(80)` | Sim | Obrigatorio quando o cartao nao possui codigo impresso |
 | `status` | `varchar(30)` | Nao / `confirmado` | `confirmado`, `substituido`, `cancelado` |
 | `confirmado_por` | `uuid` | Sim | FK `usuarios.id` |
 | `confirmado_at` | `timestamptz` | Nao / `now()` |  |
@@ -736,14 +741,25 @@ CREATE UNIQUE INDEX uq_cartoes_resposta_prova_aluno_confirmado
 ON cartoes_resposta (prova_id, aluno_id)
 WHERE status = 'confirmado';
 
-CREATE UNIQUE INDEX uq_cartoes_resposta_prova_codigo_confirmado
-ON cartoes_resposta (prova_id, codigo_cartao)
-WHERE status = 'confirmado';
+CREATE UNIQUE INDEX uq_cartoes_resposta_prova_codigo_impresso_confirmado
+ON cartoes_resposta (prova_id, codigo_impresso_normalizado)
+WHERE status = 'confirmado' AND codigo_impresso_normalizado IS NOT NULL;
+
+CREATE UNIQUE INDEX uq_cartoes_resposta_codigo_sistema
+ON cartoes_resposta (codigo_sistema)
+WHERE codigo_sistema IS NOT NULL;
 ```
 
 Indices adicionais: `(aplicacao_id, status)`, `(aluno_id, prova_id)` e `(substitui_cartao_id)`.
 
-Esses indices implementam as regras de um cartao valido por aluno/prova e codigo unico dentro da prova.
+Esses indices implementam as regras de um cartao valido por aluno/prova, codigo impresso unico dentro da prova quando informado e codigo do sistema unico globalmente.
+
+O backend deve preservar `codigo_impresso`, gerar `codigo_impresso_normalizado` conforme a versao do modelo e validar `codigo_sistema` quando informado, conforme [ADR-D010](decisoes/ADR-D010-identificacao-cartao.md). Checks devem garantir:
+
+- `codigo_impresso` e `codigo_impresso_normalizado` sao ambos nulos ou ambos preenchidos;
+- `motivo_sem_codigo_impresso = 'cartao_sem_codigo_impresso'` e `codigo_sistema IS NOT NULL` quando o codigo impresso nao existir;
+- `codigo_sistema_afixado = true` exige `codigo_sistema IS NOT NULL`;
+- `codigo_sistema_afixado = false` significa que o identificador nao pode ser usado para localizar fisicamente o papel.
 
 ### 10.2 `arquivos`
 
@@ -772,6 +788,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - `idx_arquivos_classificacao_retencao`: `(classificacao, retencao_ate)`.
 - Check `tamanho_bytes >= 0`.
 - Download deve ocorrer por autorizacao e URL temporaria; `caminho` nao deve ser exposto ao cliente.
+- `retencao_ate` deve ser preenchido conforme `ADR-D006`: imagens confirmadas por 180 dias apos a aplicacao, tentativas e processadas por 30 dias e exportacoes por 7 dias.
 
 **Relacionamentos e regras importantes:** arquivos sao referenciados por modelos, leituras, importacoes e relatorios. O objeto fisico fica fora do PostgreSQL; acesso, descarte e retencao devem ser autorizados e auditados.
 
@@ -788,10 +805,11 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 | `modelo_cartao_id` | `uuid` | Nao | FK `modelos_cartao.id` |
 | `operacao_mobile_id` | `uuid` | Sim | Idempotencia gerada no dispositivo |
 | `leitura_origem_id` | `uuid` | Sim | FK para leitura reprocessada |
-| `imagem_original_id` | `uuid` | Sim | FK `arquivos.id` |
+| `imagem_original_id` | `uuid` | Sim | FK `arquivos.id`; obrigatoria antes do processamento de leitura online do MVP |
 | `imagem_processada_id` | `uuid` | Sim | FK `arquivos.id` |
-| `codigo_detectado` | `varchar(120)` | Sim |  |
-| `confianca_codigo` | `numeric(5,4)` | Sim | Entre 0 e 1 |
+| `codigo_sistema_proposto` | `varchar(40)` | Sim | Codigo adicional proposto pelo app ou backend para a futura confirmacao |
+| `codigo_impresso_detectado` | `varchar(180)` | Sim | Valor externo detectado fisicamente na imagem |
+| `confianca_codigo_impresso` | `numeric(5,4)` | Sim | Entre 0 e 1 |
 | `confianca_geral` | `numeric(5,4)` | Sim | Entre 0 e 1 |
 | `status` | `varchar(30)` | Nao / `recebida` | `recebida`, `processando`, `sucesso`, `parcial`, `falha`, `confirmada`, `cancelada` |
 | `requer_revisao` | `boolean` | Nao / `false` |  |
@@ -810,6 +828,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 **Indices e restricoes:**
 
 - `uq_leituras_cartao_operacao_mobile`: unico em `operacao_mobile_id` onde nao nulo.
+- `idx_leituras_cartao_codigo_sistema_proposto`: `(codigo_sistema_proposto)` onde nao nulo; a unicidade e validada ao confirmar o cartao.
 - `idx_leituras_cartao_aplicacao_data`: `(aplicacao_id, created_at DESC)`.
 - `idx_leituras_cartao_cartao_data`: `(cartao_resposta_id, created_at DESC)`.
 - `idx_leituras_cartao_status`: `(status, created_at)` para workers e suporte.
@@ -817,6 +836,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - Checks de confianca entre `0` e `1`.
 - `(aplicacao_id, prova_id) -> aplicacoes(id, prova_id)`.
 - Trigger valida que o modelo da leitura corresponde ao modelo congelado na aplicacao.
+- O campo permanece anulavel para representar recebimentos incompletos ou falhos, mas a aplicacao deve exigir `imagem_original_id` antes de processar ou confirmar uma leitura online do MVP, conforme [ADR-D006](decisoes/ADR-D006-retencao-imagens-logs.md).
 
 **Relacionamentos e regras importantes:** cada leitura pertence a uma aplicacao e modelo, pode ser associada ao cartao confirmado e possui respostas detectadas. Nova captura ou reprocessamento sempre cria nova leitura; tentativas anteriores nao sao sobrescritas.
 
@@ -836,7 +856,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 | `confianca` | `numeric(5,4)` | Sim | Entre 0 e 1 |
 | `preenchimentos` | `jsonb` | Sim | Metricas por alternativa |
 | `alterada_manualmente` | `boolean` | Nao / `false` |  |
-| `motivo_alteracao` | `text` | Sim | Obrigatorio conforme politica |
+| `motivo_alteracao` | `text` | Sim | Obrigatorio com 10 a 500 caracteres quando alterada manualmente |
 | `alterada_por` | `uuid` | Sim | FK `usuarios.id` |
 | `alterada_at` | `timestamptz` | Sim |  |
 | `created_at` | `timestamptz` | Nao / `now()` |  |
@@ -849,7 +869,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - `idx_respostas_detectadas_questao_tipo`: `(questao_id, tipo_deteccao)`.
 - `idx_respostas_detectadas_alteradas`: `(leitura_cartao_id)` onde `alterada_manualmente`.
 - Check de confianca entre `0` e `1`.
-- Check exige `alterada_por` e `alterada_at` quando `alterada_manualmente = true`.
+- Check exige `alterada_por`, `alterada_at` e `motivo_alteracao` normalizado entre 10 e 500 caracteres quando `alterada_manualmente = true`.
 
 **Relacionamentos e regras importantes:** cada resposta pertence a uma leitura e questao. A resposta detectada nunca e substituida pela resposta final; alteracoes manuais devem preservar ambas e registrar ator, horario e motivo aplicavel.
 
@@ -918,6 +938,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - `uq_resultado_respostas_resultado_questao`: unico em `(resultado_id, questao_id)`.
 - `idx_resultado_respostas_questao_situacao`: `(questao_id, situacao)`.
 - Checks para pesos e pontos nao negativos.
+- Quando `situacao = 'anulada'`, `pontos_obtidos` deve ser igual ao `peso` no MVP.
 
 ## 12. Auditoria, dispositivos e sincronizacao
 
@@ -951,6 +972,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - `idx_auditorias_escola_data`: `(escola_id, created_at DESC)`.
 - Revogar `UPDATE` e `DELETE` para papeis operacionais.
 - Avaliar particionamento mensal por `created_at` quando o volume justificar.
+- Aplicar retencao minima de 5 anos, salvo obrigacao superior documentada, conforme [ADR-D006](decisoes/ADR-D006-retencao-imagens-logs.md).
 
 **Relacionamentos e regras importantes:** auditorias relacionam o ator e o escopo organizacional a uma entidade logica auditada. Nao devem conter segredos ou dados pessoais desnecessarios e sao imutaveis para usuarios operacionais.
 
@@ -1007,6 +1029,7 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 - Check `tentativas > 0`.
 - Reenvio com mesmo `operacao_id` e mesmo `payload_hash` retorna o resultado anterior.
 - Reenvio com mesmo `operacao_id` e hash diferente retorna conflito.
+- Logs de sincronizacao devem ser descartados apos 180 dias, preservando auditorias necessarias.
 
 **Relacionamentos e regras importantes:** cada log pertence a dispositivo e usuario, podendo apontar para a aplicacao e entidade resultante. O registro e a fonte de idempotencia e diagnostico da sincronizacao; conflitos nunca devem ser resolvidos silenciosamente.
 
@@ -1036,12 +1059,13 @@ Esses indices implementam as regras de um cartao valido por aluno/prova e codigo
 
 ## 14. Restricoes criticas de integridade
 
-### 14.1 Um aluno por cartao valido e um cartao por aluno/prova
+### 14.1 Um aluno por cartao valido e identificadores sem conflito
 
 Garantido pelos indices unicos parciais de `cartoes_resposta`:
 
 - `(prova_id, aluno_id)` onde `status = 'confirmado'`;
-- `(prova_id, codigo_cartao)` onde `status = 'confirmado'`.
+- `(prova_id, codigo_impresso_normalizado)` onde `status = 'confirmado'` e o codigo impresso foi informado;
+- `codigo_sistema` globalmente unico quando informado.
 
 ### 14.2 Uma versao vigente
 
@@ -1078,7 +1102,7 @@ A confirmacao deve ocorrer em uma unica transacao PostgreSQL:
 
 1. Consultar e bloquear a aplicacao com `SELECT ... FOR SHARE` ou estrategia equivalente.
 2. Validar que a aplicacao esta `em_andamento`.
-3. Validar aplicador, aluno previsto, modelo, alertas e respostas.
+3. Validar aplicador, aluno previsto, modelo, alertas, respostas, codigo impresso quando houver e codigo do sistema quando informado ou exigido.
 4. Registrar ou consultar `logs_sincronizacao` pela `operacao_id`.
 5. Criar `cartoes_resposta`; os indices unicos impedem duplicidade concorrente.
 6. Associar e marcar `leituras_cartao` como confirmada.
@@ -1090,7 +1114,7 @@ A confirmacao deve ocorrer em uma unica transacao PostgreSQL:
 12. Efetivar o commit.
 13. Publicar eventos WebSocket e jobs somente apos o commit.
 
-Conflitos de unicidade devem ser convertidos pela API em erros `409` estaveis, como `ALUNO_JA_CONFIRMADO` e `CODIGO_CARTAO_JA_VINCULADO`.
+Conflitos de unicidade devem ser convertidos pela API em erros `409` estaveis, como `ALUNO_JA_CONFIRMADO`, `CODIGO_IMPRESSO_JA_VINCULADO` e `CODIGO_SISTEMA_JA_UTILIZADO`.
 
 ## 16. Indices para dashboards e relatorios
 
@@ -1145,16 +1169,20 @@ Particionamento deve ser introduzido somente com testes de consultas, manutencao
 11. `dispositivos_mobile`, `logs_sincronizacao`, `auditorias`.
 12. Triggers de coerencia, indices parciais e permissoes de banco.
 
-## 20. Decisoes pendentes antes das migrations
+## 20. Decisoes adotadas antes das migrations do MVP
 
-1. Confirmar se a matricula e unica por escola ou por nucleo.
-2. Confirmar politica de pontuacao de questoes anuladas.
-3. Definir formatos validos para `codigo_cartao`.
-4. Definir prazos de retencao para imagens, auditorias e logs.
-5. Definir se a imagem original e obrigatoria no MVP.
-6. Definir se uma prova pode possuir mais de um modelo de cartao simultaneamente.
-7. Definir se professores podem criar provas no escopo escolar.
-8. Homologar os checks e limiares que fazem parte de `configuracao_omr`.
+| Tema | Decisao para o MVP | Referencia |
+|---|---|---|
+| Matricula | Unica por escola, normalizada e sem diferenca de caixa | [ADR-D002](decisoes/ADR-D002-unicidade-matricula.md) |
+| Questao anulada | Concede pontuacao integral a todos os resultados validos | [ADR-D004](decisoes/ADR-D004-questao-anulada.md) |
+| Identificacao do cartao | Codigo impresso externo e codigo do sistema adicional em campos separados; se nao houver impresso, o codigo do sistema e exigido | [ADR-D010](decisoes/ADR-D010-identificacao-cartao.md) |
+| Retencao | Prazos por classificacao e descarte auditado | [ADR-D006](decisoes/ADR-D006-retencao-imagens-logs.md) |
+| Imagem original | Obrigatoria nas leituras online do MVP e armazenada de forma privada | [ADR-D006](decisoes/ADR-D006-retencao-imagens-logs.md) |
+| Modelos por prova | Exatamente um modelo homologado por prova no MVP | [ADR-D001](decisoes/ADR-D001-modelo-fisico-cartao.md) |
+| Criacao de provas | Restrita a gestores autorizados; professores e aplicadores nao criam no MVP | `04-regras-de-negocio.md` |
+| Configuracao OMR | Estrutura obrigatoria e versionada; valores calibrados com dataset antes da homologacao | [ADR-D008](decisoes/ADR-D008-metas-qualidade-omr.md) |
+
+Os ADRs completos estao em [decisoes/README.md](decisoes/README.md). As migrations podem aplicar as decisoes acima, mas nao devem fixar limiares OMR sem a calibracao exigida.
 
 ## 21. Limites entre banco e aplicacao
 
