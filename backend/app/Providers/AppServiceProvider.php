@@ -4,12 +4,14 @@ namespace App\Providers;
 
 use App\Enums\PermissionCode;
 use App\Models\DispositivoMobile;
+use App\Models\Nucleo;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Models\UsuarioPerfil;
 use App\Observers\DispositivoMobileObserver;
 use App\Observers\UserAccessObserver;
 use App\Observers\UsuarioPerfilObserver;
+use App\Policies\NucleoPolicy;
 use App\Policies\PermissionPolicy;
 use App\Services\Audit\AuditAction;
 use App\Services\Audit\AuditService;
@@ -42,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         User::observe(UserAccessObserver::class);
         UsuarioPerfil::observe(UsuarioPerfilObserver::class);
         DispositivoMobile::observe(DispositivoMobileObserver::class);
+        Gate::policy(Nucleo::class, NucleoPolicy::class);
 
         RateLimiter::for('login', function (Request $request): Limit {
             $email = Str::lower(trim((string) $request->input('email')));

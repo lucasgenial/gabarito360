@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.3.0
+  version: 0.4.0
   description: |
-    Contrato OpenAPI da baseline tecnica e da autenticacao inicial implementadas.
+    Contrato OpenAPI da baseline tecnica, autenticacao e gestao inicial de nucleos.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -13,6 +13,8 @@ servers:
 tags:
   - name: Autenticacao
     description: Emissao e revogacao de tokens e contexto do usuario autenticado
+  - name: Nucleos
+    description: Cadastro, consulta, edicao e inativacao de nucleos de educacao
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -133,6 +135,172 @@ paths:
           $ref: "#/components/responses/UpgradeRequired"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/nucleos:
+    get:
+      tags:
+        - Nucleos
+      summary: Listar nucleos
+      operationId: listEducationCenters
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/NucleoStatus"
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 180
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Nucleos acessiveis ao administrador global
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NucleoListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Nucleos
+      summary: Cadastrar nucleo
+      operationId: createEducationCenter
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NucleoCreateRequest"
+      responses:
+        "201":
+          description: Nucleo cadastrado
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NucleoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/nucleos/{nucleo}:
+    parameters:
+      - $ref: "#/components/parameters/NucleoId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Nucleos
+      summary: Consultar nucleo
+      operationId: getEducationCenter
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Nucleo encontrado
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NucleoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Nucleos
+      summary: Editar nucleo
+      description: O codigo e o status nao podem ser alterados por este endpoint.
+      operationId: updateEducationCenter
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NucleoUpdateRequest"
+      responses:
+        "200":
+          description: Nucleo atualizado
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NucleoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - Nucleos
+      summary: Inativar nucleo
+      description: Preserva o registro para consulta historica e altera somente o status para inativo.
+      operationId: inactivateEducationCenter
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Nucleo inativado
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NucleoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     bearerToken:
@@ -149,6 +317,14 @@ components:
         quando ausente ou invalido, a API gera um novo UUID.
       schema:
         $ref: "#/components/schemas/RequestId"
+    NucleoId:
+      name: nucleo
+      in: path
+      required: true
+      description: UUID do nucleo.
+      schema:
+        type: string
+        format: uuid
   headers:
     XRequestId:
       description: UUID de correlacao da requisicao.
@@ -200,6 +376,38 @@ components:
             error:
               code: DEVICE_REVOKED
               message: Dispositivo mobile revogado.
+              details: {}
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    AuthorizationForbidden:
+      description: Usuario autenticado sem permissao para a operacao.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: FORBIDDEN
+              message: Acao nao autorizada.
+              details: {}
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    NotFound:
+      description: Recurso nao encontrado.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: RESOURCE_NOT_FOUND
+              message: Recurso nao encontrado.
               details: {}
             meta:
               request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
@@ -496,6 +704,187 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/User"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    NucleoStatus:
+      type: string
+      enum:
+        - ativo
+        - inativo
+    Nucleo:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - codigo
+        - nome
+        - municipio
+        - estado
+        - email
+        - telefone
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Z0-9._-]+$"
+        nome:
+          type: string
+          maxLength: 180
+        municipio:
+          type:
+            - string
+            - "null"
+          maxLength: 120
+        estado:
+          type:
+            - string
+            - "null"
+          pattern: "^[A-Z]{2}$"
+        email:
+          type:
+            - string
+            - "null"
+          format: email
+          maxLength: 254
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+        status:
+          $ref: "#/components/schemas/NucleoStatus"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    NucleoCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - codigo
+        - nome
+      properties:
+        codigo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        nome:
+          type: string
+          maxLength: 180
+        municipio:
+          type:
+            - string
+            - "null"
+          maxLength: 120
+        estado:
+          type:
+            - string
+            - "null"
+          minLength: 2
+          maxLength: 2
+        email:
+          type:
+            - string
+            - "null"
+          format: email
+          maxLength: 254
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+    NucleoUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        nome:
+          type: string
+          maxLength: 180
+        municipio:
+          type:
+            - string
+            - "null"
+          maxLength: 120
+        estado:
+          type:
+            - string
+            - "null"
+          minLength: 2
+          maxLength: 2
+        email:
+          type:
+            - string
+            - "null"
+          format: email
+          maxLength: 254
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+    NucleoResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/Nucleo"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    Pagination:
+      type: object
+      additionalProperties: false
+      required:
+        - current_page
+        - per_page
+        - total
+        - last_page
+      properties:
+        current_page:
+          type: integer
+          minimum: 1
+        per_page:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+        last_page:
+          type: integer
+          minimum: 1
+    NucleoListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Nucleo"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    NucleoListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/NucleoListData"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     EmptySuccessResponse:

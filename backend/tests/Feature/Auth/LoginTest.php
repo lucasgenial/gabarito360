@@ -6,6 +6,7 @@ use App\Enums\AccessScope;
 use App\Enums\StatusEnum;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Nucleo;
 use App\Models\Perfil;
 use App\Models\Permissao;
 use App\Models\User;
@@ -131,7 +132,7 @@ class LoginTest extends TestCase
         UsuarioPerfil::factory()->create([
             'usuario_id' => $user->id,
             'perfil_id' => $inactiveProfile->id,
-            'nucleo_id' => (string) Str::uuid(),
+            'nucleo_id' => Nucleo::factory()->create()->id,
             'inicio_at' => now()->subMinute(),
         ]);
         UsuarioPerfil::factory()->create([

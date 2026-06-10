@@ -78,10 +78,10 @@
 
 | Metodo | Endpoint | Acesso |
 |---|---|---|
-| GET | `/nucleos` | Administrador; gestor no proprio escopo |
+| GET | `/nucleos` | Administrador |
 | POST | `/nucleos` | Administrador |
-| GET | `/nucleos/{id}` | Administrador; gestor do nucleo |
-| PATCH | `/nucleos/{id}` | Administrador; gestor autorizado |
+| GET | `/nucleos/{id}` | Administrador |
+| PATCH | `/nucleos/{id}` | Administrador |
 | DELETE | `/nucleos/{id}` | Administrador, como inativacao |
 | GET | `/escolas` | Conforme escopo |
 | POST | `/escolas` | Administrador; gestor do nucleo |

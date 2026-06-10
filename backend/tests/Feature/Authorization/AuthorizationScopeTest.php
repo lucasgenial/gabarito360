@@ -5,6 +5,7 @@ namespace Tests\Feature\Authorization;
 use App\Enums\PermissionCode;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Nucleo;
 use App\Models\Perfil;
 use App\Models\Permissao;
 use App\Models\User;
@@ -47,7 +48,7 @@ class AuthorizationScopeTest extends TestCase
 
     public function test_education_center_profile_is_isolated_from_other_centers(): void
     {
-        $authorizedCenter = (string) Str::uuid();
+        $authorizedCenter = Nucleo::factory()->create()->id;
         $manager = $this->userWithRole(UserRole::EDUCATION_MANAGER, nucleoId: $authorizedCenter);
 
         $this->assertTrue($this->allows(

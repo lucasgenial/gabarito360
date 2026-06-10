@@ -6,6 +6,7 @@ use App\Enums\PermissionCode;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Models\Nucleo;
 use App\Models\Perfil;
 use App\Models\User;
 use App\Models\UsuarioPerfil;
@@ -32,7 +33,7 @@ class PermissionMatrixTest extends TestCase
     {
         parent::setUp();
 
-        $this->nucleoId = (string) Str::uuid();
+        $this->nucleoId = Nucleo::factory()->create()->id;
         $this->escolaId = (string) Str::uuid();
 
         $this->seed(AccessControlSeeder::class);

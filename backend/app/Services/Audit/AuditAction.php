@@ -20,4 +20,7 @@ enum AuditAction: string
     case PROFILE_CHANGED = 'access.profile.changed';
     case PROFILE_REVOKED = 'access.profile.revoked';
     case PROFILE_REMOVED = 'access.profile.removed';
+    case EDUCATION_CENTER_CREATED = 'nucleo.created';
+    case EDUCATION_CENTER_UPDATED = 'nucleo.updated';
+    case EDUCATION_CENTER_INACTIVATED = 'nucleo.inactivated';
 }
