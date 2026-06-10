@@ -1,6 +1,22 @@
 <?php
 
+use Illuminate\Foundation\EnvironmentDetector;
 use Illuminate\Support\Str;
+
+$environment = (new EnvironmentDetector)->detect(
+    fn (): string => env('APP_ENV', 'production'),
+    PHP_SAPI === 'cli' ? ($_SERVER['argv'] ?? null) : null,
+);
+
+$isTesting = $environment === 'testing';
+$testingDatabase = env('DB_TEST_DATABASE', 'gabarito360_testing');
+
+if ($isTesting && (
+    ! is_string($testingDatabase)
+    || preg_match('/(?:^|[_-])test(?:ing)?(?:[_-]|$)/i', $testingDatabase) !== 1
+)) {
+    throw new LogicException('The testing database must be explicitly named as a test database.');
+}
 
 return [
 
@@ -16,7 +32,25 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => $isTesting
+        ? 'pgsql_testing'
+        : env('DB_CONNECTION', 'pgsql'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Database Conventions
+    |--------------------------------------------------------------------------
+    |
+    | These values document the PostgreSQL conventions required by future
+    | domain migrations. They are asserted by the infrastructure tests.
+    |
+    */
+
+    'conventions' => [
+        'primary_key_type' => 'uuid',
+        'uuid_default_expression' => 'gen_random_uuid()',
+        'timestamp_type' => 'timestamptz',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -87,14 +121,28 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'laravel'),
-            'username' => env('DB_USERNAME', 'root'),
+            'database' => env('DB_DATABASE', 'gabarito360'),
+            'username' => env('DB_USERNAME', 'postgres'),
             'password' => env('DB_PASSWORD', ''),
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => 'public',
-            'sslmode' => 'prefer',
+            'search_path' => env('DB_SEARCH_PATH', 'public'),
+            'sslmode' => env('DB_SSLMODE', 'prefer'),
+        ],
+
+        'pgsql_testing' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_TEST_HOST', '127.0.0.1'),
+            'port' => env('DB_TEST_PORT', '5432'),
+            'database' => $testingDatabase,
+            'username' => env('DB_TEST_USERNAME', 'postgres'),
+            'password' => env('DB_TEST_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => env('DB_TEST_SEARCH_PATH', 'public'),
+            'sslmode' => env('DB_TEST_SSLMODE', 'prefer'),
         ],
 
         'sqlsrv' => [

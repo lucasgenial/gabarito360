@@ -65,6 +65,23 @@ php artisan migrate
 
 Não existem migrations de negócio nesta etapa.
 
+### Banco de testes
+
+Os testes de integração usam exclusivamente a conexão `pgsql_testing` e o banco descartável `gabarito360_testing`. Crie esse banco separado antes de executar migrations ou testes:
+
+```sql
+CREATE DATABASE gabarito360_testing;
+```
+
+O ambiente `testing` nunca utiliza SQLite nem a conexão PostgreSQL local. A migration técnica habilita somente as extensões aprovadas `pgcrypto` e `citext`.
+
+```bash
+php artisan migrate:fresh --env=testing
+php artisan test --filter=DatabaseTest
+```
+
+O teste interrompe antes da conexão caso o banco configurado não possua um nome explicitamente identificado como banco de teste.
+
 ## Servidor local
 
 Inicie o servidor:
@@ -80,18 +97,19 @@ A API ficará disponível, por padrão, em `http://127.0.0.1:8000`.
 Teste o endpoint:
 
 ```bash
-curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8000/api/v1/health
 ```
 
 Resposta esperada:
 
 ```json
 {
-  "success": true,
-  "message": "API Gabarito360 online",
   "data": {
     "app": "Gabarito360",
     "status": "online"
+  },
+  "meta": {
+    "request_id": "uuid"
   }
 }
 ```
@@ -109,9 +127,9 @@ A baseline tecnica foi validada em 10 de junho de 2026 e deve permanecer sem reg
 
 Escopo validado:
 
-- `GET /api/health` responde JSON conforme o contrato documentado.
-- A unica rota funcional da API e `/api/health`; a rota `/` permanece como pagina web padrao.
-- A suite possui somente testes tecnicos da baseline.
+- `GET /api/v1/health` responde JSON conforme o contrato documentado.
+- A unica rota funcional da API e `/api/v1/health`; a rota `/` permanece como pagina web padrao.
+- A suite possui testes tecnicos da baseline e do contrato da API.
 - Autenticacao, models de dominio e endpoints de negocio ainda nao fazem parte desta base.
 
 Gates para revalidar a baseline:
@@ -126,8 +144,8 @@ php artisan route:list --except-vendor
 Pre-condicoes do ambiente:
 
 - O alvo operacional do projeto e PHP 8.3 ou superior. Laravel 12 pode iniciar em PHP 8.2, mas isso nao aprova esse runtime para homologacao ou producao.
-- A extensao `pdo_pgsql` deve estar habilitada antes da validacao PostgreSQL do MP-008.
-- O MP-006 nao valida conexao PostgreSQL, migrations de negocio, Redis ou storage S3.
+- A extensao `pdo_pgsql` deve estar habilitada para migrations e testes PostgreSQL.
+- O MP-008 nao cria migrations de negocio nem valida Redis ou storage S3.
 
 ## Testes
 
@@ -223,15 +241,16 @@ Controllers devem permanecer finos e reutilizar Actions, Policies e Resources. A
 
 ## Padrão de resposta JSON
 
-O formato abaixo e o envelope temporario usado pela base tecnica e pelo endpoint `/api/health`. Antes dos endpoints funcionais `/api/v1`, a resposta central sera alinhada ao contrato canonico definido em [`../docs/07-api.md`](../docs/07-api.md). Nao crie novos envelopes JSON ad hoc.
+Toda resposta da API segue o contrato canonico definido em [`../docs/07-api.md`](../docs/07-api.md). O backend gera um UUID quando `X-Request-ID` nao e informado ou e invalido, devolve o identificador no header e em `meta.request_id` e o compartilha com o contexto dos logs.
 
 Respostas de sucesso usam:
 
 ```json
 {
-  "success": true,
-  "message": "Mensagem",
-  "data": {}
+  "data": {},
+  "meta": {
+    "request_id": "uuid"
+  }
 }
 ```
 
@@ -239,9 +258,15 @@ Respostas de erro usam:
 
 ```json
 {
-  "success": false,
-  "message": "Mensagem",
-  "data": null,
-  "errors": {}
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Os dados informados sao invalidos.",
+    "details": {}
+  },
+  "meta": {
+    "request_id": "uuid"
+  }
 }
 ```
+
+Codigos de erro sao estaveis e usam `UPPER_SNAKE_CASE`. Excecoes internas nao expoem mensagens ou detalhes tecnicos ao cliente.
