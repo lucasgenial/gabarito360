@@ -4,15 +4,22 @@ use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Middleware\EnsureMobileDeviceIsActive;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('/health', HealthController::class)->name('health');
 
-    Route::post('/auth/login', LoginController::class)->name('auth.login');
+    Route::post('/auth/login', LoginController::class)
+        ->middleware('throttle:login')
+        ->name('auth.login');
 
-    Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function () {
+    Route::middleware([
+        'auth:sanctum',
+        EnsureUserIsActive::class,
+        EnsureMobileDeviceIsActive::class,
+    ])->group(function () {
         Route::post('/auth/logout', LogoutController::class)->name('auth.logout');
         Route::get('/me', MeController::class)->name('me');
     });

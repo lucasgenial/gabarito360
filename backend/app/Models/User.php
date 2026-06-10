@@ -60,6 +60,11 @@ class User extends Authenticatable
         return $this->hasMany(UsuarioPerfil::class, 'concedido_por');
     }
 
+    public function dispositivosMobile(): HasMany
+    {
+        return $this->hasMany(DispositivoMobile::class, 'usuario_id');
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {

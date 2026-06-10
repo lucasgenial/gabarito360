@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.2.0
+  version: 0.3.0
   description: |
     Contrato OpenAPI da baseline tecnica e da autenticacao inicial implementadas.
   license:
@@ -73,8 +73,14 @@ paths:
                 $ref: "#/components/schemas/LoginResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
+        "426":
+          $ref: "#/components/responses/UpgradeRequired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
         "500":
           $ref: "#/components/responses/InternalServerError"
   /api/v1/auth/logout:
@@ -123,6 +129,8 @@ paths:
                 $ref: "#/components/schemas/UserResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "426":
+          $ref: "#/components/responses/UpgradeRequired"
         "500":
           $ref: "#/components/responses/InternalServerError"
 components:
@@ -179,6 +187,22 @@ components:
               details: {}
             meta:
               request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    Forbidden:
+      description: Dispositivo autenticado, mas revogado.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: DEVICE_REVOKED
+              message: Dispositivo mobile revogado.
+              details: {}
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
     UnprocessableEntity:
       description: Dados de entrada invalidos.
       headers:
@@ -195,6 +219,39 @@ components:
               details:
                 email:
                   - O campo email e obrigatorio.
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    UpgradeRequired:
+      description: Versao do aplicativo mobile abaixo da minima aceita.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: APP_VERSION_UNSUPPORTED
+              message: Atualize o aplicativo para continuar.
+              details:
+                minimum_version: 1.0.0
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    TooManyRequests:
+      description: Limite de tentativas de login excedido.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: TOO_MANY_REQUESTS
+              message: Muitas requisicoes. Tente novamente mais tarde.
+              details: {}
             meta:
               request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
     InternalServerError:
@@ -270,6 +327,59 @@ components:
           minLength: 1
           maxLength: 100
           default: api
+        dispositivo:
+          $ref: "#/components/schemas/MobileDeviceLogin"
+    MobileDeviceLogin:
+      type: object
+      additionalProperties: false
+      required:
+        - identificador
+        - plataforma
+        - versao_app
+      description: |
+        Identifica uma instalacao do app por UUID gerado localmente.
+        IMEI, serial e outros identificadores invasivos nao sao aceitos.
+      properties:
+        identificador:
+          type: string
+          format: uuid
+        plataforma:
+          type: string
+          const: android
+        modelo_dispositivo:
+          type:
+            - string
+            - "null"
+          maxLength: 120
+        versao_sistema:
+          type:
+            - string
+            - "null"
+          maxLength: 50
+        versao_app:
+          type: string
+          maxLength: 30
+          pattern: '^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$'
+    MobileDevice:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - identificador
+        - plataforma
+        - versao_app
+      properties:
+        id:
+          type: string
+          format: uuid
+        identificador:
+          type: string
+          format: uuid
+        plataforma:
+          type: string
+          const: android
+        versao_app:
+          type: string
     AuthorizedProfile:
       type: object
       additionalProperties: false
@@ -353,6 +463,7 @@ components:
         - user
         - token
         - token_type
+        - dispositivo
       properties:
         user:
           $ref: "#/components/schemas/User"
@@ -361,6 +472,10 @@ components:
         token_type:
           type: string
           const: Bearer
+        dispositivo:
+          oneOf:
+            - $ref: "#/components/schemas/MobileDevice"
+            - type: "null"
     LoginResponse:
       type: object
       additionalProperties: false
