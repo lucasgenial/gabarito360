@@ -144,9 +144,11 @@ Acoes:
 
 Arquivos envolvidos:
 - `docs/01-visao-geral.md`
+- `docs/02-requisitos-funcionais.md`
 - `docs/05-casos-de-uso.md`
 - `docs/11-roadmap-mvp.md`
-- `docs/decisoes/ADR-painel-web.md` (novo)
+- `docs/decisoes/ADR-D009-painel-web.md`
+- `docs/decisoes/ADR-D011-escopo-e-permissoes-mvp.md` (novo)
 
 Critérios de aceite:
 - Cada perfil possui acoes permitidas e escopos definidos.
@@ -154,7 +156,7 @@ Critérios de aceite:
 
 Verificação:
 ```bash
-rg "Fora do MVP|Matriz resumida de permissoes|painel" docs
+rg "Fora do MVP|Matriz de permissoes do MVP|ADR-D009|ADR-D011" docs
 ```
 
 Dependências:

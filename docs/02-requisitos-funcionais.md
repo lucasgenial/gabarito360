@@ -37,7 +37,7 @@
 |---|---|---|
 | RF016 | MVP | A escola deve poder cadastrar, editar, consultar e inativar turmas. |
 | RF017 | MVP | A escola deve poder cadastrar, editar, consultar e inativar alunos. |
-| RF018 | MVP | A escola deve poder importar alunos por arquivo CSV ou XLSX. |
+| RF018 | MVP | A escola deve poder importar alunos por arquivo CSV. |
 | RF019 | MVP | O sistema deve validar a importacao e apresentar erros por linha antes da confirmacao. |
 | RF020 | MVP | O sistema deve permitir vincular alunos a turmas por ano letivo. |
 | RF021 | V2 | O sistema deve permitir transferir aluno entre turmas preservando o historico. |

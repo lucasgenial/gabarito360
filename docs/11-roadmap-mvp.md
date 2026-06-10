@@ -20,7 +20,8 @@ O plano detalha tarefas pequenas, dependencias, criterios de aceite e gates de c
 ### 2.1 Incluido
 
 - Um nucleo com uma ou mais escolas.
-- Perfis essenciais: administrador, gestor do nucleo, responsavel da escola e professor/aplicador.
+- Perfis operacionais essenciais: administrador, gestor do nucleo, responsavel da escola, professor e aplicador.
+- Matriz de acesso definida para todos os perfis, incluindo Leitor/Consulta e Suporte Tecnico.
 - Cadastros de escolas, usuarios, turmas e alunos.
 - Importacao validada de alunos por CSV.
 - Prova objetiva padronizada com 20 questoes e alternativas A-E.
@@ -45,6 +46,15 @@ O plano detalha tarefas pequenas, dependencias, criterios de aceite e gates de c
 - Integracoes com sistemas academicos externos.
 - Aplicativo iOS.
 - Correcao de questoes discursivas.
+- Transferencia de alunos entre turmas e justificativa de ausencia.
+- Gerenciamento de sessoes ativas e MFA.
+- Interface completa de consulta de auditoria e console operacional de suporte.
+
+### 2.3 Regra de corte para liberacao
+
+Somente os itens de **2.1 Incluido** podem bloquear a liberacao do MVP. Funcionalidades marcadas como V2, V3 ou listadas em **2.2 Fora do MVP** nao devem ser adicionadas ao gate, mesmo quando a arquitetura preparar sua evolucao.
+
+A matriz aprovada de perfis, acoes e escopos esta em [05-casos-de-uso.md](05-casos-de-uso.md). O corte e as regras de autorizacao foram registrados no [ADR-D011](decisoes/ADR-D011-escopo-e-permissoes-mvp.md).
 
 ## 3. Estrategia de desenvolvimento
 
@@ -115,6 +125,7 @@ As decisoes bloqueadoras foram registradas para o MVP em 10 de junho de 2026. De
 | D008 | Metas de qualidade OMR para o piloto | Produto + OMR + QA | Aceita | [ADR-D008](decisoes/ADR-D008-metas-qualidade-omr.md) |
 | D009 | Painel web com Blade, Livewire e Tailwind | Arquitetura + Produto | Aceita | [ADR-D009](decisoes/ADR-D009-painel-web.md) |
 | D010 | Separar codigo impresso externo e codigo do sistema | Produto + OMR + Mobile + Backend | Aceita | [ADR-D010](decisoes/ADR-D010-identificacao-cartao.md) |
+| D011 | Corte de escopo e matriz de permissoes do MVP | Produto + Arquitetura + Seguranca | Aceita | [ADR-D011](decisoes/ADR-D011-escopo-e-permissoes-mvp.md) |
 
 O indice com prazos de revalidacao esta em [decisoes/README.md](decisoes/README.md).
 
@@ -132,9 +143,9 @@ Nenhuma.
 
 | Ordem | ID | Tarefa pequena | Entregavel |
 |---:|---|---|---|
-| 1 | F1-T01 | Revisar e aprovar o escopo do MVP | Lista de funcionalidades dentro e fora do MVP |
-| 2 | F1-T02 | Revalidar as decisoes `D001-D009` nos gates aplicaveis | Registro de decisoes tecnicas atualizado |
-| 3 | F1-T03 | Aprovar a matriz de perfis e permissoes do MVP | Matriz por acao e escopo |
+| 1 | F1-T01 | Revalidar o escopo aprovado do MVP no inicio de cada release | Lista de funcionalidades dentro e fora do MVP |
+| 2 | F1-T02 | Revalidar as decisoes `D001-D011` nos gates aplicaveis | Registro de decisoes tecnicas atualizado |
+| 3 | F1-T03 | Revalidar a matriz aprovada de perfis e permissoes do MVP | Matriz por acao e escopo |
 | 4 | F1-T04 | Revisar o modelo relacional e fechar decisoes bloqueadoras | Modelagem pronta para migrations |
 | 5 | F1-T05 | Revisar os endpoints necessarios ao fluxo do MVP | Contrato REST priorizado |
 | 6 | F1-T06 | Definir padroes de branch, commits, revisao e releases | Guia de contribuicao interno |

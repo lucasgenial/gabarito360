@@ -4,7 +4,7 @@
 
 - **Produto:** Gabarito360
 - **Finalidade:** gestao, aplicacao, leitura e correcao de cartoes-resposta por foto
-- **Status deste documento:** especificacao inicial
+- **Status deste documento:** escopo do MVP aprovado
 - **Publico:** gestores educacionais, equipe de produto, desenvolvimento, QA, suporte e seguranca
 
 ## 2. Resumo executivo
@@ -34,14 +34,35 @@ O Gabarito360 centraliza esse fluxo, utilizando OMR (Optical Mark Recognition) p
 - Gerar relatorios e exportacoes auditaveis.
 - Proteger dados pessoais conforme boas praticas de seguranca e LGPD.
 
-### 4.2 Fora do escopo inicial
+### 4.2 Resultado esperado do MVP
 
+O MVP deve comprovar uma aplicacao real controlada de ponta a ponta, desde os cadastros administrativos ate a confirmacao da leitura, correcao automatica, acompanhamento da aplicacao e emissao do relatorio basico por turma.
+
+O gate de liberacao do MVP considera obrigatorios:
+
+- Cadastros essenciais de nucleo, escolas, usuarios, turmas e alunos.
+- Importacao validada de alunos por CSV.
+- Prova objetiva padronizada com 20 questoes A-E, gabarito vigente e um modelo homologado de cartao.
+- Aplicacao online pelo app Android, com captura, OMR, revisao humana, vinculacao do cartao ao aluno e confirmacao.
+- Correcao automatica, dashboard simples por aplicacao, relatorio por turma em tela e CSV e auditoria de operacoes criticas.
+- Autorizacao por perfil e escopo conforme a matriz aprovada em [05-casos-de-uso.md](05-casos-de-uso.md).
+
+### 4.3 Fora do MVP
+
+- Modo offline completo, sincronizacao em lote e resolucao de conflitos.
+- Relatorios PDF e XLSX.
+- Dashboards consolidados avancados de nucleo e escola.
+- Multiplos modelos configuraveis de cartao em producao.
+- Alteracao de gabarito publicado e recorrection em lote.
+- Consulta operacional completa de auditoria e console de suporte.
 - Criacao e distribuicao do caderno de questoes.
 - Correcao de respostas discursivas.
 - Uso obrigatorio de inteligencia artificial generativa.
 - Integracao com todos os sistemas academicos existentes.
 - Suporte inicial a iOS.
 - Analise pedagogica preditiva avancada.
+
+Funcionalidades fora do MVP podem ser planejadas ou preparadas tecnicamente, mas nao bloqueiam a liberacao do piloto.
 
 ## 5. Perfis de usuario
 
@@ -55,7 +76,7 @@ O Gabarito360 centraliza esse fluxo, utilizando OMR (Optical Mark Recognition) p
 | Leitor/Consulta | Escopo concedido | Consulta de dashboards e relatorios, sem alteracao operacional |
 | Suporte Tecnico | Escopo controlado e auditado | Diagnostico tecnico sem acesso irrestrito a dados pessoais |
 
-## 6. Escopo funcional
+## 6. Escopo funcional do MVP
 
 ### 6.1 Gestao administrativa
 
@@ -73,14 +94,14 @@ O Gabarito360 centraliza esse fluxo, utilizando OMR (Optical Mark Recognition) p
 - Processamento OMR e leitura do codigo impresso do cartao, quando existente.
 - Revisao e correcao manual auditada.
 - Confirmacao e sincronizacao com o backend.
-- Operacao offline temporaria com fila local.
+- Operacao online, com idempotencia para repeticao segura de requisicoes.
 
 ### 6.3 Acompanhamento e analise
 
 - Progresso de aplicacoes em tempo real.
-- Resultados por diferentes dimensoes.
+- Resultados e pendencias da aplicacao.
 - Indicadores de pendencias e inconsistencias.
-- Exportacoes PDF, XLSX e CSV.
+- Relatorio por turma em tela e exportacao CSV.
 - Auditoria de eventos criticos.
 
 ## 7. Modulos do sistema
@@ -117,11 +138,11 @@ O Gabarito360 centraliza esse fluxo, utilizando OMR (Optical Mark Recognition) p
 | Camada | Tecnologia inicial | Responsabilidade |
 |---|---|---|
 | Backend/API | Laravel 12 | Regras de negocio, API REST, autenticacao, filas e eventos |
-| Painel web | Laravel + Vue.js ou Blade/Livewire + Tailwind | Administracao, dashboards e relatorios |
+| Painel web | Laravel Blade + Livewire + Tailwind | Administracao, dashboard simples e relatorio do MVP |
 | Banco de dados | PostgreSQL | Persistencia relacional e integridade |
 | Cache e filas | Redis | Filas, cache, locks e apoio ao tempo real |
 | Tempo real | Laravel Reverb/WebSockets | Atualizacao de progresso e dashboards |
-| Mobile | Flutter para Android | Captura, revisao, offline e sincronizacao |
+| Mobile | Flutter para Android | Captura, revisao e operacao online do MVP |
 | OMR | OpenCV, estrategia hibrida | Pre-processamento local e validacao/reprocessamento no backend |
 | Arquivos | Storage S3 compativel | Imagens, importacoes, relatorios e artefatos processados |
 | Infraestrutura | Docker, Nginx e TLS | Implantacao, proxy reverso e comunicacao segura |
@@ -174,7 +195,7 @@ A estrategia recomendada e hibrida:
 |---|---|---|
 | Fotos com baixa qualidade | Leitura incorreta | Guia de captura, validacao de qualidade e revisao |
 | Variacao de impressao | Desalinhamento do OMR | Marcadores, calibracao e modelo versionado |
-| Duplicidade offline | Resultados conflitantes | UUID, idempotencia e regras de conflito |
+| Repeticao de envio | Resultados duplicados | UUID, idempotencia e restricoes de integridade |
 | Alteracao indevida de gabarito | Resultados inconsistentes | Bloqueio, permissao especial, versao e recorrection |
 | Exposicao de dados pessoais | Risco legal e operacional | Minimizacao, RBAC, logs e retencao |
 | Sobrecarga em aplicacoes simultaneas | Atraso nos dashboards | Filas, cache, testes de carga e escalabilidade |

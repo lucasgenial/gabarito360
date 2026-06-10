@@ -7,7 +7,8 @@
 | Administrador Geral | Configura e supervisiona todo o sistema. |
 | Gestor do Nucleo | Gerencia escolas e acompanha resultados consolidados. |
 | Responsavel da Escola | Gerencia operacao e cadastros da escola. |
-| Professor/Aplicador | Executa aplicacoes e confirma leituras. |
+| Professor | Consulta suas turmas, executa aplicacoes vinculadas e acompanha resultados permitidos. |
+| Aplicador | Executa aplicacoes vinculadas, captura, revisa e confirma leituras. |
 | Leitor/Consulta | Consulta dashboards e relatorios autorizados. |
 | Suporte Tecnico | Investiga falhas com acesso controlado. |
 | Servico OMR | Processa imagens e retorna deteccoes. |
@@ -29,15 +30,15 @@
 | UC010 | Cadastrar gabarito oficial | Gestor autorizado | MVP |
 | UC011 | Publicar avaliacao | Gestor autorizado | MVP |
 | UC012 | Vincular avaliacao a turma | Gestor autorizado | MVP |
-| UC013 | Iniciar aplicacao | Professor/Aplicador | MVP |
-| UC014 | Capturar e processar cartao | Professor/Aplicador | MVP |
-| UC015 | Revisar e confirmar leitura | Professor/Aplicador | MVP |
-| UC016 | Corrigir leitura manualmente | Professor/Aplicador | MVP |
-| UC017 | Finalizar aplicacao | Professor/Aplicador | MVP |
+| UC013 | Iniciar aplicacao | Professor ou Aplicador vinculado | MVP |
+| UC014 | Capturar e processar cartao | Professor ou Aplicador vinculado | MVP |
+| UC015 | Revisar e confirmar leitura | Professor ou Aplicador vinculado | MVP |
+| UC016 | Corrigir leitura manualmente | Professor ou Aplicador vinculado | MVP |
+| UC017 | Finalizar aplicacao | Professor ou Aplicador vinculado | MVP |
 | UC018 | Acompanhar aplicacao em tempo real | Gestores/Consulta | MVP |
 | UC019 | Consultar resultado por turma | Gestores/Professor | MVP |
-| UC020 | Exportar relatorio | Usuario autorizado | MVP/V2 |
-| UC021 | Operar e sincronizar offline | Professor/Aplicador | V2 |
+| UC020 | Exportar relatorio | Usuario autorizado | MVP para CSV; V2 para PDF/XLSX |
+| UC021 | Operar e sincronizar offline | Professor ou Aplicador | V2 |
 | UC022 | Alterar gabarito e recorrerigir | Gestor autorizado | V2 |
 | UC023 | Reprocessar leitura | Usuario autorizado/Suporte | V2 |
 | UC024 | Consultar auditoria | Usuario autorizado | V2 |
@@ -177,7 +178,7 @@
 - Aluno ja possui cartao valido: rejeitar e orientar fluxo autorizado de substituicao.
 - Codigo impresso ja vinculado na prova ou codigo do sistema reutilizado: rejeitar e apresentar conflito especifico.
 - Alerta nao revisado: impedir confirmacao.
-- Falha de rede: manter operacao pendente para sincronizacao.
+- Falha de rede: preservar os dados necessarios para nova tentativa, sem confirmar a leitura ate restabelecer a conexao.
 
 **Pos-condicao:** resultado vigente criado e progresso atualizado.
 
@@ -211,7 +212,7 @@
 4. Novas confirmacoes atualizam indicadores e listas.
 5. O usuario pode filtrar escola, turma ou aplicacao conforme permissao.
 
-## 12. UC021 - Operar e sincronizar offline
+## 12. UC021 - Operar e sincronizar offline (V2)
 
 **Objetivo:** permitir continuidade temporaria sem internet.
 
@@ -228,18 +229,51 @@
 
 **Excecao:** conflitos de aluno ou cartao exigem resolucao explicita, sem substituicao silenciosa.
 
-## 13. Matriz resumida de permissoes
+## 13. Matriz de permissoes do MVP
 
-| Acao | Admin | Gestor Nucleo | Escola | Professor/Aplicador | Consulta | Suporte |
-|---|---:|---:|---:|---:|---:|---:|
-| Gerenciar nucleos | Sim | Nao | Nao | Nao | Nao | Nao |
-| Gerenciar escolas | Sim | No proprio nucleo | Nao | Nao | Nao | Nao |
-| Gerenciar turmas e alunos | Sim | Consulta/gestao delegada | Na propria escola | Consulta vinculada | Consulta concedida | Nao |
-| Criar/publicar avaliacao | Sim | Sim | Se permitido | Nao no MVP | Nao | Nao |
-| Iniciar/finalizar aplicacao | Sim | Sim | Sim | Se vinculado | Nao | Nao |
-| Confirmar leitura | Sim | Excepcional | Excepcional | Se vinculado | Nao | Nao |
-| Consultar dashboards | Sim | Proprio nucleo | Propria escola | Vinculados | Escopo concedido | Diagnostico |
-| Consultar auditoria | Sim | Escopo autorizado | Escopo autorizado | Proprias acoes | Nao | Diagnostico autorizado |
+### 13.1 Legenda de escopo
+
+- **Global:** todos os registros do sistema.
+- **Nucleo:** somente o nucleo do usuario e suas escolas vinculadas.
+- **Escola:** somente a escola vinculada ao usuario.
+- **Vinculado:** somente turmas e aplicacoes com vinculo explicito.
+- **Concedido:** somente o escopo de leitura concedido explicitamente.
+- **Diagnostico:** somente metadados tecnicos necessarios, preferencialmente anonimizados e com acesso auditado.
+- **Nao:** acao negada no MVP.
+- **V2:** capacidade fora do gate de liberacao do MVP.
+
+### 13.2 Acoes e escopos aprovados
+
+| Acao | Admin Geral | Gestor Nucleo | Responsavel Escola | Professor | Aplicador | Leitor/Consulta | Suporte Tecnico |
+|---|---|---|---|---|---|---|---|
+| Gerenciar nucleos | Global | Nao | Nao | Nao | Nao | Nao | Nao |
+| Gerenciar escolas | Global | Nucleo | Nao | Nao | Nao | Nao | Nao |
+| Gerenciar usuarios, perfis e vinculos | Global | Nucleo | Escola, sem conceder perfis privilegiados | Nao | Nao | Nao | Nao |
+| Cadastrar ou alterar turmas e alunos | Global | Nucleo | Escola | Nao | Nao | Nao | Nao |
+| Importar alunos por CSV | Global | Nucleo | Escola | Nao | Nao | Nao | Nao |
+| Consultar turmas e alunos | Global | Nucleo | Escola | Vinculado | Vinculado | Concedido | Diagnostico |
+| Vincular professor ou aplicador a turma | Global | Nucleo | Escola | Nao | Nao | Nao | Nao |
+| Criar, editar e publicar prova e gabarito | Global | Nucleo | Nao | Nao | Nao | Nao | Nao |
+| Vincular prova a turma e criar aplicacao | Global | Nucleo | Escola, para prova publicada | Nao | Nao | Nao | Nao |
+| Iniciar ou finalizar aplicacao | Nao | Nao | Nao | Vinculado | Vinculado | Nao | Nao |
+| Capturar, revisar e confirmar leitura | Nao | Nao | Nao | Vinculado | Vinculado | Nao | Nao |
+| Corrigir resposta antes da confirmacao | Nao | Nao | Nao | Vinculado, com auditoria | Vinculado, com auditoria | Nao | Nao |
+| Consultar dashboard simples da aplicacao | Global | Nucleo | Escola | Vinculado | Vinculado | Concedido | Diagnostico |
+| Consultar relatorio por turma e exportar CSV | Global | Nucleo | Escola | Vinculado | Nao | Concedido | Nao |
+| Exportar PDF ou XLSX | V2 | V2 | V2 | V2 | Nao | V2 | Nao |
+| Consultar interface completa de auditoria | V2 | V2 | V2 | V2 | V2 | Nao | V2 |
+| Executar diagnostico tecnico | Diagnostico | Nao | Nao | Nao | Nao | Nao | Diagnostico |
+
+### 13.3 Regras de autorizacao
+
+- Negar por padrao qualquer acao ou escopo nao listado como permitido.
+- Policies e filtros do backend sao a barreira autoritativa; ocultar um botao nao concede nem revoga permissao.
+- Um usuario pode possuir mais de um perfil, mas cada acao exige perfil e escopo explicitamente aplicaveis.
+- Gestores que precisarem capturar ou confirmar cartoes devem receber tambem o perfil de professor ou aplicador e o vinculo com a aplicacao. O perfil administrativo nao concede operacao implicita.
+- O Responsavel da Escola nao pode conceder perfis de Administrador Geral, Gestor do Nucleo ou Suporte Tecnico.
+- O Leitor/Consulta nunca altera dados e depende de concessao explicita de escopo.
+- O Suporte Tecnico nao altera dados de negocio e todo acesso diagnostico deve ser auditado.
+- O MVP registra auditoria das operacoes criticas, mas a interface completa para consulta e investigacao fica para V2.
 
 ## 14. Referencias
 
@@ -247,3 +281,4 @@
 - Regras: [04-regras-de-negocio.md](04-regras-de-negocio.md)
 - Fluxo mobile: [08-mobile-android.md](08-mobile-android.md)
 - Roadmap: [11-roadmap-mvp.md](11-roadmap-mvp.md)
+- Decisao de escopo e permissoes: [decisoes/ADR-D011-escopo-e-permissoes-mvp.md](decisoes/ADR-D011-escopo-e-permissoes-mvp.md)
