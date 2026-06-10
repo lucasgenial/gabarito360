@@ -11,6 +11,7 @@ Este guia define as convencoes minimas para desenvolver, revisar e versionar o G
 - Implementar validacao, autorizacao, auditoria e testes junto da funcionalidade.
 - Manter dados pessoais fora de logs, fixtures e mensagens de erro.
 - Publicar eventos e disparar efeitos externos somente depois do commit da transacao.
+- Aplicar o Design System oficial em toda interface web ou mobile.
 
 ## 2. Fluxo de contribuicao
 
@@ -88,7 +89,7 @@ Web e API devem reutilizar Actions, Policies e Services. Controllers e component
 ## 5. Convencoes da API
 
 - O contrato funcional usa o prefixo `/api/v1` e segue [docs/07-api.md](docs/07-api.md).
-- O endpoint tecnico `/api/health` permanece fora do versionamento enquanto a base da API e preparada.
+- O health check implementado e documentado esta disponivel em `/api/v1/health`.
 - Novos endpoints nao devem criar envelopes JSON proprios.
 - Codigos de erro estaveis usam `UPPER_SNAKE_CASE`.
 - Datas usam ISO 8601 com fuso e IDs de dominio usam UUID.
@@ -96,9 +97,23 @@ Web e API devem reutilizar Actions, Policies e Services. Controllers e component
 - Autorizacao e escopo sao obrigatorios no backend, inclusive quando a interface oculta a acao.
 - Mudanca incompativel de contrato exige nova versao ou estrategia explicita de compatibilidade.
 
-## 6. Testes
+## 6. Convencoes de interface
 
-### 6.1 Organizacao
+Antes de criar ou alterar uma interface web ou mobile:
+
+1. consultar [docs/design/design-system.md](docs/design/design-system.md);
+2. consultar os tokens oficiais em [docs/ui_token_gov_brasil.json](docs/ui_token_gov_brasil.json);
+3. consultar [docs/design/componentes-web.md](docs/design/componentes-web.md) ou [docs/design/componentes-mobile.md](docs/design/componentes-mobile.md);
+4. reutilizar componentes compartilhados antes de criar novos;
+5. documentar a justificativa antes de introduzir estilo sem token oficial.
+
+Toda interface deve ser mobile first, atender WCAG 2.2 AA, suportar dark mode conforme o roadmap e usar os tokens oficiais. Componentes visuais nao substituem validacao, autorizacao ou regras de negocio.
+
+Mudancas visuais devem incluir evidencias proporcionais ao risco, como testes de componente, testes de widget, validacao por teclado, contraste ou capturas comparativas.
+
+## 7. Testes
+
+### 7.1 Organizacao
 
 - `tests/Unit`: regras puras, DTOs, Enums, algoritmos e Services sem infraestrutura real.
 - `tests/Feature`: rotas, Requests, Policies, Actions com persistencia, Jobs e fluxos integrados.
@@ -106,7 +121,7 @@ Web e API devem reutilizar Actions, Policies e Services. Controllers e component
 - Regras de integridade devem cobrir caminho feliz, validacao, conflito e repeticao idempotente quando aplicavel.
 - Toda correcao de defeito deve incluir teste que falharia antes da correcao.
 
-### 6.2 Verificacao durante o desenvolvimento
+### 7.2 Verificacao durante o desenvolvimento
 
 Execute a partir de `backend/`:
 
@@ -119,7 +134,7 @@ Use `vendor/bin/pint` sem `--test` para aplicar formatacao quando necessario.
 
 No PowerShell, use `vendor\bin\pint.bat --test` para verificar e `vendor\bin\pint.bat` para formatar.
 
-### 6.3 Gate antes de commit
+### 7.3 Gate antes de commit
 
 - Revisar `git diff --check` e o diff completo.
 - Executar `vendor/bin/pint --test`.
@@ -127,8 +142,9 @@ No PowerShell, use `vendor\bin\pint.bat --test` para verificar e `vendor\bin\pin
 - Executar `composer validate --strict` quando `composer.json` ou `composer.lock` mudar.
 - Executar `php artisan route:list --except-vendor` quando rotas mudarem.
 - Executar `npm run build` quando assets do painel mudarem.
+- Validar acessibilidade, responsividade, dark mode e uso de tokens quando interfaces mudarem.
 
-### 6.4 Gate antes de pull request
+### 7.4 Gate antes de pull request
 
 Execute a partir de `backend/`:
 
@@ -140,7 +156,7 @@ php artisan test
 
 No estado atual, `composer validate --strict`, Pint e a suite de testes formam a analise automatizada minima disponivel. Analise estatica com PHPStan ou ferramenta equivalente ainda nao esta configurada; ela somente se torna obrigatoria depois de ser adicionada em micropasso proprio e no pipeline de CI.
 
-## 7. Checklist de revisao
+## 8. Checklist de revisao
 
 - A alteracao atende somente ao micropasso e aos criterios de aceite?
 - A camada escolhida respeita a tabela deste guia?
@@ -149,9 +165,10 @@ No estado atual, `composer validate --strict`, Pint e a suite de testes formam a
 - Resources, logs e erros minimizam dados pessoais?
 - Testes cobrem sucesso, negacao e falhas relevantes?
 - O contrato da API e a documentacao foram atualizados quando necessario?
+- Interfaces reutilizam componentes, tokens oficiais e atendem aos criterios de acessibilidade aplicaveis?
 - O diff esta livre de segredos, artefatos locais e alteracoes sem relacao?
 
-## 8. Pull requests
+## 9. Pull requests
 
 O pull request deve informar:
 

@@ -43,3 +43,20 @@ Não criar estilos hardcoded sem justificativa documentada.
 - Preferir commits pequenos e temáticos.
 - Informar quais arquivos pertencem a cada commit.
 - Sugerir o comando git push apenas após o commit.
+
+## Regras de Interface
+
+Antes de criar qualquer tela Web ou Mobile:
+
+1. Consultar `docs/design/design-system.md`.
+2. Consultar `docs/ui_token_gov_brasil.json`.
+3. Consultar `docs/design/componentes-web.md` ou `docs/design/componentes-mobile.md`.
+4. Reutilizar componentes existentes.
+5. Não criar estilos ad-hoc.
+
+Toda nova tela deve respeitar:
+
+- Mobile First
+- WCAG 2.2 AA
+- Dark Mode
+- Tokens oficiais
