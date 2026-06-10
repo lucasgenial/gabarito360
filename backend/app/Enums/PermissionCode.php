@@ -20,6 +20,32 @@ enum PermissionCode: string
     case VIEW_EXPORT_CLASS_REPORT = 'relatorios.turma.consultar_exportar_csv';
     case RUN_TECHNICAL_DIAGNOSTICS = 'diagnostico.executar';
 
+    public function isMutation(): bool
+    {
+        return match ($this) {
+            self::VIEW_CLASSES_STUDENTS,
+            self::VIEW_APPLICATION_DASHBOARD,
+            self::VIEW_EXPORT_CLASS_REPORT,
+            self::RUN_TECHNICAL_DIAGNOSTICS => false,
+            default => true,
+        };
+    }
+
+    public function requiresAuditedDiagnosticContext(): bool
+    {
+        return $this === self::RUN_TECHNICAL_DIAGNOSTICS;
+    }
+
+    public function requiresOperationalRole(): bool
+    {
+        return match ($this) {
+            self::RUN_APPLICATIONS,
+            self::CONFIRM_READINGS,
+            self::CORRECT_READINGS_BEFORE_CONFIRMATION => true,
+            default => false,
+        };
+    }
+
     public function description(): string
     {
         return match ($this) {
