@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.4.0
+  version: 0.5.0
   description: |
-    Contrato OpenAPI da baseline tecnica, autenticacao e gestao inicial de nucleos.
+    Contrato OpenAPI da baseline tecnica, autenticacao e gestao inicial de nucleos e escolas.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -15,6 +15,8 @@ tags:
     description: Emissao e revogacao de tokens e contexto do usuario autenticado
   - name: Nucleos
     description: Cadastro, consulta, edicao e inativacao de nucleos de educacao
+  - name: Escolas
+    description: Gestao de escolas com isolamento pelo nucleo autorizado
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -301,6 +303,177 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/escolas:
+    get:
+      tags:
+        - Escolas
+      summary: Listar escolas acessiveis
+      operationId: listSchools
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+        - name: nucleo_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/NucleoStatus"
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 180
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Escolas filtradas pelo escopo autorizado
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EscolaListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Escolas
+      summary: Cadastrar escola em nucleo ativo e autorizado
+      operationId: createSchool
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscolaCreateRequest"
+      responses:
+        "201":
+          description: Escola cadastrada
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EscolaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/escolas/{escola}:
+    parameters:
+      - $ref: "#/components/parameters/EscolaId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Escolas
+      summary: Consultar escola no escopo autorizado
+      operationId: getSchool
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Escola encontrada
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EscolaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Escolas
+      summary: Editar escola sem mover de nucleo
+      description: Nucleo e status nao podem ser alterados por este endpoint.
+      operationId: updateSchool
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscolaUpdateRequest"
+      responses:
+        "200":
+          description: Escola atualizada
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EscolaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - Escolas
+      summary: Inativar escola
+      description: Preserva a escola para consulta historica e altera somente o status para inativo.
+      operationId: inactivateSchool
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Escola inativada
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EscolaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     bearerToken:
@@ -322,6 +495,14 @@ components:
       in: path
       required: true
       description: UUID do nucleo.
+      schema:
+        type: string
+        format: uuid
+    EscolaId:
+      name: escola
+      in: path
+      required: true
+      description: UUID da escola.
       schema:
         type: string
         format: uuid
@@ -885,6 +1066,201 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/NucleoListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    EnderecoEscola:
+      type:
+        - object
+        - "null"
+      additionalProperties: false
+      properties:
+        logradouro:
+          type:
+            - string
+            - "null"
+          maxLength: 180
+        numero:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+        complemento:
+          type:
+            - string
+            - "null"
+          maxLength: 120
+        bairro:
+          type:
+            - string
+            - "null"
+          maxLength: 120
+        cep:
+          type:
+            - string
+            - "null"
+          maxLength: 20
+    Escola:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nucleo_id
+        - codigo
+        - nome
+        - municipio
+        - estado
+        - endereco
+        - email
+        - telefone
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        nucleo_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Z0-9._-]+$"
+        nome:
+          type: string
+          maxLength: 180
+        municipio:
+          type: string
+          maxLength: 120
+        estado:
+          type: string
+          pattern: "^[A-Z]{2}$"
+        endereco:
+          $ref: "#/components/schemas/EnderecoEscola"
+        email:
+          type:
+            - string
+            - "null"
+          format: email
+          maxLength: 254
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+        status:
+          $ref: "#/components/schemas/NucleoStatus"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    EscolaCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - nucleo_id
+        - codigo
+        - nome
+        - municipio
+        - estado
+      properties:
+        nucleo_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        nome:
+          type: string
+          maxLength: 180
+        municipio:
+          type: string
+          maxLength: 120
+        estado:
+          type: string
+          minLength: 2
+          maxLength: 2
+        endereco:
+          $ref: "#/components/schemas/EnderecoEscola"
+        email:
+          type:
+            - string
+            - "null"
+          format: email
+          maxLength: 254
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+    EscolaUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        codigo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        nome:
+          type: string
+          maxLength: 180
+        municipio:
+          type: string
+          maxLength: 120
+        estado:
+          type: string
+          minLength: 2
+          maxLength: 2
+        endereco:
+          $ref: "#/components/schemas/EnderecoEscola"
+        email:
+          type:
+            - string
+            - "null"
+          format: email
+          maxLength: 254
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+    EscolaResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/Escola"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    EscolaListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Escola"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    EscolaListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/EscolaListData"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     EmptySuccessResponse:

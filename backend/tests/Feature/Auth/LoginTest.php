@@ -6,13 +6,13 @@ use App\Enums\AccessScope;
 use App\Enums\StatusEnum;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Escola;
 use App\Models\Nucleo;
 use App\Models\Perfil;
 use App\Models\Permissao;
 use App\Models\User;
 use App\Models\UsuarioPerfil;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
@@ -21,7 +21,7 @@ class LoginTest extends TestCase
 
     public function test_active_user_authenticates_and_receives_authorized_context(): void
     {
-        $schoolId = (string) Str::uuid();
+        $schoolId = Escola::factory()->create()->id;
         $user = User::factory()->create([
             'email' => 'gestor@example.test',
             'password' => 'senha-segura',

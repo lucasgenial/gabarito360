@@ -43,6 +43,16 @@ class UsuarioPerfil extends Model
         return $this->belongsTo(User::class, 'concedido_por');
     }
 
+    public function nucleo(): BelongsTo
+    {
+        return $this->belongsTo(Nucleo::class, 'nucleo_id');
+    }
+
+    public function escola(): BelongsTo
+    {
+        return $this->belongsTo(Escola::class, 'escola_id');
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {

@@ -6,6 +6,8 @@ use App\Enums\AccessScope;
 use App\Enums\PermissionCode;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Escola;
+use App\Models\Nucleo;
 use App\Models\Perfil;
 use App\Models\Permissao;
 use App\Models\User;
@@ -105,11 +107,14 @@ class AccessControlSchemaTest extends TestCase
 
     public function test_profile_link_cannot_reference_nucleo_and_escola_together(): void
     {
+        $nucleo = Nucleo::factory()->create();
+        $escola = Escola::factory()->create();
+
         $this->expectException(QueryException::class);
 
         UsuarioPerfil::factory()->create([
-            'nucleo_id' => (string) Str::uuid(),
-            'escola_id' => (string) Str::uuid(),
+            'nucleo_id' => $nucleo->id,
+            'escola_id' => $escola->id,
         ]);
     }
 

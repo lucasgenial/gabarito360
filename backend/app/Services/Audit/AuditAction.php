@@ -23,4 +23,7 @@ enum AuditAction: string
     case EDUCATION_CENTER_CREATED = 'nucleo.created';
     case EDUCATION_CENTER_UPDATED = 'nucleo.updated';
     case EDUCATION_CENTER_INACTIVATED = 'nucleo.inactivated';
+    case SCHOOL_CREATED = 'escola.created';
+    case SCHOOL_UPDATED = 'escola.updated';
+    case SCHOOL_INACTIVATED = 'escola.inactivated';
 }

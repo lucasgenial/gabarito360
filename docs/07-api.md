@@ -83,11 +83,11 @@
 | GET | `/nucleos/{id}` | Administrador |
 | PATCH | `/nucleos/{id}` | Administrador |
 | DELETE | `/nucleos/{id}` | Administrador, como inativacao |
-| GET | `/escolas` | Conforme escopo |
+| GET | `/escolas` | Administrador; gestor do nucleo no proprio escopo |
 | POST | `/escolas` | Administrador; gestor do nucleo |
-| GET | `/escolas/{id}` | Conforme escopo |
-| PATCH | `/escolas/{id}` | Administrador; gestor do nucleo/escola autorizado |
-| DELETE | `/escolas/{id}` | Usuario autorizado, como inativacao |
+| GET | `/escolas/{id}` | Administrador; gestor do nucleo no proprio escopo |
+| PATCH | `/escolas/{id}` | Administrador; gestor do nucleo no proprio escopo |
+| DELETE | `/escolas/{id}` | Administrador; gestor do nucleo no proprio escopo, como inativacao |
 | GET | `/usuarios` | Gestores no escopo |
 | POST | `/usuarios` | Gestores autorizados |
 | GET | `/usuarios/{id}` | Gestores no escopo; proprio usuario |

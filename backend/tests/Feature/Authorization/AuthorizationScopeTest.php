@@ -5,6 +5,7 @@ namespace Tests\Feature\Authorization;
 use App\Enums\PermissionCode;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Escola;
 use App\Models\Nucleo;
 use App\Models\Perfil;
 use App\Models\Permissao;
@@ -71,7 +72,7 @@ class AuthorizationScopeTest extends TestCase
 
     public function test_school_profile_is_isolated_from_other_schools(): void
     {
-        $school = (string) Str::uuid();
+        $school = Escola::factory()->create()->id;
         $manager = $this->userWithRole(UserRole::SCHOOL_MANAGER, escolaId: $school);
 
         $this->assertTrue($this->allows(

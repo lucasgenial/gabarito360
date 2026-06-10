@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\MeController;
+use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Middleware\EnsureMobileDeviceIsActive;
@@ -29,5 +30,11 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/nucleos/{nucleo}', [NucleoController::class, 'show'])->name('nucleos.show');
         Route::patch('/nucleos/{nucleo}', [NucleoController::class, 'update'])->name('nucleos.update');
         Route::delete('/nucleos/{nucleo}', [NucleoController::class, 'destroy'])->name('nucleos.destroy');
+
+        Route::get('/escolas', [EscolaController::class, 'index'])->name('escolas.index');
+        Route::post('/escolas', [EscolaController::class, 'store'])->name('escolas.store');
+        Route::get('/escolas/{escola}', [EscolaController::class, 'show'])->name('escolas.show');
+        Route::patch('/escolas/{escola}', [EscolaController::class, 'update'])->name('escolas.update');
+        Route::delete('/escolas/{escola}', [EscolaController::class, 'destroy'])->name('escolas.destroy');
     });
 });
