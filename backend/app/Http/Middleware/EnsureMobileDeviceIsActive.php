@@ -24,7 +24,11 @@ class EnsureMobileDeviceIsActive
     {
         $accessToken = $request->user()?->currentAccessToken();
 
-        if (! $accessToken instanceof PersonalAccessToken || $accessToken->dispositivo_mobile_id === null) {
+        if (
+            ! $accessToken instanceof PersonalAccessToken
+            || ! $accessToken->can('mobile')
+            || $accessToken->can('api')
+        ) {
             return $next($request);
         }
 
