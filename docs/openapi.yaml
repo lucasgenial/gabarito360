@@ -1,10 +1,9 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.1.0
+  version: 0.2.0
   description: |
-    Contrato OpenAPI da baseline tecnica implementada.
-    Neste momento, apenas o health check esta disponivel.
+    Contrato OpenAPI da baseline tecnica e da autenticacao inicial implementadas.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -12,6 +11,8 @@ servers:
   - url: http://127.0.0.1:8000
     description: Ambiente local
 tags:
+  - name: Autenticacao
+    description: Emissao e revogacao de tokens e contexto do usuario autenticado
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -45,7 +46,91 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Autenticacao
+      summary: Autenticar usuario
+      operationId: login
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Usuario autenticado e token emitido
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - Autenticacao
+      summary: Revogar token atual
+      operationId: logout
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      responses:
+        "200":
+          description: Token atual revogado
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptySuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/me:
+    get:
+      tags:
+        - Autenticacao
+      summary: Consultar usuario e contexto autorizado
+      operationId: getAuthenticatedUser
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      responses:
+        "200":
+          description: Usuario ativo e seus perfis, escopos e permissoes ativos
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
+  securitySchemes:
+    bearerToken:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
   parameters:
     XRequestId:
       name: X-Request-ID
@@ -76,6 +161,40 @@ components:
               code: BAD_REQUEST
               message: Requisicao invalida.
               details: {}
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    Unauthorized:
+      description: Credenciais ou token invalidos, revogados ou vinculados a usuario inativo.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: UNAUTHENTICATED
+              message: Autenticacao necessaria.
+              details: {}
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    UnprocessableEntity:
+      description: Dados de entrada invalidos.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: VALIDATION_ERROR
+              message: Os dados informados sao invalidos.
+              details:
+                email:
+                  - O campo email e obrigatorio.
             meta:
               request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
     InternalServerError:
@@ -129,6 +248,150 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/HealthData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          format: password
+          maxLength: 255
+        token_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          default: api
+    AuthorizedProfile:
+      type: object
+      additionalProperties: false
+      required:
+        - codigo
+        - nome
+        - escopo
+        - nucleo_id
+        - escola_id
+        - permissoes
+      properties:
+        codigo:
+          type: string
+        nome:
+          type: string
+        escopo:
+          type: string
+          enum:
+            - global
+            - nucleo
+            - escola
+            - operacional
+        nucleo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        escola_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        permissoes:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+    AuthorizedContext:
+      type: object
+      additionalProperties: false
+      required:
+        - perfis
+        - permissoes
+      properties:
+        perfis:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuthorizedProfile"
+        permissoes:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+    User:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nome
+        - email
+        - status
+        - contexto_autorizado
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+          const: ativo
+        contexto_autorizado:
+          $ref: "#/components/schemas/AuthorizedContext"
+    LoginData:
+      type: object
+      additionalProperties: false
+      required:
+        - user
+        - token
+        - token_type
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+        token_type:
+          type: string
+          const: Bearer
+    LoginResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/LoginData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    UserResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/User"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    EmptySuccessResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: "null"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     ErrorDetails:
