@@ -18,7 +18,7 @@ class CreateNucleoAction
     public function execute(array $attributes, User $actor): Nucleo
     {
         return DB::transaction(function () use ($attributes, $actor): Nucleo {
-            $nucleo = Nucleo::query()->create($attributes);
+            $nucleo = Nucleo::query()->create($attributes)->refresh();
 
             $this->audit->record(
                 action: AuditAction::EDUCATION_CENTER_CREATED,
