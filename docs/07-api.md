@@ -370,18 +370,19 @@ Os criterios completos para escolher cada camada e os gates de qualidade estao e
 ### 14.2 Contrato e erros
 
 - Todo endpoint funcional novo deve usar `/api/v1`.
-- O endpoint tecnico `/api/health` permanece temporariamente fora de `/api/v1`.
+- O endpoint tecnico de verificacao esta disponivel em `/api/v1/health`.
 - Sucesso e erro devem seguir os envelopes da secao 2 e incluir `meta.request_id`.
+- O header `X-Request-ID` aceita UUID informado pelo cliente ou recebe um UUID gerado pelo backend.
+- O `request_id` deve ser compartilhado com o contexto dos logs sem registrar payloads sensiveis.
 - Codigos de erro estaveis usam `UPPER_SNAKE_CASE` e nao dependem da mensagem apresentada.
 - Erros `403` indicam acao conhecida fora da permissao; `404` pode ocultar recurso fora do escopo; `409` representa conflito de estado ou integridade esperado.
 - Nenhum endpoint deve criar formato de resposta proprio ou retornar excecao interna ao cliente.
 
 ### 14.3 Transicao da base tecnica
 
-A base Laravel atual usa um envelope temporario com `success`, `message`, `data` e `errors` no health check. Esse formato nao e o contrato dos endpoints funcionais `/api/v1`.
+A transicao da base tecnica foi concluida no MP-007. O componente central de resposta, o health check e o tratamento global de excecoes seguem os envelopes da secao 2.
 
-Antes da criacao dos endpoints funcionais, o componente central de resposta e os testes de contrato devem ser alinhados a secao 2 em micropasso proprio. Ate essa transicao:
-
-- o health check existente pode manter seu formato para preservar o aceite da base tecnica;
-- nenhum novo endpoint funcional deve copiar o envelope temporario;
-- qualquer mudanca no contrato deve atualizar testes e OpenAPI na mesma entrega.
+- nenhum endpoint deve reintroduzir o envelope temporario com `success`, `message` e `errors`;
+- toda resposta de API testada deve possuir `meta.request_id` e o header `X-Request-ID`;
+- excecoes internas devem ser registradas com correlacao e retornar somente mensagem generica ao cliente;
+- qualquer mudanca futura no contrato deve atualizar testes e OpenAPI na mesma entrega.

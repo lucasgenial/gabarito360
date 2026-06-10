@@ -23,6 +23,18 @@ Criar uma plataforma com backend web, painel administrativo, app Android e módu
 - Toda funcionalidade deve ter validação, autenticação e controle de permissões.
 - Dados de alunos devem seguir boas práticas de segurança e LGPD.
 
+## Design System Obrigatório
+
+Todo componente visual criado no projeto deve utilizar os tokens definidos em:
+
+`docs/ui_token_gov_brasil.json`
+
+e seguir as diretrizes definidas em:
+
+`docs/SDGB.md`
+
+Não criar estilos hardcoded sem justificativa documentada.
+
 ## Controle de Versão
 
 - Nunca executar comandos Git automaticamente.

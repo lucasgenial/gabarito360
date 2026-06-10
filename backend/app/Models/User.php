@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -12,38 +16,57 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, HasUuids, Notifiable, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'usuarios';
+
+    /** @var list<string> */
     protected $fillable = [
-        'name',
+        'nome',
         'email',
+        'documento',
+        'telefone',
         'password',
+        'status',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    /** @var list<string> */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    public function perfis(): BelongsToMany
+    {
+        return $this->belongsToMany(Perfil::class, 'usuario_perfis', 'usuario_id', 'perfil_id')
+            ->withPivot([
+                'id',
+                'nucleo_id',
+                'escola_id',
+                'concedido_por',
+                'inicio_at',
+                'fim_at',
+                'created_at',
+            ]);
+    }
+
+    public function perfilVinculos(): HasMany
+    {
+        return $this->hasMany(UsuarioPerfil::class, 'usuario_id');
+    }
+
+    public function perfisConcedidos(): HasMany
+    {
+        return $this->hasMany(UsuarioPerfil::class, 'concedido_por');
+    }
+
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'status' => UserStatus::class,
+            'email_verified_at' => 'immutable_datetime',
+            'ultimo_acesso_at' => 'immutable_datetime',
             'password' => 'hashed',
         ];
     }

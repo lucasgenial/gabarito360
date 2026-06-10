@@ -1,0 +1,105 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - ".github/workflows/backend-ci.yml"
+      - "backend/**"
+      - "docs/openapi.yaml"
+  pull_request:
+    paths:
+      - ".github/workflows/backend-ci.yml"
+      - "backend/**"
+      - "docs/openapi.yaml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Composer, Pint, tests and OpenAPI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: gabarito360_testing
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d gabarito360_testing"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      APP_ENV: testing
+      APP_DEBUG: "false"
+      APP_KEY: base64:MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=
+      DB_TEST_HOST: 127.0.0.1
+      DB_TEST_PORT: 5432
+      DB_TEST_DATABASE: gabarito360_testing
+      DB_TEST_USERNAME: postgres
+      DB_TEST_PASSWORD: postgres
+      REDIS_CLIENT: predis
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      CACHE_STORE: array
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: array
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pdo_pgsql, pgsql
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate Composer manifest
+        run: composer validate --strict
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run migrations and seed access control
+        run: php artisan migrate:fresh --seed --env=testing --force
+
+      - name: Check code style
+        run: php vendor/bin/pint --test
+
+      - name: Run test suite
+        run: php artisan test
+
+      - name: Validate OpenAPI contract
+        run: npx --yes @redocly/cli@2.32.0 lint ../docs/openapi.yaml

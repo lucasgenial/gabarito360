@@ -1,0 +1,165 @@
+openapi: 3.1.0
+info:
+  title: Gabarito360 API
+  version: 0.1.0
+  description: |
+    Contrato OpenAPI da baseline tecnica implementada.
+    Neste momento, apenas o health check esta disponivel.
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: http://127.0.0.1:8000
+    description: Ambiente local
+tags:
+  - name: Tecnico
+    description: Endpoints tecnicos da API
+paths:
+  /api/v1/health:
+    get:
+      tags:
+        - Tecnico
+      summary: Verificar disponibilidade da API
+      description: Retorna o estado basico da API sem consultar recursos de negocio.
+      operationId: getApiHealth
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      responses:
+        "200":
+          description: API disponivel
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                data:
+                  app: Gabarito360
+                  status: online
+                meta:
+                  request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+components:
+  parameters:
+    XRequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      description: |
+        UUID de correlacao opcional. Quando valido, e reutilizado na resposta;
+        quando ausente ou invalido, a API gera um novo UUID.
+      schema:
+        $ref: "#/components/schemas/RequestId"
+  headers:
+    XRequestId:
+      description: UUID de correlacao da requisicao.
+      schema:
+        $ref: "#/components/schemas/RequestId"
+  responses:
+    BadRequest:
+      description: Requisicao malformada.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: BAD_REQUEST
+              message: Requisicao invalida.
+              details: {}
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    InternalServerError:
+      description: Falha interna sem exposicao de detalhes sensiveis.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: INTERNAL_ERROR
+              message: Erro interno do servidor.
+              details: {}
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+  schemas:
+    RequestId:
+      type: string
+      format: uuid
+      description: Identificador usado para correlacionar resposta e logs tecnicos.
+    ResponseMeta:
+      type: object
+      additionalProperties: false
+      required:
+        - request_id
+      properties:
+        request_id:
+          $ref: "#/components/schemas/RequestId"
+    HealthData:
+      type: object
+      additionalProperties: false
+      required:
+        - app
+        - status
+      properties:
+        app:
+          type: string
+          const: Gabarito360
+        status:
+          type: string
+          const: online
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/HealthData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ErrorDetails:
+      type: object
+      description: Detalhes seguros e estruturados relacionados ao erro.
+      additionalProperties: true
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+        - details
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]*$"
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: Os dados informados sao invalidos.
+        details:
+          $ref: "#/components/schemas/ErrorDetails"
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+        - meta
+      properties:
+        error:
+          $ref: "#/components/schemas/Error"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"

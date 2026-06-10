@@ -2,12 +2,13 @@
 
 API REST do Gabarito360, criada com Laravel 12 e preparada para evoluir com PostgreSQL, Laravel Sanctum, filas, jobs, policies, form requests, resources, services e actions.
 
-Esta etapa contém somente a base técnica. Autenticação, CRUDs, models do domínio, dashboards, WebSockets e OMR ainda não foram implementados.
+Esta etapa contém a base técnica e o schema inicial de usuários, perfis e permissões. Login, CRUDs, dashboards, WebSockets e OMR ainda não foram implementados.
 
 ## Requisitos
 
 - PHP 8.3 ou superior recomendado.
 - Composer 2.
+- Node.js 22 para validação local do contrato OpenAPI.
 - PostgreSQL 14 ou superior.
 - Extensões PHP exigidas pelo Laravel.
 - Extensão PHP `pdo_pgsql` habilitada.
@@ -57,13 +58,13 @@ DB_USERNAME=postgres
 DB_PASSWORD=
 ```
 
-Execute as migrations técnicas do Laravel e Sanctum:
+Execute as migrations e semeie os perfis e permissões do MVP:
 
 ```bash
-php artisan migrate
+php artisan migrate --seed
 ```
 
-Não existem migrations de negócio nesta etapa.
+As migrations existentes cobrem somente estruturas técnicas e a base relacional de identidade e controle de acesso.
 
 ### Banco de testes
 
@@ -81,6 +82,31 @@ php artisan test --filter=DatabaseTest
 ```
 
 O teste interrompe antes da conexão caso o banco configurado não possua um nome explicitamente identificado como banco de teste.
+
+## Redis, filas e storage privado
+
+Cache e filas usam Redis por padrão, com conexões e bases lógicas separadas. O cliente PHP adotado é `predis`, e jobs dependentes de persistência são publicados somente após o commit.
+
+Instalações criadas antes do MP-009 devem alinhar o `.env` com o `.env.example`, principalmente:
+
+```dotenv
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+REDIS_CLIENT=predis
+REDIS_CACHE_CONNECTION=cache
+REDIS_QUEUE_CONNECTION=queue
+FILESYSTEM_DISK=private
+FILESYSTEM_PRIVATE_DISK=private
+FILESYSTEM_CLOUD=s3_private
+```
+
+Inicie um worker local:
+
+```bash
+php artisan queue:work --once
+```
+
+Arquivos de negócio devem usar o disco indicado por `FILESYSTEM_PRIVATE_DISK`. O disco `private` armazena arquivos locais fora da pasta pública; `s3_private` prepara storage S3 compatível com visibilidade privada.
 
 ## Servidor local
 
@@ -114,6 +140,18 @@ Resposta esperada:
 }
 ```
 
+## OpenAPI e integração contínua
+
+O contrato versionado da baseline está em [`../docs/openapi.yaml`](../docs/openapi.yaml). Ele documenta somente endpoints realmente implementados, atualmente `GET /api/v1/health`, além dos envelopes técnicos e do header `X-Request-ID`.
+
+Valide o contrato localmente:
+
+```bash
+npx --yes @redocly/cli@2.32.0 lint ../docs/openapi.yaml
+```
+
+O workflow [`../.github/workflows/backend-ci.yml`](../.github/workflows/backend-ci.yml) executa em ambiente limpo com PHP 8.3, PostgreSQL 16 e Redis 7. O pipeline valida Composer e OpenAPI, aplica migrations técnicas, verifica Pint e executa a suíte completa. Falhas não são ignoradas.
+
 ## Baseline validada
 
 A baseline tecnica foi validada em 10 de junho de 2026 e deve permanecer sem regras de negocio ate os micropassos correspondentes.
@@ -139,6 +177,7 @@ composer validate --strict
 php artisan test
 php vendor/bin/pint --test
 php artisan route:list --except-vendor
+npx --yes @redocly/cli@2.32.0 lint ../docs/openapi.yaml
 ```
 
 Pre-condicoes do ambiente:

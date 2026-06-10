@@ -210,7 +210,7 @@ Versoes posteriores incluem modo offline, dashboards consolidados, relatorios PD
 
 ## Backend
 
-A base tecnica da API Laravel esta em [`backend/`](backend/README.md). Ela inclui a estrutura inicial para API REST, PostgreSQL, Sanctum, filas, policies, requests, resources, services e o endpoint `GET /api/health`.
+A base tecnica da API Laravel esta em [`backend/`](backend/README.md). Ela inclui a estrutura inicial para API REST, PostgreSQL, Sanctum, filas, policies, requests, resources, services e o endpoint `GET /api/v1/health`.
 
 Consulte o [README do backend](backend/README.md) para requisitos e comandos de execucao local.
 

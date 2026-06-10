@@ -9,22 +9,21 @@ use Illuminate\Http\JsonResponse;
 abstract class BaseApiController extends Controller
 {
     protected function successResponse(
-        string $message,
         mixed $data = null,
         int $status = 200,
     ): JsonResponse {
-        return ApiResponse::success($message, $data, $status);
+        return ApiResponse::success($data, $status);
     }
 
     /**
-     * @param  array<string, mixed>  $errors
+     * @param  array<string, mixed>  $details
      */
     protected function errorResponse(
+        string $code,
         string $message,
-        array $errors = [],
+        array $details = [],
         int $status = 400,
-        mixed $data = null,
     ): JsonResponse {
-        return ApiResponse::error($message, $errors, $status, $data);
+        return ApiResponse::error($code, $message, $details, $status);
     }
 }

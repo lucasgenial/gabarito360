@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'database'),
+    'default' => env('CACHE_STORE', 'redis'),
 
     /*
     |--------------------------------------------------------------------------
@@ -74,7 +74,7 @@ return [
         'redis' => [
             'driver' => 'redis',
             'connection' => env('REDIS_CACHE_CONNECTION', 'cache'),
-            'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'default'),
+            'lock_connection' => env('REDIS_CACHE_LOCK_CONNECTION', 'cache'),
         ],
 
         'dynamodb' => [
@@ -103,6 +103,9 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+    'prefix' => env(
+        'CACHE_PREFIX',
+        Str::slug(env('APP_NAME', 'gabarito360'), '_').'_'.env('APP_ENV', 'production').'_cache_',
+    ),
 
 ];

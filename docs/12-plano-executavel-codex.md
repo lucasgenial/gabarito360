@@ -11,8 +11,9 @@ Cada micropasso deve resultar em uma alteracao tematica que possa ser revisada, 
 - A documentacao funcional, tecnica, relacional, mobile, OMR e de MVP ja existe em `docs/`.
 - O backend Laravel 12 ja existe em `backend/`.
 - Laravel Sanctum esta instalado, mas login e autorizacao ainda nao foram implementados.
-- O endpoint `GET /api/health` e os testes basicos estao implementados.
-- Nao existem migrations, models, CRUDs ou regras de negocio do dominio.
+- O endpoint `GET /api/v1/health` e os testes de contrato da API estao implementados.
+- A base relacional de usuarios, perfis, permissoes e associacoes esta implementada; CRUDs e login ainda nao existem.
+- `docs/SDGB.md`, `docs/ui_token_gov_brasil.json` e `docs/design/` formam a referencia visual oficial do projeto.
 - O app Flutter, o modulo OMR, o painel administrativo e a infraestrutura Docker ainda nao existem.
 - O MVP deve operar online primeiro. Offline completo, recorrection, PDF/XLSX e dashboards consolidados sao evolucoes posteriores.
 
@@ -28,6 +29,7 @@ Cada micropasso deve resultar em uma alteracao tematica que possa ser revisada, 
 8. Nao versionar segredos, dados pessoais reais ou imagens identificaveis.
 9. Nao executar comandos Git automaticamente. Os comandos de commit deste documento sao apenas sugestoes.
 10. Atualizar a documentacao quando uma decisao aprovada alterar contratos ou regras.
+11. Todo componente visual deve usar os tokens e diretrizes oficiais; estilos hardcoded exigem justificativa documentada.
 
 ## 4. Ordem geral de desenvolvimento
 
@@ -70,13 +72,13 @@ Hardening, LGPD, deploy e piloto
 | FASE 0 - Preparacao do repositorio | MP-001 a MP-005 | Decisoes bloqueadoras, escopo, qualidade e piloto documentados |
 | FASE 1 - Backend Laravel base | MP-006 a MP-010 | Backend reproduzivel, versionado, testavel e observavel |
 | FASE 2 - Autenticacao e perfis | MP-011 a MP-015 | Isolamento vertical e horizontal comprovado por testes |
-| FASE 3 - Nucleos, escolas e usuarios | MP-016 a MP-019 | Estrutura organizacional gerenciavel sem acesso cruzado |
+| FASE 3 - Nucleos, escolas e usuarios | MP-016 a MP-019, incluindo MP-019A | Estrutura organizacional gerenciavel sem acesso cruzado |
 | FASE 4 - Turmas e alunos | MP-020 a MP-023 | Estrutura academica e importacao funcionais |
 | FASE 5 - Provas, questoes e gabaritos | MP-024 a MP-028 | Prova completa pode ser publicada e vinculada |
 | FASE 6 - Aplicacoes de prova | MP-029 a MP-033 | Backend executa fluxo completo com leitura simulada |
 | FASE 7 - Leitura de cartoes e OMR | MP-034 a MP-039 | OMR real atinge gate mensuravel no dataset homologado |
-| FASE 8 - App Android Flutter | MP-040 a MP-045 | Aplicador conclui fluxo online real em aparelho homologado |
-| FASE 9 - Dashboards em tempo real | MP-046 a MP-049 | Progresso consistente atualiza em ate 5 segundos |
+| FASE 8 - App Android Flutter | MP-040 a MP-045, incluindo MP-040A e MP-040B | Aplicador conclui fluxo online real em aparelho homologado |
+| FASE 9 - Dashboards em tempo real | MP-046 a MP-049, incluindo MP-046A | Progresso consistente atualiza em ate 5 segundos |
 | FASE 10 - Relatorios e exportacoes | MP-050 a MP-053 | Relatorio por turma e CSV coerentes e auditados |
 | FASE 11 - Auditoria, seguranca e LGPD | MP-054 a MP-058 | Controles, retencao e validacao integrada aprovados |
 | FASE 12 - Deploy e infraestrutura | MP-059 a MP-063 | Homologacao reproduzivel e piloto liberavel |
@@ -803,6 +805,53 @@ git commit -m "backend: implementar gestao administrativa de usuarios"
 git push
 ```
 
+## MP-019A - Estrutura visual do painel administrativo
+
+Objetivo:
+Implementar a fundacao visual compartilhada do painel web antes das telas administrativas.
+
+Acoes:
+- Integrar os tokens de `docs/ui_token_gov_brasil.json` ao Tailwind e aos estilos globais.
+- Criar layout base com header, sidebar responsiva, area de conteudo e navegacao acessivel.
+- Criar componentes compartilhados iniciais: Button, Input, Textarea, Select, Card, Modal, Badge, Table, Alert, Loading, Error e Empty State.
+- Documentar exemplos, estados, responsividade, dark mode e justificativas para eventuais extensoes de token.
+
+Arquivos envolvidos:
+- `backend/resources/css/app.css`
+- `backend/resources/views/components/**` (novos)
+- `backend/resources/views/layouts/**` (novos)
+- `backend/tailwind.config.js` ou configuracao equivalente
+- `backend/tests/Feature/Web/DesignSystemTest.php` (novo)
+- `docs/design/**`
+
+Critérios de aceite:
+- Layout e componentes usam tokens oficiais sem valores hardcoded nao justificados.
+- Componentes fundamentais funcionam por teclado e possuem estados claro, escuro, foco, disabled, loading e erro aplicaveis.
+- Nenhuma tela funcional ou regra de autorizacao e implementada nesta etapa.
+
+Verificação:
+```bash
+cd backend && npm run build
+cd backend && php artisan test --filter=DesignSystemTest
+```
+
+Dependências:
+- MP-018.
+- ADR-D009.
+- `docs/SDGB.md`, `docs/ui_token_gov_brasil.json` e `docs/design/`.
+
+Não fazer nesta etapa:
+- Nao implementar CRUDs, dashboard ou fluxos funcionais.
+- Nao usar componentes visuais como unica barreira de autorizacao.
+- Nao criar estilos hardcoded sem justificativa documentada.
+
+Commit sugerido:
+```bash
+git add backend/resources backend/tests/Feature/Web/DesignSystemTest.php docs/design
+git commit -m "design: criar estrutura visual do painel administrativo"
+git push
+```
+
 ## MP-019 - Criar painel administrativo minimo organizacional
 
 Objetivo:
@@ -830,6 +879,7 @@ cd backend && php artisan test --filter=OrganizationPanelTest
 
 Dependências:
 - MP-016 a MP-018.
+- MP-019A.
 
 Não fazer nesta etapa:
 - Nao criar dashboard ou identidade visual fora dos tokens aprovados.
@@ -1185,6 +1235,7 @@ cd backend && npm run build
 
 Dependências:
 - MP-027.
+- MP-019A.
 
 Não fazer nesta etapa:
 - Nao criar aplicacao.
@@ -1641,7 +1692,7 @@ Criar um app Android testavel, acessivel e alinhado aos tokens visuais.
 
 Acoes:
 - Criar projeto em `mobile/`, ambientes, navegacao, estado e tratamento global de erros.
-- Incorporar tokens aplicaveis de `docs/ui_token_gov_brasil.json`.
+- Preparar a camada de integracao visual; o mapeamento dos tokens oficiais ocorre no MP-040A.
 
 Arquivos envolvidos:
 - `mobile/pubspec.yaml` (novo)
@@ -1674,6 +1725,94 @@ git commit -m "mobile: criar projeto flutter e arquitetura base"
 git push
 ```
 
+## MP-040A - Design System Flutter
+
+Objetivo:
+Mapear os tokens oficiais para uma fundacao visual Flutter consistente, acessivel e preparada para temas claro e escuro.
+
+Acoes:
+- Converter cores, tipografia, espacamentos, raios, sombras e movimento em tema e extensoes semanticas Flutter.
+- Configurar Rawline, fallbacks oficiais, Material Symbols, modo claro, modo escuro e preferencia do sistema.
+- Documentar o mapeamento de tokens e eventuais extensoes justificadas.
+- Criar testes de tema para valores semanticos e contraste aplicavel.
+
+Arquivos envolvidos:
+- `mobile/lib/core/design_system/tokens/**` (novos)
+- `mobile/lib/core/design_system/theme/**` (novos)
+- `mobile/assets/fonts/**` (novos, quando licenciados e aprovados)
+- `mobile/test/core/design_system/theme/**` (novos)
+- `mobile/README.md`
+- `docs/design/componentes-mobile.md`
+
+Critérios de aceite:
+- Temas claro e escuro usam tokens oficiais, sem valores hardcoded nao justificados.
+- Preferencia de tema do sistema e suportada.
+- Tipografia, foco, contraste e movimento reduzido seguem a documentacao oficial.
+
+Verificação:
+```bash
+cd mobile && flutter analyze
+cd mobile && flutter test test/core/design_system/theme
+```
+
+Dependências:
+- MP-040.
+- `docs/SDGB.md`, `docs/ui_token_gov_brasil.json` e `docs/design/`.
+
+Não fazer nesta etapa:
+- Nao criar telas funcionais ou cliente de API.
+- Nao criar widgets de dominio.
+- Nao adicionar valores visuais sem token ou justificativa documentada.
+
+Commit sugerido:
+```bash
+git add mobile/lib/core/design_system/tokens mobile/lib/core/design_system/theme mobile/test/core/design_system/theme mobile/README.md docs/design/componentes-mobile.md
+git commit -m "design: integrar design system ao flutter"
+git push
+```
+
+## MP-040B - Biblioteca de componentes Flutter
+
+Objetivo:
+Criar componentes Flutter compartilhados para compor os fluxos mobile sem duplicar estilos ou comportamentos.
+
+Acoes:
+- Criar componentes compartilhados de botao, campo, select, card, badge, dialog, bottom sheet, navegacao e feedback.
+- Criar estados reutilizaveis de loading, erro, vazio, alerta e indisponibilidade.
+- Validar Semantics, alvos de toque, escalonamento de texto e estados claro e escuro.
+- Documentar exemplos e limites de uso dos componentes.
+
+Arquivos envolvidos:
+- `mobile/lib/core/design_system/components/**` (novos)
+- `mobile/test/core/design_system/components/**` (novos)
+- `docs/design/componentes-mobile.md`
+
+Critérios de aceite:
+- Componentes cobrem estados padrao, foco, disabled, loading e erro aplicaveis.
+- Widgets funcionam com TalkBack, escalonamento de texto e alvos de toque adequados.
+- Nenhum componente implementa regra de negocio ou autorizacao.
+
+Verificação:
+```bash
+cd mobile && flutter analyze
+cd mobile && flutter test test/core/design_system/components
+```
+
+Dependências:
+- MP-040A.
+
+Não fazer nesta etapa:
+- Nao implementar login, camera, aplicacoes ou fluxo de leitura.
+- Nao criar componente de dominio antes da primeira necessidade funcional.
+- Nao substituir validacao ou autorizacao do backend por estado visual.
+
+Commit sugerido:
+```bash
+git add mobile/lib/core/design_system/components mobile/test/core/design_system/components docs/design/componentes-mobile.md
+git commit -m "design: criar biblioteca de componentes flutter"
+git push
+```
+
 ## MP-041 - Implementar autenticacao e cliente API mobile
 
 Objetivo:
@@ -1700,7 +1839,7 @@ cd mobile && flutter test test/features/auth
 ```
 
 Dependências:
-- MP-040.
+- MP-040B.
 - MP-013 e MP-014.
 
 Não fazer nesta etapa:
@@ -1910,6 +2049,50 @@ git commit -m "dashboard: implementar snapshot consistente da aplicacao"
 git push
 ```
 
+## MP-046A - Componentes de Dashboard
+
+Objetivo:
+Criar componentes visuais compartilhados para representar o snapshot da aplicacao antes da integracao em tempo real.
+
+Acoes:
+- Criar KPI Card, progresso, filtros, painel de alertas, lista de pendencias e lista de ultimas leituras.
+- Preparar componentes de grafico com paleta oficial, legenda, alternativa tabular e estados acessiveis.
+- Criar estados de carregamento, vazio, erro, dados indisponiveis, desatualizacao e reconexao.
+- Validar modo claro, modo escuro, responsividade e minimizacao de dados pessoais.
+
+Arquivos envolvidos:
+- `backend/resources/views/components/dashboard/**` (novos)
+- `backend/resources/js/dashboard/**` (novos, se necessario)
+- `backend/tests/Feature/Web/DashboardComponentsTest.php` (novo)
+- `docs/design/dashboard.md`
+
+Critérios de aceite:
+- Componentes representam todos os estados previstos no contrato do MP-046.
+- Graficos nao dependem somente de cor e oferecem alternativa acessivel.
+- Componentes usam a fundacao visual do MP-019A e nao implementam atualizacao em tempo real.
+
+Verificação:
+```bash
+cd backend && npm run build
+cd backend && php artisan test --filter=DashboardComponentsTest
+```
+
+Dependências:
+- MP-019A.
+- MP-046.
+
+Não fazer nesta etapa:
+- Nao configurar ou consumir WebSocket.
+- Nao criar dashboards consolidados de nucleo e escola.
+- Nao calcular indicadores no componente visual.
+
+Commit sugerido:
+```bash
+git add backend/resources/views/components/dashboard backend/resources/js/dashboard backend/tests/Feature/Web/DashboardComponentsTest.php docs/design/dashboard.md
+git commit -m "design: criar componentes compartilhados de dashboard"
+git push
+```
+
 ## MP-047 - Configurar Reverb e canais autorizados
 
 Objetivo:
@@ -1956,7 +2139,7 @@ Atualizar a tela da aplicacao depois de confirmacoes e mudancas de estado.
 
 Acoes:
 - Publicar eventos apos commit para leitura confirmada, inicio e finalizacao.
-- Criar cards, ultimas leituras, pendencias e alertas no painel.
+- Compor o painel com os cards, listas, pendencias e alertas compartilhados do MP-046A.
 
 Arquivos envolvidos:
 - `backend/app/Events/*` (novos ou alterados)
@@ -1975,6 +2158,7 @@ cd backend && php artisan test --filter=ApplicationDashboardTest
 ```
 
 Dependências:
+- MP-046A.
 - MP-047.
 
 Não fazer nesta etapa:
@@ -2091,6 +2275,7 @@ cd backend && php artisan test --filter=ClassReportPageTest
 
 Dependências:
 - MP-050.
+- MP-019A.
 
 Não fazer nesta etapa:
 - Nao gerar PDF ou XLSX.
