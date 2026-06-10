@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\DispositivoMobile;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use App\Services\Audit\AuditAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -93,6 +94,14 @@ class MobileAuthenticationTest extends TestCase
             ->assertJsonPath('error.code', 'DEVICE_REVOKED');
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->assertDatabaseHas('auditorias', [
+            'acao' => AuditAction::DEVICE_REVOKED->value,
+            'entidade_id' => $device->id,
+        ]);
+        $this->assertDatabaseHas('auditorias', [
+            'acao' => AuditAction::ACCESS_BLOCKED_DEVICE->value,
+            'entidade_id' => $device->id,
+        ]);
     }
 
     public function test_existing_mobile_token_requires_supported_version_but_can_logout(): void

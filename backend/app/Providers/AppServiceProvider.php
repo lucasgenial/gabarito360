@@ -3,9 +3,16 @@
 namespace App\Providers;
 
 use App\Enums\PermissionCode;
+use App\Models\DispositivoMobile;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use App\Models\UsuarioPerfil;
+use App\Observers\DispositivoMobileObserver;
+use App\Observers\UserAccessObserver;
+use App\Observers\UsuarioPerfilObserver;
 use App\Policies\PermissionPolicy;
+use App\Services\Audit\AuditAction;
+use App\Services\Audit\AuditService;
 use App\Services\Authorization\AuthorizationContext;
 use App\Support\ApiResponse;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,17 +39,28 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        User::observe(UserAccessObserver::class);
+        UsuarioPerfil::observe(UsuarioPerfilObserver::class);
+        DispositivoMobile::observe(DispositivoMobileObserver::class);
 
         RateLimiter::for('login', function (Request $request): Limit {
             $email = Str::lower(trim((string) $request->input('email')));
 
             return Limit::perMinute(max(1, (int) config('gabarito360.auth.login_max_attempts_per_minute')))
                 ->by($email.'|'.$request->ip())
-                ->response(fn (Request $request, array $headers) => ApiResponse::error(
-                    code: 'TOO_MANY_REQUESTS',
-                    message: 'Muitas requisicoes. Tente novamente mais tarde.',
-                    status: 429,
-                )->withHeaders($headers));
+                ->response(function (Request $request, array $headers) {
+                    app(AuditService::class)->record(
+                        action: AuditAction::LOGIN_RATE_LIMITED,
+                        entityType: 'autenticacao',
+                        metadata: ['motivo' => 'limite_tentativas_excedido'],
+                    );
+
+                    return ApiResponse::error(
+                        code: 'TOO_MANY_REQUESTS',
+                        message: 'Muitas requisicoes. Tente novamente mais tarde.',
+                        status: 429,
+                    )->withHeaders($headers);
+                });
         });
 
         foreach (PermissionCode::cases() as $permission) {

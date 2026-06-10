@@ -7,12 +7,18 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
 use App\Models\DispositivoMobile;
 use App\Models\User;
+use App\Services\Audit\AuditAction;
+use App\Services\Audit\AuditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends AuthController
 {
+    public function __construct(
+        private AuditService $audit,
+    ) {}
+
     public function __invoke(LoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
@@ -27,6 +33,17 @@ class LoginController extends AuthController
                 '<',
             )
         ) {
+            $this->audit->record(
+                action: AuditAction::LOGIN_BLOCKED_VERSION,
+                entityType: 'usuario',
+                entityId: $user?->id,
+                metadata: [
+                    'cliente' => 'mobile',
+                    'versao_app' => $deviceInput['versao_app'],
+                    'versao_minima' => config('gabarito360.mobile.minimum_app_version'),
+                ],
+            );
+
             return $this->errorResponse(
                 code: 'APP_VERSION_UNSUPPORTED',
                 message: 'Atualize o aplicativo para continuar.',
@@ -42,6 +59,18 @@ class LoginController extends AuthController
             || ! Hash::check($credentials['password'], $user->password)
             || $user->status !== UserStatus::ACTIVE
         ) {
+            $inactiveUser = $user !== null && $user->status !== UserStatus::ACTIVE;
+
+            $this->audit->record(
+                action: $inactiveUser ? AuditAction::LOGIN_BLOCKED_USER : AuditAction::LOGIN_FAILED,
+                entityType: 'usuario',
+                entityId: $user?->id,
+                metadata: [
+                    'motivo' => $inactiveUser ? 'usuario_inativo_ou_bloqueado' : 'credenciais_invalidas',
+                    'cliente' => $deviceInput === null ? 'api' : 'mobile',
+                ],
+            );
+
             return $this->errorResponse(
                 code: 'INVALID_CREDENTIALS',
                 message: 'Credenciais invalidas.',
@@ -71,10 +100,28 @@ class LoginController extends AuthController
                 $token->accessToken->forceFill(['dispositivo_mobile_id' => $device->id])->save();
             }
 
+            $this->audit->record(
+                action: AuditAction::LOGIN_SUCCEEDED,
+                entityType: 'usuario',
+                entityId: $user->id,
+                actorUserId: $user->id,
+                metadata: [
+                    'cliente' => $device === null ? 'api' : 'mobile',
+                    'dispositivo_id' => $device?->id,
+                ],
+            );
+
             return ['device' => $device, 'token' => $token];
         });
 
         if ($result['token'] === null) {
+            $this->audit->record(
+                action: AuditAction::LOGIN_BLOCKED_DEVICE,
+                entityType: 'dispositivo_mobile',
+                entityId: $result['device']->id,
+                metadata: ['motivo' => 'dispositivo_revogado'],
+            );
+
             return $this->errorResponse(
                 code: 'DEVICE_REVOKED',
                 message: 'Dispositivo mobile revogado.',
