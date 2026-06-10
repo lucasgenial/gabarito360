@@ -5,6 +5,8 @@ namespace Tests\Feature\Auth;
 use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
 use Tests\TestCase;
 
 class AuthenticatedSessionTest extends TestCase
@@ -46,12 +48,15 @@ class AuthenticatedSessionTest extends TestCase
             ->assertJsonPath('data', null);
 
         $this->assertSame(1, $user->tokens()->count());
+        $this->assertNull(PersonalAccessToken::findToken($currentToken));
 
+        Auth::forgetGuards();
         $this->withToken($currentToken)
             ->getJson('/api/v1/me')
             ->assertUnauthorized()
             ->assertJsonPath('error.code', 'UNAUTHENTICATED');
 
+        Auth::forgetGuards();
         $this->withToken($otherToken)
             ->getJson('/api/v1/me')
             ->assertOk()
