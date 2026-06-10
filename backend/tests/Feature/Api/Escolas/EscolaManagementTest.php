@@ -110,7 +110,7 @@ class EscolaManagementTest extends TestCase
         $ownSchool = Escola::factory()->create(['nucleo_id' => $ownCenter->id]);
         Escola::factory()->create(['nucleo_id' => $otherCenter->id]);
 
-        $manager = $this->actingAsRole(UserRole::EDUCATION_MANAGER, $ownCenter);
+        $this->actingAsRole(UserRole::EDUCATION_MANAGER, $ownCenter);
 
         $this->getJson('/api/v1/escolas')
             ->assertOk()
@@ -133,7 +133,7 @@ class EscolaManagementTest extends TestCase
         $ownSchool = Escola::factory()->create(['nucleo_id' => $ownCenter->id]);
         $otherSchool = Escola::factory()->create(['nucleo_id' => $otherCenter->id]);
 
-        $this->actingAsRole(UserRole::EDUCATION_MANAGER, $ownCenter);
+        $manager = $this->actingAsRole(UserRole::EDUCATION_MANAGER, $ownCenter);
 
         $this->getJson('/api/v1/escolas/'.$ownSchool->id)->assertOk();
         $this->patchJson('/api/v1/escolas/'.$ownSchool->id, [
