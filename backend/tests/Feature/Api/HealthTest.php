@@ -12,6 +12,7 @@ class HealthTest extends TestCase
 
         $response
             ->assertOk()
+            ->assertHeader('content-type', 'application/json')
             ->assertExactJson([
                 'success' => true,
                 'message' => 'API Gabarito360 online',

@@ -96,6 +96,39 @@ Resposta esperada:
 }
 ```
 
+## Baseline validada
+
+A baseline tecnica foi validada em 10 de junho de 2026 e deve permanecer sem regras de negocio ate os micropassos correspondentes.
+
+| Componente | Versao congelada pelo `composer.lock` |
+|---|---:|
+| Laravel Framework | `12.62.0` |
+| Laravel Sanctum | `4.3.2` |
+| PHPUnit | `11.5.55` |
+| Laravel Pint | `1.29.1` |
+
+Escopo validado:
+
+- `GET /api/health` responde JSON conforme o contrato documentado.
+- A unica rota funcional da API e `/api/health`; a rota `/` permanece como pagina web padrao.
+- A suite possui somente testes tecnicos da baseline.
+- Autenticacao, models de dominio e endpoints de negocio ainda nao fazem parte desta base.
+
+Gates para revalidar a baseline:
+
+```bash
+composer validate --strict
+php artisan test
+php vendor/bin/pint --test
+php artisan route:list --except-vendor
+```
+
+Pre-condicoes do ambiente:
+
+- O alvo operacional do projeto e PHP 8.3 ou superior. Laravel 12 pode iniciar em PHP 8.2, mas isso nao aprova esse runtime para homologacao ou producao.
+- A extensao `pdo_pgsql` deve estar habilitada antes da validacao PostgreSQL do MP-008.
+- O MP-006 nao valida conexao PostgreSQL, migrations de negocio, Redis ou storage S3.
+
 ## Testes
 
 Execute a suíte:
