@@ -9,11 +9,13 @@ O modulo OMR (Optical Mark Recognition) transforma a imagem de um cartao-respost
 - Cartao padronizado semelhante ao modelo da OBMEP.
 - 20 questoes objetivas.
 - Alternativas A, B, C, D e E.
-- Codigo impresso externo opcional, cujo tipo e formato sao definidos pelo modelo do cartao.
+- Identificador fisico opcional: codigo externo impresso ou codigo do sistema materialmente afixado, conforme perfil do modelo.
 - Marcadores de referencia para alinhamento.
 - Uma marcacao valida por questao.
 
 Outros formatos devem ser suportados futuramente por modelos versionados, sem alterar o significado das leituras historicas.
+
+A especificacao candidata do primeiro modelo esta em [omr/modelo-cartao-v1.md](omr/modelo-cartao-v1.md). O formato do dataset, as formulas das metricas e o protocolo de homologacao estao em [omr/dataset-e-metricas.md](omr/dataset-e-metricas.md).
 
 ## 3. Requisitos do modelo de cartao
 
@@ -21,7 +23,7 @@ Cada versao de modelo deve definir:
 
 - Dimensoes e proporcao esperadas.
 - Posicao e tipo dos marcadores de referencia.
-- Regiao e regras do codigo impresso externo, quando existente.
+- Regiao, origem semantica e regras do identificador fisico, quando existente.
 - Regioes de interesse das questoes e alternativas.
 - Ordem de leitura.
 - Limiar inicial de preenchimento.
@@ -69,14 +71,15 @@ O resultado confirmado pelo aplicador e a fonte utilizada para correcao. A detec
 
 Se os marcadores esperados nao forem encontrados com confianca suficiente, o status deve ser parcial ou falha.
 
-### 5.4 Leitura do codigo impresso
+### 5.4 Leitura do identificador fisico
 
-1. Verificar se o modelo define regiao de codigo impresso.
+1. Verificar se o modelo define regiao e perfil de identificador fisico.
 2. Recortar a regiao configurada.
 3. Tentar decodificar conforme o tipo configurado: QR Code, codigo de barras, OCR ou outro leitor homologado.
 4. Normalizar e validar conforme as regras do modelo, incluindo digito verificador quando o emissor externo o fornecer.
-5. Retornar o codigo impresso detectado e sua confianca.
-6. Permitir digitacao manual ou registro de cartao sem codigo impresso.
+5. Retornar valor, confianca e origem semantica: codigo externo ou codigo do sistema afixado.
+6. Encaminhar o valor ao campo correspondente, sem sobrescrever um identificador pelo outro.
+7. Permitir digitacao manual ou registro de cartao sem codigo impresso.
 
 O OMR nao gera nem detecta o codigo do sistema, exceto quando esse codigo tiver sido materialmente afixado ao cartao e o modelo declarar sua regiao.
 
@@ -127,7 +130,7 @@ A confianca geral deve considerar:
 - Qualidade global da imagem.
 - Confianca dos marcadores e perspectiva.
 - Percentual de questoes duvidosas.
-- Confianca da leitura do codigo impresso.
+- Confianca da leitura do identificador fisico.
 
 Baixa confianca nao significa necessariamente resposta errada; significa que a leitura exige revisao.
 
@@ -144,6 +147,7 @@ Baixa confianca nao significa necessariamente resposta errada; significa que a l
     "valor": "CARTAO-000123",
     "confianca": 0.91
   },
+  "codigo_sistema_afixado": null,
   "qualidade": {
     "nitidez": 0.86,
     "contraste": 0.78,
@@ -186,7 +190,7 @@ Baixa confianca nao significa necessariamente resposta errada; significa que a l
 
 ## 10. Estrategia de calibracao
 
-1. Criar dataset versionado com cartoes reais anonimizados.
+1. Criar dataset versionado com cartoes impressos sem dados pessoais reais e codigos sinteticos.
 2. Incluir variacoes de camera, impressao, caneta, iluminacao, inclinacao e desgaste.
 3. Rotular respostas esperadas e anomalias.
 4. Separar conjuntos de calibracao, teste e regressao.
@@ -194,18 +198,23 @@ Baixa confianca nao significa necessariamente resposta errada; significa que a l
 6. Medir resultados no conjunto de teste sem alteracao posterior.
 7. Registrar configuracao, versao e metricas de cada experimento.
 
-## 11. Metricas de qualidade
+## 11. Metricas de qualidade e gate
 
-- Acuracia por resposta.
-- Precisao e revocacao para marcacoes validas.
-- Taxa de falso positivo em respostas em branco.
-- Taxa de falso negativo em marcacoes validas.
-- Taxa de dupla marcacao corretamente sinalizada.
-- Percentual de leituras que exigem revisao.
-- Taxa de falha por modelo de dispositivo.
-- Tempo medio e percentil 95 de processamento.
+As metas minimas do piloto ja estao definidas no `ADR-D008` e devem ser medidas antes da liberacao, nunca definidas depois do piloto:
 
-Meta final do MVP deve ser definida apos o piloto com cartoes e dispositivos reais. A equipe nao deve declarar acuracia sem dataset reproduzivel.
+| Metrica critica | Meta |
+|---|---:|
+| Acuracia geral por resposta | Pelo menos 98,5% |
+| Acuracia de respostas de alta confianca | Pelo menos 99,5% |
+| Revocacao combinada de branco e dupla como alerta | Pelo menos 99,0% |
+| Erro silencioso de alta confianca | No maximo 0,1% |
+| Imagens processaveis com exatamente 20 respostas | 100% |
+| Tempo preliminar no dispositivo homologado | p95 de ate 5 segundos |
+| Validacao ou reprocessamento no backend | p95 de ate 10 segundos |
+
+Tambem devem ser reportados resultados segmentados por dispositivo, condicao, tipo de resposta, alternativa e perfil de identificador fisico. As formulas, a cobertura minima planejada e o protocolo reproduzivel estao em [omr/dataset-e-metricas.md](omr/dataset-e-metricas.md).
+
+A equipe nao deve declarar acuracia sem dataset versionado, teste selado e relatorio reproduzivel.
 
 ## 12. Estrategias para reduzir erros
 
@@ -225,7 +234,7 @@ Meta final do MVP deve ser definida apos o piloto com cartoes e dispositivos rea
 |---|---|
 | Marcadores ausentes | Solicitar nova captura |
 | Cartao de modelo diferente | Bloquear ou selecionar modelo autorizado |
-| Codigo ilegivel | Permitir digitacao manual validada |
+| Identificador fisico ilegivel | Permitir digitacao manual validada no campo correspondente |
 | Perspectiva extrema | Rejeitar imagem |
 | Sombra/reflexo | Orientar nova captura |
 | Rasura | Sinalizar baixa confianca ou dupla |
@@ -243,7 +252,7 @@ Meta final do MVP deve ser definida apos o piloto com cartoes e dispositivos rea
 
 ## 15. Criterios de aceite do MVP OMR
 
-- Processa o modelo inicial versionado de 20 questoes A-E.
+- Processa o modelo inicial versionado de 20 questoes A-E conforme [omr/modelo-cartao-v1.md](omr/modelo-cartao-v1.md).
 - Detecta e corrige perspectiva dentro das tolerancias homologadas.
 - Retorna exatamente uma entrada por questao.
 - Classifica branco, dupla e baixa confianca.
@@ -251,3 +260,16 @@ Meta final do MVP deve ser definida apos o piloto com cartoes e dispositivos rea
 - Nunca confirma automaticamente uma leitura no lugar do aplicador.
 - Mantem resultado reproduzivel para a mesma imagem, modelo e configuracao.
 - Possui suite de regressao com imagens rotuladas.
+- Cumpre todas as metas criticas do ADR-D008 no conjunto de teste selado e nos dispositivos homologados.
+
+## 16. Estado de preparacao
+
+O MP-005 define a especificacao candidata, o contrato do dataset e o protocolo de medicao. Neste momento:
+
+- nenhuma imagem real foi adicionada;
+- nenhuma metrica de acuracia ou latencia foi medida;
+- nenhum dispositivo foi homologado;
+- nenhum limiar OMR foi calibrado;
+- o modelo permanece `1.0.0-pre-homologacao`.
+
+A implementacao do harness, a coleta do dataset, a calibracao e a execucao do gate pertencem aos micropassos OMR posteriores.
