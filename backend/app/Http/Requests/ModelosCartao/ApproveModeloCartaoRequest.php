@@ -14,18 +14,18 @@ class ApproveModeloCartaoRequest extends FormRequest
     public function authorize(): bool
     {
         $actor = $this->user();
-        $boundModel = $this->route('modelo');
+        $modelId = $this->modelId();
 
-        if (! $actor instanceof User || ! $boundModel instanceof ModeloCartao) {
+        if (! $actor instanceof User || $modelId === null) {
             return false;
         }
 
         $model = app(ModeloCartaoScope::class)
             ->apply(ModeloCartao::query(), $actor)
-            ->find($boundModel->id);
+            ->find($modelId);
 
         if (! $model instanceof ModeloCartao) {
-            throw (new ModelNotFoundException)->setModel(ModeloCartao::class, [$boundModel->id]);
+            throw (new ModelNotFoundException)->setModel(ModeloCartao::class, [$modelId]);
         }
 
         $this->attributes->set('managed_card_model', $model);
@@ -54,5 +54,14 @@ class ApproveModeloCartaoRequest extends FormRequest
         $model = $this->attributes->get('managed_card_model');
 
         return $model;
+    }
+
+    private function modelId(): ?string
+    {
+        $routeModel = $this->route('modelo');
+
+        return $routeModel instanceof ModeloCartao
+            ? $routeModel->id
+            : (is_string($routeModel) ? $routeModel : null);
     }
 }
