@@ -18,12 +18,16 @@ class MatriculaTurmaFactory extends Factory
     /** @return array<string, mixed> */
     public function definition(): array
     {
-        $turma = Turma::factory()->create();
-
         return [
-            'aluno_id' => Aluno::factory()->create(['escola_id' => $turma->escola_id])->id,
-            'turma_id' => $turma->id,
-            'ano_letivo' => $turma->ano_letivo,
+            'turma_id' => Turma::factory(),
+            'aluno_id' => function (array $attributes): string {
+                $class = Turma::query()->findOrFail($attributes['turma_id']);
+
+                return Aluno::factory()->create(['escola_id' => $class->escola_id])->id;
+            },
+            'ano_letivo' => fn (array $attributes): int => Turma::query()
+                ->findOrFail($attributes['turma_id'])
+                ->ano_letivo,
             'numero_chamada' => null,
             'status' => MatriculaTurmaStatus::ACTIVE,
             'inicio_em' => now()->startOfYear()->toDateString(),

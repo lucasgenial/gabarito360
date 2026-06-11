@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AlunoController;
+use App\Http\Controllers\Api\AplicadorTurmaController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\MeController;
@@ -50,6 +52,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::get('/perfis', [PerfilController::class, 'index'])->name('perfis.index');
 
+        Route::get('/alunos', [AlunoController::class, 'index'])->name('alunos.index');
+        Route::post('/alunos', [AlunoController::class, 'store'])->name('alunos.store');
+        Route::get('/alunos/{aluno}', [AlunoController::class, 'show'])->name('alunos.show');
+        Route::patch('/alunos/{aluno}', [AlunoController::class, 'update'])->name('alunos.update');
+        Route::delete('/alunos/{aluno}', [AlunoController::class, 'destroy'])->name('alunos.destroy');
+
         Route::get('/turmas', [TurmaController::class, 'index'])->name('turmas.index');
         Route::post('/turmas', [TurmaController::class, 'store'])->name('turmas.store');
         Route::get('/turmas/{turma}', [TurmaController::class, 'show'])->name('turmas.show');
@@ -58,5 +66,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/turmas/{turma}/matriculas', [TurmaController::class, 'matriculas'])->name('turmas.matriculas.index');
         Route::post('/turmas/{turma}/matriculas', [TurmaController::class, 'storeMatricula'])->name('turmas.matriculas.store');
         Route::patch('/turmas/{turma}/matriculas/{matricula}', [TurmaController::class, 'closeMatricula'])->name('turmas.matriculas.update');
+        Route::get('/turmas/{turma}/aplicadores', [AplicadorTurmaController::class, 'index'])->name('turmas.aplicadores.index');
+        Route::post('/turmas/{turma}/aplicadores', [AplicadorTurmaController::class, 'store'])->name('turmas.aplicadores.store');
+        Route::delete('/turmas/{turma}/aplicadores/{vinculo}', [AplicadorTurmaController::class, 'destroy'])->name('turmas.aplicadores.destroy');
     });
 });

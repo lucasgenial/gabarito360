@@ -65,6 +65,16 @@ class User extends Authenticatable
         return $this->hasMany(DispositivoMobile::class, 'usuario_id');
     }
 
+    public function turmasVinculadas(): HasMany
+    {
+        return $this->hasMany(AplicadorTurma::class, 'usuario_id');
+    }
+
+    public function vinculosTurmaConcedidos(): HasMany
+    {
+        return $this->hasMany(AplicadorTurma::class, 'vinculado_por');
+    }
+
     public function auditorias(): HasMany
     {
         return $this->hasMany(Auditoria::class, 'usuario_id');

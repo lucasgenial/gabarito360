@@ -3,6 +3,7 @@
 namespace App\Services\Authorization;
 
 use App\Enums\PermissionCode;
+use App\Models\Aluno;
 use App\Models\AplicadorTurma;
 use App\Models\Escola;
 use App\Models\Turma;
@@ -10,7 +11,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
-class TurmaScope
+class AlunoScope
 {
     public function __construct(
         private ScopeResolver $scopeResolver,
@@ -23,15 +24,10 @@ class TurmaScope
             || $this->operationalClassIds($user)->isNotEmpty();
     }
 
-    public function canView(User $user, Turma $turma): bool
+    public function canManageAny(User $user): bool
     {
-        return $this->allowsSchool($user, $turma->escola, PermissionCode::VIEW_CLASSES_STUDENTS)
-            || $this->allowsOperationalClass($user, $turma);
-    }
-
-    public function canManage(User $user, Turma $turma): bool
-    {
-        return $this->allowsSchool($user, $turma->escola, PermissionCode::MANAGE_CLASSES_STUDENTS);
+        return $this->hasGlobalAccess($user, PermissionCode::MANAGE_CLASSES_STUDENTS)
+            || $this->schoolIds($user, PermissionCode::MANAGE_CLASSES_STUDENTS)->isNotEmpty();
     }
 
     public function canCreateInSchool(User $user, Escola $school): bool
@@ -39,12 +35,20 @@ class TurmaScope
         return $this->allowsSchool($user, $school, PermissionCode::MANAGE_CLASSES_STUDENTS);
     }
 
-    public function canAssignStaff(User $user, Turma $turma): bool
+    public function canManage(User $user, Aluno $student): bool
     {
-        return $this->allowsSchool($user, $turma->escola, PermissionCode::ASSIGN_CLASS_STAFF);
+        if ($this->hasGlobalAccess($user, PermissionCode::MANAGE_CLASSES_STUDENTS)) {
+            return true;
+        }
+
+        if (! $student->escola instanceof Escola) {
+            return false;
+        }
+
+        return $this->allowsSchool($user, $student->escola, PermissionCode::MANAGE_CLASSES_STUDENTS);
     }
 
-    /** @param Builder<Turma> $query */
+    /** @param Builder<Aluno> $query */
     public function apply(Builder $query, User $user): Builder
     {
         if ($this->hasGlobalAccess($user, PermissionCode::VIEW_CLASSES_STUDENTS)) {
@@ -54,8 +58,19 @@ class TurmaScope
         return $query->where(function (Builder $scope) use ($user): void {
             $scope
                 ->whereIn('escola_id', $this->schoolIds($user, PermissionCode::VIEW_CLASSES_STUDENTS))
-                ->orWhereIn('id', $this->operationalClassIds($user));
+                ->orWhereHas('matriculasTurmas', fn (Builder $enrollments) => $enrollments
+                    ->whereIn('turma_id', $this->operationalClassIds($user)));
         });
+    }
+
+    /** @param Builder<Aluno> $query */
+    public function applyManageable(Builder $query, User $user): Builder
+    {
+        if ($this->hasGlobalAccess($user, PermissionCode::MANAGE_CLASSES_STUDENTS)) {
+            return $query;
+        }
+
+        return $query->whereIn('escola_id', $this->schoolIds($user, PermissionCode::MANAGE_CLASSES_STUDENTS));
     }
 
     private function allowsSchool(User $user, Escola $school, PermissionCode $permission): bool
@@ -71,30 +86,6 @@ class TurmaScope
     private function hasGlobalAccess(User $user, PermissionCode $permission): bool
     {
         return $this->scopeResolver->allows($user, $permission, AuthorizationContext::global());
-    }
-
-    private function allowsOperationalClass(User $user, Turma $turma): bool
-    {
-        if (! AplicadorTurma::query()
-            ->where('turma_id', $turma->id)
-            ->where('usuario_id', $user->id)
-            ->whereDate('inicio_em', '<=', today())
-            ->whereNull('fim_em')
-            ->exists()) {
-            return false;
-        }
-
-        $turma->loadMissing('escola');
-
-        return $this->scopeResolver->allows(
-            $user,
-            PermissionCode::VIEW_CLASSES_STUDENTS,
-            AuthorizationContext::operational(
-                explicitlyLinked: true,
-                nucleoId: $turma->escola->nucleo_id,
-                escolaId: $turma->escola_id,
-            ),
-        );
     }
 
     /** @return Collection<int, string> */
@@ -136,7 +127,23 @@ class TurmaScope
                 ->whereNull('fim_em'))
             ->with('escola')
             ->get()
-            ->filter(fn (Turma $turma): bool => $this->allowsOperationalClass($user, $turma))
+            ->filter(function (Turma $class) use ($user): bool {
+                return AplicadorTurma::query()
+                    ->where('turma_id', $class->id)
+                    ->where('usuario_id', $user->id)
+                    ->whereDate('inicio_em', '<=', today())
+                    ->whereNull('fim_em')
+                    ->exists()
+                    && $this->scopeResolver->allows(
+                        $user,
+                        PermissionCode::VIEW_CLASSES_STUDENTS,
+                        AuthorizationContext::operational(
+                            explicitlyLinked: true,
+                            nucleoId: $class->escola->nucleo_id,
+                            escolaId: $class->escola_id,
+                        ),
+                    );
+            })
             ->pluck('id')
             ->values();
     }

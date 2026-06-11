@@ -57,4 +57,19 @@ class TurmaPolicy
     {
         return $this->scope->canManage($user, $turma);
     }
+
+    public function assignStaff(User $user, Turma $turma): bool
+    {
+        $turma->loadMissing('escola.nucleo');
+
+        return $turma->status === StatusEnum::ACTIVE
+            && $turma->escola->status === StatusEnum::ACTIVE
+            && $turma->escola->nucleo->status === StatusEnum::ACTIVE
+            && $this->scope->canAssignStaff($user, $turma);
+    }
+
+    public function closeStaff(User $user, Turma $turma): bool
+    {
+        return $this->scope->canAssignStaff($user, $turma);
+    }
 }

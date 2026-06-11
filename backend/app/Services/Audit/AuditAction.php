@@ -34,4 +34,9 @@ enum AuditAction: string
     case CLASS_INACTIVATED = 'turma.inactivated';
     case ENROLLMENT_CREATED = 'matricula_turma.created';
     case ENROLLMENT_CLOSED = 'matricula_turma.closed';
+    case STUDENT_CREATED = 'aluno.created';
+    case STUDENT_UPDATED = 'aluno.updated';
+    case STUDENT_INACTIVATED = 'aluno.inactivated';
+    case CLASS_STAFF_ASSIGNED = 'aplicador_turma.assigned';
+    case CLASS_STAFF_CLOSED = 'aplicador_turma.closed';
 }

@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.7.0
+  version: 0.8.0
   description: |
-    Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas e matriculas historicas.
+    Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos e vinculos operacionais.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -21,6 +21,8 @@ tags:
     description: Gestao administrativa de usuarios, perfis e vinculos por escopo
   - name: Turmas
     description: Gestao de turmas por ano letivo e matriculas historicas
+  - name: Alunos
+    description: Gestao de alunos com dados minimizados e isolamento por escopo
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -726,6 +728,159 @@ paths:
           $ref: "#/components/responses/AuthorizationForbidden"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/alunos:
+    get:
+      tags:
+        - Alunos
+      summary: Listar alunos autorizados
+      operationId: listStudents
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+        - name: escola_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: turma_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/NucleoStatus"
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 180
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Alunos no escopo autorizado; perfis operacionais recebem recurso reduzido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlunoListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Alunos
+      summary: Cadastrar aluno com dados minimos
+      operationId: createStudent
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlunoCreateRequest"
+      responses:
+        "201":
+          description: Aluno cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlunoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/alunos/{aluno}:
+    parameters:
+      - $ref: "#/components/parameters/AlunoId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Alunos
+      summary: Consultar aluno autorizado
+      operationId: getStudent
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Aluno autorizado; perfis operacionais recebem recurso reduzido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlunoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Alunos
+      summary: Atualizar campos minimos do aluno
+      operationId: updateStudent
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlunoUpdateRequest"
+      responses:
+        "200":
+          description: Aluno atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlunoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - Alunos
+      summary: Inativar aluno preservando historico
+      operationId: inactivateStudent
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Aluno inativado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlunoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /api/v1/turmas:
     get:
       tags:
@@ -991,6 +1146,116 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/turmas/{turma}/aplicadores:
+    parameters:
+      - $ref: "#/components/parameters/TurmaId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Turmas
+      summary: Listar vinculos operacionais da turma
+      operationId: listClassStaffAssignments
+      security:
+        - bearerToken: []
+      parameters:
+        - name: papel
+          in: query
+          schema:
+            $ref: "#/components/schemas/AplicadorTurmaPapel"
+        - name: ativos
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Vinculos operacionais autorizados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AplicadorTurmaListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Turmas
+      summary: Vincular professor ou aplicador a turma
+      operationId: assignClassStaff
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AplicadorTurmaCreateRequest"
+      responses:
+        "201":
+          description: Vinculo operacional criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AplicadorTurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/turmas/{turma}/aplicadores/{vinculo}:
+    parameters:
+      - $ref: "#/components/parameters/TurmaId"
+      - $ref: "#/components/parameters/AplicadorTurmaId"
+      - $ref: "#/components/parameters/XRequestId"
+    delete:
+      tags:
+        - Turmas
+      summary: Encerrar vinculo operacional preservando historico
+      operationId: closeClassStaffAssignment
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AplicadorTurmaCloseRequest"
+      responses:
+        "200":
+          description: Vinculo operacional encerrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AplicadorTurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     bearerToken:
@@ -1036,6 +1301,22 @@ components:
       in: path
       required: true
       description: UUID da matricula historica.
+      schema:
+        type: string
+        format: uuid
+    AlunoId:
+      name: aluno
+      in: path
+      required: true
+      description: UUID do aluno.
+      schema:
+        type: string
+        format: uuid
+    AplicadorTurmaId:
+      name: vinculo
+      in: path
+      required: true
+      description: UUID do vinculo operacional com a turma.
       schema:
         type: string
         format: uuid
@@ -2084,6 +2365,141 @@ components:
             $ref: "#/components/schemas/PerfilCatalogItem"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
+    Aluno:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - escola_id
+        - matricula
+        - codigo_interno
+        - nome
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        escola_id:
+          type: string
+          format: uuid
+        matricula:
+          type: string
+          maxLength: 80
+        codigo_interno:
+          type:
+            - string
+            - "null"
+          maxLength: 80
+        nome:
+          type: string
+          maxLength: 180
+        status:
+          $ref: "#/components/schemas/NucleoStatus"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AlunoResumo:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - matricula
+        - nome
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        matricula:
+          type: string
+          maxLength: 80
+        nome:
+          type: string
+          maxLength: 180
+        status:
+          $ref: "#/components/schemas/NucleoStatus"
+    AlunoCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - escola_id
+        - matricula
+        - nome
+      properties:
+        escola_id:
+          type: string
+          format: uuid
+        matricula:
+          type: string
+          maxLength: 80
+        codigo_interno:
+          type:
+            - string
+            - "null"
+          maxLength: 80
+        nome:
+          type: string
+          maxLength: 180
+    AlunoUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        matricula:
+          type: string
+          maxLength: 80
+        codigo_interno:
+          type:
+            - string
+            - "null"
+          maxLength: 80
+        nome:
+          type: string
+          maxLength: 180
+    AlunoResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          oneOf:
+            - $ref: "#/components/schemas/Aluno"
+            - $ref: "#/components/schemas/AlunoResumo"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    AlunoListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/Aluno"
+              - $ref: "#/components/schemas/AlunoResumo"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    AlunoListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/AlunoListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
     Turma:
       type: object
       additionalProperties: false
@@ -2355,6 +2771,119 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/MatriculaTurmaListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    AplicadorTurmaPapel:
+      type: string
+      enum:
+        - professor
+        - aplicador
+        - responsavel
+    AplicadorTurma:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - turma_id
+        - usuario_id
+        - papel
+        - inicio_em
+        - fim_em
+        - vinculado_por
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        turma_id:
+          type: string
+          format: uuid
+        usuario_id:
+          type: string
+          format: uuid
+        papel:
+          $ref: "#/components/schemas/AplicadorTurmaPapel"
+        inicio_em:
+          type: string
+          format: date
+        fim_em:
+          type:
+            - string
+            - "null"
+          format: date
+        vinculado_por:
+          type:
+            - string
+            - "null"
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    AplicadorTurmaCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - usuario_id
+        - papel
+        - inicio_em
+      properties:
+        usuario_id:
+          type: string
+          format: uuid
+        papel:
+          type: string
+          enum:
+            - professor
+            - aplicador
+        inicio_em:
+          type: string
+          format: date
+    AplicadorTurmaCloseRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - fim_em
+      properties:
+        fim_em:
+          type: string
+          format: date
+    AplicadorTurmaResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/AplicadorTurma"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    AplicadorTurmaListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AplicadorTurma"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    AplicadorTurmaListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/AplicadorTurmaListData"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     EmptySuccessResponse:
