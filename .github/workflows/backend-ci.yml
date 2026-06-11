@@ -93,6 +93,15 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Audit frontend dependencies
+        run: npm audit --audit-level=critical
+
+      - name: Build frontend assets
+        run: npm run build
+
       - name: Run migrations and seed access control
         run: php artisan migrate:fresh --seed --env=testing --force
 
