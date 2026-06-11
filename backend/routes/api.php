@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\PerfilController;
+use App\Http\Controllers\Api\StudentImportController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Middleware\EnsureMobileDeviceIsActive;
@@ -52,6 +53,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::get('/perfis', [PerfilController::class, 'index'])->name('perfis.index');
 
+        Route::post('/alunos/importacoes', [StudentImportController::class, 'store'])->name('alunos.importacoes.store');
+        Route::get('/alunos/importacoes/{importacao}', [StudentImportController::class, 'show'])->name('alunos.importacoes.show');
+        Route::post('/alunos/importacoes/{importacao}/confirmar', [StudentImportController::class, 'confirm'])->name('alunos.importacoes.confirm');
         Route::get('/alunos', [AlunoController::class, 'index'])->name('alunos.index');
         Route::post('/alunos', [AlunoController::class, 'store'])->name('alunos.store');
         Route::get('/alunos/{aluno}', [AlunoController::class, 'show'])->name('alunos.show');

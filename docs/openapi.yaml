@@ -1,9 +1,10 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.8.0
+  version: 0.9.0
   description: |
-    Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos e vinculos operacionais.
+    Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos,
+    vinculos operacionais e importacao validada de alunos por CSV.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -809,6 +810,87 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/alunos/importacoes:
+    post:
+      tags:
+        - Alunos
+      summary: Enviar e validar previamente uma importacao CSV de alunos
+      operationId: createStudentImport
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/StudentImportCreateRequest"
+      responses:
+        "201":
+          description: Lote persistido com resumo da validacao previa
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentImportResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/alunos/importacoes/{importacao}:
+    parameters:
+      - $ref: "#/components/parameters/StudentImportId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Alunos
+      summary: Consultar estado e resultado de uma importacao autorizada
+      operationId: getStudentImport
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Estado atual do lote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentImportResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/alunos/importacoes/{importacao}/confirmar:
+    parameters:
+      - $ref: "#/components/parameters/StudentImportId"
+      - $ref: "#/components/parameters/XRequestId"
+    post:
+      tags:
+        - Alunos
+      summary: Confirmar lote validado e iniciar processamento em fila
+      operationId: confirmStudentImport
+      security:
+        - bearerToken: []
+      responses:
+        "202":
+          description: Confirmacao aceita de forma idempotente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentImportResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /api/v1/alunos/{aluno}:
     parameters:
       - $ref: "#/components/parameters/AlunoId"
@@ -1312,6 +1394,14 @@ components:
       schema:
         type: string
         format: uuid
+    StudentImportId:
+      name: importacao
+      in: path
+      required: true
+      description: UUID do lote de importacao de alunos.
+      schema:
+        type: string
+        format: uuid
     AplicadorTurmaId:
       name: vinculo
       in: path
@@ -1419,6 +1509,22 @@ components:
             error:
               code: RESOURCE_NOT_FOUND
               message: Recurso nao encontrado.
+              details: {}
+            meta:
+              request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
+    Conflict:
+      description: Estado atual do recurso impede a operacao.
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: CONFLICT
+              message: Conflito ao processar a requisicao.
               details: {}
             meta:
               request_id: 2f87b442-6bca-4bb3-9038-1e6a845103bd
@@ -2498,6 +2604,143 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/AlunoListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    StudentImportCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - escola_id
+        - turma_id
+        - arquivo
+      properties:
+        escola_id:
+          type: string
+          format: uuid
+        turma_id:
+          type: string
+          format: uuid
+        arquivo:
+          type: string
+          format: binary
+          description: CSV UTF-8 com cabecalho matricula,codigo_interno,nome,numero_chamada.
+    StudentImportStatus:
+      type: string
+      enum:
+        - validada
+        - com_erros
+        - processando
+        - concluida
+        - falhou
+    StudentImportSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - linhas
+        - inclusoes
+        - atualizacoes
+        - sem_alteracao
+        - matriculas_novas
+        - matriculas_existentes
+        - erros
+      properties:
+        linhas:
+          type: integer
+          minimum: 0
+        inclusoes:
+          type: integer
+          minimum: 0
+        atualizacoes:
+          type: integer
+          minimum: 0
+        sem_alteracao:
+          type: integer
+          minimum: 0
+        matriculas_novas:
+          type: integer
+          minimum: 0
+        matriculas_existentes:
+          type: integer
+          minimum: 0
+        erros:
+          type: integer
+          minimum: 0
+    StudentImportError:
+      type: object
+      additionalProperties: false
+      required:
+        - linha
+        - campo
+        - mensagem
+      properties:
+        linha:
+          type: integer
+          minimum: 0
+        campo:
+          type: string
+        mensagem:
+          type: string
+    StudentImport:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - escola_id
+        - turma_id
+        - status
+        - arquivo_nome
+        - resumo
+        - erros
+        - confirmado_at
+        - processado_at
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        escola_id:
+          type: string
+          format: uuid
+        turma_id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/StudentImportStatus"
+        arquivo_nome:
+          type: string
+          maxLength: 255
+        resumo:
+          $ref: "#/components/schemas/StudentImportSummary"
+        erros:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudentImportError"
+        confirmado_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        processado_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    StudentImportResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/StudentImport"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     Turma:

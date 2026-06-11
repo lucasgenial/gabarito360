@@ -75,6 +75,16 @@ class User extends Authenticatable
         return $this->hasMany(AplicadorTurma::class, 'vinculado_por');
     }
 
+    public function importacoesAlunosSolicitadas(): HasMany
+    {
+        return $this->hasMany(ImportacaoAluno::class, 'solicitado_por');
+    }
+
+    public function importacoesAlunosConfirmadas(): HasMany
+    {
+        return $this->hasMany(ImportacaoAluno::class, 'confirmado_por');
+    }
+
     public function auditorias(): HasMany
     {
         return $this->hasMany(Auditoria::class, 'usuario_id');

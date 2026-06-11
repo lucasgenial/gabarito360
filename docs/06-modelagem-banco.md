@@ -169,6 +169,7 @@ Cada tabela principal possui uma secao propria com:
 | `modelos_cartao` | `id` | `nucleo_id`, `arquivo_base_id`, `criado_por` | 1:N provas, aplicacoes e leituras | Versao homologada deve ser imutavel |
 | `aplicacoes` | `id` | prova, escola, turma, gabarito e modelo | N:1 prova/turma; N:N usuarios/alunos | So recebe confirmacoes enquanto em andamento |
 | `aplicadores_turmas` | `id` | `turma_id`, `usuario_id` | N:N entre usuarios e turmas | Um vinculo ativo equivalente por vez |
+| `importacoes_alunos` | `id` | escola, turma e usuarios solicitante/confirmador | N:1 escola/turma; cria alunos e matriculas | Confirmacao somente apos validacao sem erros |
 | `leituras_cartao` | `id` | aplicacao, cartao, modelo, arquivos e usuarios | N:1 cartao; 1:N respostas detectadas | Cada tentativa deve ser preservada |
 | `respostas_detectadas` | `id` | `leitura_cartao_id`, `questao_id`, usuario | N:1 leitura e questao | Deteccao original e resposta final sao preservadas |
 | `resultados` | `id` | cartao, leitura, prova, aplicacao, aluno e gabarito | N:1 cartao; 1:N respostas corrigidas | Apenas um resultado vigente por cartao |
@@ -453,6 +454,37 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_aplicadores_turmas_turma_ativo`: `(turma_id)` onde `fim_em IS NULL`.
 
 **Relacionamentos e regras importantes:** implementa o relacionamento N:N entre usuarios e turmas. Apenas vinculos ativos autorizam a visualizacao operacional; encerrar um vinculo nao apaga aplicacoes ou leituras anteriores.
+
+### 7.5 `importacoes_alunos`
+
+**Finalidade:** preservar a validacao previa, a confirmacao e o resultado de cada lote CSV de alunos.
+
+| Campo | Tipo | Nulo/Padrao | Chave ou regra |
+|---|---|---|---|
+| `id` | `uuid` | Nao / UUID | PK |
+| `escola_id` | `uuid` | Nao | FK `escolas.id` |
+| `turma_id` | `uuid` | Nao | FK `turmas.id`; deve pertencer a escola |
+| `solicitado_por` | `uuid` | Sim | FK `usuarios.id`; `SET NULL` |
+| `confirmado_por` | `uuid` | Sim | FK `usuarios.id`; `SET NULL` |
+| `status` | `varchar(30)` | Nao | `validada`, `com_erros`, `processando`, `concluida`, `falhou` |
+| `arquivo_disco` | `varchar(40)` | Nao | Somente disco privado |
+| `arquivo_caminho` | `varchar(500)` | Nao | Caminho interno; nunca exposto pela API |
+| `arquivo_nome` | `varchar(255)` | Nao | Nome original normalizado |
+| `arquivo_checksum_sha256` | `char(64)` | Nao | Integridade entre validacao e processamento |
+| `resumo` | `jsonb` | Nao | Contadores de inclusoes, atualizacoes, matriculas e erros |
+| `erros` | `jsonb` | Nao | Erros acionaveis por linha sem copiar valores pessoais |
+| `confirmado_at` | `timestamptz` | Sim | Momento da confirmacao explicita |
+| `processado_at` | `timestamptz` | Sim | Momento da conclusao ou falha definitiva |
+| `created_at` | `timestamptz` | Nao / `now()` |  |
+| `updated_at` | `timestamptz` | Nao / `now()` |  |
+
+**Indices e restricoes:**
+
+- `idx_importacoes_alunos_escola_created`: `(escola_id, created_at DESC)`.
+- `idx_importacoes_alunos_solicitante_created`: `(solicitado_por, created_at DESC)`.
+- `idx_importacoes_alunos_processando`: `(status, confirmado_at)` onde `status = 'processando'`.
+
+**Relacionamentos e regras importantes:** o CSV fica em storage privado e a tabela preserva somente sua referencia e checksum. Nenhum aluno ou matricula e gravado durante a validacao previa. A confirmacao e idempotente, despacha processamento em fila e o lote inteiro e persistido em uma unica transacao. Reenvios sao permitidos, mas as restricoes de alunos e matriculas impedem duplicidade silenciosa. A futura tabela generica `arquivos` podera assumir a referencia do objeto sem alterar o contrato do lote.
 
 ## 8. Provas, questoes, gabaritos e modelos
 
@@ -1044,6 +1076,7 @@ O backend deve preservar `codigo_impresso`, gerar `codigo_impresso_normalizado` 
 | Perfil | N:N | Permissoes | `perfil_permissoes` |
 | Aluno | N:N historico | Turmas | `matriculas_turmas` |
 | Usuario | N:N | Turmas | `aplicadores_turmas` |
+| Escola/Turma | 1:N | Importacoes de alunos | `importacoes_alunos` |
 | Prova | 1:N | Questoes | `questoes.prova_id` |
 | Prova | 1:N | Gabaritos oficiais | `gabaritos_oficiais.prova_id` |
 | Gabarito oficial | 1:N | Respostas oficiais | `gabarito_respostas.gabarito_oficial_id` |
@@ -1159,7 +1192,7 @@ Particionamento deve ser introduzido somente com testes de consultas, manutencao
 1. Extensoes e funcoes padrao.
 2. `nucleos`, `escolas`.
 3. `usuarios`, `perfis`, `permissoes`, `perfil_permissoes`, `usuario_perfis`.
-4. `turmas`, `alunos`, `matriculas_turmas`, `aplicadores_turmas`.
+4. `turmas`, `alunos`, `matriculas_turmas`, `aplicadores_turmas`, `importacoes_alunos`.
 5. `arquivos`, `modelos_cartao`.
 6. `provas`, `questoes`, `gabaritos_oficiais`, `gabarito_respostas`, `prova_turmas`.
 7. `aplicacoes`, `aplicacao_aplicadores`, `aplicacao_alunos`.

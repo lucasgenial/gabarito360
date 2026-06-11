@@ -44,6 +44,11 @@ class Turma extends Model
         return $this->hasMany(AplicadorTurma::class, 'turma_id');
     }
 
+    public function importacoesAlunos(): HasMany
+    {
+        return $this->hasMany(ImportacaoAluno::class, 'turma_id');
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
