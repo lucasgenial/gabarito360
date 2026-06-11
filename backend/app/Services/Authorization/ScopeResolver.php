@@ -89,9 +89,12 @@ class ScopeResolver
             AccessScope::SCHOOL => $link->nucleo_id === null
                 && $link->escola_id !== null
                 && $link->escola_id === $context->escolaId,
-            AccessScope::OPERATIONAL => $link->nucleo_id === null
-                && $link->escola_id === null
-                && $context->operationallyLinked,
+            AccessScope::OPERATIONAL => $context->operationallyLinked
+                && (
+                    ($link->nucleo_id === null && $link->escola_id === null)
+                    || ($link->nucleo_id !== null && $link->nucleo_id === $context->nucleoId)
+                    || ($link->escola_id !== null && $link->escola_id === $context->escolaId)
+                ),
         };
     }
 }

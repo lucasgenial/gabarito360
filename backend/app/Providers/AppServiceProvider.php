@@ -15,6 +15,7 @@ use App\Observers\UsuarioPerfilObserver;
 use App\Policies\EscolaPolicy;
 use App\Policies\NucleoPolicy;
 use App\Policies\PermissionPolicy;
+use App\Policies\UserPolicy;
 use App\Services\Audit\AuditAction;
 use App\Services\Audit\AuditService;
 use App\Services\Authorization\AuthorizationContext;
@@ -48,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
         DispositivoMobile::observe(DispositivoMobileObserver::class);
         Gate::policy(Nucleo::class, NucleoPolicy::class);
         Gate::policy(Escola::class, EscolaPolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
 
         RateLimiter::for('login', function (Request $request): Limit {
             $email = Str::lower(trim((string) $request->input('email')));

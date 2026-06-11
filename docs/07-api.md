@@ -90,13 +90,25 @@
 | DELETE | `/escolas/{id}` | Administrador; gestor do nucleo no proprio escopo, como inativacao |
 | GET | `/usuarios` | Gestores no escopo |
 | POST | `/usuarios` | Gestores autorizados |
-| GET | `/usuarios/{id}` | Gestores no escopo; proprio usuario |
-| PATCH | `/usuarios/{id}` | Gestores autorizados; campos limitados no proprio usuario |
+| GET | `/usuarios/{id}` | Gestores no escopo; proprio usuario consulta `/me` |
+| PATCH | `/usuarios/{id}` | Gestores autorizados no escopo |
 | POST | `/usuarios/{id}/perfis` | Administrador/gestor autorizado |
 | DELETE | `/usuarios/{id}/perfis/{vinculoId}` | Administrador/gestor autorizado |
 | POST | `/usuarios/{id}/inativar` | Administrador/gestor autorizado |
+| GET | `/perfis` | Administrador/gestor autorizado; catalogo ativo para atribuicao |
 
 **Filtros comuns:** `status`, `nucleo_id`, `escola_id`, `search`, `page`, `per_page`.
+
+**Regras da gestao administrativa de usuarios:**
+
+- O cadastro exige um perfil inicial e o escopo correspondente.
+- Perfis globais nao recebem nucleo ou escola; perfil de gestor do nucleo exige `nucleo_id`; perfis escolares e operacionais exigem `escola_id`.
+- Gestores de nucleo administram somente usuarios vinculados ao proprio nucleo ou as suas escolas.
+- Responsaveis escolares administram somente usuarios integralmente vinculados a propria escola e nao concedem perfis globais ou de gestor do nucleo.
+- Um gestor pode consultar um usuario compartilhado com seu escopo, mas nao pode alterar ou inativar a identidade enquanto existirem vinculos ativos fora de sua autoridade.
+- Listagens e detalhes retornam apenas os vinculos visiveis ao ator e nunca retornam o documento completo.
+- A revogacao de perfil encerra o vinculo com `fim_at`; nao remove o historico.
+- A inativacao preserva usuario e vinculos, revoga tokens, sessoes e dispositivos mobile e impede novas autenticacoes.
 
 ## 5. Turmas e alunos
 

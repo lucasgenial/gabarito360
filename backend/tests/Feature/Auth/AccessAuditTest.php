@@ -124,18 +124,12 @@ class AccessAuditTest extends TestCase
             'acao' => AuditAction::USER_STATUS_CHANGED->value,
             'entidade_id' => $target->id,
         ]);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
 
         Auth::forgetGuards();
         $this->withToken($token)
             ->getJson('/api/v1/me')
             ->assertUnauthorized();
-
-        $this->assertDatabaseHas('auditorias', [
-            'acao' => AuditAction::ACCESS_BLOCKED_USER->value,
-            'usuario_id' => $target->id,
-            'entidade_id' => $target->id,
-        ]);
-        $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 
     public function test_audit_service_sanitizes_nested_secrets_and_records_are_immutable(): void

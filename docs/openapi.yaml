@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.5.0
+  version: 0.6.0
   description: |
-    Contrato OpenAPI da baseline tecnica, autenticacao e gestao inicial de nucleos e escolas.
+    Contrato OpenAPI da baseline tecnica, autenticacao e gestao inicial de nucleos, escolas e usuarios.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -17,6 +17,8 @@ tags:
     description: Cadastro, consulta, edicao e inativacao de nucleos de educacao
   - name: Escolas
     description: Gestao de escolas com isolamento pelo nucleo autorizado
+  - name: Usuarios
+    description: Gestao administrativa de usuarios, perfis e vinculos por escopo
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -474,6 +476,254 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/usuarios:
+    get:
+      tags:
+        - Usuarios
+      summary: Listar usuarios no escopo autorizado
+      operationId: listAdministrativeUsers
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/UsuarioStatus"
+        - name: nucleo_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: escola_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 180
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Usuarios e vinculos filtrados pelo escopo autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Usuarios
+      summary: Cadastrar usuario com perfil inicial
+      operationId: createAdministrativeUser
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioCreateRequest"
+      responses:
+        "201":
+          description: Usuario cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAdministrativoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/usuarios/{usuario}:
+    parameters:
+      - $ref: "#/components/parameters/UsuarioId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Usuarios
+      summary: Consultar usuario e vinculos visiveis
+      operationId: getAdministrativeUser
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAdministrativoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Usuarios
+      summary: Atualizar dados administrativos do usuario
+      description: Status e senha nao podem ser alterados por este endpoint.
+      operationId: updateAdministrativeUser
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UsuarioUpdateRequest"
+      responses:
+        "200":
+          description: Usuario atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAdministrativoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/usuarios/{usuario}/perfis:
+    parameters:
+      - $ref: "#/components/parameters/UsuarioId"
+      - $ref: "#/components/parameters/XRequestId"
+    post:
+      tags:
+        - Usuarios
+      summary: Atribuir perfil ao usuario
+      operationId: assignUserProfile
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PerfilAssignmentRequest"
+      responses:
+        "201":
+          description: Perfil atribuido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAdministrativoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/usuarios/{usuario}/perfis/{vinculo}:
+    parameters:
+      - $ref: "#/components/parameters/UsuarioId"
+      - $ref: "#/components/parameters/VinculoPerfilId"
+      - $ref: "#/components/parameters/XRequestId"
+    delete:
+      tags:
+        - Usuarios
+      summary: Revogar perfil preservando historico
+      operationId: revokeUserProfile
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Perfil revogado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAdministrativoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/usuarios/{usuario}/inativar:
+    parameters:
+      - $ref: "#/components/parameters/UsuarioId"
+      - $ref: "#/components/parameters/XRequestId"
+    post:
+      tags:
+        - Usuarios
+      summary: Inativar usuario e revogar seus acessos
+      operationId: inactivateAdministrativeUser
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Usuario inativado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioAdministrativoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/perfis:
+    get:
+      tags:
+        - Usuarios
+      summary: Listar catalogo ativo de perfis
+      operationId: listActiveProfiles
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      responses:
+        "200":
+          description: Catalogo de perfis disponiveis para atribuicao autorizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PerfilCatalogResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     bearerToken:
@@ -503,6 +753,22 @@ components:
       in: path
       required: true
       description: UUID da escola.
+      schema:
+        type: string
+        format: uuid
+    UsuarioId:
+      name: usuario
+      in: path
+      required: true
+      description: UUID do usuario.
+      schema:
+        type: string
+        format: uuid
+    VinculoPerfilId:
+      name: vinculo
+      in: path
+      required: true
+      description: UUID do vinculo de perfil.
       schema:
         type: string
         format: uuid
@@ -1261,6 +1527,278 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/EscolaListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    UsuarioStatus:
+      type: string
+      enum:
+        - ativo
+        - inativo
+        - bloqueado
+    PerfilAssignmentRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - perfil_id
+      properties:
+        perfil_id:
+          type: string
+          format: uuid
+        nucleo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        escola_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+    UsuarioPerfilAdministrativo:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - perfil_id
+        - codigo
+        - nome
+        - escopo
+        - nucleo_id
+        - escola_id
+        - inicio_at
+        - fim_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        perfil_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+        nome:
+          type: string
+        escopo:
+          type: string
+          enum:
+            - global
+            - nucleo
+            - escola
+            - operacional
+        nucleo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        escola_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        inicio_at:
+          type: string
+          format: date-time
+        fim_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+    UsuarioAdministrativo:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nome
+        - email
+        - documento_mascarado
+        - telefone
+        - status
+        - ultimo_acesso_at
+        - perfis
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+          maxLength: 180
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        documento_mascarado:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+        status:
+          $ref: "#/components/schemas/UsuarioStatus"
+        ultimo_acesso_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        perfis:
+          type: array
+          items:
+            $ref: "#/components/schemas/UsuarioPerfilAdministrativo"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    UsuarioCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - nome
+        - email
+        - password
+        - password_confirmation
+        - perfil_id
+      properties:
+        nome:
+          type: string
+          maxLength: 180
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        documento:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+        password:
+          type: string
+          minLength: 12
+          writeOnly: true
+        password_confirmation:
+          type: string
+          minLength: 12
+          writeOnly: true
+        perfil_id:
+          type: string
+          format: uuid
+        nucleo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        escola_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+    UsuarioUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        nome:
+          type: string
+          maxLength: 180
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        documento:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+        telefone:
+          type:
+            - string
+            - "null"
+          maxLength: 30
+    UsuarioAdministrativoResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/UsuarioAdministrativo"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    UsuarioListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/UsuarioAdministrativo"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    UsuarioListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/UsuarioListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    PerfilCatalogItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - codigo
+        - nome
+        - descricao
+        - escopo
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+        nome:
+          type: string
+        descricao:
+          type:
+            - string
+            - "null"
+        escopo:
+          type: string
+          enum:
+            - global
+            - nucleo
+            - escola
+            - operacional
+    PerfilCatalogResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PerfilCatalogItem"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     EmptySuccessResponse:

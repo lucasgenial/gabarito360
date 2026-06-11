@@ -15,6 +15,9 @@ enum AuditAction: string
     case ACCESS_BLOCKED_DEVICE = 'auth.access.blocked_device';
     case ACCESS_BLOCKED_VERSION = 'auth.access.blocked_version';
     case USER_STATUS_CHANGED = 'access.user.status_changed';
+    case USER_CREATED = 'usuario.created';
+    case USER_UPDATED = 'usuario.updated';
+    case USER_INACTIVATED = 'usuario.inactivated';
     case DEVICE_REVOKED = 'access.device.revoked';
     case PROFILE_GRANTED = 'access.profile.granted';
     case PROFILE_CHANGED = 'access.profile.changed';

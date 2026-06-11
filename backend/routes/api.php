@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\NucleoController;
+use App\Http\Controllers\Api\PerfilController;
+use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Middleware\EnsureMobileDeviceIsActive;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
@@ -36,5 +38,15 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/escolas/{escola}', [EscolaController::class, 'show'])->name('escolas.show');
         Route::patch('/escolas/{escola}', [EscolaController::class, 'update'])->name('escolas.update');
         Route::delete('/escolas/{escola}', [EscolaController::class, 'destroy'])->name('escolas.destroy');
+
+        Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+        Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+        Route::get('/usuarios/{usuario}', [UsuarioController::class, 'show'])->name('usuarios.show');
+        Route::patch('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
+        Route::post('/usuarios/{usuario}/perfis', [UsuarioController::class, 'assignProfile'])->name('usuarios.perfis.store');
+        Route::delete('/usuarios/{usuario}/perfis/{vinculo}', [UsuarioController::class, 'revokeProfile'])->name('usuarios.perfis.destroy');
+        Route::post('/usuarios/{usuario}/inativar', [UsuarioController::class, 'inactivate'])->name('usuarios.inactivate');
+
+        Route::get('/perfis', [PerfilController::class, 'index'])->name('perfis.index');
     });
 });

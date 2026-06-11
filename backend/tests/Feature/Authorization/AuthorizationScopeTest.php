@@ -108,6 +108,31 @@ class AuthorizationScopeTest extends TestCase
         ));
     }
 
+    public function test_operational_profile_scoped_to_school_requires_matching_trusted_context(): void
+    {
+        $school = Escola::factory()->create();
+        $teacher = $this->userWithRole(UserRole::TEACHER, escolaId: $school->id);
+
+        $this->assertTrue($this->allows(
+            $teacher,
+            PermissionCode::RUN_APPLICATIONS,
+            AuthorizationContext::operational(
+                explicitlyLinked: true,
+                nucleoId: $school->nucleo_id,
+                escolaId: $school->id,
+            ),
+        ));
+        $this->assertFalse($this->allows(
+            $teacher,
+            PermissionCode::RUN_APPLICATIONS,
+            AuthorizationContext::operational(
+                explicitlyLinked: true,
+                nucleoId: $school->nucleo_id,
+                escolaId: (string) Str::uuid(),
+            ),
+        ));
+    }
+
     public function test_viewer_remains_read_only_even_if_mutation_is_attached_by_mistake(): void
     {
         $viewer = $this->userWithRole(UserRole::VIEWER);
