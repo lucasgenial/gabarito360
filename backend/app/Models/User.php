@@ -95,6 +95,11 @@ class User extends Authenticatable
         return $this->hasMany(ModeloCartao::class, 'homologado_por');
     }
 
+    public function provasCriadas(): HasMany
+    {
+        return $this->hasMany(Prova::class, 'criado_por');
+    }
+
     public function auditorias(): HasMany
     {
         return $this->hasMany(Auditoria::class, 'usuario_id');

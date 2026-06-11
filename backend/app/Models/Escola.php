@@ -46,6 +46,11 @@ class Escola extends Model
         return $this->hasMany(Turma::class, 'escola_id');
     }
 
+    public function provas(): HasMany
+    {
+        return $this->hasMany(Prova::class, 'escola_id');
+    }
+
     public function alunos(): HasMany
     {
         return $this->hasMany(Aluno::class, 'escola_id');

@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\ModeloCartaoController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\PerfilController;
+use App\Http\Controllers\Api\ProvaController;
 use App\Http\Controllers\Api\StudentImportController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
@@ -81,5 +82,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::patch('/modelos-cartao/{modelo}', [ModeloCartaoController::class, 'update'])->name('modelos-cartao.update');
         Route::post('/modelos-cartao/{modelo}/homologar', [ModeloCartaoController::class, 'approve'])->name('modelos-cartao.approve');
         Route::delete('/modelos-cartao/{modelo}', [ModeloCartaoController::class, 'destroy'])->name('modelos-cartao.destroy');
+
+        Route::get('/provas', [ProvaController::class, 'index'])->name('provas.index');
+        Route::post('/provas', [ProvaController::class, 'store'])->name('provas.store');
+        Route::get('/provas/{prova}', [ProvaController::class, 'show'])->name('provas.show');
+        Route::patch('/provas/{prova}', [ProvaController::class, 'update'])->name('provas.update');
+        Route::get('/provas/{prova}/questoes', [ProvaController::class, 'questions'])->name('provas.questoes.index');
+        Route::post('/provas/{prova}/questoes', [ProvaController::class, 'storeQuestion'])->name('provas.questoes.store');
+        Route::get('/provas/{prova}/questoes/{questao}', [ProvaController::class, 'showQuestion'])->name('provas.questoes.show');
+        Route::patch('/provas/{prova}/questoes/{questao}', [ProvaController::class, 'updateQuestion'])->name('provas.questoes.update');
     });
 });

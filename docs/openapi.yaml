@@ -1,10 +1,11 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.10.0
+  version: 0.11.0
   description: |
     Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos,
-    vinculos operacionais, importacao validada de alunos por CSV e modelos versionados de cartao OMR.
+    vinculos operacionais, importacao validada de alunos por CSV, modelos versionados de cartao OMR
+    e provas com questoes em rascunho.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -26,6 +27,8 @@ tags:
     description: Gestao de alunos com dados minimizados e isolamento por escopo
   - name: Modelos de cartao
     description: Configuracoes OMR versionadas, homologadas e imutaveis
+  - name: Provas
+    description: Provas e questoes editaveis somente enquanto estao em rascunho
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -1522,6 +1525,279 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas:
+    get:
+      tags:
+        - Provas
+      summary: Listar provas no escopo autorizado
+      description: Retorna apenas provas pertencentes aos nucleos acessiveis ao usuario.
+      operationId: listExams
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+        - name: nucleo_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: escola_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: modelo_cartao_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/ProvaStatus"
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 180
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Provas filtradas pelo escopo autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProvaListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Provas
+      summary: Criar prova em rascunho
+      description: |
+        Exige exatamente um proprietario organizacional e um modelo de cartao homologado
+        global ou pertencente ao mesmo nucleo, com quantidades e alternativas identicas.
+      operationId: createExamDraft
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProvaCreateRequest"
+      responses:
+        "201":
+          description: Prova em rascunho criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProvaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Provas
+      summary: Consultar prova no escopo autorizado
+      operationId: getExam
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Prova encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProvaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Provas
+      summary: Editar prova em rascunho
+      description: Proprietario e status nao podem ser alterados por este endpoint.
+      operationId: updateExamDraft
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProvaUpdateRequest"
+      responses:
+        "200":
+          description: Prova em rascunho atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProvaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/questoes:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Provas
+      summary: Listar questoes da prova
+      operationId: listExamQuestions
+      security:
+        - bearerToken: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/QuestaoStatus"
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 100
+      responses:
+        "200":
+          description: Questoes da prova ordenadas por numero
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestaoListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Provas
+      summary: Criar questao em prova rascunho
+      description: O numero deve ser unico e nao pode exceder a quantidade definida na prova.
+      operationId: createExamQuestion
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestaoCreateRequest"
+      responses:
+        "201":
+          description: Questao criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/questoes/{questao}:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/QuestaoId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Provas
+      summary: Consultar questao pertencente a prova
+      operationId: getExamQuestion
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Questao encontrada dentro da prova
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Provas
+      summary: Editar questao de prova rascunho
+      operationId: updateExamQuestion
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestaoUpdateRequest"
+      responses:
+        "200":
+          description: Questao atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     bearerToken:
@@ -1615,6 +1891,22 @@ components:
       in: path
       required: true
       description: UUID da versao do modelo de cartao.
+      schema:
+        type: string
+        format: uuid
+    ProvaId:
+      name: prova
+      in: path
+      required: true
+      description: UUID da prova.
+      schema:
+        type: string
+        format: uuid
+    QuestaoId:
+      name: questao
+      in: path
+      required: true
+      description: UUID da questao pertencente a prova.
       schema:
         type: string
         format: uuid
@@ -3319,6 +3611,396 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/AplicadorTurmaListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ProvaStatus:
+      type: string
+      enum:
+        - rascunho
+        - publicada
+        - finalizada
+        - arquivada
+    QuestaoStatus:
+      type: string
+      enum:
+        - ativa
+        - inativa
+    Prova:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nucleo_id
+        - escola_id
+        - modelo_cartao_id
+        - codigo
+        - titulo
+        - descricao
+        - tipo
+        - nivel
+        - ano_referencia
+        - quantidade_questoes
+        - quantidade_alternativas
+        - alternativas
+        - status
+        - criado_por
+        - publicada_at
+        - finalizada_at
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        nucleo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        escola_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        modelo_cartao_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          maxLength: 60
+          pattern: "^[A-Z0-9._-]+$"
+        titulo:
+          type: string
+          maxLength: 180
+        descricao:
+          type:
+            - string
+            - "null"
+          maxLength: 5000
+        tipo:
+          type: string
+          maxLength: 50
+          pattern: "^[a-z0-9._-]+$"
+        nivel:
+          type:
+            - string
+            - "null"
+          maxLength: 80
+        ano_referencia:
+          type:
+            - integer
+            - "null"
+          minimum: 2000
+          maximum: 2100
+        quantidade_questoes:
+          type: integer
+          minimum: 1
+          maximum: 500
+        quantidade_alternativas:
+          type: integer
+          minimum: 2
+          maximum: 10
+        alternativas:
+          type: array
+          minItems: 2
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            pattern: "^[A-Z0-9]$"
+        status:
+          $ref: "#/components/schemas/ProvaStatus"
+        criado_por:
+          type:
+            - string
+            - "null"
+          format: uuid
+        publicada_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        finalizada_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ProvaCreateRequest:
+      type: object
+      description: |
+        Deve informar exatamente um entre nucleo_id e escola_id. O modelo deve estar homologado,
+        ser global ou do mesmo nucleo e possuir quantidades e alternativas identicas.
+      additionalProperties: false
+      required:
+        - modelo_cartao_id
+        - codigo
+        - titulo
+        - tipo
+        - quantidade_questoes
+        - quantidade_alternativas
+        - alternativas
+      properties:
+        nucleo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        escola_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        modelo_cartao_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          maxLength: 60
+          pattern: "^[A-Za-z0-9._-]+$"
+        titulo:
+          type: string
+          maxLength: 180
+        descricao:
+          type:
+            - string
+            - "null"
+          maxLength: 5000
+        tipo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        nivel:
+          type:
+            - string
+            - "null"
+          maxLength: 80
+        ano_referencia:
+          type:
+            - integer
+            - "null"
+          minimum: 2000
+          maximum: 2100
+        quantidade_questoes:
+          type: integer
+          minimum: 1
+          maximum: 500
+        quantidade_alternativas:
+          type: integer
+          minimum: 2
+          maximum: 10
+        alternativas:
+          type: array
+          minItems: 2
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            pattern: "^[A-Za-z0-9]$"
+    ProvaUpdateRequest:
+      type: object
+      description: Permite alterar somente campos editaveis enquanto a prova estiver em rascunho.
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        modelo_cartao_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          maxLength: 60
+          pattern: "^[A-Za-z0-9._-]+$"
+        titulo:
+          type: string
+          maxLength: 180
+        descricao:
+          type:
+            - string
+            - "null"
+          maxLength: 5000
+        tipo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        nivel:
+          type:
+            - string
+            - "null"
+          maxLength: 80
+        ano_referencia:
+          type:
+            - integer
+            - "null"
+          minimum: 2000
+          maximum: 2100
+        quantidade_questoes:
+          type: integer
+          minimum: 1
+          maximum: 500
+        quantidade_alternativas:
+          type: integer
+          minimum: 2
+          maximum: 10
+        alternativas:
+          type: array
+          minItems: 2
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            pattern: "^[A-Za-z0-9]$"
+    ProvaResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/Prova"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ProvaListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Prova"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    ProvaListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ProvaListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    Questao:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - prova_id
+        - numero
+        - codigo
+        - peso_padrao
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        prova_id:
+          type: string
+          format: uuid
+        numero:
+          type: integer
+          minimum: 1
+          maximum: 500
+        codigo:
+          type:
+            - string
+            - "null"
+          maxLength: 50
+          pattern: "^[A-Z0-9._-]+$"
+        peso_padrao:
+          type: string
+          pattern: "^[0-9]+\\.[0-9]{4}$"
+        status:
+          $ref: "#/components/schemas/QuestaoStatus"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    QuestaoCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - numero
+      properties:
+        numero:
+          type: integer
+          minimum: 1
+          maximum: 500
+        codigo:
+          type:
+            - string
+            - "null"
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        peso_padrao:
+          type: number
+          minimum: 0
+          maximum: 999999
+    QuestaoUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        numero:
+          type: integer
+          minimum: 1
+          maximum: 500
+        codigo:
+          type:
+            - string
+            - "null"
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        peso_padrao:
+          type: number
+          minimum: 0
+          maximum: 999999
+    QuestaoResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/Questao"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    QuestaoListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Questao"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    QuestaoListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/QuestaoListData"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     ModeloCartaoStatus:

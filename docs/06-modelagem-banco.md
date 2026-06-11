@@ -557,9 +557,9 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_provas_nucleo_status`: `(nucleo_id, status)`.
 - `idx_provas_escola_status`: `(escola_id, status)`.
 - Checks para quantidades positivas e alternativas em formato de array.
-- Trigger valida compatibilidade entre quantidades da prova e do modelo.
+- Trigger exige modelo homologado global ou do mesmo nucleo e valida a correspondencia exata entre quantidades e alternativas.
 
-**Relacionamentos e regras importantes:** a prova pertence exatamente a um nucleo ou escola, possui questoes, versoes de gabarito, turmas autorizadas e aplicacoes. Prova arquivada permanece consultavel, mas nao aceita novas aplicacoes.
+**Relacionamentos e regras importantes:** a prova pertence exatamente a um nucleo ou escola, possui questoes, versoes de gabarito, turmas autorizadas e aplicacoes. No MP-025, a API permite cadastro e edicao somente em rascunho e nao implementa publicacao, gabarito ou vinculo com turmas. Prova arquivada permanece consultavel, mas nao aceita novas aplicacoes.
 
 ### 8.3 `questoes`
 
@@ -582,8 +582,9 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `uq_questoes_id_prova`: unico em `(id, prova_id)`, usado por FKs compostas.
 - `idx_questoes_prova_status`: `(prova_id, status)`.
 - Check `numero > 0` e `peso_padrao >= 0`.
+- Trigger exige prova em rascunho e impede numero acima de `provas.quantidade_questoes`.
 
-**Relacionamentos e regras importantes:** cada questao pertence a uma prova e e referenciada por respostas oficiais, detectadas e corrigidas. O numero nao pode repetir dentro da prova; questoes usadas em aplicacoes nao devem ser apagadas.
+**Relacionamentos e regras importantes:** cada questao pertence a uma prova e e referenciada por respostas oficiais, detectadas e corrigidas. O numero nao pode repetir dentro da prova; questoes somente podem ser alteradas enquanto a prova estiver em rascunho e questoes usadas em aplicacoes nao devem ser apagadas.
 
 ### 8.4 `gabaritos_oficiais`
 

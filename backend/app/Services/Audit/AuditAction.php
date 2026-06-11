@@ -47,4 +47,8 @@ enum AuditAction: string
     case CARD_MODEL_UPDATED = 'modelo_cartao.updated';
     case CARD_MODEL_APPROVED = 'modelo_cartao.approved';
     case CARD_MODEL_INACTIVATED = 'modelo_cartao.inactivated';
+    case EXAM_CREATED = 'prova.created';
+    case EXAM_UPDATED = 'prova.updated';
+    case QUESTION_CREATED = 'questao.created';
+    case QUESTION_UPDATED = 'questao.updated';
 }

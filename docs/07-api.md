@@ -131,23 +131,26 @@
 | GET | `/alunos/importacoes/{id}` | Solicitante/gestor | Consulta validacao e estado |
 | POST | `/alunos/importacoes/{id}/confirmar` | Solicitante/gestor | Confirma lote validado |
 
-## 6. Avaliacoes, gabaritos e modelos
+## 6. Provas, questoes, gabaritos e modelos
 
 | Metodo | Endpoint | Acesso |
 |---|---|---|
-| GET | `/avaliacoes` | Conforme escopo |
-| POST | `/avaliacoes` | Gestor autorizado |
-| GET | `/avaliacoes/{id}` | Conforme escopo |
-| PATCH | `/avaliacoes/{id}` | Gestor autorizado; conforme status |
-| DELETE | `/avaliacoes/{id}` | Gestor autorizado; arquivamento |
-| POST | `/avaliacoes/{id}/publicar` | Gestor autorizado |
-| POST | `/avaliacoes/{id}/finalizar` | Gestor autorizado |
-| POST | `/avaliacoes/{id}/turmas` | Gestor autorizado |
-| DELETE | `/avaliacoes/{id}/turmas/{turmaId}` | Gestor autorizado; se permitido |
-| GET | `/avaliacoes/{id}/gabaritos` | Conforme escopo |
-| POST | `/avaliacoes/{id}/gabaritos` | Gestor autorizado |
-| POST | `/avaliacoes/{id}/gabaritos/{versaoId}/publicar` | Gestor autorizado |
-| POST | `/avaliacoes/{id}/gabaritos/{versaoId}/recorrigir` | Permissao especial; V2 |
+| GET | `/provas` | Administrador; gestor de nucleo no proprio escopo |
+| POST | `/provas` | Administrador; gestor de nucleo no proprio escopo |
+| GET | `/provas/{id}` | Administrador; gestor de nucleo no proprio escopo |
+| PATCH | `/provas/{id}` | Administrador; gestor de nucleo no proprio escopo; somente rascunho |
+| GET | `/provas/{id}/questoes` | Administrador; gestor de nucleo no proprio escopo |
+| POST | `/provas/{id}/questoes` | Administrador; gestor de nucleo no proprio escopo; somente rascunho |
+| GET | `/provas/{id}/questoes/{questaoId}` | Administrador; gestor de nucleo no proprio escopo |
+| PATCH | `/provas/{id}/questoes/{questaoId}` | Administrador; gestor de nucleo no proprio escopo; somente rascunho |
+| POST | `/provas/{id}/publicar` | Gestor autorizado; MP-027 |
+| POST | `/provas/{id}/finalizar` | Gestor autorizado; etapa futura |
+| POST | `/provas/{id}/turmas` | Gestor autorizado; MP-028 |
+| DELETE | `/provas/{id}/turmas/{turmaId}` | Gestor autorizado; MP-028 |
+| GET | `/provas/{id}/gabaritos` | Conforme escopo; MP-026 |
+| POST | `/provas/{id}/gabaritos` | Gestor autorizado; MP-026 |
+| POST | `/provas/{id}/gabaritos/{versaoId}/publicar` | Gestor autorizado; MP-027 |
+| POST | `/provas/{id}/gabaritos/{versaoId}/recorrigir` | Permissao especial; V2 |
 | GET | `/modelos-cartao` | Conforme escopo |
 | POST | `/modelos-cartao` | Administrador/gestor autorizado |
 | GET | `/modelos-cartao/{id}` | Conforme escopo |
@@ -157,20 +160,35 @@
 
 Modelos globais sao gerenciados somente pelo administrador geral. O gestor de nucleo consulta modelos globais e gerencia apenas modelos do proprio nucleo. A resposta inclui a configuracao OMR completa e seus limiares versionados. A homologacao exige checksum SHA-256 do artefato, sem placeholders ou limiares pendentes, e torna a versao imutavel.
 
-### 6.1 Exemplo de criacao de avaliacao
+No MP-025, somente provas e questoes em rascunho estao implementadas. Cada prova pertence exatamente a um nucleo ou escola, deve usar modelo de cartao homologado global ou do mesmo nucleo e deve repetir exatamente suas quantidades e alternativas. O codigo e unico, sem diferenciar maiusculas e minusculas, dentro do proprietario. Questoes possuem numero unico por prova e nao podem exceder a quantidade configurada.
+
+Publicacao, gabaritos, arquivamento, finalizacao e vinculo com turmas nao fazem parte do MP-025 e nao possuem endpoint implementado ainda.
+
+### 6.1 Exemplo de criacao de prova
 
 ```json
 {
+  "nucleo_id": "uuid",
+  "escola_id": null,
+  "modelo_cartao_id": "uuid",
+  "codigo": "SIMULADO-MAT-01",
   "titulo": "Simulado de Matematica - Nivel 1",
   "tipo": "simulado",
   "nivel": "6o e 7o anos",
-  "numero_questoes": 20,
-  "alternativas": ["A", "B", "C", "D", "E"],
-  "proprietario": {
-    "tipo": "nucleo",
-    "id": "uuid"
-  },
-  "modelo_cartao_id": "uuid"
+  "ano_referencia": 2026,
+  "quantidade_questoes": 20,
+  "quantidade_alternativas": 5,
+  "alternativas": ["A", "B", "C", "D", "E"]
+}
+```
+
+### 6.2 Exemplo de criacao de questao
+
+```json
+{
+  "numero": 1,
+  "codigo": "MAT-001",
+  "peso_padrao": 1
 }
 ```
 
@@ -312,7 +330,7 @@ Exemplo para cartao sem codigo impresso:
 | GET | `/resultados/{id}` | Conforme escopo |
 | GET | `/alunos/{id}/resultados` | Conforme escopo |
 | GET | `/turmas/{id}/resultados` | Conforme escopo |
-| GET | `/avaliacoes/{id}/resultados` | Conforme escopo |
+| GET | `/provas/{id}/resultados` | Conforme escopo |
 | GET | `/dashboards/nucleo/{id}` | Gestor do nucleo/consulta autorizada |
 | GET | `/dashboards/escola/{id}` | Gestor da escola/nucleo |
 | GET | `/dashboards/aplicacao/{id}` | Gestor/aplicador/consulta autorizada |

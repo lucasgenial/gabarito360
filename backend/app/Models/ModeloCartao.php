@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ModeloCartao extends Model
 {
@@ -49,6 +50,11 @@ class ModeloCartao extends Model
     public function homologadoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'homologado_por');
+    }
+
+    public function provas(): HasMany
+    {
+        return $this->hasMany(Prova::class, 'modelo_cartao_id');
     }
 
     /** @return array<string, string> */
