@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\UsuarioPerfil;
 use App\Services\Authorization\UserAdministrationScope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -164,8 +165,8 @@ class UsuarioController extends BaseApiController
     private function loadScopedProfiles(User $target, User $actor, UserAdministrationScope $scope): User
     {
         return $target->load([
-            'perfilVinculos' => fn (Builder $links): Builder => $scope
-                ->applyLinks($links, $actor)
+            'perfilVinculos' => fn (HasMany $links): Builder => $scope
+                ->applyLinks($links->getQuery(), $actor)
                 ->with('perfil')
                 ->orderBy('inicio_at'),
         ]);
