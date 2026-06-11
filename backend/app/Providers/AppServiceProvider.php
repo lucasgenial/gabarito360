@@ -7,6 +7,7 @@ use App\Models\DispositivoMobile;
 use App\Models\Escola;
 use App\Models\Nucleo;
 use App\Models\PersonalAccessToken;
+use App\Models\Turma;
 use App\Models\User;
 use App\Models\UsuarioPerfil;
 use App\Observers\DispositivoMobileObserver;
@@ -15,6 +16,7 @@ use App\Observers\UsuarioPerfilObserver;
 use App\Policies\EscolaPolicy;
 use App\Policies\NucleoPolicy;
 use App\Policies\PermissionPolicy;
+use App\Policies\TurmaPolicy;
 use App\Policies\UserPolicy;
 use App\Services\Audit\AuditAction;
 use App\Services\Audit\AuditService;
@@ -49,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
         DispositivoMobile::observe(DispositivoMobileObserver::class);
         Gate::policy(Nucleo::class, NucleoPolicy::class);
         Gate::policy(Escola::class, EscolaPolicy::class);
+        Gate::policy(Turma::class, TurmaPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
 
         RateLimiter::for('login', function (Request $request): Limit {

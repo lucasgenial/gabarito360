@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.6.0
+  version: 0.7.0
   description: |
-    Contrato OpenAPI da baseline tecnica, autenticacao e gestao inicial de nucleos, escolas e usuarios.
+    Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas e matriculas historicas.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -19,6 +19,8 @@ tags:
     description: Gestao de escolas com isolamento pelo nucleo autorizado
   - name: Usuarios
     description: Gestao administrativa de usuarios, perfis e vinculos por escopo
+  - name: Turmas
+    description: Gestao de turmas por ano letivo e matriculas historicas
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -724,6 +726,271 @@ paths:
           $ref: "#/components/responses/AuthorizationForbidden"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/turmas:
+    get:
+      tags:
+        - Turmas
+      summary: Listar turmas autorizadas
+      operationId: listClasses
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+        - name: escola_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: ano_letivo
+          in: query
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/NucleoStatus"
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 120
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Turmas acessiveis no escopo autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurmaListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Turmas
+      summary: Cadastrar turma
+      operationId: createClass
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TurmaCreateRequest"
+      responses:
+        "201":
+          description: Turma cadastrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/turmas/{turma}:
+    parameters:
+      - $ref: "#/components/parameters/TurmaId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Turmas
+      summary: Consultar turma
+      operationId: getClass
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Turma autorizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Turmas
+      summary: Atualizar campos editaveis da turma
+      operationId: updateClass
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TurmaUpdateRequest"
+      responses:
+        "200":
+          description: Turma atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - Turmas
+      summary: Inativar turma preservando historico
+      operationId: inactivateClass
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Turma inativada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/turmas/{turma}/matriculas:
+    parameters:
+      - $ref: "#/components/parameters/TurmaId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Turmas
+      summary: Listar matriculas historicas da turma
+      operationId: listClassEnrollments
+      security:
+        - bearerToken: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/MatriculaTurmaStatus"
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Matriculas da turma sem dados pessoais do aluno
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatriculaTurmaListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Turmas
+      summary: Matricular aluno ativo na turma
+      operationId: createClassEnrollment
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatriculaTurmaCreateRequest"
+      responses:
+        "201":
+          description: Matricula criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatriculaTurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/turmas/{turma}/matriculas/{matricula}:
+    parameters:
+      - $ref: "#/components/parameters/TurmaId"
+      - $ref: "#/components/parameters/MatriculaTurmaId"
+      - $ref: "#/components/parameters/XRequestId"
+    patch:
+      tags:
+        - Turmas
+      summary: Encerrar ou transferir matricula preservando historico
+      operationId: closeClassEnrollment
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatriculaTurmaCloseRequest"
+      responses:
+        "200":
+          description: Matricula historica encerrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatriculaTurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     bearerToken:
@@ -753,6 +1020,22 @@ components:
       in: path
       required: true
       description: UUID da escola.
+      schema:
+        type: string
+        format: uuid
+    TurmaId:
+      name: turma
+      in: path
+      required: true
+      description: UUID da turma.
+      schema:
+        type: string
+        format: uuid
+    MatriculaTurmaId:
+      name: matricula
+      in: path
+      required: true
+      description: UUID da matricula historica.
       schema:
         type: string
         format: uuid
@@ -1799,6 +2082,279 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PerfilCatalogItem"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    Turma:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - escola_id
+        - codigo
+        - nome
+        - serie_ano
+        - turno
+        - ano_letivo
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        escola_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Z0-9._-]+$"
+        nome:
+          type: string
+          maxLength: 120
+        serie_ano:
+          type: string
+          maxLength: 60
+        turno:
+          type:
+            - string
+            - "null"
+          enum:
+            - matutino
+            - vespertino
+            - noturno
+            - integral
+            - null
+        ano_letivo:
+          type: integer
+          minimum: 2000
+          maximum: 2100
+        status:
+          $ref: "#/components/schemas/NucleoStatus"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    TurmaCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - escola_id
+        - codigo
+        - nome
+        - serie_ano
+        - ano_letivo
+      properties:
+        escola_id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        nome:
+          type: string
+          maxLength: 120
+        serie_ano:
+          type: string
+          maxLength: 60
+        turno:
+          type:
+            - string
+            - "null"
+          enum:
+            - matutino
+            - vespertino
+            - noturno
+            - integral
+            - null
+        ano_letivo:
+          type: integer
+          minimum: 2000
+          maximum: 2100
+    TurmaUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        codigo:
+          type: string
+          maxLength: 50
+          pattern: "^[A-Za-z0-9._-]+$"
+        nome:
+          type: string
+          maxLength: 120
+        serie_ano:
+          type: string
+          maxLength: 60
+        turno:
+          type:
+            - string
+            - "null"
+          enum:
+            - matutino
+            - vespertino
+            - noturno
+            - integral
+            - null
+    TurmaResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/Turma"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    TurmaListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Turma"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    TurmaListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/TurmaListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    MatriculaTurmaStatus:
+      type: string
+      enum:
+        - ativa
+        - transferida
+        - encerrada
+    MatriculaTurma:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - aluno_id
+        - turma_id
+        - ano_letivo
+        - numero_chamada
+        - status
+        - inicio_em
+        - fim_em
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        aluno_id:
+          type: string
+          format: uuid
+        turma_id:
+          type: string
+          format: uuid
+        ano_letivo:
+          type: integer
+          minimum: 2000
+          maximum: 2100
+        numero_chamada:
+          type:
+            - string
+            - "null"
+          maxLength: 20
+        status:
+          $ref: "#/components/schemas/MatriculaTurmaStatus"
+        inicio_em:
+          type: string
+          format: date
+        fim_em:
+          type:
+            - string
+            - "null"
+          format: date
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    MatriculaTurmaCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - aluno_id
+        - inicio_em
+      properties:
+        aluno_id:
+          type: string
+          format: uuid
+        numero_chamada:
+          type:
+            - string
+            - "null"
+          maxLength: 20
+        inicio_em:
+          type: string
+          format: date
+    MatriculaTurmaCloseRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - fim_em
+      properties:
+        status:
+          type: string
+          enum:
+            - transferida
+            - encerrada
+        fim_em:
+          type: string
+          format: date
+    MatriculaTurmaResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/MatriculaTurma"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    MatriculaTurmaListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MatriculaTurma"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    MatriculaTurmaListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/MatriculaTurmaListData"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     EmptySuccessResponse:

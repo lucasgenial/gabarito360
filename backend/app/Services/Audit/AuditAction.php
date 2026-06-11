@@ -29,4 +29,9 @@ enum AuditAction: string
     case SCHOOL_CREATED = 'escola.created';
     case SCHOOL_UPDATED = 'escola.updated';
     case SCHOOL_INACTIVATED = 'escola.inactivated';
+    case CLASS_CREATED = 'turma.created';
+    case CLASS_UPDATED = 'turma.updated';
+    case CLASS_INACTIVATED = 'turma.inactivated';
+    case ENROLLMENT_CREATED = 'matricula_turma.created';
+    case ENROLLMENT_CLOSED = 'matricula_turma.closed';
 }

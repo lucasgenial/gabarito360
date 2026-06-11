@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\PerfilController;
+use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Middleware\EnsureMobileDeviceIsActive;
 use App\Http\Middleware\EnsureUserIsActive;
@@ -48,5 +49,14 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::post('/usuarios/{usuario}/inativar', [UsuarioController::class, 'inactivate'])->name('usuarios.inactivate');
 
         Route::get('/perfis', [PerfilController::class, 'index'])->name('perfis.index');
+
+        Route::get('/turmas', [TurmaController::class, 'index'])->name('turmas.index');
+        Route::post('/turmas', [TurmaController::class, 'store'])->name('turmas.store');
+        Route::get('/turmas/{turma}', [TurmaController::class, 'show'])->name('turmas.show');
+        Route::patch('/turmas/{turma}', [TurmaController::class, 'update'])->name('turmas.update');
+        Route::delete('/turmas/{turma}', [TurmaController::class, 'destroy'])->name('turmas.destroy');
+        Route::get('/turmas/{turma}/matriculas', [TurmaController::class, 'matriculas'])->name('turmas.matriculas.index');
+        Route::post('/turmas/{turma}/matriculas', [TurmaController::class, 'storeMatricula'])->name('turmas.matriculas.store');
+        Route::patch('/turmas/{turma}/matriculas/{matricula}', [TurmaController::class, 'closeMatricula'])->name('turmas.matriculas.update');
     });
 });

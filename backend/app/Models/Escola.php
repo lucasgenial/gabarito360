@@ -41,6 +41,16 @@ class Escola extends Model
         return $this->hasMany(UsuarioPerfil::class, 'escola_id');
     }
 
+    public function turmas(): HasMany
+    {
+        return $this->hasMany(Turma::class, 'escola_id');
+    }
+
+    public function alunos(): HasMany
+    {
+        return $this->hasMany(Aluno::class, 'escola_id');
+    }
+
     public function auditorias(): HasMany
     {
         return $this->hasMany(Auditoria::class, 'escola_id');
