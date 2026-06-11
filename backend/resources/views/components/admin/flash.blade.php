@@ -1,13 +1,11 @@
 @if (session('success'))
-    <div class="alert alert-success" role="status">
-        <strong>Concluido.</strong>
-        <span>{{ session('success') }}</span>
-    </div>
+    <x-ui.alert variant="success" title="Concluido.">
+        {{ session('success') }}
+    </x-ui.alert>
 @endif
 
 @if ($errors->any())
-    <div class="alert alert-error" role="alert">
-        <strong>Revise os dados informados.</strong>
-        <span>Ha campos que precisam de correcao antes de continuar.</span>
-    </div>
+    <x-ui.alert variant="error" title="Revise os dados informados.">
+        Ha campos que precisam de correcao antes de continuar.
+    </x-ui.alert>
 @endif

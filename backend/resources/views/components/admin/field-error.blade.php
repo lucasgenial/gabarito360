@@ -1,5 +1,5 @@
-@props(['name'])
+@props(['name', 'id' => null])
 
 @error($name)
-    <p class="field-error" id="{{ $name }}-error">{{ $message }}</p>
+    <p class="field-error" id="{{ $id ?? "{$name}-error" }}" role="alert">{{ $message }}</p>
 @enderror

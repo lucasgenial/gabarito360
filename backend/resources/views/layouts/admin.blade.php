@@ -53,7 +53,7 @@
                 </div>
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
-                    <button class="button button-neutral button-sm" type="submit">Sair</button>
+                    <x-ui.button type="submit" variant="neutral" size="sm">Sair</x-ui.button>
                 </form>
             </header>
 

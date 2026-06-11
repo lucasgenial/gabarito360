@@ -2,7 +2,7 @@
 
 ## 1. Estratégia
 
-O Design System será introduzido de forma incremental e versionável, sem bloquear o MP-011 ou antecipar código frontend. Os fundamentos são documentados agora; cada plataforma implementará tokens e componentes somente no micropasso correspondente.
+O Design System é introduzido de forma incremental e versionável. A fundação web da MP-019A foi concluída em etapa reparadora após a MP-028; as próximas interfaces devem obrigatoriamente reutilizá-la.
 
 ## 2. Ordem recomendada
 
@@ -70,7 +70,7 @@ Componentes não listados devem ser implementados junto da primeira necessidade 
 
 ### Fundação web no MP-019A
 
-Criar somente a infraestrutura e os componentes compartilhados necessários ao painel inicial. Componentes adicionais devem surgir junto da primeira necessidade funcional, sem duplicação local.
+A fundação foi concluída e aplicada retroativamente às telas das MP-019 e MP-028. Ela inclui o catálogo Blade inicial, temas claro e escuro, estados de interação, modal acessível e teste de contrato visual. Componentes adicionais devem surgir junto da primeira necessidade funcional, sem duplicação local.
 
 ### Fundação mobile nos MP-040A e MP-040B
 

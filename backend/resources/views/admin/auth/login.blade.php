@@ -16,23 +16,16 @@
         </div>
 
         @if ($errors->any())
-            <div class="alert alert-error" role="alert">Credenciais invalidas. Revise os dados e tente novamente.</div>
+            <x-ui.alert variant="error">
+                Credenciais invalidas. Revise os dados e tente novamente.
+            </x-ui.alert>
         @endif
 
         <form class="stack" method="POST" action="{{ route('admin.login.store') }}">
             @csrf
-            <div class="field">
-                <label for="email">E-mail</label>
-                <input id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="username" required autofocus aria-describedby="@error('email') email-error @enderror">
-                <x-admin.field-error name="email" />
-            </div>
-
-            <div class="field">
-                <label for="password">Senha</label>
-                <input id="password" name="password" type="password" autocomplete="current-password" required>
-            </div>
-
-            <button class="button button-primary" type="submit">Entrar</button>
+            <x-ui.input name="email" label="E-mail" type="email" :value="old('email')" autocomplete="username" required autofocus />
+            <x-ui.input name="password" label="Senha" type="password" autocomplete="current-password" required />
+            <x-ui.button type="submit">Entrar</x-ui.button>
         </form>
     </section>
 @endsection

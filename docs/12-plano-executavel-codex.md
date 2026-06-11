@@ -6,15 +6,15 @@ Este documento transforma a documentacao existente do Gabarito360 em uma sequenc
 
 Cada micropasso deve resultar em uma alteracao tematica que possa ser revisada, validada e revertida sem depender de mudancas futuras ainda nao implementadas. O plano nao autoriza implementacao fora do escopo de cada etapa.
 
-## 2. Estado inicial considerado
+## 2. Estado atual verificado
 
 - A documentacao funcional, tecnica, relacional, mobile, OMR e de MVP ja existe em `docs/`.
 - O backend Laravel 12 ja existe em `backend/`.
-- Laravel Sanctum esta instalado, mas login e autorizacao ainda nao foram implementados.
+- Laravel Sanctum, login, autenticacao mobile inicial, perfis, permissoes e autorizacao por escopo estao implementados.
 - O endpoint `GET /api/v1/health` e os testes de contrato da API estao implementados.
-- A base relacional de usuarios, perfis, permissoes e associacoes esta implementada; CRUDs e login ainda nao existem.
+- As fases de preparacao, backend base, autenticacao, estrutura organizacional, estrutura academica e provas foram executadas ate a MP-028.
 - `docs/SDGB.md`, `docs/ui_token_gov_brasil.json` e `docs/design/` formam a referencia visual oficial do projeto.
-- O app Flutter, o modulo OMR, o painel administrativo e a infraestrutura Docker ainda nao existem.
+- O painel administrativo minimo e a fundacao visual compartilhada existem. O app Flutter, o modulo OMR executavel e a infraestrutura Docker ainda nao existem.
 - O MVP deve operar online primeiro. Offline completo, recorrection, PDF/XLSX e dashboards consolidados sao evolucoes posteriores.
 
 ## 3. Principios de execucao
@@ -94,6 +94,19 @@ Um micropasso somente esta pronto quando:
 - documentacao e contratos afetados foram atualizados;
 - nenhum segredo ou dado pessoal real foi incluido;
 - a alteracao esta pequena o suficiente para um commit tematico.
+
+## 6.1 Fechamento reparador ate a MP-028
+
+Em 11 de junho de 2026 foi realizada uma auditoria retroativa dos criterios e dependencias das MP-001 a MP-028.
+
+- MP-001 a MP-018 possuem documentacao, implementacao ou testes correspondentes aos criterios aplicaveis.
+- MP-019A foi concluida em etapa reparadora com componentes Blade compartilhados, estados acessiveis, dark mode, modal com retorno de foco, documentacao e `DesignSystemTest`.
+- As telas administrativas entregues nas MP-019 e MP-028 foram migradas para reutilizar a fundacao visual.
+- MP-020 a MP-028 permanecem cobertas pelas fatias verticais e testes existentes.
+- MP-007, MP-009 e MP-011 foram implementadas anteriormente em entrega agrupada; seus artefatos e testes permanecem validos.
+- O gate local completo depende da extensao PHP `pdo_pgsql` e de PostgreSQL de testes. O pipeline CI executa esse gate em ambiente reproduzivel.
+
+Com esse fechamento, o gate da FASE 5 esta apto para iniciar a MP-029.
 
 # FASE 0 - Preparacao do repositorio
 
@@ -2771,9 +2784,9 @@ git push
 
 ## 7. Proximo micropasso recomendado
 
-O proximo micropasso para execucao imediata e o **MP-001 - Registrar decisoes bloqueadoras do MVP**.
+O proximo micropasso para execucao imediata e o **MP-029 - Criar aplicacoes e snapshot de alunos**.
 
-Ele deve ocorrer antes de migrations ou regras de negocio porque define escolhas que afetam diretamente unicidade, pontuacao, retencao, cartao, OMR e autorizacao.
+Ele inicia a FASE 6 usando o gate reparado da FASE 5 e deve congelar prova, modelo, gabarito e alunos previstos de forma transacional.
 
 ## 8. Comandos Git sugeridos para este documento
 

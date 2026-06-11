@@ -10,33 +10,24 @@
     </header>
 
     @can('update', $usuario)
-        <section class="card" aria-labelledby="dados-usuario">
+        <x-ui.card labelledby="dados-usuario">
             <h2 id="dados-usuario">Dados de acesso</h2>
             <form class="form-grid" method="POST" action="{{ route('admin.usuarios.update', $usuario) }}">
                 @csrf
                 @method('PATCH')
-                <div class="field">
-                    <label for="nome">Nome</label>
-                    <input id="nome" name="nome" value="{{ old('nome', $usuario->nome) }}" required maxlength="180">
-                    <x-admin.field-error name="nome" />
-                </div>
-                <div class="field">
-                    <label for="email">E-mail</label>
-                    <input id="email" name="email" type="email" value="{{ old('email', $usuario->email) }}" required maxlength="254">
-                    <x-admin.field-error name="email" />
-                </div>
+                <x-ui.input name="nome" label="Nome" :value="old('nome', $usuario->nome)" required maxlength="180" />
+                <x-ui.input name="email" label="E-mail" type="email" :value="old('email', $usuario->email)" required maxlength="254" />
                 <div class="form-actions field-wide">
-                    <button class="button button-primary" type="submit">Salvar alteracoes</button>
-                    <a class="button button-neutral" href="{{ route('admin.usuarios.index') }}" wire:navigate>Voltar</a>
+                    <x-ui.button type="submit">Salvar alteracoes</x-ui.button>
+                    <x-ui.button :href="route('admin.usuarios.index')" variant="neutral" wire:navigate>Voltar</x-ui.button>
                 </div>
             </form>
-        </section>
+        </x-ui.card>
     @endcan
 
-    <section class="card" aria-labelledby="perfis-usuario">
+    <x-ui.card labelledby="perfis-usuario">
         <h2 id="perfis-usuario">Perfis ativos no seu escopo</h2>
-        <div class="table-wrap">
-            <table>
+        <x-ui.table caption="Perfis ativos do usuario">
                 <thead>
                     <tr>
                         <th scope="col">Perfil</th>
@@ -54,73 +45,60 @@
                                     <form method="POST" action="{{ route('admin.usuarios.perfis.destroy', [$usuario, $vinculo]) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="button button-danger button-sm" type="submit">Revogar {{ $vinculo->perfil->nome }}</button>
+                                        <x-ui.button type="submit" variant="danger" size="sm">Revogar {{ $vinculo->perfil->nome }}</x-ui.button>
                                     </form>
                                 @endcan
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" class="empty-state">Nenhum perfil ativo esta visivel no seu escopo.</td></tr>
+                        <tr><td colspan="3"><x-ui.empty-state title="Nenhum perfil ativo" compact>Nenhum perfil esta visivel no seu escopo.</x-ui.empty-state></td></tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-    </section>
+        </x-ui.table>
+    </x-ui.card>
 
     @can('assignProfile', $usuario)
-        <section class="card" aria-labelledby="conceder-perfil">
+        <x-ui.card labelledby="conceder-perfil">
             <h2 id="conceder-perfil">Conceder perfil</h2>
             <p class="help-text">Informe somente o nucleo ou a escola exigida pelo perfil selecionado.</p>
             <form class="form-grid" method="POST" action="{{ route('admin.usuarios.perfis.store', $usuario) }}">
                 @csrf
-                <div class="field">
-                    <label for="perfil_id">Perfil</label>
-                    <select id="perfil_id" name="perfil_id" required>
+                <x-ui.select name="perfil_id" label="Perfil" required>
                         <option value="">Selecione um perfil</option>
                         @foreach ($options['perfis'] as $perfil)
                             <option value="{{ $perfil->id }}">{{ $perfil->nome }}</option>
                         @endforeach
-                    </select>
-                    <x-admin.field-error name="perfil_id" />
-                </div>
-                <div class="field">
-                    <label for="nucleo_id">Nucleo, quando exigido</label>
-                    <select id="nucleo_id" name="nucleo_id">
+                </x-ui.select>
+                <x-ui.select name="nucleo_id" label="Nucleo, quando exigido">
                         <option value="">Nao se aplica</option>
                         @foreach ($options['nucleos'] as $nucleo)
                             <option value="{{ $nucleo->id }}">{{ $nucleo->nome }}</option>
                         @endforeach
-                    </select>
-                    <x-admin.field-error name="nucleo_id" />
-                </div>
-                <div class="field">
-                    <label for="escola_id">Escola, quando exigida</label>
-                    <select id="escola_id" name="escola_id">
+                </x-ui.select>
+                <x-ui.select name="escola_id" label="Escola, quando exigida">
                         <option value="">Nao se aplica</option>
                         @foreach ($options['escolas'] as $escola)
                             <option value="{{ $escola->id }}">{{ $escola->nome }} / {{ $escola->nucleo->nome }}</option>
                         @endforeach
-                    </select>
-                    <x-admin.field-error name="escola_id" />
-                </div>
+                </x-ui.select>
                 <div class="form-actions field-wide">
-                    <button class="button button-primary" type="submit">Conceder perfil</button>
+                    <x-ui.button type="submit">Conceder perfil</x-ui.button>
                 </div>
             </form>
-        </section>
+        </x-ui.card>
     @endcan
 
     @can('delete', $usuario)
         @if ($usuario->status->value === 'ativo' && auth()->id() !== $usuario->id)
-            <section class="card danger-zone" aria-labelledby="inativar-usuario">
+            <x-ui.card labelledby="inativar-usuario" variant="danger">
                 <h2 id="inativar-usuario">Inativar usuario</h2>
                 <p>A inativacao encerra sessoes e revoga tokens e dispositivos, preservando o historico.</p>
                 <form class="stack" method="POST" action="{{ route('admin.usuarios.inactivate', $usuario) }}">
                     @csrf
                     <label class="check-field"><input name="confirmacao" type="checkbox" required> Confirmo a inativacao deste usuario.</label>
-                    <button class="button button-danger" type="submit">Inativar usuario</button>
+                    <x-ui.button type="submit" variant="danger">Inativar usuario</x-ui.button>
                 </form>
-            </section>
+            </x-ui.card>
         @endif
     @endcan
 @endsection

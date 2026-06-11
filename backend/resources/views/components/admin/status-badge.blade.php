@@ -1,5 +1,5 @@
 @props(['status'])
 
-<span class="badge {{ $status === 'ativo' ? 'badge-success' : 'badge-neutral' }}">
+<x-ui.badge :variant="$status === 'ativo' || $status === 'publicada' ? 'success' : 'neutral'">
     {{ ucfirst($status) }}
-</span>
+</x-ui.badge>

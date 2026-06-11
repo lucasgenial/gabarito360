@@ -36,33 +36,24 @@
                     <h2 id="vincular-{{ $prova->id }}">Vincular turma</h2>
                     <form class="form-grid" method="POST" action="{{ route('admin.provas.turmas.store', $prova) }}">
                         @csrf
-                        <div class="field field-wide">
-                            <label for="turma-{{ $prova->id }}">Turma autorizada</label>
-                            <select id="turma-{{ $prova->id }}" name="turma_id" required>
+                        <x-ui.select name="turma_id" label="Turma autorizada" id="turma-{{ $prova->id }}" required wide>
                                 <option value="">Selecione uma turma</option>
                                 @foreach ($turmasPorProva[$prova->id] as $turma)
                                     <option value="{{ $turma->id }}">
                                         {{ $turma->escola->nome }} · {{ $turma->nome }} · {{ $turma->ano_letivo }}
                                     </option>
                                 @endforeach
-                            </select>
-                            <x-admin.field-error name="turma_id" />
-                        </div>
-                        <div class="field">
-                            <label for="data-prevista-{{ $prova->id }}">Data prevista opcional</label>
-                            <input id="data-prevista-{{ $prova->id }}" name="data_prevista" type="date">
-                            <x-admin.field-error name="data_prevista" />
-                        </div>
+                        </x-ui.select>
+                        <x-ui.input name="data_prevista" label="Data prevista opcional" id="data-prevista-{{ $prova->id }}" type="date" />
                         <div class="form-actions field-wide">
-                            <button class="button button-primary" type="submit">Vincular turma</button>
+                            <x-ui.button type="submit">Vincular turma</x-ui.button>
                         </div>
                     </form>
                 </section>
 
                 <section aria-labelledby="turmas-{{ $prova->id }}">
                     <h2 id="turmas-{{ $prova->id }}">Turmas vinculadas</h2>
-                    <div class="table-wrap">
-                        <table>
+                    <x-ui.table caption="Turmas vinculadas a {{ $prova->titulo }}">
                             <thead>
                                 <tr>
                                     <th scope="col">Escola</th>
@@ -81,23 +72,24 @@
                                             <form method="POST" action="{{ route('admin.provas.turmas.destroy', [$prova, $vinculo->turma]) }}">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="button button-danger button-sm" type="submit">Remover vinculo</button>
+                                                <x-ui.button type="submit" variant="danger" size="sm">Remover vinculo</x-ui.button>
                                             </form>
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="4" class="empty-state">Nenhuma turma vinculada a esta prova.</td></tr>
+                                    <tr><td colspan="4"><x-ui.empty-state title="Nenhuma turma vinculada" compact>Vincule uma turma autorizada para continuar.</x-ui.empty-state></td></tr>
                                 @endforelse
                             </tbody>
-                        </table>
-                    </div>
+                    </x-ui.table>
                 </section>
             </div>
         </details>
     @empty
-        <section class="card empty-state">
-            Nenhuma prova publicada esta disponivel no seu escopo.
-        </section>
+        <x-ui.card>
+            <x-ui.empty-state title="Nenhuma prova publicada">
+                Nenhuma prova publicada esta disponivel no seu escopo.
+            </x-ui.empty-state>
+        </x-ui.card>
     @endforelse
 
     {{ $provas->links() }}

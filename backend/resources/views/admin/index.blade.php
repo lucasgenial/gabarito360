@@ -11,35 +11,35 @@
 
     <div class="card-grid">
         @if ($access['nucleos'])
-            <article class="card">
+            <x-ui.card>
                 <h2>Nucleos</h2>
                 <p>Cadastre e mantenha unidades organizacionais.</p>
-                <a class="button button-primary" href="{{ route('admin.nucleos.index') }}" wire:navigate>Acessar nucleos</a>
-            </article>
+                <x-ui.button :href="route('admin.nucleos.index')" wire:navigate>Acessar nucleos</x-ui.button>
+            </x-ui.card>
         @endif
 
         @if ($access['escolas'])
-            <article class="card">
+            <x-ui.card>
                 <h2>Escolas</h2>
                 <p>Gerencie escolas dentro do seu escopo autorizado.</p>
-                <a class="button button-primary" href="{{ route('admin.escolas.index') }}" wire:navigate>Acessar escolas</a>
-            </article>
+                <x-ui.button :href="route('admin.escolas.index')" wire:navigate>Acessar escolas</x-ui.button>
+            </x-ui.card>
         @endif
 
         @if ($access['usuarios'])
-            <article class="card">
+            <x-ui.card>
                 <h2>Usuarios</h2>
                 <p>Mantenha acessos e vinculos de perfil autorizados.</p>
-                <a class="button button-primary" href="{{ route('admin.usuarios.index') }}" wire:navigate>Acessar usuarios</a>
-            </article>
+                <x-ui.button :href="route('admin.usuarios.index')" wire:navigate>Acessar usuarios</x-ui.button>
+            </x-ui.card>
         @endif
 
         @if ($access['provas'])
-            <article class="card">
+            <x-ui.card>
                 <h2>Provas e turmas</h2>
                 <p>Consulte gabaritos vigentes e autorize turmas para provas publicadas.</p>
-                <a class="button button-primary" href="{{ route('admin.provas.index') }}" wire:navigate>Acessar provas</a>
-            </article>
+                <x-ui.button :href="route('admin.provas.index')" wire:navigate>Acessar provas</x-ui.button>
+            </x-ui.card>
         @endif
     </div>
 @endsection

@@ -9,53 +9,33 @@
         <p>Vinculada ao nucleo {{ $escola->nucleo->nome }}.</p>
     </header>
 
-    <section class="card">
+    <x-ui.card>
         <form class="form-grid" method="POST" action="{{ route('admin.escolas.update', $escola) }}">
             @csrf
             @method('PATCH')
-            <div class="field">
-                <label for="codigo">Codigo</label>
-                <input id="codigo" name="codigo" value="{{ old('codigo', $escola->codigo) }}" required maxlength="50">
-                <x-admin.field-error name="codigo" />
-            </div>
-            <div class="field">
-                <label for="nome">Nome</label>
-                <input id="nome" name="nome" value="{{ old('nome', $escola->nome) }}" required maxlength="180">
-                <x-admin.field-error name="nome" />
-            </div>
-            <div class="field">
-                <label for="municipio">Municipio</label>
-                <input id="municipio" name="municipio" value="{{ old('municipio', $escola->municipio) }}" required maxlength="120">
-            </div>
-            <div class="field">
-                <label for="estado">UF</label>
-                <input id="estado" name="estado" value="{{ old('estado', $escola->estado) }}" required maxlength="2">
-            </div>
-            <div class="field">
-                <label for="email">E-mail institucional</label>
-                <input id="email" name="email" type="email" value="{{ old('email', $escola->email) }}" maxlength="254">
-            </div>
-            <div class="field">
-                <label for="telefone">Telefone institucional</label>
-                <input id="telefone" name="telefone" value="{{ old('telefone', $escola->telefone) }}" maxlength="30">
-            </div>
+            <x-ui.input name="codigo" label="Codigo" :value="old('codigo', $escola->codigo)" required maxlength="50" />
+            <x-ui.input name="nome" label="Nome" :value="old('nome', $escola->nome)" required maxlength="180" />
+            <x-ui.input name="municipio" label="Municipio" :value="old('municipio', $escola->municipio)" required maxlength="120" />
+            <x-ui.input name="estado" label="UF" :value="old('estado', $escola->estado)" required maxlength="2" />
+            <x-ui.input name="email" label="E-mail institucional" type="email" :value="old('email', $escola->email)" maxlength="254" />
+            <x-ui.input name="telefone" label="Telefone institucional" :value="old('telefone', $escola->telefone)" maxlength="30" />
             <div class="form-actions field-wide">
-                <button class="button button-primary" type="submit">Salvar alteracoes</button>
-                <a class="button button-neutral" href="{{ route('admin.escolas.index') }}" wire:navigate>Voltar</a>
+                <x-ui.button type="submit">Salvar alteracoes</x-ui.button>
+                <x-ui.button :href="route('admin.escolas.index')" variant="neutral" wire:navigate>Voltar</x-ui.button>
             </div>
         </form>
-    </section>
+    </x-ui.card>
 
     @if ($escola->status->value === 'ativo')
-        <section class="card danger-zone" aria-labelledby="inativar-escola">
+        <x-ui.card labelledby="inativar-escola" variant="danger">
             <h2 id="inativar-escola">Inativar escola</h2>
             <p>O registro e seu historico serao preservados, mas novos vinculos deixarao de ser permitidos.</p>
             <form class="stack" method="POST" action="{{ route('admin.escolas.destroy', $escola) }}">
                 @csrf
                 @method('DELETE')
                 <label class="check-field"><input name="confirmacao" type="checkbox" required> Confirmo a inativacao desta escola.</label>
-                <button class="button button-danger" type="submit">Inativar escola</button>
+                <x-ui.button type="submit" variant="danger">Inativar escola</x-ui.button>
             </form>
-        </section>
+        </x-ui.card>
     @endif
 @endsection

@@ -4,7 +4,7 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
-> **Status do projeto:** documentacao inicial concluida e base tecnica do backend em Laravel criada. Regras de negocio ainda nao foram implementadas.
+> **Status do projeto:** backend e painel administrativo implementados ate a MP-028. O sistema ja cobre autenticacao, autorizacao, estrutura organizacional e academica, provas, gabaritos e vinculos de prova com turma. O proximo passo e a MP-029, com aplicacoes e snapshot de alunos.
 
 ## Sobre o sistema
 
@@ -116,7 +116,7 @@ A estrategia recomendada e hibrida: retorno rapido no aplicativo e possibilidade
 | Processamento OMR | OpenCV |
 | Cache e filas | Redis |
 | Tempo real | Laravel Reverb / WebSockets |
-| Painel web | Laravel com Vue.js ou Blade/Livewire e Tailwind CSS |
+| Painel web | Laravel Blade, Livewire e Tailwind CSS |
 | Arquivos | Storage compativel com S3 |
 | Infraestrutura | Docker, Nginx e TLS |
 
@@ -210,7 +210,7 @@ Versoes posteriores incluem modo offline, dashboards consolidados, relatorios PD
 
 ## Backend
 
-A base tecnica da API Laravel esta em [`backend/`](backend/README.md). Ela inclui a estrutura inicial para API REST, PostgreSQL, Sanctum, filas, policies, requests, resources, services e o endpoint `GET /api/v1/health`.
+A API e o painel Laravel estao em [`backend/`](backend/README.md). A implementacao atual inclui API REST, PostgreSQL, Sanctum, filas, policies, requests, resources, services, painel administrativo e o endpoint `GET /api/v1/health`.
 
 Consulte o [README do backend](backend/README.md) para requisitos e comandos de execucao local.
 
@@ -238,7 +238,7 @@ gabarito360/
 
 ## Desenvolvimento
 
-Antes de iniciar a implementacao, devem ser resolvidas as decisoes registradas na documentacao, especialmente:
+As decisoes bloqueadoras iniciais foram registradas e orientam a implementacao, especialmente:
 
 - modelo fisico inicial do cartao-resposta;
 - politica de pontuacao e anulacao de questoes;

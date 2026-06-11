@@ -204,6 +204,15 @@ php artisan test --filter=HealthTest
 
 As convencoes obrigatorias de arquitetura, testes, branches, commits e revisao estao em [`../CONTRIBUTING.md`](../CONTRIBUTING.md). A especificacao do contrato REST esta em [`../docs/07-api.md`](../docs/07-api.md).
 
+### Fundação visual do painel
+
+O painel administrativo usa os tokens oficiais de `docs/ui_token_gov_brasil.json` e os componentes Blade compartilhados em `resources/views/components/ui`. O contrato visual, incluindo estados acessíveis, dark mode, modal e reutilização nas telas administrativas, é verificado por:
+
+```bash
+php artisan test --filter=DesignSystemTest
+npm run build
+```
+
 Antes de um commit, execute a partir de `backend/`:
 
 ```bash
