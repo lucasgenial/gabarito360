@@ -5,6 +5,7 @@ namespace App\Services\Provas;
 use App\Enums\ModeloCartaoStatus;
 use App\Enums\StatusEnum;
 use App\Models\Escola;
+use App\Models\GabaritoResposta;
 use App\Models\ModeloCartao;
 use App\Models\Nucleo;
 use App\Models\Prova;
@@ -99,6 +100,18 @@ class ProvaConfigurationValidator
             && $current->questoes()->max('numero') > (int) $attributes['quantidade_questoes']
         ) {
             $this->add($errors, 'quantidade_questoes', 'A quantidade nao pode excluir numeros de questoes ja cadastradas.');
+        }
+
+        if (
+            $current instanceof Prova
+            && is_array($alternatives)
+            && GabaritoResposta::query()
+                ->where('prova_id', $current->id)
+                ->where('anulada', false)
+                ->whereNotIn('alternativa_correta', $alternatives)
+                ->exists()
+        ) {
+            $this->add($errors, 'alternativas', 'As alternativas nao podem invalidar respostas oficiais ja registradas.');
         }
 
         return $errors;

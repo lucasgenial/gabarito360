@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.11.0
+  version: 0.12.0
   description: |
     Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos,
     vinculos operacionais, importacao validada de alunos por CSV, modelos versionados de cartao OMR
-    e provas com questoes em rascunho.
+    provas, questoes e versoes de gabarito oficial em rascunho.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -1798,6 +1798,198 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/gabaritos:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Provas
+      summary: Listar versoes de gabarito da prova
+      operationId: listExamAnswerKeys
+      security:
+        - bearerToken: []
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Versoes ordenadas da mais recente para a mais antiga
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GabaritoOficialListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Provas
+      summary: Criar nova versao de gabarito em rascunho
+      description: A versao e calculada sequencialmente e a prova deve estar em rascunho.
+      operationId: createExamAnswerKeyDraft
+      security:
+        - bearerToken: []
+      responses:
+        "201":
+          description: Versao de gabarito em rascunho criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GabaritoOficialResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/gabaritos/{gabarito}:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/GabaritoId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Provas
+      summary: Consultar versao de gabarito pertencente a prova
+      operationId: getExamAnswerKey
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Versao de gabarito encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GabaritoOficialResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/gabaritos/{gabarito}/respostas:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/GabaritoId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Provas
+      summary: Listar respostas oficiais da versao
+      operationId: listExamAnswerKeyResponses
+      security:
+        - bearerToken: []
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 100
+      responses:
+        "200":
+          description: Respostas oficiais ordenadas pelo numero da questao
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GabaritoRespostaListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/gabaritos/{gabarito}/respostas/{questao}:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/GabaritoId"
+      - $ref: "#/components/parameters/QuestaoId"
+      - $ref: "#/components/parameters/XRequestId"
+    put:
+      tags:
+        - Provas
+      summary: Criar ou substituir resposta oficial da questao
+      description: |
+        Operacao idempotente permitida somente em prova e gabarito rascunho.
+        Questao anulada exige alternativa correta nula.
+      operationId: upsertExamAnswerKeyResponse
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GabaritoRespostaUpsertRequest"
+      responses:
+        "200":
+          description: Resposta oficial criada ou atualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GabaritoRespostaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/gabaritos/{gabarito}/validacao:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/GabaritoId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Provas
+      summary: Validar completude da versao de gabarito
+      description: Informa inconsistencias que impedirao a publicacao futura.
+      operationId: validateExamAnswerKey
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Resumo de completude calculado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GabaritoValidacaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     bearerToken:
@@ -1907,6 +2099,14 @@ components:
       in: path
       required: true
       description: UUID da questao pertencente a prova.
+      schema:
+        type: string
+        format: uuid
+    GabaritoId:
+      name: gabarito
+      in: path
+      required: true
+      description: UUID da versao de gabarito oficial pertencente a prova.
       schema:
         type: string
         format: uuid
@@ -4001,6 +4201,244 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/QuestaoListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    GabaritoOficialStatus:
+      type: string
+      enum:
+        - rascunho
+        - vigente
+        - substituido
+    GabaritoOficial:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - prova_id
+        - versao
+        - status
+        - justificativa
+        - criado_por
+        - publicado_por
+        - publicado_at
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        prova_id:
+          type: string
+          format: uuid
+        versao:
+          type: integer
+          minimum: 1
+        status:
+          $ref: "#/components/schemas/GabaritoOficialStatus"
+        justificativa:
+          type:
+            - string
+            - "null"
+        criado_por:
+          type:
+            - string
+            - "null"
+          format: uuid
+        publicado_por:
+          type:
+            - string
+            - "null"
+          format: uuid
+        publicado_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    GabaritoOficialResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/GabaritoOficial"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    GabaritoOficialListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/GabaritoOficial"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    GabaritoOficialListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/GabaritoOficialListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    GabaritoResposta:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - prova_id
+        - gabarito_oficial_id
+        - questao_id
+        - numero_questao
+        - alternativa_correta
+        - anulada
+        - peso
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        prova_id:
+          type: string
+          format: uuid
+        gabarito_oficial_id:
+          type: string
+          format: uuid
+        questao_id:
+          type: string
+          format: uuid
+        numero_questao:
+          type: integer
+          minimum: 1
+          maximum: 500
+        alternativa_correta:
+          type:
+            - string
+            - "null"
+          maxLength: 10
+        anulada:
+          type: boolean
+        peso:
+          type: string
+          pattern: "^[0-9]+\\.[0-9]{4}$"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    GabaritoRespostaUpsertRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - anulada
+      properties:
+        alternativa_correta:
+          type:
+            - string
+            - "null"
+          maxLength: 10
+          description: Deve pertencer as alternativas da prova quando a questao nao esta anulada.
+        anulada:
+          type: boolean
+        peso:
+          type: number
+          minimum: 0
+          maximum: 999999
+          description: Quando omitido, utiliza o peso padrao da questao.
+    GabaritoRespostaResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/GabaritoResposta"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    GabaritoRespostaListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/GabaritoResposta"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    GabaritoRespostaListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/GabaritoRespostaListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    GabaritoValidacao:
+      type: object
+      additionalProperties: false
+      required:
+        - completo
+        - questoes_esperadas
+        - questoes_ativas
+        - respostas_registradas
+        - questoes_sem_resposta
+        - problemas
+      properties:
+        completo:
+          type: boolean
+        questoes_esperadas:
+          type: integer
+          minimum: 1
+        questoes_ativas:
+          type: integer
+          minimum: 0
+        respostas_registradas:
+          type: integer
+          minimum: 0
+        questoes_sem_resposta:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+        problemas:
+          type: array
+          items:
+            type: string
+            enum:
+              - QUANTIDADE_QUESTOES_ATIVAS_DIVERGENTE
+              - RESPOSTAS_OFICIAIS_INCOMPLETAS
+    GabaritoValidacaoResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/GabaritoValidacao"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     ModeloCartaoStatus:

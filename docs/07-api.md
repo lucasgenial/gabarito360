@@ -147,8 +147,12 @@
 | POST | `/provas/{id}/finalizar` | Gestor autorizado; etapa futura |
 | POST | `/provas/{id}/turmas` | Gestor autorizado; MP-028 |
 | DELETE | `/provas/{id}/turmas/{turmaId}` | Gestor autorizado; MP-028 |
-| GET | `/provas/{id}/gabaritos` | Conforme escopo; MP-026 |
-| POST | `/provas/{id}/gabaritos` | Gestor autorizado; MP-026 |
+| GET | `/provas/{id}/gabaritos` | Administrador; gestor de nucleo no proprio escopo |
+| POST | `/provas/{id}/gabaritos` | Administrador; gestor de nucleo no proprio escopo; prova rascunho |
+| GET | `/provas/{id}/gabaritos/{gabaritoId}` | Administrador; gestor de nucleo no proprio escopo |
+| GET | `/provas/{id}/gabaritos/{gabaritoId}/respostas` | Administrador; gestor de nucleo no proprio escopo |
+| PUT | `/provas/{id}/gabaritos/{gabaritoId}/respostas/{questaoId}` | Administrador; gestor de nucleo no proprio escopo; rascunho |
+| GET | `/provas/{id}/gabaritos/{gabaritoId}/validacao` | Administrador; gestor de nucleo no proprio escopo |
 | POST | `/provas/{id}/gabaritos/{versaoId}/publicar` | Gestor autorizado; MP-027 |
 | POST | `/provas/{id}/gabaritos/{versaoId}/recorrigir` | Permissao especial; V2 |
 | GET | `/modelos-cartao` | Conforme escopo |
@@ -160,9 +164,11 @@
 
 Modelos globais sao gerenciados somente pelo administrador geral. O gestor de nucleo consulta modelos globais e gerencia apenas modelos do proprio nucleo. A resposta inclui a configuracao OMR completa e seus limiares versionados. A homologacao exige checksum SHA-256 do artefato, sem placeholders ou limiares pendentes, e torna a versao imutavel.
 
-No MP-025, somente provas e questoes em rascunho estao implementadas. Cada prova pertence exatamente a um nucleo ou escola, deve usar modelo de cartao homologado global ou do mesmo nucleo e deve repetir exatamente suas quantidades e alternativas. O codigo e unico, sem diferenciar maiusculas e minusculas, dentro do proprietario. Questoes possuem numero unico por prova e nao podem exceder a quantidade configurada.
+Provas e questoes em rascunho foram implementadas no MP-025. Cada prova pertence exatamente a um nucleo ou escola, deve usar modelo de cartao homologado global ou do mesmo nucleo e deve repetir exatamente suas quantidades e alternativas. O codigo e unico, sem diferenciar maiusculas e minusculas, dentro do proprietario. Questoes possuem numero unico por prova e nao podem exceder a quantidade configurada.
 
-Publicacao, gabaritos, arquivamento, finalizacao e vinculo com turmas nao fazem parte do MP-025 e nao possuem endpoint implementado ainda.
+O MP-026 implementa versoes sequenciais de gabarito em rascunho, preenchimento idempotente de uma resposta oficial por questao e validacao de completude. Alternativas devem pertencer a prova; questao anulada deve possuir alternativa nula e preserva seu peso conforme o ADR-D004. Respostas usam o peso informado ou, quando omitido, o peso padrao da questao.
+
+Publicacao, arquivamento, finalizacao, substituicao de gabarito vigente, recorrection e vinculo com turmas ainda nao possuem endpoint implementado.
 
 ### 6.1 Exemplo de criacao de prova
 
@@ -191,6 +197,34 @@ Publicacao, gabaritos, arquivamento, finalizacao e vinculo com turmas nao fazem 
   "peso_padrao": 1
 }
 ```
+
+### 6.3 Criar versao de gabarito em rascunho
+
+`POST /provas/{id}/gabaritos` nao recebe payload funcional. A versao e calculada sequencialmente pelo backend e sempre nasce como `rascunho`.
+
+### 6.4 Preencher resposta oficial
+
+`PUT /provas/{id}/gabaritos/{gabaritoId}/respostas/{questaoId}`
+
+```json
+{
+  "alternativa_correta": "B",
+  "anulada": false,
+  "peso": 1
+}
+```
+
+Questao anulada:
+
+```json
+{
+  "alternativa_correta": null,
+  "anulada": true,
+  "peso": 1
+}
+```
+
+O `PUT` cria ou substitui idempotentemente a resposta da questao no mesmo gabarito. O endpoint de validacao informa quantidade esperada, questoes ativas, respostas registradas, numeros sem resposta e problemas que impedirao a publicacao futura.
 
 ## 7. Aplicacoes
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Provas\Concerns;
 
+use App\Models\GabaritoOficial;
 use App\Models\Prova;
 use App\Models\Questao;
 use App\Models\User;
@@ -51,6 +52,27 @@ trait ResolvesScopedProva
         return $question;
     }
 
+    protected function resolveGabarito(Prova $exam): ?GabaritoOficial
+    {
+        $answerKeyId = $this->routeId('gabarito', GabaritoOficial::class);
+
+        if ($answerKeyId === null) {
+            return null;
+        }
+
+        $answerKey = GabaritoOficial::query()
+            ->where('prova_id', $exam->id)
+            ->find($answerKeyId);
+
+        if (! $answerKey instanceof GabaritoOficial) {
+            throw (new ModelNotFoundException)->setModel(GabaritoOficial::class, [$answerKeyId]);
+        }
+
+        $this->attributes->set('scoped_answer_key', $answerKey);
+
+        return $answerKey;
+    }
+
     public function prova(): Prova
     {
         /** @var Prova $exam */
@@ -67,7 +89,15 @@ trait ResolvesScopedProva
         return $question;
     }
 
-    /** @param class-string<Prova|Questao> $modelClass */
+    public function gabarito(): GabaritoOficial
+    {
+        /** @var GabaritoOficial $answerKey */
+        $answerKey = $this->attributes->get('scoped_answer_key');
+
+        return $answerKey;
+    }
+
+    /** @param class-string<Prova|Questao|GabaritoOficial> $modelClass */
     private function routeId(string $parameter, string $modelClass): ?string
     {
         $value = $this->route($parameter);

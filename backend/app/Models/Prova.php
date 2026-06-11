@@ -63,6 +63,11 @@ class Prova extends Model
         return $this->hasMany(Questao::class, 'prova_id');
     }
 
+    public function gabaritosOficiais(): HasMany
+    {
+        return $this->hasMany(GabaritoOficial::class, 'prova_id');
+    }
+
     public function ownerNucleoId(): string
     {
         if ($this->nucleo_id !== null) {

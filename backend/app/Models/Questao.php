@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Questao extends Model
 {
@@ -28,6 +29,11 @@ class Questao extends Model
     public function prova(): BelongsTo
     {
         return $this->belongsTo(Prova::class, 'prova_id');
+    }
+
+    public function respostasOficiais(): HasMany
+    {
+        return $this->hasMany(GabaritoResposta::class, 'questao_id');
     }
 
     /** @return array<string, string> */

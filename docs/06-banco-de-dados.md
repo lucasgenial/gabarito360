@@ -529,6 +529,8 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `uq_gabaritos_oficiais_id_prova`: unico em `(id, prova_id)`, usado por FKs compostas.
 - `idx_gabaritos_oficiais_prova_status`: `(prova_id, status)`.
 
+**Relacionamentos e regras importantes:** no MP-026, uma versao somente pode ser criada como rascunho de prova em rascunho. A versao e calculada sequencialmente sob bloqueio transacional. O banco impede exclusao fisica e alteracao de versoes vigentes ou substituidas; a publicacao permanece reservada ao MP-027.
+
 ### 8.5 `gabarito_respostas`
 
 **Finalidade:** armazenar a resposta oficial de cada questao em uma versao do gabarito.
@@ -556,6 +558,10 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `idx_gabarito_respostas_questao`: `(questao_id)`.
 - Check: `(anulada AND alternativa_correta IS NULL) OR (NOT anulada AND alternativa_correta IS NOT NULL)`.
 - Check `peso >= 0`.
+- Trigger exige gabarito, prova e questao ativa no mesmo contexto, todos editaveis em rascunho, e valida a alternativa contra `provas.alternativas`.
+- Trigger impede exclusao fisica e alteracao de respostas pertencentes a gabarito vigente ou substituido.
+
+**Validacao de completude:** o servico de dominio compara `provas.quantidade_questoes`, questoes ativas e respostas registradas. Rascunhos incompletos podem ser salvos, mas os problemas retornados impedirao a publicacao futura.
 
 ### 8.6 `prova_turmas`
 
