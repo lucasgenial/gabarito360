@@ -78,7 +78,7 @@ return new class extends Migration
         DB::statement('CREATE INDEX idx_matriculas_aluno_historico ON matriculas_turmas (aluno_id, ano_letivo, inicio_em)');
 
         DB::unprepared(<<<'SQL'
-            CREATE FUNCTION validar_matricula_turma() RETURNS trigger AS $$
+            CREATE OR REPLACE FUNCTION validar_matricula_turma() RETURNS trigger AS $$
             DECLARE
                 aluno_escola uuid;
                 turma_escola uuid;
