@@ -49,9 +49,11 @@ enum AuditAction: string
     case CARD_MODEL_INACTIVATED = 'modelo_cartao.inactivated';
     case EXAM_CREATED = 'prova.created';
     case EXAM_UPDATED = 'prova.updated';
+    case EXAM_PUBLISHED = 'prova.published';
     case QUESTION_CREATED = 'questao.created';
     case QUESTION_UPDATED = 'questao.updated';
     case ANSWER_KEY_CREATED = 'gabarito_oficial.created';
+    case ANSWER_KEY_PUBLISHED = 'gabarito_oficial.published';
     case ANSWER_KEY_RESPONSE_CREATED = 'gabarito_resposta.created';
     case ANSWER_KEY_RESPONSE_UPDATED = 'gabarito_resposta.updated';
 }

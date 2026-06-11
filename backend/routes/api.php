@@ -88,6 +88,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::post('/provas', [ProvaController::class, 'store'])->name('provas.store');
         Route::get('/provas/{prova}', [ProvaController::class, 'show'])->name('provas.show');
         Route::patch('/provas/{prova}', [ProvaController::class, 'update'])->name('provas.update');
+        Route::post('/provas/{prova}/publicar', [ProvaController::class, 'publish'])->name('provas.publish');
         Route::get('/provas/{prova}/questoes', [ProvaController::class, 'questions'])->name('provas.questoes.index');
         Route::post('/provas/{prova}/questoes', [ProvaController::class, 'storeQuestion'])->name('provas.questoes.store');
         Route::get('/provas/{prova}/questoes/{questao}', [ProvaController::class, 'showQuestion'])->name('provas.questoes.show');

@@ -612,7 +612,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 
 **Relacionamentos e regras importantes:** cada versao pertence a uma prova, possui respostas oficiais e e referenciada por aplicacoes e resultados. Uma versao publicada e imutavel; alteracoes exigem nova versao, justificativa, auditoria e recorrection.
 
-No MP-026, uma versao somente pode ser criada como rascunho de prova em rascunho. A versao e calculada sequencialmente sob bloqueio transacional. O banco impede exclusao fisica e alteracao de versoes vigentes ou substituidas; a publicacao permanece reservada ao MP-027.
+No MP-026, uma versao somente pode ser criada como rascunho de prova em rascunho e sua versao e calculada sequencialmente sob bloqueio transacional. No MP-027, a publicacao bloqueia a prova, valida o modelo homologado e a completude do gabarito escolhido e, atomicamente, torna primeiro o gabarito `vigente` e depois a prova `publicada`. Essa ordem atende aos gatilhos existentes sem expor estado intermediario fora da transacao. O indice parcial impede mais de um gabarito vigente por prova, inclusive diante de concorrencia. Depois da publicacao, prova, questoes, gabarito e respostas oficiais sao imutaveis.
 
 ### 8.5 `gabarito_respostas`
 

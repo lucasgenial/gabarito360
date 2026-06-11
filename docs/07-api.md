@@ -143,7 +143,7 @@
 | POST | `/provas/{id}/questoes` | Administrador; gestor de nucleo no proprio escopo; somente rascunho |
 | GET | `/provas/{id}/questoes/{questaoId}` | Administrador; gestor de nucleo no proprio escopo |
 | PATCH | `/provas/{id}/questoes/{questaoId}` | Administrador; gestor de nucleo no proprio escopo; somente rascunho |
-| POST | `/provas/{id}/publicar` | Gestor autorizado; MP-027 |
+| POST | `/provas/{id}/publicar` | Administrador; gestor de nucleo no proprio escopo; exige `gabarito_oficial_id` completo |
 | POST | `/provas/{id}/finalizar` | Gestor autorizado; etapa futura |
 | POST | `/provas/{id}/turmas` | Gestor autorizado; MP-028 |
 | DELETE | `/provas/{id}/turmas/{turmaId}` | Gestor autorizado; MP-028 |
@@ -153,7 +153,6 @@
 | GET | `/provas/{id}/gabaritos/{gabaritoId}/respostas` | Administrador; gestor de nucleo no proprio escopo |
 | PUT | `/provas/{id}/gabaritos/{gabaritoId}/respostas/{questaoId}` | Administrador; gestor de nucleo no proprio escopo; rascunho |
 | GET | `/provas/{id}/gabaritos/{gabaritoId}/validacao` | Administrador; gestor de nucleo no proprio escopo |
-| POST | `/provas/{id}/gabaritos/{versaoId}/publicar` | Gestor autorizado; MP-027 |
 | POST | `/provas/{id}/gabaritos/{versaoId}/recorrigir` | Permissao especial; V2 |
 | GET | `/modelos-cartao` | Conforme escopo |
 | POST | `/modelos-cartao` | Administrador/gestor autorizado |
@@ -168,7 +167,9 @@ Provas e questoes em rascunho foram implementadas no MP-025. Cada prova pertence
 
 O MP-026 implementa versoes sequenciais de gabarito em rascunho, preenchimento idempotente de uma resposta oficial por questao e validacao de completude. Alternativas devem pertencer a prova; questao anulada deve possuir alternativa nula e preserva seu peso conforme o ADR-D004. Respostas usam o peso informado ou, quando omitido, o peso padrao da questao.
 
-Publicacao, arquivamento, finalizacao, substituicao de gabarito vigente, recorrection e vinculo com turmas ainda nao possuem endpoint implementado.
+O MP-027 implementa `POST /provas/{id}/publicar`. O corpo deve informar `gabarito_oficial_id`, pertencente a prova e ainda em rascunho. A operacao valida novamente modelo homologado, configuracao da prova, quantidade de questoes ativas e completude das respostas. Em uma unica transacao, o gabarito selecionado se torna `vigente` e a prova se torna `publicada`; conflitos concorrentes nao geram um segundo gabarito vigente. Prova, questoes, gabarito e respostas oficiais ficam imutaveis apos a publicacao.
+
+Arquivamento, finalizacao, substituicao de gabarito vigente, recorrection e vinculo com turmas ainda nao possuem endpoint implementado.
 
 ### 6.1 Exemplo de criacao de prova
 

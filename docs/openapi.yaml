@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.12.0
+  version: 0.13.0
   description: |
     Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos,
     vinculos operacionais, importacao validada de alunos por CSV, modelos versionados de cartao OMR
-    provas, questoes e versoes de gabarito oficial em rascunho.
+    provas, questoes, versoes de gabarito oficial e publicacao transacional.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -1666,6 +1666,46 @@ paths:
           $ref: "#/components/responses/AuthorizationForbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/publicar:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/XRequestId"
+    post:
+      tags:
+        - Provas
+      summary: Publicar prova e gabarito oficial
+      description: |
+        Publica atomicamente a prova em rascunho e o gabarito oficial selecionado.
+        Exige modelo de cartao homologado, configuracao valida, todas as questoes ativas
+        cadastradas e uma resposta oficial para cada questao.
+      operationId: publishExam
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProvaPublishRequest"
+      responses:
+        "200":
+          description: Prova publicada e gabarito selecionado tornado vigente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProvaPublishResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
@@ -4063,6 +4103,37 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/Prova"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ProvaPublishRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - gabarito_oficial_id
+      properties:
+        gabarito_oficial_id:
+          type: string
+          format: uuid
+    ProvaPublishData:
+      type: object
+      additionalProperties: false
+      required:
+        - prova
+        - gabarito
+      properties:
+        prova:
+          $ref: "#/components/schemas/Prova"
+        gabarito:
+          $ref: "#/components/schemas/GabaritoOficial"
+    ProvaPublishResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ProvaPublishData"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     ProvaListData:

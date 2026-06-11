@@ -529,7 +529,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - `uq_gabaritos_oficiais_id_prova`: unico em `(id, prova_id)`, usado por FKs compostas.
 - `idx_gabaritos_oficiais_prova_status`: `(prova_id, status)`.
 
-**Relacionamentos e regras importantes:** no MP-026, uma versao somente pode ser criada como rascunho de prova em rascunho. A versao e calculada sequencialmente sob bloqueio transacional. O banco impede exclusao fisica e alteracao de versoes vigentes ou substituidas; a publicacao permanece reservada ao MP-027.
+**Relacionamentos e regras importantes:** no MP-026, uma versao somente pode ser criada como rascunho de prova em rascunho e sua versao e calculada sequencialmente sob bloqueio transacional. No MP-027, a publicacao bloqueia a prova, valida o modelo homologado e a completude do gabarito escolhido e, atomicamente, torna primeiro o gabarito `vigente` e depois a prova `publicada`. Essa ordem atende aos gatilhos existentes sem expor estado intermediario fora da transacao. O indice parcial impede mais de um gabarito vigente por prova, inclusive diante de concorrencia. Depois da publicacao, prova, questoes, gabarito e respostas oficiais sao imutaveis.
 
 ### 8.5 `gabarito_respostas`
 

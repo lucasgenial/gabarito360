@@ -40,4 +40,10 @@ class ProvaPolicy
         return $exam->status === ProvaStatus::DRAFT
             && $this->scope->canManage($user, $exam);
     }
+
+    public function publish(User $user, Prova $exam): bool
+    {
+        return $exam->status === ProvaStatus::DRAFT
+            && $this->scope->canManage($user, $exam);
+    }
 }

@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Provas\CreateProvaAction;
 use App\Actions\Provas\CreateQuestaoAction;
+use App\Actions\Provas\PublishProva;
 use App\Actions\Provas\UpdateProvaAction;
 use App\Actions\Provas\UpdateQuestaoAction;
 use App\Http\Requests\Provas\ListProvasRequest;
 use App\Http\Requests\Provas\ListQuestoesRequest;
+use App\Http\Requests\Provas\PublishProvaRequest;
 use App\Http\Requests\Provas\StoreProvaRequest;
 use App\Http\Requests\Provas\StoreQuestaoRequest;
 use App\Http\Requests\Provas\UpdateProvaRequest;
 use App\Http\Requests\Provas\UpdateQuestaoRequest;
 use App\Http\Requests\Provas\ViewQuestaoRequest;
+use App\Http\Resources\GabaritoOficialResource;
 use App\Http\Resources\ProvaResource;
 use App\Http\Resources\QuestaoResource;
 use App\Models\Prova;
@@ -76,6 +79,20 @@ class ProvaController extends BaseApiController
         );
 
         return $this->successResponse(ProvaResource::make($exam)->resolve($request));
+    }
+
+    public function publish(PublishProvaRequest $request, PublishProva $action): JsonResponse
+    {
+        $published = $action->execute(
+            $request->prova(),
+            $request->gabaritoOficial(),
+            $this->actor($request->user()),
+        );
+
+        return $this->successResponse([
+            'prova' => ProvaResource::make($published['prova'])->resolve($request),
+            'gabarito' => GabaritoOficialResource::make($published['gabarito'])->resolve($request),
+        ]);
     }
 
     public function questions(ListQuestoesRequest $request): JsonResponse
