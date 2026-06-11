@@ -43,4 +43,8 @@ enum AuditAction: string
     case STUDENT_IMPORT_CONFIRMED = 'importacao_aluno.confirmed';
     case STUDENT_IMPORT_COMPLETED = 'importacao_aluno.completed';
     case STUDENT_IMPORT_FAILED = 'importacao_aluno.failed';
+    case CARD_MODEL_CREATED = 'modelo_cartao.created';
+    case CARD_MODEL_UPDATED = 'modelo_cartao.updated';
+    case CARD_MODEL_APPROVED = 'modelo_cartao.approved';
+    case CARD_MODEL_INACTIVATED = 'modelo_cartao.inactivated';
 }

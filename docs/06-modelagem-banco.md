@@ -166,7 +166,7 @@ Cada tabela principal possui uma secao propria com:
 | `provas` | `id` | `nucleo_id` ou `escola_id`, `modelo_cartao_id` | 1:N questoes, gabaritos e aplicacoes | Exatamente um proprietario organizacional |
 | `questoes` | `id` | `prova_id` | N:1 prova; 1:N respostas oficiais/detectadas | Numero unico dentro da prova |
 | `gabaritos_oficiais` | `id` | `prova_id`, atores usuarios | N:1 prova; 1:N respostas oficiais | Apenas uma versao vigente por prova |
-| `modelos_cartao` | `id` | `nucleo_id`, `arquivo_base_id`, `criado_por` | 1:N provas, aplicacoes e leituras | Versao homologada deve ser imutavel |
+| `modelos_cartao` | `id` | `nucleo_id`, `criado_por`, `homologado_por` | 1:N provas, aplicacoes e leituras | Versao homologada deve ser imutavel |
 | `aplicacoes` | `id` | prova, escola, turma, gabarito e modelo | N:1 prova/turma; N:N usuarios/alunos | So recebe confirmacoes enquanto em andamento |
 | `aplicadores_turmas` | `id` | `turma_id`, `usuario_id` | N:N entre usuarios e turmas | Um vinculo ativo equivalente por vez |
 | `importacoes_alunos` | `id` | escola, turma e usuarios solicitante/confirmador | N:1 escola/turma; cria alunos e matriculas | Confirmacao somente apos validacao sem erros |
@@ -501,23 +501,26 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 | `quantidade_questoes` | `smallint` | Nao |  |
 | `quantidade_alternativas` | `smallint` | Nao |  |
 | `alternativas` | `jsonb` | Nao | Ex.: `["A","B","C","D","E"]` |
-| `tipo_codigo` | `varchar(30)` | Nao | `qr_code`, `codigo_barras`, `ocr`, `manual`, `sem_codigo` |
-| `configuracao_omr` | `jsonb` | Nao | Regioes, marcadores, limiares e regras de normalizacao do codigo impresso |
-| `arquivo_base_id` | `uuid` | Sim | FK `arquivos.id` |
+| `tipo_codigo` | `varchar(30)` | Nao | `qr_code`, `codigo_barras`, `ocr_texto`, `sem_codigo` |
+| `origem_codigo` | `varchar(30)` | Nao | `externo`, `sistema_afixado`, `nenhum`; distingue a origem semantica conforme ADR-D010 |
+| `configuracao_omr` | `jsonb` | Nao | Canvas, regioes, marcadores, grade, limiares e normalizacao explicita do codigo impresso |
+| `artefato_checksum_sha256` | `char(64)` | Sim | Obrigatorio para homologar; referencia imutavel do artefato de impressao |
 | `status` | `varchar(20)` | Nao / `rascunho` | `rascunho`, `homologado`, `inativo` |
 | `criado_por` | `uuid` | Sim | FK `usuarios.id` |
+| `homologado_por` | `uuid` | Sim | FK `usuarios.id` |
 | `homologado_at` | `timestamptz` | Sim |  |
 | `created_at` | `timestamptz` | Nao / `now()` |  |
 | `updated_at` | `timestamptz` | Nao / `now()` |  |
 
 **Indices e restricoes:**
 
-- Unico com `NULLS NOT DISTINCT` em `(nucleo_id, nome, versao)`.
+- Unico, sem diferenciar maiusculas/minusculas e com `NULLS NOT DISTINCT`, em `(nucleo_id, lower(nome), versao)`.
 - `idx_modelos_cartao_nucleo_status`: `(nucleo_id, status)`.
-- Checks para `versao > 0`, quantidades positivas e `jsonb_typeof(alternativas) = 'array'`.
-- Versao homologada usada em aplicacao deve ser tratada como imutavel.
+- Checks para versao e quantidades positivas, JSON valido, semantica coerente entre tipo/origem do codigo, checksum SHA-256 e metadados de homologacao.
+- Regioes devem permanecer dentro do canvas; marcadores, grade, centros, normalizacao e limiares sao validados antes da homologacao.
+- Toda versao homologada e inativa e imutavel no banco. Uma versao homologada pode somente ser inativada; qualquer alteracao exige nova versao.
 
-**Relacionamentos e regras importantes:** modelos sao referenciados por provas, aplicacoes e leituras. Qualquer alteracao geometrica ou de limiar exige nova versao; leituras historicas mantem a referencia da versao usada. O MVP utiliza exatamente um modelo homologado por prova, conforme [ADR-D001](decisoes/ADR-D001-modelo-fisico-cartao.md).
+**Relacionamentos e regras importantes:** `nucleo_id` nulo identifica modelo global; modelos de nucleo pertencem ao escopo administrativo correspondente. Modelos sao referenciados futuramente por provas, aplicacoes e leituras. Qualquer alteracao geometrica ou de limiar exige nova versao; leituras historicas mantem a referencia da versao usada. O checksum preserva a identidade do artefato nesta etapa; a futura tabela generica `arquivos` podera guardar sua referencia fisica sem alterar a imutabilidade. O MVP utiliza exatamente um modelo homologado por prova, conforme [ADR-D001](decisoes/ADR-D001-modelo-fisico-cartao.md).
 
 ### 8.2 `provas`
 

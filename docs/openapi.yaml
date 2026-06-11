@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.9.0
+  version: 0.10.0
   description: |
     Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos,
-    vinculos operacionais e importacao validada de alunos por CSV.
+    vinculos operacionais, importacao validada de alunos por CSV e modelos versionados de cartao OMR.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -24,6 +24,8 @@ tags:
     description: Gestao de turmas por ano letivo e matriculas historicas
   - name: Alunos
     description: Gestao de alunos com dados minimizados e isolamento por escopo
+  - name: Modelos de cartao
+    description: Configuracoes OMR versionadas, homologadas e imutaveis
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -1338,6 +1340,188 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/modelos-cartao:
+    get:
+      tags:
+        - Modelos de cartao
+      summary: Listar modelos de cartao no escopo autorizado
+      operationId: listCardModels
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+        - name: nucleo_id
+          in: query
+          schema:
+            type:
+              - string
+              - "null"
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/ModeloCartaoStatus"
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 120
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Modelos globais e do nucleo acessiveis ao usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeloCartaoListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Modelos de cartao
+      summary: Criar versao em rascunho
+      operationId: createCardModel
+      security:
+        - bearerToken: []
+      parameters:
+        - $ref: "#/components/parameters/XRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModeloCartaoCreateRequest"
+      responses:
+        "201":
+          description: Versao em rascunho criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeloCartaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/modelos-cartao/{modelo}:
+    parameters:
+      - $ref: "#/components/parameters/ModeloCartaoId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Modelos de cartao
+      summary: Consultar modelo de cartao
+      operationId: getCardModel
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Configuracao OMR versionada completa
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeloCartaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    patch:
+      tags:
+        - Modelos de cartao
+      summary: Editar configuracao de modelo em rascunho
+      operationId: updateCardModel
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModeloCartaoUpdateRequest"
+      responses:
+        "200":
+          description: Rascunho atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeloCartaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      tags:
+        - Modelos de cartao
+      summary: Inativar modelo preservando sua versao
+      operationId: inactivateCardModel
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Modelo inativado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeloCartaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/modelos-cartao/{modelo}/homologar:
+    parameters:
+      - $ref: "#/components/parameters/ModeloCartaoId"
+      - $ref: "#/components/parameters/XRequestId"
+    post:
+      tags:
+        - Modelos de cartao
+      summary: Homologar e tornar imutavel uma versao completa
+      operationId: approveCardModel
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Modelo homologado e imutavel
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeloCartaoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 components:
   securitySchemes:
     bearerToken:
@@ -1423,6 +1607,14 @@ components:
       in: path
       required: true
       description: UUID do vinculo de perfil.
+      schema:
+        type: string
+        format: uuid
+    ModeloCartaoId:
+      name: modelo
+      in: path
+      required: true
+      description: UUID da versao do modelo de cartao.
       schema:
         type: string
         format: uuid
@@ -3127,6 +3319,264 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/AplicadorTurmaListData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ModeloCartaoStatus:
+      type: string
+      enum:
+        - rascunho
+        - homologado
+        - inativo
+    ModeloCartaoTipoCodigo:
+      type: string
+      enum:
+        - sem_codigo
+        - qr_code
+        - codigo_barras
+        - ocr_texto
+    ModeloCartaoOrigemCodigo:
+      type: string
+      enum:
+        - nenhum
+        - externo
+        - sistema_afixado
+    ModeloCartaoConfiguracaoOmr:
+      type: object
+      description: |
+        Configuracao versionada completa. Deve declarar canvas, marcadores, regiao e
+        normalizacao do codigo impresso, grade de respostas e limiares explicitos.
+      additionalProperties: true
+      required:
+        - spec_id
+        - spec_version
+        - canvas
+        - markers
+        - printed_code
+        - answers
+        - thresholds
+      properties:
+        spec_id:
+          type: string
+        spec_version:
+          type: string
+        canvas:
+          type: object
+          additionalProperties: true
+        markers:
+          type: object
+          additionalProperties: true
+        printed_code:
+          type: object
+          additionalProperties: true
+        answers:
+          type: object
+          additionalProperties: true
+        thresholds:
+          type: object
+          additionalProperties: true
+    ModeloCartao:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nucleo_id
+        - nome
+        - versao
+        - quantidade_questoes
+        - quantidade_alternativas
+        - alternativas
+        - tipo_codigo
+        - origem_codigo
+        - configuracao_omr
+        - artefato_checksum_sha256
+        - status
+        - criado_por
+        - homologado_por
+        - homologado_at
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        nucleo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        nome:
+          type: string
+          maxLength: 120
+        versao:
+          type: integer
+          minimum: 1
+        quantidade_questoes:
+          type: integer
+          minimum: 1
+          maximum: 500
+        quantidade_alternativas:
+          type: integer
+          minimum: 2
+          maximum: 10
+        alternativas:
+          type: array
+          minItems: 2
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            pattern: "^[A-Z0-9]$"
+        tipo_codigo:
+          $ref: "#/components/schemas/ModeloCartaoTipoCodigo"
+        origem_codigo:
+          $ref: "#/components/schemas/ModeloCartaoOrigemCodigo"
+        configuracao_omr:
+          $ref: "#/components/schemas/ModeloCartaoConfiguracaoOmr"
+        artefato_checksum_sha256:
+          type:
+            - string
+            - "null"
+          pattern: "^[0-9a-f]{64}$"
+        status:
+          $ref: "#/components/schemas/ModeloCartaoStatus"
+        criado_por:
+          type:
+            - string
+            - "null"
+          format: uuid
+        homologado_por:
+          type:
+            - string
+            - "null"
+          format: uuid
+        homologado_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ModeloCartaoCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - nome
+        - versao
+        - quantidade_questoes
+        - quantidade_alternativas
+        - alternativas
+        - tipo_codigo
+        - origem_codigo
+        - configuracao_omr
+      properties:
+        nucleo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        nome:
+          type: string
+          maxLength: 120
+        versao:
+          type: integer
+          minimum: 1
+          maximum: 10000
+        quantidade_questoes:
+          type: integer
+          minimum: 1
+          maximum: 500
+        quantidade_alternativas:
+          type: integer
+          minimum: 2
+          maximum: 10
+        alternativas:
+          type: array
+          minItems: 2
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            pattern: "^[A-Za-z0-9]$"
+        tipo_codigo:
+          $ref: "#/components/schemas/ModeloCartaoTipoCodigo"
+        origem_codigo:
+          $ref: "#/components/schemas/ModeloCartaoOrigemCodigo"
+        configuracao_omr:
+          $ref: "#/components/schemas/ModeloCartaoConfiguracaoOmr"
+        artefato_checksum_sha256:
+          type:
+            - string
+            - "null"
+          pattern: "^[0-9a-fA-F]{64}$"
+    ModeloCartaoUpdateRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        quantidade_questoes:
+          type: integer
+          minimum: 1
+          maximum: 500
+        quantidade_alternativas:
+          type: integer
+          minimum: 2
+          maximum: 10
+        alternativas:
+          type: array
+          minItems: 2
+          maxItems: 10
+          uniqueItems: true
+          items:
+            type: string
+            pattern: "^[A-Za-z0-9]$"
+        tipo_codigo:
+          $ref: "#/components/schemas/ModeloCartaoTipoCodigo"
+        origem_codigo:
+          $ref: "#/components/schemas/ModeloCartaoOrigemCodigo"
+        configuracao_omr:
+          $ref: "#/components/schemas/ModeloCartaoConfiguracaoOmr"
+        artefato_checksum_sha256:
+          type:
+            - string
+            - "null"
+          pattern: "^[0-9a-fA-F]{64}$"
+    ModeloCartaoResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ModeloCartao"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ModeloCartaoListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModeloCartao"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    ModeloCartaoListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ModeloCartaoListData"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     EmptySuccessResponse:

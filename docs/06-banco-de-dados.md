@@ -422,21 +422,24 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 | `quantidade_questoes` | `smallint` | Nao |  |
 | `quantidade_alternativas` | `smallint` | Nao |  |
 | `alternativas` | `jsonb` | Nao | Ex.: `["A","B","C","D","E"]` |
-| `tipo_codigo` | `varchar(30)` | Nao | `qr_code`, `codigo_barras`, `ocr`, `manual`, `sem_codigo` |
-| `configuracao_omr` | `jsonb` | Nao | Regioes, marcadores, limiares e normalizacao do codigo impresso |
-| `arquivo_base_id` | `uuid` | Sim | FK `arquivos.id` |
+| `tipo_codigo` | `varchar(30)` | Nao | `qr_code`, `codigo_barras`, `ocr_texto`, `sem_codigo` |
+| `origem_codigo` | `varchar(30)` | Nao | `externo`, `sistema_afixado`, `nenhum`; distingue a origem semantica conforme ADR-D010 |
+| `configuracao_omr` | `jsonb` | Nao | Canvas, regioes, marcadores, grade, limiares e normalizacao explicita do codigo impresso |
+| `artefato_checksum_sha256` | `char(64)` | Sim | Obrigatorio para homologar; referencia imutavel do artefato de impressao |
 | `status` | `varchar(20)` | Nao / `rascunho` | `rascunho`, `homologado`, `inativo` |
 | `criado_por` | `uuid` | Sim | FK `usuarios.id` |
+| `homologado_por` | `uuid` | Sim | FK `usuarios.id` |
 | `homologado_at` | `timestamptz` | Sim |  |
 | `created_at` | `timestamptz` | Nao / `now()` |  |
 | `updated_at` | `timestamptz` | Nao / `now()` |  |
 
 **Indices e restricoes:**
 
-- Unico com `NULLS NOT DISTINCT` em `(nucleo_id, nome, versao)`.
+- Unico, sem diferenciar maiusculas/minusculas e com `NULLS NOT DISTINCT`, em `(nucleo_id, lower(nome), versao)`.
 - `idx_modelos_cartao_nucleo_status`: `(nucleo_id, status)`.
-- Checks para `versao > 0`, quantidades positivas e `jsonb_typeof(alternativas) = 'array'`.
-- Versao homologada usada em aplicacao deve ser tratada como imutavel.
+- Checks para versao e quantidades positivas, JSON valido, semantica coerente entre tipo/origem do codigo, checksum SHA-256 e metadados de homologacao.
+- Regioes devem permanecer dentro do canvas; marcadores, grade, centros, normalizacao e limiares sao validados antes da homologacao.
+- Toda versao homologada e inativa e imutavel no banco. Uma versao homologada pode somente ser inativada; qualquer alteracao exige nova versao.
 
 ### 8.2 `provas`
 

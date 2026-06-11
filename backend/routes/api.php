@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\ModeloCartaoController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\PerfilController;
 use App\Http\Controllers\Api\StudentImportController;
@@ -73,5 +74,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/turmas/{turma}/aplicadores', [AplicadorTurmaController::class, 'index'])->name('turmas.aplicadores.index');
         Route::post('/turmas/{turma}/aplicadores', [AplicadorTurmaController::class, 'store'])->name('turmas.aplicadores.store');
         Route::delete('/turmas/{turma}/aplicadores/{vinculo}', [AplicadorTurmaController::class, 'destroy'])->name('turmas.aplicadores.destroy');
+
+        Route::get('/modelos-cartao', [ModeloCartaoController::class, 'index'])->name('modelos-cartao.index');
+        Route::post('/modelos-cartao', [ModeloCartaoController::class, 'store'])->name('modelos-cartao.store');
+        Route::get('/modelos-cartao/{modelo}', [ModeloCartaoController::class, 'show'])->name('modelos-cartao.show');
+        Route::patch('/modelos-cartao/{modelo}', [ModeloCartaoController::class, 'update'])->name('modelos-cartao.update');
+        Route::post('/modelos-cartao/{modelo}/homologar', [ModeloCartaoController::class, 'approve'])->name('modelos-cartao.approve');
+        Route::delete('/modelos-cartao/{modelo}', [ModeloCartaoController::class, 'destroy'])->name('modelos-cartao.destroy');
     });
 });

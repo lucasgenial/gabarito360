@@ -38,6 +38,11 @@ class Nucleo extends Model
         return $this->hasMany(Escola::class, 'nucleo_id');
     }
 
+    public function modelosCartao(): HasMany
+    {
+        return $this->hasMany(ModeloCartao::class, 'nucleo_id');
+    }
+
     public function auditorias(): HasMany
     {
         return $this->hasMany(Auditoria::class, 'nucleo_id');

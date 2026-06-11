@@ -151,6 +151,11 @@
 | GET | `/modelos-cartao` | Conforme escopo |
 | POST | `/modelos-cartao` | Administrador/gestor autorizado |
 | GET | `/modelos-cartao/{id}` | Conforme escopo |
+| PATCH | `/modelos-cartao/{id}` | Administrador/gestor autorizado; somente rascunho |
+| POST | `/modelos-cartao/{id}/homologar` | Administrador/gestor autorizado; configuracao completa |
+| DELETE | `/modelos-cartao/{id}` | Administrador/gestor autorizado; inativacao |
+
+Modelos globais sao gerenciados somente pelo administrador geral. O gestor de nucleo consulta modelos globais e gerencia apenas modelos do proprio nucleo. A resposta inclui a configuracao OMR completa e seus limiares versionados. A homologacao exige checksum SHA-256 do artefato, sem placeholders ou limiares pendentes, e torna a versao imutavel.
 
 ### 6.1 Exemplo de criacao de avaliacao
 

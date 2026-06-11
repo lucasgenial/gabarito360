@@ -85,6 +85,16 @@ class User extends Authenticatable
         return $this->hasMany(ImportacaoAluno::class, 'confirmado_por');
     }
 
+    public function modelosCartaoCriados(): HasMany
+    {
+        return $this->hasMany(ModeloCartao::class, 'criado_por');
+    }
+
+    public function modelosCartaoHomologados(): HasMany
+    {
+        return $this->hasMany(ModeloCartao::class, 'homologado_por');
+    }
+
     public function auditorias(): HasMany
     {
         return $this->hasMany(Auditoria::class, 'usuario_id');
