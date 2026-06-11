@@ -145,8 +145,9 @@
 | PATCH | `/provas/{id}/questoes/{questaoId}` | Administrador; gestor de nucleo no proprio escopo; somente rascunho |
 | POST | `/provas/{id}/publicar` | Administrador; gestor de nucleo no proprio escopo; exige `gabarito_oficial_id` completo |
 | POST | `/provas/{id}/finalizar` | Gestor autorizado; etapa futura |
-| POST | `/provas/{id}/turmas` | Gestor autorizado; MP-028 |
-| DELETE | `/provas/{id}/turmas/{turmaId}` | Gestor autorizado; MP-028 |
+| GET | `/provas/{id}/turmas` | Administrador, gestor de nucleo ou responsavel escolar no escopo autorizado |
+| POST | `/provas/{id}/turmas` | Administrador, gestor de nucleo ou responsavel escolar; prova publicada e turma ativa compativel |
+| DELETE | `/provas/{id}/turmas/{turmaId}` | Administrador, gestor de nucleo ou responsavel escolar no escopo autorizado |
 | GET | `/provas/{id}/gabaritos` | Administrador; gestor de nucleo no proprio escopo |
 | POST | `/provas/{id}/gabaritos` | Administrador; gestor de nucleo no proprio escopo; prova rascunho |
 | GET | `/provas/{id}/gabaritos/{gabaritoId}` | Administrador; gestor de nucleo no proprio escopo |
@@ -169,7 +170,9 @@ O MP-026 implementa versoes sequenciais de gabarito em rascunho, preenchimento i
 
 O MP-027 implementa `POST /provas/{id}/publicar`. O corpo deve informar `gabarito_oficial_id`, pertencente a prova e ainda em rascunho. A operacao valida novamente modelo homologado, configuracao da prova, quantidade de questoes ativas e completude das respostas. Em uma unica transacao, o gabarito selecionado se torna `vigente` e a prova se torna `publicada`; conflitos concorrentes nao geram um segundo gabarito vigente. Prova, questoes, gabarito e respostas oficiais ficam imutaveis apos a publicacao.
 
-Arquivamento, finalizacao, substituicao de gabarito vigente, recorrection e vinculo com turmas ainda nao possuem endpoint implementado.
+O MP-028 implementa listagem, criacao e remocao de vinculos entre provas publicadas e turmas. Provas pertencentes a um nucleo podem ser vinculadas apenas a turmas de escolas desse nucleo; provas pertencentes a uma escola somente podem ser vinculadas a turmas da propria escola. Turma, escola e nucleo devem estar ativos. Vinculos duplicados sao rejeitados e todas as alteracoes sao auditadas.
+
+Arquivamento, finalizacao, substituicao de gabarito vigente e recorrection ainda nao possuem endpoint implementado.
 
 ### 6.1 Exemplo de criacao de prova
 

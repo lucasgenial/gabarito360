@@ -68,6 +68,11 @@ class Prova extends Model
         return $this->hasMany(GabaritoOficial::class, 'prova_id');
     }
 
+    public function provaTurmas(): HasMany
+    {
+        return $this->hasMany(ProvaTurma::class, 'prova_id');
+    }
+
     public function ownerNucleoId(): string
     {
         if ($this->nucleo_id !== null) {

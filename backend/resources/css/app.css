@@ -327,6 +327,32 @@ p {
     margin-bottom: var(--space-0);
 }
 
+.accordion {
+    padding: var(--space-0);
+    overflow: hidden;
+}
+
+.accordion-summary {
+    display: flex;
+    min-height: var(--table-row-height);
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--card-padding);
+    cursor: pointer;
+}
+
+.accordion-summary:hover {
+    background: var(--background-surface-alt);
+}
+
+.accordion-content {
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--card-padding);
+    border-top: var(--input-border-width) solid var(--border-default);
+}
+
 .stack {
     display: flex;
     flex-direction: column;

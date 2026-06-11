@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\Admin\EscolaController;
 use App\Http\Controllers\Web\Admin\NucleoController;
 use App\Http\Controllers\Web\Admin\OrganizationPanelController;
+use App\Http\Controllers\Web\Admin\ProvaTurmaController;
 use App\Http\Controllers\Web\Admin\UsuarioController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Middleware\EnsureUserIsActive;
@@ -45,4 +46,8 @@ Route::prefix('admin')
         Route::post('/usuarios/{usuario}/perfis', [UsuarioController::class, 'assignProfile'])->name('usuarios.perfis.store');
         Route::delete('/usuarios/{usuario}/perfis/{vinculo}', [UsuarioController::class, 'revokeProfile'])->name('usuarios.perfis.destroy');
         Route::post('/usuarios/{usuario}/inativar', [UsuarioController::class, 'inactivate'])->name('usuarios.inactivate');
+
+        Route::get('/provas', [ProvaTurmaController::class, 'index'])->name('provas.index');
+        Route::post('/provas/{prova}/turmas', [ProvaTurmaController::class, 'store'])->name('provas.turmas.store');
+        Route::delete('/provas/{prova}/turmas/{turma}', [ProvaTurmaController::class, 'destroy'])->name('provas.turmas.destroy');
     });

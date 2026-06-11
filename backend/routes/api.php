@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\ModeloCartaoController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\PerfilController;
 use App\Http\Controllers\Api\ProvaController;
+use App\Http\Controllers\Api\ProvaTurmaController;
 use App\Http\Controllers\Api\StudentImportController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
@@ -89,6 +90,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/provas/{prova}', [ProvaController::class, 'show'])->name('provas.show');
         Route::patch('/provas/{prova}', [ProvaController::class, 'update'])->name('provas.update');
         Route::post('/provas/{prova}/publicar', [ProvaController::class, 'publish'])->name('provas.publish');
+        Route::get('/provas/{prova}/turmas', [ProvaTurmaController::class, 'index'])->name('provas.turmas.index');
+        Route::post('/provas/{prova}/turmas', [ProvaTurmaController::class, 'store'])->name('provas.turmas.store');
+        Route::delete('/provas/{prova}/turmas/{turma}', [ProvaTurmaController::class, 'destroy'])->name('provas.turmas.destroy');
         Route::get('/provas/{prova}/questoes', [ProvaController::class, 'questions'])->name('provas.questoes.index');
         Route::post('/provas/{prova}/questoes', [ProvaController::class, 'storeQuestion'])->name('provas.questoes.store');
         Route::get('/provas/{prova}/questoes/{questao}', [ProvaController::class, 'showQuestion'])->name('provas.questoes.show');

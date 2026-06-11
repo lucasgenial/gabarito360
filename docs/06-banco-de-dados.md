@@ -478,7 +478,7 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 - Checks para quantidades positivas e alternativas em formato de array.
 - Trigger exige modelo homologado global ou do mesmo nucleo e valida a correspondencia exata entre quantidades e alternativas.
 
-**Relacionamentos e regras importantes:** no MP-025, a API permite cadastro e edicao somente em rascunho e nao implementa publicacao, gabarito ou vinculo com turmas.
+**Relacionamentos e regras importantes:** a prova pertence exatamente a um nucleo ou escola, possui questoes, versoes de gabarito, turmas autorizadas e aplicacoes. Prova arquivada permanece consultavel, mas nao aceita novas aplicacoes.
 
 ### 8.3 `questoes`
 
@@ -576,7 +576,15 @@ Campos: `id uuid PK`, `codigo varchar(100) NOT NULL`, `descricao text`, `created
 | `vinculado_por` | `uuid` | Sim | FK `usuarios.id` |
 | `created_at` | `timestamptz` | Nao / `now()` |  |
 
-**Indices:** unico em `(prova_id, turma_id)`; indice em `(turma_id, data_prevista)`.
+**Indices e regras importantes:**
+
+- `uq_prova_turmas_prova_turma`: unico em `(prova_id, turma_id)`.
+- `idx_prova_turmas_turma_data`: `(turma_id, data_prevista)`.
+- FKs usam `ON DELETE RESTRICT` para prova e turma; `vinculado_por` usa `ON DELETE SET NULL`.
+- Trigger exige prova publicada e turma, escola e nucleo ativos.
+- Prova de nucleo somente pode ser vinculada a turma de escola do mesmo nucleo.
+- Prova de escola somente pode ser vinculada a turma da propria escola.
+- Vinculo e desvinculo exigem `CREATE_APPLICATIONS` no escopo da escola e geram auditoria.
 
 ## 9. Aplicacoes e participantes
 

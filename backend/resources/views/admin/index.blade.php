@@ -33,5 +33,13 @@
                 <a class="button button-primary" href="{{ route('admin.usuarios.index') }}" wire:navigate>Acessar usuarios</a>
             </article>
         @endif
+
+        @if ($access['provas'])
+            <article class="card">
+                <h2>Provas e turmas</h2>
+                <p>Consulte gabaritos vigentes e autorize turmas para provas publicadas.</p>
+                <a class="button button-primary" href="{{ route('admin.provas.index') }}" wire:navigate>Acessar provas</a>
+            </article>
+        @endif
     </div>
 @endsection

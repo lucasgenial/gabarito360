@@ -37,6 +37,11 @@
                         Usuarios
                     </a>
                 @endcan
+                @can('viewClassLinksAny', App\Models\Prova::class)
+                    <a class="nav-link {{ request()->routeIs('admin.provas.*') ? 'is-active' : '' }}" href="{{ route('admin.provas.index') }}" wire:navigate>
+                        Provas
+                    </a>
+                @endcan
             </nav>
         </aside>
 

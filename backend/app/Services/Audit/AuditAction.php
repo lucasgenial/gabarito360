@@ -50,6 +50,8 @@ enum AuditAction: string
     case EXAM_CREATED = 'prova.created';
     case EXAM_UPDATED = 'prova.updated';
     case EXAM_PUBLISHED = 'prova.published';
+    case EXAM_CLASS_LINKED = 'prova_turma.linked';
+    case EXAM_CLASS_UNLINKED = 'prova_turma.unlinked';
     case QUESTION_CREATED = 'questao.created';
     case QUESTION_UPDATED = 'questao.updated';
     case ANSWER_KEY_CREATED = 'gabarito_oficial.created';

@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.13.0
+  version: 0.14.0
   description: |
     Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos,
     vinculos operacionais, importacao validada de alunos por CSV, modelos versionados de cartao OMR
-    provas, questoes, versoes de gabarito oficial e publicacao transacional.
+    provas, questoes, versoes de gabarito oficial, publicacao e vinculos autorizados com turmas.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -1708,6 +1708,101 @@ paths:
           $ref: "#/components/responses/Conflict"
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/turmas:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/XRequestId"
+    get:
+      tags:
+        - Provas
+      summary: Listar turmas autorizadas para a prova
+      operationId: listExamClasses
+      security:
+        - bearerToken: []
+      parameters:
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Vinculos da prova com turmas no escopo autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProvaTurmaListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      tags:
+        - Provas
+      summary: Autorizar turma para receber prova publicada
+      operationId: linkExamClass
+      security:
+        - bearerToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProvaTurmaCreateRequest"
+      responses:
+        "201":
+          description: Turma vinculada a prova
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProvaTurmaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/provas/{prova}/turmas/{turma}:
+    parameters:
+      - $ref: "#/components/parameters/ProvaId"
+      - $ref: "#/components/parameters/TurmaId"
+      - $ref: "#/components/parameters/XRequestId"
+    delete:
+      tags:
+        - Provas
+      summary: Remover autorizacao da turma para a prova
+      operationId: unlinkExamClass
+      security:
+        - bearerToken: []
+      responses:
+        "200":
+          description: Vinculo removido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmptySuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/AuthorizationForbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalServerError"
   /api/v1/provas/{prova}/questoes:
@@ -4134,6 +4229,91 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/ProvaPublishData"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ProvaTurmaCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - turma_id
+      properties:
+        turma_id:
+          type: string
+          format: uuid
+        data_prevista:
+          type:
+            - string
+            - "null"
+          format: date
+    ProvaTurma:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - prova_id
+        - turma_id
+        - data_prevista
+        - vinculado_por
+        - turma
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        prova_id:
+          type: string
+          format: uuid
+        turma_id:
+          type: string
+          format: uuid
+        data_prevista:
+          type:
+            - string
+            - "null"
+          format: date
+        vinculado_por:
+          type:
+            - string
+            - "null"
+          format: uuid
+        turma:
+          $ref: "#/components/schemas/Turma"
+        created_at:
+          type: string
+          format: date-time
+    ProvaTurmaResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ProvaTurma"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+    ProvaTurmaListData:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProvaTurma"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+    ProvaTurmaListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          $ref: "#/components/schemas/ProvaTurmaListData"
         meta:
           $ref: "#/components/schemas/ResponseMeta"
     ProvaListData:

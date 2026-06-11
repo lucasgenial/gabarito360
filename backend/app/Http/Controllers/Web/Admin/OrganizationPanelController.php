@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Escola;
 use App\Models\Nucleo;
+use App\Models\Prova;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,6 +21,7 @@ class OrganizationPanelController extends Controller
             'nucleos' => $actor->can('viewAny', Nucleo::class),
             'escolas' => $actor->can('viewAny', Escola::class),
             'usuarios' => $actor->can('viewAny', User::class),
+            'provas' => $actor->can('viewClassLinksAny', Prova::class),
         ];
 
         abort_unless(in_array(true, $access, strict: true), 403);
