@@ -58,4 +58,13 @@ enum AuditAction: string
     case ANSWER_KEY_PUBLISHED = 'gabarito_oficial.published';
     case ANSWER_KEY_RESPONSE_CREATED = 'gabarito_resposta.created';
     case ANSWER_KEY_RESPONSE_UPDATED = 'gabarito_resposta.updated';
+    case APPLICATION_CREATED = 'aplicacao.created';
+    case APPLICATION_STARTED = 'aplicacao.started';
+    case APPLICATION_FINISHED = 'aplicacao.finished';
+    case READING_RECEIVED = 'leitura_cartao.received';
+    case READING_REVIEWED = 'leitura_cartao.reviewed';
+    case READING_CONFIRMED = 'leitura_cartao.confirmed';
+    case RESULT_CALCULATED = 'resultado.calculated';
+    case REPORT_REQUESTED = 'relatorio.requested';
+    case REPORT_COMPLETED = 'relatorio.completed';
 }

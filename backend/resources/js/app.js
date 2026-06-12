@@ -40,6 +40,23 @@ applyTheme(storedTheme());
 function initializeInterface() {
     applyTheme(storedTheme());
 
+    document.querySelectorAll('[data-application-realtime]').forEach((container) => {
+        if (container.dataset.initialized === 'true' || ! window.Echo) {
+            return;
+        }
+
+        container.dataset.initialized = 'true';
+        window.Echo.private(`applications.${container.dataset.applicationRealtime}`)
+            .listen('.application.progress.updated', ({ metrics }) => {
+                Object.entries(metrics).forEach(([key, value]) => {
+                    container.querySelectorAll(`[data-application-metric="${key}"]`)
+                        .forEach((target) => {
+                            target.textContent = value;
+                        });
+                });
+            });
+    });
+
     document.querySelectorAll('[data-tabs]').forEach((tabs) => {
         const tabList = tabs.querySelector('[role="tablist"]');
 

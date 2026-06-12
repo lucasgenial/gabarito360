@@ -65,6 +65,11 @@ Route::middleware(['auth', EnsureUserIsActive::class])
 
         Route::get('/correcoes', [OperationController::class, 'index'])->name('operations.index');
         Route::get('/aplicacoes/{aplicacao}/correcao', [OperationController::class, 'show'])->name('operations.show');
+        Route::post('/aplicacoes/{aplicacao}/iniciar', [OperationController::class, 'start'])->name('operations.start');
+        Route::post('/aplicacoes/{aplicacao}/finalizar', [OperationController::class, 'finish'])->name('operations.finish');
+        Route::post('/leituras/{leitura}/revisar', [OperationController::class, 'review'])->name('operations.readings.review');
+        Route::post('/leituras/{leitura}/confirmar', [OperationController::class, 'confirm'])->name('operations.readings.confirm');
+        Route::post('/aplicacoes/{aplicacao}/relatorio.csv', [OperationController::class, 'exportCsv'])->name('operations.report.csv');
 
         Route::get('/resultados/{resultado}', [ReportController::class, 'result'])->name('results.show');
         Route::get('/provas/{prova}/relatorio', [ReportController::class, 'exam'])->name('reports.exam');

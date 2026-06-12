@@ -6,7 +6,7 @@
     <header class="page-heading">
         <p class="eyebrow">Operacao</p>
         <h1>Acompanhar correcoes</h1>
-        <p>Snapshot persistido das aplicacoes autorizadas. Atualizacao em tempo real pertence ao R6.</p>
+        <p>Aplicacoes autorizadas com progresso persistido e atualizacao operacional em tempo real.</p>
     </header>
 
     <x-ui.card>

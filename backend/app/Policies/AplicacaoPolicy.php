@@ -4,11 +4,21 @@ namespace App\Policies;
 
 use App\Enums\PermissionCode;
 use App\Models\Aplicacao;
+use App\Models\Escola;
 use App\Models\User;
 use App\Services\Authorization\AuthorizationContext;
 
 class AplicacaoPolicy extends BasePolicy
 {
+    public function create(User $user, Escola $school): bool
+    {
+        return $this->authorize(
+            $user,
+            PermissionCode::CREATE_APPLICATIONS,
+            AuthorizationContext::school($school->nucleo_id, $school->id),
+        );
+    }
+
     public function view(User $user, Aplicacao $aplicacao): bool
     {
         return $this->authorizeInApplicationContext($user, PermissionCode::VIEW_APPLICATION_DASHBOARD, $aplicacao);
@@ -25,6 +35,16 @@ class AplicacaoPolicy extends BasePolicy
                 escolaId: $aplicacao->escola_id,
             ),
         );
+    }
+
+    public function confirmReading(User $user, Aplicacao $aplicacao): bool
+    {
+        return $this->authorizeOperationally($user, PermissionCode::CONFIRM_READINGS, $aplicacao);
+    }
+
+    public function correctReading(User $user, Aplicacao $aplicacao): bool
+    {
+        return $this->authorizeOperationally($user, PermissionCode::CORRECT_READINGS_BEFORE_CONFIRMATION, $aplicacao);
     }
 
     private function authorizeInApplicationContext(User $user, PermissionCode $permission, Aplicacao $aplicacao): bool
@@ -56,5 +76,20 @@ class AplicacaoPolicy extends BasePolicy
                 ->where('usuario_id', $user->id)
                 ->whereNull('fim_em')
                 ->exists();
+    }
+
+    private function authorizeOperationally(User $user, PermissionCode $permission, Aplicacao $aplicacao): bool
+    {
+        $aplicacao->loadMissing('escola');
+
+        return $this->authorize(
+            $user,
+            $permission,
+            AuthorizationContext::operational(
+                explicitlyLinked: $this->isOperationallyLinked($user, $aplicacao),
+                nucleoId: $aplicacao->escola->nucleo_id,
+                escolaId: $aplicacao->escola_id,
+            ),
+        );
     }
 }

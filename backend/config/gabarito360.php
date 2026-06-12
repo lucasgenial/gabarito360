@@ -16,4 +16,10 @@ return [
             'max_rows' => (int) env('GABARITO360_STUDENT_IMPORT_MAX_ROWS', 1000),
         ],
     ],
+
+    'omr' => [
+        'python_binary' => env('GABARITO360_OMR_PYTHON_BINARY', 'python'),
+        'config_path' => env('GABARITO360_OMR_CONFIG_PATH', base_path('../omr/config/model-v1.pre-homologation.json')),
+        'timeout_seconds' => (int) env('GABARITO360_OMR_TIMEOUT_SECONDS', 20),
+    ],
 ];

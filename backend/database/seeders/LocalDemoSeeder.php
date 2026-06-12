@@ -18,6 +18,7 @@ use App\Models\Aluno;
 use App\Models\Aplicacao;
 use App\Models\AplicacaoAluno;
 use App\Models\AplicacaoAplicador;
+use App\Models\AplicadorTurma;
 use App\Models\Arquivo;
 use App\Models\Cargo;
 use App\Models\CartaoResposta;
@@ -193,8 +194,38 @@ class LocalDemoSeeder extends Seeder
             }
 
             $exam = $this->createPublishedExam($admin, $nucleo, $turma, $discipline, $grade);
-            $this->createDemoApplication($admin, $escola, $turma, $exam);
+            $operator = $this->createDemoOperator($admin, $turma);
+            $this->createDemoApplication($admin, $operator, $escola, $turma, $exam);
         });
+    }
+
+    private function createDemoOperator(User $admin, Turma $class): User
+    {
+        $operator = User::query()->updateOrCreate(
+            ['email' => 'aplicador@gabarito360.local'],
+            [
+                'nome' => 'Aplicador Local',
+                'password' => 'Gabarito360@Local',
+                'status' => UserStatus::ACTIVE,
+            ],
+        );
+        $profile = Perfil::query()->where('codigo', UserRole::APPLICATOR->value)->firstOrFail();
+        UsuarioPerfil::query()->firstOrCreate(
+            [
+                'usuario_id' => $operator->id,
+                'perfil_id' => $profile->id,
+                'nucleo_id' => null,
+                'escola_id' => null,
+                'fim_at' => null,
+            ],
+            ['concedido_por' => $admin->id, 'inicio_at' => now()],
+        );
+        AplicadorTurma::query()->firstOrCreate(
+            ['turma_id' => $class->id, 'usuario_id' => $operator->id, 'fim_em' => null],
+            ['papel' => 'aplicador', 'inicio_em' => now()->toDateString()],
+        );
+
+        return $operator;
     }
 
     private function createPublishedExam(
@@ -292,7 +323,7 @@ class LocalDemoSeeder extends Seeder
         return $exam->refresh();
     }
 
-    private function createDemoApplication(User $admin, Escola $school, Turma $class, Prova $exam): void
+    private function createDemoApplication(User $admin, User $operator, Escola $school, Turma $class, Prova $exam): void
     {
         $answerKey = $exam->gabaritosOficiais()
             ->where('status', GabaritoOficialStatus::CURRENT)
@@ -311,7 +342,7 @@ class LocalDemoSeeder extends Seeder
             ],
         );
         AplicacaoAplicador::query()->firstOrCreate(
-            ['aplicacao_id' => $application->id, 'usuario_id' => $admin->id, 'papel' => 'responsavel', 'fim_at' => null],
+            ['aplicacao_id' => $application->id, 'usuario_id' => $operator->id, 'papel' => 'responsavel', 'fim_at' => null],
             ['inicio_at' => '2026-06-15 08:00:00'],
         );
 

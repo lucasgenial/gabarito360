@@ -30,6 +30,11 @@ class LeituraCartao extends Model
         return $this->belongsTo(CartaoResposta::class, 'cartao_resposta_id');
     }
 
+    public function arquivoOriginal(): BelongsTo
+    {
+        return $this->belongsTo(Arquivo::class, 'arquivo_original_id');
+    }
+
     public function respostasDetectadas(): HasMany
     {
         return $this->hasMany(RespostaDetectada::class, 'leitura_cartao_id');
@@ -45,7 +50,9 @@ class LeituraCartao extends Model
         return [
             'confianca_geral' => 'decimal:5',
             'requer_revisao' => 'boolean',
+            'omr_metadados' => 'array',
             'alertas' => 'array',
+            'revisada_at' => 'immutable_datetime',
             'confirmada_at' => 'immutable_datetime',
             'cancelada_at' => 'immutable_datetime',
         ];

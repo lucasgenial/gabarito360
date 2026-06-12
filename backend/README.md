@@ -165,6 +165,34 @@ app/
 
 Controllers devem permanecer finos. Actions coordenam casos de uso e transações; services concentram capacidades reutilizáveis; policies controlam autorização e escopo.
 
+## Operacao R6, Reverb e OMR
+
+O fluxo operacional cobre aplicacoes, leituras, revisao auditada, confirmacao
+idempotente, resultados vigentes e CSV privado. Para executar tempo real:
+
+```text
+Painel administrativo: admin@gabarito360.local / Gabarito360@Local
+App e operacao: aplicador@gabarito360.local / Gabarito360@Local
+```
+
+```powershell
+# No .env local: BROADCAST_CONNECTION=reverb
+php artisan reverb:start
+php artisan queue:work
+```
+
+O snapshot HTTP permanece disponivel em
+`GET /api/v1/aplicacoes/{aplicacao}/dashboard`.
+
+O worker OMR chama o contrato Python localizado em `../omr`:
+
+```powershell
+python -m pip install -r ../omr/requirements.txt
+python -m pytest ../omr/tests -q
+```
+
+O modelo atual e pre-homologacao e sempre exige revisao humana.
+
 ## Design System
 
 O painel usa os tokens oficiais de `docs/ui_token_gov_brasil.json` e componentes Blade compartilhados em `resources/views/components/ui`.

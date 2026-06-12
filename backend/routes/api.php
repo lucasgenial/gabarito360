@@ -1,18 +1,22 @@
 <?php
 
 use App\Http\Controllers\Api\AlunoController;
+use App\Http\Controllers\Api\AplicacaoController;
 use App\Http\Controllers\Api\AplicadorTurmaController;
+use App\Http\Controllers\Api\ApplicationDashboardController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LogoutController;
 use App\Http\Controllers\Api\Auth\MeController;
 use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\GabaritoController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\LeituraCartaoController;
 use App\Http\Controllers\Api\ModeloCartaoController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\PerfilController;
 use App\Http\Controllers\Api\ProvaController;
 use App\Http\Controllers\Api\ProvaTurmaController;
+use App\Http\Controllers\Api\RelatorioController;
 use App\Http\Controllers\Api\StudentImportController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
@@ -103,5 +107,24 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/provas/{prova}/gabaritos/{gabarito}/validacao', [GabaritoController::class, 'validation'])->name('provas.gabaritos.validation');
         Route::get('/provas/{prova}/gabaritos/{gabarito}/respostas', [GabaritoController::class, 'responses'])->name('provas.gabaritos.respostas.index');
         Route::put('/provas/{prova}/gabaritos/{gabarito}/respostas/{questao}', [GabaritoController::class, 'upsertResponse'])->name('provas.gabaritos.respostas.upsert');
+
+        Route::get('/aplicacoes', [AplicacaoController::class, 'index'])->name('aplicacoes.index');
+        Route::post('/aplicacoes', [AplicacaoController::class, 'store'])->name('aplicacoes.store');
+        Route::get('/aplicacoes/{aplicacao}', [AplicacaoController::class, 'show'])->name('aplicacoes.show');
+        Route::get('/aplicacoes/{aplicacao}/alunos', [AplicacaoController::class, 'students'])->name('aplicacoes.alunos.index');
+        Route::post('/aplicacoes/{aplicacao}/iniciar', [AplicacaoController::class, 'start'])->name('aplicacoes.start');
+        Route::post('/aplicacoes/{aplicacao}/finalizar', [AplicacaoController::class, 'finish'])->name('aplicacoes.finish');
+        Route::get('/aplicacoes/{aplicacao}/dashboard', ApplicationDashboardController::class)->name('aplicacoes.dashboard');
+
+        Route::post('/aplicacoes/{aplicacao}/leituras', [LeituraCartaoController::class, 'store'])->name('aplicacoes.leituras.store');
+        Route::get('/leituras/{leitura}', [LeituraCartaoController::class, 'show'])->name('leituras.show');
+        Route::post('/leituras/{leitura}/processar-omr', [LeituraCartaoController::class, 'processOmr'])->name('leituras.process-omr');
+        Route::patch('/leituras/{leitura}/revisar', [LeituraCartaoController::class, 'review'])->name('leituras.review');
+        Route::post('/leituras/{leitura}/confirmar', [LeituraCartaoController::class, 'confirm'])->name('leituras.confirm');
+
+        Route::get('/relatorios', [RelatorioController::class, 'index'])->name('relatorios.index');
+        Route::post('/aplicacoes/{aplicacao}/relatorios', [RelatorioController::class, 'store'])->name('aplicacoes.relatorios.store');
+        Route::get('/relatorios/{relatorio}', [RelatorioController::class, 'show'])->name('relatorios.show');
+        Route::get('/relatorios/{relatorio}/download', [RelatorioController::class, 'download'])->name('relatorios.download');
     });
 });
