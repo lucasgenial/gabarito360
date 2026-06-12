@@ -1,0 +1,1019 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gabarito360 — Perfis de Equipe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/gov.css" />
+  <style>
+    .page-shell {
+      padding: 24px 0 48px;
+    }
+    .page-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 10px 0 24px;
+    }
+    .page-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .page-note {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .kpi-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .kpi-role {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--fg);
+    }
+    .kpi-members {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .kpi-meta {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .badge-purple {
+      background: #efe7ff;
+      color: #6d28d9;
+    }
+    .badge-amber {
+      background: #fff4d6;
+      color: #a16207;
+    }
+
+    .profiles-stack {
+      display: grid;
+      gap: 18px;
+    }
+    .role-card {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(260px, 1.15fr) minmax(360px, 1.8fr) auto;
+      gap: 22px;
+      align-items: start;
+      transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+    .role-card.editing {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(19,81,180,.12), var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .role-summary {
+      display: flex;
+      gap: 16px;
+      min-width: 0;
+    }
+    .role-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      font-weight: 800;
+      flex-shrink: 0;
+      border: 1px solid transparent;
+    }
+    .role-icon.professor {
+      background: #e8f0ff;
+      color: var(--accent-dark);
+      border-color: #cfe0ff;
+    }
+    .role-icon.diretor {
+      background: #f4ebff;
+      color: #7c3aed;
+      border-color: #e4d5ff;
+    }
+    .role-icon.vice {
+      background: #eaf8ed;
+      color: var(--success);
+      border-color: #cfe8d4;
+    }
+    .role-icon.coordenador {
+      background: #fff5dd;
+      color: #a16207;
+      border-color: #fde2a6;
+    }
+    .role-title-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .role-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--fg);
+      line-height: 1.2;
+    }
+    .role-desc {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .role-fixed {
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface-2);
+      border-radius: var(--radius-pill);
+      padding: 6px 10px;
+    }
+
+    .perm-panel {
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #fff;
+    }
+    .perm-head,
+    .perm-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 160px;
+      gap: 12px;
+      align-items: center;
+    }
+    .perm-head {
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 12px 16px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .perm-row {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .perm-row:last-child {
+      border-bottom: 0;
+    }
+    .perm-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fg-2);
+    }
+    .perm-control {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .perm-visual {
+      min-width: 110px;
+      justify-content: flex-end;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .perm-visual.yes {
+      color: var(--success);
+    }
+    .perm-visual.no {
+      color: var(--danger);
+    }
+    .perm-state-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .perm-visual.yes .perm-state-icon {
+      background: rgba(22,136,33,.12);
+    }
+    .perm-visual.no .perm-state-icon {
+      background: rgba(229,34,7,.12);
+    }
+    .perm-check-wrap {
+      display: none;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 110px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--fg);
+    }
+    .role-card.editing .perm-visual {
+      display: none;
+    }
+    .role-card.editing .perm-check-wrap {
+      display: inline-flex;
+    }
+    .perm-check-wrap input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .perm-check-wrap input[type="checkbox"]:disabled {
+      cursor: not-allowed;
+      accent-color: var(--border);
+    }
+    .perm-lock-note {
+      display: none;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .perm-check-wrap input[type="checkbox"]:disabled + .perm-lock-note {
+      display: inline;
+    }
+
+    .role-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 170px;
+    }
+    .role-actions .edit-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .role-card.editing .role-actions-view {
+      display: none;
+    }
+    .role-card:not(.editing) .role-actions-edit {
+      display: none;
+    }
+    .role-actions .btn[disabled] {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(12, 19, 31, .56);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 120;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal-card {
+      width: min(980px, 100%);
+      max-height: calc(100vh - 48px);
+      overflow: hidden;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header,
+    .modal-footer {
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .modal-header {
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .modal-footer {
+      border-top: 1px solid var(--border-soft);
+      background: var(--surface-2);
+      flex-wrap: wrap;
+    }
+    .modal-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--fg);
+    }
+    .modal-sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .modal-close {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border-soft);
+      background: var(--surface);
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--fg);
+    }
+    .modal-body {
+      overflow: auto;
+      padding: 0 22px 8px;
+    }
+    .members-table td {
+      vertical-align: middle;
+    }
+    .member-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+    .member-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--accent-dark);
+      background: var(--accent-light);
+      flex-shrink: 0;
+    }
+    .member-info {
+      min-width: 0;
+    }
+    .member-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--fg);
+    }
+    .member-email {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      word-break: break-word;
+    }
+    .modal-meta {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      background: var(--fg);
+      color: #fff;
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      box-shadow: var(--shadow-md);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 140;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .toast.active {
+      display: inline-flex;
+      animation: toastIn .18s ease;
+    }
+    .toast.success {
+      background: var(--success);
+    }
+    .toast.info {
+      background: var(--accent-dark);
+    }
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1120px) {
+      .role-card {
+        grid-template-columns: 1fr;
+      }
+      .role-actions {
+        min-width: 0;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .role-actions .edit-group,
+      .role-actions-view,
+      .role-actions-edit {
+        flex-direction: row;
+        display: flex;
+        flex-wrap: wrap;
+      }
+    }
+    @media (max-width: 860px) {
+      .kpi-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .page-head {
+        flex-direction: column;
+      }
+      .page-actions {
+        width: 100%;
+      }
+    }
+    @media (max-width: 680px) {
+      .perm-head,
+      .perm-row {
+        grid-template-columns: minmax(0, 1fr) 124px;
+      }
+      .modal-backdrop {
+        padding: 12px;
+      }
+      .modal-header,
+      .modal-footer,
+      .modal-body {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+    @media (max-width: 560px) {
+      .kpi-strip {
+        grid-template-columns: 1fr;
+      }
+      .modal-title {
+        font-size: 18px;
+      }
+      .perm-head,
+      .perm-row {
+        grid-template-columns: 1fr;
+      }
+      .perm-control {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span> Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a>
+      <a href="provas.html">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html" class="active">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Marcos Silva</div>
+            <div class="user-role">Professor</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="escolas.html">Escolas</a>
+      <span class="sep">&gt;</span>
+      <a href="escola-detalhe.html">E.E. Prof. João Pessoa</a>
+      <span class="sep">&gt;</span>
+      <span>Gerenciar Perfis</span>
+    </div>
+
+    <section class="page-head">
+      <div>
+        <div class="eyebrow">Administração escolar</div>
+        <h1 class="page-title">Perfis de Equipe</h1>
+        <p class="page-sub">Gerencie os perfis e permissões da equipe pedagógica desta escola</p>
+        <div class="page-note">Perfis existentes são fixos e não podem ser excluídos</div>
+      </div>
+      <div class="page-actions">
+        <a href="escola-detalhe.html#equipe" class="btn btn-secondary">&larr; Voltar para Equipe</a>
+      </div>
+    </section>
+
+    <section class="kpi-strip" aria-label="Resumo de perfis">
+      <article class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-role">Professor</div>
+          <span class="badge badge-info">Perfil docente</span>
+        </div>
+        <div class="kpi-members">8</div>
+        <div class="kpi-meta">8 membros vinculados</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-role">Diretor Escolar</div>
+          <span class="badge badge-purple">Gestão total</span>
+        </div>
+        <div class="kpi-members">1</div>
+        <div class="kpi-meta">1 membro vinculado</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-role">Vice-Diretor</div>
+          <span class="badge badge-success">Gestão</span>
+        </div>
+        <div class="kpi-members">1</div>
+        <div class="kpi-meta">1 membro vinculado</div>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-role">Coordenador Pedagógico</div>
+          <span class="badge badge-amber">Pedagógico</span>
+        </div>
+        <div class="kpi-members">1</div>
+        <div class="kpi-meta">1 membro vinculado</div>
+      </article>
+    </section>
+
+    <section class="profiles-stack" aria-label="Perfis da equipe">
+      <article class="role-card" data-role="professor" data-role-name="Professor">
+        <div class="role-summary">
+          <div class="role-icon professor">P</div>
+          <div>
+            <div class="role-title-row">
+              <h2 class="role-title">Professor</h2>
+              <span class="badge badge-info">8 membros</span>
+            </div>
+            <p class="role-desc">Acessa turmas próprias, cria e corrige provas das suas disciplinas, com foco na rotina de sala de aula.</p>
+            <div class="role-fixed">Perfil fixo do sistema</div>
+          </div>
+        </div>
+
+        <div class="perm-panel">
+          <div class="perm-head">
+            <div>Permissão</div>
+            <div style="text-align:right;">Status</div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Criar provas</div>
+            <div class="perm-control">
+              <span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Criar provas" checked disabled><span>Ativar</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Corrigir provas</div>
+            <div class="perm-control">
+              <span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Corrigir provas" checked disabled><span>Ativar</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Ver relatórios da turma</div>
+            <div class="perm-control">
+              <span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Ver relatórios da turma" checked disabled><span>Ativar</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Ver relatórios da escola</div>
+            <div class="perm-control">
+              <span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Ver relatórios da escola" disabled><span>Ativar</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Gerenciar alunos</div>
+            <div class="perm-control">
+              <span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar alunos" disabled><span>Ativar</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Gerenciar turmas</div>
+            <div class="perm-control">
+              <span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar turmas" disabled><span>Ativar</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Gerenciar membros da equipe</div>
+            <div class="perm-control">
+              <span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Restrito</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar membros da equipe" data-locked="true" disabled><span>Bloqueado</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Definir padrões de prova</div>
+            <div class="perm-control">
+              <span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Definir padrões de prova" disabled><span>Ativar</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Configurações da escola</div>
+            <div class="perm-control">
+              <span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Restrito</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Configurações da escola" data-locked="true" disabled><span>Bloqueado</span></label>
+            </div>
+          </div>
+          <div class="perm-row">
+            <div class="perm-name">Exportar dados</div>
+            <div class="perm-control">
+              <span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span>
+              <label class="perm-check-wrap"><input type="checkbox" data-permission="Exportar dados" disabled><span>Ativar</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="role-actions">
+          <div class="role-actions-view edit-group">
+            <button type="button" class="btn btn-secondary btn-sm" data-edit>Editar permissões</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-open-members="professor">Ver membros</button>
+          </div>
+          <div class="role-actions-edit edit-group">
+            <button type="button" class="btn btn-primary btn-sm" data-save>Salvar</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-cancel>Cancelar</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="role-card" data-role="diretor" data-role-name="Diretor Escolar" data-locked="true">
+        <div class="role-summary">
+          <div class="role-icon diretor">D</div>
+          <div>
+            <div class="role-title-row">
+              <h2 class="role-title">Diretor Escolar</h2>
+              <span class="badge badge-purple">1 membro</span>
+            </div>
+            <p class="role-desc">Acesso completo à escola, aprova provas, acompanha relatórios completos e responde pela gestão institucional.</p>
+            <div class="role-fixed">Permissões fixas e bloqueadas</div>
+          </div>
+        </div>
+
+        <div class="perm-panel">
+          <div class="perm-head">
+            <div>Permissão</div>
+            <div style="text-align:right;">Status</div>
+          </div>
+          <div class="perm-row"><div class="perm-name">Criar provas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Criar provas" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Corrigir provas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Corrigir provas" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Ver relatórios da turma</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Ver relatórios da turma" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Ver relatórios da escola</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Ver relatórios da escola" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar alunos</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar alunos" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar turmas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar turmas" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar membros da equipe</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar membros da equipe" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Definir padrões de prova</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Definir padrões de prova" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Configurações da escola</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Configurações da escola" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Exportar dados</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Exportar dados" checked disabled data-locked="true"><span>Fixo</span></label></div></div>
+        </div>
+
+        <div class="role-actions">
+          <div class="role-actions-view edit-group">
+            <button type="button" class="btn btn-secondary btn-sm" data-edit data-locked-button="true">Editar permissões</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-open-members="diretor">Ver membros</button>
+          </div>
+          <div class="role-actions-edit edit-group">
+            <button type="button" class="btn btn-primary btn-sm" data-save>Salvar</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-cancel>Cancelar</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="role-card" data-role="vice" data-role-name="Vice-Diretor">
+        <div class="role-summary">
+          <div class="role-icon vice">V</div>
+          <div>
+            <div class="role-title-row">
+              <h2 class="role-title">Vice-Diretor</h2>
+              <span class="badge badge-success">1 membro</span>
+            </div>
+            <p class="role-desc">Apoia a gestão da escola, substitui o Diretor em sua ausência e acompanha a operação pedagógica diária.</p>
+            <div class="role-fixed">Perfil fixo do sistema</div>
+          </div>
+        </div>
+
+        <div class="perm-panel">
+          <div class="perm-head"><div>Permissão</div><div style="text-align:right;">Status</div></div>
+          <div class="perm-row"><div class="perm-name">Criar provas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Criar provas" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Corrigir provas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Corrigir provas" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Ver relatórios da turma</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Ver relatórios da turma" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Ver relatórios da escola</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Ver relatórios da escola" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar alunos</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar alunos" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar turmas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar turmas" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar membros da equipe</div><div class="perm-control"><span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar membros da equipe" disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Definir padrões de prova</div><div class="perm-control"><span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Definir padrões de prova" disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Configurações da escola</div><div class="perm-control"><span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Configurações da escola" disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Exportar dados</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Exportar dados" checked disabled><span>Ativar</span></label></div></div>
+        </div>
+
+        <div class="role-actions">
+          <div class="role-actions-view edit-group">
+            <button type="button" class="btn btn-secondary btn-sm" data-edit>Editar permissões</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-open-members="vice">Ver membros</button>
+          </div>
+          <div class="role-actions-edit edit-group">
+            <button type="button" class="btn btn-primary btn-sm" data-save>Salvar</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-cancel>Cancelar</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="role-card" data-role="coordenador" data-role-name="Coordenador Pedagógico">
+        <div class="role-summary">
+          <div class="role-icon coordenador">C</div>
+          <div>
+            <div class="role-title-row">
+              <h2 class="role-title">Coordenador Pedagógico</h2>
+              <span class="badge badge-amber">1 membro</span>
+            </div>
+            <p class="role-desc">Acompanha relatórios pedagógicos, orienta avaliações e configura padrões de prova sem acesso às rotinas administrativas sensíveis.</p>
+            <div class="role-fixed">Perfil fixo do sistema</div>
+          </div>
+        </div>
+
+        <div class="perm-panel">
+          <div class="perm-head"><div>Permissão</div><div style="text-align:right;">Status</div></div>
+          <div class="perm-row"><div class="perm-name">Criar provas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Criar provas" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Corrigir provas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Corrigir provas" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Ver relatórios da turma</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Ver relatórios da turma" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Ver relatórios da escola</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Ver relatórios da escola" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar alunos</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar alunos" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar turmas</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar turmas" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Gerenciar membros da equipe</div><div class="perm-control"><span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Gerenciar membros da equipe" disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Definir padrões de prova</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Definir padrões de prova" checked disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Configurações da escola</div><div class="perm-control"><span class="perm-visual no" data-state><span class="perm-state-icon"></span><span>Bloqueado</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Configurações da escola" disabled><span>Ativar</span></label></div></div>
+          <div class="perm-row"><div class="perm-name">Exportar dados</div><div class="perm-control"><span class="perm-visual yes" data-state><span class="perm-state-icon"></span><span>Permitido</span></span><label class="perm-check-wrap"><input type="checkbox" data-permission="Exportar dados" checked disabled><span>Ativar</span></label></div></div>
+        </div>
+
+        <div class="role-actions">
+          <div class="role-actions-view edit-group">
+            <button type="button" class="btn btn-secondary btn-sm" data-edit>Editar permissões</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-open-members="coordenador">Ver membros</button>
+          </div>
+          <div class="role-actions-edit edit-group">
+            <button type="button" class="btn btn-primary btn-sm" data-save>Salvar</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-cancel>Cancelar</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+</main>
+
+<div class="modal-backdrop" id="members-modal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="members-modal-title">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="members-modal-title">Membros do perfil</div>
+        <div class="modal-sub" id="members-modal-sub">Lista de colaboradores vinculados a este perfil.</div>
+      </div>
+      <button type="button" class="modal-close" id="close-members-modal" aria-label="Fechar modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <table class="table members-table">
+        <thead>
+          <tr>
+            <th>Membro</th>
+            <th>E-mail</th>
+            <th>Turmas / disciplinas</th>
+            <th style="width:110px;">Ação</th>
+          </tr>
+        </thead>
+        <tbody id="members-modal-body"></tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <div class="modal-meta" id="members-modal-meta">0 membro(s)</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="membro-cadastrar.html" class="btn btn-primary btn-sm">+ Adicionar membro</a>
+        <button type="button" class="btn btn-ghost btn-sm" id="close-members-modal-footer">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/app.js"></script>
+<script>
+  (function () {
+    var memberDirectory = {
+      professor: [
+        { initials: 'MR', name: 'Marcos Ribeiro', email: 'marcos.ribeiro@gabarito360.edu.br', assignment: 'Matemática  6º A', avatarStyle: '' },
+        { initials: 'LC', name: 'Luana Castro', email: 'luana.castro@gabarito360.edu.br', assignment: 'Ciências  7º A', avatarStyle: '' },
+        { initials: 'CM', name: 'Carlos Mendonça', email: 'carlos.mendonca@gabarito360.edu.br', assignment: 'Português  8º A', avatarStyle: '' },
+        { initials: 'FA', name: 'Fernanda Alves', email: 'fernanda.alves@gabarito360.edu.br', assignment: 'História  8º B', avatarStyle: '' },
+        { initials: 'AM', name: 'André Moraes', email: 'andre.moraes@gabarito360.edu.br', assignment: 'Geografia  9º A', avatarStyle: '' },
+        { initials: 'PL', name: 'Patricia Lima', email: 'patricia.lima@gabarito360.edu.br', assignment: 'Educação Física  9º B', avatarStyle: '' },
+        { initials: 'JO', name: 'Juliana Oliveira', email: 'juliana.oliveira@gabarito360.edu.br', assignment: 'Arte  6º ao 9º', avatarStyle: 'background:#fce7f3;color:#9d174d;' },
+        { initials: 'TP', name: 'Thiago Pereira', email: 'thiago.pereira@gabarito360.edu.br', assignment: 'Inglês  7º ao 9º', avatarStyle: 'background:#ede9fe;color:#5b21b6;' }
+      ],
+      diretor: [
+        { initials: 'AC', name: 'Ana Claudia Ferreira', email: 'ana.ferreira@gabarito360.edu.br', assignment: 'Direção geral  Escola inteira', avatarStyle: 'background:#dbeafe;color:#1d4ed8;' }
+      ],
+      vice: [
+        { initials: 'RM', name: 'Ricardo Matos', email: 'ricardo.matos@gabarito360.edu.br', assignment: 'Gestão escolar  Suporte ao diretor', avatarStyle: 'background:#dcfce7;color:#166534;' }
+      ],
+      coordenador: [
+        { initials: 'LS', name: 'Luciana Santos', email: 'luciana.santos@gabarito360.edu.br', assignment: 'Coordenação pedagógica  6º ao 9º', avatarStyle: 'background:#fef9c3;color:#854d0e;' }
+      ]
+    };
+
+    var roleLabels = {
+      professor: 'Professor',
+      diretor: 'Diretor Escolar',
+      vice: 'Vice-Diretor',
+      coordenador: 'Coordenador Pedagógico'
+    };
+
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.role-card'));
+    var modal = document.getElementById('members-modal');
+    var modalBody = document.getElementById('members-modal-body');
+    var modalTitle = document.getElementById('members-modal-title');
+    var modalSub = document.getElementById('members-modal-sub');
+    var modalMeta = document.getElementById('members-modal-meta');
+    var toast = document.getElementById('toast');
+
+    function showToast(message, type) {
+      toast.textContent = message;
+      toast.className = 'toast active ' + (type || 'info');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(function () {
+        toast.className = 'toast';
+      }, 3200);
+    }
+
+    function updateCardVisuals(card) {
+      var rows = card.querySelectorAll('.perm-row');
+      rows.forEach(function (row) {
+        var input = row.querySelector('input[type="checkbox"]');
+        var visual = row.querySelector('.perm-visual');
+        var stateText = input.checked ? 'Permitido' : (input.dataset.locked === 'true' ? 'Restrito' : 'Bloqueado');
+        visual.classList.remove('yes', 'no');
+        visual.classList.add(input.checked ? 'yes' : 'no');
+        visual.innerHTML = '<span class="perm-state-icon">' + (input.checked ? '' : '') + '</span><span>' + stateText + '</span>';
+      });
+    }
+
+    function setEditState(card, editing) {
+      var isLockedCard = card.dataset.locked === 'true';
+      var inputs = card.querySelectorAll('input[type="checkbox"]');
+      card.classList.toggle('editing', editing);
+      inputs.forEach(function (input) {
+        if (!editing) {
+          input.disabled = true;
+          return;
+        }
+        if (isLockedCard || input.dataset.locked === 'true') {
+          input.disabled = true;
+        } else {
+          input.disabled = false;
+        }
+      });
+      updateCardVisuals(card);
+    }
+
+    function openMembersModal(role) {
+      var members = memberDirectory[role] || [];
+      modalTitle.textContent = roleLabels[role] || 'Membros do perfil';
+      modalSub.textContent = 'Lista de membros vinculados ao perfil selecionado.';
+      modalMeta.textContent = members.length + (members.length === 1 ? ' membro vinculado' : ' membros vinculados');
+      modalBody.innerHTML = members.map(function (member) {
+        return '' +
+          '<tr>' +
+            '<td>' +
+              '<div class="member-cell">' +
+                '<div class="member-avatar" style="' + (member.avatarStyle || '') + '">' + member.initials + '</div>' +
+                '<div class="member-info">' +
+                  '<div class="member-name">' + member.name + '</div>' +
+                  '<div class="member-email">' + member.email + '</div>' +
+                '</div>' +
+              '</div>' +
+            '</td>' +
+            '<td class="mono">' + member.email + '</td>' +
+            '<td>' + member.assignment + '</td>' +
+            '<td><a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a></td>' +
+          '</tr>';
+      }).join('');
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMembersModal() {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    cards.forEach(function (card) {
+      updateCardVisuals(card);
+      setEditState(card, false);
+
+      var editButton = card.querySelector('[data-edit]');
+      var saveButton = card.querySelector('[data-save]');
+      var cancelButton = card.querySelector('[data-cancel]');
+      var memberButton = card.querySelector('[data-open-members]');
+      var inputs = card.querySelectorAll('input[type="checkbox"]');
+
+      editButton.addEventListener('click', function () {
+        if (card.dataset.locked === 'true') {
+          showToast('Permissões do perfil Diretor Escolar são fixas.', 'info');
+          return;
+        }
+        inputs.forEach(function (input) {
+          input.dataset.prev = input.checked ? '1' : '0';
+        });
+        setEditState(card, true);
+      });
+
+      saveButton.addEventListener('click', function () {
+        setEditState(card, false);
+        showToast('Permissões do perfil ' + card.dataset.roleName + ' atualizadas', 'success');
+      });
+
+      cancelButton.addEventListener('click', function () {
+        inputs.forEach(function (input) {
+          input.checked = input.dataset.prev === '1';
+        });
+        setEditState(card, false);
+      });
+
+      memberButton.addEventListener('click', function () {
+        openMembersModal(memberButton.getAttribute('data-open-members'));
+      });
+    });
+
+    document.getElementById('close-members-modal').addEventListener('click', closeMembersModal);
+    document.getElementById('close-members-modal-footer').addEventListener('click', closeMembersModal);
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        closeMembersModal();
+      }
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && modal.classList.contains('active')) {
+        closeMembersModal();
+      }
+    });
+  })();
+</script>
+</body>
+</html>

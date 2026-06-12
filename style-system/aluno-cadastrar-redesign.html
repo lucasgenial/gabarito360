@@ -1,0 +1,188 @@
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Cadastrar Aluno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .form-container { display: grid; grid-template-columns: 280px 1fr; gap: 32px; margin-top: 24px; align-items: start; }
+  .identity-card { text-align: center; padding: 32px 24px; background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--elev-raised); }
+  .photo-preview { 
+    width: 140px; height: 140px; border-radius: 50%; background: var(--accent-light); 
+    color: var(--accent-dark); display: grid; place-items: center; margin: 0 auto 20px;
+    border: 4px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden;
+    position: relative; transition: transform 0.2s;
+  }
+  .photo-preview:hover { transform: scale(1.02); }
+  .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-preview svg { width: 60px; height: 60px; opacity: 0.5; }
+  
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .form-actions { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-soft); display: flex; gap: 12px; justify-content: flex-end; }
+  
+  .identity-info { margin-bottom: 24px; }
+  .identity-info h3 { font-size: 16px; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+  .identity-info p { font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 850px) { 
+    .form-container { grid-template-columns: 1fr; }
+    .identity-card { max-width: 400px; margin: 0 auto; width: 100%; }
+  }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a><a href="provas.html">Provas</a>
+      <a href="turmas.html" class="active">Turmas</a>
+      <a href="escolas.html">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Maria Silva</div>
+            <div class="user-role">Coordenadora · Rede Municipal</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb"><span>Início</span><span class="sep">/</span><a href="turmas.html">Turmas</a><span class="sep">/</span><a id="link-turma" href="turma-detalhe-2.html">Turma</a><span class="sep">/</span><span>Novo Aluno</span></div>
+  
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title">Cadastrar Novo Aluno</h1>
+      <p class="page-sub">Preencha os dados básicos para matricular o aluno no sistema.</p>
+    </div>
+  </div>
+
+  <form id="form-cadastro" class="form-container" onsubmit="event.preventDefault(); alert('Aluno cadastrado com sucesso!'); location.href='turma-detalhe-2.html?turma='+document.getElementById('turma-sel').value;">
+    
+    <aside class="identity-card">
+      <div class="photo-preview" id="photo-preview">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="identity-info">
+        <h3 id="preview-nome">Novo Aluno</h3>
+        <p id="preview-turma">Série / Turma</p>
+      </div>
+      <label class="btn btn-secondary btn-block" style="cursor:pointer;">
+        Selecionar Foto
+        <input type="file" id="inp-foto" accept="image/*" style="display:none;" onchange="previewImage(this)" />
+      </label>
+      <p style="font-size:11px;color:var(--muted);margin-top:12px;">JPG ou PNG até 2MB</p>
+    </aside>
+
+    <div class="card card-pad" style="flex:1;">
+      <div class="form-grid">
+        <div class="field">
+          <label>Nome completo do aluno</label>
+          <input class="input" id="inp-nome" required placeholder="Ex: João da Silva Santos" oninput="updatePreview()" />
+        </div>
+        <div class="field">
+          <label>Nº de Matrícula</label>
+          <input class="input" required placeholder="Ex: 2026.00000" />
+        </div>
+        <div class="field">
+          <label>Data de Nascimento</label>
+          <input class="input" type="date" required />
+        </div>
+        <div class="field">
+          <label>Turma de Destino</label>
+          <select class="select" id="turma-sel" required onchange="updatePreview()">
+            <option value="9A">9º Ano A</option>
+            <option value="9B">9º Ano B</option>
+            <option value="8A">8º Ano A</option>
+            <option value="8B">8º Ano B</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <label>Nome do Responsável (Pai/Mãe/Tutor)</label>
+          <input class="input" placeholder="Ex: Maria de Souza Silva" />
+        </div>
+        <div class="field">
+          <label>CPF do Aluno (opcional)</label>
+          <input class="input" placeholder="000.000.000-00" />
+        </div>
+        <div class="field">
+          <label>Gênero</label>
+          <select class="select">
+            <option value="">Selecione...</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+            <option value="O">Outro / Não informar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="history.back()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar Cadastro</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  var params = new URLSearchParams(location.search);
+  var key = params.get('turma') || '9A';
+  var sel = document.getElementById('turma-sel');
+  if(sel) sel.value = key;
+  
+  var linkTurma = document.getElementById('link-turma');
+  if(linkTurma) {
+    linkTurma.href = 'turma-detalhe-2.html?turma=' + key;
+    linkTurma.textContent = 'Turma ' + key;
+  }
+
+  function updatePreview() {
+    var nome = document.getElementById('inp-nome').value;
+    var turma = document.getElementById('turma-sel').options[document.getElementById('turma-sel').selectedIndex].text;
+    document.getElementById('preview-nome').textContent = nome || 'Novo Aluno';
+    document.getElementById('preview-turma').textContent = turma || 'Série / Turma';
+  }
+
+  function previewImage(input) {
+    var preview = document.getElementById('photo-preview');
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        preview.innerHTML = '<img src="' + e.target.result + '" alt="Foto do Aluno">';
+        preview.style.borderStyle = 'solid';
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+  updatePreview();
+
+  // Menu do usuário
+  (function() {
+    var trigger = document.getElementById('user-menu-trigger');
+    var menu = document.getElementById('user-menu');
+    if (!trigger || !menu) return;
+    trigger.addEventListener('click', function(e) { e.stopPropagation(); menu.classList.toggle('active'); });
+    document.addEventListener('click', function(e) { if (!menu.contains(e.target) && e.target !== trigger) menu.classList.remove('active'); });
+  })();
+</script>
+</body>
+</html>

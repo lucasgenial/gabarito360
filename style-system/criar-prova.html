@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Criar prova</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .editor-grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; margin-top: 20px; align-items: start; }
+  .sticky { position: sticky; top: 84px; }
+  .gabarito-card { padding: 22px; }
+  .progress-track { height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .progress-track > div { height: 100%; background: var(--success); width: 0; transition: width .25s; }
+  .q-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 28px; margin-top: 16px; }
+  .q-row { display: flex; align-items: center; gap: 14px; padding: 8px 10px; border-radius: 8px; }
+  .q-row:hover { background: var(--surface-2); }
+  .q-num { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--muted); width: 28px; }
+  .q-row[data-answer] .q-num { color: var(--accent); }
+  .bubbles { display: flex; gap: 8px; }
+  .bubble {
+    width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border);
+    display: grid; place-items: center; font-size: 14px; font-weight: 700; color: var(--muted);
+    cursor: pointer; transition: all .12s; background: #fff; user-select: none;
+  }
+  .bubble:hover { border-color: var(--accent); color: var(--accent); }
+  .bubble.marked { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .stepper { display: flex; gap: 0; margin-bottom: 4px; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .step .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font-size: 12px; }
+  .step.done .dot { background: var(--success); color: #fff; }
+  .step.active .dot { background: var(--accent); color: #fff; }
+  .step .line { width: 40px; height: 2px; background: var(--border); margin: 0 10px; }
+  @media (max-width: 900px){ .editor-grid{grid-template-columns:1fr;} .sticky{position:static;} .q-grid{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a>
+      <a href="provas.html" class="active">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Marcos Silva</div>
+            <div class="user-role">Professor</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb"><span>Início</span><span class="sep">/</span><a href="provas.html">Provas</a><span class="sep">/</span><span>Nova prova</span></div>
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title">Criar prova e gabarito oficial</h1>
+      <p class="page-sub">Defina os dados da prova e marque o gabarito que o OMR vai usar na correção</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary">Salvar rascunho</button>
+      <button class="btn btn-success">Publicar gabarito</button>
+    </div>
+  </div>
+
+  <div class="stepper" style="margin-top:20px;">
+    <div class="step done"><span class="dot">✓</span> Dados</div><span class="line"></span>
+    <div class="step active"><span class="dot">2</span> Gabarito oficial</div><span class="line"></span>
+    <div class="step"><span class="dot">3</span> Cartão &amp; turmas</div>
+  </div>
+
+  <div class="editor-grid">
+    <!-- Painel de dados -->
+    <div class="sticky stack">
+      <div class="card card-pad">
+        <div class="field"><label>Título da prova</label><input class="input" value="Avaliação Bimestral — Matemática" /></div>
+        <div class="field"><label>Disciplina</label>
+          <select class="select"><option>Matemática</option><option>Português</option><option>Ciências</option></select>
+        </div>
+        <div class="field"><label>Série / ano</label>
+          <select class="select"><option>9º ano — Fundamental</option><option>8º ano — Fundamental</option></select>
+        </div>
+        <div class="field">
+          <label>Nº de questões</label>
+          <input class="input num" type="number" value="20" id="num-questions" />
+          <div class="field-help">Cada questão tem 5 alternativas (A–E)</div>
+        </div>
+      </div>
+
+      <!-- Padrões de Prova (expansível) -->
+      <div class="card card-pad" id="padroes-card" style="padding:0;overflow:hidden;">
+        <button type="button" id="padroes-toggle"
+          style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:none;border:0;cursor:pointer;font-size:14px;font-weight:600;color:var(--fg);">
+          <span style="display:flex;align-items:center;gap:8px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Padrões desta prova
+          </span>
+          <svg id="padroes-chevron" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="transition:transform .2s;"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div id="padroes-body" style="display:none;padding:0 22px 20px;border-top:1px solid var(--border-soft);">
+          <p style="font-size:12px;color:var(--muted);margin:12px 0 16px;">Ajuste as configurações específicas para esta prova. Os padrões abaixo foram herdados das configurações do sistema.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="field">
+              <label for="p-alternativas">Alternativas por questão</label>
+              <select id="p-alternativas" class="select">
+                <option>3 alternativas (A, B, C)</option>
+                <option>4 alternativas (A, B, C, D)</option>
+                <option selected>5 alternativas (A, B, C, D, E)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="p-nota-max">Nota máxima</label>
+              <input id="p-nota-max" type="number" class="input" value="10" min="1" max="100">
+            </div>
+            <div class="field">
+              <label for="p-pontuacao">Tipo de pontuação</label>
+              <select id="p-pontuacao" class="select">
+                <option selected>Pesos iguais por questão</option>
+                <option>Pesos personalizados por questão</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="p-escola">Escola</label>
+              <select id="p-escola" class="select">
+                <option>E.E. Prof. João Pessoa</option>
+                <option>EMEF Monteiro Lobato</option>
+                <option>CEJA Centro</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" checked style="accent-color:var(--accent);"> Anular questão se todas marcadas
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+              <input type="checkbox" checked style="accent-color:var(--accent);"> Gerar cartão-resposta em PDF
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="card card-pad">
+        <div class="row-between"><b style="font-size:14px;">Gabarito preenchido</b><span class="num" data-gabarito-count style="font-weight:700;color:var(--accent);">0 / 20</span></div>
+        <div class="progress-track"><div data-gabarito-bar></div></div>
+        <p class="field-help" style="margin-top:10px;">Clique nas bolhas à direita para definir a resposta correta de cada questão.</p>
+      </div>
+    </div>
+
+    <!-- Editor de bolhas -->
+    <div class="card gabarito-card">
+      <div class="row-between" style="margin-bottom:4px;">
+        <h3 style="font-size:17px;">Folha de respostas oficial</h3>
+        <span class="badge badge-info">A · B · C · D · E</span>
+      </div>
+      <div class="q-grid" data-gabarito id="gabarito"></div>
+    </div>
+  </div>
+  <div style="height:48px"></div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  // Padrões expansível
+  document.getElementById('padroes-toggle').addEventListener('click', function() {
+    var body = document.getElementById('padroes-body');
+    var chevron = document.getElementById('padroes-chevron');
+    var open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    chevron.style.transform = open ? '' : 'rotate(180deg)';
+  });
+  // gera 20 questões com 5 alternativas
+  (function () {
+    var grid = document.getElementById('gabarito');
+    var opts = ['A','B','C','D','E'];
+    var preset = {1:'C',2:'A',3:'E',4:'B',5:'D',6:'A',7:'C'}; // algumas já respondidas
+    for (var q = 1; q <= 20; q++) {
+      var row = document.createElement('div');
+      row.className = 'q-row';
+      var bubbles = opts.map(function (o) {
+        var marked = preset[q] === o ? ' marked' : '';
+        return '<div class="bubble' + marked + '" data-opt="' + o + '">' + o + '</div>';
+      }).join('');
+      if (preset[q]) row.setAttribute('data-answer', preset[q]);
+      row.innerHTML = '<span class="q-num">' + (q < 10 ? '0' : '') + q + '</span><div class="bubbles">' + bubbles + '</div>';
+      grid.appendChild(row);
+    }
+    initGabaritoEditor();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 &mdash; Cadastrar Novo Membro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .member-page { padding-bottom: 40px; }
+  .member-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    margin-top: 20px;
+    align-items: start;
+  }
+  .identity-card,
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .identity-card {
+    padding: 24px 20px;
+    position: sticky;
+    top: 88px;
+    text-align: center;
+  }
+  .avatar-preview {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #f6f8fb 0%, #edf2f9 100%);
+    color: var(--muted);
+    border: 3px solid #fff;
+    box-shadow: 0 8px 24px rgba(28,39,51,0.12);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .avatar-preview svg { width: 60px; height: 60px; opacity: .5; }
+  .avatar-preview.has-photo {
+    font-size: 42px;
+    font-weight: 800;
+    color: #fff;
+    font-family: var(--font-mono);
+  }
+  .upload-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  .identity-details {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-soft);
+    text-align: left;
+  }
+  .identity-label {
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .identity-value {
+    font-size: 14px;
+    color: var(--fg);
+    font-weight: 600;
+    min-height: 20px;
+    word-break: break-word;
+  }
+  .identity-block + .identity-block { margin-top: 14px; }
+  .form-main {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .section-head {
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .section-head h2 {
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+  .section-head p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .section-body { padding: 22px 24px 24px; }
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 18px;
+  }
+  .full-width { grid-column: 1 / -1; }
+  .inline-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding-top: 10px;
+  }
+  .radio-option,
+  .check-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--fg-2);
+    cursor: pointer;
+  }
+  .radio-option input,
+  .check-option input { accent-color: var(--accent); }
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 14px;
+  }
+  .section-hidden { display: none; }
+  .action-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 6px;
+    padding-top: 8px;
+  }
+  .toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    min-width: 280px;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    background: var(--success);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateY(16px);
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 200;
+    font-weight: 700;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .field input:invalid:focus,
+  .field select:invalid:focus,
+  .field textarea:invalid:focus {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(229,34,7,0.12);
+  }
+  @media (max-width: 960px) {
+    .member-layout { grid-template-columns: 1fr; }
+    .identity-card { position: static; }
+  }
+  @media (max-width: 720px) {
+    .form-grid-2,
+    .checkbox-grid { grid-template-columns: 1fr; }
+    .action-bar { flex-direction: column-reverse; }
+    .action-bar .btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>&#x1F1E7;&#x1F1F7; Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a>
+      <a href="provas.html">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html" class="active">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Marcos Silva</div>
+            <div class="user-role">Professor</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configura&ccedil;&otilde;es</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container member-page">
+  <div class="breadcrumb">
+    <a href="escolas.html">Escolas</a><span class="sep">/</span>
+    <a href="escola-detalhe.html">E.E. Prof. Jo&atilde;o Pessoa</a><span class="sep">/</span>
+    <a href="escola-detalhe.html#equipe">Equipe</a><span class="sep">/</span>
+    <span>Novo Membro</span>
+  </div>
+
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title">Cadastrar Novo Membro</h1>
+      <p class="page-sub">Cadastre um novo integrante da equipe escolar e defina seu perfil de acesso.</p>
+    </div>
+  </div>
+
+  <form id="member-form" class="member-layout">
+    <aside class="identity-card">
+      <div class="avatar-preview" id="avatar-preview" aria-label="Pr&eacute;-visualiza&ccedil;&atilde;o do avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <button type="button" class="btn btn-secondary btn-block" id="upload-trigger">Fazer upload</button>
+      <p class="upload-note">Simula&ccedil;&atilde;o de foto com iniciais coloridas.</p>
+
+      <div class="identity-details">
+        <div class="identity-block">
+          <div class="identity-label">Nome</div>
+          <div class="identity-value" id="preview-name">Nome do membro</div>
+        </div>
+        <div class="identity-block">
+          <div class="identity-label">Cargo / Perfil</div>
+          <div class="identity-value" id="preview-role">&mdash;</div>
+        </div>
+        <div class="identity-block">
+          <div class="identity-label">E-mail</div>
+          <div class="identity-value" id="preview-email">&mdash;</div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="form-main">
+      <section class="section-card">
+        <div class="section-head">
+          <h2>Perfil e Acesso</h2>
+          <p>Defina o tipo de usu&aacute;rio e a situa&ccedil;&atilde;o do membro na unidade escolar.</p>
+        </div>
+        <div class="section-body">
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="perfil">Perfil</label>
+              <select class="select" id="perfil" name="perfil" required>
+                <option value="">&mdash; Selecione o perfil &mdash;</option>
+                <option value="Professor">Professor</option>
+                <option value="Diretor Escolar">Diretor Escolar</option>
+                <option value="Vice-Diretor">Vice-Diretor</option>
+                <option value="Coordenador Pedag&oacute;gico">Coordenador Pedag&oacute;gico</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="data_inicio">Data de in&iacute;cio</label>
+              <input class="input" type="date" id="data_inicio" name="data_inicio" />
+            </div>
+            <div class="field full-width">
+              <label>Status</label>
+              <div class="inline-options">
+                <label class="radio-option"><input type="radio" name="status" value="Ativo" checked /> Ativo</label>
+                <label class="radio-option"><input type="radio" name="status" value="Inativo" /> Inativo</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <h2>Dados Pessoais</h2>
+          <p>Informe os dados b&aacute;sicos de identifica&ccedil;&atilde;o e contato do membro.</p>
+        </div>
+        <div class="section-body">
+          <div class="form-grid-2">
+            <div class="field full-width">
+              <label for="nome">Nome completo</label>
+              <input class="input" id="nome" name="nome" required placeholder="Ex: Ana Paula Ferreira" />
+            </div>
+            <div class="field">
+              <label for="cpf">CPF</label>
+              <input class="input" id="cpf" name="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" />
+            </div>
+            <div class="field">
+              <label for="data_nascimento">Data de nascimento</label>
+              <input class="input" type="date" id="data_nascimento" name="data_nascimento" />
+            </div>
+            <div class="field">
+              <label for="telefone">Telefone</label>
+              <input class="input" id="telefone" name="telefone" inputmode="numeric" maxlength="15" placeholder="(00) 00000-0000" />
+            </div>
+            <div class="field full-width">
+              <label for="email">E-mail</label>
+              <input class="input" type="email" id="email" name="email" placeholder="nome@escola.gov.br" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <h2>Forma&ccedil;&atilde;o Acad&ecirc;mica</h2>
+          <p>Registre a forma&ccedil;&atilde;o principal e certifica&ccedil;&otilde;es complementares.</p>
+        </div>
+        <div class="section-body">
+          <div class="form-grid-2">
+            <div class="field full-width">
+              <label for="graduacao">Gradua&ccedil;&atilde;o / Licenciatura</label>
+              <input class="input" id="graduacao" name="graduacao" placeholder="Ex: Licenciatura em Matem&aacute;tica" />
+            </div>
+            <div class="field full-width">
+              <label for="especializacao">Especializa&ccedil;&atilde;o / P&oacute;s-gradua&ccedil;&atilde;o</label>
+              <input class="input" id="especializacao" name="especializacao" placeholder="Opcional" />
+            </div>
+            <div class="field full-width">
+              <label for="registro_profissional">Registro profissional (CRP, CREF, etc.)</label>
+              <input class="input" id="registro_profissional" name="registro_profissional" placeholder="Opcional" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card section-hidden" id="teacher-section">
+        <div class="section-head">
+          <h2>Disciplinas e Turmas</h2>
+          <p>Selecione as disciplinas ministradas e as turmas vinculadas ao professor.</p>
+        </div>
+        <div class="section-body">
+          <div class="field">
+            <label>Disciplinas</label>
+            <div class="checkbox-grid">
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Matem&aacute;tica" /> Matem&aacute;tica</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Portugu&ecirc;s" /> Portugu&ecirc;s</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Hist&oacute;ria" /> Hist&oacute;ria</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Geografia" /> Geografia</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Ci&ecirc;ncias" /> Ci&ecirc;ncias</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Ed. F&iacute;sica" /> Ed. F&iacute;sica</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Arte" /> Arte</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Ingl&ecirc;s" /> Ingl&ecirc;s</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Espanhol" /> Espanhol</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Filosofia" /> Filosofia</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Sociologia" /> Sociologia</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="F&iacute;sica" /> F&iacute;sica</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Qu&iacute;mica" /> Qu&iacute;mica</label>
+              <label class="check-option"><input type="checkbox" name="disciplinas" value="Biologia" /> Biologia</label>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Turmas</label>
+            <div class="checkbox-grid">
+              <label class="check-option"><input type="checkbox" name="turmas" value="6&ordm; A" /> 6&ordm; A</label>
+              <label class="check-option"><input type="checkbox" name="turmas" value="6&ordm; B" /> 6&ordm; B</label>
+              <label class="check-option"><input type="checkbox" name="turmas" value="7&ordm; A" /> 7&ordm; A</label>
+              <label class="check-option"><input type="checkbox" name="turmas" value="7&ordm; B" /> 7&ordm; B</label>
+              <label class="check-option"><input type="checkbox" name="turmas" value="8&ordm; A" /> 8&ordm; A</label>
+              <label class="check-option"><input type="checkbox" name="turmas" value="8&ordm; B" /> 8&ordm; B</label>
+              <label class="check-option"><input type="checkbox" name="turmas" value="9&ordm; A" /> 9&ordm; A</label>
+              <label class="check-option"><input type="checkbox" name="turmas" value="9&ordm; B" /> 9&ordm; B</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card">
+        <div class="section-head">
+          <h2>Observa&ccedil;&otilde;es</h2>
+          <p>Inclua informa&ccedil;&otilde;es adicionais relevantes para a gest&atilde;o da equipe.</p>
+        </div>
+        <div class="section-body">
+          <div class="field" style="margin-bottom:0;">
+            <label for="observacoes">Observa&ccedil;&otilde;es</label>
+            <textarea class="input" id="observacoes" name="observacoes" rows="3" placeholder="Campo livre para observa&ccedil;&otilde;es internas."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <div class="action-bar">
+        <a href="escola-detalhe.html" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary" id="submit-button">Salvar Membro</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast-success">Membro cadastrado com sucesso!</div>
+
+<script src="js/app.js"></script>
+<script>
+  (function () {
+    var form = document.getElementById('member-form');
+    var nameInput = document.getElementById('nome');
+    var profileInput = document.getElementById('perfil');
+    var emailInput = document.getElementById('email');
+    var cpfInput = document.getElementById('cpf');
+    var phoneInput = document.getElementById('telefone');
+    var teacherSection = document.getElementById('teacher-section');
+    var avatarPreview = document.getElementById('avatar-preview');
+    var uploadTrigger = document.getElementById('upload-trigger');
+    var toast = document.getElementById('toast-success');
+    var submitButton = document.getElementById('submit-button');
+    var previewName = document.getElementById('preview-name');
+    var previewRole = document.getElementById('preview-role');
+    var previewEmail = document.getElementById('preview-email');
+    var placeholderIcon = avatarPreview.innerHTML;
+
+    function onlyDigits(value) {
+      return value.replace(/\D/g, '');
+    }
+
+    function formatCPF(value) {
+      var digits = onlyDigits(value).slice(0, 11);
+      digits = digits.replace(/(\d{3})(\d)/, '$1.$2');
+      digits = digits.replace(/(\d{3})(\d)/, '$1.$2');
+      digits = digits.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      return digits;
+    }
+
+    function formatPhone(value) {
+      var digits = onlyDigits(value).slice(0, 11);
+      if (digits.length <= 10) {
+        digits = digits.replace(/(\d{2})(\d)/, '($1) $2');
+        digits = digits.replace(/(\d{4})(\d{1,4})$/, '$1-$2');
+        return digits;
+      }
+      digits = digits.replace(/(\d{2})(\d)/, '($1) $2');
+      digits = digits.replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+      return digits;
+    }
+
+    function getInitials(name) {
+      var parts = (name || '').trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return 'NM';
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function getAvatarColors(seed) {
+      var palettes = [
+        ['#1351b4', '#0c326f'],
+        ['#168821', '#0d5e17'],
+        ['#006b5d', '#004b41'],
+        ['#7b2cbf', '#5a189a'],
+        ['#b45f06', '#8c4704'],
+        ['#c2185b', '#880e4f']
+      ];
+      var total = 0;
+      var base = seed || 'G360';
+      for (var i = 0; i < base.length; i++) total += base.charCodeAt(i);
+      return palettes[total % palettes.length];
+    }
+
+    function renderPlaceholderAvatar() {
+      avatarPreview.classList.remove('has-photo');
+      avatarPreview.style.background = 'linear-gradient(180deg, #f6f8fb 0%, #edf2f9 100%)';
+      avatarPreview.textContent = '';
+      avatarPreview.innerHTML = placeholderIcon;
+    }
+
+    function renderInitialsAvatar() {
+      var name = nameInput.value.trim();
+      var initials = getInitials(name);
+      var colors = getAvatarColors(name);
+      avatarPreview.classList.add('has-photo');
+      avatarPreview.style.background = 'linear-gradient(135deg, ' + colors[0] + ' 0%, ' + colors[1] + ' 100%)';
+      avatarPreview.textContent = initials;
+    }
+
+    function updatePreview() {
+      previewName.textContent = nameInput.value.trim() || 'Nome do membro';
+      previewRole.innerHTML = profileInput.value || '&mdash;';
+      previewEmail.textContent = emailInput.value.trim() || '—';
+    }
+
+    function toggleTeacherSection() {
+      teacherSection.classList.toggle('section-hidden', profileInput.value !== 'Professor');
+    }
+
+    cpfInput.addEventListener('input', function () {
+      cpfInput.value = formatCPF(cpfInput.value);
+    });
+
+    phoneInput.addEventListener('input', function () {
+      phoneInput.value = formatPhone(phoneInput.value);
+    });
+
+    nameInput.addEventListener('input', function () {
+      updatePreview();
+      if (avatarPreview.classList.contains('has-photo')) renderInitialsAvatar();
+    });
+
+    profileInput.addEventListener('change', function () {
+      updatePreview();
+      toggleTeacherSection();
+    });
+
+    emailInput.addEventListener('input', updatePreview);
+
+    uploadTrigger.addEventListener('click', function () {
+      renderInitialsAvatar();
+    });
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      if (!form.reportValidity()) return;
+
+      updatePreview();
+      submitButton.disabled = true;
+      toast.classList.add('show');
+
+      window.setTimeout(function () {
+        window.location.href = 'escola-detalhe.html';
+      }, 1500);
+    });
+
+    renderPlaceholderAvatar();
+    updatePreview();
+    toggleTeacherSection();
+  }());
+</script>
+</body>
+</html>

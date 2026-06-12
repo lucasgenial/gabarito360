@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Turmas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .toolbar { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
+  .toolbar .input-icon { flex: 1; min-width: 220px; }
+  .toolbar .select { width: auto; min-width: 170px; }
+  .turma-name { display: flex; align-items: center; gap: 12px; }
+  .turma-name .av { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-light); color: var(--accent-dark); display: grid; place-items: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .mini-bar { width: 80px; height: 7px; background: var(--surface-2); border-radius: 99px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  .mini-bar > div { height: 100%; }
+  .empty-note { color: var(--muted); font-size: 14px; }
+  .btn-result { background: var(--success-light); color: var(--success); }
+  .btn-result:hover { filter: brightness(0.95); }
+  .btn-action { min-width: 144px; }
+  @media (max-width:900px){
+    .btn-action{ min-width: 0; padding: 8px 10px; }
+    .btn-action .btn-label{ display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a><a href="provas.html">Provas</a>
+      <a href="turmas.html" class="active">Turmas</a>
+      <a href="escolas.html">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Marcos Silva</div>
+            <div class="user-role">Professor</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb"><span>Início</span><span class="sep">/</span><span>Turmas</span></div>
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title">Turmas</h1>
+      <p class="page-sub"><b id="turma-count">0</b> turmas · <b id="turma-total-alunos">0</b> alunos no total</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary">Importar planilha</button>
+      <button class="btn btn-primary">+ Nova turma</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="input-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input class="input" id="turma-search" placeholder="Buscar turma por nome…" />
+    </div>
+    <select class="select" id="filter-serie">
+      <option value="">Todas as séries</option>
+      <option value="9º ano">9º ano</option>
+      <option value="8º ano">8º ano</option>
+    </select>
+    <select class="select" id="filter-status">
+      <option value="">Todos os status</option>
+      <option value="em-dia">Em dia</option>
+      <option value="recuperacao">Em recuperação</option>
+      <option value="pendencia">Com pendências</option>
+    </select>
+  </div>
+
+  <div class="card" style="margin-top:18px;overflow:hidden;">
+    <table class="table">
+      <thead><tr>
+        <th>Turma</th><th>Série</th><th>Alunos</th><th>Desempenho médio</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody id="turma-tbody"></tbody>
+    </table>
+    <div id="no-results" style="display:none;padding:32px;text-align:center;" class="empty-note">Nenhuma turma corresponde aos filtros.</div>
+  </div>
+  <div style="height:48px"></div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  var turmas = [
+    {key:'9A', nome:'9º A', serie:'9º ano', alunos:3, media:73, pendencias:0, recuperacao:1},
+    {key:'9B', nome:'9º B', serie:'9º ano', alunos:3, media:79, pendencias:1, recuperacao:0},
+    {key:'8A', nome:'8º A', serie:'8º ano', alunos:2, media:74, pendencias:1, recuperacao:0},
+    {key:'8B', nome:'8º B', serie:'8º ano', alunos:2, media:64, pendencias:0, recuperacao:1}
+  ];
+  var icoTurma = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+  var tbody = document.getElementById('turma-tbody');
+  var totalAlunos = 0;
+  turmas.forEach(function (t) {
+    totalAlunos += t.alunos;
+    var color = t.media>=70?'var(--success)':t.media>=50?'var(--warn)':'var(--danger)';
+    var perf = '<span class="mini-bar"><div style="width:'+t.media+'%;background:'+color+'"></div></span><span class="num">'+t.media+'%</span>';
+    var status;
+    if (t.pendencias > 0) status = {key:'pendencia', cls:'badge-danger', label: t.pendencias + (t.pendencias>1?' pendências':' pendência')};
+    else if (t.recuperacao > 0) status = {key:'recuperacao', cls:'badge-warn', label: t.recuperacao + ' em recuperação'};
+    else status = {key:'em-dia', cls:'badge-success', label:'Em dia'};
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-turma-row','');
+    tr.dataset.nome = t.nome; tr.dataset.serie = t.serie; tr.dataset.status = status.key;
+    tr.innerHTML =
+      '<td><div class="turma-name"><span class="av">'+t.nome.replace('º ','')+'</span><b>'+t.nome+'</b></div></td>'+
+      '<td><span class="badge badge-info">'+t.serie+'</span></td>'+
+      '<td class="num">'+t.alunos+'</td>'+
+      '<td>'+perf+'</td>'+
+      '<td><span class="badge '+status.cls+' badge-dot">'+status.label+'</span></td>'+
+      '<td style="text-align:right;"><a href="turma-detalhe-2.html?turma='+t.key+'" class="btn btn-result btn-action btn-sm" aria-label="Ver turma">'+icoTurma+'<span class="btn-label">Ver turma</span></a></td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('turma-total-alunos').textContent = totalAlunos;
+  initTurmaFilter();
+</script>
+</body>
+</html>

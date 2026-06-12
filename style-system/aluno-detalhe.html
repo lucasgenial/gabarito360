@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Detalhe do Aluno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .profile-header { display: flex; align-items: flex-start; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .profile-avatar { width: 100px; height: 100px; border-radius: 50%; background: var(--accent-light); color: var(--accent-dark); display: grid; place-items: center; font-size: 36px; font-weight: 800; flex-shrink: 0; border: 4px solid #fff; box-shadow: var(--elev-raised); }
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 22px; }
+  .section-title { font-size: 18px; font-weight: 700; margin: 32px 0 16px; display: flex; align-items: center; gap: 8px; }
+  .exam-history { margin-top: 20px; }
+  .btn-result { background: var(--success-light); color: var(--success); }
+  .btn-result:hover { filter: brightness(0.95); }
+  .btn-action { min-width: 144px; }
+  .stat-card { text-align: center; padding: 20px; }
+  .stat-card .v { font-size: 28px; font-weight: 800; color: var(--accent); font-family: var(--font-mono); }
+  .stat-card .l { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .info-list { list-style: none; margin-top: 12px; }
+  .info-list li { margin-bottom: 8px; font-size: 15px; color: var(--fg-2); }
+  .info-list b { color: var(--fg); width: 120px; display: inline-block; }
+  
+  @media (max-width: 768px) {
+    .kpi-grid { grid-template-columns: 1fr; }
+    .profile-header { flex-direction: column; align-items: center; text-align: center; }
+    .info-list li b { display: block; width: auto; margin-bottom: 2px; }
+  }
+  @media (max-width:900px){
+    .btn-action{ min-width: 0; padding: 8px 10px; }
+    .btn-action .btn-label{ display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a><a href="provas.html">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Marcos Silva</div>
+            <div class="user-role">Professor</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb"><span>Início</span><span class="sep">/</span><a href="turmas.html">Turmas</a><span class="sep">/</span><a id="link-turma" href="turma-detalhe-2.html?turma=9A">9º A</a><span class="sep">/</span><span id="breadcrumb-aluno">Aluno</span></div>
+  
+  <div class="profile-header">
+    <div class="profile-avatar" id="aluno-iniciais">--</div>
+    <div style="flex:1;">
+      <h1 class="page-title" id="aluno-nome" style="margin:0;">Nome do Aluno</h1>
+      <p class="page-sub" id="aluno-sub">Série · Turma</p>
+      <ul class="info-list">
+        <li><b>Matrícula:</b> <span id="aluno-matricula">2026.00412</span></li>
+        <li><b>Data Nasc.:</b> 12/04/2011 (15 anos)</li>
+        <li><b>Responsável:</b> Maria Silva Lima</li>
+      </ul>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <a id="btn-editar" href="aluno-editar.html" class="btn btn-secondary">Editar dados</a>
+      <button class="btn btn-primary">Ficha do Aluno (PDF)</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="card stat-card"><div class="v" id="kpi-media">0,0</div><div class="l">Média Geral</div></div>
+    <div class="card stat-card"><div class="v" id="kpi-frequencia">96%</div><div class="l">Frequência</div></div>
+    <div class="card stat-card"><div class="v" id="kpi-provas">0</div><div class="l">Provas Realizadas</div></div>
+  </div>
+
+  <div class="row-between" style="margin-top: 32px; align-items: flex-end;">
+    <h2 class="section-title" style="margin:0;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Histórico de Avaliações
+    </h2>
+    <div style="display:flex;gap:10px;">
+        <select class="select select-sm">
+            <option>1º Bimestre</option>
+            <option selected>2º Bimestre</option>
+            <option>Todos</option>
+        </select>
+    </div>
+  </div>
+
+  <div class="card exam-history" style="overflow:hidden;">
+    <table class="table">
+      <thead><tr>
+        <th>Prova</th><th>Data</th><th>Desempenho</th><th>Nota</th><th></th>
+      </tr></thead>
+      <tbody id="exam-tbody"></tbody>
+    </table>
+  </div>
+
+  <h2 class="section-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Evolução de Notas
+  </h2>
+  <div class="card card-pad">
+    <div id="chart-evolucao" data-bars='[{"l":"Mar","v":6.5},{"l":"Abr","v":7.2,"c":"#1351b4"},{"l":"Mai","v":7.8,"c":"#1351b4"},{"l":"Jun","v":8.0,"c":"#1b61c9"}]'></div>
+  </div>
+
+  <div style="height:48px"></div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  var students = [
+    {id:1, n:'Ana Beatriz Lima', t:'9A', m:'2026.00412', d:8.0},
+    {id:2, n:'Bruno Carvalho Souza', t:'9A', m:'2026.00518', d:5.2},
+    {id:3, n:'Henrique Oliveira', t:'9A', m:'2026.00622', d:7.9}
+  ];
+  
+  var exams = [
+    {titulo:'Avaliação Bimestral — Matemática', data:'04/06/2025', nota:8.0, total:10},
+    {titulo:'Avaliação Bimestral — Português', data:'28/05/2025', nota:7.5, total:10},
+    {titulo:'Simulado — Ciências', data:'15/05/2025', nota:6.8, total:10},
+    {titulo:'Avaliação Mensal — Geografia', data:'10/05/2025', nota:8.2, total:10}
+  ];
+
+  var icoResult = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>';
+
+  var params = new URLSearchParams(location.search);
+  var id = parseInt(params.get('id')) || 1;
+  var aluno = students.find(s => s.id === id) || students[0];
+  
+  document.getElementById('aluno-nome').textContent = aluno.n;
+  document.getElementById('breadcrumb-aluno').textContent = aluno.n;
+  document.getElementById('aluno-iniciais').textContent = aluno.n.split(' ').map(x => x[0]).slice(0,2).join('');
+  document.getElementById('aluno-sub').textContent = '9º Ano · Turma ' + aluno.t;
+  document.getElementById('aluno-matricula').textContent = aluno.m;
+  document.getElementById('kpi-media').textContent = (aluno.d).toFixed(1).replace('.',',');
+  document.getElementById('kpi-provas').textContent = exams.length;
+  document.getElementById('link-turma').href = 'turma-detalhe-2.html?turma=' + aluno.t;
+  document.getElementById('link-turma').textContent = 'Turma ' + aluno.t;
+  document.getElementById('btn-editar').href = 'aluno-editar.html?id=' + id + '&turma=' + aluno.t;
+
+  var tbody = document.getElementById('exam-tbody');
+  exams.forEach(function(ex) {
+    var tr = document.createElement('tr');
+    var color = ex.nota >= 7 ? 'var(--success)' : (ex.nota >= 5 ? 'var(--warn)' : 'var(--danger)');
+    var pct = (ex.nota / ex.total) * 100;
+    
+    tr.innerHTML = `
+      <td><b>${ex.titulo}</b></td>
+      <td>${ex.data}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <div class="mini-bar" style="width:100px;height:8px;background:#eee;border-radius:4px;overflow:hidden;">
+                <div style="width:${pct}%;height:100%;background:${color}"></div>
+            </div>
+            <span style="font-size:12px;color:var(--muted)">${pct}%</span>
+        </div>
+      </td>
+      <td class="num"><b>${ex.nota.toFixed(1).replace('.',',')}</b></td>
+      <td style="text-align:right;">
+        <a href="resultado.html?id=${aluno.id}&from=aluno&turma=${aluno.t}" class="btn btn-result btn-action btn-sm">
+          ${icoResult} <span class="btn-label">Ver Resultado</span>
+        </a>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+</script>
+</body>
+</html>

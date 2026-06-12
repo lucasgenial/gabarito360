@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gabarito360 — Configurações</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&amp;family=Roboto+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css">
+<style>
+  .config-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    align-items: start;
+  }
+
+  .config-nav {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    position: sticky;
+    top: 80px;
+  }
+  .config-nav-group { padding: 8px; }
+  .config-nav-group + .config-nav-group {
+    border-top: 1px solid var(--border-soft);
+    padding-top: 8px;
+  }
+  .config-nav-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--muted);
+    padding: 8px 12px 4px;
+  }
+  .config-nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: var(--radius-md);
+    font-size: 14px; font-weight: 500; color: var(--fg-2);
+    transition: background .15s; text-decoration: none;
+  }
+  .config-nav a:hover { background: var(--surface-2); color: var(--accent); text-decoration: none; }
+  .config-nav a.active { background: var(--accent-light); color: var(--accent-dark); font-weight: 600; }
+  .config-nav .nav-ico { font-size: 15px; width: 20px; text-align: center; }
+
+  .config-main { display: flex; flex-direction: column; gap: 24px; }
+
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .section-head {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .section-head h2 { font-size: 16px; font-weight: 700; }
+  .section-head p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .section-body { padding: 24px; }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0; border-bottom: 1px solid var(--border-soft);
+    gap: 16px;
+  }
+  .toggle-row:last-child { border: 0; padding-bottom: 0; }
+  .toggle-label { font-size: 14px; font-weight: 500; }
+  .toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .toggle {
+    position: relative; width: 44px; height: 24px; flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--border); border-radius: var(--radius-pill); transition: background .2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; left: 3px; top: 3px;
+    background: white; border-radius: 50%;
+    transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .option-card {
+    border: 2px solid var(--border-soft); border-radius: var(--radius-md);
+    padding: 14px 12px; cursor: pointer; transition: all .15s;
+    text-align: center; background: var(--surface);
+    display: flex; flex-direction: column; gap: 6px; align-items: center;
+  }
+  .option-card:hover { border-color: var(--accent); }
+  .option-card.selected { border-color: var(--accent); background: var(--accent-light); }
+  .option-card input { display: none; }
+  .option-card .opt-ico { font-size: 24px; }
+  .option-card .opt-label { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .option-card .opt-desc { font-size: 11px; color: var(--muted); }
+  .option-card.selected .opt-label { color: var(--accent-dark); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+
+  .danger-zone {
+    border-color: var(--danger-light);
+    background: #fffafa;
+  }
+  .danger-zone .section-head { border-bottom-color: var(--danger-light); }
+  .danger-zone h2 { color: var(--danger); }
+  .danger-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0; border-bottom: 1px solid var(--border-soft); gap: 16px;
+  }
+  .danger-item:last-child { border: 0; padding-bottom: 0; }
+  .danger-item-text .label { font-size: 14px; font-weight: 600; }
+  .danger-item-text .desc { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+  .plan-card {
+    background: var(--accent-light);
+    border: 1.5px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .plan-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.05em;
+    padding: 4px 12px; border-radius: var(--radius-pill);
+    text-transform: uppercase;
+  }
+  .plan-name { font-size: 17px; font-weight: 700; color: var(--accent-dark); margin-top: 6px; }
+  .plan-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  .integrations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .integration-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px; border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md); background: var(--surface);
+  }
+  .integration-ico {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--surface-2); display: grid; place-items: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .integration-name { font-size: 14px; font-weight: 600; }
+  .integration-status { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-md); font-family: var(--font-body); font-size: 15px; color: var(--fg); background: #fff; cursor: pointer; }
+  .select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(19,81,180,0.15); }
+
+  @media (max-width: 900px) {
+    .config-layout { grid-template-columns: 1fr; }
+    .config-nav { position: static; }
+    .config-nav-group { display: flex; flex-wrap: wrap; gap: 4px; }
+    .config-nav-label { width: 100%; }
+    .form-row { grid-template-columns: 1fr; }
+    .option-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a>
+      <a href="provas.html">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <span class="badge badge-info badge-dot">Rede Municipal</span>
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Maria Silva</div>
+            <div class="user-role">Coordenadora · Rede Municipal</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html" style="color:var(--accent);font-weight:600;">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb">
+    <a href="dashboard.html">Início</a><span class="sep">/</span>
+    <span>Configurações</span>
+  </div>
+  <div class="row-between" style="margin-top:12px; margin-bottom:0;">
+    <div>
+      <h1 class="page-title">Configurações</h1>
+      <p class="page-sub">Preferências do sistema, unidade escolar e integrações</p>
+    </div>
+  </div>
+
+  <div class="config-layout">
+    <!-- Sidebar nav -->
+    <nav class="config-nav">
+      <div class="config-nav-group">
+        <div class="config-nav-label">Geral</div>
+        <a href="#aparencia" class="active"><span class="nav-ico">🎨</span> Aparência</a>
+        <a href="#idioma"><span class="nav-ico">🌐</span> Idioma e Região</a>
+        <a href="#acessibilidade"><span class="nav-ico">♿</span> Acessibilidade</a>
+      </div>
+      <div class="config-nav-group">
+        <div class="config-nav-label">Sistema</div>
+        <a href="#importacao"><span class="nav-ico">📤</span> Importação / Exportação</a>
+      </div>
+      <div class="config-nav-group">
+        <div class="config-nav-label">Conta</div>
+        <a href="#plano"><span class="nav-ico">⭐</span> Plano e Uso</a>
+        <a href="#integracoes"><span class="nav-ico">🔗</span> Integrações</a>
+        <a href="#privacidade"><span class="nav-ico">🛡️</span> Privacidade</a>
+        <a href="#zona-perigo" style="color:var(--danger);"><span class="nav-ico">⚠️</span> Zona de Perigo</a>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="config-main">
+
+      <!-- Aparência -->
+      <div class="section-card" id="aparencia">
+        <div class="section-head">
+          <div><h2>Aparência</h2><p>Tema visual e densidade da interface</p></div>
+        </div>
+        <div class="section-body">
+          <div class="field">
+            <label style="font-size:14px;font-weight:600;display:block;margin-bottom:12px;">Tema</label>
+            <div class="option-grid" id="theme-options">
+              <label class="option-card selected">
+                <input type="radio" name="theme" value="light" checked="">
+                <span class="opt-ico">☀️</span>
+                <span class="opt-label">Claro</span>
+                <span class="opt-desc">Padrão gov.br</span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="theme" value="dark">
+                <span class="opt-ico">🌙</span>
+                <span class="opt-label">Escuro</span>
+                <span class="opt-desc">Baixa luminosidade</span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="theme" value="contrast">
+                <span class="opt-ico">◑</span>
+                <span class="opt-label">Alto contraste</span>
+                <span class="opt-desc">Acessibilidade</span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="theme" value="system">
+                <span class="opt-ico">💻</span>
+                <span class="opt-label">Automático</span>
+                <span class="opt-desc">Segue o SO</span>
+              </label>
+            </div>
+          </div>
+          <div class="field" style="margin-top:24px;">
+            <label style="font-size:14px;font-weight:600;display:block;margin-bottom:12px;">Densidade da interface</label>
+            <div class="option-grid" id="density-options">
+              <label class="option-card">
+                <input type="radio" name="density" value="compact">
+                <span class="opt-ico">▤</span>
+                <span class="opt-label">Compacta</span>
+                <span class="opt-desc">Mais conteúdo</span>
+              </label>
+              <label class="option-card selected">
+                <input type="radio" name="density" value="comfortable" checked="">
+                <span class="opt-ico">▥</span>
+                <span class="opt-label">Confortável</span>
+                <span class="opt-desc">Padrão</span>
+              </label>
+              <label class="option-card">
+                <input type="radio" name="density" value="spacious">
+                <span class="opt-ico">▦</span>
+                <span class="opt-label">Espaçosa</span>
+                <span class="opt-desc">Mais fácil de ler</span>
+              </label>
+            </div>
+          </div>
+          <div style="margin-top:24px;">
+            <button class="btn btn-primary btn-sm" onclick="showToast('Aparência salva!','success')">Salvar aparência</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Idioma e Região -->
+      <div class="section-card" id="idioma">
+        <div class="section-head">
+          <div><h2>Idioma e Região</h2><p>Fuso horário e formato de data</p></div>
+        </div>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="field">
+              <label for="idioma-sel">Idioma do sistema</label>
+              <select id="idioma-sel" class="select">
+                <option selected="">Português (Brasil)</option>
+                <option>Español</option>
+                <option>English</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="fuso">Fuso horário</label>
+              <select id="fuso" class="select">
+                <option selected="">América/São Paulo (UTC −3)</option>
+                <option>América/Manaus (UTC −4)</option>
+                <option>América/Belém (UTC −3)</option>
+                <option>América/Fortaleza (UTC −3)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="data-fmt">Formato de data</label>
+              <select id="data-fmt" class="select">
+                <option selected="">DD/MM/AAAA</option>
+                <option>AAAA-MM-DD (ISO)</option>
+                <option>MM/DD/AAAA</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="nota-fmt">Formato de nota</label>
+              <select id="nota-fmt" class="select">
+                <option selected="">0 a 10 (com decimal)</option>
+                <option>0 a 100 (percentual)</option>
+                <option>Conceito A–E</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showToast('Configurações regionais salvas!','success')">Salvar</button>
+        </div>
+      </div>
+
+      <!-- Acessibilidade -->
+      <div class="section-card" id="acessibilidade">
+        <div class="section-head">
+          <div><h2>Acessibilidade</h2><p>Ajuste para atender requisitos do e-MAG</p></div>
+        </div>
+        <div class="section-body">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Reduzir animações</div>
+              <div class="toggle-desc">Remove transições e efeitos de movimento</div>
+            </div>
+            <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Aumentar área de clique</div>
+              <div class="toggle-desc">Botões e links com alvo ≥ 48 px (WCAG 2.5.8)</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked=""><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Modo daltônico</div>
+              <div class="toggle-desc">Substitui verde/vermelho por azul/laranja</div>
+            </div>
+            <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Leitura em voz alta (TTS)</div>
+              <div class="toggle-desc">Ativa suporte a leitores de tela (ARIA)</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked=""><span class="toggle-slider"></span></label>
+          </div>
+          <div style="margin-top:20px;">
+            <button class="btn btn-primary btn-sm" onclick="showToast('Configurações de acessibilidade salvas!','success')">Salvar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Importação / Exportação -->
+      <div class="section-card" id="importacao">
+        <div class="section-head">
+          <div><h2>Importação e Exportação</h2><p>Formatos suportados para dados de alunos e resultados</p></div>
+        </div>
+        <div class="section-body">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Exportar resultados em CSV automaticamente</div>
+              <div class="toggle-desc">Gera CSV ao finalizar cada correção</div>
+            </div>
+            <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Incluir cabeçalho da escola no PDF</div>
+              <div class="toggle-desc">Exibe nome, CNPJ e logo nos relatórios exportados</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked=""><span class="toggle-slider"></span></label>
+          </div>
+          <div class="field" style="margin-top:20px;">
+            <label for="encoding">Codificação padrão para CSV</label>
+            <select id="encoding" class="select" style="max-width:240px;">
+              <option selected="">UTF-8</option>
+              <option>ISO-8859-1 (Latin-1)</option>
+              <option>Windows-1252</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Exportação iniciada','success')">📥 Exportar todos os dados</button>
+            <button class="btn btn-ghost btn-sm">📤 Importar alunos (CSV/XLSX)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plano -->
+      <div class="section-card" id="plano">
+        <div class="section-head">
+          <div><h2>Plano e Uso</h2><p>Seu plano atual e limites de uso</p></div>
+        </div>
+        <div class="section-body">
+          <div class="plan-card">
+            <div>
+              <span class="plan-badge">✦ Plano Rede</span>
+              <div class="plan-name">Gabarito360 Rede Municipal</div>
+              <div class="plan-desc">Contrato vigente até 31/12/2025 · Secretaria Municipal de Educação</div>
+            </div>
+            <a href="#" class="btn btn-secondary btn-sm">Ver fatura</a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:20px;">
+            <div class="card kpi" style="padding:16px;">
+              <div class="kpi-label">Provas criadas</div>
+              <div class="kpi-value" style="font-size:28px;">128</div>
+              <div class="kpi-trend" style="color:var(--muted);">/ ilimitado</div>
+            </div>
+            <div class="card kpi" style="padding:16px;">
+              <div class="kpi-label">Cartões processados</div>
+              <div class="kpi-value" style="font-size:28px;">9.842</div>
+              <div class="kpi-trend" style="color:var(--muted);">/ 50.000 no plano</div>
+            </div>
+            <div class="card kpi" style="padding:16px;">
+              <div class="kpi-label">Alunos cadastrados</div>
+              <div class="kpi-value" style="font-size:28px;">1.247</div>
+              <div class="kpi-trend" style="color:var(--muted);">/ ilimitado</div>
+            </div>
+            <div class="card kpi" style="padding:16px;">
+              <div class="kpi-label">Usuários ativos</div>
+              <div class="kpi-value" style="font-size:28px;">42</div>
+              <div class="kpi-trend" style="color:var(--muted);">/ 200 no plano</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Integrações -->
+      <div class="section-card" id="integracoes">
+        <div class="section-head">
+          <div><h2>Integrações</h2><p>Conecte o Gabarito360 a outros sistemas da rede</p></div>
+        </div>
+        <div class="section-body">
+          <div class="integrations-grid">
+            <div class="integration-item">
+              <div class="integration-ico">🏛️</div>
+              <div style="flex:1;">
+                <div class="integration-name">SEGES / SME-SP</div>
+                <div class="integration-status">Conectado · sincronizado há 2h</div>
+              </div>
+              <span class="badge badge-success">Ativo</span>
+            </div>
+            <div class="integration-item">
+              <div class="integration-ico">📊</div>
+              <div style="flex:1;">
+                <div class="integration-name">Google Classroom</div>
+                <div class="integration-status">Não conectado</div>
+              </div>
+              <button class="btn btn-secondary btn-sm">Conectar</button>
+            </div>
+            <div class="integration-item">
+              <div class="integration-ico">📋</div>
+              <div style="flex:1;">
+                <div class="integration-name">Microsoft Teams</div>
+                <div class="integration-status">Não conectado</div>
+              </div>
+              <button class="btn btn-secondary btn-sm">Conectar</button>
+            </div>
+            <div class="integration-item">
+              <div class="integration-ico">🔌</div>
+              <div style="flex:1;">
+                <div class="integration-name">API REST</div>
+                <div class="integration-status">Chave ativa · criada em jan/2024</div>
+              </div>
+              <button class="btn btn-ghost btn-sm">Gerenciar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Privacidade -->
+      <div class="section-card" id="privacidade">
+        <div class="section-head">
+          <div><h2>Privacidade e LGPD</h2><p>Controle de dados pessoais conforme Lei 13.709/2018</p></div>
+        </div>
+        <div class="section-body">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Análise de uso anônima</div>
+              <div class="toggle-desc">Envia dados de uso sem identificação para melhoria do produto</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked=""><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Relatórios de diagnóstico</div>
+              <div class="toggle-desc">Envia automaticamente logs de erro para a equipe técnica</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked=""><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Compartilhar dados com a Secretaria</div>
+              <div class="toggle-desc">Permite que a SME acesse relatórios consolidados da sua unidade</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked=""><span class="toggle-slider"></span></label>
+          </div>
+          <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Solicitação enviada. Aguarde até 15 dias úteis.','success')">📄 Solicitar relatório dos meus dados</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--muted);">Ver política de privacidade</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zona de perigo -->
+      <div class="section-card danger-zone" id="zona-perigo">
+        <div class="section-head">
+          <div><h2>Zona de Perigo</h2><p>Ações irreversíveis — execute com cautela</p></div>
+        </div>
+        <div class="section-body">
+          <div class="danger-item">
+            <div class="danger-item-text">
+              <div class="label">Excluir todos os dados de provas</div>
+              <div class="desc">Remove permanentemente gabaritos, resultados e cartões desta unidade</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger-light);" onclick="confirmDanger('Tem certeza? Esta ação não pode ser desfeita.')">Excluir dados</button>
+          </div>
+          <div class="danger-item">
+            <div class="danger-item-text">
+              <div class="label">Desativar minha conta</div>
+              <div class="desc">Suspende o acesso. Os dados ficam retidos por 90 dias conforme a LGPD</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:var(--danger-light);" onclick="confirmDanger('Desativar sua conta irá suspender todos os acessos.')">Desativar conta</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:32px;"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  // Navegação sidebar
+  const navLinks = document.querySelectorAll('.config-nav a');
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      navLinks.forEach(a => a.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+  // Highlight nav on scroll
+  const sections = document.querySelectorAll('.section-card[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY + 120 >= s.offsetTop) current = s.id;
+    });
+    navLinks.forEach(a => {
+      const href = a.getAttribute('href').replace('#','');
+      a.classList.toggle('active', href === current);
+    });
+  }, { passive: true });
+
+  // Option cards (radio)
+  document.querySelectorAll('.option-grid').forEach(grid => {
+    grid.querySelectorAll('.option-card').forEach(card => {
+      card.addEventListener('click', () => {
+        grid.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        const input = card.querySelector('input');
+        if (input) input.checked = true;
+      });
+    });
+  });
+
+  // Edição unidade escolar
+  const btnEditUnidade = document.getElementById('btn-edit-unidade');
+  const btnCancelUnidade = document.getElementById('btn-cancel-unidade');
+  const unidadeActions = document.getElementById('unidade-actions');
+  const unidadeInputs = document.querySelectorAll('#form-unidade input');
+
+  btnEditUnidade.addEventListener('click', () => {
+    unidadeInputs.forEach(el => el.disabled = false);
+    unidadeActions.style.display = 'flex';
+    btnEditUnidade.style.display = 'none';
+  });
+  btnCancelUnidade.addEventListener('click', () => {
+    unidadeInputs.forEach(el => el.disabled = true);
+    unidadeActions.style.display = 'none';
+    btnEditUnidade.style.display = '';
+  });
+  document.getElementById('form-unidade').addEventListener('submit', e => {
+    e.preventDefault();
+    unidadeInputs.forEach(el => el.disabled = true);
+    unidadeActions.style.display = 'none';
+    btnEditUnidade.style.display = '';
+    showToast('Dados da unidade atualizados!', 'success');
+  });
+
+  // Toast
+  function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.style.cssText = `
+      position:fixed;bottom:28px;right:28px;z-index:9999;
+      background:${type === 'success' ? 'var(--success)' : 'var(--danger)'};
+      color:#fff;padding:14px 20px;border-radius:var(--radius-md);
+      font-size:14px;font-weight:600;
+      box-shadow:var(--shadow-md);
+      animation:toastIn .25s ease;
+    `;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  function confirmDanger(msg) {
+    if (confirm(msg + '\n\nDigite "CONFIRMAR" para prosseguir.')) {
+      showToast('Ação cancelada — confirmação incorreta.', 'danger');
+    }
+  }
+
+  const style = document.createElement('style');
+  style.textContent = '@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}';
+  document.head.appendChild(style);
+</script>
+
+
+</body></html>

@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Meu Perfil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .profile-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    align-items: start;
+  }
+  .profile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .avatar-lg {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    display: grid; place-items: center;
+    font-weight: 800; font-size: 28px;
+    font-family: var(--font-mono);
+    margin: 0 auto 16px;
+    border: 3px solid var(--accent);
+  }
+  .profile-name { font-size: 20px; font-weight: 700; color: var(--fg); }
+  .profile-role { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .profile-institution {
+    margin-top: 16px; padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+    font-size: 13px; color: var(--muted);
+    display: flex; flex-direction: column; gap: 6px;
+    text-align: left;
+  }
+  .profile-institution span { display: flex; gap: 8px; align-items: center; }
+  .profile-institution strong { color: var(--fg-2); font-size: 13px; }
+
+  .profile-nav { display: flex; flex-direction: column; gap: 2px; }
+  .profile-nav a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px; border-radius: var(--radius-md);
+    font-size: 14px; font-weight: 500; color: var(--fg-2);
+    transition: background .15s;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+  .profile-nav a:hover { background: var(--surface-2); color: var(--accent); text-decoration: none; }
+  .profile-nav a.active {
+    background: var(--accent-light); color: var(--accent-dark);
+    border-color: var(--accent-light); font-weight: 600;
+  }
+  .profile-nav .nav-icon {
+    width: 20px; text-align: center; font-size: 15px;
+  }
+
+  .profile-main { display: flex; flex-direction: column; gap: 24px; }
+
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .section-head {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-head h2 { font-size: 16px; font-weight: 700; }
+  .section-head p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .section-body { padding: 24px; }
+
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 20px; }
+
+  .password-strength {
+    display: flex; gap: 4px; margin-top: 8px; align-items: center;
+  }
+  .strength-bar {
+    height: 4px; flex: 1; border-radius: 2px;
+    background: var(--border-soft);
+    transition: background .3s;
+  }
+  .strength-label { font-size: 12px; color: var(--muted); margin-left: 8px; width: 60px; }
+
+  .activity-list { display: flex; flex-direction: column; gap: 0; }
+  .activity-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 14px 0; border-bottom: 1px solid var(--border-soft);
+    font-size: 14px;
+  }
+  .activity-item:last-child { border: 0; padding-bottom: 0; }
+  .activity-ico {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: grid; place-items: center; flex-shrink: 0;
+    font-size: 14px;
+  }
+  .activity-text { flex: 1; }
+  .activity-text strong { color: var(--fg); display: block; margin-bottom: 2px; }
+  .activity-meta { font-size: 12px; color: var(--muted); }
+
+  .photo-upload {
+    display: flex; gap: 20px; align-items: center;
+    padding: 20px; background: var(--surface-2);
+    border-radius: var(--radius-md); border: 1.5px dashed var(--border);
+  }
+  .photo-upload .avatar-preview {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent-dark);
+    display: grid; place-items: center; font-weight: 800; font-size: 24px;
+    font-family: var(--font-mono); flex-shrink: 0;
+    border: 2px solid var(--accent);
+  }
+  .photo-upload-text { flex: 1; }
+  .photo-upload-text strong { display: block; font-size: 14px; margin-bottom: 4px; }
+  .photo-upload-text span { font-size: 12px; color: var(--muted); }
+
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0; border-bottom: 1px solid var(--border-soft);
+  }
+  .toggle-row:last-child { border: 0; padding-bottom: 0; }
+  .toggle-label { font-size: 14px; font-weight: 500; }
+  .toggle-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .toggle {
+    position: relative; width: 44px; height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--border); border-radius: var(--radius-pill);
+    transition: background .2s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute;
+    width: 18px; height: 18px; left: 3px; top: 3px;
+    background: white; border-radius: 50%;
+    transition: transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  @media (max-width: 900px) {
+    .profile-layout { grid-template-columns: 1fr; }
+    .profile-sidebar { flex-direction: row; flex-wrap: wrap; }
+    .profile-card { flex: 1 1 240px; }
+    .profile-nav { flex-direction: row; flex-wrap: wrap; }
+    .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .profile-card { text-align: left; }
+    .avatar-lg { margin: 0 0 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a>
+      <a href="provas.html">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <span class="badge badge-info badge-dot">Rede Municipal</span>
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Maria Silva</div>
+            <div class="user-role">Coordenadora · Rede Municipal</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html" class="active" style="color:var(--accent);font-weight:600;">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb">
+    <a href="dashboard.html">Início</a><span class="sep">/</span>
+    <span>Meu Perfil</span>
+  </div>
+  <div class="row-between" style="margin-top:12px; margin-bottom:0;">
+    <div>
+      <h1 class="page-title">Meu Perfil</h1>
+      <p class="page-sub">Gerencie seus dados pessoais e preferências de conta</p>
+    </div>
+  </div>
+
+  <div class="profile-layout">
+    <!-- Sidebar -->
+    <div class="profile-sidebar">
+      <div class="profile-card">
+        <div class="avatar-lg">MS</div>
+        <div class="profile-name">Maria Silva</div>
+        <div class="profile-role">Coordenadora Pedagógica</div>
+        <div class="profile-institution">
+          <span>🏫 <strong>EMEF Tiradentes</strong></span>
+          <span>📍 <strong>Rede Municipal de São Paulo</strong></span>
+          <span>📧 <strong>maria.silva@edu.sp.gov.br</strong></span>
+          <span>📅 <strong>Desde jan/2022</strong></span>
+        </div>
+      </div>
+
+      <nav class="profile-nav card card-pad" style="padding:8px;">
+        <a href="#dados" class="active"><span class="nav-icon">👤</span> Dados Pessoais</a>
+        <a href="#senha"><span class="nav-icon">🔒</span> Alterar Senha</a>
+        <a href="#notificacoes"><span class="nav-icon">🔔</span> Notificações</a>
+        <a href="#acesso"><span class="nav-icon">📋</span> Histórico de Acesso</a>
+      </nav>
+    </div>
+
+    <!-- Main content -->
+    <div class="profile-main">
+
+      <!-- Foto de perfil -->
+      <div class="section-card">
+        <div class="section-head">
+          <div>
+            <h2>Foto do Perfil</h2>
+            <p>Imagem exibida no sistema e em relatórios</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="photo-upload">
+            <div class="avatar-preview">MS</div>
+            <div class="photo-upload-text">
+              <strong>Alterar foto</strong>
+              <span>JPG, PNG ou GIF · máximo 2 MB · dimensão mínima 200×200 px</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+              <button class="btn btn-secondary btn-sm">Enviar foto</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--danger);">Remover</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dados pessoais -->
+      <div class="section-card" id="dados">
+        <div class="section-head">
+          <div>
+            <h2>Dados Pessoais</h2>
+            <p>Informações exibidas em provas, relatórios e certificados</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btn-edit-dados">✏️ Editar</button>
+        </div>
+        <div class="section-body">
+          <form id="form-dados">
+            <div class="form-grid-2">
+              <div class="field">
+                <label for="nome">Nome completo</label>
+                <input id="nome" type="text" class="input" value="Maria Aparecida Silva" disabled />
+              </div>
+              <div class="field">
+                <label for="cpf">CPF</label>
+                <input id="cpf" type="text" class="input" value="•••.•••.•••-••" disabled />
+              </div>
+              <div class="field">
+                <label for="email">E-mail institucional</label>
+                <input id="email" type="email" class="input" value="maria.silva@edu.sp.gov.br" disabled />
+              </div>
+              <div class="field">
+                <label for="email2">E-mail de recuperação</label>
+                <input id="email2" type="email" class="input" value="maria.silva@gmail.com" disabled />
+              </div>
+              <div class="field">
+                <label for="telefone">Telefone</label>
+                <input id="telefone" type="tel" class="input" value="(11) 98765-4321" disabled />
+              </div>
+              <div class="field">
+                <label for="cargo">Cargo / Função</label>
+                <input id="cargo" type="text" class="input" value="Coordenadora Pedagógica" disabled />
+              </div>
+            </div>
+            <div class="form-grid-2">
+              <div class="field">
+                <label for="escola">Unidade escolar</label>
+                <input id="escola" type="text" class="input" value="EMEF Tiradentes" disabled />
+              </div>
+              <div class="field">
+                <label for="rede">Rede de ensino</label>
+                <input id="rede" type="text" class="input" value="Rede Municipal de São Paulo" disabled />
+              </div>
+            </div>
+            <div id="dados-actions" style="display:none;gap:12px;margin-top:8px;" class="row-between" style="justify-content:flex-start;">
+              <div style="display:flex;gap:10px;">
+                <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                <button type="button" class="btn btn-ghost" id="btn-cancel-dados">Cancelar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Alterar senha -->
+      <div class="section-card" id="senha">
+        <div class="section-head">
+          <div>
+            <h2>Alterar Senha</h2>
+            <p>Use uma senha forte com letras, números e símbolos</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <form id="form-senha" style="max-width:440px;">
+            <div class="field">
+              <label for="senha-atual">Senha atual</label>
+              <input id="senha-atual" type="password" class="input" placeholder="Digite sua senha atual" />
+            </div>
+            <div class="field">
+              <label for="nova-senha">Nova senha</label>
+              <input id="nova-senha" type="password" class="input" placeholder="Mínimo 8 caracteres" />
+              <div class="password-strength">
+                <div class="strength-bar" id="bar1"></div>
+                <div class="strength-bar" id="bar2"></div>
+                <div class="strength-bar" id="bar3"></div>
+                <div class="strength-bar" id="bar4"></div>
+                <span class="strength-label" id="strength-label">—</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="confirmar-senha">Confirmar nova senha</label>
+              <input id="confirmar-senha" type="password" class="input" placeholder="Repita a nova senha" />
+              <p class="field-help" id="senha-match-msg"></p>
+            </div>
+            <button type="submit" class="btn btn-primary">Atualizar senha</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Notificações -->
+      <div class="section-card" id="notificacoes">
+        <div class="section-head">
+          <div>
+            <h2>Notificações por E-mail</h2>
+            <p>Escolha quais avisos deseja receber</p>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Correção concluída</div>
+              <div class="toggle-desc">Aviso quando uma prova terminar de ser corrigida</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Cartões com pendência</div>
+              <div class="toggle-desc">Alerta de cartões com marcação ambígua ou ilegível</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Novo professor cadastrado</div>
+              <div class="toggle-desc">Quando um docente é adicionado à sua unidade</div>
+            </div>
+            <label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Relatórios semanais</div>
+              <div class="toggle-desc">Resumo de desempenho toda segunda-feira às 7h</div>
+            </div>
+            <label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Atualizações do sistema</div>
+              <div class="toggle-desc">Notas de versão e manutenções programadas</div>
+            </div>
+            <label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label>
+          </div>
+          <div style="margin-top:20px;">
+            <button class="btn btn-primary btn-sm">Salvar preferências</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Histórico de acesso -->
+      <div class="section-card" id="acesso">
+        <div class="section-head">
+          <div>
+            <h2>Histórico de Acesso</h2>
+            <p>Últimos acessos à sua conta</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="color:var(--danger);font-size:13px;">Encerrar todas as sessões</button>
+        </div>
+        <div class="section-body">
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-ico" style="background:var(--success-light);color:var(--success);">✓</div>
+              <div class="activity-text">
+                <strong>Sessão atual — Chrome 124 · Windows 11</strong>
+                <div class="activity-meta">São Paulo, SP · agora · IP 187.23.xx.xx</div>
+              </div>
+              <span class="badge badge-success">Ativa</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-ico" style="background:var(--accent-light);color:var(--accent-dark);">↙</div>
+              <div class="activity-text">
+                <strong>Login — Safari · iPhone 15</strong>
+                <div class="activity-meta">São Paulo, SP · ontem, 18:42 · IP 187.23.xx.xx</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="font-size:12px;color:var(--danger);">Encerrar</button>
+            </div>
+            <div class="activity-item">
+              <div class="activity-ico" style="background:var(--accent-light);color:var(--accent-dark);">↙</div>
+              <div class="activity-text">
+                <strong>Login — Chrome 124 · macOS</strong>
+                <div class="activity-meta">São Paulo, SP · 09/06/2025, 09:15 · IP 189.12.xx.xx</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="font-size:12px;color:var(--danger);">Encerrar</button>
+            </div>
+            <div class="activity-item">
+              <div class="activity-ico" style="background:var(--warn-light);color:var(--warn-fg);">!</div>
+              <div class="activity-text">
+                <strong>Tentativa de login recusada</strong>
+                <div class="activity-meta">Campinas, SP · 08/06/2025, 23:11 · IP 201.45.xx.xx</div>
+              </div>
+              <span class="badge badge-warn">Bloqueado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:32px;"></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  // Edição de dados pessoais
+  const btnEdit = document.getElementById('btn-edit-dados');
+  const btnCancel = document.getElementById('btn-cancel-dados');
+  const dadosActions = document.getElementById('dados-actions');
+  const formInputs = document.querySelectorAll('#form-dados input');
+
+  btnEdit.addEventListener('click', () => {
+    formInputs.forEach(el => { if (el.id !== 'cpf') el.disabled = false; });
+    dadosActions.style.display = 'flex';
+    btnEdit.style.display = 'none';
+  });
+
+  btnCancel.addEventListener('click', () => {
+    formInputs.forEach(el => el.disabled = true);
+    dadosActions.style.display = 'none';
+    btnEdit.style.display = '';
+  });
+
+  document.getElementById('form-dados').addEventListener('submit', (e) => {
+    e.preventDefault();
+    formInputs.forEach(el => el.disabled = true);
+    dadosActions.style.display = 'none';
+    btnEdit.style.display = '';
+    // Toast de confirmação
+    showToast('Dados atualizados com sucesso!', 'success');
+  });
+
+  // Força da senha
+  const novaSenha = document.getElementById('nova-senha');
+  const confirmarSenha = document.getElementById('confirmar-senha');
+  const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+  const strengthLabel = document.getElementById('strength-label');
+  const matchMsg = document.getElementById('senha-match-msg');
+
+  const colors = ['var(--danger)', 'var(--warn-fg)', 'var(--accent)', 'var(--success)'];
+  const labels = ['Fraca', 'Regular', 'Boa', 'Forte'];
+
+  novaSenha.addEventListener('input', () => {
+    const val = novaSenha.value;
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    bars.forEach((b, i) => b.style.background = i < score ? colors[score - 1] : 'var(--border-soft)');
+    strengthLabel.textContent = val.length === 0 ? '—' : labels[score - 1] || 'Fraca';
+    strengthLabel.style.color = val.length === 0 ? 'var(--muted)' : colors[score - 1];
+  });
+
+  confirmarSenha.addEventListener('input', () => {
+    if (!confirmarSenha.value) { matchMsg.textContent = ''; return; }
+    if (confirmarSenha.value === novaSenha.value) {
+      matchMsg.textContent = '✓ Senhas coincidem';
+      matchMsg.style.color = 'var(--success)';
+    } else {
+      matchMsg.textContent = 'As senhas não coincidem';
+      matchMsg.style.color = 'var(--danger)';
+    }
+  });
+
+  document.getElementById('form-senha').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (confirmarSenha.value !== novaSenha.value) return;
+    showToast('Senha alterada com sucesso!', 'success');
+    e.target.reset();
+    bars.forEach(b => b.style.background = 'var(--border-soft)');
+    strengthLabel.textContent = '—';
+    matchMsg.textContent = '';
+  });
+
+  // Navegação por âncora suave
+  document.querySelectorAll('.profile-nav a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      document.querySelectorAll('.profile-nav a').forEach(a => a.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+  // Toast helper
+  function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.style.cssText = `
+      position:fixed;bottom:28px;right:28px;z-index:9999;
+      background:${type === 'success' ? 'var(--success)' : 'var(--danger)'};
+      color:#fff;padding:14px 20px;border-radius:var(--radius-md);
+      font-size:14px;font-weight:600;
+      box-shadow:var(--shadow-md);
+      animation:toastIn .25s ease;
+    `;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  const style = document.createElement('style');
+  style.textContent = '@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}';
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
