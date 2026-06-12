@@ -178,6 +178,17 @@ Login
 6. Confirma aluno, codigo impresso quando houver e codigo do sistema quando utilizado ou exigido.
 7. App envia leitura com `Idempotency-Key`.
 8. Backend valida, persiste, corrige e retorna resultado.
+
+## Status de implementacao R6
+
+A base Flutter executavel esta em `mobile/` e consome autenticacao mobile,
+aplicacoes, dashboard e alunos autorizados. Ela aplica tema claro padrao,
+dark mode explicito e tokens oficiais.
+
+A captura por camera e o OMR no dispositivo continuam bloqueados ate
+homologacao do modelo fisico e da matriz de dispositivos. Esse bloqueio e
+deliberado: o app nao deve produzir uma falsa leitura operacional antes dos
+gates descritos em `docs/18-contrato-r6-integracao-operacional.md`.
 9. App marca o aluno como lido e oferece nova leitura.
 
 ## 7. Fluxo offline futuro

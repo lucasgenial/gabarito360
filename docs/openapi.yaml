@@ -1,22 +1,22 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.15.0
+  version: 0.16.0
   description: |
     Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos,
     vinculos operacionais, importacao validada de alunos por CSV, modelos versionados de cartao OMR
     provas, questoes, versoes de gabarito oficial, publicacao e vinculos autorizados com turmas.
-    A fundacao R3 formaliza os contratos persistentes academicos, operacionais,
-    de resultados e relatorios sem declarar endpoints ainda nao implementados.
+    A R6 implementa o ciclo operacional de aplicacoes, leituras, revisao,
+    confirmacao idempotente, resultados, dashboard e relatorio CSV.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
 servers:
   - url: http://127.0.0.1:8000
     description: Ambiente local
-x-gabarito360-r3-contracts:
-  status: foundation-only
-  documentation: docs/16-contrato-dominio-r3.md
+x-gabarito360-r6-contracts:
+  status: operational-flow-implemented
+  documentation: docs/18-contrato-r6-integracao-operacional.md
   resources:
     academic:
       - periodos_letivos
@@ -38,11 +38,9 @@ x-gabarito360-r3-contracts:
       - resultados
       - resultado_questoes
       - relatorios
-  reservedUntilFunctionalSlices:
-    - application lifecycle
-    - OMR processing
-    - result calculation
-    - report generation and download
+  blockedUntilHomologation:
+    - real OMR accuracy gate
+    - physical device performance gate
 tags:
   - name: Autenticacao
     description: Emissao e revogacao de tokens e contexto do usuario autenticado
@@ -63,9 +61,9 @@ tags:
   - name: Estrutura academica
     description: Periodos, series, disciplinas e temas da fundacao R3
   - name: Aplicacoes
-    description: Contratos operacionais reservados para fatias funcionais posteriores
+    description: Ciclo operacional, leituras, revisao, confirmacao e dashboard
   - name: Resultados e relatorios
-    description: Contratos persistentes reservados para calculo, consulta e exportacao posteriores
+    description: Calculo, consulta e exportacao autorizada
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -2162,6 +2160,91 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /api/v1/aplicacoes:
+    get:
+      tags: [Aplicacoes]
+      summary: Listar aplicacoes autorizadas
+      operationId: listApplications
+      security: [{ bearerToken: [] }]
+      responses:
+        "200": { description: Aplicacoes autorizadas }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Aplicacoes]
+      summary: Criar aplicacao e snapshot de alunos
+      operationId: createApplication
+      security: [{ bearerToken: [] }]
+      responses:
+        "201": { description: Aplicacao criada }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+  /api/v1/aplicacoes/{aplicacao}/iniciar:
+    parameters:
+      - { name: aplicacao, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Aplicacoes]
+      summary: Iniciar aplicacao autorizada
+      operationId: startApplication
+      security: [{ bearerToken: [] }]
+      responses:
+        "200": { description: Aplicacao iniciada }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/v1/aplicacoes/{aplicacao}/leituras:
+    parameters:
+      - { name: aplicacao, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Aplicacoes]
+      summary: Registrar leitura preliminar
+      operationId: createPreliminaryReading
+      security: [{ bearerToken: [] }]
+      responses:
+        "201": { description: Leitura preliminar registrada }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+  /api/v1/leituras/{leitura}/revisar:
+    parameters:
+      - { name: leitura, in: path, required: true, schema: { type: string, format: uuid } }
+    patch:
+      tags: [Aplicacoes]
+      summary: Registrar revisao manual auditada
+      operationId: reviewReading
+      security: [{ bearerToken: [] }]
+      responses:
+        "200": { description: Leitura revisada }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/v1/leituras/{leitura}/confirmar:
+    parameters:
+      - { name: leitura, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: Idempotency-Key, in: header, required: true, schema: { type: string, maxLength: 80 } }
+    post:
+      tags: [Aplicacoes]
+      summary: Confirmar leitura e calcular resultado
+      operationId: confirmReading
+      security: [{ bearerToken: [] }]
+      responses:
+        "200": { description: Leitura confirmada e resultado calculado }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /api/v1/aplicacoes/{aplicacao}/dashboard:
+    parameters:
+      - { name: aplicacao, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [Aplicacoes]
+      summary: Obter snapshot de progresso
+      operationId: getApplicationDashboard
+      security: [{ bearerToken: [] }]
+      responses:
+        "200": { description: Metricas derivadas do banco }
+        "403": { $ref: "#/components/responses/AuthorizationForbidden" }
+  /api/v1/aplicacoes/{aplicacao}/relatorios:
+    parameters:
+      - { name: aplicacao, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Resultados e relatorios]
+      summary: Gerar relatorio CSV privado
+      operationId: createApplicationReport
+      security: [{ bearerToken: [] }]
+      responses:
+        "201": { description: Relatorio concluido }
+        "403": { $ref: "#/components/responses/AuthorizationForbidden" }
 components:
   securitySchemes:
     bearerToken:

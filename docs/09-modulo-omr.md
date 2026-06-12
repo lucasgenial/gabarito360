@@ -238,6 +238,17 @@ A equipe nao deve declarar acuracia sem dataset versionado, teste selado e relat
 | Perspectiva extrema | Rejeitar imagem |
 | Sombra/reflexo | Orientar nova captura |
 | Rasura | Sinalizar baixa confianca ou dupla |
+
+## 14. Status de implementacao R6
+
+O contrato executavel esta em `omr/`. Ele inclui configuracao versionada,
+normalizacao geometrica, qualidade, classificacao de marcacoes, JSON de saida,
+amostra sintetica e teste de regressao. O backend pode executa-lo pelo job
+`ProcessOmrReadingJob`.
+
+O perfil atual e exclusivamente `pre-homologacao`: sempre marca a leitura para
+revisao e nunca confirma resultado. Acuracia real, p95 e liberacao de piloto
+continuam pendentes ate coleta do dataset e teste nos dispositivos fisicos.
 | Regiao cortada | Falha de leitura |
 | Processamento interrompido | Manter tentativa e permitir nova execucao |
 

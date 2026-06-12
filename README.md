@@ -4,9 +4,9 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
-> **Status do projeto:** as fundações MariaDB, de domínio, visual e web das R2
-> a R5 foram concluídas na branch de refatoração. O próximo passo é a R6, que
-> integrará aplicações operacionais, OMR, tempo real e geração de relatórios.
+> **Status do projeto:** as fundacoes R2 a R5 e a integracao operacional R6
+> foram implementadas na branch de refatoracao. O piloto continua bloqueado
+> ate homologacao do OMR e dos dispositivos com dataset real.
 
 ## Sobre o sistema
 
@@ -217,6 +217,13 @@ canonicos de aluno, prova e turma/prova fazem parte do primeiro painel funcional
 A API e o painel Laravel estao em [`backend/`](backend/README.md). A base atual inclui API REST, Sanctum, filas, policies, requests, resources, services, painel administrativo e o endpoint `GET /api/v1/health`.
 
 Consulte o [README do backend](backend/README.md) para requisitos e comandos de execucao local.
+
+## App Android e OMR
+
+O cliente Flutter esta em [`mobile/`](mobile/README.md) e o contrato OpenCV
+executavel esta em [`omr/`](omr/README.md). O status e os gates da integracao
+operacional estao em
+[`docs/18-contrato-r6-integracao-operacional.md`](docs/18-contrato-r6-integracao-operacional.md).
 
 ### Refatoracao em andamento
 

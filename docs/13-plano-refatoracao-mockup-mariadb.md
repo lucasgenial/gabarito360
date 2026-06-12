@@ -342,4 +342,10 @@ componentes fundamentais.
 R5 foi concluída com rotas canônicas, consultas escopadas, telas responsivas e
 testes web. O contrato da entrega está em `docs/17-contrato-r5-fatias-web.md`.
 
-Executar somente **R6 - Integrar OMR, tempo real e qualidade operacional**.
+R6 possui implementacao tecnica e contrato em
+`docs/18-contrato-r6-integracao-operacional.md`. O fluxo automatizado foi
+validado, mas a homologacao fisica do OMR e dos dispositivos continua
+bloqueante. Nao iniciar piloto antes desses gates.
+
+Proxima etapa recomendada: **R7 - Empacotar, homologar e preparar merge**,
+preservando o bloqueio formal do piloto.

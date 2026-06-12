@@ -419,6 +419,27 @@ Eventos nao devem expor dados pessoais alem do necessario ao cliente autorizado.
 Esta secao registra recursos necessarios ao mockup e a modelagem MariaDB. Os
 endpoints abaixo sao **planejados** e nao foram implementados pela R1.
 
+### Status operacional R6
+
+Em 12 de junho de 2026, a R6 implementou os contratos operacionais abaixo:
+
+| Metodo | Endpoint implementado | Finalidade |
+|---|---|---|
+| GET/POST | `/api/v1/aplicacoes` | listar e criar aplicacao com snapshot |
+| GET | `/api/v1/aplicacoes/{id}/alunos` | listar alunos minimizados da aplicacao |
+| POST | `/api/v1/aplicacoes/{id}/iniciar` | iniciar por aplicador vinculado |
+| POST | `/api/v1/aplicacoes/{id}/finalizar` | finalizar sem revisoes pendentes |
+| GET | `/api/v1/aplicacoes/{id}/dashboard` | obter snapshot para fallback do Reverb |
+| POST | `/api/v1/aplicacoes/{id}/leituras` | registrar tentativa preliminar |
+| PATCH | `/api/v1/leituras/{id}/revisar` | registrar revisao manual auditada |
+| POST | `/api/v1/leituras/{id}/confirmar` | confirmar com `Idempotency-Key` |
+| POST | `/api/v1/leituras/{id}/processar-omr` | enfileirar contrato OMR backend |
+| GET/POST | `/api/v1/relatorios` e `/api/v1/aplicacoes/{id}/relatorios` | consultar e gerar CSV |
+| GET | `/api/v1/relatorios/{id}/download` | baixar arquivo privado autorizado |
+
+O contrato de entrega e os gates pendentes estao em
+`docs/18-contrato-r6-integracao-operacional.md`.
+
 Em 12 de junho de 2026, a R3 implementou a persistencia, os modelos e as
 barreiras de policy desses contratos. Os endpoints continuam reservados para as
 fatias funcionais da R5 e R6 e nao devem ser tratados como disponiveis antes
