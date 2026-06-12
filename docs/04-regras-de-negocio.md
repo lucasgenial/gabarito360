@@ -32,7 +32,7 @@
 
 | ID | Regra |
 |---|---|
-| RN013 | Uma avaliacao em rascunho pode ser criada e editada por gestor autorizado; professores e aplicadores nao criam avaliacoes no MVP. |
+| RN013 | Uma avaliacao em rascunho pode ser criada e editada por usuario com `provas_gabaritos.gerenciar` dentro do escopo academico concedido; cargo ou perfil isolado nao concede a acao. |
 | RN014 | Uma avaliacao so pode ser publicada com exatamente um modelo de cartao homologado e um gabarito valido. |
 | RN015 | A quantidade de respostas do gabarito deve corresponder a quantidade de questoes da avaliacao. |
 | RN016 | Cada questao possui no maximo uma alternativa correta, salvo modelo futuro explicitamente configurado. |
@@ -118,7 +118,24 @@
 | RN061 | Relatorios gerados devem registrar filtros, solicitante, data e versao dos dados quando aplicavel. |
 | RN062 | Rankings devem informar criterio de ordenacao e tratamento de empates. |
 
-## 11. Decisoes adotadas para o MVP
+## 11. Regras incorporadas pela R1
+
+| ID | Regra |
+|---|---|
+| RN068 | Cargo institucional, perfil de autorizacao e permissao sao conceitos distintos. |
+| RN069 | Diretor, vice-diretor, coordenador ou professor so executa uma acao quando possuir permissao e escopo explicitos. |
+| RN070 | Nao existe auto-cadastro publico; usuarios sao provisionados ou convidados por gestores autorizados. |
+| RN071 | A rota `/painel` seleciona indicadores pelo contexto e pelas permissoes, sem conceder acesso por variante visual. |
+| RN072 | Tema claro e o padrao; tema escuro depende de escolha explicita persistida. |
+| RN073 | Agenda e reunioes nao fazem parte do MVP; eventos exibidos devem derivar de provas e aplicacoes registradas. |
+| RN074 | Resultados individuais do MVP sao acessados apenas por profissionais autorizados; dashboard autenticado do aluno fica para V2. |
+| RN075 | PDF e CSV dos relatorios canonicos exigem permissao, escopo, registro da solicitacao e auditoria do download. |
+| RN076 | Responsaveis de alunos nao recebem conta automaticamente e seus dados devem ser minimizados. |
+| RN077 | Integracoes externas permanecem desabilitadas ate aprovacao e implementacao especificas. |
+| RN078 | Registros operacionais e historicos nao podem ser apagados permanentemente por fluxos comuns. |
+| RN079 | Vinculos vigentes devem ser encerrados preservando historico; unicidades condicionais sao garantidas por chave vigente e transacao. |
+
+## 12. Decisoes adotadas para o MVP
 
 | Tema | Decisao |
 |---|---|
@@ -127,8 +144,9 @@
 | Questao anulada | Concede pontuacao integral a todos os resultados validos, conforme [ADR-D004](decisoes/ADR-D004-questao-anulada.md). |
 | Correcao manual | Motivo obrigatorio em toda alteracao de resposta, conforme [ADR-D005](decisoes/ADR-D005-motivo-correcao-manual.md). |
 | Retencao | Prazos definidos por classificacao, conforme [ADR-D006](decisoes/ADR-D006-retencao-imagens-logs.md). |
-| Criacao de prova | Professores e aplicadores nao criam provas no MVP; a acao fica restrita a gestores autorizados. |
+| Criacao de prova | Usuario com permissao explicita pode criar provas dentro do escopo academico concedido, conforme [ADR-D013](decisoes/ADR-D013-contrato-produto-web-r1.md). |
+| Produto web | Cadastro aberto, gov.br, aluno autenticado, agenda, integracoes e formatos de relatorio seguem a [ADR-D013](decisoes/ADR-D013-contrato-produto-web-r1.md). |
 | Modelo por prova | Cada prova do MVP referencia exatamente um modelo de cartao homologado. |
 | Limiares OMR | Devem ser calibrados com dataset real e versionados no modelo; nao existem limiares globais fixos. |
 
-O registro completo de `D001-D009` esta em [decisoes/README.md](decisoes/README.md).
+O registro completo das decisoes esta em [decisoes/README.md](decisoes/README.md).

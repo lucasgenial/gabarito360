@@ -16,8 +16,9 @@ As decisoes abaixo foram registradas para o MVP em **10 de junho de 2026**. O st
 | D008 | [Metas de qualidade OMR](ADR-D008-metas-qualidade-omr.md) | Produto + OMR + QA | Aceita | Antes do piloto e apos mudanca de modelo |
 | D009 | [Abordagem do painel web](ADR-D009-painel-web.md) | Arquitetura + Produto | Aceita | Apos o piloto ou antes de ampliar o painel |
 | D010 | [Identificacao de cartoes impressos e codigos gerados](ADR-D010-identificacao-cartao.md) | Produto + OMR + Mobile + Backend | Aceita | Antes das migrations de cartoes e da homologacao OMR |
-| D011 | [Corte de escopo e matriz de permissoes do MVP](ADR-D011-escopo-e-permissoes-mvp.md) | Produto + Arquitetura + Seguranca | Aceita | Antes de alterar o gate do MVP ou iniciar nova release |
+| D011 | [Corte de escopo e matriz de permissoes do MVP](ADR-D011-escopo-e-permissoes-mvp.md) | Produto + Arquitetura + Seguranca | Aceita, parcialmente substituida por D013 | Antes de alterar o gate do MVP ou iniciar nova release |
 | D012 | [Reorientacao pelo mockup funcional e adocao do MariaDB](ADR-D012-reorientacao-mockup-mariadb.md) | Produto + Arquitetura + Design + Backend | Aceita | Antes de iniciar R2 |
+| D013 | [Contrato de produto web da R1](ADR-D013-contrato-produto-web-r1.md) | Produto + Arquitetura + Design + Seguranca | Aceita | Antes de ampliar o MVP ou iniciar integracoes |
 
 ## Regras de governanca
 

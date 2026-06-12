@@ -24,7 +24,7 @@ consultas e estados testáveis.
 
 | Módulo | Telas de referência | Funcionalidades identificadas | Situação atual |
 |---|---|---|---|
-| Acesso | `login.html` | login, manter conectado, recuperação, cadastro ilustrativo | Login existe; cadastro aberto e recuperação precisam de decisão |
+| Acesso | `login.html` | login, manter conectado e recuperação; cadastro é apenas ilustrativo | Login existe; cadastro aberto foi rejeitado e recuperação integra o MVP |
 | Dashboards | `dashboard*.html` | visão por administrador, aluno, coordenador, diretor escolar, diretor de núcleo e professor | Apenas painel organizacional mínimo existe |
 | Escolas | `escolas.html`, `escola-detalhe.html` | busca, cadastro, edição, reativação, visão consolidada, turmas, provas, alunos e equipe | CRUD básico existe; detalhe consolidado não |
 | Equipe e perfis | `membro-cadastrar.html`, `membro-editar.html`, `perfis-equipe.html` | dados profissionais, lotação, disciplinas, turmas, perfis e permissões | Usuários e perfis existem parcialmente |
@@ -95,16 +95,25 @@ próprio no mockup.
 - perfil, senha e alternância de tema;
 - tema claro padrão e responsividade.
 
-### Dependentes de decisão antes da implementação
+### Decisões fechadas na R1
 
-- auto-cadastro de usuários;
-- login ou autenticação via gov.br;
-- dashboard autenticado do aluno;
-- agenda e reuniões;
-- integrações externas;
-- plano, faturamento e limites;
-- exportação de todos os dados;
-- múltiplos idiomas.
+| Tema | Decisão |
+|---|---|
+| Auto-cadastro | Não implementar; usuários são provisionados ou convidados por gestores autorizados |
+| gov.br | Adiado; não alegar integração ou vinculação oficial |
+| Dashboard do aluno | V2; resultados do MVP são consultados por profissionais autorizados |
+| Agenda e reuniões | V2; MVP exibe apenas provas e aplicações registradas |
+| Integrações externas | V2 e somente após aprovação específica |
+| Plano, faturamento e limites | Fora do escopo atual |
+| Exportação integral e idiomas | V2; MVP opera em pt-BR |
+| PDF | MVP para relatórios canônicos de aluno, prova e turma/prova |
+| XLSX | V2 |
+| Criação de provas por professor | Permitida somente com permissão explícita e escopo concedido |
+
+As decisões completas estão na
+[ADR-D013](decisoes/ADR-D013-contrato-produto-web-r1.md) e o contrato de rotas,
+atores, permissões, dados e estados está em
+[15-mapa-rotas-web.md](15-mapa-rotas-web.md).
 
 ### Ações do protótipo que não devem ser copiadas literalmente
 
@@ -125,3 +134,14 @@ próprio no mockup.
 - Toda tela deve possuir estados de carregamento, vazio, erro, sucesso e acesso
   negado quando aplicável.
 - O mockup define composição; os tokens oficiais definem valores.
+
+## 9. Fechamento da R1
+
+- As 30 telas HTML foram classificadas como canônicas, históricas, referência
+  compartilhada ou referência V2.
+- Toda tela canônica possui rota, ator, permissão, dados e estados definidos em
+  [15-mapa-rotas-web.md](15-mapa-rotas-web.md).
+- Duplicidades e funcionalidades adiadas foram decididas na
+  [ADR-D013](decisoes/ADR-D013-contrato-produto-web-r1.md).
+- A modelagem necessária às telas está definida para MariaDB em
+  [06-modelagem-banco.md](06-modelagem-banco.md).

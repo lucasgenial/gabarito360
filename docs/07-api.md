@@ -69,8 +69,8 @@
 | POST | `/auth/reset-password` | Publico com token | Redefinir senha |
 | GET | `/me` | Autenticado | Consultar usuario, perfis, escopos e permissoes |
 | GET | `/me/aplicacoes` | Professor/Aplicador | Listar aplicacoes autorizadas para o app |
-| GET | `/me/sessoes` | Autenticado | Listar sessoes ativas na V2 |
-| DELETE | `/me/sessoes/{id}` | Autenticado | Revogar sessao na V2 |
+| GET | `/me/sessoes` | Autenticado | Listar sessoes ativas |
+| DELETE | `/me/sessoes/{id}` | Autenticado | Revogar sessao propria |
 
 **Validacoes de login:** credenciais obrigatorias, usuario ativo, rate limit e dispositivo identificavel no mobile.
 
@@ -414,16 +414,74 @@ Eventos nao devem expor dados pessoais alem do necessario ao cliente autorizado.
 - Endpoints de listagem limitam `per_page` e campos de ordenacao.
 - Erros internos retornam codigo generico ao cliente e detalhes somente nos logs protegidos.
 
-## 13. Versionamento e documentacao
+## 13. Contrato planejado pela R1
+
+Esta secao registra recursos necessarios ao mockup e a modelagem MariaDB. Os
+endpoints abaixo sao **planejados** e nao foram implementados pela R1.
+
+### 13.1 Contexto, equipe e preferencias
+
+| Metodo | Endpoint planejado | Finalidade |
+|---|---|---|
+| GET | `/me/contextos` | Listar contextos autorizados para o painel |
+| GET/PATCH | `/me/preferencias` | Consultar ou alterar tema e acessibilidade |
+| GET/PATCH | `/me/notificacoes` | Consultar ou alterar preferencias de notificacao |
+| GET | `/escolas/{id}/equipe` | Listar equipe, cargos e vinculos |
+| POST | `/escolas/{id}/equipe` | Criar ou convidar membro autorizado |
+| PATCH | `/escolas/{id}/equipe/{usuarioId}` | Alterar lotacoes e vinculos |
+| GET | `/cargos` | Consultar catalogo institucional |
+| GET | `/disciplinas` | Consultar catalogo academico |
+| GET | `/periodos-letivos` | Consultar periodos no escopo |
+| GET | `/series-anos` | Consultar series/anos |
+
+Cargo, perfil e permissao sao contratos distintos. Nenhum endpoint deve inferir
+autorizacao apenas pelo cargo.
+
+### 13.2 Alunos, responsaveis e temas
+
+| Metodo | Endpoint planejado | Finalidade |
+|---|---|---|
+| GET/POST | `/alunos/{id}/responsaveis` | Consultar ou vincular responsavel |
+| PATCH/DELETE | `/alunos/{id}/responsaveis/{vinculoId}` | Alterar ou encerrar vinculo |
+| GET | `/temas-habilidades` | Consultar classificacoes por disciplina |
+| POST | `/questoes/{id}/temas` | Vincular tema por usuario autorizado |
+
+`DELETE` de vinculo significa encerramento logico, nunca exclusao do historico.
+
+### 13.3 Painel e relatorios canonicos
+
+| Metodo | Endpoint planejado | Finalidade |
+|---|---|---|
+| GET | `/dashboards/contexto-atual` | Snapshot para a composicao de `/painel` |
+| GET | `/correcoes` | Listar progresso e alertas autorizados |
+| GET | `/resultados/{id}` | Consultar resultado individual autorizado |
+| GET | `/provas/{id}/relatorio` | Dados do relatorio por prova |
+| GET | `/turmas/{turmaId}/provas/{provaId}/relatorio` | Dados do relatorio turma/prova |
+| POST | `/relatorios` | Solicitar CSV ou PDF canonico |
+
+PDF e CSV pertencem ao MVP para os relatorios canonicos; XLSX permanece em V2.
+Solicitacao e download exigem permissao, escopo e auditoria.
+
+### 13.4 Itens rejeitados ou adiados
+
+- Nao criar endpoint publico de cadastro de usuario.
+- Nao criar autenticacao gov.br sem decisao e integracao aprovadas.
+- Nao expor dashboard autenticado de aluno no MVP.
+- Nao criar agenda, faturamento, limites comerciais ou integracoes simuladas.
+
+O mapa de telas e rotas web esta em
+[15-mapa-rotas-web.md](15-mapa-rotas-web.md).
+
+## 14. Versionamento e documentacao
 
 - Mudancas incompativeis geram nova versao da API.
 - OpenAPI deve ser mantido junto da implementacao a partir do inicio do backend.
 - Campos novos devem ser preferencialmente opcionais para clientes antigos.
 - O app deve informar sua versao; o backend pode exigir atualizacao minima por motivo de seguranca.
 
-## 14. Convencoes de implementacao
+## 15. Convencoes de implementacao
 
-### 14.1 Fluxo por camada
+### 15.1 Fluxo por camada
 
 ```text
 Route -> Form Request -> Policy -> Controller -> Action
@@ -440,7 +498,7 @@ Route -> Form Request -> Policy -> Controller -> Action
 
 Os criterios completos para escolher cada camada e os gates de qualidade estao em [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-### 14.2 Contrato e erros
+### 15.2 Contrato e erros
 
 - Todo endpoint funcional novo deve usar `/api/v1`.
 - O endpoint tecnico de verificacao esta disponivel em `/api/v1/health`.
@@ -451,7 +509,7 @@ Os criterios completos para escolher cada camada e os gates de qualidade estao e
 - Erros `403` indicam acao conhecida fora da permissao; `404` pode ocultar recurso fora do escopo; `409` representa conflito de estado ou integridade esperado.
 - Nenhum endpoint deve criar formato de resposta proprio ou retornar excecao interna ao cliente.
 
-### 14.3 Transicao da base tecnica
+### 15.3 Transicao da base tecnica
 
 A transicao da base tecnica foi concluida no MP-007. O componente central de resposta, o health check e o tratamento global de excecoes seguem os envelopes da secao 2.
 

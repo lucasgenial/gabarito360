@@ -168,15 +168,29 @@ Dar suporte operacional a aplicacao ativa.
 | Desempenho por questao | Acertos, erros, brancos e distribuicao de alternativas | Perfis pedagogicos autorizados |
 | Auditoria operacional | Alteracoes manuais, reprocessamentos e cancelamentos | Perfis autorizados |
 
-## 9. Exportacoes
+## 9. Composicao canonica pela R1
 
-### 9.1 Formatos
+- A rota web unica `/painel` escolhe a composicao pelo contexto ativo e pelas
+  permissoes; variante visual nao concede acesso.
+- Administrador, diretor de nucleo, diretor/vice escolar, coordenador e professor
+  compartilham componentes e recebem somente dados autorizados.
+- O dashboard do aluno e referencia de V2 e nao integra o gate do MVP.
+- Agenda do MVP representa apenas provas e aplicacoes registradas.
+- Todo card ou grafico deve declarar fonte, filtro, periodo e estado da
+  atualizacao. Dados estaticos do mockup nao podem chegar a producao.
+- Estados obrigatorios: carregando, vazio, erro, dados parciais, sucesso e acesso
+  negado.
+
+## 10. Exportacoes
+
+### 10.1 Formatos
 
 - CSV no MVP.
-- PDF e XLSX na V2.
+- PDF no MVP para aluno, prova e turma/prova.
+- XLSX na V2.
 - JSON apenas para integracoes autorizadas.
 
-### 9.2 Fluxo
+### 10.2 Fluxo
 
 1. Usuario define relatorio, filtros e formato.
 2. Backend valida permissao e escopo.
@@ -185,11 +199,11 @@ Dar suporte operacional a aplicacao ativa.
 5. Download e disponibilizado por URL temporaria.
 6. Solicitacao e download sao auditados.
 
-### 9.3 Estados
+### 10.3 Estados
 
 `solicitado`, `processando`, `concluido`, `falhou`, `expirado`.
 
-## 10. Filtros e segmentacoes
+## 11. Filtros e segmentacoes
 
 - Nucleo, escola e turma.
 - Avaliacao e aplicacao.
@@ -202,7 +216,7 @@ Dar suporte operacional a aplicacao ativa.
 
 Filtros devem ser validados no backend e limitados ao escopo do usuario.
 
-## 11. Permissoes e privacidade
+## 12. Permissoes e privacidade
 
 - Gestor do nucleo acessa agregados e detalhes autorizados de suas escolas.
 - Escola acessa apenas seus dados.
@@ -212,7 +226,7 @@ Filtros devem ser validados no backend e limitados ao escopo do usuario.
 - Ranking individual deve ser configuravel e exibido apenas com finalidade definida.
 - Exportacoes com dados pessoais exigem permissao especifica.
 
-## 12. Desempenho e consistencia
+## 13. Desempenho e consistencia
 
 - Indicadores em tempo real podem usar contadores atualizados por eventos.
 - Resultados analiticos podem usar consultas agregadas, cache ou visoes materializadas na V2.
@@ -220,12 +234,13 @@ Filtros devem ser validados no backend e limitados ao escopo do usuario.
 - Recalculo deve invalidar caches afetados.
 - Dashboard deve informar quando dados ainda estao sendo processados.
 
-## 13. Criterios de aceite do MVP
+## 14. Criterios de aceite do MVP
 
 - Dashboard da aplicacao apresenta previstos, lidos, pendentes e percentual.
 - Confirmacao valida atualiza o dashboard em ate 5 segundos na condicao homologada.
 - Usuario nao acessa dashboard fora de seu escopo.
 - Totais consideram somente resultados vigentes.
 - Filtros preservam coerencia entre cards e listas.
-- Relatorio basico por turma pode ser exportado em CSV.
+- Relatorios canonicos de aluno, prova e turma/prova podem ser exportados em PDF,
+  e o relatorio basico por turma pode ser exportado em CSV.
 - Geracao e download ficam registrados para auditoria.

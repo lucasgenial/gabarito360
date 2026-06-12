@@ -6,7 +6,7 @@ O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escol
 
 > **Status do projeto:** desenvolvimento suspenso após a MP-028 para reorientar
 > produto, interface e persistência pelo mockup funcional e MariaDB. O próximo
-> passo é R1 do novo plano de refatoração.
+> passo é R2 do novo plano de refatoração.
 
 ## Sobre o sistema
 
@@ -177,7 +177,7 @@ O primeiro MVP deve permitir uma aplicacao real controlada:
 - vinculacao unica entre cartao e aluno;
 - correcao automatica;
 - dashboard simples de progresso;
-- relatorio basico por turma em CSV;
+- relatorio basico por turma em CSV e PDFs canonicos por aluno, prova e turma/prova;
 - auditoria das operacoes criticas.
 
 ## Roadmap resumido
@@ -192,7 +192,9 @@ O primeiro MVP deve permitir uma aplicacao real controlada:
 | 5. Tempo real e relatorios | Dashboard, encerramento e exportacao CSV |
 | 6. Piloto controlado | Validacao com turmas e dispositivos reais |
 
-Versoes posteriores incluem modo offline, dashboards consolidados, relatorios PDF/XLSX, recorrection, multiplos modelos de cartao e integracoes externas.
+Versoes posteriores incluem modo offline, XLSX, recorrection, multiplos modelos
+de cartao, dashboard autenticado do aluno e integracoes externas. CSV e os PDFs
+canonicos de aluno, prova e turma/prova fazem parte do primeiro painel funcional.
 
 ## Documentacao
 
@@ -203,7 +205,7 @@ Versoes posteriores incluem modo offline, dashboards consolidados, relatorios PD
 | [Requisitos nao funcionais](docs/03-requisitos-nao-funcionais.md) | Seguranca, desempenho, disponibilidade e qualidade |
 | [Regras de negocio](docs/04-regras-de-negocio.md) | Regras de integridade, acesso e operacao |
 | [Casos de uso](docs/05-casos-de-uso.md) | Atores, fluxos e matriz resumida de permissoes |
-| [Modelagem do banco](docs/06-modelagem-banco.md) | Modelagem PostgreSQL histórica, em revisão para MariaDB |
+| [Modelagem do banco](docs/06-modelagem-banco.md) | Modelagem relacional canonica para MariaDB |
 | [API REST](docs/07-api.md) | Contratos e endpoints iniciais |
 | [Aplicativo Android](docs/08-mobile-android.md) | Telas, navegacao, fluxos e sincronizacao |
 | [Modulo OMR](docs/09-modulo-omr.md) | Pipeline, confianca, calibracao e testes |

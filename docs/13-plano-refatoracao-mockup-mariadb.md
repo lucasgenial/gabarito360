@@ -92,6 +92,8 @@ Não fazer:
 
 ## R1 - Canonizar produto, rotas e modelo de dados
 
+**Status: concluída em 12 de junho de 2026.**
+
 Objetivo: fechar o contrato antes de refatorar código.
 
 Ações:
@@ -109,6 +111,13 @@ Aceite:
 - cada tela canônica possui rota, ator, permissão, dados e estado;
 - modelagem MariaDB não depende de recurso PostgreSQL;
 - duplicidades do protótipo possuem decisão.
+
+Entregáveis:
+
+- `docs/decisoes/ADR-D013-contrato-produto-web-r1.md`;
+- `docs/15-mapa-rotas-web.md`;
+- `docs/06-modelagem-banco.md` canônico para MariaDB;
+- requisitos, regras, casos de uso, API, dashboards e matriz funcional alinhados.
 
 Não fazer:
 
@@ -293,7 +302,8 @@ componentes fundamentais.
 
 ## 7. Próxima execução recomendada
 
-Executar somente **R1 - Canonizar produto, rotas e modelo de dados**.
+Executar somente **R2 - Subir fundação MariaDB e restaurar o gate técnico**.
 
-R1 deve terminar com a nova modelagem MariaDB e o novo mapa de rotas aprovado.
-Somente depois deve começar R2 e subir a aplicação sobre MariaDB.
+R2 deve transformar a modelagem aprovada em baseline de migrations MariaDB,
+ambiente local reproduzível e suíte completa passando antes de qualquer nova
+tela ou módulo funcional.

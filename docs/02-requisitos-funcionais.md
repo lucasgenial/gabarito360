@@ -55,7 +55,7 @@
 | RF028 | MVP | O sistema deve permitir vincular avaliacoes a turmas. |
 | RF029 | MVP | O sistema deve manter um modelo de cartao versionado para cada avaliacao. |
 | RF030 | V2 | O sistema deve permitir importar gabarito oficial por planilha. |
-| RF031 | V2 | O sistema deve permitir anular questoes e definir pesos. |
+| RF031 | MVP | O sistema deve permitir anular questoes e definir pesos antes da publicacao, respeitando a politica vigente. |
 | RF032 | V2 | O sistema deve permitir duplicar uma avaliacao. |
 | RF033 | V2 | Usuarios autorizados devem poder alterar gabarito publicado com justificativa e auditoria. |
 | RF034 | V2 | O sistema deve permitir recorrection em lote apos alteracao autorizada do gabarito. |
@@ -116,10 +116,10 @@
 | RF069 | MVP | O sistema deve atualizar indicadores operacionais em tempo real. |
 | RF070 | MVP | O sistema deve gerar relatorio basico de resultados por turma. |
 | RF071 | MVP | O sistema deve permitir exportar resultados em CSV. |
-| RF072 | V2 | O sistema deve exibir dashboards consolidados de escola e nucleo. |
-| RF073 | V2 | O sistema deve exibir desempenho por questao. |
-| RF074 | V2 | O sistema deve gerar relatorios por aluno, escola, avaliacao e nucleo. |
-| RF075 | V2 | O sistema deve exportar relatorios em PDF e XLSX. |
+| RF072 | MVP | O sistema deve exibir dashboards consolidados de escola e nucleo com dados reais e escopo autorizado. |
+| RF073 | MVP | O sistema deve exibir desempenho por questao nos contextos autorizados. |
+| RF074 | MVP/V2 | O MVP deve gerar relatorios canonicos por aluno, avaliacao e turma/avaliacao; consolidados adicionais de escola e nucleo evoluem conforme o roadmap. |
+| RF075 | MVP/V2 | O MVP deve exportar CSV e PDF para os relatorios canonicos; XLSX permanece em V2. |
 | RF076 | V3 | O sistema deve permitir agendar relatorios recorrentes. |
 
 ## 10. Auditoria, arquivos e suporte
@@ -134,8 +134,32 @@
 | RF082 | V2 | O sistema deve permitir cancelar logicamente uma leitura confirmada com justificativa. |
 | RF083 | V3 | O sistema deve oferecer API de integracao para sistemas educacionais externos. |
 
-## 11. Rastreabilidade inicial do MVP
+## 11. Requisitos incorporados pela R1
 
-O MVP compreende `RF001-RF005`, `RF008-RF013`, `RF016-RF020`, `RF023-RF029`, `RF035-RF039`, `RF042-RF053`, `RF057-RF065`, `RF068-RF071` e `RF077-RF080`.
+| ID | Prioridade | Requisito |
+|---|---|---|
+| RF084 | MVP | O painel deve selecionar sua composicao pela permissao, cargo e contexto ativo do usuario, usando a rota unica `/painel`. |
+| RF085 | MVP | Gestores autorizados devem poder manter equipe escolar com cargos, lotacoes, perfis, disciplinas e turmas em conceitos separados. |
+| RF086 | MVP | O sistema deve manter periodos letivos, series/anos e disciplinas normalizados. |
+| RF087 | MVP | O sistema deve permitir vincular responsaveis a alunos, coletando somente os dados necessarios. |
+| RF088 | MVP | Questoes devem poder ser classificadas por temas ou habilidades para analise pedagogica. |
+| RF089 | MVP | O usuario deve poder manter preferencias de tema, acessibilidade e notificacoes; o tema claro e o padrao. |
+| RF090 | MVP | O usuario deve poder consultar e revogar suas sessoes ativas e alterar sua senha. |
+| RF091 | MVP | Profissionais com `provas_gabaritos.gerenciar` devem poder criar e manter provas somente no escopo academico concedido. |
+| RF092 | MVP | O sistema deve apresentar estados de carregamento, vazio, erro, sucesso e acesso negado nas telas canonicas. |
+| RF093 | MVP | Usuarios devem ser provisionados ou convidados por gestores autorizados; nao deve existir auto-cadastro publico. |
+| RF094 | V2 | O sistema podera oferecer dashboard autenticado ao aluno, limitado aos proprios dados. |
+| RF095 | V2 | Agenda, reunioes, integracoes externas, exportacao integral e multiplos idiomas dependem de aprovacao especifica. |
+| RF096 | MVP | O sistema deve registrar e acompanhar solicitacoes LGPD autorizadas. |
+
+O contrato detalhado das telas esta em
+[15-mapa-rotas-web.md](15-mapa-rotas-web.md).
+
+## 12. Rastreabilidade inicial do MVP
+
+O MVP compreende `RF001-RF005`, `RF008-RF013`, `RF016-RF020`,
+`RF023-RF029`, `RF031`, `RF035-RF039`, `RF042-RF053`, `RF057-RF065`,
+`RF068-RF075` conforme seus cortes MVP, `RF077-RF080` e `RF084-RF093`,
+`RF096`.
 
 Os criterios de aceite detalhados serao refinados no backlog de cada etapa descrita em [Roadmap do MVP](11-roadmap-mvp.md).

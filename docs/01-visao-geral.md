@@ -44,13 +44,15 @@ O gate de liberacao do MVP considera obrigatorios:
 - Importacao validada de alunos por CSV.
 - Prova objetiva padronizada com 20 questoes A-E, gabarito vigente e um modelo homologado de cartao.
 - Aplicacao online pelo app Android, com captura, OMR, revisao humana, vinculacao do cartao ao aluno e confirmacao.
-- Correcao automatica, dashboard simples por aplicacao, relatorio por turma em tela e CSV e auditoria de operacoes criticas.
+- Correcao automatica, dashboards contextuais, relatorios canonicos por aluno,
+  prova e turma/prova em tela e PDF, CSV por turma e auditoria de operacoes
+  criticas.
 - Autorizacao por perfil e escopo conforme a matriz aprovada em [05-casos-de-uso.md](05-casos-de-uso.md).
 
 ### 4.3 Fora do MVP
 
 - Modo offline completo, sincronizacao em lote e resolucao de conflitos.
-- Relatorios PDF e XLSX.
+- XLSX e relatorios PDF adicionais aos tres formatos canonicos.
 - Dashboards consolidados avancados de nucleo e escola.
 - Multiplos modelos configuraveis de cartao em producao.
 - Alteracao de gabarito publicado e recorrection em lote.
@@ -71,7 +73,7 @@ Funcionalidades fora do MVP podem ser planejadas ou preparadas tecnicamente, mas
 | Administrador Geral | Todo o sistema | Configuracao global, usuarios, perfis, suporte e auditoria |
 | Gestor do Nucleo | Nucleo e escolas vinculadas | Escolas, avaliacoes oficiais, acompanhamento e relatorios consolidados |
 | Responsavel da Escola | Uma escola | Usuarios locais, turmas, alunos, aplicacoes e relatorios da escola |
-| Professor | Turmas e aplicacoes vinculadas | Consulta de turmas, aplicacao, leitura e acompanhamento |
+| Professor | Turmas, disciplinas e aplicacoes vinculadas | Consulta e, quando autorizado explicitamente, criacao de provas; aplicacao, leitura e acompanhamento |
 | Aplicador | Aplicacoes vinculadas | Captura, revisao e confirmacao de cartoes |
 | Leitor/Consulta | Escopo concedido | Consulta de dashboards e relatorios, sem alteracao operacional |
 | Suporte Tecnico | Escopo controlado e auditado | Diagnostico tecnico sem acesso irrestrito a dados pessoais |

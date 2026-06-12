@@ -37,7 +37,7 @@
 | UC017 | Finalizar aplicacao | Professor ou Aplicador vinculado | MVP |
 | UC018 | Acompanhar aplicacao em tempo real | Gestores/Consulta | MVP |
 | UC019 | Consultar resultado por turma | Gestores/Professor | MVP |
-| UC020 | Exportar relatorio | Usuario autorizado | MVP para CSV; V2 para PDF/XLSX |
+| UC020 | Exportar relatorio | Usuario autorizado | MVP para CSV e PDF canonicos; V2 para XLSX |
 | UC021 | Operar e sincronizar offline | Professor ou Aplicador | V2 |
 | UC022 | Alterar gabarito e recorrerigir | Gestor autorizado | V2 |
 | UC023 | Reprocessar leitura | Usuario autorizado/Suporte | V2 |
@@ -253,14 +253,15 @@
 | Importar alunos por CSV | Global | Nucleo | Escola | Nao | Nao | Nao | Nao |
 | Consultar turmas e alunos | Global | Nucleo | Escola | Vinculado | Vinculado | Concedido | Diagnostico |
 | Vincular professor ou aplicador a turma | Global | Nucleo | Escola | Nao | Nao | Nao | Nao |
-| Criar, editar e publicar prova e gabarito | Global | Nucleo | Nao | Nao | Nao | Nao | Nao |
+| Criar, editar e publicar prova e gabarito | Global | Nucleo | Escola quando concedido | Vinculado quando concedido | Nao | Nao | Nao |
 | Vincular prova a turma e criar aplicacao | Global | Nucleo | Escola, para prova publicada | Nao | Nao | Nao | Nao |
 | Iniciar ou finalizar aplicacao | Nao | Nao | Nao | Vinculado | Vinculado | Nao | Nao |
 | Capturar, revisar e confirmar leitura | Nao | Nao | Nao | Vinculado | Vinculado | Nao | Nao |
 | Corrigir resposta antes da confirmacao | Nao | Nao | Nao | Vinculado, com auditoria | Vinculado, com auditoria | Nao | Nao |
 | Consultar dashboard simples da aplicacao | Global | Nucleo | Escola | Vinculado | Vinculado | Concedido | Diagnostico |
 | Consultar relatorio por turma e exportar CSV | Global | Nucleo | Escola | Vinculado | Nao | Concedido | Nao |
-| Exportar PDF ou XLSX | V2 | V2 | V2 | V2 | Nao | V2 | Nao |
+| Exportar PDF canonico | Global | Nucleo | Escola | Vinculado | Nao | Concedido | Nao |
+| Exportar XLSX | V2 | V2 | V2 | V2 | Nao | V2 | Nao |
 | Consultar interface completa de auditoria | V2 | V2 | V2 | V2 | V2 | Nao | V2 |
 | Executar diagnostico tecnico | Diagnostico | Nao | Nao | Nao | Nao | Nao | Diagnostico |
 
@@ -275,10 +276,43 @@
 - O Suporte Tecnico nao altera dados de negocio e todo acesso diagnostico deve ser auditado.
 - O MVP registra auditoria das operacoes criticas, mas a interface completa para consulta e investigacao fica para V2.
 
-## 14. Referencias
+## 14. Casos de uso incorporados pela R1
+
+### UC025 - Gerenciar equipe escolar
+
+Gestor autorizado cria ou convida um usuario, registra lotacao e cargo, concede
+perfis permitidos e vincula disciplinas e turmas. Cargo nao concede permissao e
+toda concessao privilegiada e auditada.
+
+### UC026 - Gerenciar perfil e preferencias proprias
+
+Usuario autenticado consulta seus dados, altera senha e preferencias, seleciona
+tema e acessibilidade e revoga sessoes proprias. Tema claro permanece como
+padrao ate escolha explicita.
+
+### UC027 - Consultar painel contextual
+
+Usuario acessa `/painel`; o sistema resolve contexto, permissoes e fontes de
+dados, apresenta somente indicadores autorizados e informa estados vazio,
+parcial, erro ou acesso negado.
+
+### UC028 - Gerar relatorio canonico
+
+Profissional autorizado seleciona aluno, prova ou turma/prova, informa filtros e
+solicita CSV ou PDF. O sistema valida escopo, gera arquivo privado, registra
+solicitacao e audita o download.
+
+### UC029 - Gerenciar responsaveis do aluno
+
+Gestor autorizado vincula contato minimo de um responsavel ao aluno, define
+parentesco e autorizacao de contato e encerra vinculos preservando historico.
+
+## 15. Referencias
 
 - Requisitos: [02-requisitos-funcionais.md](02-requisitos-funcionais.md)
 - Regras: [04-regras-de-negocio.md](04-regras-de-negocio.md)
 - Fluxo mobile: [08-mobile-android.md](08-mobile-android.md)
 - Roadmap: [11-roadmap-mvp.md](11-roadmap-mvp.md)
 - Decisao de escopo e permissoes: [decisoes/ADR-D011-escopo-e-permissoes-mvp.md](decisoes/ADR-D011-escopo-e-permissoes-mvp.md)
+- Contrato de produto web: [decisoes/ADR-D013-contrato-produto-web-r1.md](decisoes/ADR-D013-contrato-produto-web-r1.md)
+- Mapa de rotas web: [15-mapa-rotas-web.md](15-mapa-rotas-web.md)

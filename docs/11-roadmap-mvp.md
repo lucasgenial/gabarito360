@@ -1,8 +1,14 @@
-> **Roadmap suspenso para reorientação.** O plano abaixo permanece como histórico
-> do trabalho realizado até a MP-028, mas não deve orientar novas implementações
-> até a conclusão do plano em `docs/13-plano-refatoracao-mockup-mariadb.md`.
+> **Roadmap funcional de referência.** A ordem técnica vigente da refatoração
+> está em `docs/13-plano-refatoracao-mockup-mariadb.md`; este documento preserva
+> o detalhamento funcional e deve ser interpretado pelas decisões da R1.
 
 # Gabarito360 - Plano Tecnico do MVP
+
+> **Atualizacao da R1, 12 de junho de 2026:** este roadmap funcional permanece
+> como referencia de entregas, mas sua fundacao tecnica anterior foi substituida
+> pelo plano de refatoracao em `docs/13-plano-refatoracao-mockup-mariadb.md`.
+> O banco alvo e MariaDB, o mockup em `style-system/` e a referencia web, CSV e
+> PDF canonico integram o primeiro painel funcional e XLSX permanece em V2.
 
 ## 1. Objetivo
 
@@ -43,7 +49,7 @@ O plano detalha tarefas pequenas, dependencias, criterios de aceite e gates de c
 ### 2.2 Fora do MVP
 
 - Modo offline completo e resolucao de conflitos.
-- Relatorios PDF e XLSX.
+- XLSX e relatorios PDF adicionais aos tres formatos canonicos do primeiro painel.
 - Dashboards consolidados avancados de nucleo e escola.
 - Multiplos modelos configuraveis de cartao em producao.
 - Alteracao de gabarito publicado e recorrection em lote.
@@ -193,9 +199,9 @@ Criar a fundacao tecnica do backend, banco, filas, arquivos, testes e observabil
 |---:|---|---|---|
 | 1 | F2-T01 | Criar o projeto Laravel 12 | Aplicacao backend inicial |
 | 2 | F2-T02 | Definir estrutura modular e convencoes do backend | Organizacao documentada do codigo |
-| 3 | F2-T03 | Configurar Docker para aplicacao, PostgreSQL e Redis | Ambiente local reproduzivel |
+| 3 | F2-T03 | Configurar ambiente para aplicacao, MariaDB e Redis | Ambiente local reproduzivel |
 | 4 | F2-T04 | Configurar variaveis por ambiente e exemplos sem segredos | Arquivo de exemplo seguro |
-| 5 | F2-T05 | Configurar conexao PostgreSQL e extensoes aprovadas | Banco acessivel pela aplicacao |
+| 5 | F2-T05 | Configurar conexao MariaDB e convencoes aprovadas | Banco acessivel pela aplicacao |
 | 6 | F2-T06 | Criar migrations na ordem definida pela modelagem | Schema inicial versionado |
 | 7 | F2-T07 | Criar factories e seeders minimos para testes | Dados de teste reproduziveis |
 | 8 | F2-T08 | Configurar Redis, filas e worker | Tarefa assincrona de prova |
@@ -209,7 +215,7 @@ Criar a fundacao tecnica do backend, banco, filas, arquivos, testes e observabil
 
 ### 6.4 Criterios de aceite
 
-- Um desenvolvedor inicia backend, PostgreSQL e Redis com procedimento documentado.
+- Um desenvolvedor inicia backend, MariaDB e Redis com procedimento documentado.
 - Migrations sobem em banco vazio e podem ser revertidas conforme estrategia aprovada.
 - Testes executam usando ambiente isolado.
 - API retorna formato padronizado de sucesso e erro.
@@ -713,7 +719,7 @@ Prioridade sugerida depois do piloto:
 1. Corrigir problemas identificados no uso real.
 2. Implementar modo offline e sincronizacao com conflitos.
 3. Adicionar dashboards consolidados de escola e nucleo.
-4. Adicionar relatorios PDF e XLSX.
+4. Adicionar XLSX e relatorios PDF adicionais.
 5. Implementar alteracao controlada de gabarito e recorrection.
 6. Suportar multiplos modelos de cartao.
 7. Adicionar integracoes externas e analises avancadas.
