@@ -66,6 +66,6 @@
                     @endforelse
                 </tbody>
         </x-ui.table>
-        {{ $nucleos->links() }}
+        <x-ui.pagination :paginator="$nucleos" />
     </x-ui.card>
 @endsection

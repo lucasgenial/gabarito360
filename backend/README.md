@@ -7,6 +7,10 @@ estrutura acadêmica, equipe, responsáveis, aplicações, leituras, resultados 
 relatórios. Os fluxos e endpoints desses novos contratos permanecem reservados
 para as próximas fatias funcionais.
 
+A R4 consolidou o shell web responsivo, tema claro padrão com alternância
+persistida, tokens oficiais e biblioteca Blade compartilhada. A R5 conectará
+essa fundação visual aos fluxos funcionais, sem dados estáticos do mockup.
+
 ## Requisitos
 
 - PHP 8.3 ou superior com `pdo_mysql`;

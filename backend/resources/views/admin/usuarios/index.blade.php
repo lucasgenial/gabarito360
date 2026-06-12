@@ -90,6 +90,6 @@
                     @endforelse
                 </tbody>
         </x-ui.table>
-        {{ $usuarios->links() }}
+        <x-ui.pagination :paginator="$usuarios" />
     </x-ui.card>
 @endsection

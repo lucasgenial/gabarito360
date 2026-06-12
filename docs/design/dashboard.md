@@ -57,5 +57,8 @@ Bibliotecas recomendadas pelo SDGB: Chart.js, ApexCharts ou ECharts. A escolha d
 
 ## 7. Evolução
 
-O MP-046 fornece o snapshot consistente sem criar interface. O MP-046A cria os componentes visuais compartilhados. O MP-048 monta o dashboard operacional em tempo real, e o MP-049 adiciona resiliência e validação de latência.
-
+A R4 fornece os componentes estruturais `x-ui.kpi` e `x-ui.chart`, sem dados
+estáticos nem comportamento em tempo real. O MP-046 fornece o snapshot
+consistente, o MP-046A especializa os componentes operacionais de dashboard, o
+MP-048 monta a atualização em tempo real e o MP-049 adiciona resiliência e
+validação de latência.

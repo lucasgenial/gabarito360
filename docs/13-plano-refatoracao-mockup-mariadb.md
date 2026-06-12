@@ -201,6 +201,8 @@ Não fazer:
 
 ## R4 - Construir fundação visual canônica
 
+Status: **concluída em 12 de junho de 2026**.
+
 Objetivo: transformar o mockup em biblioteca reutilizável.
 
 Ações:
@@ -223,6 +225,18 @@ Não fazer:
 
 - páginas com dados estáticos;
 - regras de negócio dentro dos componentes.
+
+Entregas realizadas:
+
+- tokens oficiais reconciliados e congelados em `backend/resources/css/tokens.css`
+  e `docs/design/tokens-web-r4.md`;
+- shell autenticado responsivo com sidebar desktop, drawer móvel, cabeçalho,
+  breadcrumb e menu de conta;
+- tema claro padrão com alternância explícita persistida;
+- catálogo Blade ampliado para formulários, navegação, feedback, KPI e gráfico
+  com alternativa tabular;
+- componentes compartilhados aplicados nas telas administrativas existentes;
+- contrato automatizado de acessibilidade, responsividade e tema.
 
 ## R5 - Implementar fatias funcionais web
 
@@ -325,7 +339,7 @@ componentes fundamentais.
 
 ## 7. Próxima execução recomendada
 
-Executar somente **R4 - Construir fundação visual canônica**.
+Executar somente **R5 - Implementar fatias funcionais web**.
 
-R4 deve transformar o mockup em shell e biblioteca reutilizável, consumindo os
-contratos reais da R3 sem iniciar ainda as fatias funcionais completas da R5.
+R5 deve conectar o shell e os componentes da R4 aos contratos reais da R3 em
+fatias verticais pequenas, sem usar indicadores estáticos do mockup.

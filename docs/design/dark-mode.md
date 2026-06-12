@@ -33,7 +33,7 @@ Os valores do JSON prevalecem sobre exemplos de cor presentes no SDGB.
 - Preservar contraste mínimo de texto e controles.
 - Usar o foco amarelo definido por `themes.dark.border.focus`.
 - Validar imagens, logos, gráficos e estados semânticos nos dois temas.
-- Preferência do sistema operacional deve ser respeitada; alteração manual futura deve persistir sem afetar autenticação.
+- A preferência do sistema operacional não ativa o tema escuro automaticamente; somente a escolha explícita persistida pode alterá-lo.
 
 ## 4. Critérios de aceite
 

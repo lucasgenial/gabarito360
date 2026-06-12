@@ -64,11 +64,13 @@ O painel web do MVP usa Blade, Livewire e Tailwind conforme ADR-D009. A bibliote
 
 ## 8. Implementação compartilhada
 
-A fundação web implementada no reparo da MP-019A está em:
+A fundação web consolidada na R4 está em:
 
 - `backend/resources/views/components/ui/`: catálogo Blade compartilhado;
-- `backend/resources/css/app.css`: mapeamento dos tokens oficiais, temas e estados;
-- `backend/resources/js/app.js`: comportamento acessível de modal;
+- `backend/resources/views/layouts/`: shell autenticado e público;
+- `backend/resources/css/tokens.css`: espelho congelado dos tokens oficiais;
+- `backend/resources/css/app.css`: composição, temas e estados baseados em tokens;
+- `backend/resources/js/app.js`: tema, modal, drawer, toast e tabs acessíveis;
 - `backend/tests/Feature/Web/DesignSystemTest.php`: contrato automatizado da fundação visual.
 
 Catálogo disponível:
@@ -76,12 +78,15 @@ Catálogo disponível:
 | Componente Blade | Uso |
 |---|---|
 | `x-ui.button` | botão ou link com variantes, tamanhos, disabled e loading |
-| `x-ui.input`, `x-ui.textarea`, `x-ui.select` | campo com label, ajuda, erro associado e estado inválido |
+| `x-ui.input`, `x-ui.textarea`, `x-ui.select`, `x-ui.date-picker` | campos com label, ajuda, erro associado e estado inválido |
 | `x-ui.card` | agrupamento de conteúdo e variante de perigo |
-| `x-ui.modal` | diálogo nativo com fechamento previsível e retorno de foco |
+| `x-ui.modal`, `x-ui.drawer` | diálogos nativos com fechamento previsível e retorno de foco |
 | `x-ui.badge` | estado textual com variante semântica |
-| `x-ui.table` | tabela responsiva com caption acessível |
-| `x-ui.alert` | feedback anunciado como status ou alerta |
+| `x-ui.table`, `x-ui.pagination` | tabela responsiva e navegação paginada nomeada |
+| `x-ui.alert`, `x-ui.toast`, `x-ui.tooltip` | feedback persistente, temporário e complementar |
+| `x-ui.accordion`, `x-ui.tabs`, `x-ui.tab`, `x-ui.tab-panel` | organização progressiva com navegação por teclado |
+| `x-ui.breadcrumb`, `x-ui.avatar`, `x-ui.account-menu`, `x-ui.theme-toggle` | localização, identidade e controles do shell |
+| `x-ui.kpi`, `x-ui.chart` | indicadores e gráficos com contexto e alternativa tabular |
 | `x-ui.loading` | progresso anunciado |
 | `x-ui.error-state` | falha com recuperação possível |
 | `x-ui.empty-state` | ausência de conteúdo com orientação |
@@ -143,4 +148,20 @@ Os valores abaixo não representam identidade visual nova. Eles resolvem necessi
 | `--layout-table-min` | `720px` | preserva colunas essenciais e ativa rolagem horizontal controlada |
 | `--layer-skip-link` | `50` | garante que o atalho de conteúdo permaneça acima do layout |
 
-Os breakpoints repetidos nas media queries correspondem diretamente a `breakpoints.md` e `breakpoints.lg` do JSON. CSS não permite usar custom properties em condições de media query.
+Os breakpoints repetidos nas media queries correspondem diretamente a
+`breakpoints.sm`, `breakpoints.md` e `breakpoints.lg` do JSON. CSS não permite
+usar custom properties em condições de media query.
+
+A lista completa e o contrato congelado estão em
+[`tokens-web-r4.md`](tokens-web-r4.md).
+
+## 10. Shell Canônico da R4
+
+- celular e tablet usam cabeçalho compacto e `x-ui.drawer`;
+- desktop a partir de `breakpoints.lg` usa sidebar persistente;
+- breadcrumb e menu da conta fazem parte do layout autenticado;
+- tema claro é o valor inicial declarado no HTML;
+- alternância de tema é persistida localmente e não depende da preferência do
+  sistema operacional;
+- a rota raiz direciona ao painel autenticado e não exibe página demonstrativa
+  estática.

@@ -72,6 +72,6 @@
                     @endforelse
                 </tbody>
         </x-ui.table>
-        {{ $escolas->links() }}
+        <x-ui.pagination :paginator="$escolas" />
     </x-ui.card>
 @endsection

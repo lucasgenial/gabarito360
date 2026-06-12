@@ -15,6 +15,7 @@ O tema claro é o padrão. O tema escuro é uma preferência opcional, nunca inf
 ## Documentos consolidados
 
 - [`design-system.md`](design-system.md): fundamentos, tokens, estados e governança.
+- [`tokens-web-r4.md`](tokens-web-r4.md): reconciliação congelada e espelho web dos tokens oficiais.
 - [`componentes-web.md`](componentes-web.md): biblioteca e uso dos componentes Blade/Livewire.
 - [`componentes-mobile.md`](componentes-mobile.md): biblioteca e uso dos componentes Flutter.
 - [`dashboard.md`](dashboard.md): padrões de KPIs, gráficos, filtros e estados.

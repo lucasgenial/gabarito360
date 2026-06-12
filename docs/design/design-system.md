@@ -35,6 +35,10 @@ Quando `docs/SDGB.md` e o JSON apresentarem valores diferentes, prevalece o JSON
 O tema inicial obrigatório é `light`. A aplicação somente usa `dark` após ação
 explícita do usuário, com preferência persistida.
 
+Na web, a R4 congela o espelho implementável em
+`backend/resources/css/tokens.css`. A reconciliação e as extensões estruturais
+aprovadas estão em [`tokens-web-r4.md`](tokens-web-r4.md).
+
 ## 4. Identidade visual
 
 ### 4.1 Cores de marca

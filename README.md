@@ -4,9 +4,9 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
-> **Status do projeto:** as fundações MariaDB e de domínio das R2 e R3 foram
-> concluídas na branch de refatoração. O próximo passo é a R4, responsável pela
-> fundação visual canônica baseada no mockup funcional.
+> **Status do projeto:** as fundações MariaDB, de domínio e visual das R2, R3 e
+> R4 foram concluídas na branch de refatoração. O próximo passo é a R5, que
+> implementará as fatias funcionais web sobre o shell canônico.
 
 ## Sobre o sistema
 

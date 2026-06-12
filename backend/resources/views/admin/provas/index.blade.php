@@ -10,16 +10,15 @@
     </header>
 
     @forelse ($provas as $prova)
-        <details class="accordion card" @if ($loop->first) open @endif>
-            <summary class="accordion-summary">
+        <x-ui.accordion :open="$loop->first">
+            <x-slot:summary>
                 <span>
                     <strong>{{ $prova->titulo }}</strong>
                     <span class="cell-detail">{{ $prova->codigo }} · {{ $prova->nucleo?->nome ?? $prova->escola?->nome }}</span>
                 </span>
                 <x-admin.status-badge :status="$prova->status->value" />
-            </summary>
+            </x-slot:summary>
 
-            <div class="accordion-content">
                 <section aria-labelledby="gabarito-{{ $prova->id }}">
                     <h2 id="gabarito-{{ $prova->id }}">Gabarito oficial</h2>
                     @php($gabarito = $prova->gabaritosOficiais->first())
@@ -44,7 +43,7 @@
                                     </option>
                                 @endforeach
                         </x-ui.select>
-                        <x-ui.input name="data_prevista" label="Data prevista opcional" id="data-prevista-{{ $prova->id }}" type="date" />
+                        <x-ui.date-picker name="data_prevista" label="Data prevista opcional" id="data-prevista-{{ $prova->id }}" />
                         <div class="form-actions field-wide">
                             <x-ui.button type="submit">Vincular turma</x-ui.button>
                         </div>
@@ -82,8 +81,7 @@
                             </tbody>
                     </x-ui.table>
                 </section>
-            </div>
-        </details>
+        </x-ui.accordion>
     @empty
         <x-ui.card>
             <x-ui.empty-state title="Nenhuma prova publicada">
@@ -92,5 +90,5 @@
         </x-ui.card>
     @endforelse
 
-    {{ $provas->links() }}
+    <x-ui.pagination :paginator="$provas" />
 @endsection
