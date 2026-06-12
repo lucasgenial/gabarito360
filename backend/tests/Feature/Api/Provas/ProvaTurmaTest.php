@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Provas;
 
+use App\Actions\Provas\LinkProvaTurmaAction;
 use App\Enums\GabaritoOficialStatus;
 use App\Enums\ProvaStatus;
 use App\Enums\StatusEnum;
@@ -19,6 +20,7 @@ use App\Services\Audit\AuditAction;
 use Database\Seeders\AccessControlSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -155,7 +157,7 @@ class ProvaTurmaTest extends TestCase
         ]);
     }
 
-    public function test_database_rejects_incompatible_class(): void
+    public function test_link_action_rejects_incompatible_class(): void
     {
         $firstNucleus = Nucleo::factory()->create();
         $secondNucleus = Nucleo::factory()->create();
@@ -163,12 +165,10 @@ class ProvaTurmaTest extends TestCase
         $foreignClass = Turma::factory()->create(['escola_id' => $foreignSchool->id]);
         $exam = $this->publishedExam(nucleus: $firstNucleus);
 
-        $this->expectException(QueryException::class);
+        $actor = $this->actingAsRole(UserRole::ADMINISTRATOR);
+        $this->expectException(ValidationException::class);
 
-        ProvaTurma::query()->create([
-            'prova_id' => $exam->id,
-            'turma_id' => $foreignClass->id,
-        ]);
+        app(LinkProvaTurmaAction::class)->execute($exam, $foreignClass, [], $actor);
     }
 
     public function test_database_rejects_duplicate_link(): void

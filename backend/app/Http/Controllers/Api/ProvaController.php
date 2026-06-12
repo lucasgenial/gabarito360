@@ -46,8 +46,8 @@ class ProvaController extends BaseApiController
         if (isset($filters['search'])) {
             $query->where(function ($search) use ($filters): void {
                 $search
-                    ->where('titulo', 'ilike', '%'.$filters['search'].'%')
-                    ->orWhere('codigo', 'ilike', '%'.$filters['search'].'%');
+                    ->where('titulo', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('codigo', 'like', '%'.$filters['search'].'%');
             });
         }
 

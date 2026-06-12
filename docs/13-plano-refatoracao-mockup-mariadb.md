@@ -127,6 +127,8 @@ Não fazer:
 
 ## R2 - Subir fundação MariaDB e restaurar o gate técnico
 
+**Status: concluída em 12 de junho de 2026.**
+
 Objetivo: tornar backend e testes reproduzíveis com MariaDB.
 
 Ações:
@@ -144,6 +146,15 @@ Aceite:
 - suíte completa passa em MariaDB;
 - setup local é reproduzível;
 - nenhuma migration exige PostgreSQL.
+
+Entregáveis:
+
+- scripts portáteis de setup, start e stop em `scripts/local/`;
+- conexões `mariadb` e `mariadb_testing` isoladas;
+- baseline de migrations compatível com MariaDB;
+- regras entre entidades protegidas por actions transacionais e testes;
+- CI executando migrations, seeders e suíte completa em MariaDB 11.4;
+- documentação operacional atualizada sem dependência de PostgreSQL.
 
 Não fazer:
 
@@ -302,8 +313,7 @@ componentes fundamentais.
 
 ## 7. Próxima execução recomendada
 
-Executar somente **R2 - Subir fundação MariaDB e restaurar o gate técnico**.
+Executar somente **R3 - Alinhar domínio e contratos ao mockup**.
 
-R2 deve transformar a modelagem aprovada em baseline de migrations MariaDB,
-ambiente local reproduzível e suíte completa passando antes de qualquer nova
-tela ou módulo funcional.
+R3 deve fornecer fontes de dados e contratos autorizados para as telas canônicas,
+sem iniciar a composição visual completa prevista para a R4.

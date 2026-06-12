@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Gabaritos;
 
+use App\Actions\Gabaritos\UpsertGabaritoRespostaAction;
 use App\Enums\GabaritoOficialStatus;
 use App\Enums\ModeloCartaoStatus;
 use App\Enums\ProvaStatus;
@@ -20,6 +21,7 @@ use App\Services\Audit\AuditAction;
 use Database\Seeders\AccessControlSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -247,25 +249,22 @@ class GabaritoManagementTest extends TestCase
         ]);
     }
 
-    public function test_database_rejects_alternative_outside_exam_configuration(): void
+    public function test_answer_key_action_rejects_alternative_outside_exam_configuration(): void
     {
         $exam = Prova::factory()->create();
         $question = Questao::factory()->create(['prova_id' => $exam->id, 'numero' => 1]);
         $answerKey = GabaritoOficial::factory()->create(['prova_id' => $exam->id]);
 
-        $this->expectException(QueryException::class);
+        $this->expectException(ValidationException::class);
 
-        GabaritoResposta::query()->create([
-            'prova_id' => $exam->id,
-            'gabarito_oficial_id' => $answerKey->id,
-            'questao_id' => $question->id,
+        app(UpsertGabaritoRespostaAction::class)->execute($exam, $answerKey, $question, [
             'alternativa_correta' => 'Z',
             'anulada' => false,
             'peso' => 1,
-        ]);
+        ], User::factory()->create());
     }
 
-    public function test_database_rejects_changes_to_response_of_current_answer_key(): void
+    public function test_answer_key_action_rejects_changes_to_current_answer_key(): void
     {
         $exam = Prova::factory()->create();
         $question = Questao::factory()->create(['prova_id' => $exam->id, 'numero' => 1]);
@@ -285,9 +284,13 @@ class GabaritoManagementTest extends TestCase
             'publicado_at' => now(),
         ]);
 
-        $this->expectException(QueryException::class);
+        $this->expectException(ValidationException::class);
 
-        $response->update(['alternativa_correta' => 'B']);
+        app(UpsertGabaritoRespostaAction::class)->execute($exam, $answerKey->refresh(), $question, [
+            'alternativa_correta' => 'B',
+            'anulada' => false,
+            'peso' => 1,
+        ], $publisher);
     }
 
     private function examWithQuestionCount(int $count): Prova

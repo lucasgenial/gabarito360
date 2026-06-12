@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\Audit\AuditAction;
 use App\Services\Audit\AuditService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CreateMatriculaTurmaAction
 {
@@ -19,11 +20,20 @@ class CreateMatriculaTurmaAction
     public function execute(Turma $turma, array $attributes, User $actor): MatriculaTurma
     {
         return DB::transaction(function () use ($turma, $attributes, $actor): MatriculaTurma {
-            $matricula = $turma->matriculas()->create([
+            $lockedClass = Turma::query()->lockForUpdate()->findOrFail($turma->id);
+            $student = $lockedClass->escola->alunos()->findOrFail($attributes['aluno_id']);
+
+            if ($student->escola_id !== $lockedClass->escola_id) {
+                throw ValidationException::withMessages([
+                    'aluno_id' => ['Aluno e turma devem pertencer a mesma escola.'],
+                ]);
+            }
+
+            $matricula = $lockedClass->matriculas()->create([
                 ...$attributes,
-                'ano_letivo' => $turma->ano_letivo,
+                'ano_letivo' => $lockedClass->ano_letivo,
             ])->refresh();
-            $turma->loadMissing('escola');
+            $lockedClass->loadMissing('escola');
 
             $this->audit->record(
                 action: AuditAction::ENROLLMENT_CREATED,
@@ -31,8 +41,8 @@ class CreateMatriculaTurmaAction
                 entityId: $matricula->id,
                 actorUserId: $actor->id,
                 after: $matricula->only(['aluno_id', 'turma_id', 'ano_letivo', 'numero_chamada', 'status', 'inicio_em', 'fim_em']),
-                nucleoId: $turma->escola->nucleo_id,
-                escolaId: $turma->escola_id,
+                nucleoId: $lockedClass->escola->nucleo_id,
+                escolaId: $lockedClass->escola_id,
             );
 
             return $matricula;

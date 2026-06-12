@@ -31,8 +31,8 @@ class NucleoController extends BaseApiController
         if (isset($filters['search'])) {
             $query->where(function ($query) use ($filters): void {
                 $query
-                    ->where('nome', 'ilike', '%'.$filters['search'].'%')
-                    ->orWhere('codigo', 'ilike', '%'.$filters['search'].'%');
+                    ->where('nome', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('codigo', 'like', '%'.$filters['search'].'%');
             });
         }
 

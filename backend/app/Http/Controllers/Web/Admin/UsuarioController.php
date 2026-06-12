@@ -54,8 +54,8 @@ class UsuarioController extends Controller
         if (isset($filters['search'])) {
             $query->where(function (Builder $search) use ($filters): void {
                 $search
-                    ->where('nome', 'ilike', '%'.$filters['search'].'%')
-                    ->orWhere('email', 'ilike', '%'.$filters['search'].'%');
+                    ->where('nome', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('email', 'like', '%'.$filters['search'].'%');
             });
         }
 

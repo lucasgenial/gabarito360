@@ -33,23 +33,25 @@ return [
     */
 
     'default' => $isTesting
-        ? 'pgsql_testing'
-        : env('DB_CONNECTION', 'pgsql'),
+        ? 'mariadb_testing'
+        : env('DB_CONNECTION', 'mariadb'),
 
     /*
     |--------------------------------------------------------------------------
     | Database Conventions
     |--------------------------------------------------------------------------
     |
-    | These values document the PostgreSQL conventions required by future
+    | These values document the MariaDB conventions required by future
     | domain migrations. They are asserted by the infrastructure tests.
     |
     */
 
     'conventions' => [
         'primary_key_type' => 'uuid',
-        'uuid_default_expression' => 'gen_random_uuid()',
-        'timestamp_type' => 'timestamptz',
+        'uuid_generation' => 'application',
+        'timestamp_type' => 'datetime(6) UTC',
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_unicode_ci',
     ],
 
     /*
@@ -116,33 +118,23 @@ return [
             ]) : [],
         ],
 
-        'pgsql' => [
-            'driver' => 'pgsql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'gabarito360'),
-            'username' => env('DB_USERNAME', 'postgres'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'search_path' => env('DB_SEARCH_PATH', 'public'),
-            'sslmode' => env('DB_SSLMODE', 'prefer'),
-        ],
-
-        'pgsql_testing' => [
-            'driver' => 'pgsql',
+        'mariadb_testing' => [
+            'driver' => 'mariadb',
             'host' => env('DB_TEST_HOST', '127.0.0.1'),
-            'port' => env('DB_TEST_PORT', '5432'),
+            'port' => env('DB_TEST_PORT', '3307'),
             'database' => $testingDatabase,
-            'username' => env('DB_TEST_USERNAME', 'postgres'),
+            'username' => env('DB_TEST_USERNAME', 'root'),
             'password' => env('DB_TEST_PASSWORD', ''),
-            'charset' => 'utf8',
+            'unix_socket' => '',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'prefix_indexes' => true,
-            'search_path' => env('DB_TEST_SEARCH_PATH', 'public'),
-            'sslmode' => env('DB_TEST_SSLMODE', 'prefer'),
+            'strict' => true,
+            'engine' => 'InnoDB',
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
         ],
 
         'sqlsrv' => [

@@ -3,52 +3,40 @@
 namespace Tests\Feature\Infrastructure;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class DatabaseTest extends TestCase
 {
-    public function test_testing_database_is_isolated_postgresql_with_required_capabilities(): void
+    public function test_testing_database_is_isolated_mariadb_with_required_capabilities(): void
     {
         $connectionName = config('database.default');
         $connectionConfig = config("database.connections.{$connectionName}");
         $databaseName = $connectionConfig['database'] ?? null;
 
-        $this->assertSame('pgsql_testing', $connectionName);
-        $this->assertSame('pgsql', $connectionConfig['driver'] ?? null);
+        $this->assertSame('mariadb_testing', $connectionName);
+        $this->assertSame('mariadb', $connectionConfig['driver'] ?? null);
         $this->assertIsString($databaseName);
         $this->assertMatchesRegularExpression(
             '/(?:^|[_-])test(?:ing)?(?:[_-]|$)/i',
             $databaseName,
             'The automated test database must be isolated and explicitly named as a test database.',
         );
-        $this->assertTrue(
-            extension_loaded('pdo_pgsql'),
-            'The pdo_pgsql PHP extension is required for PostgreSQL integration tests.',
-        );
+        $this->assertTrue(extension_loaded('pdo_mysql'), 'The pdo_mysql extension is required.');
 
         $connection = DB::connection();
-        $this->assertSame('pgsql', $connection->getDriverName());
+        $this->assertSame('mariadb', $connection->getDriverName());
         $this->assertSame($databaseName, $connection->getDatabaseName());
-        $this->assertSame(
-            $databaseName,
-            $connection->selectOne('SELECT current_database() AS name')->name,
-        );
-
-        $extensions = collect($connection->select(
-            "SELECT extname FROM pg_extension WHERE extname IN ('pgcrypto', 'citext') ORDER BY extname"
-        ))->pluck('extname')->all();
-
-        $this->assertSame(['citext', 'pgcrypto'], $extensions);
+        $this->assertSame($databaseName, $connection->selectOne('SELECT DATABASE() AS name')->name);
 
         $capabilities = $connection->selectOne(
-            "SELECT gen_random_uuid()::text AS uuid, ('GABARITO360@EXAMPLE.COM'::citext = 'gabarito360@example.com'::citext) AS citext_case_insensitive"
+            'SELECT VERSION() AS version, @@character_set_database AS charset_name, @@collation_database AS collation_name'
         );
 
-        $this->assertTrue(Str::isUuid($capabilities->uuid, 4));
-        $this->assertTrue((bool) $capabilities->citext_case_insensitive);
+        $this->assertStringContainsString('MariaDB', $capabilities->version);
+        $this->assertSame('utf8mb4', $capabilities->charset_name);
+        $this->assertSame('utf8mb4_unicode_ci', $capabilities->collation_name);
         $this->assertSame('uuid', config('database.conventions.primary_key_type'));
-        $this->assertSame('gen_random_uuid()', config('database.conventions.uuid_default_expression'));
-        $this->assertSame('timestamptz', config('database.conventions.timestamp_type'));
+        $this->assertSame('application', config('database.conventions.uuid_generation'));
+        $this->assertSame('datetime(6) UTC', config('database.conventions.timestamp_type'));
     }
 }

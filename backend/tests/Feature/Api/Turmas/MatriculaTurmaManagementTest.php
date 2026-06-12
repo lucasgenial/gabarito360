@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Turmas;
 
+use App\Actions\Turmas\CreateMatriculaTurmaAction;
 use App\Enums\MatriculaTurmaStatus;
 use App\Enums\StatusEnum;
 use App\Enums\UserRole;
@@ -15,7 +16,6 @@ use App\Models\User;
 use App\Models\UsuarioPerfil;
 use App\Services\Audit\AuditAction;
 use Database\Seeders\AccessControlSeeder;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -229,7 +229,7 @@ class MatriculaTurmaManagementTest extends TestCase
         $this->assertDatabaseCount('matriculas_turmas', 0);
     }
 
-    public function test_database_rejects_enrollment_year_different_from_class(): void
+    public function test_enrollment_action_derives_school_year_from_class(): void
     {
         $school = Escola::factory()->create();
         $turma = Turma::factory()->create([
@@ -238,15 +238,14 @@ class MatriculaTurmaManagementTest extends TestCase
         ]);
         $aluno = Aluno::factory()->create(['escola_id' => $school->id]);
 
-        $this->expectException(QueryException::class);
-
-        MatriculaTurma::query()->create([
+        $enrollment = app(CreateMatriculaTurmaAction::class)->execute($turma, [
             'aluno_id' => $aluno->id,
-            'turma_id' => $turma->id,
             'ano_letivo' => 2027,
             'status' => MatriculaTurmaStatus::ACTIVE,
             'inicio_em' => '2026-02-02',
-        ]);
+        ], User::factory()->create());
+
+        $this->assertSame(2026, $enrollment->ano_letivo);
     }
 
     public function test_nested_enrollment_from_another_class_is_not_found_and_outside_scope_is_forbidden(): void

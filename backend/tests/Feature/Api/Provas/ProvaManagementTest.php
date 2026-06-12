@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Api\Provas;
 
+use App\Actions\Provas\CreateQuestaoAction;
+use App\Actions\Provas\UpdateProvaAction;
 use App\Enums\ModeloCartaoStatus;
 use App\Enums\ProvaStatus;
 use App\Enums\UserRole;
@@ -15,9 +17,8 @@ use App\Models\User;
 use App\Models\UsuarioPerfil;
 use App\Services\Audit\AuditAction;
 use Database\Seeders\AccessControlSeeder;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -271,7 +272,7 @@ class ProvaManagementTest extends TestCase
         ])->assertNotFound();
     }
 
-    public function test_database_rejects_incompatible_exam(): void
+    public function test_update_action_rejects_incompatible_exam(): void
     {
         $nucleus = Nucleo::factory()->create();
         $model = $this->approvedModel();
@@ -280,22 +281,21 @@ class ProvaManagementTest extends TestCase
             'modelo_cartao_id' => $model->id,
         ]);
 
-        $this->expectException(QueryException::class);
+        $this->expectException(ValidationException::class);
 
-        DB::table('provas')->where('id', $exam->id)->update(['quantidade_questoes' => 19]);
+        app(UpdateProvaAction::class)->execute($exam, ['quantidade_questoes' => 19], User::factory()->create());
     }
 
-    public function test_database_rejects_question_number_above_limit(): void
+    public function test_create_question_action_rejects_number_above_limit(): void
     {
         $exam = Prova::factory()->create();
 
-        $this->expectException(QueryException::class);
+        $this->expectException(ValidationException::class);
 
-        Questao::query()->create([
-            'prova_id' => $exam->id,
+        app(CreateQuestaoAction::class)->execute($exam, [
             'numero' => 21,
             'peso_padrao' => 1,
-        ]);
+        ], User::factory()->create());
     }
 
     public function test_published_exam_rejects_new_questions(): void

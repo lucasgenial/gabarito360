@@ -39,7 +39,7 @@ class ModeloCartaoController extends BaseApiController
         }
 
         if (isset($filters['search'])) {
-            $query->where('nome', 'ilike', '%'.$filters['search'].'%');
+            $query->where('nome', 'like', '%'.$filters['search'].'%');
         }
 
         $paginator = $query->paginate($filters['per_page'] ?? 20);

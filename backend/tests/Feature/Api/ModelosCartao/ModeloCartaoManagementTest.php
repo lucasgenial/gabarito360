@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\ModelosCartao;
 
+use App\Actions\ModelosCartao\UpdateModeloCartaoAction;
 use App\Enums\ModeloCartaoOrigemCodigo;
 use App\Enums\ModeloCartaoStatus;
 use App\Enums\ModeloCartaoTipoCodigo;
@@ -15,9 +16,8 @@ use App\Models\UsuarioPerfil;
 use App\Services\Audit\AuditAction;
 use Database\Factories\ModeloCartaoFactory;
 use Database\Seeders\AccessControlSeeder;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -222,17 +222,19 @@ class ModeloCartaoManagementTest extends TestCase
         $this->postJson('/api/v1/modelos-cartao/'.$model->id.'/homologar')->assertForbidden();
     }
 
-    public function test_database_trigger_blocks_direct_mutation_of_approved_configuration(): void
+    public function test_update_action_blocks_mutation_of_approved_configuration(): void
     {
         $model = ModeloCartao::factory()->create();
         $this->actingAsRole(UserRole::ADMINISTRATOR);
         $this->postJson('/api/v1/modelos-cartao/'.$model->id.'/homologar')->assertOk();
 
-        $this->expectException(QueryException::class);
+        $this->expectException(ValidationException::class);
 
-        DB::table('modelos_cartao')
-            ->where('id', $model->id)
-            ->update(['configuracao_omr' => json_encode(['alterado' => true], JSON_THROW_ON_ERROR)]);
+        app(UpdateModeloCartaoAction::class)->execute(
+            $model->refresh(),
+            ['configuracao_omr' => ['alterado' => true]],
+            User::factory()->create(),
+        );
     }
 
     public function test_draft_can_be_updated_and_inactivated_without_homologation_metadata(): void

@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -10,25 +9,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('usuarios', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->string('nome', 180);
-            $table->string('email', 254);
-            $table->string('documento', 30)->nullable();
+            $table->string('email', 254)->unique('uq_usuarios_email');
+            $table->string('documento', 30)->nullable()->index('idx_usuarios_documento');
             $table->string('telefone', 30)->nullable();
             $table->string('password');
-            $table->string('status', 20)->default('ativo');
-            $table->timestampTz('email_verified_at')->nullable();
-            $table->timestampTz('ultimo_acesso_at')->nullable();
+            $table->string('status', 20)->default('ativo')->index('idx_usuarios_status');
+            $table->dateTime('email_verified_at', 6)->nullable();
+            $table->dateTime('ultimo_acesso_at', 6)->nullable();
             $table->rememberToken();
-            $table->timestampTz('created_at')->useCurrent();
-            $table->timestampTz('updated_at')->useCurrent();
-            $table->softDeletesTz();
+            $table->dateTime('created_at', 6)->useCurrent();
+            $table->dateTime('updated_at', 6)->useCurrent();
+            $table->softDeletes('deleted_at', 6);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email', 254)->primary();
             $table->string('token');
-            $table->timestampTz('created_at')->nullable();
+            $table->dateTime('created_at', 6)->nullable();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -38,16 +37,8 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
-
             $table->foreign('user_id')->references('id')->on('usuarios')->nullOnDelete();
         });
-
-        DB::statement('ALTER TABLE usuarios ALTER COLUMN email TYPE citext USING email::citext');
-        DB::statement('ALTER TABLE password_reset_tokens ALTER COLUMN email TYPE citext USING email::citext');
-        DB::statement("ALTER TABLE usuarios ADD CONSTRAINT ck_usuarios_status CHECK (status IN ('ativo', 'inativo', 'bloqueado'))");
-        DB::statement('CREATE UNIQUE INDEX uq_usuarios_email ON usuarios (email) WHERE deleted_at IS NULL');
-        DB::statement('CREATE INDEX idx_usuarios_status ON usuarios (status) WHERE deleted_at IS NULL');
-        DB::statement('CREATE INDEX idx_usuarios_documento ON usuarios (documento) WHERE documento IS NOT NULL AND deleted_at IS NULL');
     }
 
     public function down(): void

@@ -47,8 +47,8 @@ class AlunoController extends BaseApiController
         if (isset($filters['search'])) {
             $query->where(function (Builder $search) use ($filters): void {
                 $search
-                    ->where('nome', 'ilike', '%'.$filters['search'].'%')
-                    ->orWhere('matricula', 'ilike', '%'.$filters['search'].'%');
+                    ->where('nome', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('matricula', 'like', '%'.$filters['search'].'%');
             });
         }
 

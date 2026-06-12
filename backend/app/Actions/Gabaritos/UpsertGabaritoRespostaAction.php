@@ -43,6 +43,27 @@ class UpsertGabaritoRespostaAction
                 ]);
             }
 
+            if (
+                $lockedAnswerKey->prova_id !== $exam->id
+                || $question->prova_id !== $exam->id
+            ) {
+                throw ValidationException::withMessages([
+                    'questao_id' => ['A questao e o gabarito devem pertencer a prova informada.'],
+                ]);
+            }
+
+            $alternative = $attributes['alternativa_correta'] ?? null;
+            $annulled = (bool) ($attributes['anulada'] ?? false);
+
+            if (
+                (! $annulled && (! is_string($alternative) || ! in_array($alternative, $exam->alternativas, true)))
+                || ($annulled && $alternative !== null)
+            ) {
+                throw ValidationException::withMessages([
+                    'alternativa_correta' => ['A alternativa deve pertencer a prova ou ser nula quando a questao estiver anulada.'],
+                ]);
+            }
+
             $response = GabaritoResposta::query()->updateOrCreate(
                 [
                     'gabarito_oficial_id' => $lockedAnswerKey->id,
@@ -50,8 +71,8 @@ class UpsertGabaritoRespostaAction
                 ],
                 [
                     'prova_id' => $exam->id,
-                    'alternativa_correta' => $attributes['alternativa_correta'] ?? null,
-                    'anulada' => $attributes['anulada'],
+                    'alternativa_correta' => $alternative,
+                    'anulada' => $annulled,
                     'peso' => $attributes['peso'] ?? $question->peso_padrao,
                 ],
             );

@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('importacoes_alunos', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('gen_random_uuid()'));
+            $table->uuid('id')->primary();
             $table->uuid('escola_id');
             $table->uuid('turma_id');
             $table->uuid('solicitado_por')->nullable();
@@ -20,23 +20,21 @@ return new class extends Migration
             $table->string('arquivo_caminho', 500);
             $table->string('arquivo_nome', 255);
             $table->char('arquivo_checksum_sha256', 64);
-            $table->jsonb('resumo');
-            $table->jsonb('erros');
-            $table->timestampTz('confirmado_at')->nullable();
-            $table->timestampTz('processado_at')->nullable();
-            $table->timestampTz('created_at')->useCurrent();
-            $table->timestampTz('updated_at')->useCurrent();
-
+            $table->json('resumo');
+            $table->json('erros');
+            $table->dateTime('confirmado_at', 6)->nullable();
+            $table->dateTime('processado_at', 6)->nullable();
+            $table->timestamps(6);
             $table->foreign('escola_id')->references('id')->on('escolas')->restrictOnDelete();
             $table->foreign('turma_id')->references('id')->on('turmas')->restrictOnDelete();
             $table->foreign('solicitado_por')->references('id')->on('usuarios')->nullOnDelete();
             $table->foreign('confirmado_por')->references('id')->on('usuarios')->nullOnDelete();
+            $table->index(['escola_id', 'created_at'], 'idx_importacoes_alunos_escola_created');
+            $table->index(['solicitado_por', 'created_at'], 'idx_importacoes_alunos_solicitante_created');
+            $table->index(['status', 'confirmado_at'], 'idx_importacoes_alunos_processando');
         });
 
         DB::statement("ALTER TABLE importacoes_alunos ADD CONSTRAINT ck_importacoes_alunos_status CHECK (status IN ('validada', 'com_erros', 'processando', 'concluida', 'falhou'))");
-        DB::statement('CREATE INDEX idx_importacoes_alunos_escola_created ON importacoes_alunos (escola_id, created_at DESC)');
-        DB::statement('CREATE INDEX idx_importacoes_alunos_solicitante_created ON importacoes_alunos (solicitado_por, created_at DESC)');
-        DB::statement("CREATE INDEX idx_importacoes_alunos_processando ON importacoes_alunos (status, confirmado_at) WHERE status = 'processando'");
     }
 
     public function down(): void

@@ -4,9 +4,9 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
-> **Status do projeto:** desenvolvimento suspenso após a MP-028 para reorientar
-> produto, interface e persistência pelo mockup funcional e MariaDB. O próximo
-> passo é R2 do novo plano de refatoração.
+> **Status do projeto:** a fundação MariaDB da R2 foi concluída na branch de
+> refatoração. O próximo passo é a R3, que alinhará domínio e contratos aos dados
+> exigidos pelo mockup funcional.
 
 ## Sobre o sistema
 
@@ -218,16 +218,14 @@ A API e o painel Laravel estao em [`backend/`](backend/README.md). A base atual 
 
 Consulte o [README do backend](backend/README.md) para requisitos e comandos de execucao local.
 
-### Reorientacao em andamento
+### Refatoracao em andamento
 
-O desenvolvimento após a MP-028 está suspenso enquanto a aplicação é alinhada
-ao mockup funcional em [`style-system/`](style-system/) e migrada de PostgreSQL
-para MariaDB. O plano vigente está em
+O desenvolvimento após a MP-028 foi reorientado para alinhar a aplicação ao
+mockup funcional em [`style-system/`](style-system/) e ao MariaDB. O plano vigente está em
 [`docs/13-plano-refatoracao-mockup-mariadb.md`](docs/13-plano-refatoracao-mockup-mariadb.md).
 
-Os scripts locais PostgreSQL existentes são transitórios e não devem orientar
-novas implementações. Eles serão substituídos pela fundação MariaDB no primeiro
-passo técnico da refatoração.
+O ambiente local reproduzível usa MariaDB portátil em `.local/`. Consulte o
+[README do backend](backend/README.md) para os comandos de setup, start e stop.
 
 ## Estrutura atual do repositorio
 
