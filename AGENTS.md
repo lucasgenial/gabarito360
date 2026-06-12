@@ -7,7 +7,7 @@ Criar uma plataforma com backend web, painel administrativo, app Android e módu
 
 ## Stack desejada
 - Backend: Laravel 12
-- Banco: PostgreSQL
+- Banco: MariaDB
 - Mobile: Flutter
 - OMR: OpenCV
 - Tempo real: Laravel Reverb/WebSockets
@@ -25,7 +25,11 @@ Criar uma plataforma com backend web, painel administrativo, app Android e módu
 
 ## Design System Obrigatório
 
-Todo componente visual criado no projeto deve utilizar os tokens definidos em:
+O mockup funcional em `style-system/` e a matriz registrada em
+`docs/14-matriz-funcional-mockup.md` definem as telas, hierarquia visual,
+navegação, comportamento responsivo e estados esperados da aplicação web.
+
+Todo componente visual criado no projeto deve também utilizar os tokens definidos em:
 
 `docs/ui_token_gov_brasil.json`
 
@@ -34,6 +38,15 @@ e seguir as diretrizes definidas em:
 `docs/SDGB.md`
 
 Não criar estilos hardcoded sem justificativa documentada.
+
+Em caso de divergência:
+
+1. o mockup define composição, fluxo e comportamento;
+2. os tokens oficiais definem os valores visuais implementáveis;
+3. `docs/SDGB.md` define as diretrizes normativas.
+
+O tema claro é o padrão obrigatório. O tema escuro deve ser opcional, acionado
+por controle explícito e persistido por usuário ou dispositivo.
 
 ## Controle de Versão
 
@@ -48,11 +61,13 @@ Não criar estilos hardcoded sem justificativa documentada.
 
 Antes de criar qualquer tela Web ou Mobile:
 
-1. Consultar `docs/design/design-system.md`.
-2. Consultar `docs/ui_token_gov_brasil.json`.
-3. Consultar `docs/design/componentes-web.md` ou `docs/design/componentes-mobile.md`.
-4. Reutilizar componentes existentes.
-5. Não criar estilos ad-hoc.
+1. Consultar a tela equivalente em `style-system/`.
+2. Consultar `docs/14-matriz-funcional-mockup.md`.
+3. Consultar `docs/design/design-system.md`.
+4. Consultar `docs/ui_token_gov_brasil.json`.
+5. Consultar `docs/design/componentes-web.md` ou `docs/design/componentes-mobile.md`.
+6. Reutilizar componentes existentes.
+7. Não criar estilos ad-hoc.
 
 Toda nova tela deve respeitar:
 

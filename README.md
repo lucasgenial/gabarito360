@@ -4,7 +4,9 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
-> **Status do projeto:** backend e painel administrativo implementados ate a MP-028. O sistema ja cobre autenticacao, autorizacao, estrutura organizacional e academica, provas, gabaritos e vinculos de prova com turma. O proximo passo e a MP-029, com aplicacoes e snapshot de alunos.
+> **Status do projeto:** desenvolvimento suspenso após a MP-028 para reorientar
+> produto, interface e persistência pelo mockup funcional e MariaDB. O próximo
+> passo é R1 do novo plano de refatoração.
 
 ## Sobre o sistema
 
@@ -111,7 +113,7 @@ A estrategia recomendada e hibrida: retorno rapido no aplicativo e possibilidade
 | Camada | Tecnologia |
 |---|---|
 | Backend e API REST | Laravel 12 |
-| Banco de dados | PostgreSQL |
+| Banco de dados | MariaDB |
 | Aplicativo Android | Flutter |
 | Processamento OMR | OpenCV |
 | Cache e filas | Redis |
@@ -123,7 +125,7 @@ A estrategia recomendada e hibrida: retorno rapido no aplicativo e possibilidade
 ```text
 Painel Web --------\
                     \
-App Android --------> API Laravel ----> PostgreSQL
+App Android --------> API Laravel ----> MariaDB
                          |   |   \
                          |   |    \----> Storage S3
                          |   |
@@ -201,7 +203,7 @@ Versoes posteriores incluem modo offline, dashboards consolidados, relatorios PD
 | [Requisitos nao funcionais](docs/03-requisitos-nao-funcionais.md) | Seguranca, desempenho, disponibilidade e qualidade |
 | [Regras de negocio](docs/04-regras-de-negocio.md) | Regras de integridade, acesso e operacao |
 | [Casos de uso](docs/05-casos-de-uso.md) | Atores, fluxos e matriz resumida de permissoes |
-| [Modelagem do banco](docs/06-modelagem-banco.md) | Modelagem relacional detalhada para PostgreSQL |
+| [Modelagem do banco](docs/06-modelagem-banco.md) | Modelagem PostgreSQL histórica, em revisão para MariaDB |
 | [API REST](docs/07-api.md) | Contratos e endpoints iniciais |
 | [Aplicativo Android](docs/08-mobile-android.md) | Telas, navegacao, fluxos e sincronizacao |
 | [Modulo OMR](docs/09-modulo-omr.md) | Pipeline, confianca, calibracao e testes |
@@ -210,9 +212,20 @@ Versoes posteriores incluem modo offline, dashboards consolidados, relatorios PD
 
 ## Backend
 
-A API e o painel Laravel estao em [`backend/`](backend/README.md). A implementacao atual inclui API REST, PostgreSQL, Sanctum, filas, policies, requests, resources, services, painel administrativo e o endpoint `GET /api/v1/health`.
+A API e o painel Laravel estao em [`backend/`](backend/README.md). A base atual inclui API REST, Sanctum, filas, policies, requests, resources, services, painel administrativo e o endpoint `GET /api/v1/health`.
 
 Consulte o [README do backend](backend/README.md) para requisitos e comandos de execucao local.
+
+### Reorientacao em andamento
+
+O desenvolvimento após a MP-028 está suspenso enquanto a aplicação é alinhada
+ao mockup funcional em [`style-system/`](style-system/) e migrada de PostgreSQL
+para MariaDB. O plano vigente está em
+[`docs/13-plano-refatoracao-mockup-mariadb.md`](docs/13-plano-refatoracao-mockup-mariadb.md).
+
+Os scripts locais PostgreSQL existentes são transitórios e não devem orientar
+novas implementações. Eles serão substituídos pela fundação MariaDB no primeiro
+passo técnico da refatoração.
 
 ## Estrutura atual do repositorio
 

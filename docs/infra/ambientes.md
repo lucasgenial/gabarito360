@@ -1,3 +1,7 @@
+> **Documento em revisão para MariaDB.** As referências PostgreSQL abaixo
+> descrevem a fundação anterior e serão substituídas durante R1 e R2 do plano de
+> refatoração.
+
 # Gabarito360 - Ambientes e Segredos
 
 ## 1. Objetivo

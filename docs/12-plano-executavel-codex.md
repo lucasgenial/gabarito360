@@ -1,3 +1,8 @@
+> **Execução suspensa após a MP-028.** Não iniciar a MP-029. O projeto entrou em
+> reorientação visual, funcional e de persistência para seguir `style-system/` e
+> MariaDB. O novo plano executável está em
+> `docs/13-plano-refatoracao-mockup-mariadb.md`.
+
 # Gabarito360 - Plano Executavel Codex
 
 ## 1. Objetivo
@@ -2782,9 +2787,11 @@ git commit -m "documentacao: registrar liberacao do piloto controlado"
 git push
 ```
 
-## 7. Proximo micropasso recomendado
+## 7. Proximo passo recomendado
 
-O proximo micropasso para execucao imediata e o **MP-029 - Criar aplicacoes e snapshot de alunos**.
+Este plano está suspenso. O próximo passo para execução imediata é **R1 -
+Canonizar produto, rotas e modelo de dados**, conforme
+`docs/13-plano-refatoracao-mockup-mariadb.md`.
 
 Ele inicia a FASE 6 usando o gate reparado da FASE 5 e deve congelar prova, modelo, gabarito e alunos previstos de forma transacional.
 

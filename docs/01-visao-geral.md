@@ -139,7 +139,7 @@ Funcionalidades fora do MVP podem ser planejadas ou preparadas tecnicamente, mas
 |---|---|---|
 | Backend/API | Laravel 12 | Regras de negocio, API REST, autenticacao, filas e eventos |
 | Painel web | Laravel Blade + Livewire + Tailwind | Administracao, dashboard simples e relatorio do MVP |
-| Banco de dados | PostgreSQL | Persistencia relacional e integridade |
+| Banco de dados | MariaDB | Persistencia relacional e integridade |
 | Cache e filas | Redis | Filas, cache, locks e apoio ao tempo real |
 | Tempo real | Laravel Reverb/WebSockets | Atualizacao de progresso e dashboards |
 | Mobile | Flutter para Android | Captura, revisao e operacao online do MVP |

@@ -4,10 +4,13 @@ Esta pasta consolida a referência visual oficial do Gabarito360 para painel web
 
 ## Fontes oficiais
 
-1. [`docs/ui_token_gov_brasil.json`](../ui_token_gov_brasil.json): fonte implementável para cores, tipografia, espaçamentos, bordas, sombras, movimento, breakpoints e dimensões de componentes.
-2. [`docs/SDGB.md`](../SDGB.md): fonte normativa para princípios visuais, identidade, comportamento, acessibilidade e catálogo obrigatório de componentes.
+1. [`style-system/`](../../style-system): contrato funcional e visual das telas web, incluindo composição, navegação, responsividade e interações.
+2. [`docs/ui_token_gov_brasil.json`](../ui_token_gov_brasil.json): fonte implementável para cores, tipografia, espaçamentos, bordas, sombras, movimento, breakpoints e dimensões de componentes.
+3. [`docs/SDGB.md`](../SDGB.md): fonte normativa para princípios visuais, identidade, comportamento, acessibilidade e catálogo obrigatório de componentes.
 
-Quando houver divergência de valor entre as fontes, o token JSON prevalece. A diretriz do SDGB continua obrigatória. Divergências ou tokens ausentes devem ser documentados antes da implementação; não devem ser resolvidos com estilos hardcoded silenciosos.
+O mockup define o que a tela faz e como é composta. O token JSON prevalece para valores visuais implementáveis. A diretriz do SDGB continua obrigatória. Divergências ou tokens ausentes devem ser documentados antes da implementação; não devem ser resolvidos com estilos hardcoded silenciosos.
+
+O tema claro é o padrão. O tema escuro é uma preferência opcional, nunca inferida automaticamente como primeira experiência.
 
 ## Documentos consolidados
 
@@ -35,4 +38,3 @@ O Design System não substitui Policies, regras de negócio, contratos da API ou
 3. Caso falte um token, registrar a necessidade e a justificativa em documentação antes de implementá-lo.
 4. Validar modo claro, modo escuro, responsividade e acessibilidade.
 5. Adicionar testes proporcionais à plataforma e ao risco.
-

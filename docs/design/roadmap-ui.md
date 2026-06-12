@@ -1,3 +1,7 @@
+> **Roadmap histórico suspenso.** A sequência MP-019A/MP-029 foi substituída
+> pelas etapas R1 a R7 de `docs/13-plano-refatoracao-mockup-mariadb.md`. O
+> mockup em `style-system/` agora orienta a reconstrução da aplicação web.
+
 # Roadmap de UI
 
 ## 1. Estratégia

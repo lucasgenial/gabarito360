@@ -1,3 +1,7 @@
+> **Roadmap suspenso para reorientação.** O plano abaixo permanece como histórico
+> do trabalho realizado até a MP-028, mas não deve orientar novas implementações
+> até a conclusão do plano em `docs/13-plano-refatoracao-mockup-mariadb.md`.
+
 # Gabarito360 - Plano Tecnico do MVP
 
 ## 1. Objetivo

@@ -1,8 +1,13 @@
-# Gabarito360 - Modelagem Relacional PostgreSQL
+> **Documento histórico em revisão.** A decisão de 12 de junho de 2026 mudou o
+> banco alvo para MariaDB. Não implementar novas migrations a partir das
+> construções PostgreSQL deste documento. Consulte
+> `docs/13-plano-refatoracao-mockup-mariadb.md` e ADR-D012.
+
+# Gabarito360 - Modelagem Relacional PostgreSQL (Historico)
 
 ## 1. Objetivo
 
-Este e o documento canonico da modelagem relacional do Gabarito360 para PostgreSQL. O modelo cobre organizacao, controle de acesso, provas, aplicacoes, leitura OMR, correcao, auditoria, arquivos e sincronizacao mobile.
+Este foi o documento canonico da modelagem relacional do Gabarito360 para PostgreSQL. O modelo cobre organizacao, controle de acesso, provas, aplicacoes, leitura OMR, correcao, auditoria, arquivos e sincronizacao mobile, mas deve ser revisado para MariaDB antes de orientar novas migrations.
 
 O documento especifica tabelas, campos, tipos, chaves, indices, relacionamentos e regras de integridade. Ele orientara a criacao futura das migrations, mas **nao implementa migrations ou SQL de schema nesta etapa**. Os trechos SQL apresentados sao exemplos de restricoes e indices recomendados.
 

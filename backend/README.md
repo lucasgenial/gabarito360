@@ -1,3 +1,7 @@
+> **Backend em reorientação.** A implementação atual ainda depende de PostgreSQL,
+> mas novas alterações de persistência devem seguir o plano MariaDB em
+> `../docs/13-plano-refatoracao-mockup-mariadb.md`.
+
 # Backend Gabarito360
 
 API REST do Gabarito360, criada com Laravel 12 e preparada para evoluir com PostgreSQL, Laravel Sanctum, filas, jobs, policies, form requests, resources, services e actions.

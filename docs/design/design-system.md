@@ -4,6 +4,11 @@
 
 O Design System do Gabarito360 estabelece uma linguagem visual única para web, mobile e dashboards. Ele deve transmitir confiança, transparência, modernidade, simplicidade e brasilidade, com aparência de serviço público moderno e acolhedor.
 
+As telas e fluxos web em `style-system/` são a referência de composição. Elas
+devem ser convertidas em componentes compartilhados e dados reais; CSS inline,
+JavaScript duplicado e dados estáticos do protótipo não devem ser copiados para
+produção.
+
 ## 2. Princípios visuais
 
 - **Simplicidade:** cada tela deve deixar clara a próxima ação esperada.
@@ -26,6 +31,9 @@ Ordem de decisão:
 4. nunca introduzir valor hardcoded sem justificativa documentada.
 
 Quando `docs/SDGB.md` e o JSON apresentarem valores diferentes, prevalece o JSON. Por exemplo, o modo escuro deve usar `themes.dark.background.*` do JSON.
+
+O tema inicial obrigatório é `light`. A aplicação somente usa `dark` após ação
+explícita do usuário, com preferência persistida.
 
 ## 4. Identidade visual
 
@@ -109,4 +117,3 @@ Todo componente interativo deve considerar, quando aplicável:
 O catálogo inicial inclui: Button, Input, Textarea, Select, DatePicker, Modal, Drawer, Card, Table, DataTable, Badge, Toast, Tooltip, Accordion, Tabs, Breadcrumb, Pagination, Avatar e Dashboard Card.
 
 Cada plataforma deve mapear esse catálogo para componentes compartilhados e documentar exceções de interação específicas da web ou do mobile.
-

@@ -17,6 +17,7 @@ As decisoes abaixo foram registradas para o MVP em **10 de junho de 2026**. O st
 | D009 | [Abordagem do painel web](ADR-D009-painel-web.md) | Arquitetura + Produto | Aceita | Apos o piloto ou antes de ampliar o painel |
 | D010 | [Identificacao de cartoes impressos e codigos gerados](ADR-D010-identificacao-cartao.md) | Produto + OMR + Mobile + Backend | Aceita | Antes das migrations de cartoes e da homologacao OMR |
 | D011 | [Corte de escopo e matriz de permissoes do MVP](ADR-D011-escopo-e-permissoes-mvp.md) | Produto + Arquitetura + Seguranca | Aceita | Antes de alterar o gate do MVP ou iniciar nova release |
+| D012 | [Reorientacao pelo mockup funcional e adocao do MariaDB](ADR-D012-reorientacao-mockup-mariadb.md) | Produto + Arquitetura + Design + Backend | Aceita | Antes de iniciar R2 |
 
 ## Regras de governanca
 

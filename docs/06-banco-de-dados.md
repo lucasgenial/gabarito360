@@ -1,4 +1,8 @@
-# Gabarito360 - Modelagem Relacional PostgreSQL
+> **Documento legado em revisão.** A decisão de 12 de junho de 2026 mudou o
+> banco alvo para MariaDB. Preserve este arquivo somente como referência
+> histórica e consulte `docs/13-plano-refatoracao-mockup-mariadb.md`.
+
+# Gabarito360 - Modelagem Relacional PostgreSQL (Historico)
 
 > **Documento legado:** a versao canonica e refinada desta modelagem esta em [06-modelagem-banco.md](06-modelagem-banco.md). Este arquivo foi preservado para nao quebrar referencias historicas.
 
