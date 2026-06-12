@@ -339,7 +339,7 @@ componentes fundamentais.
 
 ## 7. Próxima execução recomendada
 
-Executar somente **R5 - Implementar fatias funcionais web**.
+R5 foi concluída com rotas canônicas, consultas escopadas, telas responsivas e
+testes web. O contrato da entrega está em `docs/17-contrato-r5-fatias-web.md`.
 
-R5 deve conectar o shell e os componentes da R4 aos contratos reais da R3 em
-fatias verticais pequenas, sem usar indicadores estáticos do mockup.
+Executar somente **R6 - Integrar OMR, tempo real e qualidade operacional**.

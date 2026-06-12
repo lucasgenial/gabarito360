@@ -2,14 +2,10 @@
 
 API REST e painel administrativo do Gabarito360, construídos com Laravel 12 e MariaDB. A arquitetura utiliza Sanctum, requests, resources, policies, actions, services, filas e auditoria.
 
-A fundação R3 também disponibiliza modelos e contratos persistentes para
-estrutura acadêmica, equipe, responsáveis, aplicações, leituras, resultados e
-relatórios. Os fluxos e endpoints desses novos contratos permanecem reservados
-para as próximas fatias funcionais.
-
-A R4 consolidou o shell web responsivo, tema claro padrão com alternância
-persistida, tokens oficiais e biblioteca Blade compartilhada. A R5 conectará
-essa fundação visual aos fluxos funcionais, sem dados estáticos do mockup.
+A R3 disponibiliza os contratos persistentes de domínio. A R4 consolidou o
+shell responsivo e a biblioteca Blade. A R5 conecta essa base às rotas web
+canônicas de conta, painel, escolas, turmas, alunos, provas, correções,
+resultados e relatórios, sempre com dados persistidos e escopo autorizado.
 
 ## Requisitos
 
@@ -79,7 +75,9 @@ powershell -ExecutionPolicy Bypass -File scripts/local/stop.ps1
 
 O comando `start.ps1` inicia MariaDB e Laravel. Endereços:
 
-- painel: `http://127.0.0.1:8000/admin/login`;
+- login canônico: `http://127.0.0.1:8000/login`;
+- painel canônico: `http://127.0.0.1:8000/painel`;
+- painel administrativo legado: `http://127.0.0.1:8000/admin/login`;
 - health check: `http://127.0.0.1:8000/api/v1/health`.
 
 ## Banco de testes

@@ -10,9 +10,9 @@ use Tests\TestCase;
 
 class DesignSystemTest extends TestCase
 {
-    public function test_root_redirects_to_the_canonical_admin_shell(): void
+    public function test_root_redirects_to_the_canonical_portal_shell(): void
     {
-        $this->get('/')->assertRedirect('/admin');
+        $this->get('/')->assertRedirect('/painel');
     }
 
     public function test_required_shared_components_exist(): void
@@ -223,6 +223,7 @@ class DesignSystemTest extends TestCase
 
         $productionViews = [
             ...File::allFiles(resource_path('views/admin')),
+            ...File::allFiles(resource_path('views/portal')),
             ...File::allFiles(resource_path('views/components')),
             ...File::allFiles(resource_path('views/layouts')),
         ];

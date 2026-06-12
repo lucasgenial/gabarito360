@@ -95,3 +95,12 @@ Uma tela so pode ser iniciada em R5 quando:
 3. nenhuma metrica depender de dado estatico do mockup;
 4. a permissao e o escopo estiverem cobertos por teste;
 5. o comportamento responsivo e acessivel estiver especificado.
+
+## 10. Situacao apos R5
+
+As rotas canonicas de conta, painel, escolas, equipe, turmas, alunos, provas,
+gabaritos, acompanhamento de correcoes, resultados e relatorios foram
+implementadas na R5.
+
+As telas operacionais usam snapshots persistidos. Captura OMR, revisao,
+confirmacao, tempo real e geracao de arquivos permanecem reservados para R6.

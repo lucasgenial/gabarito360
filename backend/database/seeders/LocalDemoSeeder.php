@@ -15,11 +15,17 @@ use App\Enums\StatusEnum;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\Aluno;
+use App\Models\Aplicacao;
+use App\Models\AplicacaoAluno;
+use App\Models\AplicacaoAplicador;
+use App\Models\Arquivo;
 use App\Models\Cargo;
+use App\Models\CartaoResposta;
 use App\Models\Disciplina;
 use App\Models\Escola;
 use App\Models\GabaritoOficial;
 use App\Models\GabaritoResposta;
+use App\Models\LeituraCartao;
 use App\Models\MatriculaTurma;
 use App\Models\ModeloCartao;
 use App\Models\Nucleo;
@@ -27,6 +33,9 @@ use App\Models\Perfil;
 use App\Models\PeriodoLetivo;
 use App\Models\Prova;
 use App\Models\Questao;
+use App\Models\RespostaDetectada;
+use App\Models\Resultado;
+use App\Models\ResultadoQuestao;
 use App\Models\SerieAno;
 use App\Models\TemaHabilidade;
 use App\Models\Turma;
@@ -183,7 +192,8 @@ class LocalDemoSeeder extends Seeder
                 );
             }
 
-            $this->createPublishedExam($admin, $nucleo, $turma, $discipline, $grade);
+            $exam = $this->createPublishedExam($admin, $nucleo, $turma, $discipline, $grade);
+            $this->createDemoApplication($admin, $escola, $turma, $exam);
         });
     }
 
@@ -193,9 +203,11 @@ class LocalDemoSeeder extends Seeder
         Turma $turma,
         Disciplina $discipline,
         SerieAno $grade,
-    ): void {
-        if (Prova::query()->where('nucleo_id', $nucleo->id)->where('codigo', 'PROVA-DEMO-2026')->exists()) {
-            return;
+    ): Prova {
+        $existing = Prova::query()->where('nucleo_id', $nucleo->id)->where('codigo', 'PROVA-DEMO-2026')->first();
+
+        if ($existing instanceof Prova) {
+            return $existing;
         }
 
         $alternatives = ['A', 'B', 'C', 'D', 'E'];
@@ -276,6 +288,126 @@ class LocalDemoSeeder extends Seeder
             ['data_prevista' => '2026-06-15'],
             $admin,
         );
+
+        return $exam->refresh();
+    }
+
+    private function createDemoApplication(User $admin, Escola $school, Turma $class, Prova $exam): void
+    {
+        $answerKey = $exam->gabaritosOficiais()
+            ->where('status', GabaritoOficialStatus::CURRENT)
+            ->firstOrFail();
+        $application = Aplicacao::query()->updateOrCreate(
+            ['prova_id' => $exam->id, 'turma_id' => $class->id, 'titulo' => 'Aplicacao demonstrativa concluida'],
+            [
+                'escola_id' => $school->id,
+                'gabarito_oficial_id' => $answerKey->id,
+                'inicio_previsto_at' => '2026-06-15 08:00:00',
+                'fim_previsto_at' => '2026-06-15 10:00:00',
+                'iniciada_at' => '2026-06-15 08:02:00',
+                'finalizada_at' => '2026-06-15 09:48:00',
+                'status' => 'finalizada',
+                'criada_por_id' => $admin->id,
+            ],
+        );
+        AplicacaoAplicador::query()->firstOrCreate(
+            ['aplicacao_id' => $application->id, 'usuario_id' => $admin->id, 'papel' => 'responsavel', 'fim_at' => null],
+            ['inicio_at' => '2026-06-15 08:00:00'],
+        );
+
+        $answers = $answerKey->respostas()->with('questao')->get()->keyBy('questao_id');
+        $enrollments = $class->matriculas()->with('aluno')->orderBy('numero_chamada')->get();
+
+        foreach ($enrollments as $index => $enrollment) {
+            $applicationStudent = AplicacaoAluno::query()->firstOrCreate(
+                ['aplicacao_id' => $application->id, 'aluno_id' => $enrollment->aluno_id],
+                ['matricula_turma_id' => $enrollment->id, 'status' => 'confirmado', 'confirmado_at' => '2026-06-15 09:30:00'],
+            );
+            $card = CartaoResposta::query()->firstOrCreate(
+                ['prova_id' => $exam->id, 'aluno_id' => $enrollment->aluno_id],
+                [
+                    'aplicacao_id' => $application->id,
+                    'codigo_impresso' => $enrollment->aluno->codigo_interno,
+                    'codigo_impresso_normalizado' => mb_strtoupper((string) $enrollment->aluno->codigo_interno),
+                    'status' => 'vigente',
+                ],
+            );
+            $file = Arquivo::query()->firstOrCreate(
+                ['disco' => 'local', 'caminho' => 'demo/cartao-'.$enrollment->aluno_id.'.jpg'],
+                [
+                    'nome_original' => 'cartao-demonstracao.jpg',
+                    'mime' => 'image/jpeg',
+                    'tamanho_bytes' => 360000,
+                    'checksum' => hash('sha256', 'cartao-demo-'.$enrollment->aluno_id),
+                    'classificacao' => 'restrito',
+                    'proprietario_tipo' => 'leitura_cartao',
+                    'criado_por_id' => $admin->id,
+                ],
+            );
+            $reading = LeituraCartao::query()->firstOrCreate(
+                ['operacao_id' => 'DEMO-LEITURA-'.$enrollment->aluno_id],
+                [
+                    'aplicacao_id' => $application->id,
+                    'aplicacao_aluno_id' => $applicationStudent->id,
+                    'cartao_resposta_id' => $card->id,
+                    'modelo_cartao_id' => $exam->modelo_cartao_id,
+                    'arquivo_original_id' => $file->id,
+                    'capturada_por_id' => $admin->id,
+                    'status' => 'confirmada',
+                    'confianca_geral' => 0.985,
+                    'requer_revisao' => false,
+                    'confirmada_at' => '2026-06-15 09:30:00',
+                ],
+            );
+
+            $correctCount = max(12, 19 - $index);
+            foreach ($answers->values() as $answerIndex => $answer) {
+                $isCorrect = $answerIndex < $correctCount;
+                $final = $isCorrect ? $answer->alternativa_correta : $exam->alternativas[($answerIndex + 1) % count($exam->alternativas)];
+                RespostaDetectada::query()->updateOrCreate(
+                    ['leitura_cartao_id' => $reading->id, 'questao_id' => $answer->questao_id],
+                    [
+                        'alternativa_detectada' => $final,
+                        'alternativa_final' => $final,
+                        'tipo_deteccao' => 'unica',
+                        'confianca' => $isCorrect ? 0.99 : 0.94,
+                    ],
+                );
+            }
+
+            $result = Resultado::query()->updateOrCreate(
+                ['aplicacao_aluno_id' => $applicationStudent->id, 'versao' => 1],
+                [
+                    'aplicacao_id' => $application->id,
+                    'aluno_id' => $enrollment->aluno_id,
+                    'prova_id' => $exam->id,
+                    'gabarito_oficial_id' => $answerKey->id,
+                    'leitura_cartao_id' => $reading->id,
+                    'status' => 'vigente',
+                    'acertos' => $correctCount,
+                    'erros' => $exam->quantidade_questoes - $correctCount,
+                    'pontuacao' => $correctCount,
+                    'nota_percentual' => ($correctCount / $exam->quantidade_questoes) * 100,
+                    'calculado_at' => '2026-06-15 09:31:00',
+                ],
+            );
+            $applicationStudent->update(['resultado_vigente_id' => $result->id]);
+
+            foreach ($answers->values() as $answerIndex => $answer) {
+                $detected = RespostaDetectada::query()
+                    ->where('leitura_cartao_id', $reading->id)
+                    ->where('questao_id', $answer->questao_id)
+                    ->firstOrFail();
+                ResultadoQuestao::query()->updateOrCreate(
+                    ['resultado_id' => $result->id, 'questao_id' => $answer->questao_id],
+                    [
+                        'resposta_final' => $detected->alternativa_final,
+                        'situacao' => $answerIndex < $correctCount ? 'correta' : 'incorreta',
+                        'pontuacao' => $answerIndex < $correctCount ? 1 : 0,
+                    ],
+                );
+            }
+        }
     }
 
     /** @return list<array{matricula: string, codigo_interno: string, nome: string}> */

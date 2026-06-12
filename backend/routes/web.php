@@ -6,17 +6,70 @@ use App\Http\Controllers\Web\Admin\OrganizationPanelController;
 use App\Http\Controllers\Web\Admin\ProvaTurmaController;
 use App\Http\Controllers\Web\Admin\UsuarioController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Web\Portal\AcademicController;
+use App\Http\Controllers\Web\Portal\AccountController;
+use App\Http\Controllers\Web\Portal\AssessmentController;
+use App\Http\Controllers\Web\Portal\DashboardController;
+use App\Http\Controllers\Web\Portal\OperationController;
+use App\Http\Controllers\Web\Portal\OrganizationController;
+use App\Http\Controllers\Web\Portal\ReportController;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/admin');
+Route::redirect('/', '/painel');
 
 Route::middleware('guest')->group(function () {
-    Route::get('/admin/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('login.store');
+    Route::get('/admin/login', [AuthenticatedSessionController::class, 'create'])->name('admin.login.create');
     Route::post('/admin/login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:5,1')
         ->name('admin.login.store');
 });
+
+Route::middleware(['auth', EnsureUserIsActive::class])
+    ->name('portal.')
+    ->group(function () {
+        Route::get('/painel', DashboardController::class)->name('dashboard');
+        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+        Route::get('/perfil', [AccountController::class, 'profile'])->name('profile');
+        Route::patch('/perfil', [AccountController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/configuracoes', [AccountController::class, 'settings'])->name('settings');
+        Route::patch('/configuracoes/preferencias', [AccountController::class, 'updatePreferences'])->name('settings.preferences');
+        Route::patch('/configuracoes/senha', [AccountController::class, 'updatePassword'])->name('settings.password');
+
+        Route::get('/escolas', [OrganizationController::class, 'index'])->name('schools.index');
+        Route::get('/escolas/{escola}', [OrganizationController::class, 'show'])->name('schools.show');
+        Route::get('/escolas/{escola}/equipe', [OrganizationController::class, 'team'])->name('schools.team');
+        Route::get('/escolas/{escola}/equipe/novo', [OrganizationController::class, 'createMember'])->name('schools.team.create');
+        Route::get('/escolas/{escola}/equipe/{usuario}/editar', [OrganizationController::class, 'editMember'])->name('schools.team.edit');
+
+        Route::get('/turmas', [AcademicController::class, 'index'])->name('classes.index');
+        Route::post('/turmas', [AcademicController::class, 'storeClass'])->name('classes.store');
+        Route::get('/turmas/{turma}', [AcademicController::class, 'showClass'])->name('classes.show');
+        Route::get('/turmas/{turma}/alunos/novo', [AcademicController::class, 'createStudent'])->name('students.create');
+        Route::post('/turmas/{turma}/alunos', [AcademicController::class, 'storeStudent'])->name('students.store');
+        Route::post('/alunos/importacoes', [AcademicController::class, 'importStudents'])->name('students.import');
+        Route::get('/alunos/{aluno}', [AcademicController::class, 'showStudent'])->name('students.show');
+        Route::get('/alunos/{aluno}/editar', [AcademicController::class, 'editStudent'])->name('students.edit');
+        Route::patch('/alunos/{aluno}', [AcademicController::class, 'updateStudent'])->name('students.update');
+
+        Route::get('/provas', [AssessmentController::class, 'index'])->name('exams.index');
+        Route::get('/provas/nova', [AssessmentController::class, 'create'])->name('exams.create');
+        Route::post('/provas', [AssessmentController::class, 'store'])->name('exams.store');
+        Route::get('/provas/{prova}', [AssessmentController::class, 'show'])->name('exams.show');
+        Route::get('/provas/{prova}/gabarito', [AssessmentController::class, 'answerKey'])->name('exams.answer-key');
+
+        Route::get('/correcoes', [OperationController::class, 'index'])->name('operations.index');
+        Route::get('/aplicacoes/{aplicacao}/correcao', [OperationController::class, 'show'])->name('operations.show');
+
+        Route::get('/resultados/{resultado}', [ReportController::class, 'result'])->name('results.show');
+        Route::get('/provas/{prova}/relatorio', [ReportController::class, 'exam'])->name('reports.exam');
+        Route::get('/turmas/{turma}/provas/{prova}/relatorio', [ReportController::class, 'classExam'])->name('reports.class-exam');
+    });
 
 Route::prefix('admin')
     ->name('admin.')

@@ -61,7 +61,7 @@ class AuthenticatedSessionController extends Controller
             metadata: ['cliente' => 'painel_web'],
         );
 
-        return redirect()->intended(route('admin.index'));
+        return redirect()->intended(route('portal.dashboard'));
     }
 
     public function destroy(Request $request): RedirectResponse

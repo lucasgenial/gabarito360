@@ -13,7 +13,7 @@
 
     <div class="admin-shell">
         <aside class="sidebar desktop-sidebar" aria-label="Menu lateral">
-            <a class="brand" href="{{ route('admin.index') }}" wire:navigate>
+            <a class="brand" href="{{ route('portal.dashboard') }}" wire:navigate>
                 <span class="brand-mark" aria-hidden="true">G360</span>
                 <span class="brand-copy">
                     <strong>Gabarito360</strong>
@@ -38,7 +38,9 @@
                 <div class="topbar-actions">
                     <x-ui.theme-toggle />
                     <x-ui.account-menu :name="auth()->user()->nome" context="Conta institucional">
-                        <form method="POST" action="{{ route('admin.logout') }}">
+                        <a class="text-link" href="{{ route('portal.profile') }}" wire:navigate>Meu perfil</a>
+                        <a class="text-link" href="{{ route('portal.settings') }}" wire:navigate>Configuracoes</a>
+                        <form method="POST" action="{{ route('portal.logout') }}">
                             @csrf
                             <x-ui.button type="submit" variant="text" size="sm">Sair da conta</x-ui.button>
                         </form>
@@ -49,7 +51,7 @@
             <main id="conteudo" class="content" tabindex="-1">
                 @php($pageTitle = trim($__env->yieldContent('title', 'Painel')))
                 <x-ui.breadcrumb :items="[
-                    ['label' => 'Inicio', 'href' => route('admin.index'), 'navigate' => true],
+                    ['label' => 'Painel', 'href' => route('portal.dashboard'), 'navigate' => true],
                     ['label' => $pageTitle],
                 ]" />
                 <x-admin.flash />
@@ -59,7 +61,7 @@
     </div>
 
     <x-ui.drawer id="navigation-drawer" title="Menu principal" description="Acesse as areas autorizadas do Gabarito360.">
-        <a class="brand drawer-brand" href="{{ route('admin.index') }}" wire:navigate>
+        <a class="brand drawer-brand" href="{{ route('portal.dashboard') }}" wire:navigate>
             <span class="brand-mark" aria-hidden="true">G360</span>
             <span class="brand-copy">
                 <strong>Gabarito360</strong>

@@ -30,7 +30,7 @@ class OrganizationPanelTest extends TestCase
         $admin = $this->userWithRole(UserRole::ADMINISTRATOR);
 
         $this->get('/admin')
-            ->assertRedirect('/admin/login');
+            ->assertRedirect('/login');
 
         $this->post('/admin/login', [
             'email' => $admin->email,
@@ -47,7 +47,7 @@ class OrganizationPanelTest extends TestCase
             ->assertSee('Usuarios');
 
         $this->post('/admin/logout')
-            ->assertRedirect('/admin/login');
+            ->assertRedirect('/login');
 
         $this->assertGuest();
     }
