@@ -1,0 +1,15 @@
+{
+  "dataset_version": "0.1.0",
+  "model_spec": {
+    "id": "gabarito360-cartao-omr-v1",
+    "version": "1.0.0-pre-homologacao"
+  },
+  "status": "awaiting-real-captures",
+  "splits": {
+    "calibration": [],
+    "test": [],
+    "regression": ["synthetic-card"]
+  },
+  "devices": [],
+  "print_batches": []
+}

@@ -1,0 +1,24 @@
+{
+  "spec_id": "gabarito360-cartao-omr-v1",
+  "spec_version": "1.0.0-pre-homologacao",
+  "processor_version": "0.1.0-pre-homologation",
+  "homologated": false,
+  "threshold_profile": "synthetic-regression-only-not-for-pilot",
+  "canvas": {"width": 2480, "height": 3508},
+  "geometry": {"mode": "canonical_or_aruco", "dictionary": "DICT_4X4_50", "ids": [0, 1, 2, 3]},
+  "answers": {
+    "questions": 20,
+    "alternatives": ["A", "B", "C", "D", "E"],
+    "first_center_y": 950,
+    "row_step": 105,
+    "centers_x": {"A": 900, "B": 1120, "C": 1340, "D": 1560, "E": 1780},
+    "mask_radius": 28
+  },
+  "thresholds": {
+    "minimum_sharpness": 20.0,
+    "minimum_contrast": 20.0,
+    "marked_fill_ratio": 0.55,
+    "ambiguous_fill_ratio": 0.32,
+    "minimum_margin": 0.12
+  }
+}
