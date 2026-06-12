@@ -419,6 +419,12 @@ Eventos nao devem expor dados pessoais alem do necessario ao cliente autorizado.
 Esta secao registra recursos necessarios ao mockup e a modelagem MariaDB. Os
 endpoints abaixo sao **planejados** e nao foram implementados pela R1.
 
+Em 12 de junho de 2026, a R3 implementou a persistencia, os modelos e as
+barreiras de policy desses contratos. Os endpoints continuam reservados para as
+fatias funcionais da R5 e R6 e nao devem ser tratados como disponiveis antes
+disso. O recorte executado esta em
+[16-contrato-dominio-r3.md](16-contrato-dominio-r3.md).
+
 ### 13.1 Contexto, equipe e preferencias
 
 | Metodo | Endpoint planejado | Finalidade |

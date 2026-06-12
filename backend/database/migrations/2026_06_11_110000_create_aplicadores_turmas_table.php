@@ -25,7 +25,7 @@ return new class extends Migration
             $table->index(['turma_id', 'fim_em'], 'idx_aplicadores_turmas_turma_ativo');
         });
 
-        DB::statement("ALTER TABLE aplicadores_turmas ADD CONSTRAINT ck_aplicadores_turmas_papel CHECK (papel IN ('professor', 'aplicador', 'responsavel'))");
+        DB::statement("ALTER TABLE aplicadores_turmas ADD CONSTRAINT ck_aplicadores_turmas_papel CHECK (papel IN ('professor', 'aplicador', 'responsavel', 'coordenador'))");
         DB::statement('ALTER TABLE aplicadores_turmas ADD CONSTRAINT ck_aplicadores_turmas_periodo CHECK (fim_em IS NULL OR fim_em >= inicio_em)');
         DB::statement("ALTER TABLE aplicadores_turmas ADD chave_vigente VARCHAR(255) AS (IF(fim_em IS NULL, CONCAT(CAST(turma_id AS CHAR(36)), '|', CAST(usuario_id AS CHAR(36)), '|', papel), NULL)) PERSISTENT");
         DB::statement('CREATE UNIQUE INDEX uq_aplicadores_turmas_ativo ON aplicadores_turmas (chave_vigente)');

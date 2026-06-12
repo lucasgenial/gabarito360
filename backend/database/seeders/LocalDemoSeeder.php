@@ -15,6 +15,8 @@ use App\Enums\StatusEnum;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\Aluno;
+use App\Models\Cargo;
+use App\Models\Disciplina;
 use App\Models\Escola;
 use App\Models\GabaritoOficial;
 use App\Models\GabaritoResposta;
@@ -22,10 +24,15 @@ use App\Models\MatriculaTurma;
 use App\Models\ModeloCartao;
 use App\Models\Nucleo;
 use App\Models\Perfil;
+use App\Models\PeriodoLetivo;
 use App\Models\Prova;
 use App\Models\Questao;
+use App\Models\SerieAno;
+use App\Models\TemaHabilidade;
 use App\Models\Turma;
 use App\Models\User;
+use App\Models\UsuarioDisciplina;
+use App\Models\UsuarioLotacao;
 use App\Models\UsuarioPerfil;
 use Database\Factories\ModeloCartaoFactory;
 use Illuminate\Database\Seeder;
@@ -40,7 +47,10 @@ class LocalDemoSeeder extends Seeder
             throw new LogicException('Os dados de demonstracao somente podem ser criados no ambiente local.');
         }
 
-        $this->call(AccessControlSeeder::class);
+        $this->call([
+            AccessControlSeeder::class,
+            AcademicCatalogSeeder::class,
+        ]);
 
         DB::transaction(function (): void {
             $admin = User::query()->updateOrCreate(
@@ -98,6 +108,24 @@ class LocalDemoSeeder extends Seeder
                 ],
             );
 
+            $period = PeriodoLetivo::query()->firstOrCreate(
+                ['escola_id' => $escola->id, 'ano' => 2026, 'nome' => 'Ano letivo 2026'],
+                [
+                    'tipo' => 'anual',
+                    'inicio_em' => '2026-02-02',
+                    'fim_em' => '2026-12-18',
+                    'status' => 'ativo',
+                ],
+            );
+            $grade = SerieAno::query()->firstOrCreate(
+                ['codigo' => '6-ano'],
+                ['nome' => '6 ano', 'ordem' => 6, 'nivel' => 'fundamental', 'ativo' => true],
+            );
+            $discipline = Disciplina::query()->firstOrCreate(
+                ['codigo' => 'matematica'],
+                ['nome' => 'Matematica', 'cor_token' => 'color.action.primary', 'ativo' => true],
+            );
+
             $turma = Turma::query()->updateOrCreate(
                 [
                     'escola_id' => $escola->id,
@@ -106,10 +134,26 @@ class LocalDemoSeeder extends Seeder
                 ],
                 [
                     'nome' => '6 Ano A - Demonstracao',
+                    'periodo_letivo_id' => $period->id,
+                    'serie_ano_id' => $grade->id,
                     'serie_ano' => '6 ano',
                     'turno' => 'matutino',
+                    'capacidade' => 35,
                     'status' => StatusEnum::ACTIVE,
                 ],
+            );
+
+            $directorRole = Cargo::query()->firstOrCreate(
+                ['codigo' => 'diretor-escolar'],
+                ['nome' => 'Diretor Escolar', 'ativo' => true],
+            );
+            UsuarioLotacao::query()->firstOrCreate(
+                ['usuario_id' => $admin->id, 'cargo_id' => $directorRole->id, 'escola_id' => $escola->id, 'fim_em' => null],
+                ['inicio_em' => '2026-02-02', 'principal' => true],
+            );
+            UsuarioDisciplina::query()->firstOrCreate(
+                ['usuario_id' => $admin->id, 'disciplina_id' => $discipline->id, 'escola_id' => $escola->id, 'fim_em' => null],
+                ['inicio_em' => '2026-02-02'],
             );
 
             foreach ($this->students() as $index => $studentData) {
@@ -139,12 +183,17 @@ class LocalDemoSeeder extends Seeder
                 );
             }
 
-            $this->createPublishedExam($admin, $nucleo, $turma);
+            $this->createPublishedExam($admin, $nucleo, $turma, $discipline, $grade);
         });
     }
 
-    private function createPublishedExam(User $admin, Nucleo $nucleo, Turma $turma): void
-    {
+    private function createPublishedExam(
+        User $admin,
+        Nucleo $nucleo,
+        Turma $turma,
+        Disciplina $discipline,
+        SerieAno $grade,
+    ): void {
         if (Prova::query()->where('nucleo_id', $nucleo->id)->where('codigo', 'PROVA-DEMO-2026')->exists()) {
             return;
         }
@@ -172,6 +221,8 @@ class LocalDemoSeeder extends Seeder
             'nucleo_id' => $nucleo->id,
             'escola_id' => null,
             'modelo_cartao_id' => $cardModel->id,
+            'disciplina_id' => $discipline->id,
+            'serie_ano_id' => $grade->id,
             'codigo' => 'PROVA-DEMO-2026',
             'titulo' => 'Avaliacao Diagnostica de Demonstracao',
             'descricao' => 'Prova ficticia criada exclusivamente para visualizar o painel local.',
@@ -181,6 +232,7 @@ class LocalDemoSeeder extends Seeder
             'quantidade_questoes' => 20,
             'quantidade_alternativas' => count($alternatives),
             'alternativas' => $alternatives,
+            'valor_total' => 20,
             'status' => ProvaStatus::DRAFT,
             'criado_por' => $admin->id,
         ]);
@@ -191,6 +243,11 @@ class LocalDemoSeeder extends Seeder
             'status' => GabaritoOficialStatus::DRAFT,
             'criado_por' => $admin->id,
         ]);
+
+        $theme = TemaHabilidade::query()->firstOrCreate(
+            ['disciplina_id' => $discipline->id, 'codigo' => 'NUM-01'],
+            ['nome' => 'Numeros e operacoes', 'tipo' => 'tema', 'ativo' => true],
+        );
 
         foreach (range(1, 20) as $number) {
             $question = Questao::query()->create([
@@ -209,6 +266,7 @@ class LocalDemoSeeder extends Seeder
                 'anulada' => false,
                 'peso' => 1,
             ]);
+            $question->temasHabilidades()->attach($theme->id, ['principal' => true]);
         }
 
         app(PublishProva::class)->execute($exam, $answerKey, $admin);

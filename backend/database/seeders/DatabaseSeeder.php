@@ -8,6 +8,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(AccessControlSeeder::class);
+        $this->call([
+            AccessControlSeeder::class,
+            AcademicCatalogSeeder::class,
+        ]);
     }
 }

@@ -68,6 +68,9 @@ class AccessControlSeeder extends Seeder
                     PermissionCode::CREATE_APPLICATIONS,
                     PermissionCode::VIEW_APPLICATION_DASHBOARD,
                     PermissionCode::VIEW_EXPORT_CLASS_REPORT,
+                    PermissionCode::VIEW_RESULTS,
+                    PermissionCode::VIEW_REPORTS,
+                    PermissionCode::MANAGE_SETTINGS,
                     PermissionCode::RUN_TECHNICAL_DIAGNOSTICS,
                 ],
             ],
@@ -85,6 +88,8 @@ class AccessControlSeeder extends Seeder
                     PermissionCode::CREATE_APPLICATIONS,
                     PermissionCode::VIEW_APPLICATION_DASHBOARD,
                     PermissionCode::VIEW_EXPORT_CLASS_REPORT,
+                    PermissionCode::VIEW_RESULTS,
+                    PermissionCode::VIEW_REPORTS,
                 ],
             ],
             UserRole::SCHOOL_MANAGER->value => [
@@ -99,6 +104,8 @@ class AccessControlSeeder extends Seeder
                     PermissionCode::CREATE_APPLICATIONS,
                     PermissionCode::VIEW_APPLICATION_DASHBOARD,
                     PermissionCode::VIEW_EXPORT_CLASS_REPORT,
+                    PermissionCode::VIEW_RESULTS,
+                    PermissionCode::VIEW_REPORTS,
                 ],
             ],
             UserRole::TEACHER->value => [
@@ -106,11 +113,14 @@ class AccessControlSeeder extends Seeder
                 'description' => 'Operacao vinculada de aplicacoes e consulta pedagogica.',
                 'permissions' => [
                     PermissionCode::VIEW_CLASSES_STUDENTS,
+                    PermissionCode::MANAGE_EXAMS_ANSWER_KEYS,
                     PermissionCode::RUN_APPLICATIONS,
                     PermissionCode::CONFIRM_READINGS,
                     PermissionCode::CORRECT_READINGS_BEFORE_CONFIRMATION,
                     PermissionCode::VIEW_APPLICATION_DASHBOARD,
                     PermissionCode::VIEW_EXPORT_CLASS_REPORT,
+                    PermissionCode::VIEW_RESULTS,
+                    PermissionCode::VIEW_REPORTS,
                 ],
             ],
             UserRole::APPLICATOR->value => [
@@ -131,6 +141,8 @@ class AccessControlSeeder extends Seeder
                     PermissionCode::VIEW_CLASSES_STUDENTS,
                     PermissionCode::VIEW_APPLICATION_DASHBOARD,
                     PermissionCode::VIEW_EXPORT_CLASS_REPORT,
+                    PermissionCode::VIEW_RESULTS,
+                    PermissionCode::VIEW_REPORTS,
                 ],
             ],
             UserRole::TECHNICAL_SUPPORT->value => [

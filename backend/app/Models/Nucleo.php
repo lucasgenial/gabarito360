@@ -53,6 +53,11 @@ class Nucleo extends Model
         return $this->hasMany(Auditoria::class, 'nucleo_id');
     }
 
+    public function lotacoes(): HasMany
+    {
+        return $this->hasMany(UsuarioLotacao::class, 'nucleo_id');
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MatriculaTurma extends Model
 {
@@ -35,6 +36,11 @@ class MatriculaTurma extends Model
     public function turma(): BelongsTo
     {
         return $this->belongsTo(Turma::class, 'turma_id');
+    }
+
+    public function aplicacoes(): HasMany
+    {
+        return $this->hasMany(AplicacaoAluno::class, 'matricula_turma_id');
     }
 
     /** @return array<string, string> */

@@ -24,8 +24,10 @@ class Aluno extends Model
         'matricula',
         'codigo_interno',
         'nome',
+        'nome_social',
         'data_nascimento',
         'documento',
+        'foto_arquivo_id',
         'status',
         'observacoes',
     ];
@@ -38,6 +40,26 @@ class Aluno extends Model
     public function matriculasTurmas(): HasMany
     {
         return $this->hasMany(MatriculaTurma::class, 'aluno_id');
+    }
+
+    public function fotoArquivo(): BelongsTo
+    {
+        return $this->belongsTo(Arquivo::class, 'foto_arquivo_id');
+    }
+
+    public function responsaveis(): HasMany
+    {
+        return $this->hasMany(AlunoResponsavel::class, 'aluno_id');
+    }
+
+    public function aplicacoes(): HasMany
+    {
+        return $this->hasMany(AplicacaoAluno::class, 'aluno_id');
+    }
+
+    public function resultados(): HasMany
+    {
+        return $this->hasMany(Resultado::class, 'aluno_id');
     }
 
     /** @return array<string, string> */

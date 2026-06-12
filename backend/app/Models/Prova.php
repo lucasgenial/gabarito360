@@ -22,6 +22,8 @@ class Prova extends Model
     protected $fillable = [
         'nucleo_id',
         'escola_id',
+        'disciplina_id',
+        'serie_ano_id',
         'modelo_cartao_id',
         'codigo',
         'titulo',
@@ -32,6 +34,7 @@ class Prova extends Model
         'quantidade_questoes',
         'quantidade_alternativas',
         'alternativas',
+        'valor_total',
         'status',
         'criado_por',
         'publicada_at',
@@ -73,6 +76,26 @@ class Prova extends Model
         return $this->hasMany(ProvaTurma::class, 'prova_id');
     }
 
+    public function disciplina(): BelongsTo
+    {
+        return $this->belongsTo(Disciplina::class, 'disciplina_id');
+    }
+
+    public function serieAno(): BelongsTo
+    {
+        return $this->belongsTo(SerieAno::class, 'serie_ano_id');
+    }
+
+    public function aplicacoes(): HasMany
+    {
+        return $this->hasMany(Aplicacao::class, 'prova_id');
+    }
+
+    public function resultados(): HasMany
+    {
+        return $this->hasMany(Resultado::class, 'prova_id');
+    }
+
     public function ownerNucleoId(): string
     {
         if ($this->nucleo_id !== null) {
@@ -92,6 +115,7 @@ class Prova extends Model
             'quantidade_questoes' => 'integer',
             'quantidade_alternativas' => 'integer',
             'alternativas' => 'array',
+            'valor_total' => 'decimal:4',
             'status' => ProvaStatus::class,
             'publicada_at' => 'immutable_datetime',
             'finalizada_at' => 'immutable_datetime',

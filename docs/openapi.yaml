@@ -1,17 +1,48 @@
 openapi: 3.1.0
 info:
   title: Gabarito360 API
-  version: 0.14.0
+  version: 0.15.0
   description: |
     Contrato OpenAPI da baseline tecnica, autenticacao, gestao organizacional, turmas, alunos,
     vinculos operacionais, importacao validada de alunos por CSV, modelos versionados de cartao OMR
     provas, questoes, versoes de gabarito oficial, publicacao e vinculos autorizados com turmas.
+    A fundacao R3 formaliza os contratos persistentes academicos, operacionais,
+    de resultados e relatorios sem declarar endpoints ainda nao implementados.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
 servers:
   - url: http://127.0.0.1:8000
     description: Ambiente local
+x-gabarito360-r3-contracts:
+  status: foundation-only
+  documentation: docs/16-contrato-dominio-r3.md
+  resources:
+    academic:
+      - periodos_letivos
+      - series_anos
+      - disciplinas
+      - temas_habilidades
+    staff:
+      - cargos
+      - usuario_lotacoes
+      - usuario_disciplinas
+    operations:
+      - aplicacoes
+      - aplicacao_aplicadores
+      - aplicacao_alunos
+      - cartoes_resposta
+      - leituras_cartao
+      - respostas_detectadas
+    analytics:
+      - resultados
+      - resultado_questoes
+      - relatorios
+  reservedUntilFunctionalSlices:
+    - application lifecycle
+    - OMR processing
+    - result calculation
+    - report generation and download
 tags:
   - name: Autenticacao
     description: Emissao e revogacao de tokens e contexto do usuario autenticado
@@ -29,6 +60,12 @@ tags:
     description: Configuracoes OMR versionadas, homologadas e imutaveis
   - name: Provas
     description: Provas e questoes editaveis somente enquanto estao em rascunho
+  - name: Estrutura academica
+    description: Periodos, series, disciplinas e temas da fundacao R3
+  - name: Aplicacoes
+    description: Contratos operacionais reservados para fatias funcionais posteriores
+  - name: Resultados e relatorios
+    description: Contratos persistentes reservados para calculo, consulta e exportacao posteriores
   - name: Tecnico
     description: Endpoints tecnicos da API
 paths:
@@ -2862,6 +2899,7 @@ components:
         - nucleo_id
         - codigo
         - nome
+        - inep
         - municipio
         - estado
         - endereco
@@ -2884,6 +2922,11 @@ components:
         nome:
           type: string
           maxLength: 180
+        inep:
+          type:
+            - string
+            - "null"
+          maxLength: 20
         municipio:
           type: string
           maxLength: 120
@@ -3299,6 +3342,8 @@ components:
         - matricula
         - codigo_interno
         - nome
+        - nome_social
+        - foto_arquivo_id
         - status
         - created_at
         - updated_at
@@ -3320,6 +3365,16 @@ components:
         nome:
           type: string
           maxLength: 180
+        nome_social:
+          type:
+            - string
+            - "null"
+          maxLength: 180
+        foto_arquivo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
         status:
           $ref: "#/components/schemas/NucleoStatus"
         created_at:
@@ -3568,10 +3623,13 @@ components:
       required:
         - id
         - escola_id
+        - periodo_letivo_id
+        - serie_ano_id
         - codigo
         - nome
         - serie_ano
         - turno
+        - capacidade
         - ano_letivo
         - status
         - created_at
@@ -3582,6 +3640,16 @@ components:
           format: uuid
         escola_id:
           type: string
+          format: uuid
+        periodo_letivo_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        serie_ano_id:
+          type:
+            - string
+            - "null"
           format: uuid
         codigo:
           type: string
@@ -3603,6 +3671,11 @@ components:
             - noturno
             - integral
             - null
+        capacidade:
+          type:
+            - integer
+            - "null"
+          minimum: 1
         ano_letivo:
           type: integer
           minimum: 2000
@@ -3967,6 +4040,8 @@ components:
         - id
         - nucleo_id
         - escola_id
+        - disciplina_id
+        - serie_ano_id
         - modelo_cartao_id
         - codigo
         - titulo
@@ -3977,6 +4052,7 @@ components:
         - quantidade_questoes
         - quantidade_alternativas
         - alternativas
+        - valor_total
         - status
         - criado_por
         - publicada_at
@@ -3993,6 +4069,16 @@ components:
             - "null"
           format: uuid
         escola_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        disciplina_id:
+          type:
+            - string
+            - "null"
+          format: uuid
+        serie_ano_id:
           type:
             - string
             - "null"
@@ -4043,6 +4129,9 @@ components:
           items:
             type: string
             pattern: "^[A-Z0-9]$"
+        valor_total:
+          type: string
+          pattern: "^[0-9]+\\.[0-9]{4}$"
         status:
           $ref: "#/components/schemas/ProvaStatus"
         criado_por:
@@ -4348,7 +4437,9 @@ components:
         - prova_id
         - numero
         - codigo
+        - enunciado
         - peso_padrao
+        - metadados
         - status
         - created_at
         - updated_at
@@ -4369,6 +4460,15 @@ components:
             - "null"
           maxLength: 50
           pattern: "^[A-Z0-9._-]+$"
+        enunciado:
+          type:
+            - string
+            - "null"
+        metadados:
+          type:
+            - object
+            - "null"
+          additionalProperties: true
         peso_padrao:
           type: string
           pattern: "^[0-9]+\\.[0-9]{4}$"

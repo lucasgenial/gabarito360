@@ -19,6 +19,7 @@ class ProvaTurma extends Model
         'prova_id',
         'turma_id',
         'data_prevista',
+        'status',
         'vinculado_por',
     ];
 

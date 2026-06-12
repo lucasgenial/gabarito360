@@ -21,10 +21,13 @@ class Turma extends Model
     /** @var list<string> */
     protected $fillable = [
         'escola_id',
+        'periodo_letivo_id',
+        'serie_ano_id',
         'codigo',
         'nome',
         'serie_ano',
         'turno',
+        'capacidade',
         'ano_letivo',
         'status',
     ];
@@ -54,11 +57,27 @@ class Turma extends Model
         return $this->hasMany(ProvaTurma::class, 'turma_id');
     }
 
+    public function periodoLetivo(): BelongsTo
+    {
+        return $this->belongsTo(PeriodoLetivo::class, 'periodo_letivo_id');
+    }
+
+    public function serieAno(): BelongsTo
+    {
+        return $this->belongsTo(SerieAno::class, 'serie_ano_id');
+    }
+
+    public function aplicacoes(): HasMany
+    {
+        return $this->hasMany(Aplicacao::class, 'turma_id');
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
         return [
             'ano_letivo' => 'integer',
+            'capacidade' => 'integer',
             'status' => StatusEnum::class,
             'deleted_at' => 'immutable_datetime',
         ];

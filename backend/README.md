@@ -2,6 +2,11 @@
 
 API REST e painel administrativo do Gabarito360, construídos com Laravel 12 e MariaDB. A arquitetura utiliza Sanctum, requests, resources, policies, actions, services, filas e auditoria.
 
+A fundação R3 também disponibiliza modelos e contratos persistentes para
+estrutura acadêmica, equipe, responsáveis, aplicações, leituras, resultados e
+relatórios. Os fluxos e endpoints desses novos contratos permanecem reservados
+para as próximas fatias funcionais.
+
 ## Requisitos
 
 - PHP 8.3 ou superior com `pdo_mysql`;

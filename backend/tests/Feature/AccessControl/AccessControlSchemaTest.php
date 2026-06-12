@@ -29,7 +29,7 @@ class AccessControlSchemaTest extends TestCase
 
         $this->assertDatabaseCount('perfis', count(UserRole::cases()));
         $this->assertDatabaseCount('permissoes', count(PermissionCode::cases()));
-        $this->assertDatabaseCount('perfil_permissoes', 47);
+        $this->assertDatabaseCount('perfil_permissoes', 59);
 
         $profiles = Perfil::query()->with('permissoes')->get()->keyBy('codigo');
 
@@ -42,6 +42,11 @@ class AccessControlSchemaTest extends TestCase
             $profiles[UserRole::TEACHER->value]
                 ->permissoes
                 ->contains('codigo', PermissionCode::CONFIRM_READINGS->value),
+        );
+        $this->assertTrue(
+            $profiles[UserRole::TEACHER->value]
+                ->permissoes
+                ->contains('codigo', PermissionCode::MANAGE_EXAMS_ANSWER_KEYS->value),
         );
         $this->assertFalse(
             $profiles[UserRole::SCHOOL_MANAGER->value]

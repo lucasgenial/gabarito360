@@ -16,6 +16,8 @@ class AlunoResource extends JsonResource
             'matricula' => $this->resource->matricula,
             'codigo_interno' => $this->resource->codigo_interno,
             'nome' => $this->resource->nome,
+            'nome_social' => $this->resource->nome_social,
+            'foto_arquivo_id' => $this->resource->foto_arquivo_id,
             'status' => $this->resource->status->value,
             'created_at' => $this->resource->created_at?->toAtomString(),
             'updated_at' => $this->resource->updated_at?->toAtomString(),

@@ -48,6 +48,16 @@ class GabaritoOficial extends Model
         return $this->hasMany(GabaritoResposta::class, 'gabarito_oficial_id');
     }
 
+    public function aplicacoes(): HasMany
+    {
+        return $this->hasMany(Aplicacao::class, 'gabarito_oficial_id');
+    }
+
+    public function resultados(): HasMany
+    {
+        return $this->hasMany(Resultado::class, 'gabarito_oficial_id');
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {

@@ -164,6 +164,8 @@ Não fazer:
 
 ## R3 - Alinhar domínio e contratos ao mockup
 
+**Status: concluída em 12 de junho de 2026.**
+
 Objetivo: fornecer os dados reais necessários às telas canônicas.
 
 Ações:
@@ -180,6 +182,16 @@ Aceite:
 - toda informação obrigatória das telas possui fonte de dados autorizada;
 - nenhum dashboard depende de número estático;
 - contratos e policies cobrem os novos contextos.
+
+Entregáveis:
+
+- contrato executável em `docs/16-contrato-dominio-r3.md`;
+- fundação acadêmica, equipe, responsáveis, preferências e LGPD;
+- contratos persistentes para aplicações, leituras, resultados e relatórios;
+- modelos e relacionamentos Eloquent para as fontes canônicas;
+- permissões e policies para configurações, resultados e relatórios;
+- dados locais demonstrativos alinhados à estrutura acadêmica;
+- testes de schema, relacionamentos, constraints, permissões e escopo.
 
 Não fazer:
 
@@ -313,7 +325,7 @@ componentes fundamentais.
 
 ## 7. Próxima execução recomendada
 
-Executar somente **R3 - Alinhar domínio e contratos ao mockup**.
+Executar somente **R4 - Construir fundação visual canônica**.
 
-R3 deve fornecer fontes de dados e contratos autorizados para as telas canônicas,
-sem iniciar a composição visual completa prevista para a R4.
+R4 deve transformar o mockup em shell e biblioteca reutilizável, consumindo os
+contratos reais da R3 sem iniciar ainda as fatias funcionais completas da R5.

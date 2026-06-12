@@ -36,6 +36,11 @@ class DispositivoMobile extends Model
         return $this->hasMany(PersonalAccessToken::class, 'dispositivo_mobile_id');
     }
 
+    public function logsSincronizacao(): HasMany
+    {
+        return $this->hasMany(LogSincronizacao::class, 'dispositivo_id');
+    }
+
     public function revoke(): void
     {
         DB::transaction(function (): void {

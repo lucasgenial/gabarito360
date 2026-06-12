@@ -22,8 +22,11 @@ class AuthorizationContractTest extends TestCase
         $this->assertFalse(PermissionCode::VIEW_CLASSES_STUDENTS->isMutation());
         $this->assertFalse(PermissionCode::VIEW_APPLICATION_DASHBOARD->isMutation());
         $this->assertFalse(PermissionCode::VIEW_EXPORT_CLASS_REPORT->isMutation());
+        $this->assertFalse(PermissionCode::VIEW_RESULTS->isMutation());
+        $this->assertFalse(PermissionCode::VIEW_REPORTS->isMutation());
         $this->assertFalse(PermissionCode::RUN_TECHNICAL_DIAGNOSTICS->isMutation());
         $this->assertTrue(PermissionCode::MANAGE_CLASSES_STUDENTS->isMutation());
+        $this->assertTrue(PermissionCode::MANAGE_SETTINGS->isMutation());
         $this->assertTrue(PermissionCode::CONFIRM_READINGS->isMutation());
         $this->assertTrue(PermissionCode::RUN_APPLICATIONS->requiresOperationalRole());
         $this->assertTrue(PermissionCode::CONFIRM_READINGS->requiresOperationalRole());

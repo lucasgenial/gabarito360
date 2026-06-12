@@ -36,6 +36,7 @@ return new class extends Migration
             $table->index(['nucleo_id', 'status'], 'idx_provas_nucleo_status');
             $table->index(['escola_id', 'status'], 'idx_provas_escola_status');
             $table->index('modelo_cartao_id', 'idx_provas_modelo_cartao');
+            $table->index('criado_por', 'idx_provas_criado_por');
         });
 
         DB::statement('ALTER TABLE provas ADD CONSTRAINT ck_provas_proprietario CHECK ((nucleo_id IS NULL) <> (escola_id IS NULL))');

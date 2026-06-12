@@ -18,6 +18,9 @@ enum PermissionCode: string
     case CORRECT_READINGS_BEFORE_CONFIRMATION = 'leituras.corrigir_antes_confirmacao';
     case VIEW_APPLICATION_DASHBOARD = 'dashboards.aplicacao.consultar';
     case VIEW_EXPORT_CLASS_REPORT = 'relatorios.turma.consultar_exportar_csv';
+    case VIEW_RESULTS = 'relatorios.resultados.consultar';
+    case VIEW_REPORTS = 'relatorios.consultar';
+    case MANAGE_SETTINGS = 'configuracoes.gerenciar';
     case RUN_TECHNICAL_DIAGNOSTICS = 'diagnostico.executar';
 
     public function isMutation(): bool
@@ -26,6 +29,8 @@ enum PermissionCode: string
             self::VIEW_CLASSES_STUDENTS,
             self::VIEW_APPLICATION_DASHBOARD,
             self::VIEW_EXPORT_CLASS_REPORT,
+            self::VIEW_RESULTS,
+            self::VIEW_REPORTS,
             self::RUN_TECHNICAL_DIAGNOSTICS => false,
             default => true,
         };
@@ -63,6 +68,9 @@ enum PermissionCode: string
             self::CORRECT_READINGS_BEFORE_CONFIRMATION => 'Corrigir resposta antes da confirmacao.',
             self::VIEW_APPLICATION_DASHBOARD => 'Consultar dashboard simples da aplicacao.',
             self::VIEW_EXPORT_CLASS_REPORT => 'Consultar relatorio por turma e exportar CSV.',
+            self::VIEW_RESULTS => 'Consultar resultados individuais autorizados.',
+            self::VIEW_REPORTS => 'Consultar e solicitar relatorios canonicos.',
+            self::MANAGE_SETTINGS => 'Gerenciar configuracoes administrativas do sistema.',
             self::RUN_TECHNICAL_DIAGNOSTICS => 'Executar diagnostico tecnico.',
         };
     }

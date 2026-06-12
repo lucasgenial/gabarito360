@@ -15,6 +15,7 @@ class EscolaResource extends JsonResource
             'nucleo_id' => $this->resource->nucleo_id,
             'codigo' => $this->resource->codigo,
             'nome' => $this->resource->nome,
+            'inep' => $this->resource->inep,
             'municipio' => $this->resource->municipio,
             'estado' => $this->resource->estado,
             'endereco' => $this->resource->endereco,

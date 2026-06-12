@@ -6,8 +6,10 @@ use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -26,6 +28,7 @@ class User extends Authenticatable
         'email',
         'documento',
         'telefone',
+        'foto_arquivo_id',
         'password',
         'status',
     ];
@@ -103,6 +106,36 @@ class User extends Authenticatable
     public function auditorias(): HasMany
     {
         return $this->hasMany(Auditoria::class, 'usuario_id');
+    }
+
+    public function fotoArquivo(): BelongsTo
+    {
+        return $this->belongsTo(Arquivo::class, 'foto_arquivo_id');
+    }
+
+    public function lotacoes(): HasMany
+    {
+        return $this->hasMany(UsuarioLotacao::class, 'usuario_id');
+    }
+
+    public function disciplinasVinculadas(): HasMany
+    {
+        return $this->hasMany(UsuarioDisciplina::class, 'usuario_id');
+    }
+
+    public function preferencia(): HasOne
+    {
+        return $this->hasOne(PreferenciaUsuario::class, 'usuario_id');
+    }
+
+    public function preferenciasNotificacao(): HasMany
+    {
+        return $this->hasMany(PreferenciaNotificacao::class, 'usuario_id');
+    }
+
+    public function relatoriosSolicitados(): HasMany
+    {
+        return $this->hasMany(Relatorio::class, 'solicitante_id');
     }
 
     /** @return array<string, string> */

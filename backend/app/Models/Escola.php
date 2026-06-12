@@ -23,6 +23,7 @@ class Escola extends Model
         'nucleo_id',
         'codigo',
         'nome',
+        'inep',
         'municipio',
         'estado',
         'endereco',
@@ -64,6 +65,21 @@ class Escola extends Model
     public function auditorias(): HasMany
     {
         return $this->hasMany(Auditoria::class, 'escola_id');
+    }
+
+    public function periodosLetivos(): HasMany
+    {
+        return $this->hasMany(PeriodoLetivo::class, 'escola_id');
+    }
+
+    public function lotacoes(): HasMany
+    {
+        return $this->hasMany(UsuarioLotacao::class, 'escola_id');
+    }
+
+    public function aplicacoes(): HasMany
+    {
+        return $this->hasMany(Aplicacao::class, 'escola_id');
     }
 
     /** @return array<string, string> */
