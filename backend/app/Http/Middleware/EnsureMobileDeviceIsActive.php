@@ -50,7 +50,7 @@ class EnsureMobileDeviceIsActive
             throw new AuthenticationException;
         }
 
-        if (! $device->supportsCurrentAppVersion() && ! $request->routeIs('api.v1.auth.logout')) {
+        if (! $device->supportsCurrentAppVersion() && ! $request->routeIs('api.v2.auth.logout')) {
             $this->audit->record(
                 action: AuditAction::ACCESS_BLOCKED_VERSION,
                 entityType: 'dispositivo_mobile',
@@ -65,8 +65,8 @@ class EnsureMobileDeviceIsActive
             return ApiResponse::error(
                 code: 'APP_VERSION_UNSUPPORTED',
                 message: 'Atualize o aplicativo para continuar.',
-                details: [
-                    'minimum_version' => config('gabarito360.mobile.minimum_app_version'),
+                errors: [
+                    'minimum_version' => [(string) config('gabarito360.mobile.minimum_app_version')],
                 ],
                 status: 426,
             );

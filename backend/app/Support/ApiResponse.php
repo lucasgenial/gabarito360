@@ -22,24 +22,22 @@ final class ApiResponse
     }
 
     /**
-     * @param  array<string, mixed>  $details
+     * @param  array<string, mixed>  $errors
      */
     public static function error(
         string $code,
         string $message,
-        array $details = [],
+        array $errors = [],
         int $status = 400,
     ): JsonResponse {
         $requestId = self::requestId();
 
         return response()->json([
-            'error' => [
-                'code' => $code,
-                'message' => $message,
-                'details' => $details === [] ? (object) [] : $details,
-            ],
+            'message' => $message,
+            'errors' => $errors === [] ? (object) [] : $errors,
             'meta' => [
                 'request_id' => $requestId,
+                'code' => $code,
             ],
         ], $status)->header('X-Request-ID', $requestId);
     }

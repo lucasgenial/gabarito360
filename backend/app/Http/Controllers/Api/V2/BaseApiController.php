@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V2;
 
 use App\Http\Controllers\Controller;
 use App\Support\ApiResponse;
@@ -16,14 +16,14 @@ abstract class BaseApiController extends Controller
     }
 
     /**
-     * @param  array<string, mixed>  $details
+     * @param  array<string, mixed>  $errors
      */
     protected function errorResponse(
         string $code,
         string $message,
-        array $details = [],
+        array $errors = [],
         int $status = 400,
     ): JsonResponse {
-        return ApiResponse::error($code, $message, $details, $status);
+        return ApiResponse::error($code, $message, $errors, $status);
     }
 }

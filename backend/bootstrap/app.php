@@ -59,7 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 return ApiResponse::error(
                     code: 'VALIDATION_ERROR',
                     message: 'Os dados informados sao invalidos.',
-                    details: $exception->errors(),
+                    errors: $exception->errors(),
                     status: 422,
                 );
             }
