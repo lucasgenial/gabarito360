@@ -203,3 +203,23 @@ npm run build
 ```
 
 O contrato visual exige tema claro padrão, dark mode explícito, responsividade e WCAG 2.2 AA.
+
+## Ambiente containerizado R7
+
+Na raiz do repositorio, o `compose.yaml` separa Nginx, PHP-FPM, migrations,
+filas, scheduler, Reverb, MariaDB e Redis. Apenas o Nginx publica porta.
+
+```powershell
+Copy-Item .env.docker.example .env.docker
+cd backend
+php artisan key:generate --show
+# Registre a chave e substitua as senhas/segredos em .env.docker.
+cd ..
+docker compose --env-file .env.docker config --quiet
+docker compose --env-file .env.docker up -d --build --wait
+Invoke-RestMethod http://127.0.0.1:8080/api/v1/health
+```
+
+O deploy executa migrations, mas nao carrega o `LocalDemoSeeder`. Procedimentos
+de deploy, continuidade e incidentes estao em `docs/infra/deploy.md` e
+`docs/operacao/`.

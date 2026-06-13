@@ -5,8 +5,9 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
 > **Status do projeto:** as fundacoes R2 a R5 e a integracao operacional R6
-> foram implementadas na branch de refatoracao. O piloto continua bloqueado
-> ate homologacao do OMR e dos dispositivos com dataset real.
+> foram implementadas na branch de refatoracao. O R7 empacota a aplicacao e
+> prepara a homologacao tecnica. O piloto continua bloqueado ate homologacao do
+> OMR, dos dispositivos e da operacao LGPD com dados reais autorizados.
 
 ## Sobre o sistema
 
@@ -233,6 +234,22 @@ mockup funcional em [`style-system/`](style-system/) e ao MariaDB. O plano vigen
 
 O ambiente local reproduzível usa MariaDB portátil em `.local/`. Consulte o
 [README do backend](backend/README.md) para os comandos de setup, start e stop.
+
+### Ambiente containerizado
+
+O R7 fornece um ambiente de homologacao em [`compose.yaml`](compose.yaml), com
+Nginx, Laravel, MariaDB, Redis, filas, scheduler e Reverb separados. Somente o
+Nginx publica porta; MariaDB e Redis permanecem na rede interna.
+
+```powershell
+Copy-Item .env.docker.example .env.docker
+# Gere APP_KEY e substitua todos os segredos de .env.docker.
+docker compose --env-file .env.docker up -d --build --wait
+Invoke-RestMethod http://127.0.0.1:8080/api/v1/health
+```
+
+Consulte [deploy](docs/infra/deploy.md), [backup e restauracao](docs/operacao/backup-e-restauracao.md)
+e o [contrato R7](docs/19-contrato-r7-empacotamento-homologacao.md).
 
 ## Estrutura atual do repositorio
 

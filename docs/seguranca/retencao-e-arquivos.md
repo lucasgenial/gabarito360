@@ -8,7 +8,7 @@ Este documento operacionaliza a classificacao, o acesso, a retencao e o descarte
 
 - Coletar, armazenar e expor somente o necessario para a finalidade declarada.
 - Manter todo arquivo identificavel em storage privado.
-- Registrar metadados no PostgreSQL; nao armazenar imagens em `bytea`.
+- Registrar metadados no MariaDB; nao armazenar imagens como blob.
 - Preencher `arquivos.retencao_ate` ao classificar o arquivo.
 - Autorizar e auditar acesso, download, retencao legal e descarte.
 - Nunca usar nome, matricula, CPF ou codigo impresso no caminho do objeto.
@@ -102,7 +102,8 @@ A suspensao nao amplia acesso ao conteudo. Encerrada a necessidade, o objeto ret
 ## 9. Backups e restauracao
 
 - Backups devem ser criptografados, isolados e acessiveis somente pela equipe autorizada.
-- A politica detalhada de backup e restauracao sera implementada no micropasso de continuidade.
+- A politica detalhada e os scripts de backup/restauracao estao em
+  [`../operacao/backup-e-restauracao.md`](../operacao/backup-e-restauracao.md).
 - Restaurar um backup nao pode reativar permanentemente arquivos cujo prazo ja venceu.
 - Apos restauracao, o processo de descarte deve reaplicar `retencao_ate` e retencoes legais vigentes.
 - Testes de restauracao usam dados sinteticos ou anonimizados sempre que possivel.

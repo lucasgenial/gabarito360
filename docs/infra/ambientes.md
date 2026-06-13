@@ -1,7 +1,3 @@
-> **Documento em revisão para MariaDB.** As referências PostgreSQL abaixo
-> descrevem a fundação anterior e serão substituídas durante R1 e R2 do plano de
-> refatoração.
-
 # Gabarito360 - Ambientes e Segredos
 
 ## 1. Objetivo
@@ -13,7 +9,7 @@ Este documento define configuracoes, isolamento e responsabilidades para os ambi
 - Cada ambiente usa banco, Redis, storage, credenciais, URLs e chaves proprios.
 - `test` e `homologacao` nunca apontam para servicos ou dados de producao.
 - Segredos sao injetados no ambiente e nunca versionados, embutidos em imagens ou registrados em logs.
-- PostgreSQL, Redis e storage privado nao ficam expostos publicamente.
+- MariaDB, Redis e storage privado nao ficam expostos publicamente.
 - `APP_DEBUG` deve ser `false` fora do ambiente local.
 - Homologacao deve ser representativa de producao sem utilizar dados pessoais reais, salvo processo formal autorizado e minimizado.
 - Objetos identificaveis sao privados e seguem [retencao-e-arquivos.md](../seguranca/retencao-e-arquivos.md).
@@ -26,16 +22,18 @@ Este documento define configuracoes, isolamento e responsabilidades para os ambi
 | Dados permitidos | Sinteticos ou anonimizados | Fixtures sinteticas | Sinteticos ou anonimizados | Dados reais autorizados |
 | `APP_ENV` | `local` | `testing` | `staging` | `production` |
 | `APP_DEBUG` | `true` | `false` | `false` | `false` |
-| PostgreSQL | Instancia local, banco `gabarito360` | Banco descartavel e exclusivo, nunca compartilhado | Instancia e credencial exclusivas | Instancia privada, monitorada e com backup |
+| MariaDB | Instancia portatil local, banco `gabarito360` | Banco descartavel e exclusivo, nunca compartilhado | Container/instancia e credencial exclusivas | Instancia privada, monitorada e com backup |
 | Redis | Alvo do projeto; banco/prefixo local exclusivo | `array`/`sync` por padrao ou Redis exclusivo no teste de integracao | Redis privado exclusivo | Redis privado, monitorado e sem persistir dado pessoal desnecessario |
-| Cache e filas | Banco enquanto MP-009 nao for executado; depois Redis | `array` e `sync`, salvo teste especifico | Redis com workers controlados | Redis com workers monitorados |
+| Cache e filas | Redis no Compose ou `array`/`sync` no ambiente portatil minimo | `array` e `sync`, salvo teste especifico | Redis com workers controlados | Redis com workers monitorados |
 | Storage | Disco `local` privado | Diretorio temporario descartavel | Bucket/prefixo S3 compativel exclusivo e privado | Bucket S3 compativel privado, criptografado e com lifecycle |
 | E-mail | Driver `log`; nao envia externamente | Driver `array` | SMTP sandbox com destinatarios controlados | Provedor transacional autorizado |
 | Logs | Locais, sem dados sensiveis | Minimos e descartaveis | Centralizados e restritos | Centralizados, monitorados e retidos por 90 dias |
 | Segredos | `.env` local ignorado pelo Git | Valores efemeros sem privilegio | Cofre de segredos ou variaveis protegidas do deploy | Cofre de segredos com acesso minimo e rotacao |
 | Acesso | Desenvolvedor local | Pipeline e desenvolvedor | Equipe autorizada | Equipe operacional autorizada e auditada |
 
-Redis, S3 compativel, workers e servicos externos ainda nao sao configurados pelo MP-004. A implementacao tecnica dessas integracoes ocorre nos micropassos de infraestrutura correspondentes.
+O Compose do R7 fornece Redis, workers e Reverb para homologacao tecnica.
+Storage S3 compativel, e-mail externo e observabilidade gerenciada dependem do
+ambiente implantado.
 
 ## 4. Configuracoes por componente
 
@@ -50,7 +48,7 @@ Redis, S3 compativel, workers e servicos externos ainda nao sao configurados pel
 | `LOG_LEVEL` | `debug` somente local; `info` ou mais restritivo fora do local |
 | `LOG_DAILY_DAYS` | Nao ultrapassar 90 dias em logs tecnicos acessiveis |
 
-### 4.2 PostgreSQL
+### 4.2 MariaDB
 
 - Usar banco e usuario exclusivos por ambiente, com privilegio minimo.
 - Producao e homologacao devem exigir conexao protegida e rede privada.
