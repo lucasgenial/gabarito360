@@ -2,7 +2,8 @@
 
 ## Convenções
 
-- API REST em `/api/v2`; `/api/v1` permanece durante a transição.
+- API REST **exclusivamente** em `/api/v2`. Não há `/api/v1` nem compatibilidade
+  retroativa (ADR-D016).
 - JSON consistente com `success`, `message`, `data`, `errors` e metadados.
 - Sanctum para clientes próprios; OAuth2/credenciais específicas para integrações.
 - Paginação, filtros, ordenação, escopo e erros versionados.
@@ -35,8 +36,9 @@ As integrações visíveis em configurações devem ter catálogo, status, conex
 teste, sincronização, última execução, erros e desconexão. Segredos ficam
 criptografados e nunca retornam completos à interface.
 
-## Compatibilidade
+## Versionamento (sem compatibilidade retroativa)
 
-A transição deve mapear endpoints V1 reutilizáveis para V2 sem quebrar o app
-existente. Mudanças incompatíveis exigem endpoint V2, documentação OpenAPI,
-teste de contrato e plano de desativação.
+Não há `/api/v1` nem app legado a preservar (ADR-D016). Toda a superfície é
+`/api/v2`, com documentação OpenAPI e teste de contrato por recurso. Evoluções
+futuras seguem SemVer; mudanças incompatíveis criam nova versão com plano de
+depreciação próprio.

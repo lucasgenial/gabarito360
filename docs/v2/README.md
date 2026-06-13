@@ -2,13 +2,13 @@
 
 ## Status
 
-Esta pasta é a fonte de verdade da V2. O produto deve reproduzir integralmente
-as funcionalidades, recursos, conteúdo, interações, responsividade e identidade
-visual presentes nas 30 telas de `style-system/`.
+Esta pasta é a **única** fonte de verdade da V2. O produto deve reproduzir
+integralmente as funcionalidades, recursos, conteúdo, interações, responsividade
+e identidade visual presentes nas 30 telas de `style-system/`.
 
-Os documentos anteriores em `docs/` permanecem como histórico da V1. Eles
-podem fornecer decisões técnicas reutilizáveis, mas não podem excluir ou adiar
-funcionalidades presentes no mockup sem uma nova decisão formal.
+A V2 é **produto único, sem legado** ([ADR-D016](../decisoes/ADR-D016-v2-sem-legado.md)):
+não há reaproveitamento da V1 nem compatibilidade retroativa. Os documentos
+anteriores em `docs/` são histórico arquivado e não governam a V2.
 
 ## Precedência
 
@@ -31,13 +31,19 @@ funcionalidades presentes no mockup sem uma nova decisão formal.
 | `07-modelagem-dados-mariadb.md` | Modelo de dados V2 |
 | `08-api-e-integracoes.md` | Contratos API, eventos e integrações |
 | `09-web-design-system.md` | Contrato da aplicação web responsiva |
-| `10-android-flutter.md` | Contrato do aplicativo Android |
+| `10-android-react-native.md` | Contrato do aplicativo Android (React Native, ADR-D015) |
+| `10-android-flutter.md` | Histórico (substituído por React Native) |
 | `11-omr-opencv.md` | Contrato do módulo OMR |
 | `12-dashboards-e-relatorios.md` | Indicadores, relatórios e exportações |
 | `13-seguranca-lgpd.md` | Segurança, privacidade e auditoria |
 | `14-infraestrutura-e-qualidade.md` | Ambientes, CI, testes e operação |
 | `15-matriz-rastreabilidade.md` | Rastreabilidade mockup -> produto -> entrega |
 | `16-plano-executavel-v2.md` | Ordem executável de reconstrução |
+| `17-analise-gap.md` | GAP: existente vs mockup, faltas e divergências |
+| `18-analise-reaproveitamento.md` | Classificação de reaproveitamento por módulo |
+| `19-estrategia-git.md` | Branches, commits, merge, versionamento e tags |
+| `20-relatorio-execucao.md` | Relatório da fase de planejamento V2 |
+| `21-plano-backend.md` | Plano executável do backend Laravel + MariaDB (V2-02) |
 
 ## Regra de conclusão
 

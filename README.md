@@ -4,11 +4,11 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
-> **Status do projeto:** a V2 esta sendo reconstruida na branch
-> `v2/mockup-canonico`. As 30 telas e todos os recursos de `style-system/`
-> passam a ser o contrato integral do produto. A fundacao tecnica R0-R7 sera
-> reaproveitada seletivamente; a interpretacao reduzida do mockup e as paginas
-> web anteriores ficam como historico da V1.
+> **Status do projeto:** a V2 esta sendo reconstruida do zero na branch
+> `v2/mockup-canonico`, como **produto unico e sem legado** (ADR-D016). As 30
+> telas e todos os recursos de `style-system/` sao o contrato integral do
+> produto. Nao ha reaproveitamento da fundacao R0-R7, compatibilidade com
+> `/api/v1`, nem app/paginas legados: tudo e construido para a V2 ou removido.
 
 ## Sobre o sistema
 
@@ -115,7 +115,7 @@ A estrategia recomendada e hibrida: retorno rapido no aplicativo e possibilidade
 |---|---|
 | Backend e API REST | Laravel 12 |
 | Banco de dados | MariaDB |
-| Aplicativo Android | Flutter |
+| Aplicativo Android | React Native (TypeScript) |
 | Processamento OMR | OpenCV |
 | Cache e filas | Redis |
 | Tempo real | Laravel Reverb / WebSockets |
@@ -124,9 +124,9 @@ A estrategia recomendada e hibrida: retorno rapido no aplicativo e possibilidade
 | Infraestrutura | Docker, Nginx e TLS |
 
 ```text
-Painel Web --------\
-                    \
-App Android --------> API Laravel ----> MariaDB
+Painel Web --------------\
+                          \
+App Android (React Native) --> API Laravel ----> MariaDB
                          |   |   \
                          |   |    \----> Storage S3
                          |   |
@@ -189,39 +189,43 @@ o pipeline OMR OpenCV para cartões e dispositivos reais.
 
 ## Documentacao
 
-A documentacao canonica da nova versao esta em
-[`docs/v2/`](docs/v2/README.md). Os documentos numerados diretamente em
-`docs/` registram a V1 e continuam disponiveis para rastreabilidade, mas nao
-podem reduzir o escopo definido pelo mockup funcional.
+A documentacao canonica da V2 esta em [`docs/v2/`](docs/v2/README.md) e e a
+unica que governa o produto. Os documentos numerados diretamente em `docs/` sao
+historico arquivado da V1 (ADR-D016) e nao definem escopo.
 
 | Documento | Conteúdo |
 |---|---|
 | [Índice V2](docs/v2/README.md) | Precedência e conjunto canônico |
 | [Inventário do mockup](docs/v2/02-inventario-funcional-mockup.md) | Todas as telas e capacidades |
-| [Arquitetura e reaproveitamento](docs/v2/06-arquitetura-e-reaproveitamento-v1.md) | O que reutilizar, refatorar e substituir |
-| [Modelagem MariaDB](docs/v2/07-modelagem-dados-mariadb.md) | Dados reutilizados e ampliações |
-| [Matriz de rastreabilidade](docs/v2/15-matriz-rastreabilidade.md) | Mockup, implementação e evidência |
+| [Arquitetura V2](docs/v2/06-arquitetura-e-reaproveitamento-v1.md) | Arquitetura e plano de reconstrução/remoção |
+| [Modelagem MariaDB](docs/v2/07-modelagem-dados-mariadb.md) | Esquema único V2 |
+| [Análise de GAP](docs/v2/17-analise-gap.md) | O que construir e o que remover |
+| [Plano de reconstrução/remoção](docs/v2/18-analise-reaproveitamento.md) | Reconstruir vs Remover por módulo |
 | [Plano executável V2](docs/v2/16-plano-executavel-v2.md) | Ordem e gates de reconstrução |
+| [Plano de backend](docs/v2/21-plano-backend.md) | Passos Laravel + MariaDB (sem legado) |
 
 ## Backend
 
-A API e o painel Laravel estao em [`backend/`](backend/README.md). A base atual inclui API REST, Sanctum, filas, policies, requests, resources, services, painel administrativo e o endpoint `GET /api/v1/health`.
+A API e o painel Laravel estao em [`backend/`](backend/README.md). A V2 expoe
+**apenas** `/api/v2` (sem `/api/v1`), com Sanctum, filas, policies, requests,
+resources e services. O plano de construcao do backend esta em
+[`docs/v2/21-plano-backend.md`](docs/v2/21-plano-backend.md).
 
 Consulte o [README do backend](backend/README.md) para requisitos e comandos de execucao local.
 
 ## App Android e OMR
 
-O cliente Flutter existente em [`mobile/`](mobile/README.md) e o contrato
-OpenCV em [`omr/`](omr/README.md) são fundações reutilizáveis, ainda não o
-produto final. O contrato V2 está em
-[`docs/v2/10-android-flutter.md`](docs/v2/10-android-flutter.md) e
+O pipeline OMR OpenCV é reconstruído e homologado na V2. O aplicativo móvel da
+V2 é **React Native** (ADR-D015), um projeto novo; a base Flutter em `mobile/`
+é **removida** (sem legado, ADR-D016). Os contratos V2 estão em
+[`docs/v2/10-android-react-native.md`](docs/v2/10-android-react-native.md) e
 [`docs/v2/11-omr-opencv.md`](docs/v2/11-omr-opencv.md).
 
 ### Reconstrucao V2
 
 O mockup funcional em [`style-system/`](style-system/) e o handoff exportado
-sao a fonte de verdade visual e funcional. A estrategia de reaproveitamento e o
-plano vigente estao em
+sao a fonte de verdade visual e funcional. O plano de reconstrucao/remocao
+(sem legado) e o plano vigente estao em
 [`docs/v2/06-arquitetura-e-reaproveitamento-v1.md`](docs/v2/06-arquitetura-e-reaproveitamento-v1.md)
 e [`docs/v2/16-plano-executavel-v2.md`](docs/v2/16-plano-executavel-v2.md).
 
@@ -238,7 +242,7 @@ Nginx publica porta; MariaDB e Redis permanecem na rede interna.
 Copy-Item .env.docker.example .env.docker
 # Gere APP_KEY e substitua todos os segredos de .env.docker.
 docker compose --env-file .env.docker up -d --build --wait
-Invoke-RestMethod http://127.0.0.1:8080/api/v1/health
+Invoke-RestMethod http://127.0.0.1:8080/api/v2/health
 ```
 
 Consulte [deploy](docs/infra/deploy.md), [backup e restauracao](docs/operacao/backup-e-restauracao.md)

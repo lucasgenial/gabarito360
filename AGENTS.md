@@ -8,7 +8,7 @@ Criar uma plataforma com backend web, painel administrativo, app Android e módu
 ## Stack desejada
 - Backend: Laravel 12
 - Banco: MariaDB
-- Mobile: Flutter
+- Mobile: React Native (TypeScript) — ver ADR-D015
 - OMR: OpenCV
 - Tempo real: Laravel Reverb/WebSockets
 - Filas/cache: Redis

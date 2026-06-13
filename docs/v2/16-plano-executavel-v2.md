@@ -3,7 +3,8 @@
 ## 1. Objetivo e ordem
 
 Este plano substitui os planos de execução anteriores para a V2. A reconstrução
-parte da fundação R7, mas considera o mockup integral como contrato de produto.
+é integral e sem legado (ADR-D016): o mockup é o contrato de produto e nenhum
+artefato V1 é reaproveitado ou mantido.
 
 O número mínimo responsável é **10 etapas**, incluindo esta preparação. Menos
 etapas misturaria mudanças de produto, dados, web, Android e OMR em entregas
@@ -18,25 +19,27 @@ usados, no máximo, três especialistas:
 |---|---|
 | Produto/Web | inventário, paridade visual, responsividade e acessibilidade |
 | Domínio/API/Dados | migrations, regras, policies, serviços e contratos |
-| Mobile/OMR/QA | Flutter, câmera, OpenCV, dataset e testes ponta a ponta |
+| Mobile/OMR/QA | React Native, câmera, OpenCV, dataset e testes ponta a ponta |
 
 O agente principal integra decisões e impede alterações concorrentes nas mesmas
 migrations, rotas, contratos ou fundações visuais.
 
 ## V2-00 - Canonizar produto e congelar a V1
 
-**Objetivo:** estabelecer a direção correta sem alterar funcionalidades.
+**Objetivo:** estabelecer a direção correta e congelar o legado para remoção.
 
 **Ações:**
 - criar a branch `v2/mockup-canonico`;
 - declarar `style-system/` como contrato integral;
-- criar documentação V2 e matriz de reaproveitamento;
-- manter R0-R7 e documentos V1 como histórico.
+- criar documentação V2 e o plano de reconstrução/remoção (sem legado, ADR-D016);
+- arquivar R0-R7 e documentos V1 como histórico (não governam a V2).
 
-**Arquivos:** `AGENTS.md`, `README.md`, `docs/v2/*`, `docs/decisoes/ADR-D014-v2-mockup-canonico.md`.
+**Arquivos:** `AGENTS.md`, `README.md`, `docs/v2/*`,
+`docs/decisoes/ADR-D014-v2-mockup-canonico.md`,
+`docs/decisoes/ADR-D016-v2-sem-legado.md`.
 
-**Aceite:** todas as 30 telas e capacidades aparecem no inventário; lacunas e
-reaproveitamento estão explícitos; nenhum código funcional foi alterado.
+**Aceite:** todas as 30 telas e capacidades aparecem no inventário; o plano de
+reconstrução/remoção está explícito; o legado está marcado para remoção.
 
 **Verificação:**
 ```powershell
@@ -83,10 +86,12 @@ Get-ChildItem docs/v2/telas -Filter *.md | Measure-Object
 **Objetivo:** sustentar integralmente o mockup com dados reais.
 
 **Ações:**
-- comparar tabelas atuais com todas as capacidades mapeadas;
-- criar migrations incrementais para lacunas;
-- ampliar modelos, factories, seeders, policies e OpenAPI `/api/v2`;
-- preservar compatibilidade temporária com `/api/v1`.
+- modelar o esquema MariaDB **único V2** do zero, cobrindo todas as capacidades;
+- recriar a base com `migrate:fresh --seed` (sem migração de dados V1);
+- modelar modelos, factories, seeders, policies e OpenAPI `/api/v2`;
+- remover qualquer rota/contrato `/api/v1` (sem compatibilidade — ADR-D016).
+
+Detalhamento por passos em [`21-plano-backend.md`](21-plano-backend.md).
 
 **Arquivos prováveis:** `backend/database/migrations/*`,
 `backend/app/Models/*`, `backend/app/Policies/*`, `docs/openapi-v2.yaml`.
@@ -221,22 +226,26 @@ npm.cmd run build
 
 **Depende de:** contratos V2-02 e fluxo operacional V2-06.
 
-**Objetivo:** transformar a base Flutter em aplicativo operacional completo.
+**Objetivo:** construir o aplicativo React Native operacional completo (ADR-D015),
+substituindo a base Flutter legada.
 
 **Ações:**
-- reorganizar por features;
+- inicializar projeto React Native (TypeScript) organizado por features;
+- portar tokens do mockup e tema claro padrão;
 - implementar câmera, guia, qualidade, revisão, confirmação e histórico;
 - implementar fila offline, sincronização e conflitos;
-- validar tema, acessibilidade e dispositivos.
+- validar tema, acessibilidade e dispositivos homologados.
 
 **Aceite:** aplicador conclui fluxo real online e recupera falhas/offline.
 
 **Verificação:**
 ```powershell
 cd mobile
-flutter analyze
-flutter test
-flutter build apk --debug
+npm install
+npm run lint
+npx tsc --noEmit
+npm test
+cd android; ./gradlew assembleRelease
 ```
 
 **Não fazer:** confirmar leitura ambígua automaticamente.
@@ -287,8 +296,8 @@ cd backend
 php artisan test
 npm.cmd run build
 cd ../mobile
-flutter analyze
-flutter test
+npm run lint
+npm test
 cd ..
 python -m pytest omr/tests -q
 docker compose --env-file .env.docker config --quiet

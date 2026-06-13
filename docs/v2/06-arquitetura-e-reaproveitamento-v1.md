@@ -1,33 +1,47 @@
-# Arquitetura V2 e Reaproveitamento da V1
+# Arquitetura V2 (produto único, sem legado)
+
+> **Atualizado por [ADR-D016](../decisoes/ADR-D016-v2-sem-legado.md):** não há
+> reaproveitamento de legado nem compatibilidade retroativa. A V2 é o único
+> produto; a "matriz de reaproveitamento" abaixo foi convertida em **plano de
+> reconstrução e remoção** (ver [`18-analise-reaproveitamento.md`](18-analise-reaproveitamento.md)).
 
 ## Decisão estrutural
 
-A V2 continua no mesmo repositório e parte da branch R7. A arquitetura alvo é:
+A V2 é construída do zero no mesmo repositório, isolada na branch
+`v2/mockup-canonico`, sem herdar implementação da V1. A arquitetura alvo é:
 
 ```text
 Web Blade/Livewire ------\
-Flutter Android ----------> API/Aplicação Laravel 12 ---> MariaDB
+React Native Android -----> API/Aplicação Laravel 12 ---> MariaDB
 Integrações externas ----/           |  |  |
                                      |  |  +--> Storage privado/S3
                                      |  +-----> Redis, filas e cache
                                      +--------> Reverb/WebSockets
-Flutter/Workers ------------------------------> OpenCV/OMR
+App/Workers ----------------------------------> OpenCV/OMR
 ```
 
-## Matriz de reaproveitamento
+> Atualização: a tecnologia mobile passou de Flutter para **React Native**
+> ([ADR-D015](../decisoes/ADR-D015-mobile-react-native.md)).
 
-| Área V1/R7 | Decisão V2 | Motivo |
+## Plano de reconstrução e remoção
+
+> Sem reaproveitamento de legado (ADR-D016): cada área é **Reconstruir** (do zero
+> sob os contratos V2) ou **Remover**. Detalhamento em
+> [`18-analise-reaproveitamento.md`](18-analise-reaproveitamento.md).
+
+| Área | Decisão V2 | Motivo |
 |---|---|---|
-| Laravel 12, Actions, Requests, Resources, Policies e Services | Reaproveitar | Estrutura testada e compatível |
-| MariaDB, migrations base, Eloquent e constraints | Reaproveitar e ampliar | ORM já existe; faltam capacidades do mockup |
-| Sanctum, escopos, auditoria e idempotência | Reaproveitar e endurecer | Fundamentos necessários |
-| Aplicações, leituras, resultados e relatórios | Reaproveitar e ampliar | Fluxo operacional já testado |
-| Docker, Nginx, Redis, Reverb, CI, backup/restauração | Reaproveitar | Gates técnicos aprovados |
-| Tokens e componentes UI R4 | Reavaliar componente a componente | Úteis, mas paridade com mockup não foi garantida |
-| Páginas Blade R5 | Refatorar ou substituir | Não implementam integralmente o mockup |
-| Matriz funcional, rotas e planos R1-R7 | Manter como histórico | Reduziram indevidamente o escopo |
-| Flutter R6 | Reaproveitar fundação; reconstruir jornadas | Apenas login/listas/snapshot estão prontos |
-| OMR pré-homologação | Reaproveitar contrato; concluir implementação | Falta dataset real, câmera e homologação |
+| Estrutura Laravel 12 (Actions, Requests, Resources, Policies, Services) | Reconstruir | Reaplicar o padrão em projeto V2 limpo, sem herdar implementação |
+| Esquema MariaDB | Reconstruir | Esquema único V2; `migrate:fresh` baseline; sem tabelas legadas |
+| Sanctum, escopos, auditoria e idempotência | Reconstruir | Definidos como base V2 |
+| Aplicações, leituras, resultados e relatórios | Reconstruir | Modelados conforme o mockup, não herdados |
+| Docker, Nginx, Redis, Reverb, CI, backup/restauração | Reconstruir | Montados para servir somente a V2 |
+| API `/api/v1` | Remover | A V2 expõe apenas `/api/v2` |
+| Tokens e componentes UI anteriores | Reconstruir | Extrair tokens do mockup; biblioteca nova |
+| Páginas Blade anteriores | Remover | Não implementam o mockup; reconstruir fiel |
+| Matriz funcional, rotas e planos R1-R7 | Remover (arquivar) | Não definem escopo V2 |
+| App Flutter R6 | Remover | V2 adota React Native (ADR-D015); sem base legada |
+| OMR pré-homologação | Remover | Substituído pelo pipeline OpenCV V2 homologado |
 
 ## Lacunas que exigem novas estruturas
 
@@ -39,9 +53,12 @@ Flutter/Workers ------------------------------> OpenCV/OMR
 - Android com câmera, revisão, sincronização e operação real.
 - OMR OpenCV homologado em cartões e dispositivos reais.
 
-## Limites de refatoração
+## Limites da reconstrução
 
-- Não remover contratos válidos antes de existir substituto testado.
-- Não reescrever domínio já correto apenas por mudança visual.
+- A reconstrução é guiada pelo mockup e pelos contratos `docs/v2/`, não por
+  código legado.
 - Não copiar dados estáticos ou JavaScript do protótipo como regra de negócio.
-- Cada substituição deve preservar testes de segurança e operação existentes.
+- Cada capacidade entregue deve ter validação, autorização por escopo, auditoria
+  quando aplicável e testes proporcionais ao risco.
+- Nenhum artefato legado (rota v1, página, app Flutter, tabela V1) permanece no
+  produto após a etapa correspondente.

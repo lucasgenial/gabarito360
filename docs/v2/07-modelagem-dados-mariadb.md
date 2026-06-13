@@ -6,11 +6,12 @@
 - FKs, `unique`, índices compostos e transações protegem integridade.
 - JSON somente para configuração versionada ou payload técnico, não para
   relacionamentos centrais.
-- O modelo atual é baseline reutilizável e será ampliado por migrations V2.
+- Esquema **único V2**, construído do zero (ADR-D016). `migrate:fresh` é a
+  baseline; não há tabelas herdadas nem migração de dados V1.
 
 ## Domínios e entidades
 
-| Domínio | Tabelas reutilizadas | Ampliações/novas tabelas V2 |
+| Domínio | Tabelas núcleo V2 | Tabelas complementares V2 |
 |---|---|---|
 | Identidade e acesso | `users`, `perfis`, `permissoes`, `usuarios_perfis`, `usuarios_lotacoes`, `cargos`, `personal_access_tokens` | `convites_usuarios`, `solicitacoes_cadastro`, `sessoes_usuarios`, `historicos_acesso` |
 | Organização | `nucleos`, `escolas`, `usuarios_disciplinas` | `configuracoes_organizacionais`, `integracoes`, `credenciais_integracoes` |
@@ -48,6 +49,6 @@ qualquer agregado -> arquivos/relatorios/auditorias
 
 ## Gate antes das migrations V2
 
-Cada nova tabela deve estar vinculada a uma tela/capacidade na matriz de
-rastreabilidade, possuir política de retenção e ter estratégia de migração dos
-dados V1 quando houver correspondência.
+Cada tabela deve estar vinculada a uma tela/capacidade na matriz de
+rastreabilidade e possuir política de retenção. Não há migração de dados V1: os
+dados de demonstração são semeados pela V2.
