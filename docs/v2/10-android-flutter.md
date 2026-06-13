@@ -1,5 +1,11 @@
 # Aplicativo Android Flutter V2
 
+> **DOCUMENTO SUBSTITUÍDO (histórico).** A V2 adotou **React Native** como
+> tecnologia oficial do aplicativo móvel. Consulte o contrato vigente em
+> [`10-android-react-native.md`](10-android-react-native.md) e a decisão em
+> [ADR-D015](../decisoes/ADR-D015-mobile-react-native.md). O conteúdo abaixo é
+> mantido apenas como referência das jornadas já mapeadas.
+
 ## Objetivo
 
 Entregar a superfície operacional Android para professores e aplicadores,
