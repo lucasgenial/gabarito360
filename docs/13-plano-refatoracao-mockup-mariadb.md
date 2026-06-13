@@ -291,8 +291,9 @@ Não fazer:
 
 ## R7 - Empacotar, homologar e preparar merge
 
-Status: **implementacao concluida em 13 de junho de 2026; homologacao integrada
-e merge bloqueados ate a CI de containers/restauracao passar.**
+Status: **concluida tecnicamente em 13 de junho de 2026; CI integrada aprovada
+na draft PR #1 e merge bloqueado ate revisao humana. O piloto permanece
+bloqueado pelos gates fisicos e organizacionais.**
 
 Objetivo: tornar a nova fundação implantável e integrar a branch.
 

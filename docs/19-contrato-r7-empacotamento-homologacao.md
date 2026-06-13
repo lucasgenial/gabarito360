@@ -6,10 +6,9 @@ O R7 empacota a fundacao da branch `refatoracao-mockup-mariadb`, estabelece
 continuidade operacional, amplia a CI e prepara uma PR revisavel sem realizar
 merge direto.
 
-Em 13 de junho de 2026, a implementacao e a regressao local independente de
-containers foram concluidas. A homologacao integrada de containers e
-restauracao permanece condicionada ao job remoto porque o daemon Docker local
-nao iniciou.
+Em 13 de junho de 2026, a implementacao, a regressao local e a homologacao
+integrada foram concluidas. O daemon Docker local nao iniciou, mas o job remoto
+da draft PR #1 aprovou build, subida, health, backup e restauracao isolada.
 
 ## 2. Entregaveis
 

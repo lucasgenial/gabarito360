@@ -46,6 +46,7 @@
 
 ## 6. Bloqueios atuais
 
-O merge nao deve ser feito enquanto CI, subida containerizada e restauracao nao
-estiverem aprovadas. O piloto possui bloqueios adicionais descritos em
-`docs/piloto/relatorio-homologacao-r7.md`.
+CI, subida containerizada e restauracao foram aprovadas na draft PR #1. O merge
+continua bloqueado ate as revisoes humanas obrigatorias e a decisao sobre o
+risco residual da dependencia de build. O piloto possui bloqueios adicionais
+descritos em `docs/piloto/relatorio-homologacao-r7.md`.

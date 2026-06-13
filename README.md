@@ -5,9 +5,11 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
 > **Status do projeto:** as fundacoes R2 a R5 e a integracao operacional R6
-> foram implementadas na branch de refatoracao. O R7 empacota a aplicacao e
-> prepara a homologacao tecnica. O piloto continua bloqueado ate homologacao do
-> OMR, dos dispositivos e da operacao LGPD com dados reais autorizados.
+> foram implementadas na branch de refatoracao. O R7 concluiu empacotamento,
+> continuidade e homologacao tecnica na draft PR
+> [#1](https://github.com/lucasgenial/gabarito360/pull/1). O piloto continua
+> bloqueado ate homologacao do OMR, dos dispositivos e da operacao LGPD com
+> dados reais autorizados.
 
 ## Sobre o sistema
 
