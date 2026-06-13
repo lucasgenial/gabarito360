@@ -13,7 +13,7 @@ class ApiResponseTest extends TestCase
         $response = ApiResponse::error(
             code: 'VALIDATION_ERROR',
             message: 'Dados invalidos',
-            details: ['field' => ['Campo obrigatorio']],
+            errors: ['field' => ['Campo obrigatorio']],
             status: 422,
         );
 
@@ -21,15 +21,13 @@ class ApiResponseTest extends TestCase
 
         $this->assertSame(422, $response->getStatusCode());
         $this->assertSame([
-            'error' => [
-                'code' => 'VALIDATION_ERROR',
-                'message' => 'Dados invalidos',
-                'details' => [
-                    'field' => ['Campo obrigatorio'],
-                ],
+            'message' => 'Dados invalidos',
+            'errors' => [
+                'field' => ['Campo obrigatorio'],
             ],
             'meta' => [
                 'request_id' => $payload['meta']['request_id'],
+                'code' => 'VALIDATION_ERROR',
             ],
         ], $payload);
         $this->assertTrue(Str::isUuid($payload['meta']['request_id']));

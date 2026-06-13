@@ -78,7 +78,7 @@ O comando `start.ps1` inicia MariaDB e Laravel. Endereços:
 - login canônico: `http://127.0.0.1:8000/login`;
 - painel canônico: `http://127.0.0.1:8000/painel`;
 - painel administrativo legado: `http://127.0.0.1:8000/admin/login`;
-- health check: `http://127.0.0.1:8000/api/v1/health`.
+- health check: `http://127.0.0.1:8000/api/v2/health`.
 
 ## Banco de testes
 
@@ -181,8 +181,9 @@ php artisan reverb:start
 php artisan queue:work
 ```
 
-O snapshot HTTP permanece disponivel em
-`GET /api/v1/aplicacoes/{aplicacao}/dashboard`.
+O snapshot HTTP de aplicacoes (`GET /api/v2/aplicacoes/{aplicacao}/dashboard`)
+sera reintroduzido em B5, quando o recurso de aplicacoes/OMR for reconstruido
+para a V2 (ver `docs/v2/21-plano-backend.md`).
 
 O worker OMR chama o contrato Python localizado em `../omr`:
 
@@ -217,7 +218,7 @@ php artisan key:generate --show
 cd ..
 docker compose --env-file .env.docker config --quiet
 docker compose --env-file .env.docker up -d --build --wait
-Invoke-RestMethod http://127.0.0.1:8080/api/v1/health
+Invoke-RestMethod http://127.0.0.1:8080/api/v2/health
 ```
 
 O deploy executa migrations, mas nao carrega o `LocalDemoSeeder`. Procedimentos
