@@ -193,7 +193,7 @@ jobs:
 
       - name: Verify HTTP health
         run: |
-          curl --fail --retry 5 --retry-delay 2 http://127.0.0.1:8080/api/v1/health
+          curl --fail --retry 5 --retry-delay 2 http://127.0.0.1:8080/api/v2/health
           curl --fail --location --output /tmp/gabarito360-login.html http://127.0.0.1:8080/login
           grep --quiet "Gabarito360" /tmp/gabarito360-login.html
 
