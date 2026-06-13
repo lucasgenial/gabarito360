@@ -1,5 +1,8 @@
 # API, Eventos e Integrações V2
 
+> Contrato formal: [`../openapi-v2.yaml`](../openapi-v2.yaml) (OpenAPI 3.1).
+> Valide com: `npx --yes @redocly/cli@2.32.0 lint docs/openapi-v2.yaml`.
+
 ## Convenções
 
 - API REST **exclusivamente** em `/api/v2`. Não há `/api/v1` nem compatibilidade
