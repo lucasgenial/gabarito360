@@ -48,4 +48,4 @@ $serverPid = Get-PortProcessId $script:AppPort
 Set-Content -Path $script:LaravelServerPidFile -Value $serverPid -Encoding ASCII
 
 Write-Host "Painel: http://${script:MariaDbHost}:$script:AppPort/admin/login"
-Write-Host "API health: http://${script:MariaDbHost}:$script:AppPort/api/v1/health"
+Write-Host "API health: http://${script:MariaDbHost}:$script:AppPort/api/v2/health"
