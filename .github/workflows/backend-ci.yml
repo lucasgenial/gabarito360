@@ -96,6 +96,11 @@ jobs:
       - name: Build frontend assets
         run: npm run build
 
+      - name: Normalize testing database collation
+        run: >-
+          php -r '$pdo = new PDO("mysql:host=127.0.0.1;port=3306;dbname=gabarito360_testing", "root", "root");
+          $pdo->exec("ALTER DATABASE gabarito360_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");'
+
       - name: Run migrations and seed access control
         run: php artisan migrate:fresh --seed --env=testing --force
 
@@ -146,7 +151,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.38.4"
+          flutter-version: "3.44.2"
           channel: stable
           cache: true
 

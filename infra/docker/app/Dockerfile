@@ -28,6 +28,7 @@ RUN apt-get update \
         gosu \
         libcurl4-openssl-dev \
         libicu-dev \
+        libonig-dev \
         libxml2-dev \
         libzip-dev \
         mariadb-client \
