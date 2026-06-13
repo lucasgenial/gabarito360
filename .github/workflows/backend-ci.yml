@@ -1,16 +1,8 @@
-name: Backend CI
+name: Gabarito360 CI
 
 on:
   push:
-    paths:
-      - ".github/workflows/backend-ci.yml"
-      - "backend/**"
-      - "docs/openapi.yaml"
   pull_request:
-    paths:
-      - ".github/workflows/backend-ci.yml"
-      - "backend/**"
-      - "docs/openapi.yaml"
 
 permissions:
   contents: read
@@ -92,6 +84,9 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Audit PHP dependencies
+        run: composer audit --locked
+
       - name: Install frontend dependencies
         run: npm ci
 
@@ -112,3 +107,99 @@ jobs:
 
       - name: Validate OpenAPI contract
         run: npx --yes @redocly/cli@2.32.0 lint ../docs/openapi.yaml
+
+  omr:
+    name: OMR contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: omr/requirements.txt
+
+      - name: Install OMR dependencies
+        run: python -m pip install -r omr/requirements.txt
+
+      - name: Run OMR contract tests
+        run: python -m pytest omr/tests -q
+
+  mobile:
+    name: Flutter analyze and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.4"
+          channel: stable
+          cache: true
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Analyze Flutter application
+        run: flutter analyze
+
+      - name: Run Flutter tests
+        run: flutter test
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+
+  containers:
+    name: Containers and restore verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Prepare isolated environment
+        run: |
+          cp .env.docker.example .env.docker
+          sed -i "s|^APP_KEY=.*|APP_KEY=base64:$(openssl rand -base64 32)|" .env.docker
+
+      - name: Validate Compose contract
+        shell: pwsh
+        run: ./scripts/infra/validate-compose.ps1
+
+      - name: Build application images
+        run: docker compose --env-file .env.docker -f compose.yaml build app nginx
+
+      - name: Start isolated environment
+        run: docker compose --env-file .env.docker -f compose.yaml up -d --wait
+
+      - name: Verify HTTP health
+        run: |
+          curl --fail --retry 5 --retry-delay 2 http://127.0.0.1:8080/api/v1/health
+          curl --fail --location --output /tmp/gabarito360-login.html http://127.0.0.1:8080/login
+          grep --quiet "Gabarito360" /tmp/gabarito360-login.html
+
+      - name: Verify backup and isolated restore
+        shell: pwsh
+        run: ./scripts/infra/verify-restore.ps1
+
+      - name: Show service logs after failure
+        if: failure()
+        run: docker compose --env-file .env.docker -f compose.yaml logs --no-color
+
+      - name: Stop isolated environment
+        if: always()
+        run: docker compose --env-file .env.docker -f compose.yaml down -v --remove-orphans

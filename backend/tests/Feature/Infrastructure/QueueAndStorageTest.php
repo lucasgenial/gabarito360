@@ -24,6 +24,7 @@ class QueueAndStorageTest extends TestCase
         $this->assertSame(5, config('queue.connections.redis.block_for'));
         $this->assertSame('predis', config('database.redis.client'));
         $this->assertTrue(class_exists(Client::class));
+        $this->assertNotContains('*', config('reverb.apps.apps.0.allowed_origins'));
 
         $this->assertSame('private', config('filesystems.private'));
         $this->assertSame('private', config('filesystems.disks.private.visibility'));
