@@ -4,12 +4,11 @@ Plataforma de gestao, aplicacao, leitura e correcao automatica de cartoes-respos
 
 O Gabarito360 foi projetado para nucleos de educacao que acompanham varias escolas. A solucao integra um painel web administrativo, um aplicativo Android para professores e aplicadores e um modulo OMR para identificar marcacoes em cartoes-resposta.
 
-> **Status do projeto:** as fundacoes R2 a R5 e a integracao operacional R6
-> foram implementadas na branch de refatoracao. O R7 concluiu empacotamento,
-> continuidade e homologacao tecnica na draft PR
-> [#1](https://github.com/lucasgenial/gabarito360/pull/1). O piloto continua
-> bloqueado ate homologacao do OMR, dos dispositivos e da operacao LGPD com
-> dados reais autorizados.
+> **Status do projeto:** a V2 esta sendo reconstruida na branch
+> `v2/mockup-canonico`. As 30 telas e todos os recursos de `style-system/`
+> passam a ser o contrato integral do produto. A fundacao tecnica R0-R7 sera
+> reaproveitada seletivamente; a interpretacao reduzida do mockup e as paginas
+> web anteriores ficam como historico da V1.
 
 ## Sobre o sistema
 
@@ -79,7 +78,7 @@ O modulo OMR nao substitui a conferencia humana em casos duvidosos. Leituras com
 
 ## Aplicativo Android
 
-O aplicativo sera utilizado durante a aplicacao real da prova. O fluxo principal inclui:
+O aplicativo é a superfície operacional Android da V2. O fluxo principal inclui:
 
 1. Login do professor ou aplicador.
 2. Selecao da prova, turma e aluno.
@@ -89,9 +88,8 @@ O aplicativo sera utilizado durante a aplicacao real da prova. O fluxo principal
 6. Correcao manual, quando necessaria.
 7. Confirmacao do aluno, do codigo impresso quando houver e do codigo do sistema quando utilizado.
 8. Envio do resultado ao backend.
-9. Atualizacao dos alunos lidos e pendentes.
-
-O modo offline temporario e a sincronizacao automatica estao planejados para uma etapa posterior ao MVP online.
+9. Atualização dos alunos lidos e pendentes.
+10. Fila offline temporária, sincronização e resolução de conflitos.
 
 ## Modulo OMR
 
@@ -111,7 +109,7 @@ Pipeline planejado:
 
 A estrategia recomendada e hibrida: retorno rapido no aplicativo e possibilidade de validacao ou reprocessamento no backend.
 
-## Arquitetura planejada
+## Arquitetura V2
 
 | Camada | Tecnologia |
 |---|---|
@@ -166,54 +164,44 @@ O sistema deve proteger os dados pessoais de alunos e usuarios desde o inicio:
 - suporte tecnico com acesso restrito;
 - historico preservado sem exclusoes operacionais indevidas.
 
-## Escopo do MVP
+## Escopo da V2
 
-O primeiro MVP deve permitir uma aplicacao real controlada:
+A V2 implementa integralmente as 30 telas e capacidades de
+[`style-system/`](style-system/): acesso e onboarding, dashboards por ator,
+escolas, equipe, turmas, alunos, provas, aplicações, correção, resultados,
+relatórios, perfil, configurações, integrações, privacidade e LGPD.
 
-- cadastro de nucleo, escolas, usuarios e perfis;
-- cadastro de turmas e alunos;
-- importacao validada de alunos;
-- cadastro de prova, questoes, modelo e gabarito oficial;
-- vinculacao da prova a turma;
-- criacao e inicio da aplicacao;
-- aplicativo Android com captura, OMR, revisao e confirmacao;
-- vinculacao unica entre cartao e aluno;
-- correcao automatica;
-- dashboard simples de progresso;
-- relatorio basico por turma em CSV e PDFs canonicos por aluno, prova e turma/prova;
-- auditoria das operacoes criticas.
+Além da aplicação web responsiva, a V2 conclui o aplicativo Android e homologa
+o pipeline OMR OpenCV para cartões e dispositivos reais.
 
 ## Roadmap resumido
 
 | Etapa | Objetivo |
 |---|---|
-| 0. Fundacao | Aprovar documentacao, regras, cartao inicial e criterios do piloto |
-| 1. Backend seguro | Autenticacao, autorizacao, nucleos, escolas e usuarios |
-| 2. Estrutura academica | Turmas, alunos, provas, gabaritos e aplicacoes |
-| 3. Prototipo OMR | Pipeline reproduzivel, calibracao e dataset rotulado |
-| 4. App Android | Captura, revisao, confirmacao e fluxo completo |
-| 5. Tempo real e relatorios | Dashboard, encerramento e exportacao CSV |
-| 6. Piloto controlado | Validacao com turmas e dispositivos reais |
-
-Versoes posteriores incluem modo offline, XLSX, recorrection, multiplos modelos
-de cartao, dashboard autenticado do aluno e integracoes externas. CSV e os PDFs
-canonicos de aluno, prova e turma/prova fazem parte do primeiro painel funcional.
+| V2-00 | Canonizar o mockup integral e preservar a V1 |
+| V2-01 | Mapear cada tela, controle, dado, estado e teste |
+| V2-02 | Ampliar domínio, MariaDB e API V2 |
+| V2-03 | Reconstruir a fundação visual fiel ao mockup |
+| V2-04 a V2-06 | Entregar todas as jornadas e telas web |
+| V2-07 | Concluir o aplicativo Android |
+| V2-08 | Implementar e homologar o OMR real |
+| V2-09 | Homologar o produto integral e preparar lançamento |
 
 ## Documentacao
 
-| Documento | Conteudo |
+A documentacao canonica da nova versao esta em
+[`docs/v2/`](docs/v2/README.md). Os documentos numerados diretamente em
+`docs/` registram a V1 e continuam disponiveis para rastreabilidade, mas nao
+podem reduzir o escopo definido pelo mockup funcional.
+
+| Documento | Conteúdo |
 |---|---|
-| [Visao geral](docs/01-visao-geral.md) | Objetivos, escopo, arquitetura e riscos |
-| [Requisitos funcionais](docs/02-requisitos-funcionais.md) | Funcionalidades identificadas e priorizadas |
-| [Requisitos nao funcionais](docs/03-requisitos-nao-funcionais.md) | Seguranca, desempenho, disponibilidade e qualidade |
-| [Regras de negocio](docs/04-regras-de-negocio.md) | Regras de integridade, acesso e operacao |
-| [Casos de uso](docs/05-casos-de-uso.md) | Atores, fluxos e matriz resumida de permissoes |
-| [Modelagem do banco](docs/06-modelagem-banco.md) | Modelagem relacional canonica para MariaDB |
-| [API REST](docs/07-api.md) | Contratos e endpoints iniciais |
-| [Aplicativo Android](docs/08-mobile-android.md) | Telas, navegacao, fluxos e sincronizacao |
-| [Modulo OMR](docs/09-modulo-omr.md) | Pipeline, confianca, calibracao e testes |
-| [Dashboards e relatorios](docs/10-dashboard-relatorios.md) | Indicadores, filtros e exportacoes |
-| [Roadmap e MVP](docs/11-roadmap-mvp.md) | Etapas, backlog e criterios de conclusao |
+| [Índice V2](docs/v2/README.md) | Precedência e conjunto canônico |
+| [Inventário do mockup](docs/v2/02-inventario-funcional-mockup.md) | Todas as telas e capacidades |
+| [Arquitetura e reaproveitamento](docs/v2/06-arquitetura-e-reaproveitamento-v1.md) | O que reutilizar, refatorar e substituir |
+| [Modelagem MariaDB](docs/v2/07-modelagem-dados-mariadb.md) | Dados reutilizados e ampliações |
+| [Matriz de rastreabilidade](docs/v2/15-matriz-rastreabilidade.md) | Mockup, implementação e evidência |
+| [Plano executável V2](docs/v2/16-plano-executavel-v2.md) | Ordem e gates de reconstrução |
 
 ## Backend
 
@@ -223,16 +211,19 @@ Consulte o [README do backend](backend/README.md) para requisitos e comandos de 
 
 ## App Android e OMR
 
-O cliente Flutter esta em [`mobile/`](mobile/README.md) e o contrato OpenCV
-executavel esta em [`omr/`](omr/README.md). O status e os gates da integracao
-operacional estao em
-[`docs/18-contrato-r6-integracao-operacional.md`](docs/18-contrato-r6-integracao-operacional.md).
+O cliente Flutter existente em [`mobile/`](mobile/README.md) e o contrato
+OpenCV em [`omr/`](omr/README.md) são fundações reutilizáveis, ainda não o
+produto final. O contrato V2 está em
+[`docs/v2/10-android-flutter.md`](docs/v2/10-android-flutter.md) e
+[`docs/v2/11-omr-opencv.md`](docs/v2/11-omr-opencv.md).
 
-### Refatoracao em andamento
+### Reconstrucao V2
 
-O desenvolvimento após a MP-028 foi reorientado para alinhar a aplicação ao
-mockup funcional em [`style-system/`](style-system/) e ao MariaDB. O plano vigente está em
-[`docs/13-plano-refatoracao-mockup-mariadb.md`](docs/13-plano-refatoracao-mockup-mariadb.md).
+O mockup funcional em [`style-system/`](style-system/) e o handoff exportado
+sao a fonte de verdade visual e funcional. A estrategia de reaproveitamento e o
+plano vigente estao em
+[`docs/v2/06-arquitetura-e-reaproveitamento-v1.md`](docs/v2/06-arquitetura-e-reaproveitamento-v1.md)
+e [`docs/v2/16-plano-executavel-v2.md`](docs/v2/16-plano-executavel-v2.md).
 
 O ambiente local reproduzível usa MariaDB portátil em `.local/`. Consulte o
 [README do backend](backend/README.md) para os comandos de setup, start e stop.
@@ -260,19 +251,12 @@ gabarito360/
 |-- AGENTS.md
 |-- README.md
 |-- backend/
+|-- mobile/
+|-- omr/
+|-- style-system/
 \-- docs/
-    |-- 01-visao-geral.md
-    |-- 02-requisitos-funcionais.md
-    |-- 03-requisitos-nao-funcionais.md
-    |-- 04-regras-de-negocio.md
-    |-- 05-casos-de-uso.md
-    |-- 06-banco-de-dados.md
-    |-- 06-modelagem-banco.md
-    |-- 07-api.md
-    |-- 08-mobile-android.md
-    |-- 09-modulo-omr.md
-    |-- 10-dashboard-relatorios.md
-    \-- 11-roadmap-mvp.md
+    |-- v2/
+    \-- decisoes/
 ```
 
 ## Desenvolvimento

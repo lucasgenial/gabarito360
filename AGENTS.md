@@ -25,9 +25,15 @@ Criar uma plataforma com backend web, painel administrativo, app Android e módu
 
 ## Design System Obrigatório
 
-O mockup funcional em `style-system/` e a matriz registrada em
-`docs/14-matriz-funcional-mockup.md` definem as telas, hierarquia visual,
-navegação, comportamento responsivo e estados esperados da aplicação web.
+O mockup funcional em `style-system/` e a documentação canônica em
+`docs/v2/` definem integralmente o produto V2: funcionalidades, casos de uso,
+recursos, telas, conteúdo, hierarquia visual, navegação, comportamento
+responsivo, interações e estados esperados.
+
+Nenhuma funcionalidade visível no mockup pode ser descartada, adiada ou
+substituída silenciosamente. Ajustes exigidos por segurança, LGPD, integridade
+ou limitação técnica devem preservar a intenção do fluxo e ser registrados em
+ADR e na matriz de rastreabilidade V2.
 
 Todo componente visual criado no projeto deve também utilizar os tokens definidos em:
 
@@ -41,9 +47,10 @@ Não criar estilos hardcoded sem justificativa documentada.
 
 Em caso de divergência:
 
-1. o mockup define composição, fluxo e comportamento;
+1. o mockup define produto, composição, fluxo e comportamento;
 2. os tokens oficiais definem os valores visuais implementáveis;
 3. `docs/SDGB.md` define as diretrizes normativas.
+4. `docs/v2/` define os contratos de implementação e rastreabilidade.
 
 O tema claro é o padrão obrigatório. O tema escuro deve ser opcional, acionado
 por controle explícito e persistido por usuário ou dispositivo.
@@ -62,12 +69,13 @@ por controle explícito e persistido por usuário ou dispositivo.
 Antes de criar qualquer tela Web ou Mobile:
 
 1. Consultar a tela equivalente em `style-system/`.
-2. Consultar `docs/14-matriz-funcional-mockup.md`.
-3. Consultar `docs/design/design-system.md`.
-4. Consultar `docs/ui_token_gov_brasil.json`.
-5. Consultar `docs/design/componentes-web.md` ou `docs/design/componentes-mobile.md`.
-6. Reutilizar componentes existentes.
-7. Não criar estilos ad-hoc.
+2. Consultar `docs/v2/02-inventario-funcional-mockup.md`.
+3. Consultar `docs/v2/15-matriz-rastreabilidade.md`.
+4. Consultar `docs/design/design-system.md`.
+5. Consultar `docs/ui_token_gov_brasil.json`.
+6. Consultar `docs/design/componentes-web.md` ou `docs/design/componentes-mobile.md`.
+7. Reutilizar componentes existentes.
+8. Não criar estilos ad-hoc.
 
 Toda nova tela deve respeitar:
 
