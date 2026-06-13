@@ -1,0 +1,1290 @@
+openapi: 3.1.0
+info:
+  title: Gabarito360 API v2
+  version: 2.0.0-alpha.1
+  description: >
+    Contrato da API REST da V2 (produto único, sem legado — ADR-D016).
+    Exclusivamente `/api/v2`; não há `/api/v1`. Toda resposta usa o envelope
+    padrão `data`/`meta` com `request_id`; erros usam código estável em
+    UPPER_SNAKE_CASE. Operações de captura, confirmação, importação e exportação
+    exigem `Idempotency-Key`. Autorização por perfil e escopo organizacional
+    (núcleo → escola → turma). Rastreabilidade tela↔endpoint em
+    docs/v2/15-matriz-rastreabilidade.md.
+  license:
+    name: A definir
+    identifier: UNLICENSED
+servers:
+  - url: https://{host}/api/v2
+    variables:
+      host:
+        default: 127.0.0.1:8000
+
+tags:
+  - name: auth
+    description: Autenticação, sessões e recuperação de senha.
+  - name: me
+    description: Perfil, preferências e sessões do usuário autenticado.
+  - name: onboarding
+    description: Cadastro controlado de novas organizações e usuários.
+  - name: dashboards
+    description: Painéis, indicadores e atividades por ator.
+  - name: escolas
+    description: Gestão de escolas/núcleos.
+  - name: equipe
+    description: Membros, perfis e permissões da equipe.
+  - name: turmas
+    description: Gestão de turmas e matrículas.
+  - name: alunos
+    description: Gestão de alunos e seus dados.
+  - name: provas
+    description: Criação e gestão de provas.
+  - name: gabaritos
+    description: Gabaritos oficiais das provas.
+  - name: correcao
+    description: Progresso e pendências da correção por leitura óptica.
+  - name: resultados
+    description: Resultados individuais dos alunos.
+  - name: relatorios
+    description: Relatórios consolidados e suas exportações.
+  - name: agenda
+    description: Eventos de calendário e agenda.
+  - name: notificacoes
+    description: Notificações do usuário.
+  - name: configuracoes
+    description: Configurações gerais, plano de uso e importações.
+  - name: integracoes
+    description: Integrações externas (conexão, teste e status).
+  - name: lgpd
+    description: Solicitações relacionadas à LGPD.
+  - name: exportacoes
+    description: Histórico de exportações geradas.
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ───────────────────────── Auth & conta ─────────────────────────
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Autenticar usuário
+      operationId: authLogin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginInput' }
+      responses:
+        '200':
+          description: Token emitido
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: { $ref: '#/components/schemas/Sessao' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Encerrar sessão (revoga token)
+      operationId: authLogout
+      responses:
+        '204': { description: Sessão encerrada }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/forgot-password:
+    post:
+      tags: [auth]
+      summary: Solicitar redefinição de senha
+      operationId: authForgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '202': { description: Solicitação registrada (resposta neutra) }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /auth/reset-password:
+    post:
+      tags: [auth]
+      summary: Redefinir senha por token
+      operationId: authResetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, email, senha]
+              properties:
+                token: { type: string }
+                email: { type: string, format: email }
+                senha: { type: string, format: password, minLength: 8 }
+      responses:
+        '200': { description: Senha redefinida }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /onboarding:
+    post:
+      tags: [onboarding]
+      summary: Solicitar cadastro (controlado, com consentimento LGPD)
+      operationId: onboardingCriarSolicitacao
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SolicitacaoCadastroInput' }
+      responses:
+        '202':
+          description: Solicitação registrada para validação/aprovação
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /onboarding/perfis:
+    get:
+      tags: [onboarding]
+      summary: Perfis disponíveis para cadastro
+      operationId: onboardingListarPerfis
+      security: []
+      responses:
+        '200': { $ref: '#/components/responses/PerfilList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /me:
+    get:
+      tags: [me]
+      summary: Identidade, papel, escopo e navegação permitida
+      operationId: meObter
+      responses:
+        '200':
+          description: Usuário autenticado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: { $ref: '#/components/schemas/Usuario' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      tags: [me]
+      summary: Editar dados do próprio perfil
+      operationId: meAtualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UsuarioInput' }
+      responses:
+        '200': { $ref: '#/components/responses/UsuarioOne' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /me/senha:
+    put:
+      tags: [me]
+      summary: Trocar a própria senha
+      operationId: meAlterarSenha
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [senha_atual, senha]
+              properties:
+                senha_atual: { type: string, format: password }
+                senha: { type: string, format: password, minLength: 8 }
+      responses:
+        '204': { description: Senha alterada }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /me/foto:
+    post:
+      tags: [me]
+      summary: Atualizar avatar
+      operationId: meAtualizarFoto
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                foto: { type: string, format: binary }
+      responses:
+        '200': { $ref: '#/components/responses/UsuarioOne' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /me/preferencias:
+    patch:
+      tags: [me]
+      summary: Tema, idioma, acessibilidade e notificações
+      operationId: meAtualizarPreferencias
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Preferencias' }
+      responses:
+        '200':
+          description: Preferências atualizadas
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: { $ref: '#/components/schemas/Preferencias' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /me/sessoes:
+    get:
+      tags: [me]
+      summary: Listar sessões ativas
+      operationId: meListarSessoes
+      responses:
+        '200':
+          description: Sessões
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Sessao' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /me/sessoes/{id}:
+    delete:
+      tags: [me]
+      summary: Encerrar uma sessão
+      operationId: meEncerrarSessao
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '204': { description: Sessão revogada }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────── Dashboards ─────────────────────────
+  /dashboards/{ator}:
+    get:
+      tags: [dashboards]
+      summary: Composição do painel do ator (KPIs e blocos)
+      operationId: dashboardObter
+      parameters:
+        - name: ator
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [admin, aluno, coordenador, diretor-escolar, diretor-nucleo, professor, geral]
+      responses:
+        '200':
+          description: Painel do ator
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: { $ref: '#/components/schemas/Dashboard' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /atividades-recentes:
+    get:
+      tags: [dashboards]
+      summary: Feed de atividades recentes (escopo do ator)
+      operationId: atividadesRecentesListar
+      parameters: [{ $ref: '#/components/parameters/Page' }]
+      responses:
+        '200': { description: Atividades, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /alertas:
+    get:
+      tags: [dashboards]
+      summary: Alertas críticos (pendências, metas, integrações)
+      operationId: alertasListar
+      responses:
+        '200': { description: Alertas, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ───────────────────────── Escolas ─────────────────────────
+  /escolas:
+    get:
+      tags: [escolas]
+      summary: Listar escolas (escopo)
+      operationId: escolasListar
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+        - name: status
+          in: query
+          schema: { type: string, enum: [ativa, inativa] }
+        - { $ref: '#/components/parameters/Page' }
+      responses:
+        '200': { description: Lista, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [escolas]
+      summary: Cadastrar escola
+      operationId: escolaCriar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EscolaInput' } } }
+      responses:
+        '201': { $ref: '#/components/responses/EscolaOne' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /escolas/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [escolas]
+      summary: Detalhe da escola
+      operationId: escolaObter
+      responses:
+        '200': { $ref: '#/components/responses/EscolaOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [escolas]
+      summary: Editar escola
+      operationId: escolaAtualizar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EscolaInput' } } }
+      responses:
+        '200': { $ref: '#/components/responses/EscolaOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /escolas/{id}/reativar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [escolas]
+      summary: Reativar escola inativa
+      operationId: escolaReativar
+      responses:
+        '200': { $ref: '#/components/responses/EscolaOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /escolas/{id}/indicadores:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [escolas]
+      summary: KPIs, desempenho, distribuição e evolução da escola
+      operationId: escolaIndicadores
+      responses:
+        '200': { description: Indicadores, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────── Equipe / perfis / membros ─────────────────────────
+  /escolas/{id}/perfis:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [equipe]
+      summary: Perfis, contagem e matriz de permissões
+      operationId: escolaPerfisListar
+      responses:
+        '200': { $ref: '#/components/responses/PerfilList' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /escolas/{id}/perfis/{perfil}/permissoes:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+      - name: perfil
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [equipe]
+      summary: Salvar permissões do perfil (auditado; perfis/permissões fixos imutáveis)
+      operationId: escolaPerfilPermissoesAtualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissoes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      chave: { type: string }
+                      permitido: { type: boolean }
+      responses:
+        '200': { description: Atualizado }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /escolas/{id}/membros:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [equipe]
+      summary: Listar membros da escola
+      operationId: escolaMembrosListar
+      parameters: [{ $ref: '#/components/parameters/Q' }, { $ref: '#/components/parameters/Page' }]
+      responses:
+        '200': { description: Lista, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [equipe]
+      summary: Cadastrar membro
+      operationId: escolaMembroCriar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/MembroInput' } } }
+      responses:
+        '201': { $ref: '#/components/responses/UsuarioOne' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /escolas/{id}/membros/{membro}:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+      - name: membro
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      tags: [equipe]
+      summary: Detalhe do membro
+      operationId: escolaMembroObter
+      responses:
+        '200': { $ref: '#/components/responses/UsuarioOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [equipe]
+      summary: Editar membro (CPF/login imutáveis)
+      operationId: escolaMembroAtualizar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/MembroInput' } } }
+      responses:
+        '200': { $ref: '#/components/responses/UsuarioOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /escolas/{id}/membros/{membro}/suspender:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+      - name: membro
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      tags: [equipe]
+      summary: Suspender acesso (reversível, auditado)
+      operationId: escolaMembroSuspender
+      responses:
+        '200': { $ref: '#/components/responses/UsuarioOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────── Turmas ─────────────────────────
+  /turmas:
+    get:
+      tags: [turmas]
+      summary: Listar turmas (escopo)
+      operationId: turmasListar
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+        - { name: serie, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [em-dia, recuperacao, pendencia] } }
+        - { $ref: '#/components/parameters/Page' }
+      responses:
+        '200': { description: Lista, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [turmas]
+      summary: Criar turma
+      operationId: turmaCriar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TurmaInput' } } }
+      responses:
+        '201': { $ref: '#/components/responses/TurmaOne' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /turmas/importar:
+    post:
+      tags: [turmas]
+      summary: Importar turmas/alunos por planilha (idempotente)
+      operationId: turmasImportar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                arquivo: { type: string, format: binary }
+      responses:
+        '202':
+          description: Importação processada com relatório de linhas
+          content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /turmas/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [turmas]
+      summary: Detalhe da turma
+      operationId: turmaObter
+      responses:
+        '200': { $ref: '#/components/responses/TurmaOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /turmas/{id}/alunos:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [turmas]
+      summary: Alunos da turma
+      operationId: turmaAlunosListar
+      parameters: [{ $ref: '#/components/parameters/Q' }, { name: status, in: query, schema: { type: string } }]
+      responses:
+        '200': { description: Lista, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────── Alunos ─────────────────────────
+  /alunos:
+    post:
+      tags: [alunos]
+      summary: Cadastrar aluno (matrícula em turma)
+      operationId: alunoCriar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/AlunoInput' } } }
+      responses:
+        '201': { $ref: '#/components/responses/AlunoOne' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /alunos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [alunos]
+      summary: Detalhe do aluno (com KPIs)
+      operationId: alunoObter
+      responses:
+        '200': { $ref: '#/components/responses/AlunoOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [alunos]
+      summary: Editar aluno (inclui transferência de turma e status)
+      operationId: alunoAtualizar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/AlunoInput' } } }
+      responses:
+        '200': { $ref: '#/components/responses/AlunoOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /alunos/{id}/avaliacoes:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [alunos]
+      summary: Histórico de avaliações
+      operationId: alunoAvaliacoesListar
+      parameters: [{ name: periodo, in: query, schema: { type: string } }]
+      responses:
+        '200': { description: Histórico, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /alunos/{id}/ficha.pdf:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [alunos]
+      summary: Ficha do aluno (PDF)
+      operationId: alunoFichaPdf
+      responses:
+        '200': { description: PDF, content: { application/pdf: { schema: { type: string, format: binary } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────── Provas & gabaritos ─────────────────────────
+  /provas:
+    get:
+      tags: [provas]
+      summary: Listar provas (escopo)
+      operationId: provasListar
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+        - { name: disciplina, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string, enum: [rascunho, publicada, correcao, corrigida] } }
+        - { $ref: '#/components/parameters/Page' }
+      responses:
+        '200': { description: Lista, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [provas]
+      summary: Criar prova (rascunho)
+      operationId: provaCriar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ProvaInput' } } }
+      responses:
+        '201': { $ref: '#/components/responses/ProvaOne' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /provas/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [provas]
+      summary: Detalhe da prova
+      operationId: provaObter
+      responses:
+        '200': { $ref: '#/components/responses/ProvaOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [provas]
+      summary: Editar prova/rascunho
+      operationId: provaAtualizar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ProvaInput' } } }
+      responses:
+        '200': { $ref: '#/components/responses/ProvaOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /provas/{id}/gabarito:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [gabaritos]
+      summary: Gabarito oficial da prova
+      operationId: provaGabaritoObter
+      responses:
+        '200':
+          description: Gabarito
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: { $ref: '#/components/schemas/Gabarito' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [gabaritos]
+      summary: Salvar respostas oficiais
+      operationId: provaGabaritoAtualizar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/Gabarito' } } }
+      responses:
+        '200': { description: Gabarito salvo }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /provas/{id}/publicar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [provas]
+      summary: Publicar gabarito (exige gabarito completo)
+      operationId: provaPublicar
+      responses:
+        '200': { $ref: '#/components/responses/ProvaOne' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /provas/{id}/gabarito.pdf:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [gabaritos]
+      summary: Exportar gabarito (PDF)
+      operationId: provaGabaritoPdf
+      responses:
+        '200': { description: PDF, content: { application/pdf: { schema: { type: string, format: binary } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────── Correção & leituras ─────────────────────────
+  /correcao/{prova}:
+    parameters:
+      - { name: prova, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [correcao]
+      summary: Snapshot de progresso da correção (geral)
+      operationId: correcaoProgresso
+      parameters: [{ name: turma, in: query, schema: { type: string, format: uuid } }]
+      responses:
+        '200':
+          description: Progresso
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: { $ref: '#/components/schemas/ProgressoCorrecao' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /correcao/{prova}/pendencias:
+    parameters:
+      - { name: prova, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [correcao]
+      summary: Pendências de revisão (ambígua, em branco, baixa confiança)
+      operationId: correcaoPendenciasListar
+      responses:
+        '200': { description: Pendências, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /leituras/{leitura}/revisao:
+    parameters:
+      - { name: leitura, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [correcao]
+      summary: Resolver pendência de leitura (idempotente, auditado)
+      operationId: leituraRevisar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [questao, decisao]
+              properties:
+                questao: { type: integer }
+                decisao: { type: string, description: "alternativa (A-E) ou 'branco'" }
+                motivo: { type: string }
+      responses:
+        '200': { description: Pendência resolvida }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ───────────────────────── Resultados & relatórios ─────────────────────────
+  /resultados/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [resultados]
+      summary: Resultado individual (com folha corrigida)
+      operationId: resultadoObter
+      responses:
+        '200':
+          description: Resultado
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: { $ref: '#/components/schemas/Resultado' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /resultados/{id}.pdf:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [resultados]
+      summary: Resultado individual (PDF)
+      operationId: resultadoPdf
+      responses:
+        '200': { description: PDF, content: { application/pdf: { schema: { type: string, format: binary } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /relatorios/prova/{prova}:
+    parameters:
+      - { name: prova, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [relatorios]
+      summary: Relatório consolidado da prova
+      operationId: relatorioProvaObter
+      responses:
+        '200': { description: Relatório, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /relatorios/prova/{prova}/exportar/{formato}:
+    parameters:
+      - { name: prova, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: formato, in: path, required: true, schema: { type: string, enum: [pdf, csv, xlsx] } }
+    get:
+      tags: [relatorios]
+      summary: Exportar relatório da prova (autorizado/auditado)
+      operationId: relatorioProvaExportar
+      responses:
+        '200': { description: Arquivo, content: { application/octet-stream: { schema: { type: string, format: binary } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ───────────────────────── Agenda & notificações ─────────────────────────
+  /agenda:
+    get:
+      tags: [agenda]
+      summary: Eventos de agenda no escopo
+      operationId: agendaListar
+      parameters: [{ name: escopo, in: query, schema: { type: string } }]
+      responses:
+        '200': { description: Eventos, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /notificacoes:
+    get:
+      tags: [notificacoes]
+      summary: Notificações do usuário
+      operationId: notificacoesListar
+      responses:
+        '200': { description: Notificações, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ───────────────────────── Configurações, integrações, LGPD ─────────────────────────
+  /plano-uso:
+    get:
+      tags: [configuracoes]
+      summary: Plano atual, uso e limites
+      operationId: planoUsoObter
+      responses:
+        '200': { description: Plano, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /integracoes:
+    get:
+      tags: [integracoes]
+      summary: Catálogo de integrações com status (segredos ocultos)
+      operationId: integracoesListar
+      responses:
+        '200': { description: Integrações, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [integracoes]
+      summary: Conectar integração (segredos criptografados)
+      operationId: integracaoConectar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/IntegracaoInput' } } }
+      responses:
+        '201': { description: Conectada }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /integracoes/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    delete:
+      tags: [integracoes]
+      summary: Desconectar integração
+      operationId: integracaoDesconectar
+      responses:
+        '204': { description: Desconectada }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /integracoes/{id}/testar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [integracoes]
+      summary: Testar conexão da integração
+      operationId: integracaoTestar
+      responses:
+        '200': { description: Resultado do teste }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /exportacoes:
+    get:
+      tags: [exportacoes]
+      summary: Listar exportações (autorizado/auditado)
+      operationId: exportacoesListar
+      responses:
+        '200': { description: Exportações, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /importacoes:
+    post:
+      tags: [configuracoes]
+      summary: Importar dados (idempotente)
+      operationId: importacoesCriar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                arquivo: { type: string, format: binary }
+      responses:
+        '202': { description: Importação processada }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /solicitacoes-lgpd:
+    get:
+      tags: [lgpd]
+      summary: Listar solicitações LGPD
+      operationId: solicitacoesLgpdListar
+      responses:
+        '200': { description: Solicitações, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [lgpd]
+      summary: Abrir solicitação LGPD (inativação/anonimização/descarte rastreável)
+      operationId: solicitacaoLgpdCriar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tipo, alvo]
+              properties:
+                tipo: { type: string, enum: [inativacao, anonimizacao, exportacao, descarte] }
+                alvo: { type: string, description: "entidade/identificador alvo" }
+                justificativa: { type: string }
+      responses:
+        '202': { description: Solicitação registrada }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: "Token Sanctum (Authorization: Bearer <token>)"
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    Q:
+      name: q
+      in: query
+      schema: { type: string }
+      description: Termo de busca
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string }
+      description: Chave de idempotência (captura, confirmação, importação, exportação)
+
+  responses:
+    ValidationError:
+      description: Erro de validação
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example:
+            errors:
+              email: ["Informe um e-mail válido."]
+            meta: { request_id: "0e6f3a9c-7e2a-4f0a-9b2a-7c2f3a9c0e6f", code: "VALIDATION_ERROR" }
+    BadRequest:
+      description: Requisição inválida
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unauthorized:
+      description: Não autenticado
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Forbidden:
+      description: Fora do escopo / sem permissão
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: Não encontrado
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Conflict:
+      description: "Conflito de estado (ex.: publicar sem gabarito completo)"
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    EscolaOne:
+      description: Escola
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties: { data: { $ref: '#/components/schemas/Escola' } }
+    TurmaOne:
+      description: Turma
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties: { data: { $ref: '#/components/schemas/Turma' } }
+    AlunoOne:
+      description: Aluno
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties: { data: { $ref: '#/components/schemas/Aluno' } }
+    ProvaOne:
+      description: Prova
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties: { data: { $ref: '#/components/schemas/Prova' } }
+    UsuarioOne:
+      description: Usuário
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties: { data: { $ref: '#/components/schemas/Usuario' } }
+    PerfilList:
+      description: Perfis
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Perfil' }
+
+  schemas:
+    Dashboard:
+      type: object
+      description: "Composição dinâmica do painel: KPIs, blocos e widgets por ator/escopo"
+      properties:
+        ator: { type: string, enum: [admin, aluno, coordenador, diretor-escolar, diretor-nucleo, professor, geral] }
+        kpis:
+          type: array
+          items: { type: object }
+        blocos:
+          type: array
+          items: { type: object }
+    Meta:
+      type: object
+      properties:
+        request_id: { type: string, format: uuid }
+        code: { type: string, description: "código estável UPPER_SNAKE_CASE" }
+    PaginationMeta:
+      allOf:
+        - $ref: '#/components/schemas/Meta'
+        - properties:
+            page: { type: integer }
+            per_page: { type: integer }
+            total: { type: integer }
+    Envelope:
+      type: object
+      properties:
+        data: {}
+        meta: { $ref: '#/components/schemas/Meta' }
+    EnvelopeList:
+      type: object
+      properties:
+        data:
+          type: array
+          items: { type: object }
+        meta: { $ref: '#/components/schemas/PaginationMeta' }
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+        meta: { $ref: '#/components/schemas/Meta' }
+
+    LoginInput:
+      type: object
+      required: [email, senha]
+      properties:
+        email: { type: string, format: email }
+        senha: { type: string, format: password }
+        manter_conectado: { type: boolean, default: false }
+    Sessao:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        token: { type: string }
+        dispositivo: { type: string }
+        criado_em: { type: string, format: date-time }
+        ultimo_acesso: { type: string, format: date-time }
+    SolicitacaoCadastroInput:
+      type: object
+      required: [nome, cpf, perfil, email, consentimento_lgpd]
+      properties:
+        nome: { type: string }
+        cpf: { type: string }
+        perfil: { type: string }
+        email: { type: string, format: email }
+        consentimento_lgpd: { type: boolean }
+    Preferencias:
+      type: object
+      properties:
+        tema: { type: string, enum: [light, dark, contrast, system], default: light }
+        idioma: { type: string, example: pt-BR }
+        regiao: { type: string }
+        acessibilidade:
+          type: object
+          additionalProperties: { type: boolean }
+        notificacoes:
+          type: object
+          additionalProperties: { type: boolean }
+    Usuario:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        nome: { type: string }
+        email: { type: string, format: email }
+        cpf: { type: string, readOnly: true }
+        perfil: { type: string }
+        escopo: { type: string }
+        foto_url: { type: [string, "null"], format: uri }
+        status: { type: string, enum: [ativo, inativo, suspenso] }
+    UsuarioInput:
+      type: object
+      properties:
+        nome: { type: string }
+        telefone: { type: string }
+        email: { type: string, format: email }
+    MembroInput:
+      type: object
+      required: [nome, perfil]
+      properties:
+        nome: { type: string }
+        cpf: { type: string }
+        email: { type: string, format: email }
+        telefone: { type: string }
+        perfil: { type: string }
+        data_inicio: { type: string, format: date }
+        status: { type: string, enum: [ativo, inativo] }
+        formacao: { type: string }
+        registro_profissional: { type: string }
+        disciplinas: { type: array, items: { type: string } }
+        turmas: { type: array, items: { type: string } }
+        observacoes: { type: string }
+    Perfil:
+      type: object
+      properties:
+        chave: { type: string }
+        nome: { type: string }
+        fixo: { type: boolean }
+        membros: { type: integer }
+        permissoes:
+          type: array
+          items:
+            type: object
+            properties:
+              chave: { type: string }
+              permitido: { type: boolean }
+              fixo: { type: boolean }
+    Escola:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        nome: { type: string }
+        inep: { type: [string, "null"] }
+        rede: { type: string, enum: [estadual, municipal, federal, privada] }
+        endereco: { type: string }
+        cidade: { type: string }
+        uf: { type: string }
+        telefone: { type: string }
+        email: { type: string, format: email }
+        diretor: { type: string }
+        status: { type: string, enum: [ativa, inativa] }
+    EscolaInput:
+      type: object
+      required: [nome]
+      properties:
+        nome: { type: string }
+        inep: { type: string }
+        rede: { type: string }
+        endereco: { type: string }
+        cidade: { type: string }
+        uf: { type: string }
+        telefone: { type: string }
+        email: { type: string, format: email }
+        diretor: { type: string }
+        ativa: { type: boolean, default: true }
+    Turma:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        nome: { type: string }
+        serie: { type: string }
+        escola_id: { type: string, format: uuid }
+        periodo_letivo: { type: string }
+        turno: { type: string }
+        alunos: { type: integer }
+        desempenho_medio: { type: number }
+        status: { type: string, enum: [em-dia, recuperacao, pendencia] }
+    TurmaInput:
+      type: object
+      required: [nome, serie, escola_id, periodo_letivo]
+      properties:
+        nome: { type: string }
+        serie: { type: string }
+        escola_id: { type: string, format: uuid }
+        periodo_letivo: { type: string }
+        turno: { type: string }
+        codigo: { type: string }
+    Aluno:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        nome: { type: string }
+        matricula: { type: string }
+        data_nascimento: { type: string, format: date }
+        responsavel: { type: string }
+        turma_id: { type: string, format: uuid }
+        cpf: { type: [string, "null"] }
+        genero: { type: [string, "null"] }
+        status: { type: string, enum: [ativo, inativo, transferido] }
+        media_geral: { type: number }
+        frequencia: { type: number }
+    AlunoInput:
+      type: object
+      required: [nome, matricula, turma_id]
+      properties:
+        nome: { type: string }
+        matricula: { type: string }
+        data_nascimento: { type: string, format: date }
+        turma_id: { type: string, format: uuid }
+        responsavel: { type: string }
+        cpf: { type: string }
+        genero: { type: string }
+        status: { type: string, enum: [ativo, inativo, transferido] }
+    Prova:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        titulo: { type: string }
+        disciplina: { type: string }
+        serie: { type: string }
+        num_questoes: { type: integer }
+        status: { type: string, enum: [rascunho, publicada, correcao, corrigida] }
+        turmas: { type: array, items: { type: string } }
+        aplicacao: { type: [string, "null"], format: date }
+        versao_gabarito: { type: integer }
+    ProvaInput:
+      type: object
+      required: [titulo, disciplina, num_questoes]
+      properties:
+        titulo: { type: string }
+        disciplina: { type: string }
+        serie: { type: string }
+        num_questoes: { type: integer, minimum: 1 }
+        padrao:
+          type: object
+          properties:
+            alternativas: { type: integer, enum: [3, 4, 5], default: 5 }
+            nota_maxima: { type: number, default: 10 }
+            pontuacao: { type: string, enum: [iguais, personalizados] }
+            anular_se_todas_marcadas: { type: boolean, default: true }
+            gerar_cartao_pdf: { type: boolean, default: true }
+    Gabarito:
+      type: object
+      properties:
+        prova_id: { type: string, format: uuid }
+        versao: { type: integer }
+        respostas:
+          type: array
+          items:
+            type: object
+            properties:
+              questao: { type: integer }
+              correta: { type: string, description: "A-E" }
+    ProgressoCorrecao:
+      type: object
+      properties:
+        prova_id: { type: string, format: uuid }
+        turma_id: { type: [string, "null"], format: uuid }
+        total: { type: integer }
+        lidos: { type: integer }
+        pendentes: { type: integer }
+        ambiguos: { type: integer }
+        percentual: { type: number }
+    Resultado:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        aluno_id: { type: string, format: uuid }
+        prova_id: { type: string, format: uuid }
+        nota_final: { type: number }
+        acertos: { type: integer }
+        questoes: { type: integer }
+        status: { type: string, enum: [aprovado, recuperacao] }
+        confianca_omr: { type: number }
+        versao_gabarito: { type: integer }
+        folha:
+          type: array
+          items:
+            type: object
+            properties:
+              questao: { type: integer }
+              oficial: { type: string }
+              marcado: { type: [string, "null"] }
+              situacao: { type: string, enum: [correta, incorreta, branco, ambigua] }
+    IntegracaoInput:
+      type: object
+      required: [chave]
+      properties:
+        chave: { type: string }
+        credenciais:
+          type: object
+          additionalProperties: { type: string }
+          writeOnly: true

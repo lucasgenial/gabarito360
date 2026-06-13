@@ -59,7 +59,7 @@
 | Gabarito oficial | [gabarito](telas/gabarito.md) | `/provas/{id}/gabarito` | `provas/{id}/gabarito`, `.../gabarito.pdf` | `gabaritos_oficiais`, `gabaritos_respostas`, `versoes_prova` | B4 |
 | Acompanhar correção (geral/turma) | [correcao](telas/correcao.md) | `/correcao/{prova}[/turma/{t}]` | `correcao/{prova}`, `.../pendencias`, `leituras/{l}/revisao` + eventos Reverb | `aplicacoes`, `leituras_cartao`, `respostas_detectadas`, `processamentos_omr`, `revisoes_leitura` | B5/B7 |
 | Resultado individual | [resultados](telas/resultados.md) | `/resultados/{aluno}/{prova}` | `resultados/{id}`, `.../{id}.pdf`, `leituras/{l}/revisao` | `resultados`, `resultados_questoes`, `respostas_detectadas`, `metricas_omr` | B6 |
-| Relatórios (prova/turma) | [relatorios](telas/relatorios.md) | `/relatorios/...` | `relatorios/prova/{id}`, `.../turma-prova/{t}/{p}`, `.../{id}.{pdf\|csv\|xlsx}` | `resultados`, `resultados_questoes`, `temas_habilidades`, `exportacoes`, `comparativos` | B6 |
+| Relatórios (prova/turma) | [relatorios](telas/relatorios.md) | `/relatorios/...` | `relatorios/prova/{id}`, `.../turma-prova/{t}/{p}`, `.../{id}/exportar/{pdf\|csv\|xlsx}` | `resultados`, `resultados_questoes`, `temas_habilidades`, `exportacoes`, `comparativos` | B6 |
 
 ## Cobertura por passo de backend
 

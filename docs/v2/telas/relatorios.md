@@ -25,7 +25,7 @@
 | Controle | Tipo | Ação | Endpoint | Regra |
 |---|---|---|---|---|
 | Ver prova (linha) | link | resultado individual | `/resultados/{aluno}/{prova}?from=...` | — |
-| Exportar (PDF/CSV/XLSX) | botão | exporta relatório | `GET /api/v2/relatorios/prova/{id}.{fmt}` | autorizado/auditado |
+| Exportar (PDF/CSV/XLSX) | botão | exporta relatório | `GET /api/v2/relatorios/prova/{id}/exportar/{fmt}` | autorizado/auditado |
 | Aluno (link) | link | detalhe do aluno | `/alunos/{id}` | — |
 
 ## Dados exibidos
@@ -55,7 +55,7 @@ KPI grid 4→2→1; blocos de gráfico colapsam; tabela com rolagem controlada.
 ## Endpoints `/api/v2` necessários
 
 - `GET /api/v2/relatorios/prova/{id}` e `.../turma-prova/{turma}/{prova}` — dados.
-- `GET /api/v2/relatorios/prova/{id}.{pdf|csv|xlsx}` — exportações.
+- `GET /api/v2/relatorios/prova/{id}/exportar/{pdf|csv|xlsx}` — exportações.
 
 ## Pendências/decisões
 
