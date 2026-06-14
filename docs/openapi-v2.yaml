@@ -312,6 +312,60 @@ paths:
         '200': { description: Alertas, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  # ───────────────────────── Núcleos ─────────────────────────
+  /nucleos:
+    get:
+      tags: [escolas]
+      summary: Listar núcleos (admin global)
+      operationId: nucleosListar
+      parameters:
+        - { $ref: '#/components/parameters/Q' }
+        - name: status
+          in: query
+          schema: { type: string, enum: [ativo, inativo] }
+        - { $ref: '#/components/parameters/Page' }
+      responses:
+        '200': { description: Lista, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [escolas]
+      summary: Cadastrar núcleo
+      operationId: nucleoCriar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/NucleoInput' } } }
+      responses:
+        '201': { $ref: '#/components/responses/NucleoOne' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /nucleos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [escolas]
+      summary: Detalhe do núcleo
+      operationId: nucleoObter
+      responses:
+        '200': { $ref: '#/components/responses/NucleoOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [escolas]
+      summary: Editar núcleo
+      operationId: nucleoAtualizar
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/NucleoInput' } } }
+      responses:
+        '200': { $ref: '#/components/responses/NucleoOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /nucleos/{id}/reativar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [escolas]
+      summary: Reativar núcleo inativo
+      operationId: nucleoReativar
+      responses:
+        '200': { $ref: '#/components/responses/NucleoOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   # ───────────────────────── Escolas ─────────────────────────
   /escolas:
     get:
@@ -949,6 +1003,14 @@ components:
     Conflict:
       description: "Conflito de estado (ex.: publicar sem gabarito completo)"
       content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NucleoOne:
+      description: Núcleo
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Envelope'
+              - properties: { data: { $ref: '#/components/schemas/Nucleo' } }
     EscolaOne:
       description: Escola
       content:
@@ -1132,6 +1194,27 @@ components:
               chave: { type: string }
               permitido: { type: boolean }
               fixo: { type: boolean }
+    Nucleo:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        codigo: { type: string }
+        nome: { type: string }
+        municipio: { type: [string, "null"] }
+        estado: { type: [string, "null"] }
+        email: { type: [string, "null"], format: email }
+        telefone: { type: [string, "null"] }
+        status: { type: string, enum: [ativo, inativo] }
+    NucleoInput:
+      type: object
+      required: [codigo, nome]
+      properties:
+        codigo: { type: string }
+        nome: { type: string }
+        municipio: { type: string }
+        estado: { type: string }
+        email: { type: string, format: email }
+        telefone: { type: string }
     Escola:
       type: object
       properties:

@@ -7,9 +7,13 @@ use Illuminate\Support\Str;
 
 final class ApiResponse
 {
+    /**
+     * @param  array<string, mixed>  $extraMeta
+     */
     public static function success(
         mixed $data = null,
         int $status = 200,
+        array $extraMeta = [],
     ): JsonResponse {
         $requestId = self::requestId();
 
@@ -17,6 +21,7 @@ final class ApiResponse
             'data' => $data,
             'meta' => [
                 'request_id' => $requestId,
+                ...$extraMeta,
             ],
         ], $status)->header('X-Request-ID', $requestId);
     }
