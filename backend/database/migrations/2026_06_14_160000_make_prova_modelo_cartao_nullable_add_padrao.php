@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -37,24 +36,20 @@ return new class extends Migration
 
     /**
      * Altera a nulabilidade de provas.modelo_cartao_id preservando o charset e
-     * a collation EXATOS de modelos_cartao.id, para que a FK forme em qualquer
-     * configuração de servidor (a FK exige collations idênticas).
+     * a collation da conexão (os mesmos usados para criar as colunas UUID), para
+     * que a FK com modelos_cartao.id forme em qualquer servidor — a FK exige
+     * collations idênticas.
      */
     private function modifyModeloCartaoColumn(string $nullability): void
     {
-        $column = DB::selectOne(
-            'SELECT character_set_name AS charset, collation_name AS collation
-             FROM information_schema.columns
-             WHERE table_schema = DATABASE()
-               AND table_name = ?
-               AND column_name = ?',
-            ['modelos_cartao', 'id'],
-        );
+        $connection = Schema::getConnection();
+        $charset = $connection->getConfig('charset') ?: 'utf8mb4';
+        $collation = $connection->getConfig('collation') ?: 'utf8mb4_unicode_ci';
 
-        DB::statement(sprintf(
+        $connection->statement(sprintf(
             'ALTER TABLE provas MODIFY modelo_cartao_id CHAR(36) CHARACTER SET %s COLLATE %s %s',
-            $column->charset,
-            $column->collation,
+            $charset,
+            $collation,
             $nullability,
         ));
     }
