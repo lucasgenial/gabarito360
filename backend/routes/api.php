@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\V2\Alunos\AlunoController;
+use App\Http\Controllers\Api\V2\Alunos\AlunoFichaController;
+use App\Http\Controllers\Api\V2\Alunos\AlunoFotoController;
 use App\Http\Controllers\Api\V2\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V2\Auth\LoginController;
 use App\Http\Controllers\Api\V2\Auth\LogoutController;
@@ -19,6 +22,7 @@ use App\Http\Controllers\Api\V2\Me\UpdatePreferenciasController;
 use App\Http\Controllers\Api\V2\Nucleos\NucleoController;
 use App\Http\Controllers\Api\V2\Onboarding\PerfilController;
 use App\Http\Controllers\Api\V2\Onboarding\SolicitacaoController;
+use App\Http\Controllers\Api\V2\Turmas\TurmaController;
 use App\Http\Middleware\Api\V2\EnsureIdempotency;
 use App\Http\Middleware\Api\V2\EnsureOrganizationalScope;
 use App\Http\Middleware\EnsureMobileDeviceIsActive;
@@ -88,5 +92,21 @@ Route::prefix('v2')->name('api.v2.')->group(function () {
         Route::post('/integracoes', [IntegracaoController::class, 'store'])->name('integracoes.store');
         Route::delete('/integracoes/{integracao}', [IntegracaoController::class, 'destroy'])->name('integracoes.destroy');
         Route::post('/integracoes/{integracao}/testar', [IntegracaoController::class, 'testar'])->name('integracoes.testar');
+
+        // Turmas (/turmas/importar antes de /turmas/{turma})
+        Route::get('/turmas', [TurmaController::class, 'index'])->name('turmas.index');
+        Route::post('/turmas', [TurmaController::class, 'store'])->name('turmas.store');
+        Route::post('/turmas/importar', [TurmaController::class, 'importar'])->name('turmas.importar');
+        Route::get('/turmas/{turma}', [TurmaController::class, 'show'])->name('turmas.show');
+        Route::get('/turmas/{turma}/alunos', [TurmaController::class, 'alunos'])->name('turmas.alunos');
+
+        // Alunos
+        Route::post('/alunos', [AlunoController::class, 'store'])->name('alunos.store');
+        Route::get('/alunos/{aluno}', [AlunoController::class, 'show'])->name('alunos.show');
+        Route::put('/alunos/{aluno}', [AlunoController::class, 'update'])->name('alunos.update');
+        Route::get('/alunos/{aluno}/avaliacoes', [AlunoController::class, 'avaliacoes'])->name('alunos.avaliacoes');
+        Route::get('/alunos/{aluno}/ficha.pdf', AlunoFichaController::class)->name('alunos.ficha');
+        Route::post('/alunos/{aluno}/foto', [AlunoController::class, 'foto'])->name('alunos.foto');
+        Route::get('/alunos/{aluno}/foto', AlunoFotoController::class)->name('alunos.foto.show');
     });
 });

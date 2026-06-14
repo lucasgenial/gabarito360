@@ -13,11 +13,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 abstract class BaseApiController extends Controller
 {
+    /**
+     * @param  array<string, mixed>  $extraMeta
+     */
     protected function successResponse(
         mixed $data = null,
         int $status = 200,
+        array $extraMeta = [],
     ): JsonResponse {
-        return ApiResponse::success($data, $status);
+        return ApiResponse::success($data, $status, $extraMeta);
     }
 
     /**
