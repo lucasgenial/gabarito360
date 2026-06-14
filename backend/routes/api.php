@@ -22,6 +22,9 @@ use App\Http\Controllers\Api\V2\Me\UpdatePreferenciasController;
 use App\Http\Controllers\Api\V2\Nucleos\NucleoController;
 use App\Http\Controllers\Api\V2\Onboarding\PerfilController;
 use App\Http\Controllers\Api\V2\Onboarding\SolicitacaoController;
+use App\Http\Controllers\Api\V2\Provas\GabaritoController;
+use App\Http\Controllers\Api\V2\Provas\ProvaController;
+use App\Http\Controllers\Api\V2\Provas\ProvaTurmaController;
 use App\Http\Controllers\Api\V2\Turmas\TurmaController;
 use App\Http\Middleware\Api\V2\EnsureIdempotency;
 use App\Http\Middleware\Api\V2\EnsureOrganizationalScope;
@@ -108,5 +111,18 @@ Route::prefix('v2')->name('api.v2.')->group(function () {
         Route::get('/alunos/{aluno}/ficha.pdf', AlunoFichaController::class)->name('alunos.ficha');
         Route::post('/alunos/{aluno}/foto', [AlunoController::class, 'foto'])->name('alunos.foto');
         Route::get('/alunos/{aluno}/foto', AlunoFotoController::class)->name('alunos.foto.show');
+
+        // Provas (gabarito.pdf antes de gabarito)
+        Route::get('/provas', [ProvaController::class, 'index'])->name('provas.index');
+        Route::post('/provas', [ProvaController::class, 'store'])->name('provas.store');
+        Route::get('/provas/{prova}', [ProvaController::class, 'show'])->name('provas.show');
+        Route::put('/provas/{prova}', [ProvaController::class, 'update'])->name('provas.update');
+        Route::post('/provas/{prova}/publicar', [ProvaController::class, 'publicar'])->name('provas.publicar');
+        Route::get('/provas/{prova}/gabarito.pdf', [GabaritoController::class, 'pdf'])->name('provas.gabarito.pdf');
+        Route::get('/provas/{prova}/gabarito', [GabaritoController::class, 'show'])->name('provas.gabarito.show');
+        Route::put('/provas/{prova}/gabarito', [GabaritoController::class, 'update'])->name('provas.gabarito.update');
+        Route::get('/provas/{prova}/turmas', [ProvaTurmaController::class, 'index'])->name('provas.turmas.index');
+        Route::post('/provas/{prova}/turmas', [ProvaTurmaController::class, 'store'])->name('provas.turmas.store');
+        Route::delete('/provas/{prova}/turmas/{turma}', [ProvaTurmaController::class, 'destroy'])->name('provas.turmas.destroy');
     });
 });
