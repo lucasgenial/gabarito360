@@ -76,21 +76,25 @@ class ProvaConfigurationValidator
             }
         }
 
-        $model = ModeloCartao::query()->find($attributes['modelo_cartao_id'] ?? null);
+        // O modelo de cartão OMR é opcional no B4 (entra no B5). Quando informado,
+        // mantém-se a validação de homologação/compatibilidade.
+        if (($attributes['modelo_cartao_id'] ?? null) !== null) {
+            $model = ModeloCartao::query()->find($attributes['modelo_cartao_id']);
 
-        if (! $model instanceof ModeloCartao || $model->status !== ModeloCartaoStatus::APPROVED) {
-            $this->add($errors, 'modelo_cartao_id', 'A prova deve usar um modelo de cartao homologado.');
-        } elseif ($ownerEducationCenterId !== null) {
-            if ($model->nucleo_id !== null && $model->nucleo_id !== $ownerEducationCenterId) {
-                $this->add($errors, 'modelo_cartao_id', 'O modelo de cartao pertence a outro nucleo.');
-            }
+            if (! $model instanceof ModeloCartao || $model->status !== ModeloCartaoStatus::APPROVED) {
+                $this->add($errors, 'modelo_cartao_id', 'A prova deve usar um modelo de cartao homologado.');
+            } elseif ($ownerEducationCenterId !== null) {
+                if ($model->nucleo_id !== null && $model->nucleo_id !== $ownerEducationCenterId) {
+                    $this->add($errors, 'modelo_cartao_id', 'O modelo de cartao pertence a outro nucleo.');
+                }
 
-            if (
-                $model->quantidade_questoes !== (int) ($attributes['quantidade_questoes'] ?? 0)
-                || $model->quantidade_alternativas !== (int) ($attributes['quantidade_alternativas'] ?? 0)
-                || $model->alternativas !== $alternatives
-            ) {
-                $this->add($errors, 'modelo_cartao_id', 'Quantidades e alternativas devem corresponder ao modelo de cartao.');
+                if (
+                    $model->quantidade_questoes !== (int) ($attributes['quantidade_questoes'] ?? 0)
+                    || $model->quantidade_alternativas !== (int) ($attributes['quantidade_alternativas'] ?? 0)
+                    || $model->alternativas !== $alternatives
+                ) {
+                    $this->add($errors, 'modelo_cartao_id', 'Quantidades e alternativas devem corresponder ao modelo de cartao.');
+                }
             }
         }
 

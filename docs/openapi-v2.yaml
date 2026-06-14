@@ -756,6 +756,40 @@ paths:
       responses:
         '200': { description: PDF, content: { application/pdf: { schema: { type: string, format: binary } } } }
         '404': { $ref: '#/components/responses/NotFound' }
+  /provas/{id}/turmas:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [provas]
+      summary: Turmas vinculadas à prova
+      operationId: provaTurmasListar
+      responses:
+        '200': { description: Lista, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [provas]
+      summary: Vincular turma (prova publicada)
+      operationId: provaTurmaVincular
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ProvaTurmaInput' } } }
+      responses:
+        '201': { description: Vinculada, content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/ProvaTurma' } } } ] } } } }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /provas/{id}/turmas/{turma}:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+      - name: turma
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    delete:
+      tags: [provas]
+      summary: Desvincular turma da prova
+      operationId: provaTurmaDesvincular
+      responses:
+        '204': { description: Desvinculada }
+        '404': { $ref: '#/components/responses/NotFound' }
 
   # ───────────────────────── Correção & leituras ─────────────────────────
   /correcao/{prova}:
@@ -1359,6 +1393,20 @@ components:
             properties:
               questao: { type: integer }
               correta: { type: string, description: "A-E" }
+    ProvaTurma:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        turma_id: { type: string, format: uuid }
+        turma: { type: [string, "null"] }
+        data_prevista: { type: [string, "null"], format: date }
+        status: { type: string }
+    ProvaTurmaInput:
+      type: object
+      required: [turma_id]
+      properties:
+        turma_id: { type: string, format: uuid }
+        data_prevista: { type: string, format: date }
     ProgressoCorrecao:
       type: object
       properties:

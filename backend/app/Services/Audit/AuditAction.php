@@ -69,6 +69,7 @@ enum AuditAction: string
     case ANSWER_KEY_PUBLISHED = 'gabarito_oficial.published';
     case ANSWER_KEY_RESPONSE_CREATED = 'gabarito_resposta.created';
     case ANSWER_KEY_RESPONSE_UPDATED = 'gabarito_resposta.updated';
+    case ANSWER_KEY_EXPORTED = 'gabarito_oficial.exported';
     case APPLICATION_CREATED = 'aplicacao.created';
     case APPLICATION_STARTED = 'aplicacao.started';
     case APPLICATION_FINISHED = 'aplicacao.finished';
