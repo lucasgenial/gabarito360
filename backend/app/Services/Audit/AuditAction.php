@@ -11,6 +11,10 @@ enum AuditAction: string
     case LOGIN_BLOCKED_VERSION = 'auth.login.blocked_version';
     case LOGIN_RATE_LIMITED = 'auth.login.rate_limited';
     case LOGOUT = 'auth.logout';
+    case PASSWORD_CHANGED = 'usuario.password_changed';
+    case PASSWORD_RESET = 'auth.password.reset';
+    case SESSION_REVOKED = 'auth.session.revoked';
+    case ONBOARDING_REQUESTED = 'onboarding.requested';
     case ACCESS_BLOCKED_USER = 'auth.access.blocked_user';
     case ACCESS_BLOCKED_DEVICE = 'auth.access.blocked_device';
     case ACCESS_BLOCKED_VERSION = 'auth.access.blocked_version';

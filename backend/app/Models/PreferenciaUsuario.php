@@ -27,6 +27,9 @@ class PreferenciaUsuario extends Model
         return [
             'contraste_alto' => 'boolean',
             'reduzir_movimento' => 'boolean',
+            'tema_sistema' => 'boolean',
+            'acessibilidade' => 'array',
+            'notificacoes' => 'array',
         ];
     }
 }

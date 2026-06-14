@@ -138,6 +138,16 @@ class User extends Authenticatable
         return $this->hasMany(Relatorio::class, 'solicitante_id');
     }
 
+    public function sessoes(): HasMany
+    {
+        return $this->hasMany(SessaoUsuario::class, 'usuario_id');
+    }
+
+    public function historicosAcesso(): HasMany
+    {
+        return $this->hasMany(HistoricoAcesso::class, 'usuario_id');
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
