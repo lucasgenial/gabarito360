@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware\Api\V2;
 
+use App\Models\User;
+use App\Support\Authorization\PrimaryRoleResolver;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,17 +11,29 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureOrganizationalScope
 {
     /**
-     * Placeholder da fundacao B0.
+     * Resolve o escopo organizacional do usuário autenticado (global → núcleo
+     * → escola) a partir do vínculo de perfil principal e o anexa à requisição
+     * em `organizational_scope`, para uso por controllers/resources.
      *
-     * A resolucao completa do escopo organizacional (nucleo -> escola ->
-     * turma) sera implementada em B1, junto dos primeiros recursos
-     * autenticados. O middleware ja fica registrado no pipeline /api/v2 para
-     * que B1+ apenas preencham a logica, sem alterar routes/api.php.
+     * Não bloqueia: a autorização efetiva continua por Policy/Scope em cada
+     * recurso. Apenas disponibiliza o contexto resolvido.
      *
      * @param  Closure(Request): Response  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $user = $request->user();
+
+        if ($user instanceof User) {
+            $link = PrimaryRoleResolver::resolve($user);
+
+            $request->attributes->set('organizational_scope', [
+                'scope' => $link?->perfil?->escopo_permitido?->value,
+                'nucleo_id' => $link?->nucleo_id,
+                'escola_id' => $link?->escola_id,
+            ]);
+        }
+
         return $next($request);
     }
 }

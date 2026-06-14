@@ -30,9 +30,15 @@ enum AuditAction: string
     case EDUCATION_CENTER_CREATED = 'nucleo.created';
     case EDUCATION_CENTER_UPDATED = 'nucleo.updated';
     case EDUCATION_CENTER_INACTIVATED = 'nucleo.inactivated';
+    case EDUCATION_CENTER_REACTIVATED = 'nucleo.reactivated';
     case SCHOOL_CREATED = 'escola.created';
     case SCHOOL_UPDATED = 'escola.updated';
     case SCHOOL_INACTIVATED = 'escola.inactivated';
+    case SCHOOL_REACTIVATED = 'escola.reactivated';
+    case SCHOOL_PROFILE_PERMISSIONS_ATTEMPTED = 'escola.perfil.permissoes_attempted';
+    case INTEGRATION_CONNECTED = 'integracao.connected';
+    case INTEGRATION_DISCONNECTED = 'integracao.disconnected';
+    case INTEGRATION_TESTED = 'integracao.tested';
     case CLASS_CREATED = 'turma.created';
     case CLASS_UPDATED = 'turma.updated';
     case CLASS_INACTIVATED = 'turma.inactivated';

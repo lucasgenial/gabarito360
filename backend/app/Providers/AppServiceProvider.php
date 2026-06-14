@@ -9,6 +9,7 @@ use App\Models\DispositivoMobile;
 use App\Models\Escola;
 use App\Models\GabaritoOficial;
 use App\Models\ImportacaoAluno;
+use App\Models\Integracao;
 use App\Models\ModeloCartao;
 use App\Models\Nucleo;
 use App\Models\PersonalAccessToken;
@@ -26,6 +27,7 @@ use App\Policies\AplicacaoPolicy;
 use App\Policies\EscolaPolicy;
 use App\Policies\GabaritoOficialPolicy;
 use App\Policies\ImportacaoAlunoPolicy;
+use App\Policies\IntegracaoPolicy;
 use App\Policies\ModeloCartaoPolicy;
 use App\Policies\NucleoPolicy;
 use App\Policies\PermissionPolicy;
@@ -77,6 +79,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Relatorio::class, RelatorioPolicy::class);
         Gate::policy(Turma::class, TurmaPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(Integracao::class, IntegracaoPolicy::class);
 
         RateLimiter::for('login', function (Request $request): Limit {
             $email = Str::lower(trim((string) $request->input('email')));
