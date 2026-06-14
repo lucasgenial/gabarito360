@@ -3,6 +3,8 @@
 return [
     'auth' => [
         'login_max_attempts_per_minute' => (int) env('GABARITO360_LOGIN_MAX_ATTEMPTS_PER_MINUTE', 5),
+        'web_token_hours' => (int) env('GABARITO360_WEB_TOKEN_HOURS', 12),
+        'web_token_remember_days' => (int) env('GABARITO360_WEB_TOKEN_REMEMBER_DAYS', 30),
     ],
 
     'mobile' => [
