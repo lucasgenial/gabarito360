@@ -562,8 +562,10 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required: [arquivo, turma_id]
               properties:
                 arquivo: { type: string, format: binary }
+                turma_id: { type: string, format: uuid }
       responses:
         '202':
           description: Importação processada com relatório de linhas
@@ -638,6 +640,32 @@ paths:
       operationId: alunoFichaPdf
       responses:
         '200': { description: PDF, content: { application/pdf: { schema: { type: string, format: binary } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /alunos/{id}/foto:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [alunos]
+      summary: Atualizar foto do aluno
+      operationId: alunoAtualizarFoto
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [foto]
+              properties:
+                foto: { type: string, format: binary }
+      responses:
+        '200': { $ref: '#/components/responses/AlunoOne' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    get:
+      tags: [alunos]
+      summary: Foto do aluno (binário)
+      operationId: alunoObterFoto
+      responses:
+        '200': { description: Imagem, content: { 'image/*': { schema: { type: string, format: binary } } } }
         '404': { $ref: '#/components/responses/NotFound' }
 
   # ───────────────────────── Provas & gabaritos ─────────────────────────

@@ -27,6 +27,7 @@ class Aluno extends Model
         'nome_social',
         'data_nascimento',
         'documento',
+        'genero',
         'foto_arquivo_id',
         'status',
         'observacoes',
