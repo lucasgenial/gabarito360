@@ -13,7 +13,7 @@ return new class extends Migration
             $table->dropForeign(['modelo_cartao_id']);
         });
 
-        DB::statement('ALTER TABLE provas MODIFY modelo_cartao_id CHAR(36) NULL');
+        $this->modifyModeloCartaoColumn('NULL');
 
         Schema::table('provas', function (Blueprint $table) {
             $table->foreign('modelo_cartao_id')->references('id')->on('modelos_cartao')->restrictOnDelete();
@@ -28,10 +28,34 @@ return new class extends Migration
             $table->dropColumn('padrao');
         });
 
-        DB::statement('ALTER TABLE provas MODIFY modelo_cartao_id CHAR(36) NOT NULL');
+        $this->modifyModeloCartaoColumn('NOT NULL');
 
         Schema::table('provas', function (Blueprint $table) {
             $table->foreign('modelo_cartao_id')->references('id')->on('modelos_cartao')->restrictOnDelete();
         });
+    }
+
+    /**
+     * Altera a nulabilidade de provas.modelo_cartao_id preservando o charset e
+     * a collation EXATOS de modelos_cartao.id, para que a FK forme em qualquer
+     * configuração de servidor (a FK exige collations idênticas).
+     */
+    private function modifyModeloCartaoColumn(string $nullability): void
+    {
+        $column = DB::selectOne(
+            'SELECT character_set_name AS charset, collation_name AS collation
+             FROM information_schema.columns
+             WHERE table_schema = DATABASE()
+               AND table_name = ?
+               AND column_name = ?',
+            ['modelos_cartao', 'id'],
+        );
+
+        DB::statement(sprintf(
+            'ALTER TABLE provas MODIFY modelo_cartao_id CHAR(36) CHARACTER SET %s COLLATE %s %s',
+            $column->charset,
+            $column->collation,
+            $nullability,
+        ));
     }
 };
