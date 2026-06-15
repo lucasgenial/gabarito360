@@ -2,12 +2,14 @@
 
 namespace App\Actions\Relatorios;
 
+use App\Events\ReportReady;
 use App\Models\Arquivo;
 use App\Models\Exportacao;
 use App\Models\Prova;
 use App\Models\User;
 use App\Services\Audit\AuditAction;
 use App\Services\Audit\AuditService;
+use App\Services\Notificacoes\NotificationService;
 use App\Services\Relatorios\ReportExportWriter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +26,7 @@ class GenerateExportacaoAction
     public function __construct(
         private AuditService $audit,
         private ReportExportWriter $writer,
+        private NotificationService $notifications,
     ) {}
 
     /**
@@ -59,7 +62,7 @@ class GenerateExportacaoAction
             nucleoId: $nucleoId,
         );
 
-        return DB::transaction(function () use ($exportacao, $prova, $formato, $report, $actor): Exportacao {
+        return DB::transaction(function () use ($exportacao, $prova, $formato, $report, $actor, $nucleoId): Exportacao {
             $rendered = $this->writer->write($formato, $report, $prova);
             $path = 'exports/'.$exportacao->id.'.'.$rendered['extensao'];
 
@@ -86,6 +89,15 @@ class GenerateExportacaoAction
                 'concluido_at' => now(),
                 'expira_at' => now()->addDays(30),
             ]);
+
+            ReportReady::dispatch($actor->id, 'exportacao', $exportacao->id, ['formato' => $formato]);
+            $this->notifications->notify(
+                $actor,
+                'report.ready',
+                'Exportação pronta',
+                'Sua exportação do relatório da prova está disponível para download.',
+                ['link' => '/exportacoes/'.$exportacao->id, 'nucleo_id' => $nucleoId],
+            );
 
             return $exportacao->refresh();
         });

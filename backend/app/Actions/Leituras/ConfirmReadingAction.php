@@ -5,6 +5,7 @@ namespace App\Actions\Leituras;
 use App\Actions\Resultados\CalculateResultAction;
 use App\Enums\LeituraCartaoStatus;
 use App\Events\ApplicationProgressUpdated;
+use App\Events\ReadingConfirmed;
 use App\Models\CartaoResposta;
 use App\Models\LeituraCartao;
 use App\Models\LogSincronizacao;
@@ -92,6 +93,7 @@ class ConfirmReadingAction
                 escolaId: $reading->aplicacao->escola_id,
             );
             ApplicationProgressUpdated::dispatch($reading->aplicacao, $this->metrics->for($reading->aplicacao));
+            ReadingConfirmed::dispatch($reading);
 
             return ['reading' => $reading->refresh(), 'result' => $result];
         });

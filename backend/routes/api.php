@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\V2\Agenda\AgendaController;
 use App\Http\Controllers\Api\V2\Alunos\AlunoController;
 use App\Http\Controllers\Api\V2\Alunos\AlunoFichaController;
 use App\Http\Controllers\Api\V2\Alunos\AlunoFotoController;
 use App\Http\Controllers\Api\V2\Aplicacoes\AplicacaoController;
+use App\Http\Controllers\Api\V2\Atividades\AtividadeController;
 use App\Http\Controllers\Api\V2\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V2\Auth\LoginController;
 use App\Http\Controllers\Api\V2\Auth\LogoutController;
@@ -24,6 +26,7 @@ use App\Http\Controllers\Api\V2\Me\UpdateFotoController;
 use App\Http\Controllers\Api\V2\Me\UpdateMeController;
 use App\Http\Controllers\Api\V2\Me\UpdatePasswordController;
 use App\Http\Controllers\Api\V2\Me\UpdatePreferenciasController;
+use App\Http\Controllers\Api\V2\Notificacoes\NotificacaoController;
 use App\Http\Controllers\Api\V2\Nucleos\NucleoController;
 use App\Http\Controllers\Api\V2\Onboarding\PerfilController;
 use App\Http\Controllers\Api\V2\Onboarding\SolicitacaoController;
@@ -178,5 +181,22 @@ Route::prefix('v2')->name('api.v2.')->group(function () {
 
         // Snapshot de indicadores da prova (B6)
         Route::get('/dashboards/prova/{prova}/snapshot', [DashboardController::class, 'snapshot'])->name('dashboards.prova.snapshot');
+
+        // Notificações (B7) — rotas literais antes do wildcard {notificacao}
+        Route::get('/notificacoes', [NotificacaoController::class, 'index'])->name('notificacoes.index');
+        Route::post('/notificacoes/ler-todas', [NotificacaoController::class, 'marcarTodas'])->name('notificacoes.ler-todas');
+        Route::get('/notificacoes/preferencias', [NotificacaoController::class, 'preferencias'])->name('notificacoes.preferencias.index');
+        Route::put('/notificacoes/preferencias', [NotificacaoController::class, 'atualizarPreferencias'])->name('notificacoes.preferencias.update');
+        Route::post('/notificacoes/{notificacao}/ler', [NotificacaoController::class, 'marcarLida'])->name('notificacoes.ler');
+
+        // Agenda (B7)
+        Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda.index');
+        Route::post('/agenda', [AgendaController::class, 'store'])->name('agenda.store');
+        Route::get('/agenda/{evento}', [AgendaController::class, 'show'])->name('agenda.show');
+        Route::put('/agenda/{evento}', [AgendaController::class, 'update'])->name('agenda.update');
+        Route::post('/agenda/{evento}/confirmar', [AgendaController::class, 'confirmar'])->name('agenda.confirmar');
+
+        // Atividades recentes (B7) — feed dos painéis
+        Route::get('/atividades-recentes', [AtividadeController::class, 'index'])->name('atividades-recentes.index');
     });
 });

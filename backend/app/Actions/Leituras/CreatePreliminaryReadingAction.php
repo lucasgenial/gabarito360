@@ -5,6 +5,7 @@ namespace App\Actions\Leituras;
 use App\Enums\AplicacaoStatus;
 use App\Enums\LeituraCartaoStatus;
 use App\Events\ApplicationProgressUpdated;
+use App\Events\ReadingReviewRequired;
 use App\Models\Aplicacao;
 use App\Models\AplicacaoAluno;
 use App\Models\Arquivo;
@@ -117,6 +118,10 @@ class CreatePreliminaryReadingAction
                 escolaId: $application->escola_id,
             );
             ApplicationProgressUpdated::dispatch($application, $this->metrics->for($application));
+
+            if ($requiresReview) {
+                ReadingReviewRequired::dispatch($reading);
+            }
 
             return $reading->load('respostasDetectadas');
         });
