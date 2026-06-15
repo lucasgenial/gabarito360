@@ -12,7 +12,14 @@ return new class extends Migration
             $table->dropForeign(['modelo_cartao_id']);
         });
 
-        $this->modifyModeloCartaoColumn('NULL');
+        // Reusa o mesmo Blueprint uuid() que criou modelos_cartao.id, garantindo
+        // tipo/charset/collation IDÊNTICOS aos da coluna referenciada em qualquer
+        // servidor — no MariaDB 11.4 (CI) uuid() é o tipo nativo UUID (sem
+        // collation); em versões mais antigas é char(36). Forçar CHAR(36) aqui
+        // quebrava a FK no CI (errno 150). Com ->change() a FK forma por construção.
+        Schema::table('provas', function (Blueprint $table) {
+            $table->uuid('modelo_cartao_id')->nullable()->change();
+        });
 
         Schema::table('provas', function (Blueprint $table) {
             $table->foreign('modelo_cartao_id')->references('id')->on('modelos_cartao')->restrictOnDelete();
@@ -27,50 +34,12 @@ return new class extends Migration
             $table->dropColumn('padrao');
         });
 
-        $this->modifyModeloCartaoColumn('NOT NULL');
+        Schema::table('provas', function (Blueprint $table) {
+            $table->uuid('modelo_cartao_id')->nullable(false)->change();
+        });
 
         Schema::table('provas', function (Blueprint $table) {
             $table->foreign('modelo_cartao_id')->references('id')->on('modelos_cartao')->restrictOnDelete();
         });
-    }
-
-    /**
-     * Altera a nulabilidade de provas.modelo_cartao_id casando EXATAMENTE a
-     * collation de modelos_cartao.id (lida do servidor em tempo de migration).
-     * A FK exige collations idênticas; o default de collation do servidor varia
-     * entre versões do MariaDB (ex.: 11.4 no CI vs. local), então não dá para
-     * fixar nem confiar no default da conexão.
-     */
-    private function modifyModeloCartaoColumn(string $nullability): void
-    {
-        $collation = $this->referencedIdCollation();
-
-        // COLLATE sem CHARACTER SET: o charset é inferido da própria collation.
-        Schema::getConnection()->statement(sprintf(
-            'ALTER TABLE provas MODIFY modelo_cartao_id CHAR(36) COLLATE %s %s',
-            $collation,
-            $nullability,
-        ));
-    }
-
-    /**
-     * Lê a collation real da coluna id de modelos_cartao via SHOW FULL COLUMNS
-     * (resolvido no schema atual da conexão — não depende de DATABASE()).
-     */
-    private function referencedIdCollation(): string
-    {
-        foreach (Schema::getConnection()->select('SHOW FULL COLUMNS FROM modelos_cartao') as $column) {
-            $column = (array) $column;
-
-            if (($column['Field'] ?? null) === 'id') {
-                $collation = $column['Collation'] ?? null;
-
-                if (is_string($collation) && $collation !== '') {
-                    return $collation;
-                }
-            }
-        }
-
-        throw new \RuntimeException('Não foi possível determinar a collation de modelos_cartao.id.');
     }
 };
