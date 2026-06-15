@@ -121,6 +121,68 @@ class PortalScope
         return $this->turmaScope->apply(Turma::query(), $user)->pluck('id');
     }
 
+    /**
+     * Ator com visão ampla (rede): vê qualquer escopo de comunicação/agenda.
+     */
+    public function isGlobalViewer(User $user): bool
+    {
+        return $this->hasGlobal($user, PermissionCode::VIEW_APPLICATION_DASHBOARD)
+            || $this->hasGlobal($user, PermissionCode::MANAGE_SCHOOLS);
+    }
+
+    public function canViewNucleo(User $user, string $nucleoId): bool
+    {
+        if ($this->isGlobalViewer($user)) {
+            return true;
+        }
+
+        return $this->accessibleNucleoIds($user)->contains($nucleoId)
+            || Escola::query()
+                ->where('nucleo_id', $nucleoId)
+                ->whereIn('id', $this->accessibleSchoolIds($user))
+                ->exists();
+    }
+
+    /**
+     * Núcleos das lotações ativas do usuário (sem gatear por permissão — base de
+     * escopo para agenda, atividades e notificações).
+     *
+     * @return Collection<int, string>
+     */
+    public function accessibleNucleoIds(User $user): Collection
+    {
+        return $user->perfilVinculos()
+            ->where('inicio_at', '<=', now())
+            ->whereNull('fim_at')
+            ->whereNotNull('nucleo_id')
+            ->pluck('nucleo_id')
+            ->unique()
+            ->values();
+    }
+
+    /**
+     * Escolas visíveis ao usuário pelas lotações (diretas + via núcleo).
+     *
+     * @return Collection<int, string>
+     */
+    public function accessibleSchoolIds(User $user): Collection
+    {
+        $directIds = $user->perfilVinculos()
+            ->where('inicio_at', '<=', now())
+            ->whereNull('fim_at')
+            ->whereNotNull('escola_id')
+            ->pluck('escola_id');
+
+        $nucleusIds = $this->accessibleNucleoIds($user);
+
+        return Escola::query()
+            ->where(fn (Builder $query) => $query
+                ->whereIn('id', $directIds)
+                ->orWhereIn('nucleo_id', $nucleusIds))
+            ->pluck('id')
+            ->values();
+    }
+
     public function hasAnyPermission(User $user, PermissionCode $permission): bool
     {
         return $user->perfilVinculos()

@@ -2,18 +2,23 @@
 
 namespace App\Actions\Relatorios;
 
+use App\Events\ReportReady;
 use App\Models\Aplicacao;
 use App\Models\Arquivo;
 use App\Models\Relatorio;
 use App\Models\User;
 use App\Services\Audit\AuditAction;
 use App\Services\Audit\AuditService;
+use App\Services\Notificacoes\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class GenerateApplicationCsvReportAction
 {
-    public function __construct(private AuditService $audit) {}
+    public function __construct(
+        private AuditService $audit,
+        private NotificationService $notifications,
+    ) {}
 
     public function execute(Aplicacao $application, User $actor): Relatorio
     {
@@ -76,6 +81,15 @@ class GenerateApplicationCsvReportAction
                 metadata: ['checksum' => $file->checksum, 'linhas' => $application->resultados()->where('status', 'vigente')->count()],
                 nucleoId: $application->escola->nucleo_id,
                 escolaId: $application->escola_id,
+            );
+
+            ReportReady::dispatch($actor->id, 'relatorio', $report->id, ['formato' => 'csv']);
+            $this->notifications->notify(
+                $actor,
+                'report.ready',
+                'Relatório pronto',
+                'Seu relatório de resultados da aplicação está disponível para download.',
+                ['link' => '/relatorios/'.$report->id, 'nucleo_id' => $application->escola->nucleo_id, 'escola_id' => $application->escola_id],
             );
 
             return $report->refresh();

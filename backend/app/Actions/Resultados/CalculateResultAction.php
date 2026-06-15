@@ -2,18 +2,23 @@
 
 namespace App\Actions\Resultados;
 
+use App\Events\ResultCalculated;
 use App\Models\AplicacaoAluno;
 use App\Models\LeituraCartao;
 use App\Models\Resultado;
 use App\Models\ResultadoQuestao;
 use App\Models\User;
+use App\Services\Atividades\ActivityService;
 use App\Services\Audit\AuditAction;
 use App\Services\Audit\AuditService;
 use Illuminate\Support\Facades\DB;
 
 class CalculateResultAction
 {
-    public function __construct(private AuditService $audit) {}
+    public function __construct(
+        private AuditService $audit,
+        private ActivityService $activity,
+    ) {}
 
     public function execute(LeituraCartao $reading, User $actor): Resultado
     {
@@ -106,6 +111,15 @@ class CalculateResultAction
                 nucleoId: $reading->aplicacao->escola->nucleo_id,
                 escolaId: $reading->aplicacao->escola_id,
             );
+            ResultCalculated::dispatch($result);
+            $this->activity->record('resultado.calculado', 'Resultado calculado e disponível.', [
+                'ator_id' => $actor->id,
+                'nucleo_id' => $reading->aplicacao->escola->nucleo_id,
+                'escola_id' => $reading->aplicacao->escola_id,
+                'sujeito_tipo' => 'resultado',
+                'sujeito_id' => $result->id,
+                'dados' => ['aplicacao_id' => $result->aplicacao_id, 'nota_percentual' => (float) $result->nota_percentual],
+            ]);
 
             return $result->refresh();
         });
