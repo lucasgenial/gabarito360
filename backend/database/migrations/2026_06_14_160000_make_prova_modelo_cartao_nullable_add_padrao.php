@@ -35,22 +35,42 @@ return new class extends Migration
     }
 
     /**
-     * Altera a nulabilidade de provas.modelo_cartao_id preservando o charset e
-     * a collation da conexão (os mesmos usados para criar as colunas UUID), para
-     * que a FK com modelos_cartao.id forme em qualquer servidor — a FK exige
-     * collations idênticas.
+     * Altera a nulabilidade de provas.modelo_cartao_id casando EXATAMENTE a
+     * collation de modelos_cartao.id (lida do servidor em tempo de migration).
+     * A FK exige collations idênticas; o default de collation do servidor varia
+     * entre versões do MariaDB (ex.: 11.4 no CI vs. local), então não dá para
+     * fixar nem confiar no default da conexão.
      */
     private function modifyModeloCartaoColumn(string $nullability): void
     {
-        $connection = Schema::getConnection();
-        $charset = $connection->getConfig('charset') ?: 'utf8mb4';
-        $collation = $connection->getConfig('collation') ?: 'utf8mb4_unicode_ci';
+        $collation = $this->referencedIdCollation();
 
-        $connection->statement(sprintf(
-            'ALTER TABLE provas MODIFY modelo_cartao_id CHAR(36) CHARACTER SET %s COLLATE %s %s',
-            $charset,
+        // COLLATE sem CHARACTER SET: o charset é inferido da própria collation.
+        Schema::getConnection()->statement(sprintf(
+            'ALTER TABLE provas MODIFY modelo_cartao_id CHAR(36) COLLATE %s %s',
             $collation,
             $nullability,
         ));
+    }
+
+    /**
+     * Lê a collation real da coluna id de modelos_cartao via SHOW FULL COLUMNS
+     * (resolvido no schema atual da conexão — não depende de DATABASE()).
+     */
+    private function referencedIdCollation(): string
+    {
+        foreach (Schema::getConnection()->select('SHOW FULL COLUMNS FROM modelos_cartao') as $column) {
+            $column = (array) $column;
+
+            if (($column['Field'] ?? null) === 'id') {
+                $collation = $column['Collation'] ?? null;
+
+                if (is_string($collation) && $collation !== '') {
+                    return $collation;
+                }
+            }
+        }
+
+        throw new \RuntimeException('Não foi possível determinar a collation de modelos_cartao.id.');
     }
 };
