@@ -63,6 +63,15 @@ security:
   - bearerAuth: []
 
 paths:
+  /health:
+    get:
+      tags: [auth]
+      summary: Healthcheck público
+      operationId: health
+      security: []
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+
   # ───────────────────────── Auth & conta ─────────────────────────
   /auth/login:
     post:
@@ -206,6 +215,13 @@ paths:
         '204': { description: Senha alterada }
         '422': { $ref: '#/components/responses/ValidationError' }
   /me/foto:
+    get:
+      tags: [me]
+      summary: Obter avatar do usuário
+      operationId: meObterFoto
+      responses:
+        '200': { description: Imagem, content: { image/*: { schema: { type: string, format: binary } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
     post:
       tags: [me]
       summary: Atualizar avatar
@@ -271,29 +287,36 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
 
   # ───────────────────────── Dashboards ─────────────────────────
-  /dashboards/{ator}:
+  /dashboards/aplicacao/{aplicacao}:
+    parameters:
+      - { name: aplicacao, in: path, required: true, schema: { type: string, format: uuid } }
     get:
       tags: [dashboards]
-      summary: Composição do painel do ator (KPIs e blocos)
-      operationId: dashboardObter
-      parameters:
-        - name: ator
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [admin, aluno, coordenador, diretor-escolar, diretor-nucleo, professor, geral]
+      summary: Painel da aplicação (progresso de leituras + indicadores)
+      operationId: dashboardAplicacao
       responses:
-        '200':
-          description: Painel do ator
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/Envelope'
-                  - properties:
-                      data: { $ref: '#/components/schemas/Dashboard' }
+        '200': { description: Painel, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
         '403': { $ref: '#/components/responses/Forbidden' }
+  /dashboards/prova/{prova}:
+    parameters:
+      - { name: prova, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [dashboards]
+      summary: Painel consolidado da prova (geral + por turma)
+      operationId: dashboardProva
+      responses:
+        '200': { description: Painel, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /dashboards/prova/{prova}/snapshot:
+    parameters:
+      - { name: prova, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [dashboards]
+      summary: Gera e persiste um snapshot de indicadores da prova
+      operationId: dashboardProvaSnapshot
+      responses:
+        '201': { description: Snapshot, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
   /atividades-recentes:
     get:
       tags: [dashboards]
@@ -302,14 +325,6 @@ paths:
       parameters: [{ $ref: '#/components/parameters/Page' }]
       responses:
         '200': { description: Atividades, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-  /alertas:
-    get:
-      tags: [dashboards]
-      summary: Alertas críticos (pendências, metas, integrações)
-      operationId: alertasListar
-      responses:
-        '200': { description: Alertas, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
   # ───────────────────────── Núcleos ─────────────────────────
@@ -974,11 +989,23 @@ paths:
         '409': { $ref: '#/components/responses/Conflict' }
 
   # ───────────────────────── Resultados & relatórios ─────────────────────────
+  /resultados:
+    get:
+      tags: [resultados]
+      summary: Listar resultados vigentes (filtro por aplicação, aluno ou prova)
+      operationId: resultadosListar
+      parameters:
+        - { name: aplicacao_id, in: query, schema: { type: string, format: uuid } }
+        - { name: aluno_id, in: query, schema: { type: string, format: uuid } }
+        - { name: prova_id, in: query, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: Resultados, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '422': { $ref: '#/components/responses/ValidationError' }
   /resultados/{id}:
     parameters: [{ $ref: '#/components/parameters/Id' }]
     get:
       tags: [resultados]
-      summary: Resultado individual (com folha corrigida)
+      summary: Resultado individual (com respostas por questão)
       operationId: resultadoObter
       responses:
         '200':
@@ -990,36 +1017,97 @@ paths:
                   - $ref: '#/components/schemas/Envelope'
                   - properties:
                       data: { $ref: '#/components/schemas/Resultado' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
-  /resultados/{id}.pdf:
+  /relatorios:
+    get:
+      tags: [relatorios]
+      summary: Listar relatórios solicitados pelo ator
+      operationId: relatoriosListar
+      responses:
+        '200': { description: Relatórios, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [relatorios]
+      summary: Solicitar relatório CSV de resultados de uma aplicação
+      operationId: relatorioCriar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tipo, aplicacao_id]
+              properties:
+                tipo: { type: string, enum: [resultados_aplicacao] }
+                aplicacao_id: { type: string, format: uuid }
+      responses:
+        '201': { description: Relatório gerado, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /relatorios/{id}:
     parameters: [{ $ref: '#/components/parameters/Id' }]
     get:
-      tags: [resultados]
-      summary: Resultado individual (PDF)
-      operationId: resultadoPdf
+      tags: [relatorios]
+      summary: Status de um relatório (do próprio solicitante)
+      operationId: relatorioObter
       responses:
-        '200': { description: PDF, content: { application/pdf: { schema: { type: string, format: binary } } } }
-        '404': { $ref: '#/components/responses/NotFound' }
+        '200': { description: Relatório, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /relatorios/{id}/download:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [relatorios]
+      summary: Download do arquivo do relatório (auditado)
+      operationId: relatorioDownload
+      responses:
+        '200': { description: Arquivo, content: { text/csv: { schema: { type: string, format: binary } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
   /relatorios/prova/{prova}:
     parameters:
       - { name: prova, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: turma_id, in: query, schema: { type: string, format: uuid } }
     get:
       tags: [relatorios]
-      summary: Relatório consolidado da prova
+      summary: Relatório consolidado da prova (KPIs, temas, resultado por aluno)
       operationId: relatorioProvaObter
       responses:
         '200': { description: Relatório, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
         '404': { $ref: '#/components/responses/NotFound' }
-  /relatorios/prova/{prova}/exportar/{formato}:
+  /relatorios/prova/{prova}/exportar:
     parameters:
       - { name: prova, in: path, required: true, schema: { type: string, format: uuid } }
-      - { name: formato, in: path, required: true, schema: { type: string, enum: [pdf, csv, xlsx] } }
+    post:
+      tags: [exportacoes]
+      summary: Exportar relatório da prova (csv/pdf/xlsx) — autorizado/auditado
+      operationId: relatorioProvaExportar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [formato]
+              properties:
+                formato: { type: string, enum: [csv, pdf, xlsx] }
+                turma_id: { type: string, format: uuid }
+      responses:
+        '201': { description: Exportação criada, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /comparativos/nucleo/{nucleo}:
+    parameters:
+      - { name: nucleo, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: prova_id, in: query, schema: { type: string, format: uuid } }
     get:
       tags: [relatorios]
-      summary: Exportar relatório da prova (autorizado/auditado)
-      operationId: relatorioProvaExportar
+      summary: Comparativo das escolas de um núcleo
+      operationId: comparativoNucleo
       responses:
-        '200': { description: Arquivo, content: { application/octet-stream: { schema: { type: string, format: binary } } } }
+        '200': { description: Comparativo, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
         '404': { $ref: '#/components/responses/NotFound' }
 
   # ───────────────────────── Agenda & notificações ─────────────────────────
@@ -1028,18 +1116,143 @@ paths:
       tags: [agenda]
       summary: Eventos de agenda no escopo
       operationId: agendaListar
-      parameters: [{ name: escopo, in: query, schema: { type: string } }]
+      parameters:
+        - { name: de, in: query, schema: { type: string, format: date-time } }
+        - { name: ate, in: query, schema: { type: string, format: date-time } }
+        - { name: escola_id, in: query, schema: { type: string, format: uuid } }
+        - { name: turma_id, in: query, schema: { type: string, format: uuid } }
       responses:
         '200': { description: Eventos, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [agenda]
+      summary: Criar evento de agenda e convidar participantes
+      operationId: agendaCriar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tipo, titulo, inicio_at]
+              properties:
+                tipo: { type: string }
+                titulo: { type: string }
+                descricao: { type: string }
+                nucleo_id: { type: string, format: uuid }
+                escola_id: { type: string, format: uuid }
+                turma_id: { type: string, format: uuid }
+                prova_id: { type: string, format: uuid }
+                local: { type: string }
+                inicio_at: { type: string, format: date-time }
+                fim_at: { type: string, format: date-time }
+                participantes: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '201': { description: Evento criado, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /agenda/{evento}:
+    parameters:
+      - { name: evento, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [agenda]
+      summary: Detalhe de um evento
+      operationId: agendaObter
+      responses:
+        '200': { description: Evento, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      tags: [agenda]
+      summary: Atualizar evento (publica calendar.event.changed)
+      operationId: agendaAtualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                titulo: { type: string }
+                descricao: { type: string }
+                local: { type: string }
+                inicio_at: { type: string, format: date-time }
+                fim_at: { type: string, format: date-time }
+                status: { type: string, enum: [agendado, confirmado, cancelado, concluido] }
+      responses:
+        '200': { description: Evento atualizado, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /agenda/{evento}/confirmar:
+    parameters:
+      - { name: evento, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [agenda]
+      summary: Confirmar participação no evento
+      operationId: agendaConfirmar
+      responses:
+        '200': { description: Participação confirmada, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /notificacoes:
     get:
       tags: [notificacoes]
-      summary: Notificações do usuário
+      summary: Notificações do usuário (meta.nao_lidas)
       operationId: notificacoesListar
+      parameters:
+        - { name: nao_lidas, in: query, schema: { type: boolean } }
       responses:
         '200': { description: Notificações, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
+  /notificacoes/ler-todas:
+    post:
+      tags: [notificacoes]
+      summary: Marcar todas as notificações como lidas
+      operationId: notificacoesLerTodas
+      responses:
+        '200': { description: Quantidade marcada, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /notificacoes/preferencias:
+    get:
+      tags: [notificacoes]
+      summary: Preferências de notificação (evento × canal)
+      operationId: notificacoesPreferenciasObter
+      responses:
+        '200': { description: Preferências, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      tags: [notificacoes]
+      summary: Atualizar preferências de notificação
+      operationId: notificacoesPreferenciasAtualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [preferencias]
+              properties:
+                preferencias:
+                  type: array
+                  items:
+                    type: object
+                    required: [evento, canal, habilitada]
+                    properties:
+                      evento: { type: string }
+                      canal: { type: string, enum: [sistema, email, push] }
+                      habilitada: { type: boolean }
+      responses:
+        '200': { description: Preferências atualizadas, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /notificacoes/{notificacao}/ler:
+    parameters:
+      - { name: notificacao, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [notificacoes]
+      summary: Marcar uma notificação como lida
+      operationId: notificacaoLer
+      responses:
+        '200': { description: Notificação lida, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
 
   # ───────────────────────── Configurações, integrações, LGPD ─────────────────────────
   /plano-uso:
@@ -1090,39 +1303,44 @@ paths:
   /exportacoes:
     get:
       tags: [exportacoes]
-      summary: Listar exportações (autorizado/auditado)
+      summary: Listar exportações do solicitante
       operationId: exportacoesListar
       responses:
         '200': { description: Exportações, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
-  /importacoes:
-    post:
-      tags: [configuracoes]
-      summary: Importar dados (idempotente)
-      operationId: importacoesCriar
-      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                arquivo: { type: string, format: binary }
+  /exportacoes/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [exportacoes]
+      summary: Status de uma exportação (do solicitante)
+      operationId: exportacaoObter
       responses:
-        '202': { description: Importação processada }
+        '200': { description: Exportação, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /exportacoes/{id}/download:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [exportacoes]
+      summary: Download do arquivo exportado (auditado)
+      operationId: exportacaoDownload
+      responses:
+        '200': { description: Arquivo, content: { application/octet-stream: { schema: { type: string, format: binary } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
   /solicitacoes-lgpd:
     get:
       tags: [lgpd]
-      summary: Listar solicitações LGPD
+      summary: Listar solicitações LGPD (solicitante vê as suas; admin vê todas)
       operationId: solicitacoesLgpdListar
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - { name: tipo, in: query, schema: { type: string } }
       responses:
         '200': { description: Solicitações, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
     post:
       tags: [lgpd]
-      summary: Abrir solicitação LGPD (inativação/anonimização/descarte rastreável)
+      summary: Abrir solicitação LGPD (zona de perigo — rastreável, sem exclusão direta)
       operationId: solicitacaoLgpdCriar
       parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody:
@@ -1131,14 +1349,57 @@ paths:
           application/json:
             schema:
               type: object
-              required: [tipo, alvo]
+              required: [tipo, descricao]
               properties:
-                tipo: { type: string, enum: [inativacao, anonimizacao, exportacao, descarte] }
-                alvo: { type: string, description: "entidade/identificador alvo" }
-                justificativa: { type: string }
+                tipo: { type: string, enum: [acesso, correcao, portabilidade, anonimizacao, exclusao] }
+                descricao: { type: string }
+                aluno_id: { type: string, format: uuid, description: "titular aluno (exige gestão de alunos)" }
       responses:
-        '202': { description: Solicitação registrada }
+        '201': { description: Solicitação registrada, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/ValidationError' }
+  /solicitacoes-lgpd/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [lgpd]
+      summary: Detalhe de uma solicitação (dono ou admin)
+      operationId: solicitacaoLgpdObter
+      responses:
+        '200': { description: Solicitação, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /solicitacoes-lgpd/{id}/processar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [lgpd]
+      summary: Processar solicitação (anonimização/inativação + trilha de descarte)
+      operationId: solicitacaoLgpdProcessar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decisao]
+              properties:
+                decisao: { type: string }
+      responses:
+        '200': { description: Solicitação concluída, content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /auditorias:
+    get:
+      tags: [configuracoes]
+      summary: Consultar trilha de auditoria (escopada)
+      operationId: auditoriasListar
+      parameters:
+        - { name: acao, in: query, schema: { type: string } }
+        - { name: entidade_tipo, in: query, schema: { type: string } }
+        - { name: usuario_id, in: query, schema: { type: string, format: uuid } }
+        - { name: de, in: query, schema: { type: string, format: date-time } }
+        - { name: ate, in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200': { description: Auditorias, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '403': { $ref: '#/components/responses/Forbidden' }
 
 components:
   securitySchemes:
@@ -1255,17 +1516,6 @@ components:
                     items: { $ref: '#/components/schemas/Perfil' }
 
   schemas:
-    Dashboard:
-      type: object
-      description: "Composição dinâmica do painel: KPIs, blocos e widgets por ator/escopo"
-      properties:
-        ator: { type: string, enum: [admin, aluno, coordenador, diretor-escolar, diretor-nucleo, professor, geral] }
-        kpis:
-          type: array
-          items: { type: object }
-        blocos:
-          type: array
-          items: { type: object }
     Meta:
       type: object
       properties:
