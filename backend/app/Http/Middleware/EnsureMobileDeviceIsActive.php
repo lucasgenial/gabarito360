@@ -32,17 +32,27 @@ class EnsureMobileDeviceIsActive
             return $next($request);
         }
 
-        $device = $accessToken->dispositivoMobile()
-            ->where('usuario_id', $request->user()->id)
-            ->first();
+        $user = $request->user();
+        $requestId = $request->attributes->get('request_id');
+
+        // Otimização: evita query se o relacionamento já foi carregado no Provider/Auth
+        $device = $accessToken->relationLoaded('dispositivoMobile')
+            ? $accessToken->dispositivoMobile
+            : $accessToken->dispositivoMobile()->where('usuario_id', $user->id)->first();
 
         if ($device === null || $device->isRevoked()) {
             $this->audit->record(
                 action: AuditAction::ACCESS_BLOCKED_DEVICE,
                 entityType: 'dispositivo_mobile',
                 entityId: $device?->id,
-                actorUserId: $request->user()->id,
-                metadata: ['motivo' => $device === null ? 'dispositivo_inexistente' : 'dispositivo_revogado'],
+                actorUserId: $user->id,
+                metadata: [
+                    'motivo' => $device === null ? 'dispositivo_inexistente' : 'dispositivo_revogado',
+                    'request_id' => $requestId,
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'token_id' => $accessToken->id,
+                ],
             );
 
             $accessToken->delete();
@@ -55,10 +65,11 @@ class EnsureMobileDeviceIsActive
                 action: AuditAction::ACCESS_BLOCKED_VERSION,
                 entityType: 'dispositivo_mobile',
                 entityId: $device->id,
-                actorUserId: $request->user()->id,
+                actorUserId: $user->id,
                 metadata: [
                     'versao_app' => $device->versao_app,
-                    'versao_minima' => config('gabarito360.mobile.minimum_app_version'),
+                    'versao_minima' => (string) config('gabarito360.mobile.minimum_app_version', '1.0.0'),
+                    'request_id' => $requestId,
                 ],
             );
 

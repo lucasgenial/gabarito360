@@ -31,7 +31,7 @@
 
 | Tela | Mapa | Rota | Endpoints `/api/v2` | Tabelas | Backend |
 |---|---|---|---|---|---|
-| 7 painéis por ator | [dashboards](telas/dashboards.md) | `/painel` | `dashboards/{ator}`, `dashboards/{ator}/kpis`, `dashboards/{ator}/desempenho`, `atividades-recentes`, `agenda`, `alertas` | `snapshots_indicadores`, `atividades_recentes`, `eventos_agenda`, `notificacoes` (+ agregações) | B6/B7 |
+| 7 painéis por ator | [dashboards](telas/dashboards.md) | `/painel` | `dashboards/aplicacao/{id}` ✓, `dashboards/prova/{id}` ✓, `dashboards/prova/{id}/snapshot` ✓; `dashboards/{ator}`, `.../kpis`, `.../desempenho`, `atividades-recentes`, `agenda`, `alertas` (B7) | `snapshots_indicadores`, `atividades_recentes`, `eventos_agenda`, `notificacoes` (+ agregações) | B6 ✓ / B7 |
 
 ### Escolas e equipe
 
@@ -58,8 +58,8 @@
 | Criar prova | [criar-prova](telas/criar-prova.md) | `/provas/criar` | `provas`, `provas/{id}/gabarito`, `.../publicar`, `padroes-prova`, `.../cartao.pdf`, `.../turmas` | `provas`, `questoes`, `gabaritos_oficiais`, `gabaritos_respostas`, `padroes_prova`, `versoes_prova`, `materiais_prova` | B4 |
 | Gabarito oficial | [gabarito](telas/gabarito.md) | `/provas/{id}/gabarito` | `provas/{id}/gabarito`, `.../gabarito.pdf` | `gabaritos_oficiais`, `gabaritos_respostas`, `versoes_prova` | B4 |
 | Acompanhar correção (geral/turma) | [correcao](telas/correcao.md) | `/correcao/{prova}[/turma/{t}]` | `correcao/{prova}`, `.../pendencias`, `leituras/{l}/revisao` + eventos Reverb | `aplicacoes`, `leituras_cartao`, `respostas_detectadas`, `processamentos_omr`, `revisoes_leitura` | B5/B7 |
-| Resultado individual | [resultados](telas/resultados.md) | `/resultados/{aluno}/{prova}` | `resultados/{id}`, `.../{id}.pdf`, `leituras/{l}/revisao` | `resultados`, `resultados_questoes`, `respostas_detectadas`, `metricas_omr` | B6 |
-| Relatórios (prova/turma) | [relatorios](telas/relatorios.md) | `/relatorios/...` | `relatorios/prova/{id}`, `.../turma-prova/{t}/{p}`, `.../{id}/exportar/{pdf\|csv\|xlsx}` | `resultados`, `resultados_questoes`, `temas_habilidades`, `exportacoes`, `comparativos` | B6 |
+| Resultado individual | [resultados](telas/resultados.md) | `/resultados/{aluno}/{prova}` | `resultados` (filtro), `resultados/{id}`, `leituras/{l}/revisao` | `resultados`, `resultados_questoes`, `respostas_detectadas`, `metricas_omr` | B6 ✓ |
+| Relatórios (prova/turma) | [relatorios](telas/relatorios.md) | `/relatorios/...` | `relatorios/prova/{id}` (`?turma_id=`), `relatorios/prova/{id}/exportar` (`csv\|pdf\|xlsx`), `exportacoes`, `exportacoes/{id}/download`, `comparativos/nucleo/{n}` | `resultados`, `resultados_questoes`, `temas_habilidades`, `exportacoes`, `comparativos` | B6 ✓ |
 
 ## Cobertura por passo de backend
 
