@@ -82,4 +82,7 @@ enum AuditAction: string
     case REPORT_DOWNLOADED = 'relatorio.downloaded';
     case EXPORT_REQUESTED = 'exportacao.requested';
     case EXPORT_DOWNLOADED = 'exportacao.downloaded';
+    case LGPD_REQUEST_CREATED = 'lgpd.solicitacao.created';
+    case LGPD_REQUEST_PROCESSED = 'lgpd.solicitacao.processed';
+    case LGPD_SUBJECT_ANONYMIZED = 'lgpd.titular.anonimizado';
 }

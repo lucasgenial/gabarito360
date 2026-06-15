@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SolicitacaoLgpd extends Model
 {
@@ -17,6 +18,11 @@ class SolicitacaoLgpd extends Model
     public function solicitante(): BelongsTo
     {
         return $this->belongsTo(User::class, 'solicitante_id');
+    }
+
+    public function execucoes(): HasMany
+    {
+        return $this->hasMany(ExecucaoDescarte::class, 'solicitacao_lgpd_id');
     }
 
     protected function casts(): array
