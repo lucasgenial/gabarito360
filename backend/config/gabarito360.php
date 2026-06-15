@@ -18,6 +18,11 @@ return [
         'meta_aprovacao' => (float) env('GABARITO360_RESULTADOS_META_APROVACAO', 60.0),
     ],
 
+    'lgpd' => [
+        // Prazo (dias) para resposta a uma solicitação LGPD do titular.
+        'prazo_resposta_dias' => (int) env('GABARITO360_LGPD_PRAZO_RESPOSTA_DIAS', 15),
+    ],
+
     'imports' => [
         'students' => [
             'max_file_kilobytes' => (int) env('GABARITO360_STUDENT_IMPORT_MAX_FILE_KILOBYTES', 2048),

@@ -25,7 +25,7 @@
 | Acesso | [login](telas/login.md) | `/login` | `auth/login`, `auth/forgot-password`, `auth/reset-password`, `onboarding`, `onboarding/perfis` | `users`, `perfis`, `solicitacoes_cadastro`, `convites_usuarios`, `consentimentos` | B1 |
 | Shell autenticado | [_shell](telas/_shell.md) | (todas) | `me`, `auth/logout`, `me/preferencias` | `users`, `usuarios_lotacoes`, `preferencias_usuarios` | B1 |
 | Perfil | [perfil](telas/perfil.md) | `/perfil` | `me`, `me/senha`, `me/foto`, `me/sessoes`, `me/preferencias` | `users`, `sessoes_usuarios`, `historicos_acesso`, `preferencias_notificacoes`, `arquivos` | B1/B8 |
-| Configurações | [configuracoes](telas/configuracoes.md) | `/configuracoes` | `me/preferencias`, `plano-uso`, `integracoes`, `integracoes/{id}/testar`, `importacoes`, `exportacoes`, `solicitacoes-lgpd` | `preferencias_usuarios`, `planos_uso`, `integracoes`, `credenciais_integracoes`, `consentimentos`, `politicas_retencao`, `solicitacoes_lgpd` | B2/B8 |
+| Configurações | [configuracoes](telas/configuracoes.md) | `/configuracoes` | `me/preferencias` ✓, `plano-uso` ✓, `solicitacoes-lgpd` (+`/{id}`, `/{id}/processar`) ✓, `auditorias` ✓, `integracoes`, `integracoes/{id}/testar`, `importacoes`, `exportacoes` | `preferencias_usuario`, `planos_uso`, `politicas_retencao`, `execucoes_descarte`, `solicitacoes_lgpd`, `consentimentos`, `auditorias`, `integracoes`, `credenciais_integracoes` | B2 / B8 ✓ |
 
 ### Dashboards
 
@@ -72,7 +72,7 @@
 | B5 Aplicações/OMR | Acompanhar correção |
 | B6 Resultados/relatórios | Resultado, Relatórios, Dashboards (indicadores) |
 | B7 Comunicação/tempo real ✓ | Notificações (sino do shell), Agenda, Atividade recente, eventos Reverb da correção |
-| B8 Conta/LGPD | Perfil, Configurações (privacidade/zona de perigo), remoções LGPD |
+| B8 Conta/LGPD ✓ | Configurações (plano/uso, privacidade, zona de perigo), solicitações LGPD com anonimização/descarte, consulta de auditorias |
 
 ## Registro por entrega (manter por tela)
 

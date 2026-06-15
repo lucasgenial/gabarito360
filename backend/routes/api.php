@@ -6,11 +6,13 @@ use App\Http\Controllers\Api\V2\Alunos\AlunoFichaController;
 use App\Http\Controllers\Api\V2\Alunos\AlunoFotoController;
 use App\Http\Controllers\Api\V2\Aplicacoes\AplicacaoController;
 use App\Http\Controllers\Api\V2\Atividades\AtividadeController;
+use App\Http\Controllers\Api\V2\Auditorias\AuditoriaController;
 use App\Http\Controllers\Api\V2\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V2\Auth\LoginController;
 use App\Http\Controllers\Api\V2\Auth\LogoutController;
 use App\Http\Controllers\Api\V2\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\V2\Comparativos\ComparativoController;
+use App\Http\Controllers\Api\V2\Configuracoes\PlanoUsoController;
 use App\Http\Controllers\Api\V2\Correcao\CorrecaoController;
 use App\Http\Controllers\Api\V2\Dashboards\DashboardController;
 use App\Http\Controllers\Api\V2\Escolas\EscolaController;
@@ -19,6 +21,7 @@ use App\Http\Controllers\Api\V2\Escolas\MembroController;
 use App\Http\Controllers\Api\V2\HealthController;
 use App\Http\Controllers\Api\V2\Integracoes\IntegracaoController;
 use App\Http\Controllers\Api\V2\Leituras\LeituraController;
+use App\Http\Controllers\Api\V2\Lgpd\SolicitacaoLgpdController;
 use App\Http\Controllers\Api\V2\Me\MeController;
 use App\Http\Controllers\Api\V2\Me\SessaoController;
 use App\Http\Controllers\Api\V2\Me\ShowFotoController;
@@ -198,5 +201,13 @@ Route::prefix('v2')->name('api.v2.')->group(function () {
 
         // Atividades recentes (B7) — feed dos painéis
         Route::get('/atividades-recentes', [AtividadeController::class, 'index'])->name('atividades-recentes.index');
+
+        // Conta e LGPD (B8)
+        Route::get('/plano-uso', [PlanoUsoController::class, 'show'])->name('plano-uso.show');
+        Route::get('/solicitacoes-lgpd', [SolicitacaoLgpdController::class, 'index'])->name('solicitacoes-lgpd.index');
+        Route::post('/solicitacoes-lgpd', [SolicitacaoLgpdController::class, 'store'])->name('solicitacoes-lgpd.store');
+        Route::get('/solicitacoes-lgpd/{solicitacao}', [SolicitacaoLgpdController::class, 'show'])->name('solicitacoes-lgpd.show');
+        Route::post('/solicitacoes-lgpd/{solicitacao}/processar', [SolicitacaoLgpdController::class, 'processar'])->name('solicitacoes-lgpd.processar');
+        Route::get('/auditorias', [AuditoriaController::class, 'index'])->name('auditorias.index');
     });
 });
