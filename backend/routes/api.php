@@ -3,15 +3,18 @@
 use App\Http\Controllers\Api\V2\Alunos\AlunoController;
 use App\Http\Controllers\Api\V2\Alunos\AlunoFichaController;
 use App\Http\Controllers\Api\V2\Alunos\AlunoFotoController;
+use App\Http\Controllers\Api\V2\Aplicacoes\AplicacaoController;
 use App\Http\Controllers\Api\V2\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V2\Auth\LoginController;
 use App\Http\Controllers\Api\V2\Auth\LogoutController;
 use App\Http\Controllers\Api\V2\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\V2\Correcao\CorrecaoController;
 use App\Http\Controllers\Api\V2\Escolas\EscolaController;
 use App\Http\Controllers\Api\V2\Escolas\EscolaPerfilController;
 use App\Http\Controllers\Api\V2\Escolas\MembroController;
 use App\Http\Controllers\Api\V2\HealthController;
 use App\Http\Controllers\Api\V2\Integracoes\IntegracaoController;
+use App\Http\Controllers\Api\V2\Leituras\LeituraController;
 use App\Http\Controllers\Api\V2\Me\MeController;
 use App\Http\Controllers\Api\V2\Me\SessaoController;
 use App\Http\Controllers\Api\V2\Me\ShowFotoController;
@@ -124,5 +127,22 @@ Route::prefix('v2')->name('api.v2.')->group(function () {
         Route::get('/provas/{prova}/turmas', [ProvaTurmaController::class, 'index'])->name('provas.turmas.index');
         Route::post('/provas/{prova}/turmas', [ProvaTurmaController::class, 'store'])->name('provas.turmas.store');
         Route::delete('/provas/{prova}/turmas/{turma}', [ProvaTurmaController::class, 'destroy'])->name('provas.turmas.destroy');
+
+        // Aplicacoes (ciclo operacional)
+        Route::get('/aplicacoes', [AplicacaoController::class, 'index'])->name('aplicacoes.index');
+        Route::post('/aplicacoes', [AplicacaoController::class, 'store'])->name('aplicacoes.store');
+        Route::get('/aplicacoes/{aplicacao}', [AplicacaoController::class, 'show'])->name('aplicacoes.show');
+        Route::post('/aplicacoes/{aplicacao}/iniciar', [AplicacaoController::class, 'iniciar'])->name('aplicacoes.iniciar');
+        Route::post('/aplicacoes/{aplicacao}/finalizar', [AplicacaoController::class, 'finalizar'])->name('aplicacoes.finalizar');
+        Route::get('/aplicacoes/{aplicacao}/leituras', [LeituraController::class, 'index'])->name('aplicacoes.leituras.index');
+        Route::post('/aplicacoes/{aplicacao}/leituras', [LeituraController::class, 'capturar'])->name('aplicacoes.leituras.capturar');
+
+        // Leituras (confirmar e revisar pendencias)
+        Route::post('/leituras/{leitura}/confirmar', [LeituraController::class, 'confirmar'])->name('leituras.confirmar');
+        Route::post('/leituras/{leitura}/revisao', [LeituraController::class, 'revisar'])->name('leituras.revisao');
+
+        // Correcao (progresso e pendencias por prova)
+        Route::get('/correcao/{prova}', [CorrecaoController::class, 'progresso'])->name('correcao.progresso');
+        Route::get('/correcao/{prova}/pendencias', [CorrecaoController::class, 'pendencias'])->name('correcao.pendencias');
     });
 });

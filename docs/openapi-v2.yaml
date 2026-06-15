@@ -791,6 +791,109 @@ paths:
         '204': { description: Desvinculada }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  # ───────────────────────── Aplicações & leituras ─────────────────────────
+  /aplicacoes:
+    get:
+      tags: [aplicacoes]
+      summary: Listar aplicações no escopo
+      operationId: aplicacoesListar
+      parameters:
+        - { name: prova, in: query, schema: { type: string, format: uuid } }
+        - { name: turma, in: query, schema: { type: string, format: uuid } }
+        - { name: escola, in: query, schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { type: string, enum: [rascunho, agendada, em_andamento, finalizada, cancelada] } }
+        - { $ref: '#/components/parameters/Page' }
+      responses:
+        '200': { description: Aplicações, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [aplicacoes]
+      summary: Criar aplicação (gabarito vigente derivado da prova)
+      operationId: aplicacaoCriar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AplicacaoInput' }
+      responses:
+        '201':
+          description: Criada
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/Aplicacao' } }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /aplicacoes/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [aplicacoes]
+      summary: Detalhe da aplicação (com métricas de progresso)
+      operationId: aplicacaoObter
+      responses:
+        '200':
+          description: Aplicação
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/Aplicacao' } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /aplicacoes/{id}/iniciar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [aplicacoes]
+      summary: Iniciar aplicação (agendada → em andamento)
+      operationId: aplicacaoIniciar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200': { description: Iniciada }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /aplicacoes/{id}/finalizar:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      tags: [aplicacoes]
+      summary: Finalizar aplicação (bloqueia se há pendências de revisão)
+      operationId: aplicacaoFinalizar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200': { description: Finalizada }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /aplicacoes/{id}/leituras:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [aplicacoes]
+      summary: Listar leituras da aplicação
+      operationId: aplicacaoLeiturasListar
+      responses:
+        '200': { description: Leituras, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [aplicacoes]
+      summary: Capturar cartão (imagem + OMR do app) — idempotente por operacao_id
+      operationId: aplicacaoLeituraCapturar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/CapturaLeitura' }
+      responses:
+        '201':
+          description: Leitura registrada
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/Leitura' } }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
   # ───────────────────────── Correção & leituras ─────────────────────────
   /correcao/{prova}:
     parameters:
@@ -819,7 +922,15 @@ paths:
       summary: Pendências de revisão (ambígua, em branco, baixa confiança)
       operationId: correcaoPendenciasListar
       responses:
-        '200': { description: Pendências, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeList' } } } }
+        '200':
+          description: Pendências
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/EnvelopeList'
+                  - properties:
+                      data: { type: array, items: { $ref: '#/components/schemas/PendenciaLeitura' } }
         '404': { $ref: '#/components/responses/NotFound' }
   /leituras/{leitura}/revisao:
     parameters:
@@ -842,6 +953,24 @@ paths:
                 motivo: { type: string }
       responses:
         '200': { description: Pendência resolvida }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /leituras/{leitura}/confirmar:
+    parameters:
+      - { name: leitura, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [correcao]
+      summary: Confirmar leitura (idempotente) e calcular resultado
+      operationId: leituraConfirmar
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200':
+          description: Leitura confirmada (resultado_id em meta)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties: { data: { $ref: '#/components/schemas/Leitura' } }
         '409': { $ref: '#/components/responses/Conflict' }
 
   # ───────────────────────── Resultados & relatórios ─────────────────────────
@@ -1417,6 +1546,123 @@ components:
         pendentes: { type: integer }
         ambiguos: { type: integer }
         percentual: { type: number }
+    Aplicacao:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        titulo: { type: string }
+        status: { type: string, enum: [rascunho, agendada, em_andamento, finalizada, cancelada] }
+        prova:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            titulo: { type: [string, "null"] }
+        turma:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            nome: { type: [string, "null"] }
+        escola:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            nome: { type: [string, "null"] }
+        inicio_previsto_at: { type: [string, "null"], format: date-time }
+        fim_previsto_at: { type: [string, "null"], format: date-time }
+        iniciada_at: { type: [string, "null"], format: date-time }
+        finalizada_at: { type: [string, "null"], format: date-time }
+        metricas:
+          type: object
+          properties:
+            status: { type: string }
+            expected_students: { type: integer }
+            readings: { type: integer }
+            pending_review: { type: integer }
+            confirmed_readings: { type: integer }
+            current_results: { type: integer }
+    AplicacaoInput:
+      type: object
+      required: [prova_id, turma_id, titulo]
+      properties:
+        prova_id: { type: string, format: uuid }
+        turma_id: { type: string, format: uuid }
+        titulo: { type: string, maxLength: 180 }
+        inicio_previsto_at: { type: string, format: date-time }
+        fim_previsto_at: { type: string, format: date-time }
+    Leitura:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        aplicacao_id: { type: string, format: uuid }
+        status: { type: string, enum: [recebida, em_revisao, revisada, confirmada, cancelada, falhou] }
+        requer_revisao: { type: boolean }
+        confianca_geral: { type: [number, "null"] }
+        alertas: { type: array, items: { type: string } }
+        aluno:
+          type: object
+          properties:
+            id: { type: [string, "null"], format: uuid }
+            nome: { type: [string, "null"] }
+        respostas:
+          type: array
+          items:
+            type: object
+            properties:
+              questao: { type: integer }
+              detectada: { type: [string, "null"] }
+              final: { type: [string, "null"] }
+              tipo: { type: string }
+              confianca: { type: [number, "null"] }
+    CapturaLeitura:
+      type: object
+      required: [imagem, aplicacao_aluno_id, operacao_id, respostas]
+      properties:
+        imagem: { type: string, format: binary }
+        aplicacao_aluno_id: { type: string, format: uuid }
+        operacao_id: { type: string, maxLength: 90 }
+        dispositivo_id: { type: string, format: uuid }
+        codigo_impresso_detectado: { type: string }
+        confianca_geral: { type: number }
+        requer_revisao: { type: boolean }
+        omr_versao: { type: string }
+        alertas: { type: array, items: { type: string } }
+        respostas:
+          type: array
+          items:
+            type: object
+            required: [numero, tipo_deteccao]
+            properties:
+              numero: { type: integer }
+              alternativa_detectada: { type: string }
+              tipo_deteccao: { type: string, enum: [marcada, branco, dupla, ambigua] }
+              confianca: { type: number }
+    PendenciaLeitura:
+      type: object
+      properties:
+        leitura_id: { type: string, format: uuid }
+        aplicacao_id: { type: string, format: uuid }
+        status: { type: string }
+        confianca_geral: { type: [number, "null"] }
+        alertas: { type: array, items: { type: string } }
+        aluno:
+          type: object
+          properties:
+            id: { type: [string, "null"], format: uuid }
+            nome: { type: [string, "null"] }
+        turma:
+          type: object
+          properties:
+            id: { type: [string, "null"], format: uuid }
+            nome: { type: [string, "null"] }
+        questoes_pendentes:
+          type: array
+          items:
+            type: object
+            properties:
+              questao: { type: integer }
+              tipo: { type: string }
+              detectada: { type: [string, "null"] }
+              confianca: { type: [number, "null"] }
     Resultado:
       type: object
       properties:

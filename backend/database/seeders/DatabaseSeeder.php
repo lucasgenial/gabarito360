@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AccessControlSeeder::class,
             AcademicCatalogSeeder::class,
+            OperationsDemoSeeder::class,
         ]);
     }
 }
