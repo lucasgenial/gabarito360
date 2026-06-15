@@ -37,4 +37,19 @@ trait InteractsWithIdentity
     {
         return $user->createToken('api', ['api'])->plainTextToken;
     }
+
+    /**
+     * Autentica a próxima requisição como {@see $user} via Bearer token real.
+     *
+     * O guard `auth:sanctum` (RequestGuard) memoriza o usuário resolvido na
+     * primeira requisição e a instância sobrevive entre as várias chamadas HTTP
+     * de um mesmo método de teste. Sem limpar os guards, um segundo
+     * `withToken()` de outro usuário continuaria respondendo como o primeiro.
+     */
+    protected function actingAsToken(User $user): static
+    {
+        $this->app['auth']->forgetGuards();
+
+        return $this->withToken($this->bearerToken($user));
+    }
 }

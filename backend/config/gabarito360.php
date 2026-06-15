@@ -12,6 +12,12 @@ return [
         'token_expiration_days' => (int) env('GABARITO360_MOBILE_TOKEN_EXPIRATION_DAYS', 30),
     ],
 
+    'resultados' => [
+        // Nota percentual mínima para considerar um aluno aprovado nos
+        // relatórios/dashboards de prova (status aprovado vs. recuperação).
+        'meta_aprovacao' => (float) env('GABARITO360_RESULTADOS_META_APROVACAO', 60.0),
+    ],
+
     'imports' => [
         'students' => [
             'max_file_kilobytes' => (int) env('GABARITO360_STUDENT_IMPORT_MAX_FILE_KILOBYTES', 2048),

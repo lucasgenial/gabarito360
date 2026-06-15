@@ -8,7 +8,9 @@ use App\Http\Controllers\Api\V2\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V2\Auth\LoginController;
 use App\Http\Controllers\Api\V2\Auth\LogoutController;
 use App\Http\Controllers\Api\V2\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\V2\Comparativos\ComparativoController;
 use App\Http\Controllers\Api\V2\Correcao\CorrecaoController;
+use App\Http\Controllers\Api\V2\Dashboards\DashboardController;
 use App\Http\Controllers\Api\V2\Escolas\EscolaController;
 use App\Http\Controllers\Api\V2\Escolas\EscolaPerfilController;
 use App\Http\Controllers\Api\V2\Escolas\MembroController;
@@ -28,6 +30,10 @@ use App\Http\Controllers\Api\V2\Onboarding\SolicitacaoController;
 use App\Http\Controllers\Api\V2\Provas\GabaritoController;
 use App\Http\Controllers\Api\V2\Provas\ProvaController;
 use App\Http\Controllers\Api\V2\Provas\ProvaTurmaController;
+use App\Http\Controllers\Api\V2\Relatorios\ExportacaoController;
+use App\Http\Controllers\Api\V2\Relatorios\RelatorioController;
+use App\Http\Controllers\Api\V2\Relatorios\RelatorioProvaController;
+use App\Http\Controllers\Api\V2\Resultados\ResultadoController;
 use App\Http\Controllers\Api\V2\Turmas\TurmaController;
 use App\Http\Middleware\Api\V2\EnsureIdempotency;
 use App\Http\Middleware\Api\V2\EnsureOrganizationalScope;
@@ -144,5 +150,33 @@ Route::prefix('v2')->name('api.v2.')->group(function () {
         // Correcao (progresso e pendencias por prova)
         Route::get('/correcao/{prova}', [CorrecaoController::class, 'progresso'])->name('correcao.progresso');
         Route::get('/correcao/{prova}/pendencias', [CorrecaoController::class, 'pendencias'])->name('correcao.pendencias');
+
+        // Resultados (B6)
+        Route::get('/resultados', [ResultadoController::class, 'index'])->name('resultados.index');
+        Route::get('/resultados/{resultado}', [ResultadoController::class, 'show'])->name('resultados.show');
+
+        // Dashboards (B6)
+        Route::get('/dashboards/aplicacao/{aplicacao}', [DashboardController::class, 'aplicacao'])->name('dashboards.aplicacao');
+        Route::get('/dashboards/prova/{prova}', [DashboardController::class, 'prova'])->name('dashboards.prova');
+
+        // Relatórios (B6)
+        Route::get('/relatorios', [RelatorioController::class, 'index'])->name('relatorios.index');
+        Route::post('/relatorios', [RelatorioController::class, 'store'])->name('relatorios.store');
+        // Relatório de prova (dados) + exportação multi-formato — antes do wildcard {relatorio}.
+        Route::get('/relatorios/prova/{prova}', [RelatorioProvaController::class, 'show'])->name('relatorios.prova');
+        Route::post('/relatorios/prova/{prova}/exportar', [ExportacaoController::class, 'store'])->name('relatorios.prova.exportar');
+        Route::get('/relatorios/{relatorio}', [RelatorioController::class, 'show'])->name('relatorios.show');
+        Route::get('/relatorios/{relatorio}/download', [RelatorioController::class, 'download'])->name('relatorios.download');
+
+        // Exportações (B6) — artefatos csv/pdf/xlsx de relatórios
+        Route::get('/exportacoes', [ExportacaoController::class, 'index'])->name('exportacoes.index');
+        Route::get('/exportacoes/{exportacao}', [ExportacaoController::class, 'show'])->name('exportacoes.show');
+        Route::get('/exportacoes/{exportacao}/download', [ExportacaoController::class, 'download'])->name('exportacoes.download');
+
+        // Comparativos (B6)
+        Route::get('/comparativos/nucleo/{nucleo}', [ComparativoController::class, 'nucleo'])->name('comparativos.nucleo');
+
+        // Snapshot de indicadores da prova (B6)
+        Route::get('/dashboards/prova/{prova}/snapshot', [DashboardController::class, 'snapshot'])->name('dashboards.prova.snapshot');
     });
 });

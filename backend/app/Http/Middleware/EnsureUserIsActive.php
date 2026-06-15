@@ -32,7 +32,12 @@ class EnsureUserIsActive
                     entityType: 'usuario',
                     entityId: $user->id,
                     actorUserId: $user->id,
-                    metadata: ['motivo' => 'usuario_inativo_bloqueado_ou_excluido'],
+                    metadata: [
+                        'motivo' => 'usuario_inativo_bloqueado_ou_excluido',
+                        'request_id' => $request->attributes->get('request_id'),
+                        'contexto' => $user->tokenCan('mobile') ? 'mobile' : 'web/api',
+                        'ip' => $request->ip(),
+                    ],
                 );
             }
 

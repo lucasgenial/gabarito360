@@ -79,4 +79,7 @@ enum AuditAction: string
     case RESULT_CALCULATED = 'resultado.calculated';
     case REPORT_REQUESTED = 'relatorio.requested';
     case REPORT_COMPLETED = 'relatorio.completed';
+    case REPORT_DOWNLOADED = 'relatorio.downloaded';
+    case EXPORT_REQUESTED = 'exportacao.requested';
+    case EXPORT_DOWNLOADED = 'exportacao.downloaded';
 }
