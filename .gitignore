@@ -1,0 +1,36 @@
+# Dependências
+node_modules/
+vendor/
+
+# Laravel
+apps/api/.env
+apps/api/storage/logs/
+apps/api/storage/framework/cache/
+apps/api/storage/framework/sessions/
+apps/api/storage/framework/views/
+apps/api/bootstrap/cache/
+apps/web/.env
+apps/web/storage/logs/
+apps/web/storage/framework/cache/
+apps/web/storage/framework/sessions/
+apps/web/storage/framework/views/
+apps/web/bootstrap/cache/
+
+# React Native
+apps/android/.env
+apps/ios/.env
+apps/android/android/
+apps/ios/ios/
+
+# IDEs e editores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Imagens de cartões (dados de produção)
+apps/api/storage/app/cartoes/
