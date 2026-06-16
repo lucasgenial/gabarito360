@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Provas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .toolbar { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
+  .toolbar .input-icon { flex: 1; min-width: 240px; }
+  .toolbar .select { width: auto; min-width: 170px; }
+  .exam-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .turmas-list { color: var(--fg-2); font-size: 14px; }
+  .progress-cell { display: flex; align-items: center; }
+  .mini-bar { width: 76px; height: 7px; background: var(--surface-2); border-radius: 99px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  .mini-bar > div { height: 100%; }
+  .empty-note { color: var(--muted); font-size: 14px; }
+  .btn-result { background: var(--success-light); color: var(--success); }
+  .btn-result:hover { filter: brightness(0.95); }
+  .btn-track { background: var(--warn-light); color: var(--warn-fg); }
+  .btn-track:hover { filter: brightness(0.95); }
+  .btn-key { background: var(--accent-light); color: var(--accent-dark); }
+  .btn-key:hover { filter: brightness(0.95); }
+  .btn-action { min-width: 144px; }
+  @media (max-width:900px){
+    .hide-sm{display:none;}
+    .btn-action{ min-width: 0; padding: 8px 10px; }
+    .btn-action .btn-label{ display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a>
+      <a href="provas.html" class="active">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Marcos Silva</div>
+            <div class="user-role">Professor</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb"><span>Início</span><span class="sep">/</span><span>Provas</span></div>
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title">Provas e gabaritos</h1>
+      <p class="page-sub"><b id="exam-count">0</b> provas · período letivo 2025 · 2º bimestre</p>
+    </div>
+    <a href="criar-prova.html" class="btn btn-primary">+ Nova prova</a>
+  </div>
+
+  <div class="toolbar">
+    <div class="input-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input class="input" id="exam-search" placeholder="Buscar prova por título…" />
+    </div>
+    <select class="select" id="filter-disciplina">
+      <option value="">Todas as disciplinas</option>
+      <option value="Matemática">Matemática</option>
+      <option value="Português">Português</option>
+      <option value="Ciências">Ciências</option>
+      <option value="História">História</option>
+      <option value="Geografia">Geografia</option>
+      <option value="Inglês">Inglês</option>
+    </select>
+    <select class="select" id="filter-status">
+      <option value="">Todos os status</option>
+      <option value="rascunho">Rascunho</option>
+      <option value="publicada">Publicada</option>
+      <option value="correcao">Em correção</option>
+      <option value="corrigida">Corrigida</option>
+    </select>
+  </div>
+
+  <div class="card" style="margin-top:18px;overflow:hidden;">
+    <table class="table">
+      <thead><tr>
+        <th>Prova</th><th>Turmas</th><th class="hide-sm">Aplicação</th><th>Status</th><th>Progresso</th><th></th>
+      </tr></thead>
+      <tbody id="exam-tbody"></tbody>
+    </table>
+    <div id="no-results" style="display:none;padding:32px;text-align:center;" class="empty-note">Nenhuma prova corresponde aos filtros.</div>
+  </div>
+  <div style="height:48px"></div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  var exams = [
+    {titulo:'Avaliação Bimestral — Matemática', disc:'Matemática', turmas:'9º A · 9º B', data:'04/06/2025', status:'corrigida', media:6.8, total:'64/64 cartões'},
+    {titulo:'Avaliação Bimestral — Português', disc:'Português', turmas:'9º A · 9º B · 8º A · 8º B', data:'28/05/2025', status:'corrigida', media:7.2, total:'118/118 cartões'},
+    {titulo:'Simulado — Ciências', disc:'Ciências', turmas:'9º A', data:'10/06/2025', status:'correcao', done:18, totalCartoes:32},
+    {titulo:'Avaliação Diagnóstica — Inglês', disc:'Inglês', turmas:'8º A · 8º B', data:'12/06/2025', status:'publicada'},
+    {titulo:'Recuperação — Matemática', disc:'Matemática', turmas:'9º B', data:null, status:'rascunho', gDone:12, gTotal:20},
+    {titulo:'Avaliação Bimestral — História', disc:'História', turmas:'8º A', data:'20/05/2025', status:'corrigida', media:7.5, total:'29/29 cartões'},
+    {titulo:'Avaliação Bimestral — Geografia', disc:'Geografia', turmas:'9º A · 9º B', data:'22/05/2025', status:'corrigida', media:6.4, total:'64/64 cartões'},
+    {titulo:'Prova Mensal — Ciências', disc:'Ciências', turmas:'8º B', data:null, status:'rascunho', gDone:0, gTotal:25}
+  ];
+  var statusBadge = {rascunho:'badge-muted', publicada:'badge-info', correcao:'badge-warn', corrigida:'badge-success'};
+  var statusLabel = {rascunho:'Rascunho', publicada:'Publicada', correcao:'Em correção', corrigida:'Corrigida'};
+  var icoResult = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>';
+  var icoTrack = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var icoKey = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg>';
+  var icoEdit = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  var tbody = document.getElementById('exam-tbody');
+  exams.forEach(function (e) {
+    var progress;
+    if (e.status === 'corrigida') {
+      var color = e.media >= 7 ? 'var(--success)' : e.media >= 5 ? 'var(--warn)' : 'var(--danger)';
+      progress = '<div class="progress-cell"><span class="mini-bar"><div style="width:'+(e.media*10)+'%;background:'+color+'"></div></span><span class="num">'+e.media.toFixed(1).replace('.',',')+'</span></div><div class="exam-meta">'+e.total+'</div>';
+    } else if (e.status === 'correcao') {
+      var pct = Math.round(e.done / e.totalCartoes * 100);
+      progress = '<div class="progress-cell"><span class="mini-bar"><div style="width:'+pct+'%;background:var(--accent)"></div></span><span class="num">'+e.done+'/'+e.totalCartoes+'</span></div><div class="exam-meta">cartões lidos</div>';
+    } else if (e.status === 'rascunho') {
+      var pct2 = Math.round(e.gDone / e.gTotal * 100);
+      progress = '<div class="progress-cell"><span class="mini-bar"><div style="width:'+pct2+'%;background:var(--muted)"></div></span><span class="num">'+e.gDone+'/'+e.gTotal+'</span></div><div class="exam-meta">questões no gabarito</div>';
+    } else {
+      progress = '<span class="empty-note">Aguardando aplicação</span>';
+    }
+    var action;
+    if (e.status === 'corrigida') action = '<a href="relatorio-prova.html" class="btn btn-result btn-action btn-sm" aria-label="Ver resultados">'+icoResult+'<span class="btn-label">Ver resultados</span></a>';
+    else if (e.status === 'correcao') action = '<a href="acompanhar-correcao.html" class="btn btn-track btn-action btn-sm" aria-label="Acompanhar">'+icoTrack+'<span class="btn-label">Acompanhar</span></a>';
+    else if (e.status === 'publicada') action = '<a href="gabarito.html" class="btn btn-key btn-action btn-sm" aria-label="Ver gabarito">'+icoKey+'<span class="btn-label">Ver gabarito</span></a>';
+    else action = '<a href="criar-prova.html" class="btn btn-secondary btn-action btn-sm" aria-label="Continuar">'+icoEdit+'<span class="btn-label">Continuar</span></a>';
+
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-exam','');
+    tr.dataset.titulo = e.titulo; tr.dataset.disc = e.disc; tr.dataset.status = e.status;
+    tr.innerHTML =
+      '<td><b>'+e.titulo+'</b><div class="exam-meta">'+e.disc+'</div></td>'+
+      '<td class="turmas-list">'+e.turmas+'</td>'+
+      '<td class="hide-sm num">'+(e.data || '—')+'</td>'+
+      '<td><span class="badge '+statusBadge[e.status]+' badge-dot">'+statusLabel[e.status]+'</span></td>'+
+      '<td>'+progress+'</td>'+
+      '<td style="text-align:right;">'+action+'</td>';
+    tbody.appendChild(tr);
+  });
+  initExamFilter();
+</script>
+</body>
+</html>
