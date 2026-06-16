@@ -42,7 +42,10 @@ Route::middleware(['auth', EnsureUserIsActive::class])
         Route::patch('/configuracoes/senha', [AccountController::class, 'updatePassword'])->name('settings.password');
 
         Route::get('/escolas', [OrganizationController::class, 'index'])->name('schools.index');
+        Route::post('/escolas', [OrganizationController::class, 'store'])->name('schools.store');
         Route::get('/escolas/{escola}', [OrganizationController::class, 'show'])->name('schools.show');
+        Route::patch('/escolas/{escola}', [OrganizationController::class, 'update'])->name('schools.update');
+        Route::post('/escolas/{escola}/reativar', [OrganizationController::class, 'reactivate'])->name('schools.reactivate');
         Route::get('/escolas/{escola}/equipe', [OrganizationController::class, 'team'])->name('schools.team');
         Route::get('/escolas/{escola}/equipe/novo', [OrganizationController::class, 'createMember'])->name('schools.team.create');
         Route::get('/escolas/{escola}/equipe/{usuario}/editar', [OrganizationController::class, 'editMember'])->name('schools.team.edit');

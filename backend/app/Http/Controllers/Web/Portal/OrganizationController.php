@@ -2,14 +2,24 @@
 
 namespace App\Http\Controllers\Web\Portal;
 
+use App\Actions\Escolas\CreateEscolaAction;
+use App\Actions\Escolas\ReactivateEscolaAction;
+use App\Actions\Escolas\UpdateEscolaAction;
+use App\Enums\StatusEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V2\Escolas\StoreEscolaRequest;
+use App\Http\Requests\Api\V2\Escolas\UpdateEscolaRequest;
+use App\Models\Aluno;
 use App\Models\Escola;
+use App\Models\Nucleo;
+use App\Models\Turma;
 use App\Models\User;
 use App\Services\Authorization\PortalScope;
 use App\Services\Authorization\UserAdministrationScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class OrganizationController extends Controller
@@ -17,16 +27,65 @@ class OrganizationController extends Controller
     public function index(Request $request, PortalScope $scope): View
     {
         $user = $this->actor($request);
-        $schools = $scope->applySchools(
+        $search = trim((string) $request->string('q')->toString());
+        $scopedSchools = $scope->applySchools(Escola::query(), $user);
+        $schoolIds = (clone $scopedSchools)->pluck('id');
+        $hasScopedSchools = $schoolIds->isNotEmpty();
+        $schoolList = $scope->applySchools(
             Escola::query()
                 ->with('nucleo')
-                ->withCount(['turmas', 'alunos', 'aplicacoes']),
+                ->withCount([
+                    'alunos',
+                    'provas',
+                    'turmas',
+                    'turmas as turmas_ativas_count' => fn (Builder $query): Builder => $query
+                        ->where('status', StatusEnum::ACTIVE->value),
+                ]),
             $user,
-        )->orderBy('nome')->paginate(20);
+        );
 
-        abort_if($schools->isEmpty() && ! $scope->canViewApplications($user), 403);
+        if ($search !== '') {
+            $schoolList->where(function (Builder $query) use ($search): void {
+                $query
+                    ->where('nome', 'like', '%'.$search.'%')
+                    ->orWhere('codigo', 'like', '%'.$search.'%')
+                    ->orWhere('inep', 'like', '%'.$search.'%');
+            });
+        }
 
-        return view('portal.organization.index', compact('schools'));
+        $schools = $schoolList
+            ->orderBy('nome')
+            ->paginate(12)
+            ->withQueryString();
+
+        abort_if(! $hasScopedSchools && ! $scope->canViewApplications($user), 403);
+
+        $manageableNuclei = Nucleo::query()
+            ->where('status', StatusEnum::ACTIVE->value)
+            ->orderBy('nome')
+            ->get()
+            ->filter(fn (Nucleo $nucleo): bool => Gate::forUser($user)->allows('create', [Escola::class, $nucleo]))
+            ->values();
+
+        return view('portal.organization.index', [
+            'schools' => $schools,
+            'scopeLabel' => $this->scopeLabel($scope, $user),
+            'search' => $search,
+            'manageableNuclei' => $manageableNuclei,
+            'canCreateSchool' => $manageableNuclei->isNotEmpty(),
+            'kpis' => [
+                'total' => $schoolIds->count(),
+                'active' => Escola::query()
+                    ->whereIn('id', $schoolIds)
+                    ->where('status', StatusEnum::ACTIVE->value)
+                    ->count(),
+                'students' => Aluno::query()->whereIn('escola_id', $schoolIds)->count(),
+                'active_classes' => Turma::query()
+                    ->whereIn('escola_id', $schoolIds)
+                    ->where('status', StatusEnum::ACTIVE->value)
+                    ->count(),
+            ],
+        ]);
     }
 
     public function show(Request $request, Escola $escola, PortalScope $scope): View
@@ -89,11 +148,61 @@ class OrganizationController extends Controller
         return redirect()->route('admin.usuarios.edit', $usuario);
     }
 
+    public function store(
+        StoreEscolaRequest $request,
+        CreateEscolaAction $action,
+    ): RedirectResponse {
+        $action->execute($request->mappedAttributes(), $this->actor($request));
+
+        return redirect()
+            ->route('portal.schools.index')
+            ->with('school_success', 'Escola criada com sucesso.');
+    }
+
+    public function update(
+        UpdateEscolaRequest $request,
+        Escola $escola,
+        UpdateEscolaAction $action,
+    ): RedirectResponse {
+        $action->execute($escola, $request->mappedAttributes(), $this->actor($request));
+
+        return redirect()
+            ->route('portal.schools.index')
+            ->with('school_success', 'Escola atualizada com sucesso.');
+    }
+
+    public function reactivate(
+        Request $request,
+        Escola $escola,
+        ReactivateEscolaAction $action,
+    ): RedirectResponse {
+        Gate::authorize('update', $escola);
+
+        $action->execute($escola, $this->actor($request));
+
+        return redirect()
+            ->route('portal.schools.index')
+            ->with('school_success', 'Escola reativada com sucesso.');
+    }
+
     private function actor(Request $request): User
     {
         $user = $request->user();
         abort_unless($user instanceof User, 401);
 
         return $user;
+    }
+
+    private function scopeLabel(PortalScope $scope, User $user): string
+    {
+        if ($scope->isGlobalViewer($user)) {
+            return 'Rede';
+        }
+
+        $nucleoId = $scope->accessibleNucleoIds($user)->first();
+
+        return $nucleoId !== null
+            ? (string) (Nucleo::query()->whereKey($nucleoId)->value('nome') ?? 'Meu nucleo')
+            : 'Minhas escolas';
     }
 }
