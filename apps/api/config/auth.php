@@ -1,23 +1,12 @@
 <?php
 
-use App\Models\User;
+use App\Models\Usuario;
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Authentication Defaults
-    |--------------------------------------------------------------------------
-    |
-    | This option defines the default authentication "guard" and password
-    | reset "broker" for your application. You may change these values
-    | as required, but they're a perfect start for most applications.
-    |
-    */
-
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'guard'     => env('AUTH_GUARD', 'sanctum'),
+        'passwords' => env('AUTH_PASSWORD_BROKER', 'usuarios'),
     ],
 
     /*
@@ -39,8 +28,12 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
+            'driver'   => 'session',
+            'provider' => 'usuarios',
+        ],
+        'sanctum' => [
+            'driver'   => 'sanctum',
+            'provider' => 'usuarios',
         ],
     ],
 
@@ -62,15 +55,10 @@ return [
     */
 
     'providers' => [
-        'users' => [
+        'usuarios' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model'  => Usuario::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*
@@ -93,11 +81,11 @@ return [
     */
 
     'passwords' => [
-        'users' => [
-            'provider' => 'users',
-            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
-            'expire' => 60,
-            'throttle' => 60,
+        'usuarios' => [
+            'provider'  => 'usuarios',
+            'table'     => 'password_reset_tokens',
+            'expire'    => 60,
+            'throttle'  => 60,
         ],
     ],
 
