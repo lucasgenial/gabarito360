@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Detalhes da Escola</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  /* ─── Hero ─────────────────────────────────────────────── */
+  .escola-hero {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    color: #fff;
+    padding: 32px 0 0;
+    margin-bottom: 0;
+  }
+  .escola-hero-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .escola-hero-icon {
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,.18);
+    border-radius: var(--radius-md);
+    display: grid; place-items: center;
+    font-size: 30px;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,.3);
+  }
+  .escola-hero-info { flex: 1; min-width: 0; }
+  .escola-hero-info h1 { font-size: 22px; font-weight: 800; line-height: 1.2; }
+  .escola-hero-meta {
+    display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px;
+    font-size: 13px; opacity: .88;
+  }
+  .escola-hero-meta span { display: flex; align-items: center; gap: 5px; }
+  .hero-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .btn-hero { background: rgba(255,255,255,.2); color: #fff; border: 1.5px solid rgba(255,255,255,.35); font-size: 13px; padding: 7px 16px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; text-decoration: none; transition: background .15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-hero:hover { background: rgba(255,255,255,.32); color: #fff; text-decoration: none; }
+  .btn-hero-solid { background: #fff; color: var(--accent-dark); border: 1.5px solid #fff; }
+  .btn-hero-solid:hover { background: rgba(255,255,255,.88); color: var(--accent-dark); }
+
+  /* ─── Tabs ──────────────────────────────────────────────── */
+  .tabs-row {
+    display: flex; gap: 0;
+    border-bottom: none;
+    padding: 0;
+    margin-top: 20px;
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    font-size: 14px; font-weight: 600;
+    color: rgba(255,255,255,.7);
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .tab-btn.active { color: #fff; border-bottom-color: #fff; }
+  .tab-btn:hover:not(.active) { color: rgba(255,255,255,.9); }
+
+  /* ─── Tab panels ────────────────────────────────────────── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── KPI strip ─────────────────────────────────────────── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .kpi-label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+  .kpi-value { font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: var(--accent); margin: 4px 0 2px; }
+  .kpi-delta { font-size: 12px; }
+  .kpi-delta.up { color: var(--success); }
+  .kpi-delta.down { color: var(--danger); }
+  .kpi-delta.neutral { color: var(--muted); }
+
+  /* ─── 2-col layout ──────────────────────────────────────── */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+  .detail-grid-3 { grid-template-columns: 2fr 1fr; }
+
+  /* ─── Info card ─────────────────────────────────────────── */
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+    box-shadow: var(--shadow-sm);
+  }
+  .info-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--fg); }
+  .info-row {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 13px;
+  }
+  .info-row:last-child { border: 0; }
+  .info-row .lbl { color: var(--muted); min-width: 120px; flex-shrink: 0; font-weight: 500; }
+  .info-row .val { color: var(--fg); font-weight: 500; }
+
+  /* ─── Chart bar ─────────────────────────────────────────── */
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .bar-label { min-width: 90px; color: var(--muted); font-size: 12px; text-align: right; }
+  .bar-track { flex: 1; height: 10px; background: var(--border-soft); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width .6s ease; }
+  .bar-fill.green { background: var(--success); }
+  .bar-fill.yellow { background: #f59e0b; }
+  .bar-fill.red { background: var(--danger); }
+  .bar-val { min-width: 32px; font-family: var(--font-mono); font-size: 12px; color: var(--fg-2); font-weight: 600; }
+
+  /* ─── Mini line chart ───────────────────────────────────── */
+  .sparkline-area { padding: 8px 0 0; }
+  .spark-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  /* ─── Table ─────────────────────────────────────────────── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { text-align: left; padding: 10px 12px; background: var(--surface-2,#f4f6f9); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 11px 12px; border-bottom: 1px solid var(--border-soft); color: var(--fg-2); vertical-align: middle; }
+  .data-table tr:last-child td { border: 0; }
+  .data-table tr:hover td { background: rgba(0,0,0,.02); }
+  .mono { font-family: var(--font-mono); font-size: 12px; }
+
+  /* ─── Progress donut ────────────────────────────────────── */
+  .donut-wrap { display: flex; align-items: center; gap: 18px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+  .donut-item { display: flex; align-items: center; gap: 8px; }
+  .donut-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── Score gauge strip ─────────────────────────────────── */
+  .score-row { display: flex; gap: 14px; flex-wrap: wrap; margin: 14px 0; }
+  .score-box {
+    flex: 1; min-width: 80px;
+    background: var(--surface-2,#f4f6f9);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    text-align: center;
+  }
+  .score-box .s-val { font-family: var(--font-mono); font-size: 22px; font-weight: 700; }
+  .score-box .s-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* ─── Team card ─────────────────────────────────────────── */
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .team-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .team-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--accent-light); color: var(--accent-dark); display: grid; place-items: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+  .team-name { font-size: 14px; font-weight: 600; }
+  .team-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ─── Recent exams ──────────────────────────────────────── */
+  .prova-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-soft); }
+  .prova-row:last-child { border: 0; }
+  .prova-ico { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-light); color: var(--accent-dark); display: grid; place-items: center; flex-shrink: 0; font-size: 18px; }
+  .prova-info { flex: 1; min-width: 0; }
+  .prova-name { font-size: 14px; font-weight: 600; }
+  .prova-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .prova-score { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--accent); }
+
+  /* ─── Breadcrumb ────────────────────────────────────────── */
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: rgba(255,255,255,.7); padding-bottom: 6px; }
+  .breadcrumb a { color: rgba(255,255,255,.8); text-decoration: none; }
+  .breadcrumb a:hover { color: #fff; }
+  .breadcrumb-sep { opacity: .5; }
+
+  /* ─── Responsive ────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .kpi-strip { grid-template-columns: repeat(3,1fr); }
+    .detail-grid, .detail-grid-3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    .kpi-strip { grid-template-columns: repeat(2,1fr); }
+    .tabs-row { overflow-x: auto; }
+    .tab-btn { padding: 10px 14px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a>
+      <a href="provas.html">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html" class="active">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <span class="badge badge-info badge-dot">Rede Municipal</span>
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Maria Silva</div>
+            <div class="user-role">Coordenadora · Rede Municipal</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ─── Hero da escola ──────────────────────────────────────── -->
+<div class="escola-hero">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="escolas.html">Escolas</a>
+      <span class="breadcrumb-sep">/</span>
+      <span id="hero-breadcrumb">E.E. Prof. João Pessoa</span>
+    </div>
+    <div class="escola-hero-inner">
+      <div class="escola-hero-icon">🏫</div>
+      <div class="escola-hero-info">
+        <h1 id="hero-nome">E.E. Prof. João Pessoa</h1>
+        <div class="escola-hero-meta">
+          <span>
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            INEP: <strong id="hero-inep">35000001</strong>
+          </span>
+          <span>
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="hero-end">Rua das Flores, 123 — Centro, São Paulo / SP</span>
+          </span>
+          <span id="hero-status-wrap">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+            <strong id="hero-status">Ativa</strong>
+          </span>
+          <span>
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span id="hero-rede">Estadual</span>
+          </span>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-hero btn-hero-solid" onclick="window.history.back()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Voltar
+          </button>
+          <button class="btn-hero" onclick="showToast('Modo de edição disponível em breve','info')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Editar escola
+          </button>
+          <button class="btn-hero" onclick="window.location.href='turmas.html'">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Ver turmas
+          </button>
+          <button class="btn-hero" onclick="window.location.href='provas.html'">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Ver provas
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs aderidas ao hero -->
+    <div class="tabs-row" role="tablist">
+      <button class="tab-btn active" role="tab" data-tab="visao-geral">Visão Geral</button>
+      <button class="tab-btn" role="tab" data-tab="turmas">Turmas</button>
+      <button class="tab-btn" role="tab" data-tab="provas">Provas</button>
+      <button class="tab-btn" role="tab" data-tab="alunos">Alunos</button>
+      <button class="tab-btn" role="tab" data-tab="equipe">Equipe</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Conteúdo principal ─────────────────────────────────── -->
+<main class="container" style="padding-top:24px; padding-bottom:48px;">
+
+  <!-- ══ TAB: Visão Geral ══════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-visao-geral">
+
+    <!-- KPIs -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">Alunos ativos</div>
+        <div class="kpi-value">87</div>
+        <div class="kpi-delta up">↑ +4 este mês</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Turmas</div>
+        <div class="kpi-value">6</div>
+        <div class="kpi-delta neutral">2 turnos</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Provas aplicadas</div>
+        <div class="kpi-value">12</div>
+        <div class="kpi-delta up">↑ 3 este bimestre</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Média geral</div>
+        <div class="kpi-value">7,4</div>
+        <div class="kpi-delta up">↑ +0,6 vs anterior</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Taxa de aprovação</div>
+        <div class="kpi-value">91%</div>
+        <div class="kpi-delta up">↑ +3pp</div>
+      </div>
+    </div>
+
+    <!-- Info + desempenho -->
+    <div class="detail-grid detail-grid-3">
+
+      <!-- Desempenho por disciplina -->
+      <div class="info-card">
+        <h3>Desempenho por disciplina</h3>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">Matemática</div>
+            <div class="bar-track"><div class="bar-fill" style="width:72%"></div></div>
+            <div class="bar-val">7,2</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Português</div>
+            <div class="bar-track"><div class="bar-fill green" style="width:81%"></div></div>
+            <div class="bar-val">8,1</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Ciências</div>
+            <div class="bar-track"><div class="bar-fill" style="width:68%"></div></div>
+            <div class="bar-val">6,8</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">História</div>
+            <div class="bar-track"><div class="bar-fill yellow" style="width:74%"></div></div>
+            <div class="bar-val">7,4</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Geografia</div>
+            <div class="bar-track"><div class="bar-fill" style="width:70%"></div></div>
+            <div class="bar-val">7,0</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Ed. Física</div>
+            <div class="bar-track"><div class="bar-fill green" style="width:88%"></div></div>
+            <div class="bar-val">8,8</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Arte</div>
+            <div class="bar-track"><div class="bar-fill green" style="width:85%"></div></div>
+            <div class="bar-val">8,5</div>
+          </div>
+        </div>
+
+        <!-- Evolução bimestral (SVG sparkline) -->
+        <h3 style="margin-top:22px;">Evolução da média — 2025</h3>
+        <div class="sparkline-area">
+          <svg width="100%" height="80" viewBox="0 0 400 80" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--accent)" stop-opacity=".25"/>
+                <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- Area fill -->
+            <path d="M0,62 L67,50 L133,44 L200,34 L267,28 L333,20 L400,14 L400,80 L0,80 Z" fill="url(#sparkGrad)"/>
+            <!-- Line -->
+            <polyline points="0,62 67,50 133,44 200,34 267,28 333,20 400,14" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+            <!-- Dots -->
+            <circle cx="0"   cy="62" r="4" fill="var(--accent)"/>
+            <circle cx="67"  cy="50" r="4" fill="var(--accent)"/>
+            <circle cx="133" cy="44" r="4" fill="var(--accent)"/>
+            <circle cx="200" cy="34" r="4" fill="var(--accent)"/>
+            <circle cx="267" cy="28" r="4" fill="var(--accent)"/>
+            <circle cx="333" cy="20" r="4" fill="var(--accent)"/>
+            <circle cx="400" cy="14" r="4" fill="var(--accent)"/>
+          </svg>
+          <div class="spark-labels">
+            <span>1º Bi</span><span>2º Bi</span><span>3º Bi</span><span>4º Bi</span><span>1º Bi</span><span>2º Bi</span><span>3º Bi</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna direita -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+
+        <!-- Dados da escola -->
+        <div class="info-card">
+          <h3>Dados da escola</h3>
+          <div class="info-row">
+            <span class="lbl">Endereço</span>
+            <span class="val">Rua das Flores, 123 — Centro, São Paulo / SP</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">CEP</span>
+            <span class="val mono">01310-000</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Telefone</span>
+            <span class="val">(11) 3000-0001</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">E-mail</span>
+            <span class="val">joao.pessoa@edu.sp.gov.br</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Rede</span>
+            <span class="val">Estadual</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">INEP</span>
+            <span class="val mono">35000001</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Fundação</span>
+            <span class="val">12 de março de 1972</span>
+          </div>
+          <div class="info-row">
+            <span class="lbl">Status</span>
+            <span class="val"><span class="badge badge-success">Ativa</span></span>
+          </div>
+        </div>
+
+        <!-- Distribuição de notas -->
+        <div class="info-card">
+          <h3>Distribuição de notas</h3>
+          <div class="donut-wrap">
+            <svg width="88" height="88" viewBox="0 0 88 88">
+              <!-- Excelente 38% -->
+              <circle cx="44" cy="44" r="36" fill="none" stroke="var(--border-soft)" stroke-width="12"/>
+              <circle cx="44" cy="44" r="36" fill="none" stroke="var(--success)" stroke-width="12"
+                stroke-dasharray="226.2" stroke-dashoffset="0" stroke-linecap="butt"
+                transform="rotate(-90 44 44)"
+                style="stroke-dasharray: calc(226.2 * 0.38) calc(226.2 * 0.62); stroke-dashoffset: 0;"/>
+              <!-- Bom 34% -->
+              <circle cx="44" cy="44" r="36" fill="none" stroke="var(--accent)" stroke-width="12"
+                transform="rotate(-90 44 44)"
+                style="stroke-dasharray: calc(226.2 * 0.34) calc(226.2 * 0.66); stroke-dashoffset: calc(-226.2 * 0.38);"/>
+              <!-- Regular 18% -->
+              <circle cx="44" cy="44" r="36" fill="none" stroke="#f59e0b" stroke-width="12"
+                transform="rotate(-90 44 44)"
+                style="stroke-dasharray: calc(226.2 * 0.18) calc(226.2 * 0.82); stroke-dashoffset: calc(-226.2 * 0.72);"/>
+              <!-- Abaixo 10% -->
+              <circle cx="44" cy="44" r="36" fill="none" stroke="var(--danger)" stroke-width="12"
+                transform="rotate(-90 44 44)"
+                style="stroke-dasharray: calc(226.2 * 0.10) calc(226.2 * 0.90); stroke-dashoffset: calc(-226.2 * 0.90);"/>
+              <text x="44" y="48" text-anchor="middle" font-family="var(--font-mono)" font-size="13" font-weight="700" fill="var(--fg)">91%</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="donut-item"><div class="donut-dot" style="background:var(--success)"></div><span>Excelente (8–10) — 38%</span></div>
+              <div class="donut-item"><div class="donut-dot" style="background:var(--accent)"></div><span>Bom (6–7,9) — 34%</span></div>
+              <div class="donut-item"><div class="donut-dot" style="background:#f59e0b"></div><span>Regular (5–5,9) — 18%</span></div>
+              <div class="donut-item"><div class="donut-dot" style="background:var(--danger)"></div><span>Abaixo de 5 — 10%</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Provas recentes -->
+    <div class="info-card" style="margin-bottom:18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h3 style="margin:0;">Provas recentes</h3>
+        <a href="provas.html" class="btn btn-sm btn-secondary">Ver todas</a>
+      </div>
+      <div class="prova-row">
+        <div class="prova-ico">📝</div>
+        <div class="prova-info">
+          <div class="prova-name">Avaliação Bimestral — Matemática</div>
+          <div class="prova-meta">8º Ano A · 28 alunos · aplicada em 05/06/2025</div>
+        </div>
+        <div><span class="badge badge-success">Corrigida</span></div>
+        <div class="prova-score">7,8</div>
+      </div>
+      <div class="prova-row">
+        <div class="prova-ico">📝</div>
+        <div class="prova-info">
+          <div class="prova-name">Simulado ENEM — Linguagens</div>
+          <div class="prova-meta">9º Ano B · 31 alunos · aplicada em 02/06/2025</div>
+        </div>
+        <div><span class="badge badge-success">Corrigida</span></div>
+        <div class="prova-score">6,5</div>
+      </div>
+      <div class="prova-row">
+        <div class="prova-ico">📝</div>
+        <div class="prova-info">
+          <div class="prova-name">Prova Diagnóstica — Ciências</div>
+          <div class="prova-meta">7º Ano · 25 alunos · aplicada em 28/05/2025</div>
+        </div>
+        <div><span class="badge" style="background:rgba(245,158,11,.12);color:#b45309;">Em correção</span></div>
+        <div class="prova-score" style="color:var(--muted);">—</div>
+      </div>
+      <div class="prova-row">
+        <div class="prova-ico">📝</div>
+        <div class="prova-info">
+          <div class="prova-name">Avaliação Bimestral — Português</div>
+          <div class="prova-meta">6º Ano A · 27 alunos · aplicada em 20/05/2025</div>
+        </div>
+        <div><span class="badge badge-success">Corrigida</span></div>
+        <div class="prova-score">8,1</div>
+      </div>
+    </div>
+
+  </div><!-- /tab visao-geral -->
+
+  <!-- ══ TAB: Turmas ═══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-turmas">
+    <div class="info-card" style="margin-top:4px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h3 style="margin:0;">Turmas ativas</h3>
+        <a href="turmas.html" class="btn btn-sm btn-primary">+ Nova turma</a>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Turma</th>
+            <th>Série</th>
+            <th>Turno</th>
+            <th>Professor(a)</th>
+            <th>Alunos</th>
+            <th>Média</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>6º A</strong></td>
+            <td>6º Ano — EF II</td>
+            <td>Manhã</td>
+            <td>Prof. Marcos Ribeiro</td>
+            <td class="mono">27</td>
+            <td class="mono" style="color:var(--success);font-weight:700;">8,1</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="turma-detalhe-2.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>7º A</strong></td>
+            <td>7º Ano — EF II</td>
+            <td>Manhã</td>
+            <td>Profa. Luana Castro</td>
+            <td class="mono">25</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">7,3</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="turma-detalhe-2.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>8º A</strong></td>
+            <td>8º Ano — EF II</td>
+            <td>Tarde</td>
+            <td>Prof. Carlos Mendonça</td>
+            <td class="mono">28</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">7,8</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="turma-detalhe-2.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>8º B</strong></td>
+            <td>8º Ano — EF II</td>
+            <td>Manhã</td>
+            <td>Profa. Fernanda Alves</td>
+            <td class="mono">26</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">7,0</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="turma-detalhe-2.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>9º A</strong></td>
+            <td>9º Ano — EF II</td>
+            <td>Tarde</td>
+            <td>Prof. André Moraes</td>
+            <td class="mono">29</td>
+            <td class="mono" style="color:var(--success);font-weight:700;">7,9</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="turma-detalhe-2.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>9º B</strong></td>
+            <td>9º Ano — EF II</td>
+            <td>Tarde</td>
+            <td>Profa. Patricia Lima</td>
+            <td class="mono">31</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">6,5</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="turma-detalhe-2.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAB: Provas ═══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-provas">
+    <div class="info-card" style="margin-top:4px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h3 style="margin:0;">Provas desta escola</h3>
+        <a href="criar-prova.html" class="btn btn-sm btn-primary">+ Nova prova</a>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Prova</th>
+            <th>Disciplina</th>
+            <th>Turma</th>
+            <th>Aplicação</th>
+            <th>Alunos</th>
+            <th>Média</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Av. Bimestral — Mat.</strong></td>
+            <td>Matemática</td>
+            <td>8º A</td>
+            <td>05/06/2025</td>
+            <td class="mono">28</td>
+            <td class="mono" style="color:var(--success);font-weight:700;">7,8</td>
+            <td><span class="badge badge-success">Corrigida</span></td>
+            <td><a href="relatorio-prova.html" class="btn btn-sm btn-secondary">Relatório</a></td>
+          </tr>
+          <tr>
+            <td><strong>Simulado ENEM — Ling.</strong></td>
+            <td>Linguagens</td>
+            <td>9º B</td>
+            <td>02/06/2025</td>
+            <td class="mono">31</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">6,5</td>
+            <td><span class="badge badge-success">Corrigida</span></td>
+            <td><a href="relatorio-prova.html" class="btn btn-sm btn-secondary">Relatório</a></td>
+          </tr>
+          <tr>
+            <td><strong>Diagnóstica — Ciências</strong></td>
+            <td>Ciências</td>
+            <td>7º A</td>
+            <td>28/05/2025</td>
+            <td class="mono">25</td>
+            <td class="mono" style="color:var(--muted);">—</td>
+            <td><span class="badge" style="background:rgba(245,158,11,.12);color:#b45309;">Em correção</span></td>
+            <td><a href="acompanhar-correcao.html" class="btn btn-sm btn-secondary">Acompanhar</a></td>
+          </tr>
+          <tr>
+            <td><strong>Av. Bimestral — Port.</strong></td>
+            <td>Português</td>
+            <td>6º A</td>
+            <td>20/05/2025</td>
+            <td class="mono">27</td>
+            <td class="mono" style="color:var(--success);font-weight:700;">8,1</td>
+            <td><span class="badge badge-success">Corrigida</span></td>
+            <td><a href="relatorio-prova.html" class="btn btn-sm btn-secondary">Relatório</a></td>
+          </tr>
+          <tr>
+            <td><strong>Av. Bimestral — Hist.</strong></td>
+            <td>História</td>
+            <td>9º A</td>
+            <td>15/05/2025</td>
+            <td class="mono">29</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">7,4</td>
+            <td><span class="badge badge-success">Corrigida</span></td>
+            <td><a href="relatorio-prova.html" class="btn btn-sm btn-secondary">Relatório</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TAB: Alunos ═══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-alunos">
+    <div class="info-card" style="margin-top:4px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <h3 style="margin:0;">Alunos matriculados <span class="badge" style="margin-left:8px;">87</span></h3>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" class="input" style="width:220px;font-size:13px;padding:7px 12px;" placeholder="Buscar aluno…" id="aluno-search" oninput="filterAlunos(this.value)">
+          <a href="aluno-cadastrar.html" class="btn btn-sm btn-primary">+ Cadastrar</a>
+        </div>
+      </div>
+      <table class="data-table" id="alunos-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Matrícula</th>
+            <th>Turma</th>
+            <th>Média geral</th>
+            <th>Provas</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="alunos-tbody">
+          <tr>
+            <td><strong>Ana Beatriz Costa</strong></td>
+            <td class="mono">2025001</td>
+            <td>8º A</td>
+            <td class="mono" style="color:var(--success);font-weight:700;">8,7</td>
+            <td class="mono">5</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="aluno-detalhe.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>Bruno Henrique Silva</strong></td>
+            <td class="mono">2025002</td>
+            <td>9º B</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">7,2</td>
+            <td class="mono">5</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="aluno-detalhe.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>Carla Rodrigues</strong></td>
+            <td class="mono">2025003</td>
+            <td>6º A</td>
+            <td class="mono" style="color:var(--success);font-weight:700;">9,1</td>
+            <td class="mono">4</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="aluno-detalhe.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>Diego Ferreira</strong></td>
+            <td class="mono">2025004</td>
+            <td>7º A</td>
+            <td class="mono" style="color:#b45309;font-weight:700;">4,8</td>
+            <td class="mono">4</td>
+            <td><span class="badge" style="background:rgba(245,158,11,.12);color:#b45309;">Atenção</span></td>
+            <td><a href="aluno-detalhe.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>Eduarda Pimentel</strong></td>
+            <td class="mono">2025005</td>
+            <td>9º A</td>
+            <td class="mono" style="color:var(--success);font-weight:700;">8,3</td>
+            <td class="mono">5</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="aluno-detalhe.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>Felipe Augusto Nunes</strong></td>
+            <td class="mono">2025006</td>
+            <td>8º B</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">6,9</td>
+            <td class="mono">5</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="aluno-detalhe.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>Gabriela Santos</strong></td>
+            <td class="mono">2025007</td>
+            <td>6º A</td>
+            <td class="mono" style="color:var(--accent);font-weight:700;">7,5</td>
+            <td class="mono">4</td>
+            <td><span class="badge badge-success">Ativa</span></td>
+            <td><a href="aluno-detalhe.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+          <tr>
+            <td><strong>Henrique Oliveira</strong></td>
+            <td class="mono">2025008</td>
+            <td>9º A</td>
+            <td class="mono" style="color:var(--danger);font-weight:700;">3,9</td>
+            <td class="mono">5</td>
+            <td><span class="badge badge-danger">Reprovação</span></td>
+            <td><a href="aluno-detalhe.html" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="padding:12px 0 0;font-size:13px;color:var(--muted);">Exibindo 8 de 87 alunos — <a href="#" style="color:var(--accent);">ver todos</a></div>
+    </div>
+  </div>
+
+  <!-- ══ TAB: Equipe ═══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-equipe">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 18px;">
+      <h3 style="font-size:16px;font-weight:700;">Equipe pedagógica</h3>
+      <div style="display:flex;gap:8px;">
+        <a href="perfis-equipe.html" class="btn btn-sm btn-secondary">Gerenciar perfis</a>
+        <a href="membro-cadastrar.html?escola=1" class="btn btn-sm btn-primary">+ Adicionar membro</a>
+      </div>
+    </div>
+
+    <!-- Direção -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px;">Direção</div>
+      <div class="team-grid">
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar" style="background:#dbeafe;color:#1d4ed8;">AC</div>
+            <div>
+              <div class="team-name">Ana Claudia Ferreira</div>
+              <div class="team-role">Diretora</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">(11) 3000-0001</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar" style="background:#dcfce7;color:#166534;">RM</div>
+            <div>
+              <div class="team-name">Ricardo Matos</div>
+              <div class="team-role">Vice-diretor</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">(11) 3000-0002</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar" style="background:#fef9c3;color:#854d0e;">LS</div>
+            <div>
+              <div class="team-name">Luciana Santos</div>
+              <div class="team-role">Coord. Pedagógica</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px;">(11) 3000-0003</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Professores -->
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px;">Professores</div>
+      <div class="team-grid">
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar">MR</div>
+            <div>
+              <div class="team-name">Marcos Ribeiro</div>
+              <div class="team-role">Matemática · 6º A</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar">LC</div>
+            <div>
+              <div class="team-name">Luana Castro</div>
+              <div class="team-role">Ciências · 7º A</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar">CM</div>
+            <div>
+              <div class="team-name">Carlos Mendonça</div>
+              <div class="team-role">Português · 8º A</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar">FA</div>
+            <div>
+              <div class="team-name">Fernanda Alves</div>
+              <div class="team-role">História · 8º B</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar">AM</div>
+            <div>
+              <div class="team-name">André Moraes</div>
+              <div class="team-role">Geografia · 9º A</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar">PL</div>
+            <div>
+              <div class="team-name">Patricia Lima</div>
+              <div class="team-role">Ed. Física · 9º B</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar" style="background:#fce7f3;color:#9d174d;">JO</div>
+            <div>
+              <div class="team-name">Juliana Oliveira</div>
+              <div class="team-role">Arte · 6º–9º</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+        <div class="team-card" style="justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="team-avatar" style="background:#ede9fe;color:#5b21b6;">TP</div>
+            <div>
+              <div class="team-name">Thiago Pereira</div>
+              <div class="team-role">Inglês · 7º–9º</div>
+            </div>
+          </div>
+          <a href="membro-editar.html" class="btn btn-sm btn-secondary">Editar</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--fg);color:#fff;padding:11px 22px;border-radius:var(--radius-sm);font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);"></div>
+
+<script src="js/app.js"></script>
+<script>
+  // ─── Tabs ────────────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ─── Toast ───────────────────────────────────────────────────
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    t.style.background = type === 'success' ? 'var(--success)' : type === 'danger' ? 'var(--danger)' : 'var(--fg)';
+    clearTimeout(t._tid);
+    t._tid = setTimeout(() => { t.style.display = 'none'; }, 3000);
+  }
+
+  // ─── Busca alunos ────────────────────────────────────────────
+  function filterAlunos(q) {
+    const rows = document.querySelectorAll('#alunos-tbody tr');
+    rows.forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+    });
+  }
+
+  // ─── Popula dados da escola via URL param ────────────────────
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const schools = {
+    '1': { nome: 'E.E. Prof. João Pessoa', inep: '35000001', end: 'Rua das Flores, 123 — Centro, São Paulo / SP', status: 'Ativa', rede: 'Estadual' },
+    '2': { nome: 'EMEF Monteiro Lobato',    inep: '35000042', end: 'Av. Brasil, 450 — Bela Vista, São Paulo / SP', status: 'Ativa', rede: 'Municipal' },
+    '3': { nome: 'CEJA Centro',             inep: '35000099', end: 'Rua da Consolação, 890 — Consolação, São Paulo / SP', status: 'Ativa', rede: 'Estadual' },
+    '4': { nome: 'E.M. Santos Dumont',      inep: '35000117', end: 'Rua Santos Dumont, 15 — Lapa, São Paulo / SP', status: 'Inativa', rede: 'Municipal' },
+  };
+  const s = schools[id] || schools['1'];
+  document.getElementById('hero-nome').textContent = s.nome;
+  document.getElementById('hero-breadcrumb').textContent = s.nome;
+  document.getElementById('hero-inep').textContent = s.inep;
+  document.getElementById('hero-end').textContent = s.end;
+  document.getElementById('hero-status').textContent = s.status;
+  document.getElementById('hero-rede').textContent = s.rede;
+  document.title = 'Gabarito360 — ' + s.nome;
+  if (s.status === 'Inativa') {
+    document.getElementById('hero-status-wrap').style.opacity = '.7';
+  }
+</script>
+</body>
+</html>

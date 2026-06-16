@@ -1,0 +1,390 @@
+{
+  "schema": "open-design.design-manifest.v1",
+  "title": "03f5ca44-ae6a-41d1-b9e3-ebc3e36bbd4a",
+  "entryFile": "acompanhar-correcao-turma.html",
+  "sourceFiles": {
+    "all": [
+      "acompanhar-correcao-turma.html",
+      "acompanhar-correcao.html",
+      "aluno-cadastrar-redesign.html",
+      "aluno-cadastrar.html",
+      "aluno-detalhe.html",
+      "aluno-editar.html",
+      "brand-spec.md",
+      "configuracoes.html",
+      "criar-prova.html",
+      "css/gov.css",
+      "dashboard-admin.html",
+      "dashboard-aluno.html",
+      "dashboard-coordenador.html",
+      "dashboard-diretor-escolar.html",
+      "dashboard-diretor-nucleo.html",
+      "dashboard-professor.html",
+      "dashboard.html",
+      "escola-detalhe.html",
+      "escolas.html",
+      "gabarito.html",
+      "js/app.js",
+      "login.html",
+      "membro-cadastrar.html",
+      "membro-editar.html",
+      "mqa04pwj-drawing-2026-06-11T21-20-32-790Z.png",
+      "mqa0r12m-drawing-2026-06-11T21-37-53-695Z.png",
+      "mqa12fp6-drawing-2026-06-11T21-46-45-867Z.png",
+      "mqa4fu1i-drawing-2026-06-11T23-21-09-825Z.png",
+      "mqa4k2r2-drawing-2026-06-11T23-24-27-749Z.png",
+      "perfil.html",
+      "perfis-equipe.html",
+      "provas.html",
+      "relatorio-prova.html",
+      "relatorio-turma-prova.html",
+      "resultado-dinamico.html",
+      "resultado.html",
+      "turma-detalhe-2.html",
+      "turmas.html"
+    ],
+    "html": [
+      "acompanhar-correcao-turma.html",
+      "acompanhar-correcao.html",
+      "aluno-cadastrar-redesign.html",
+      "aluno-cadastrar.html",
+      "aluno-detalhe.html",
+      "aluno-editar.html",
+      "configuracoes.html",
+      "criar-prova.html",
+      "dashboard-admin.html",
+      "dashboard-aluno.html",
+      "dashboard-coordenador.html",
+      "dashboard-diretor-escolar.html",
+      "dashboard-diretor-nucleo.html",
+      "dashboard-professor.html",
+      "dashboard.html",
+      "escola-detalhe.html",
+      "escolas.html",
+      "gabarito.html",
+      "login.html",
+      "membro-cadastrar.html",
+      "membro-editar.html",
+      "perfil.html",
+      "perfis-equipe.html",
+      "provas.html",
+      "relatorio-prova.html",
+      "relatorio-turma-prova.html",
+      "resultado-dinamico.html",
+      "resultado.html",
+      "turma-detalhe-2.html",
+      "turmas.html"
+    ],
+    "css": [
+      "css/gov.css"
+    ],
+    "scriptsAndComponents": [
+      "js/app.js"
+    ],
+    "assets": [
+      "brand-spec.md",
+      "mqa04pwj-drawing-2026-06-11T21-20-32-790Z.png",
+      "mqa0r12m-drawing-2026-06-11T21-37-53-695Z.png",
+      "mqa12fp6-drawing-2026-06-11T21-46-45-867Z.png",
+      "mqa4fu1i-drawing-2026-06-11T23-21-09-825Z.png",
+      "mqa4k2r2-drawing-2026-06-11T23-24-27-749Z.png"
+    ]
+  },
+  "screens": [
+    {
+      "file": "acompanhar-correcao-turma.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "acompanhar-correcao.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "aluno-cadastrar-redesign.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "aluno-cadastrar.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "aluno-detalhe.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "aluno-editar.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "configuracoes.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "criar-prova.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "dashboard-admin.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "dashboard-aluno.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "dashboard-coordenador.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "dashboard-diretor-escolar.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "dashboard-diretor-nucleo.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "dashboard-professor.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "dashboard.html",
+      "role": "product-screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "escola-detalhe.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "escolas.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "gabarito.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "login.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "membro-cadastrar.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "membro-editar.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "perfil.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "perfis-equipe.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "provas.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "relatorio-prova.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "relatorio-turma-prova.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "resultado-dinamico.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "resultado.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "turma-detalhe-2.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    },
+    {
+      "file": "turmas.html",
+      "role": "screen",
+      "implementationNote": "Preserve visual hierarchy, responsive behavior, and interactive states from this screen."
+    }
+  ],
+  "screenFilePolicy": {
+    "mode": "screen-file-first",
+    "entryFileRole": "primary-screen",
+    "rules": [
+      "Each distinct user-facing screen or surface must be delivered and implemented as its own file/route.",
+      "If a landing page is present or requested, keep it in landing.html and do not merge it into the product app screen.",
+      "When multiple HTML screens exist, index.html is a launcher/overview only; it must not be treated as the combined final UI.",
+      "Keep product app screens, landing pages, platform screens, and OS widget surfaces separate in production code."
+    ]
+  },
+  "appModules": [
+    "Identify domain-specific in-app modules from the exported UI; do not reduce them to generic cards.",
+    "For each major module, implement purpose, default/loading/empty/error/success states, and responsive behavior.",
+    "Keep app modules separate from OS home-screen widgets in the production component model."
+  ],
+  "osWidgets": [
+    "If the export includes home-screen, lock-screen, Live Activity, tablet glance, or Android widget surfaces, implement them as platform quick-access surfaces outside the app UI.",
+    "If none are present, do not invent OS widgets unless the product requirements request them."
+  ],
+  "landingPage": {
+    "detection": "Inspect files and screen names for a marketing/landing page surface. If present, keep it separate from product app screens.",
+    "requiredSections": [
+      "hero",
+      "value props",
+      "product proof/screenshots",
+      "feature proof",
+      "CTA"
+    ]
+  },
+  "tokens": {
+    "source": [
+      "css/gov.css"
+    ],
+    "required": [
+      "background",
+      "surface",
+      "foreground",
+      "muted text",
+      "border",
+      "accent",
+      "radius",
+      "shadow",
+      "spacing",
+      "type scale",
+      "motion"
+    ],
+    "note": "Extract/freeze tokens before framework implementation so coding tools do not substitute default theme colors or typography."
+  },
+  "interactions": {
+    "source": [
+      "js/app.js"
+    ],
+    "requiredStates": [
+      "default",
+      "hover",
+      "focus",
+      "active",
+      "disabled",
+      "loading",
+      "empty",
+      "error",
+      "success"
+    ],
+    "requiredBehaviors": [
+      "forms/validation where present",
+      "tabs/filters where present",
+      "dialogs/sheets/drawers where present",
+      "copy/generate/share actions where present",
+      "player or quick controls where present"
+    ],
+    "note": "If the prototype is static, derive missing behavior from visible controls and document it before coding."
+  },
+  "responsiveViewports": [
+    {
+      "name": "mobile-compact",
+      "width": 360,
+      "height": 800,
+      "category": "mobile",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "mobile-standard",
+      "width": 390,
+      "height": 844,
+      "category": "mobile",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "mobile-large",
+      "width": 430,
+      "height": 932,
+      "category": "mobile",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "foldable-small-tablet",
+      "width": 600,
+      "height": 960,
+      "category": "foldable-tablet",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "tablet-portrait",
+      "width": 820,
+      "height": 1180,
+      "category": "tablet",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "tablet-landscape",
+      "width": 1024,
+      "height": 768,
+      "category": "tablet",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "laptop",
+      "width": 1366,
+      "height": 768,
+      "category": "desktop",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "category": "desktop",
+      "mustAvoidHorizontalScroll": true
+    },
+    {
+      "name": "wide",
+      "width": 1920,
+      "height": 1080,
+      "category": "wide",
+      "mustAvoidHorizontalScroll": true
+    }
+  ],
+  "implementationChecklist": [
+    "Open entryFile first and map screens, modules, tokens, and interactions.",
+    "Extract tokens before writing framework components.",
+    "Implement app-specific modules with real states instead of generic card grids.",
+    "Preserve or rebuild JS interactions for meaningful UX actions.",
+    "Validate screenshots at desktop/tablet/mobile viewports with no horizontal overflow.",
+    "Keep landing pages, in-app modules, and OS widgets as separate implementation surfaces."
+  ]
+}

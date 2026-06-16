@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Escolas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .escola-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+  }
+  .escola-card {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .15s, transform .15s;
+  }
+  .escola-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .escola-card-head {
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .escola-icon {
+    width: 44px; height: 44px; border-radius: var(--radius-md);
+    background: var(--accent-light);
+    display: grid; place-items: center;
+    flex-shrink: 0;
+    font-size: 22px;
+  }
+  .escola-name { font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .escola-code { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .escola-status {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .escola-card-body { padding: 16px 22px; flex: 1; }
+  .escola-meta { display: flex; flex-direction: column; gap: 8px; }
+  .escola-meta-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--fg-2);
+  }
+  .escola-meta-row svg { flex-shrink: 0; opacity: .5; }
+  .escola-card-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .escola-stats {
+    display: flex; gap: 20px;
+  }
+  .escola-stat { text-align: center; }
+  .escola-stat .val { font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--accent); }
+  .escola-stat .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .escola-actions { display: flex; gap: 8px; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    z-index: 1000; display: none; align-items: center; justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: 0 24px 64px rgba(0,0,0,.22);
+    width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-head {
+    padding: 22px 24px 18px; border-bottom: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-head h2 { font-size: 18px; font-weight: 700; }
+  .modal-close {
+    width: 34px; height: 34px; border-radius: 50%; background: none; border: 0;
+    cursor: pointer; font-size: 20px; color: var(--muted); display: grid; place-items: center;
+    transition: background .15s;
+  }
+  .modal-close:hover { background: var(--surface-2); }
+  .modal-body { padding: 24px; }
+  .modal-foot {
+    padding: 16px 24px; border-top: 1px solid var(--border-soft);
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+
+  .form-section { margin-bottom: 20px; }
+  .form-section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); margin-bottom: 12px;
+  }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 80px 20px; color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 18px; font-weight: 700; color: var(--fg-2); margin-bottom: 8px; }
+
+  /* Danger zone dentro do modal */
+  .danger-toggle {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--danger); cursor: pointer;
+    background: none; border: 0; padding: 0; font-weight: 600;
+  }
+  .danger-section { display: none; margin-top: 14px; }
+
+  @media (max-width: 700px) {
+    .escola-grid { grid-template-columns: 1fr; }
+    .form-row-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a>
+      <a href="provas.html">Provas</a>
+      <a href="turmas.html">Turmas</a>
+      <a href="escolas.html" class="active">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Marcos Silva</div>
+            <div class="user-role">Professor</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb"><a href="dashboard.html">Início</a><span class="sep">/</span><span>Escolas</span></div>
+
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title">Escolas</h1>
+      <p class="page-sub">Gerencie todas as unidades escolares cadastradas no sistema</p>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="search-box" style="position:relative;">
+        <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="search-escolas" type="search" class="input" placeholder="Buscar escola…" style="padding-left:36px;width:240px;" />
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Nova escola
+      </button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px;" class="kpi-strip">
+    <div class="card card-pad" style="padding:16px 20px;">
+      <div class="kpi-val" style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--accent);">4</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Escolas cadastradas</div>
+    </div>
+    <div class="card card-pad" style="padding:16px 20px;">
+      <div class="kpi-val" style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--success);">3</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Escolas ativas</div>
+    </div>
+    <div class="card card-pad" style="padding:16px 20px;">
+      <div class="kpi-val" style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--fg);">247</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Alunos totais</div>
+    </div>
+    <div class="card card-pad" style="padding:16px 20px;">
+      <div class="kpi-val" style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--fg);">18</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px;">Turmas ativas</div>
+    </div>
+  </div>
+
+  <!-- Grid de escolas -->
+  <div class="escola-grid" id="escola-grid">
+
+    <!-- Escola 1 -->
+    <div class="escola-card" data-nome="E.E. Prof. João Pessoa">
+      <div class="escola-card-head">
+        <div class="escola-icon">🏫</div>
+        <div style="flex:1;min-width:0;">
+          <div class="escola-name">E.E. Prof. João Pessoa</div>
+          <div class="escola-code">INEP: 35000001</div>
+        </div>
+        <div class="escola-status"><span class="badge badge-success">Ativa</span></div>
+      </div>
+      <div class="escola-card-body">
+        <div class="escola-meta">
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Rua das Flores, 123 — Centro, São Paulo / SP
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            (11) 3000-0001
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            joao.pessoa@edu.sp.gov.br
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Diretora: Ana Claudia Ferreira
+          </div>
+        </div>
+      </div>
+      <div class="escola-card-foot">
+        <div class="escola-stats">
+          <div class="escola-stat"><div class="val">87</div><div class="lbl">Alunos</div></div>
+          <div class="escola-stat"><div class="val">6</div><div class="lbl">Turmas</div></div>
+          <div class="escola-stat"><div class="val">12</div><div class="lbl">Provas</div></div>
+        </div>
+        <div class="escola-actions">
+          <button class="btn btn-sm btn-secondary" onclick="openEditModal(this)" data-escola-id="1">Editar</button>
+          <a href="escola-detalhe.html?id=1" class="btn btn-sm btn-primary">Ver mais</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Escola 2 -->
+    <div class="escola-card" data-nome="EMEF Monteiro Lobato">
+      <div class="escola-card-head">
+        <div class="escola-icon">🏫</div>
+        <div style="flex:1;min-width:0;">
+          <div class="escola-name">EMEF Monteiro Lobato</div>
+          <div class="escola-code">INEP: 35000042</div>
+        </div>
+        <div class="escola-status"><span class="badge badge-success">Ativa</span></div>
+      </div>
+      <div class="escola-card-body">
+        <div class="escola-meta">
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Av. Brasil, 450 — Bela Vista, São Paulo / SP
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            (11) 3000-0042
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            monteiro.lobato@edu.sp.gov.br
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Diretora: Paula Mendes
+          </div>
+        </div>
+      </div>
+      <div class="escola-card-foot">
+        <div class="escola-stats">
+          <div class="escola-stat"><div class="val">103</div><div class="lbl">Alunos</div></div>
+          <div class="escola-stat"><div class="val">8</div><div class="lbl">Turmas</div></div>
+          <div class="escola-stat"><div class="val">9</div><div class="lbl">Provas</div></div>
+        </div>
+        <div class="escola-actions">
+          <button class="btn btn-sm btn-secondary" onclick="openEditModal(this)" data-escola-id="2">Editar</button>
+          <a href="escola-detalhe.html?id=2" class="btn btn-sm btn-primary">Ver mais</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Escola 3 -->
+    <div class="escola-card" data-nome="CEJA Centro">
+      <div class="escola-card-head">
+        <div class="escola-icon">🏫</div>
+        <div style="flex:1;min-width:0;">
+          <div class="escola-name">CEJA Centro</div>
+          <div class="escola-code">INEP: 35000099</div>
+        </div>
+        <div class="escola-status"><span class="badge badge-success">Ativa</span></div>
+      </div>
+      <div class="escola-card-body">
+        <div class="escola-meta">
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Rua da Consolação, 890 — Consolação, São Paulo / SP
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            (11) 3000-0099
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            ceja.centro@edu.sp.gov.br
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Diretor: Roberto Lima
+          </div>
+        </div>
+      </div>
+      <div class="escola-card-foot">
+        <div class="escola-stats">
+          <div class="escola-stat"><div class="val">57</div><div class="lbl">Alunos</div></div>
+          <div class="escola-stat"><div class="val">4</div><div class="lbl">Turmas</div></div>
+          <div class="escola-stat"><div class="val">7</div><div class="lbl">Provas</div></div>
+        </div>
+        <div class="escola-actions">
+          <button class="btn btn-sm btn-secondary" onclick="openEditModal(this)" data-escola-id="3">Editar</button>
+          <a href="escola-detalhe.html?id=3" class="btn btn-sm btn-primary">Ver mais</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Escola 4 - Inativa -->
+    <div class="escola-card" data-nome="E.M. Santos Dumont" style="opacity:.7;">
+      <div class="escola-card-head">
+        <div class="escola-icon" style="background:var(--surface-2);">🏫</div>
+        <div style="flex:1;min-width:0;">
+          <div class="escola-name">E.M. Santos Dumont</div>
+          <div class="escola-code">INEP: 35000117</div>
+        </div>
+        <div class="escola-status"><span class="badge">Inativa</span></div>
+      </div>
+      <div class="escola-card-body">
+        <div class="escola-meta">
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Rua Santos Dumont, 15 — Lapa, São Paulo / SP
+          </div>
+          <div class="escola-meta-row">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Diretora: Carla Souza
+          </div>
+          <div class="escola-meta-row" style="color:var(--danger);">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Inativa desde jan/2025 — sem turmas ativas
+          </div>
+        </div>
+      </div>
+      <div class="escola-card-foot">
+        <div class="escola-stats">
+          <div class="escola-stat"><div class="val" style="color:var(--muted);">0</div><div class="lbl">Alunos</div></div>
+          <div class="escola-stat"><div class="val" style="color:var(--muted);">0</div><div class="lbl">Turmas</div></div>
+          <div class="escola-stat"><div class="val" style="color:var(--muted);">3</div><div class="lbl">Provas</div></div>
+        </div>
+        <div class="escola-actions">
+          <button class="btn btn-sm btn-secondary" onclick="openEditModal(this)" data-escola-id="4">Editar</button>
+          <button class="btn btn-sm btn-success" onclick="showToast('Escola reativada com sucesso!','success')">Reativar</button>
+          <a href="escola-detalhe.html?id=4" class="btn btn-sm btn-secondary">Ver mais</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /escola-grid -->
+  <div style="height:48px;"></div>
+</div>
+
+<!-- Modal: Cadastrar / Editar escola -->
+<div class="modal-backdrop" id="modal-escola" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-title">Nova escola</h2>
+      <button class="modal-close" onclick="closeModal()" aria-label="Fechar">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-section">
+        <div class="form-section-label">Identificação</div>
+        <div class="field"><label for="m-nome">Nome da escola <span style="color:var(--danger)">*</span></label>
+          <input id="m-nome" type="text" class="input" placeholder="Ex.: E.E. Prof. João Pessoa" required>
+        </div>
+        <div class="form-row-2">
+          <div class="field"><label for="m-inep">Código INEP</label>
+            <input id="m-inep" type="text" class="input" placeholder="00000000" maxlength="8">
+          </div>
+          <div class="field"><label for="m-tipo">Tipo de rede</label>
+            <select id="m-tipo" class="select">
+              <option>Estadual</option>
+              <option>Municipal</option>
+              <option>Federal</option>
+              <option>Privada</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-label">Endereço</div>
+        <div class="form-row-2">
+          <div class="field" style="grid-column:1/-1"><label for="m-logradouro">Logradouro</label>
+            <input id="m-logradouro" type="text" class="input" placeholder="Rua / Av.">
+          </div>
+          <div class="field"><label for="m-cidade">Cidade</label>
+            <input id="m-cidade" type="text" class="input" placeholder="São Paulo">
+          </div>
+          <div class="field"><label for="m-uf">UF</label>
+            <select id="m-uf" class="select">
+              <option>SP</option><option>RJ</option><option>MG</option><option>RS</option>
+              <option>PR</option><option>SC</option><option>BA</option><option>GO</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-label">Contato</div>
+        <div class="form-row-2">
+          <div class="field"><label for="m-tel">Telefone</label>
+            <input id="m-tel" type="tel" class="input" placeholder="(11) 9 0000-0000">
+          </div>
+          <div class="field"><label for="m-email">E-mail institucional</label>
+            <input id="m-email" type="email" class="input" placeholder="contato@escola.edu.br">
+          </div>
+          <div class="field" style="grid-column:1/-1"><label for="m-diretor">Diretor(a)</label>
+            <input id="m-diretor" type="text" class="input" placeholder="Nome completo">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" style="margin-bottom:0;">
+        <div class="form-section-label">Status</div>
+        <label style="display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;">
+          <input type="checkbox" id="m-ativa" checked style="accent-color:var(--accent);width:18px;height:18px;">
+          Escola ativa (aparece na seleção de provas e turmas)
+        </label>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEscola()">Salvar escola</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  // Modal helpers
+  function openModal() {
+    document.getElementById('modal-title').textContent = 'Nova escola';
+    document.getElementById('m-nome').value = '';
+    document.getElementById('m-inep').value = '';
+    document.getElementById('m-logradouro').value = '';
+    document.getElementById('m-cidade').value = '';
+    document.getElementById('m-tel').value = '';
+    document.getElementById('m-email').value = '';
+    document.getElementById('m-diretor').value = '';
+    document.getElementById('m-ativa').checked = true;
+    document.getElementById('modal-escola').classList.add('open');
+    setTimeout(function(){ document.getElementById('m-nome').focus(); }, 80);
+  }
+
+  function openEditModal(btn) {
+    var id = btn.getAttribute('data-escola-id');
+    var card = btn.closest('.escola-card');
+    var nome = card.querySelector('.escola-name').textContent;
+    document.getElementById('modal-title').textContent = 'Editar escola';
+    document.getElementById('m-nome').value = nome;
+    document.getElementById('modal-escola').classList.add('open');
+    setTimeout(function(){ document.getElementById('m-nome').focus(); }, 80);
+  }
+
+  function closeModal() {
+    document.getElementById('modal-escola').classList.remove('open');
+  }
+
+  function salvarEscola() {
+    var nome = document.getElementById('m-nome').value.trim();
+    if (!nome) {
+      document.getElementById('m-nome').focus();
+      showToast('Informe o nome da escola', 'warn');
+      return;
+    }
+    closeModal();
+    showToast('Escola "' + nome + '" salva com sucesso!', 'success');
+  }
+
+  // Fechar modal ao clicar no backdrop
+  document.getElementById('modal-escola').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Busca em tempo real
+  document.getElementById('search-escolas').addEventListener('input', function() {
+    var q = this.value.toLowerCase().trim();
+    document.querySelectorAll('.escola-card').forEach(function(card) {
+      var nome = card.getAttribute('data-nome').toLowerCase();
+      card.style.display = (!q || nome.includes(q)) ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>
