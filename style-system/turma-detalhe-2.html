@@ -1,0 +1,266 @@
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360 — Turma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 22px; }
+  .toolbar { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
+  .toolbar .input-icon { flex: 1; min-width: 220px; }
+  .toolbar .select { width: auto; min-width: 160px; }
+  .student-name { display: flex; align-items: center; gap: 12px; }
+  .student-name .av { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-light); color: var(--accent-dark); display: grid; place-items: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .mini-bar { width: 80px; height: 7px; background: var(--surface-2); border-radius: 99px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  .mini-bar > div { height: 100%; }
+  .empty-note { color: var(--muted); font-size: 14px; }
+  .btn-result { background: var(--success-light); color: var(--success); }
+  .btn-result:hover { filter: brightness(0.95); }
+  .btn-track { background: var(--warn-light); color: var(--warn-fg); }
+  .btn-track:hover { filter: brightness(0.95); }
+  .btn-action { min-width: 144px; }
+  .section-title { font-size: 18px; font-weight: 700; margin: 32px 0 16px; display: flex; align-items: center; gap: 8px; }
+  .exam-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  @media (max-width:980px){ .kpi-grid{grid-template-columns:repeat(2,1fr);}.result-head{grid-template-columns:1fr !important;} }
+  @media (max-width:560px){ .kpi-grid{grid-template-columns:1fr;} }
+  @media (max-width:720px){ .hide-sm{display:none;} }
+  @media (max-width:900px){
+    .btn-action{ min-width: 0; padding: 8px 10px; }
+    .btn-action .btn-label{ display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>🇧🇷 Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a><a href="provas.html">Provas</a>
+      <a href="turmas.html" class="active">Turmas</a>
+      <a href="escolas.html">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header">
+            <div class="user-name">Marcos Silva</div>
+            <div class="user-role">Professor</div>
+          </div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a>
+            <a href="configuracoes.html">Configurações</a>
+            <hr>
+            <a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="breadcrumb"><span>Início</span><span class="sep">/</span><a href="turmas.html">Turmas</a><span class="sep">/</span><span id="turma-nome">Turma</span></div>
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title" id="turma-titulo">Turma</h1>
+      <p class="page-sub"><span id="turma-meta"></span></p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary">Relatório Geral</button>
+      <a id="btn-add-aluno" href="aluno-cadastrar.html" class="btn btn-primary">+ Adicionar aluno</a>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="card kpi"><div class="kpi-label">Desempenho médio</div><div class="kpi-value" id="kpi-media">0%</div><div class="kpi-trend up">▲ 2% vs mês anterior</div></div>
+    <div class="card kpi"><div class="kpi-label">Provas aplicadas</div><div class="kpi-value" id="kpi-provas">0</div><div class="kpi-trend">neste bimestre</div></div>
+    <div class="card kpi"><div class="kpi-label">Alunos ativos</div><div class="kpi-value" id="kpi-alunos">0</div><div class="kpi-trend">total matriculados</div></div>
+    <div class="card kpi"><div class="kpi-label">Frequência média</div><div class="kpi-value">94%</div><div class="kpi-trend">meta da rede 90%</div></div>
+  </div>
+
+  <div class="result-head" style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-top: 20px;">
+    <div class="card card-pad">
+      <h3 style="font-size:16px;margin-bottom:6px;">Desempenho por disciplina (Turma)</h3>
+      <div id="chart-disciplinas" data-bars='[{"l":"Mat.","v":68},{"l":"Port.","v":72,"c":"#1351b4"},{"l":"Ciên.","v":56,"c":"#e52207"},{"l":"Geo.","v":64}]'></div>
+    </div>
+    <div class="card card-pad">
+      <h3 style="font-size:16px;margin-bottom:6px;text-align:center;">Participação em Provas</h3>
+      <div style="display:flex;justify-content:center;margin-top:8px;">
+        <div data-donut="92" data-color="#168821"></div>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:14px;margin-top:8px;">92% dos alunos presentes nas avaliações</p>
+    </div>
+  </div>
+
+  <h2 class="section-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg>
+    Provas da Turma
+  </h2>
+  <div class="card" style="overflow:hidden;">
+    <table class="table">
+      <thead><tr>
+        <th>Prova</th><th class="hide-sm">Aplicação</th><th>Status</th><th>Média</th><th></th>
+      </tr></thead>
+      <tbody id="exam-tbody"></tbody>
+    </table>
+  </div>
+
+  <h2 class="section-title">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Alunos da Turma
+  </h2>
+  <div class="toolbar">
+    <div class="input-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input class="input" id="student-search" placeholder="Buscar aluno por nome…" />
+    </div>
+    <select class="select" id="filter-status">
+      <option value="">Todos os status</option>
+      <option value="aprovado">Aprovado</option>
+      <option value="recuperacao">Recuperação</option>
+      <option value="pendente">Pendente</option>
+    </select>
+  </div>
+
+  <div class="card" style="margin-top:18px;overflow:hidden;">
+    <table class="table">
+      <thead><tr>
+        <th>Aluno</th><th class="hide-sm">Provas</th><th>Desempenho</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody id="student-tbody"></tbody>
+    </table>
+    <div id="no-results" style="display:none;padding:32px;text-align:center;" class="empty-note">Nenhum aluno corresponde aos filtros.</div>
+  </div>
+  <div style="height:48px"></div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  var students = [
+    {n:'Ana Beatriz Lima', t:'9A', p:4, d:88, s:'aprovado'},
+    {n:'Bruno Carvalho Souza', t:'9A', p:4, d:52, s:'recuperacao'},
+    {n:'Henrique Oliveira', t:'9A', p:4, d:79, s:'aprovado'},
+    {n:'Camila Ferreira', t:'9B', p:3, d:91, s:'aprovado'},
+    {n:'Diego Almeida Rocha', t:'9B', p:4, d:67, s:'aprovado'},
+    {n:'João Pedro Santos', t:'9B', p:2, d:0, s:'pendente'},
+    {n:'Eduarda Nunes', t:'8A', p:2, d:0, s:'pendente'},
+    {n:'Felipe Gomes Dias', t:'8A', p:3, d:74, s:'aprovado'},
+    {n:'Gabriela Martins', t:'8B', p:3, d:45, s:'recuperacao'},
+    {n:'Isabela Costa Pereira', t:'8B', p:3, d:83, s:'aprovado'}
+  ];
+  var exams = [
+    {titulo:'Avaliação Bimestral — Matemática', turmas:['9A','9B'], data:'04/06/2025', status:'corrigida', media:6.8},
+    {titulo:'Avaliação Bimestral — Português', turmas:['9A','9B','8A','8B'], data:'28/05/2025', status:'corrigida', media:7.2},
+    {titulo:'Simulado — Ciências', turmas:['9A'], data:'10/06/2025', status:'correcao', done:18, total:32},
+    {titulo:'Avaliação Bimestral — Geografia', turmas:['9A','9B'], data:'22/05/2025', status:'corrigida', media:6.4}
+  ];
+  var turmaInfo = {
+    '9A': {nome:'9º A', serie:'9º ano'},
+    '9B': {nome:'9º B', serie:'9º ano'},
+    '8A': {nome:'8º A', serie:'8º ano'},
+    '8B': {nome:'8º B', serie:'8º ano'}
+  };
+  var sb = {aprovado:'success', recuperacao:'warn', pendente:'danger'};
+  var sl = {aprovado:'Aprovado', recuperacao:'Recuperação', pendente:'Pendente'};
+  var statusBadge = {correcao:'badge-warn', corrigida:'badge-success'};
+  var statusLabel = {correcao:'Em correção', corrigida:'Corrigida'};
+  var icoResult = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>';
+  var icoTrack = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+  var params = new URLSearchParams(location.search);
+  var key = params.get('turma') || '9A';
+  var turma = turmaInfo[key] || turmaInfo['9A'];
+  var turmaStudents = students.filter(function (st) { return st.t === key; });
+  var turmaExams = exams.filter(function (e) { return e.turmas.indexOf(key) !== -1; });
+
+  document.title = 'Gabarito360 — ' + turma.nome;
+  document.getElementById('turma-nome').textContent = turma.nome;
+  document.getElementById('turma-titulo').textContent = turma.nome;
+  document.getElementById('btn-add-aluno').href = 'aluno-cadastrar.html?turma=' + key;
+
+  var avaliados = turmaStudents.filter(function (st) { return st.s !== 'pendente'; });
+  var media = avaliados.length ? Math.round(avaliados.reduce(function (a, st) { return a + st.d; }, 0) / avaliados.length) : 0;
+  document.getElementById('turma-meta').textContent = turma.serie + ' · desempenho médio ' + media + '%';
+  document.getElementById('kpi-media').textContent = media + '%';
+  document.getElementById('kpi-provas').textContent = turmaExams.length;
+  document.getElementById('kpi-alunos').textContent = turmaStudents.length;
+
+  var examTbody = document.getElementById('exam-tbody');
+  turmaExams.forEach(function (e) {
+    var tr = document.createElement('tr');
+    var progress = '—';
+    var action = '';
+    if (e.status === 'corrigida') {
+      var color = e.media >= 7 ? 'var(--success)' : e.media >= 5 ? 'var(--warn)' : 'var(--danger)';
+      progress = '<div style="display:flex;align-items:center;"><span class="mini-bar"><div style="width:'+(e.media*10)+'%;background:'+color+'"></div></span><span class="num">'+e.media.toFixed(1).replace('.',',')+'</span></div>';
+      action = '<a href="relatorio-turma-prova.html?turma='+key+'" class="btn btn-result btn-action btn-sm">'+icoResult+'<span class="btn-label">Relatório</span></a>';
+    } else {
+      var pct = Math.round(e.done / e.total * 100);
+      progress = '<div style="display:flex;align-items:center;"><span class="mini-bar"><div style="width:'+pct+'%;background:var(--accent)"></div></span><span class="num">'+pct+'%</span></div>';
+      action = '<a href="acompanhar-correcao-turma.html?turma='+key+'" class="btn btn-track btn-action btn-sm">'+icoTrack+'<span class="btn-label">Acompanhar</span></a>';
+    }
+    tr.innerHTML =
+      '<td><b>'+e.titulo+'</b></td>'+
+      '<td class="hide-sm num">'+e.data+'</td>'+
+      '<td><span class="badge '+statusBadge[e.status]+' badge-dot">'+statusLabel[e.status]+'</span></td>'+
+      '<td>'+progress+'</td>'+
+      '<td style="text-align:right;">'+action+'</td>';
+    examTbody.appendChild(tr);
+  });
+
+  var studentTbody = document.getElementById('student-tbody');
+  studentTbody.innerHTML = '';
+  turmaStudents.forEach(function (st, idx) {
+    var sId = (st.n === 'Ana Beatriz Lima' ? '1' : (st.n === 'Bruno Carvalho Souza' ? '2' : (st.n === 'Henrique Oliveira' ? '3' : idx + 1)));
+    var ini = st.n.split(' ').map(function(x){return x[0];}).slice(0,2).join('');
+    var color = st.d>=70?'var(--success)':st.d>=50?'var(--warn)':'var(--danger)';
+    var perf = st.s==='pendente' ? '<span class="empty-note">—</span>'
+      : '<span class="mini-bar"><div style="width:'+st.d+'%;background:'+color+'"></div></span><span class="num">'+st.d+'%</span>';
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-student','');
+    tr.dataset.name = st.n; 
+    tr.dataset.status = st.s;
+    tr.dataset.turma = key;
+    tr.innerHTML =
+      '<td><a href="aluno-detalhe.html?id='+sId+'&turma='+key+'" style="text-decoration:none;color:inherit;"><div class="student-name"><span class="av">'+ini+'</span><b>'+st.n+'</b></div></a></td>'+
+      '<td class="hide-sm num">'+st.p+'</td>'+
+      '<td>'+perf+'</td>'+
+      '<td><span class="badge badge-'+sb[st.s]+' badge-dot">'+sl[st.s]+'</span></td>'+
+      '<td style="text-align:right;"><a href="aluno-detalhe.html?id='+sId+'&turma='+key+'" class="btn btn-result btn-action btn-sm" aria-label="Ver perfil">'+icoResult+'<span class="btn-label">Perfil</span></a></td>';
+    studentTbody.appendChild(tr);
+  });
+
+  if (typeof initStudentFilter === 'function') {
+    initStudentFilter();
+  }
+  
+  function checkEmpty() {
+    var rows = document.querySelectorAll('[data-student]');
+    var visible = Array.prototype.filter.call(rows, function(r){ return r.style.display !== 'none'; });
+    var noRes = document.getElementById('no-results');
+    if(noRes) noRes.style.display = visible.length ? 'none' : 'block';
+    
+    var counter = document.getElementById('kpi-alunos');
+    if(counter) counter.textContent = visible.length;
+  }
+  
+  ['student-search','filter-status'].forEach(function(id){
+    var el=document.getElementById(id); 
+    if(el) { 
+      el.addEventListener('input', checkEmpty); 
+      el.addEventListener('change', checkEmpty); 
+    }
+  });
+  
+  // Executa após um pequeno delay para garantir que o initStudentFilter do app.js já rodou
+  setTimeout(checkEmpty, 50);
+</script>
+</body>
+</html>

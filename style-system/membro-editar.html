@@ -1,0 +1,347 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gabarito360  Editar Membro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/gov.css" />
+<style>
+  .page-header { background: var(--surface); border-bottom: 1px solid var(--border-soft); padding: 20px 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .breadcrumb a { color: var(--accent); }
+  .breadcrumb span { opacity: 0.5; }
+  .page-title { font-size: 22px; font-weight: 800; color: var(--fg); }
+  .page-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+  .form-layout { display: grid; grid-template-columns: 260px 1fr; gap: 28px; margin-top: 28px; align-items: start; }
+  .identity-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: 28px 20px; text-align: center; position: sticky; top: 84px; }
+  .photo-ring { width: 100px; height: 100px; border-radius: 50%; background: #dbeafe; color: #1d4ed8; display: grid; place-items: center; margin: 0 auto 16px; border: 3px solid #fff; box-shadow: 0 3px 12px rgba(19,81,180,0.18); font-size: 32px; font-weight: 800; font-family: var(--font-mono); position: relative; overflow: hidden; cursor: pointer; transition: box-shadow .2s; }
+  .photo-ring:hover { box-shadow: 0 4px 18px rgba(19,81,180,0.28); }
+  .photo-overlay { position: absolute; inset: 0; background: rgba(19,81,180,0.72); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; opacity: 0; transition: opacity .18s; font-family: var(--font-body); letter-spacing: .04em; }
+  .photo-ring:hover .photo-overlay { opacity: 1; }
+  .id-name { font-size: 15px; font-weight: 700; color: var(--fg); }
+  .id-role { display: inline-block; margin-top: 6px; background: var(--accent-light); color: var(--accent-dark); font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 3px 10px; border-radius: var(--radius-pill); text-transform: uppercase; }
+  .id-meta { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.8; }
+  .last-update { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); font-size: 11px; color: var(--muted); text-align: left; }
+  .last-update strong { display: block; font-weight: 700; margin-bottom: 4px; color: var(--fg-2); }
+  .profile-color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+  .profile-dot { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform .15s, border-color .15s; margin: 0 auto; }
+  .profile-dot:hover, .profile-dot.selected { transform: scale(1.15); border-color: var(--fg); }
+  .member-status-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 0; box-shadow: var(--shadow-sm); }
+  .member-status-info { display: flex; align-items: center; gap: 12px; }
+  .member-status-avatar { width: 44px; height: 44px; border-radius: 50%; background: #dbeafe; color: #1d4ed8; display: grid; place-items: center; font-size: 16px; font-weight: 800; font-family: var(--font-mono); flex-shrink: 0; }
+  .member-status-name { font-size: 15px; font-weight: 700; color: var(--fg); }
+  .member-status-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .form-sections { display: flex; flex-direction: column; gap: 20px; }
+  .form-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+  .section-head { padding: 16px 24px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; gap: 10px; }
+  .section-head-ico { width: 30px; height: 30px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--accent-light); color: var(--accent); font-size: 15px; }
+  .section-head h2 { font-size: 14px; font-weight: 700; color: var(--fg); }
+  .section-head p { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .section-body { padding: 20px 24px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.span-2 { grid-column: span 2; }
+  label { font-size: 13px; font-weight: 600; color: var(--fg); display: flex; align-items: center; gap: 4px; }
+  label .req { color: var(--danger); font-size: 12px; }
+  input[type=text], input[type=email], input[type=tel], input[type=date], input[type=password], select, textarea { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font-body); color: var(--fg); background: var(--surface); transition: border-color .15s, box-shadow .15s; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(19,81,180,0.12); }
+  input:disabled, select:disabled { background: var(--bg); color: var(--muted); cursor: not-allowed; }
+  .input-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  textarea { resize: vertical; min-height: 80px; }
+  .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 4px; }
+  .role-option { border: 2px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; cursor: pointer; transition: border-color .15s, background .15s; display: flex; align-items: center; gap: 10px; position: relative; }
+  .role-option:hover { border-color: var(--accent-light); background: rgba(19,81,180,0.03); }
+  .role-option.selected { border-color: var(--accent); background: rgba(19,81,180,0.06); }
+  .role-option input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .role-ico { width: 36px; height: 36px; border-radius: var(--radius-sm); display: grid; place-items: center; font-size: 18px; flex-shrink: 0; }
+  .role-info { min-width: 0; }
+  .role-info strong { font-size: 13px; font-weight: 700; color: var(--fg); display: block; }
+  .role-info small { font-size: 11px; color: var(--muted); line-height: 1.3; }
+  .role-check { margin-left: auto; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; transition: background .15s, border-color .15s; display: grid; place-items: center; }
+  .role-option.selected .role-check { background: var(--accent); border-color: var(--accent); }
+  .role-option.selected .role-check::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-soft); }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-info strong { font-size: 13px; font-weight: 600; color: var(--fg); }
+  .toggle-info small { font-size: 12px; color: var(--muted); display: block; }
+  .toggle-switch { width: 42px; height: 24px; background: var(--border); border-radius: var(--radius-pill); cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+  .toggle-switch.on { background: var(--accent); }
+  .toggle-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.2); transition: left .2s; }
+  .toggle-switch.on::after { left: 21px; }
+  .disc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .disc-tag { display: flex; align-items: center; gap: 4px; background: var(--accent-light); color: var(--accent-dark); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: var(--radius-pill); cursor: pointer; }
+  .disc-tag .remove { font-size: 14px; line-height: 1; opacity: .7; }
+  .disc-add { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .disc-add input { flex: 1; }
+  .turma-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .turma-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; transition: border-color .15s, background .15s; user-select: none; }
+  .turma-item:hover { border-color: var(--accent-light); }
+  .turma-item.checked { border-color: var(--accent); background: rgba(19,81,180,0.05); }
+  .turma-item input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+  .danger-zone { border: 1.5px solid var(--danger); border-radius: var(--radius-md); padding: 20px 24px; background: #fff8f7; }
+  .danger-zone h3 { font-size: 14px; font-weight: 700; color: var(--danger); margin-bottom: 8px; }
+  .danger-zone p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius-md); box-shadow: 0 8px 40px rgba(0,0,0,.2); padding: 28px; max-width: 420px; width: 90%; }
+  .modal h3 { font-size: 16px; font-weight: 700; color: var(--danger); margin-bottom: 10px; }
+  .modal p { font-size: 14px; color: var(--fg-2); margin-bottom: 20px; line-height: 1.5; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .form-actions { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .form-actions-right { display: flex; gap: 10px; }
+  @media (max-width: 900px) { .form-layout { grid-template-columns: 1fr; } .identity-card { max-width: 480px; position: static; } .role-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .form-group.span-2 { grid-column: span 1; } .turma-list { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="govbar"><div class="container"><span>&#127463;&#127479; Governo Federal</span><a href="#">Acessibilidade</a><a href="#">Alto contraste</a></div></div>
+<header class="app-header">
+  <div class="container">
+    <a class="brand" href="dashboard.html"><span class="logo">G360</span> Gabarito360</a>
+    <nav class="app-nav">
+      <a href="dashboard.html">Painel</a><a href="provas.html">Provas</a>
+      <a href="turmas.html">Turmas</a><a href="escolas.html" class="active">Escolas</a>
+    </nav>
+    <div class="header-right">
+      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <div class="user-menu-container">
+        <div class="avatar" id="user-menu-trigger">MS</div>
+        <div class="user-menu" id="user-menu">
+          <div class="user-menu-header"><div class="user-name">Marcos Silva</div><div class="user-role">Professor</div></div>
+          <div class="user-menu-links">
+            <a href="perfil.html">Meu Perfil</a><a href="configuracoes.html">Configuracoes</a><hr><a href="login.html" class="logout">Sair</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="escolas.html">Escolas</a><span>></span>
+      <a href="escola-detalhe.html?id=1" id="bc-escola">E.E. Prof. Joao Pessoa</a>
+      <span>></span><span>Equipe</span><span>></span><span id="bc-nome">Editar membro</span>
+    </div>
+    <div class="page-title">Editar membro</div>
+    <div class="page-subtitle">Altere os dados e permissoes do membro da equipe.</div>
+  </div>
+</div>
+
+<main class="container" style="padding-bottom:48px;">
+  <div style="margin-top:24px;margin-bottom:28px;" class="member-status-bar">
+    <div class="member-status-info">
+      <div class="member-status-avatar" id="status-avatar" style="background:#dbeafe;color:#1d4ed8;">AC</div>
+      <div>
+        <div class="member-status-name" id="status-name">Ana Claudia Ferreira</div>
+        <div class="member-status-sub">Diretora Escolar &middot; E.E. Prof. Joao Pessoa &middot; Desde jan/2019</div>
+      </div>
+      <span class="badge badge-success" style="margin-left:8px;">Ativo</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-sm btn-secondary" onclick="showToast('Acesso temporariamente suspenso.','info')">Suspender acesso</button>
+      <button class="btn btn-sm" style="background:var(--danger-light);color:var(--danger);border:1.5px solid var(--danger);" onclick="openDeleteModal()">Remover membro</button>
+    </div>
+  </div>
+
+  <form id="form-editar" novalidate>
+  <div class="form-layout">
+    <div class="identity-card">
+      <div class="photo-ring" id="photo-ring" onclick="document.getElementById('foto-input').click()" style="background:#dbeafe;color:#1d4ed8;">
+        <span id="photo-initials">AC</span>
+        <div class="photo-overlay">Alterar foto</div>
+      </div>
+      <input type="file" id="foto-input" accept="image/*" style="display:none" />
+      <div class="id-name" id="id-name-preview">Ana Claudia Ferreira</div>
+      <div class="id-role" id="id-role-preview">Diretora Escolar</div>
+      <div class="id-meta">E.E. Prof. Joao Pessoa<br>Desde: jan/2019<br>Status: Ativo</div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-soft);">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;">Cor do avatar</div>
+        <div class="profile-color-grid">
+          <div class="profile-dot selected" style="background:#dbeafe;" data-bg="#dbeafe" data-fg="#1d4ed8" onclick="selectColor(this)"></div>
+          <div class="profile-dot" style="background:#dcfce7;" data-bg="#dcfce7" data-fg="#166534" onclick="selectColor(this)"></div>
+          <div class="profile-dot" style="background:#fef9c3;" data-bg="#fef9c3" data-fg="#854d0e" onclick="selectColor(this)"></div>
+          <div class="profile-dot" style="background:#fce7f3;" data-bg="#fce7f3" data-fg="#9d174d" onclick="selectColor(this)"></div>
+          <div class="profile-dot" style="background:#ede9fe;" data-bg="#ede9fe" data-fg="#5b21b6" onclick="selectColor(this)"></div>
+          <div class="profile-dot" style="background:#ffedd5;" data-bg="#ffedd5" data-fg="#9a3412" onclick="selectColor(this)"></div>
+          <div class="profile-dot" style="background:#f0fdf4;" data-bg="#f0fdf4" data-fg="#14532d" onclick="selectColor(this)"></div>
+          <div class="profile-dot" style="background:#e0f2fe;" data-bg="#e0f2fe" data-fg="#075985" onclick="selectColor(this)"></div>
+        </div>
+      </div>
+      <div class="last-update">
+        <strong>Ultima atualizacao</strong>Marcos Silva (admin)<br>10/06/2025 as 14:32
+      </div>
+    </div>
+
+    <div class="form-sections">
+      <div class="form-section">
+        <div class="section-head"><div class="section-head-ico">&#128100;</div><div><h2>Perfil e cargo</h2><p>Altere o perfil de acesso deste membro.</p></div></div>
+        <div class="section-body">
+          <div class="role-grid">
+            <label class="role-option" onclick="selectRole(this,'Professor','professor')">
+              <input type="radio" name="perfil" value="professor" />
+              <div class="role-ico" style="background:#dbeafe;">&#127979;</div>
+              <div class="role-info"><strong>Professor</strong><small>Cria provas e corrige gabaritos de suas turmas.</small></div>
+              <div class="role-check"></div>
+            </label>
+            <label class="role-option selected" onclick="selectRole(this,'Diretora Escolar','diretor-escolar')">
+              <input type="radio" name="perfil" value="diretor-escolar" checked />
+              <div class="role-ico" style="background:#dcfce7;">&#127963;</div>
+              <div class="role-info"><strong>Diretor Escolar</strong><small>Acesso completo a escola e relatorios gerenciais.</small></div>
+              <div class="role-check"></div>
+            </label>
+            <label class="role-option" onclick="selectRole(this,'Vice-Diretor','vice-diretor')">
+              <input type="radio" name="perfil" value="vice-diretor" />
+              <div class="role-ico" style="background:#fef9c3;">&#128193;</div>
+              <div class="role-info"><strong>Vice-Diretor</strong><small>Suporte a direcao, acesso a turmas e alunos.</small></div>
+              <div class="role-check"></div>
+            </label>
+            <label class="role-option" onclick="selectRole(this,'Coord. Pedagogico','coordenador-pedagogico')">
+              <input type="radio" name="perfil" value="coordenador-pedagogico" />
+              <div class="role-ico" style="background:#ede9fe;">&#128202;</div>
+              <div class="role-info"><strong>Coord. Pedagogico</strong><small>Monitora desempenho pedagogico e resultados.</small></div>
+              <div class="role-check"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-head"><div class="section-head-ico">&#128203;</div><div><h2>Dados pessoais</h2><p>Informacoes de identificacao do membro.</p></div></div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="form-group span-2"><label>Nome completo <span class="req">*</span></label><input type="text" id="nome" value="Ana Claudia Ferreira" oninput="updatePreview()" /></div>
+            <div class="form-group"><label>CPF</label><input type="text" value="123.456.789-00" disabled /><span class="input-hint">CPF nao pode ser alterado apos o cadastro.</span></div>
+            <div class="form-group"><label>Data de nascimento</label><input type="date" value="1982-07-15" /></div>
+            <div class="form-group"><label>Telefone</label><input type="tel" value="(11) 3000-0001" /></div>
+            <div class="form-group"><label>E-mail institucional <span class="req">*</span></label><input type="email" value="ana.claudia@edu.sp.gov.br" /></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-head"><div class="section-head-ico">&#127891;</div><div><h2>Dados profissionais</h2><p>Formacao, registro e lotacao na escola.</p></div></div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="form-group"><label>Formacao academica</label><input type="text" value="Pedagogia - Universidade de Sao Paulo" /></div>
+            <div class="form-group"><label>No de registro profissional</label><input type="text" value="CRE 0001234" /></div>
+            <div class="form-group"><label>Escola <span class="req">*</span></label>
+              <select><option value="1" selected>E.E. Prof. Joao Pessoa</option><option value="2">EMEF Monteiro Lobato</option><option value="3">CEJA Centro</option><option value="4">E.M. Santos Dumont</option></select>
+            </div>
+            <div class="form-group"><label>Data de ingresso</label><input type="date" value="2019-01-15" /></div>
+          </div>
+          <div id="bloco-disciplinas" style="display:none;margin-top:18px;">
+            <label style="margin-bottom:6px;">Disciplinas que leciona</label>
+            <div class="disc-tags" id="disc-tags-list"><span class="disc-tag">Matematica <span class="remove" onclick="removeDisc(this)">x</span></span></div>
+            <div class="disc-add"><input type="text" id="disc-input" placeholder="Digite e pressione Enter" onkeydown="addDiscKey(event)" /><button type="button" class="btn btn-secondary" onclick="addDisc()">+ Adicionar</button></div>
+          </div>
+          <div id="bloco-turmas" style="display:none;margin-top:18px;">
+            <label style="margin-bottom:8px;">Turmas atribuidas</label>
+            <div class="turma-list">
+              <label class="turma-item"><input type="checkbox"> 6 Ano A</label>
+              <label class="turma-item"><input type="checkbox"> 6 Ano B</label>
+              <label class="turma-item"><input type="checkbox"> 7 Ano A</label>
+              <label class="turma-item"><input type="checkbox"> 7 Ano B</label>
+              <label class="turma-item"><input type="checkbox"> 8 Ano A</label>
+              <label class="turma-item"><input type="checkbox"> 8 Ano B</label>
+              <label class="turma-item"><input type="checkbox"> 9 Ano A</label>
+              <label class="turma-item"><input type="checkbox"> 9 Ano B</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-head"><div class="section-head-ico">&#128274;</div><div><h2>Acesso ao sistema</h2><p>Controle de autenticacao e status de acesso.</p></div></div>
+        <div class="section-body">
+          <div class="form-grid" style="margin-bottom:18px;">
+            <div class="form-group"><label>Login (usuario)</label><input type="text" value="ana.claudia" disabled /><span class="input-hint">Login nao pode ser alterado.</span></div>
+            <div class="form-group"><label>Nova senha</label><input type="password" placeholder="Deixe em branco para manter" /></div>
+          </div>
+          <div class="toggle-row"><div class="toggle-info"><strong>Membro ativo</strong><small>Permite acesso ao sistema.</small></div><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle-row"><div class="toggle-info"><strong>Forcar troca de senha</strong><small>Exige nova senha no proximo acesso.</small></div><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-head"><div class="section-head-ico">&#128221;</div><div><h2>Observacoes</h2><p>Anotacoes internas sobre este membro.</p></div></div>
+        <div class="section-body">
+          <div class="form-group"><textarea rows="3">Diretora desde 2019. Responsavel por coordenar o Projeto Politico-Pedagogico da unidade.</textarea><span class="input-hint">Visivel apenas para gestores e administradores.</span></div>
+        </div>
+      </div>
+
+      <div class="danger-zone">
+        <h3>Zona de perigo</h3>
+        <p>Acoes permanentes que nao podem ser desfeitas. Proceda com cautela.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-sm" style="background:var(--warn-light);color:var(--warn-fg);border:1.5px solid var(--warn);" onclick="showToast('Acesso suspenso temporariamente.','info')">Suspender acesso</button>
+          <button type="button" class="btn btn-sm" style="background:var(--danger-light);color:var(--danger);border:1.5px solid var(--danger);" onclick="openDeleteModal()">Remover membro permanentemente</button>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="escola-detalhe.html?id=1" class="btn btn-ghost">Cancelar</a>
+        <div class="form-actions-right">
+          <button type="button" class="btn btn-secondary" onclick="showToast('Rascunho salvo.','info')">Salvar rascunho</button>
+          <button type="submit" class="btn btn-primary" onclick="submitForm(event)">Salvar alteracoes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </form>
+</main>
+
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <h3>Remover membro permanentemente?</h3>
+    <p>Esta acao e <strong>irreversivel</strong>. O membro perdera acesso ao sistema. As provas e correcoes associadas serao preservadas.</p>
+    <div class="form-group" style="margin-bottom:16px;"><label>Para confirmar, digite o nome completo do membro:</label><input type="text" id="confirm-nome" placeholder="Ana Claudia Ferreira" oninput="validateDelete()" /></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button><button class="btn" id="btn-confirm-delete" disabled style="background:var(--danger);color:#fff;opacity:.5;cursor:not-allowed;" onclick="confirmDelete()">Sim, remover</button></div>
+  </div>
+</div>
+
+<div id="toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--fg);color:#fff;padding:11px 22px;border-radius:var(--radius-sm);font-size:14px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);"></div>
+<script src="js/app.js"></script>
+<script>
+  function selectRole(el, label) {
+    document.querySelectorAll('.role-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('id-role-preview').textContent = label;
+    const val = el.querySelector('input').value;
+    const isProf = val === 'professor';
+    document.getElementById('bloco-disciplinas').style.display = isProf ? '' : 'none';
+    document.getElementById('bloco-turmas').style.display = isProf ? '' : 'none';
+  }
+  function selectColor(el) {
+    document.querySelectorAll('.profile-dot').forEach(d => d.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('photo-ring').style.background = el.dataset.bg;
+    document.getElementById('photo-ring').style.color = el.dataset.fg;
+    document.getElementById('status-avatar').style.background = el.dataset.bg;
+    document.getElementById('status-avatar').style.color = el.dataset.fg;
+  }
+  function updatePreview() {
+    const nome = document.getElementById('nome').value.trim();
+    const parts = nome.split(' ').filter(Boolean);
+    const initials = parts.length >= 2 ? (parts[0][0]+parts[parts.length-1][0]).toUpperCase() : nome.slice(0,2).toUpperCase()||'??';
+    document.getElementById('photo-initials').textContent = initials;
+    document.getElementById('id-name-preview').textContent = nome || 'Nome completo';
+    document.getElementById('status-name').textContent = nome || 'Nome completo';
+  }
+  function addDisc() { const inp=document.getElementById('disc-input'); const v=inp.value.trim(); if(!v) return; const list=document.getElementById('disc-tags-list'); const tag=document.createElement('span'); tag.className='disc-tag'; tag.innerHTML=v+' <span class="remove" onclick="removeDisc(this)">x</span>'; list.appendChild(tag); inp.value=''; }
+  function addDiscKey(e) { if(e.key==='Enter'){e.preventDefault();addDisc();} }
+  function removeDisc(el) { el.parentElement.remove(); }
+  document.querySelectorAll('.turma-item').forEach(i => i.addEventListener('click',()=>i.classList.toggle('checked')));
+  function submitForm(e) { e.preventDefault(); showToast('Alteracoes salvas com sucesso!','success'); setTimeout(()=>{ window.location.href='escola-detalhe.html?id=1'; },1500); }
+  function openDeleteModal() { document.getElementById('delete-modal').classList.add('open'); document.getElementById('confirm-nome').value=''; validateDelete(); }
+  function closeDeleteModal() { document.getElementById('delete-modal').classList.remove('open'); }
+  function validateDelete() { const v=document.getElementById('confirm-nome').value.trim(); const btn=document.getElementById('btn-confirm-delete'); const ok=v==='Ana Claudia Ferreira'; btn.disabled=!ok; btn.style.opacity=ok?'1':'.5'; btn.style.cursor=ok?'pointer':'not-allowed'; }
+  function confirmDelete() { closeDeleteModal(); showToast('Membro removido.','success'); setTimeout(()=>{ window.location.href='escola-detalhe.html?id=1'; },1500); }
+  document.getElementById('delete-modal').addEventListener('click',function(e){ if(e.target===this) closeDeleteModal(); });
+  function showToast(msg,type) { const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; t.style.background=type==='success'?'var(--success)':type==='danger'?'var(--danger)':'var(--fg)'; clearTimeout(t._tid); t._tid=setTimeout(()=>{ t.style.display='none'; },3000); }
+</script>
+</body>
+</html>

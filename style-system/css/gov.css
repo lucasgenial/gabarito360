@@ -1,0 +1,248 @@
+/* ============================================================
+   Gabarito360 — Design System gov.br (compartilhado)
+   Padrão Digital de Governo brasileiro
+   ============================================================ */
+:root {
+  --bg: #f8f8f8;
+  --surface: #ffffff;
+  --surface-2: #f0f3f8;
+  --fg: #1c2733;
+  --fg-2: #333d47;
+  --muted: #555555;
+  --border: #cccccc;
+  --border-soft: #e6e9ed;
+
+  --accent: #1351b4;          /* azul institucional gov.br */
+  --accent-dark: #0c326f;     /* hover/active */
+  --accent-light: #c5d4eb;    /* fundo sutil */
+  --accent-on: #ffffff;
+
+  --success: #168821;         /* verde gov.br */
+  --success-light: #e3f5e1;
+  --warn: #ffcd07;            /* amarelo atenção */
+  --warn-fg: #6b5400;
+  --warn-light: #fff8d6;
+  --danger: #e52207;          /* vermelho erro */
+  --danger-light: #fce8e6;
+
+  --font-body: 'Rawline', 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Rawline', 'Raleway', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'Roboto Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
+
+  --shadow-sm: 0 1px 3px rgba(28,39,51,0.08), 0 0 0 1px rgba(28,39,51,0.02);
+  --shadow-md: 0 4px 16px rgba(28,39,51,0.08), 0 0 0 1px rgba(28,39,51,0.03);
+  --container: 1280px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 16px;
+  line-height: 1.5;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.2; letter-spacing: -0.01em; font-weight: 700; }
+img { max-width: 100%; display: block; }
+
+/* ---------- Faixa governamental (topo institucional) ---------- */
+.govbar {
+  background: #071d41;
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 6px 0;
+}
+.govbar .container { display: flex; align-items: center; gap: 16px; }
+.govbar a { color: #fff; opacity: 0.9; font-size: 12px; }
+
+/* ---------- Header app ---------- */
+.app-header {
+  background: var(--accent);
+  color: #fff;
+  position: sticky; top: 0; z-index: 50;
+}
+.app-header .container { display: flex; align-items: center; gap: 20px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; color: #fff; }
+.brand:hover { text-decoration: none; }
+.brand .logo {
+  width: 34px; height: 34px; border-radius: 8px; background: #fff;
+  display: grid; place-items: center; color: var(--accent); font-weight: 900;
+  font-family: var(--font-mono); font-size: 13px;
+}
+.app-nav { display: flex; gap: 4px; margin-left: 12px; }
+.app-nav a {
+  color: rgba(255,255,255,0.85); padding: 8px 14px; border-radius: 6px;
+  font-size: 14px; font-weight: 500; transition: background .15s;
+}
+.app-nav a:hover { background: rgba(255,255,255,0.12); text-decoration: none; }
+.app-nav a.active { background: rgba(255,255,255,0.2); color: #fff; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%; background: var(--accent-light);
+  color: var(--accent-dark); display: grid; place-items: center; font-weight: 700; font-size: 14px;
+  cursor: pointer; user-select: none;
+}
+
+/* ---------- Botão de tema (claro/escuro) ---------- */
+.theme-btn {
+  width: 38px; height: 38px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.15); color: #fff;
+  cursor: pointer; display: grid; place-items: center;
+  transition: background .15s; flex-shrink: 0; padding: 0;
+}
+.theme-btn:hover { background: rgba(255,255,255,0.28); }
+.theme-btn svg { display: block; }
+
+/* ---------- User Menu ---------- */
+.user-menu-container { position: relative; }
+.user-menu {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 220px; background: #fff; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md); border: 1px solid var(--border-soft);
+  z-index: 100; display: none; overflow: hidden;
+}
+.user-menu.active { display: block; animation: menuFade 0.2s ease; }
+@keyframes menuFade { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+.user-menu-header { padding: 16px; background: var(--surface-2); border-bottom: 1px solid var(--border-soft); text-align: left; }
+.user-name { font-weight: 700; font-size: 14px; color: var(--fg); line-height: 1.2; }
+.user-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.user-menu-links { padding: 8px 0; }
+.user-menu-links a {
+  display: block; padding: 10px 16px; color: var(--fg-2); font-size: 14px;
+  transition: background 0.1s; text-align: left;
+}
+.user-menu-links a:hover { background: var(--surface-2); text-decoration: none; color: var(--accent); }
+.user-menu-links hr { border: 0; border-top: 1px solid var(--border-soft); margin: 8px 0; }
+.user-menu-links a.logout { color: var(--danger); }
+.user-menu-links a.logout:hover { background: var(--danger-light); }
+
+.container { max-width: var(--container); margin: 0 auto; padding: 0 24px; }
+
+/* ---------- Breadcrumb ---------- */
+.breadcrumb { display: flex; gap: 8px; font-size: 13px; color: var(--muted); padding: 16px 0 0; }
+.breadcrumb span.sep { opacity: 0.5; }
+
+/* ---------- Botões ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-body); font-size: 15px; font-weight: 600; letter-spacing: 0.01em;
+  padding: 10px 20px; border-radius: var(--radius-md); border: 1.5px solid transparent;
+  cursor: pointer; transition: all .15s; line-height: 1.2; text-decoration: none;
+}
+.btn:hover { text-decoration: none; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); }
+.btn-secondary { background: transparent; color: var(--accent); border-color: var(--accent); }
+.btn-secondary:hover { background: var(--accent-light); }
+.btn-ghost { background: transparent; color: var(--fg-2); }
+.btn-ghost:hover { background: var(--surface-2); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover { filter: brightness(0.92); }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn-block { width: 100%; }
+
+/* ---------- Form ---------- */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--fg); }
+.input, .select, textarea.input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-md);
+  font-family: var(--font-body); font-size: 15px; color: var(--fg); background: #fff; transition: border .15s, box-shadow .15s;
+}
+.input:focus, .select:focus, textarea.input:focus {
+  outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(19,81,180,0.15);
+}
+.input-icon { position: relative; }
+.input-icon .input { padding-left: 40px; }
+.input-icon svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.field-help { font-size: 13px; color: var(--muted); margin-top: 5px; }
+
+/* ---------- Card ---------- */
+.card { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.card-pad { padding: 24px; }
+
+/* ---------- Badges / pills ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
+  padding: 3px 10px; border-radius: var(--radius-pill); letter-spacing: 0.02em;
+}
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-warn { background: var(--warn-light); color: var(--warn-fg); }
+.badge-danger { background: var(--danger-light); color: var(--danger); }
+.badge-info { background: var(--accent-light); color: var(--accent-dark); }
+.badge-muted { background: var(--surface-2); color: var(--muted); }
+.badge-dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ---------- Tabela ---------- */
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th {
+  text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); font-weight: 700; padding: 12px 16px; border-bottom: 1.5px solid var(--border);
+}
+.table td { padding: 14px 16px; border-bottom: 1px solid var(--border-soft); }
+.table tbody tr:hover { background: var(--surface-2); }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ---------- KPI stat ---------- */
+.kpi { padding: 20px 22px; }
+.kpi .kpi-label { font-size: 13px; color: var(--muted); font-weight: 600; }
+.kpi .kpi-value { font-family: var(--font-mono); font-size: 34px; font-weight: 700; letter-spacing: -0.02em; margin-top: 6px; line-height: 1; }
+.kpi .kpi-trend { font-size: 13px; margin-top: 8px; font-weight: 600; }
+.up { color: var(--success); } .down { color: var(--danger); }
+
+.eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.page-title { font-size: 30px; margin: 6px 0 4px; }
+.page-sub { color: var(--muted); font-size: 15px; }
+
+.grid { display: grid; gap: 20px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.stack > * + * { margin-top: 16px; }
+
+@media (max-width: 720px) {
+  .app-nav { display: none; }
+  .page-title { font-size: 24px; }
+  .container { padding: 0 16px; }
+}
+
+/* ============================================================
+   Tema escuro — tokens sobrescritos via html[data-theme="dark"]
+   ============================================================ */
+html[data-theme="dark"] {
+  --bg: #0f1117;
+  --surface: #1a1f2e;
+  --surface-2: #1e2433;
+  --fg: #e8edf5;
+  --fg-2: #c5ccd8;
+  --muted: #8892a4;
+  --border: #2d3548;
+  --border-soft: #222840;
+  --accent: #4080e0;
+  --accent-dark: #6699f0;
+  --accent-light: #1a2d4a;
+  --success-light: #0a2a10;
+  --warn-light: #2a200a;
+  --warn-fg: #f0c060;
+  --danger-light: #2a0a08;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,0,0,0.2);
+}
+html[data-theme="dark"] .input,
+html[data-theme="dark"] .select,
+html[data-theme="dark"] textarea.input { background: var(--surface-2); color: var(--fg); border-color: var(--border); }
+html[data-theme="dark"] .user-menu { background: var(--surface); border-color: var(--border); }
+html[data-theme="dark"] .user-menu-header { background: var(--surface-2); border-bottom-color: var(--border); }
+html[data-theme="dark"] .user-menu-links a { color: var(--fg-2); }
+html[data-theme="dark"] .user-menu-links a:hover { background: var(--surface-2); }
+html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
