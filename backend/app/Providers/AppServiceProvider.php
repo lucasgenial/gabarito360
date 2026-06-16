@@ -40,10 +40,12 @@ use App\Services\Audit\AuditAction;
 use App\Services\Audit\AuditService;
 use App\Services\Authorization\AuthorizationContext;
 use App\Support\ApiResponse;
+use App\Support\Web\PortalUiContext;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
@@ -108,5 +110,13 @@ class AppServiceProvider extends ServiceProvider
                     ->allows($user, $permission, $context),
             );
         }
+
+        View::composer('layouts.app', function ($view): void {
+            $user = request()->user();
+
+            if ($user instanceof User) {
+                $view->with('portalUi', app(PortalUiContext::class)->forUser($user));
+            }
+        });
     }
 }
