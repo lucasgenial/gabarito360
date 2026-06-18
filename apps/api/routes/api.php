@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -18,6 +19,12 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::put('me',     [AuthController::class, 'update']);
+        });
+
+        // Dashboard
+        Route::prefix('dashboard')->group(function () {
+            Route::get('admin', [DashboardController::class, 'admin'])
+                ->middleware('perfil:admin_rede');
         });
     });
 
