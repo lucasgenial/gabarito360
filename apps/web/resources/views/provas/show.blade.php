@@ -46,10 +46,7 @@
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
     @if($prova['status'] === 'rascunho')
       <button class="btn btn-secondary" onclick="abrirModal()">Editar</button>
-      <form method="POST" action="{{ route('provas.publicar', $prova['id']) }}">
-        @csrf
-        <button type="submit" class="btn btn-primary">Publicar gabarito</button>
-      </form>
+      <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" class="btn btn-primary">Editar gabarito →</a>
       <form method="POST" action="{{ route('provas.destroy', $prova['id']) }}"
             onsubmit="return confirm('Excluir esta prova?')" style="display:inline;">
         @csrf
@@ -58,6 +55,7 @@
       </form>
     @elseif($prova['status'] === 'publicada')
       <button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>
+      <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-secondary">Ver gabarito</a>
     @endif
     <a href="{{ route('provas.index') }}" class="btn btn-ghost">← Voltar</a>
   </div>
@@ -174,7 +172,7 @@
       <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--fg-2);">
         @if($prova['status'] === 'rascunho')
           <div style="display:flex;align-items:center;gap:8px;"><span>1️⃣</span> Verifique os dados da prova</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span>2️⃣</span> Configure o gabarito (MP-020)</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span>2️⃣</span> <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" style="color:var(--accent);">Configure o gabarito</a></div>
           <div style="display:flex;align-items:center;gap:8px;"><span>3️⃣</span> Publique o gabarito</div>
           <div style="display:flex;align-items:center;gap:8px;"><span>4️⃣</span> Aplique a prova nas turmas</div>
           <div style="display:flex;align-items:center;gap:8px;"><span>5️⃣</span> Lance os cartões-resposta (OMR)</div>
