@@ -150,6 +150,8 @@
     <div class="tabs-row" role="tablist" style="margin-top:20px;">
       <button class="tab-btn active" role="tab" id="tab-btn-visao" data-tab="visao-geral">Visão Geral</button>
       <button class="tab-btn" role="tab" id="tab-btn-turmas" data-tab="turmas">Turmas</button>
+      <button class="tab-btn" role="tab" id="tab-btn-provas" data-tab="provas">Provas</button>
+      <button class="tab-btn" role="tab" id="tab-btn-alunos" data-tab="alunos">Alunos</button>
       <button class="tab-btn" role="tab" id="tab-btn-equipe" data-tab="equipe">Equipe</button>
     </div>
   </div>
@@ -399,6 +401,119 @@
       <div style="font-size:40px;margin-bottom:14px;">🏫</div>
       <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma cadastrada</div>
       <p>As turmas desta escola aparecerão aqui após o cadastro no módulo de Turmas.</p>
+    </div>
+    @endif
+  </div>
+</div>
+
+{{-- ═══ TAB: Provas ════════════════════════════════════════════ --}}
+<div class="tab-panel" id="tab-provas">
+  <div class="info-card" style="margin-top:4px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="margin:0;">Provas desta escola</h3>
+      <a href="{{ route('provas.create') }}" class="btn btn-sm btn-primary">+ Nova prova</a>
+    </div>
+    @if(count($escola['provas'] ?? []) > 0)
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Prova</th>
+          <th>Disciplina</th>
+          <th>Turma</th>
+          <th>Aplicação</th>
+          <th>Alunos</th>
+          <th>Média</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($escola['provas'] as $p)
+          @php
+            $statusCfg = [
+              'rascunho'    => ['cls'=>'badge-info',   'label'=>'Rascunho'],
+              'publicada'   => ['cls'=>'badge-success', 'label'=>'Publicada'],
+              'em_correcao' => ['cls'=>'',              'label'=>'Em correção',  'style'=>'background:rgba(245,158,11,.15);color:#b45309;'],
+              'corrigida'   => ['cls'=>'badge-success', 'label'=>'Corrigida'],
+            ];
+            $sc = $statusCfg[$p['status']] ?? ['cls'=>'badge-info','label'=>$p['status']];
+          @endphp
+          <tr>
+            <td><strong>{{ $p['titulo'] }}</strong></td>
+            <td>{{ $p['disciplina'] }}</td>
+            <td>{{ $p['turma'] }}</td>
+            <td>{{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}</td>
+            <td style="font-family:var(--font-mono);">{{ $p['total_alunos'] }}</td>
+            <td style="font-family:var(--font-mono);">{{ $p['media'] !== null ? number_format($p['media'], 1, ',', '') : '—' }}</td>
+            <td><span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span></td>
+            <td>
+              @if($p['status'] === 'em_correcao')
+                <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary">Acompanhar</a>
+              @elseif($p['status'] === 'corrigida')
+                <a href="{{ route('relatorios.prova', $p['id']) }}" class="btn btn-sm btn-secondary">Relatório</a>
+              @else
+                <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
+              @endif
+            </td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+    @else
+    <div style="text-align:center;padding:48px 20px;color:var(--muted);">
+      <div style="font-size:40px;margin-bottom:14px;">📝</div>
+      <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma prova cadastrada</div>
+      <p>As provas desta escola aparecerão aqui após a criação no módulo de Provas.</p>
+    </div>
+    @endif
+  </div>
+</div>
+
+{{-- ═══ TAB: Alunos ════════════════════════════════════════════ --}}
+<div class="tab-panel" id="tab-alunos">
+  <div class="info-card" style="margin-top:4px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="margin:0;">Alunos matriculados <span class="badge" style="margin-left:8px;">{{ count($escola['alunos'] ?? []) }}</span></h3>
+      <a href="{{ route('alunos.create') }}" class="btn btn-sm btn-primary">+ Cadastrar</a>
+    </div>
+    @if(count($escola['alunos'] ?? []) > 0)
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Aluno</th>
+          <th>Matrícula</th>
+          <th>Turma</th>
+          <th>Média geral</th>
+          <th>Provas</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($escola['alunos'] as $a)
+          <tr>
+            <td><strong>{{ $a['nome'] }}</strong></td>
+            <td style="font-family:var(--font-mono);">{{ $a['matricula'] }}</td>
+            <td>{{ $a['turma'] }}</td>
+            <td style="font-family:var(--font-mono);">{{ $a['media_geral'] !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</td>
+            <td style="font-family:var(--font-mono);">{{ $a['total_provas'] }}</td>
+            <td>
+              @if($a['ativo'])
+                <span class="badge badge-success">Ativa</span>
+              @else
+                <span class="badge badge-danger">Inativa</span>
+              @endif
+            </td>
+            <td><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a></td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+    @else
+    <div style="text-align:center;padding:48px 20px;color:var(--muted);">
+      <div style="font-size:40px;margin-bottom:14px;">🎓</div>
+      <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhum aluno matriculado</div>
+      <p>Os alunos desta escola aparecerão aqui após o cadastro nas turmas.</p>
     </div>
     @endif
   </div>

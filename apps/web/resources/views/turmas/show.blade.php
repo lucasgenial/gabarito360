@@ -78,19 +78,19 @@
 {{-- KPIs --}}
 <div class="kpi-grid">
   <div class="card kpi">
+    <div class="kpi-label">Desempenho médio</div>
+    <div class="kpi-value">{{ $turma['media_turma'] !== null ? number_format($turma['media_turma'], 1, ',', '') : '—' }}</div>
+    <div class="kpi-trend">média da turma</div>
+  </div>
+  <div class="card kpi">
+    <div class="kpi-label">Provas aplicadas</div>
+    <div class="kpi-value">{{ $turma['total_provas'] ?? 0 }}</div>
+    <div class="kpi-trend">nesta turma</div>
+  </div>
+  <div class="card kpi">
     <div class="kpi-label">Alunos ativos</div>
     <div class="kpi-value">{{ $turma['total_alunos'] ?? 0 }}</div>
     <div class="kpi-trend">matriculados</div>
-  </div>
-  <div class="card kpi">
-    <div class="kpi-label">Série</div>
-    <div class="kpi-value" style="font-size:20px;margin-top:6px;">{{ $turma['serie'] }}</div>
-  </div>
-  <div class="card kpi">
-    <div class="kpi-label">Turno</div>
-    <div class="kpi-value" style="font-size:20px;margin-top:6px;">
-      {{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$turma['turno']] ?? $turma['turno'] }}
-    </div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Ano letivo</div>
@@ -126,7 +126,10 @@
       <tr>
         <th>Aluno</th>
         <th>Matrícula</th>
+        <th>Média geral</th>
+        <th>Provas</th>
         <th>Status</th>
+        <th></th>
       </tr>
     </thead>
     <tbody id="alunos-tbody">
@@ -140,6 +143,8 @@
             </div>
           </td>
           <td style="font-family:var(--font-mono);">{{ $a['matricula'] ?? '—' }}</td>
+          <td style="font-family:var(--font-mono);">{{ ($a['media_geral'] ?? null) !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</td>
+          <td style="font-family:var(--font-mono);">{{ $a['total_provas'] ?? 0 }}</td>
           <td>
             @if($a['ativo'] ?? true)
               <span class="badge badge-success badge-dot">Ativo</span>
@@ -147,10 +152,11 @@
               <span class="badge badge-danger badge-dot">Inativo</span>
             @endif
           </td>
+          <td><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a></td>
         </tr>
       @empty
         <tr id="empty-row">
-          <td colspan="3" style="text-align:center;padding:48px 20px;color:var(--muted);">
+          <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div style="font-size:36px;margin-bottom:12px;">👤</div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhum aluno matriculado</div>
             <p>Os alunos aparecerão aqui após o cadastro no módulo de Alunos.</p>
@@ -162,6 +168,68 @@
   <div id="no-results" style="display:none;padding:32px;text-align:center;color:var(--muted);font-size:14px;">
     Nenhum aluno corresponde à busca.
   </div>
+</div>
+
+{{-- Seção: Provas da turma --}}
+<h2 class="section-title">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <path d="M14 2v6h6"/>
+  </svg>
+  Provas da Turma
+  <span class="badge" style="margin-left:6px;font-size:13px;">{{ count($turma['provas'] ?? []) }}</span>
+</h2>
+
+<div class="card" style="overflow:hidden;margin-bottom:24px;">
+  @if(count($turma['provas'] ?? []) > 0)
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Prova</th>
+        <th>Disciplina</th>
+        <th>Aplicação</th>
+        <th>Média</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @php
+        $statusCfg = [
+          'rascunho'    => ['cls'=>'badge-info',   'label'=>'Rascunho'],
+          'publicada'   => ['cls'=>'badge-success', 'label'=>'Publicada'],
+          'em_correcao' => ['cls'=>'',              'label'=>'Em correção',  'style'=>'background:rgba(245,158,11,.15);color:#b45309;'],
+          'corrigida'   => ['cls'=>'badge-success', 'label'=>'Corrigida'],
+        ];
+      @endphp
+      @foreach($turma['provas'] as $p)
+        @php $sc = $statusCfg[$p['status']] ?? ['cls'=>'badge-info','label'=>$p['status']]; @endphp
+        <tr>
+          <td><strong>{{ $p['titulo'] }}</strong></td>
+          <td>{{ $p['disciplina'] }}</td>
+          <td>{{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}</td>
+          <td style="font-family:var(--font-mono);">{{ $p['media'] !== null ? number_format($p['media'], 1, ',', '') : '—' }}</td>
+          <td><span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span></td>
+          <td>
+            @if($p['status'] === 'em_correcao')
+              <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary">Acompanhar</a>
+            @elseif($p['status'] === 'corrigida')
+              <a href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}" class="btn btn-sm btn-secondary">Relatório</a>
+            @else
+              <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
+            @endif
+          </td>
+        </tr>
+      @endforeach
+    </tbody>
+  </table>
+  @else
+  <div style="text-align:center;padding:48px 20px;color:var(--muted);">
+    <div style="font-size:36px;margin-bottom:12px;">📝</div>
+    <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma prova aplicada</div>
+    <p>As provas vinculadas a esta turma aparecerão aqui.</p>
+  </div>
+  @endif
 </div>
 
 {{-- Seção: Professores vinculados --}}

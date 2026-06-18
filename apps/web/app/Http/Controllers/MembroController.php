@@ -39,25 +39,39 @@ class MembroController extends Controller
 
     public function create(): View
     {
-        return view('membros.create', ['perfis' => self::PERFIS]);
+        $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
+
+        return view('membros.create', ['perfis' => self::PERFIS, 'escolas' => $escolas]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nome'   => 'required|string|max:200',
-            'email'  => 'required|email',
-            'cpf'    => 'required|string',
-            'perfil' => 'required|string',
+            'nome'                  => 'required|string|max:200',
+            'email'                 => 'required|email',
+            'cpf'                   => 'required|string',
+            'perfil'                => 'required|string',
+            'data_nascimento'       => 'sometimes|date|nullable',
+            'data_ingresso'         => 'sometimes|date|nullable',
         ]);
 
-        $resp = $this->api->post('/v1/usuarios', [
-            'nome'   => $request->nome,
-            'email'  => $request->email,
-            'cpf'    => preg_replace('/\D/', '', $request->cpf),
-            'perfil' => $request->perfil,
-            'ativo'  => $request->boolean('ativo', true),
-        ]);
+        $dados = [
+            'nome'                   => $request->nome,
+            'email'                  => $request->email,
+            'cpf'                    => preg_replace('/\D/', '', $request->cpf),
+            'perfil'                 => $request->perfil,
+            'ativo'                  => $request->boolean('ativo', true),
+            'data_nascimento'        => $request->input('data_nascimento'),
+            'telefone'               => $request->input('telefone'),
+            'data_ingresso'          => $request->input('data_ingresso'),
+            'formacao_academica'     => $request->input('formacao_academica'),
+            'especializacao'         => $request->input('especializacao'),
+            'registro_profissional'  => $request->input('registro_profissional'),
+            'observacoes'            => $request->input('observacoes'),
+            'escola_id'              => $request->input('escola_id'),
+        ];
+
+        $resp = $this->api->post('/v1/usuarios', $dados);
 
         if ($resp->failed()) {
             return back()->withInput()
@@ -76,26 +90,45 @@ class MembroController extends Controller
             abort(404, 'Membro não encontrado.');
         }
 
+        $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
+
         return view('membros.edit', [
-            'membro' => $resp->json('data'),
-            'perfis' => self::PERFIS,
+            'membro'  => $resp->json('data'),
+            'perfis'  => self::PERFIS,
+            'escolas' => $escolas,
         ]);
     }
 
     public function update(Request $request, int $id)
     {
         $request->validate([
-            'nome'   => 'required|string|max:200',
-            'email'  => 'required|email',
-            'perfil' => 'required|string',
+            'nome'       => 'required|string|max:200',
+            'email'      => 'required|email',
+            'perfil'     => 'required|string',
+            'nova_senha' => 'sometimes|string|min:8|nullable',
         ]);
 
-        $resp = $this->api->put("/v1/usuarios/{$id}", [
-            'nome'   => $request->nome,
-            'email'  => $request->email,
-            'perfil' => $request->perfil,
-            'ativo'  => $request->boolean('ativo', true),
-        ]);
+        $dados = [
+            'nome'                   => $request->nome,
+            'email'                  => $request->email,
+            'perfil'                 => $request->perfil,
+            'ativo'                  => $request->boolean('ativo', true),
+            'data_nascimento'        => $request->input('data_nascimento'),
+            'telefone'               => $request->input('telefone'),
+            'data_ingresso'          => $request->input('data_ingresso'),
+            'formacao_academica'     => $request->input('formacao_academica'),
+            'especializacao'         => $request->input('especializacao'),
+            'registro_profissional'  => $request->input('registro_profissional'),
+            'observacoes'            => $request->input('observacoes'),
+            'escola_id'              => $request->input('escola_id'),
+            'forcar_troca_senha'     => $request->boolean('forcar_troca_senha'),
+        ];
+
+        if ($request->filled('nova_senha')) {
+            $dados['nova_senha'] = $request->input('nova_senha');
+        }
+
+        $resp = $this->api->put("/v1/usuarios/{$id}", $dados);
 
         if ($resp->failed()) {
             return back()->withInput()

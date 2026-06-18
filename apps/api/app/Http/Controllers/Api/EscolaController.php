@@ -58,15 +58,18 @@ class EscolaController extends Controller
             ->orderBy('nome')
             ->get()
             ->map(function (Escola $e) {
-                $stats = DB::table('turmas')->where('escola_id', $e->id)
-                    ->selectRaw('count(*) as turmas, sum(total_alunos) as alunos')
-                    ->first();
+                $totalTurmas = DB::table('turmas')->where('escola_id', $e->id)->count();
+
+                $totalAlunosEscola = DB::table('alunos')
+                    ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+                    ->where('turmas.escola_id', $e->id)
+                    ->count();
 
                 $provas = DB::table('provas')->where('escola_id', $e->id)->count();
 
                 return array_merge($e->toArray(), [
-                    'total_turmas' => (int) ($stats->turmas ?? 0),
-                    'total_alunos' => (int) ($stats->alunos ?? 0),
+                    'total_turmas' => $totalTurmas,
+                    'total_alunos' => $totalAlunosEscola,
                     'total_provas' => $provas,
                     'nucleo_nome'  => $e->nucleo?->nome,
                 ]);
@@ -115,7 +118,7 @@ class EscolaController extends Controller
 
         $escola = Escola::create($data);
 
-        return ApiResponse::success($escola, 'Escola criada com sucesso.', 201);
+        return ApiResponse::success($escola, null, 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -133,17 +136,30 @@ class EscolaController extends Controller
             return ApiResponse::notFound('Escola não encontrada.');
         }
 
-        $stats = DB::table('turmas')->where('escola_id', $id)
-            ->selectRaw('count(*) as turmas, sum(total_alunos) as alunos')
-            ->first();
+        $totalTurmas = DB::table('turmas')->where('escola_id', $id)->count();
+
+        $totalAlunosEscola = DB::table('alunos')
+            ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+            ->where('turmas.escola_id', $id)
+            ->count();
 
         $provas = DB::table('provas')->where('escola_id', $id)->count();
 
         $turmas = DB::table('turmas')
             ->where('escola_id', $id)
             ->orderBy('nome')
-            ->select('id', 'nome', 'ano', 'turno', 'total_alunos', 'ativo')
-            ->get();
+            ->select('id', 'nome', 'ano_letivo as ano', 'turno', 'ativo')
+            ->get()
+            ->map(function ($t) {
+                return [
+                    'id'           => $t->id,
+                    'nome'         => $t->nome,
+                    'ano'          => $t->ano,
+                    'turno'        => $t->turno,
+                    'ativo'        => (bool) $t->ativo,
+                    'total_alunos' => DB::table('alunos')->where('turma_id', $t->id)->where('ativo', true)->count(),
+                ];
+            });
 
         $equipe = DB::table('usuarios')
             ->join('usuario_escopos', function ($j) use ($id) {
@@ -155,13 +171,68 @@ class EscolaController extends Controller
             ->orderBy('usuarios.nome')
             ->get();
 
+        $provasLista = DB::table('provas')
+            ->where('escola_id', $id)
+            ->orderByDesc('data_aplicacao')
+            ->select('id', 'titulo', 'disciplina', 'status', 'data_aplicacao')
+            ->get()
+            ->map(function ($p) {
+                $turmasNomes = DB::table('prova_turmas')
+                    ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+                    ->where('prova_turmas.prova_id', $p->id)
+                    ->pluck('turmas.nome')
+                    ->implode(', ');
+
+                $totalAlunos = DB::table('prova_turmas')
+                    ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                    ->where('prova_turmas.prova_id', $p->id)
+                    ->where('alunos.ativo', true)
+                    ->count();
+
+                $media = DB::table('notas')->where('prova_id', $p->id)->avg('nota_final');
+
+                return [
+                    'id'             => $p->id,
+                    'titulo'         => $p->titulo,
+                    'disciplina'     => $p->disciplina,
+                    'turma'          => $turmasNomes ?: '—',
+                    'data_aplicacao' => $p->data_aplicacao,
+                    'total_alunos'   => $totalAlunos,
+                    'media'          => $media !== null ? round((float) $media, 1) : null,
+                    'status'         => $p->status,
+                ];
+            });
+
+        $alunosLista = DB::table('alunos')
+            ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+            ->where('turmas.escola_id', $id)
+            ->select('alunos.id', 'alunos.nome', 'alunos.matricula', 'alunos.ativo', 'turmas.nome as turma')
+            ->orderBy('alunos.nome')
+            ->get()
+            ->map(function ($a) {
+                $media = DB::table('notas')->where('aluno_id', $a->id)->avg('nota_final');
+                $totalProvas = DB::table('notas')->where('aluno_id', $a->id)->count();
+
+                return [
+                    'id'           => $a->id,
+                    'nome'         => $a->nome,
+                    'matricula'    => $a->matricula,
+                    'turma'        => $a->turma,
+                    'media_geral'  => $media !== null ? round((float) $media, 1) : null,
+                    'total_provas' => $totalProvas,
+                    'ativo'        => (bool) $a->ativo,
+                ];
+            });
+
         return ApiResponse::success(array_merge($escola->toArray(), [
-            'total_turmas' => (int) ($stats->turmas ?? 0),
-            'total_alunos' => (int) ($stats->alunos ?? 0),
+            'total_turmas' => $totalTurmas,
+            'total_alunos' => $totalAlunosEscola,
             'total_provas' => $provas,
             'nucleo_nome'  => $escola->nucleo?->nome,
             'turmas'       => $turmas,
             'equipe'       => $equipe,
+            'provas'       => $provasLista,
+            'alunos'       => $alunosLista,
         ]));
     }
 
@@ -188,7 +259,7 @@ class EscolaController extends Controller
 
         $escola->update($data);
 
-        return ApiResponse::success($escola->fresh(), 'Escola atualizada com sucesso.');
+        return ApiResponse::success($escola->fresh());
     }
 
     public function toggle(int $id): JsonResponse

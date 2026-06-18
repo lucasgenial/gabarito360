@@ -79,9 +79,12 @@ class TurmaController extends Controller
                     ->where('ativo', true)
                     ->count();
 
+                $media = DB::table('notas')->where('turma_id', $t->id)->avg('nota_final');
+
                 return array_merge($t->toArray(), [
                     'total_alunos' => $totalAlunos,
                     'escola_nome'  => $t->escola?->nome,
+                    'media_turma'  => $media !== null ? round((float) $media, 1) : null,
                 ]);
             });
 
@@ -114,7 +117,7 @@ class TurmaController extends Controller
 
         $turma = Turma::create($data);
 
-        return ApiResponse::success($turma, 'Turma criada com sucesso.', 201);
+        return ApiResponse::success($turma, null, 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -136,14 +139,47 @@ class TurmaController extends Controller
             ->where('turma_id', $id)
             ->orderBy('nome')
             ->select('id', 'nome', 'matricula', 'data_nascimento', 'ativo')
-            ->get();
+            ->get()
+            ->map(function ($a) {
+                $a->media_geral = DB::table('notas')->where('aluno_id', $a->id)->avg('nota_final');
+                $a->media_geral = $a->media_geral !== null ? round((float) $a->media_geral, 1) : null;
+                $a->total_provas = DB::table('notas')->where('aluno_id', $a->id)->count();
+                return $a;
+            });
 
         $totalAlunos = $alunos->where('ativo', true)->count();
 
+        $mediaTurma = DB::table('notas')->where('turma_id', $id)->avg('nota_final');
+
+        $provas = DB::table('prova_turmas')
+            ->join('provas', 'prova_turmas.prova_id', '=', 'provas.id')
+            ->where('prova_turmas.turma_id', $id)
+            ->orderByDesc('provas.data_aplicacao')
+            ->select('provas.id', 'provas.titulo', 'provas.disciplina', 'provas.status', 'provas.data_aplicacao')
+            ->get()
+            ->map(function ($p) use ($id) {
+                $media = DB::table('notas')
+                    ->where('prova_id', $p->id)
+                    ->where('turma_id', $id)
+                    ->avg('nota_final');
+
+                return [
+                    'id'             => $p->id,
+                    'titulo'         => $p->titulo,
+                    'disciplina'     => $p->disciplina,
+                    'data_aplicacao' => $p->data_aplicacao,
+                    'media'          => $media !== null ? round((float) $media, 1) : null,
+                    'status'         => $p->status,
+                ];
+            });
+
         return ApiResponse::success(array_merge($turma->toArray(), [
-            'total_alunos' => $totalAlunos,
-            'escola_nome'  => $turma->escola?->nome,
-            'alunos'       => $alunos,
+            'total_alunos'  => $totalAlunos,
+            'escola_nome'   => $turma->escola?->nome,
+            'media_turma'   => $mediaTurma !== null ? round((float) $mediaTurma, 1) : null,
+            'total_provas'  => $provas->count(),
+            'alunos'        => $alunos,
+            'provas'        => $provas,
         ]));
     }
 
@@ -166,7 +202,7 @@ class TurmaController extends Controller
 
         $turma->update($data);
 
-        return ApiResponse::success($turma->fresh(), 'Turma atualizada com sucesso.');
+        return ApiResponse::success($turma->fresh());
     }
 
     public function toggle(int $id): JsonResponse

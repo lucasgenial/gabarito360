@@ -28,7 +28,7 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
-        $response = $this->api->post('/auth/login', [
+        $response = $this->api->post('/v1/auth/login', [
             'email'    => $request->email,
             'password' => $request->password,
         ]);
@@ -66,7 +66,7 @@ class LoginController extends Controller
 
         $cpfLimpo = preg_replace('/\D/', '', $request->cpf);
 
-        $resp = $this->api->post('/auth/registro', [
+        $resp = $this->api->post('/v1/auth/registro', [
             'nome'   => $request->nome,
             'email'  => $request->email,
             'cpf'    => $cpfLimpo,
@@ -94,7 +94,7 @@ class LoginController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $this->api->post('/auth/esqueci-senha', ['email' => $request->email]);
+        $this->api->post('/v1/auth/esqueci-senha', ['email' => $request->email]);
 
         return redirect()->route('esqueci-senha')
             ->with('sucesso', 'Se o e-mail estiver cadastrado, um link de recuperação foi enviado.');
@@ -119,7 +119,7 @@ class LoginController extends Controller
             'password.confirmed' => 'As senhas não conferem.',
         ]);
 
-        $resp = $this->api->post('/auth/redefinir-senha', [
+        $resp = $this->api->post('/v1/auth/redefinir-senha', [
             'email'                 => $request->email,
             'token'                 => $request->token,
             'password'              => $request->password,
@@ -137,7 +137,7 @@ class LoginController extends Controller
 
     public function destroy(Request $request)
     {
-        $this->api->post('/auth/logout');
+        $this->api->post('/v1/auth/logout');
 
         $request->session()->flush();
 

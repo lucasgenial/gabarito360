@@ -9,7 +9,7 @@ class Aluno extends Model
     protected $table = 'alunos';
 
     protected $fillable = [
-        'turma_id', 'nome', 'matricula', 'data_nascimento', 'nome_responsavel', 'ativo',
+        'turma_id', 'nome', 'matricula', 'cpf', 'data_nascimento', 'genero', 'foto_path', 'nome_responsavel', 'ativo',
     ];
 
     protected $casts = ['ativo' => 'boolean'];

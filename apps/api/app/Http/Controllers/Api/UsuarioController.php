@@ -76,11 +76,19 @@ class UsuarioController extends Controller
         $this->autorizarGestor($request);
 
         $data = $request->validate([
-            'nome'   => 'required|string|max:200',
-            'email'  => 'required|email|unique:usuarios,email',
-            'cpf'    => 'required|string|regex:/^\d{11}$/|unique:usuarios,cpf',
-            'perfil' => ['required', Rule::in(['admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aluno'])],
-            'ativo'  => 'sometimes|boolean',
+            'nome'                   => 'required|string|max:200',
+            'email'                  => 'required|email|unique:usuarios,email',
+            'cpf'                    => 'required|string|regex:/^\d{11}$/|unique:usuarios,cpf',
+            'perfil'                 => ['required', Rule::in(['admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aluno'])],
+            'ativo'                  => 'sometimes|boolean',
+            'data_nascimento'        => 'sometimes|date|nullable',
+            'telefone'               => 'sometimes|string|max:20|nullable',
+            'data_ingresso'          => 'sometimes|date|nullable',
+            'formacao_academica'     => 'sometimes|string|max:200|nullable',
+            'especializacao'         => 'sometimes|string|max:200|nullable',
+            'registro_profissional'  => 'sometimes|string|max:50|nullable',
+            'observacoes'            => 'sometimes|string|nullable',
+            'escola_id'              => 'sometimes|integer|exists:escolas,id|nullable',
         ], [
             'cpf.regex'    => 'CPF deve conter 11 dígitos.',
             'email.unique' => 'E-mail já cadastrado.',
@@ -88,19 +96,31 @@ class UsuarioController extends Controller
         ]);
 
         $usuario = Usuario::create([
-            'nome'     => $data['nome'],
-            'email'    => $data['email'],
-            'cpf'      => $data['cpf'],
-            'perfil'   => $data['perfil'],
-            'password' => Hash::make(Str::random(32)),
-            'ativo'    => $data['ativo'] ?? true,
+            'nome'                  => $data['nome'],
+            'email'                 => $data['email'],
+            'cpf'                   => $data['cpf'],
+            'perfil'                => $data['perfil'],
+            'password'              => Hash::make(Str::random(32)),
+            'ativo'                 => $data['ativo'] ?? true,
+            'data_nascimento'       => $data['data_nascimento'] ?? null,
+            'telefone'              => $data['telefone'] ?? null,
+            'data_ingresso'         => $data['data_ingresso'] ?? null,
+            'formacao_academica'    => $data['formacao_academica'] ?? null,
+            'especializacao'        => $data['especializacao'] ?? null,
+            'registro_profissional' => $data['registro_profissional'] ?? null,
+            'observacoes'           => $data['observacoes'] ?? null,
         ]);
 
-        return ApiResponse::success(
-            $usuario->only(['id', 'nome', 'email', 'perfil', 'ativo']),
-            'Membro cadastrado com sucesso.',
-            201
-        );
+        if (!empty($data['escola_id'])) {
+            DB::table('usuario_escopos')->insert([
+                'usuario_id'  => $usuario->id,
+                'escopo_tipo' => 'escola',
+                'escopo_id'   => $data['escola_id'],
+                'created_at'  => now(),
+            ]);
+        }
+
+        return ApiResponse::success($usuario, null, 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -111,7 +131,14 @@ class UsuarioController extends Controller
             return ApiResponse::notFound('Usuário não encontrado.');
         }
 
-        return ApiResponse::success($usuario);
+        $escolaId = DB::table('usuario_escopos')
+            ->where('usuario_id', $id)
+            ->where('escopo_tipo', 'escola')
+            ->value('escopo_id');
+
+        return ApiResponse::success(array_merge($usuario->toArray(), [
+            'escola_id' => $escolaId,
+        ]));
     }
 
     public function update(Request $request, int $id): JsonResponse
@@ -125,18 +152,49 @@ class UsuarioController extends Controller
         }
 
         $data = $request->validate([
-            'nome'   => 'sometimes|string|max:200',
-            'email'  => ['sometimes', 'email', Rule::unique('usuarios', 'email')->ignore($id)],
-            'perfil' => ['sometimes', Rule::in(['admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aluno'])],
-            'ativo'  => 'sometimes|boolean',
+            'nome'                   => 'sometimes|string|max:200',
+            'email'                  => ['sometimes', 'email', Rule::unique('usuarios', 'email')->ignore($id)],
+            'perfil'                 => ['sometimes', Rule::in(['admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aluno'])],
+            'ativo'                  => 'sometimes|boolean',
+            'data_nascimento'        => 'sometimes|date|nullable',
+            'telefone'               => 'sometimes|string|max:20|nullable',
+            'data_ingresso'          => 'sometimes|date|nullable',
+            'formacao_academica'     => 'sometimes|string|max:200|nullable',
+            'especializacao'         => 'sometimes|string|max:200|nullable',
+            'registro_profissional'  => 'sometimes|string|max:50|nullable',
+            'observacoes'            => 'sometimes|string|nullable',
+            'escola_id'              => 'sometimes|integer|exists:escolas,id|nullable',
+            'nova_senha'             => 'sometimes|string|min:8|nullable',
+            'forcar_troca_senha'     => 'sometimes|boolean',
         ]);
+
+        $escolaId = $data['escola_id'] ?? null;
+        unset($data['escola_id']);
+
+        if (!empty($data['nova_senha'])) {
+            $data['password'] = Hash::make($data['nova_senha']);
+        }
+        unset($data['nova_senha']);
 
         $usuario->update($data);
 
-        return ApiResponse::success(
-            $usuario->fresh()->only(['id', 'nome', 'email', 'perfil', 'ativo']),
-            'Membro atualizado com sucesso.'
-        );
+        if ($request->has('escola_id')) {
+            DB::table('usuario_escopos')
+                ->where('usuario_id', $id)
+                ->where('escopo_tipo', 'escola')
+                ->delete();
+
+            if ($escolaId) {
+                DB::table('usuario_escopos')->insert([
+                    'usuario_id'  => $id,
+                    'escopo_tipo' => 'escola',
+                    'escopo_id'   => $escolaId,
+                    'created_at'  => now(),
+                ]);
+            }
+        }
+
+        return ApiResponse::success($usuario->fresh());
     }
 
     public function toggle(Request $request, int $id): JsonResponse
@@ -152,10 +210,7 @@ class UsuarioController extends Controller
         $novoStatus = !$usuario->ativo;
         $usuario->update(['ativo' => $novoStatus]);
 
-        return ApiResponse::success(
-            ['ativo' => $novoStatus],
-            $novoStatus ? 'Membro ativado.' : 'Membro desativado.'
-        );
+        return ApiResponse::success(['ativo' => $novoStatus]);
     }
 
     private function autorizarGestor(Request $request): void

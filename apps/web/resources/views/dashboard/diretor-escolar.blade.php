@@ -233,7 +233,7 @@
 {{-- Ações rápidas --}}
 <h3 style="font-size:17px;margin-top:32px;">Ações rápidas</h3>
 <div class="quick-actions">
-  <a class="qa" href="#">
+  <a class="qa" href="{{ route('membros.index') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/><path d="M3.5 19c1.8-3 7.2-3 9 0M13.5 18.5c.9-1.8 3.7-2.6 5.8-1.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>

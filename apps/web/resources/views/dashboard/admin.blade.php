@@ -160,7 +160,7 @@
         <div class="eyebrow">Alertas críticos</div>
         <h3 style="font-size:18px;">Pontos de atenção</h3>
       </div>
-      @php $totalAlertas = ($alertas['cartoes_ambiguos'] > 0 ? 1 : 0) + ($alertas['escolas_abaixo_meta'] > 0 ? 1 : 0) + ($alertas['seges_atraso_min'] !== null ? 1 : 0); @endphp
+      @php $totalAlertas = $alertas ? ($alertas['cartoes_ambiguos'] > 0 ? 1 : 0) + ($alertas['escolas_abaixo_meta'] > 0 ? 1 : 0) + ($alertas['seges_atraso_min'] !== null ? 1 : 0) : 0; @endphp
       @if($alertas && $totalAlertas > 0)
         <span class="badge badge-warn">{{ $totalAlertas }} {{ $totalAlertas === 1 ? 'alerta' : 'alertas' }}</span>
       @else
@@ -295,7 +295,7 @@
     <b>Gerar Relatório</b>
     <span>Emitir consolidado da rede por escola, série e disciplina.</span>
   </a>
-  <a class="qa" href="#">
+  <a class="qa" href="{{ route('configuracoes.index') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 0 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 0 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 0 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a2 2 0 0 1 0 4h-.2a1 1 0 0 0-.9.6Z" stroke="currentColor" stroke-width="1.6"/></svg>
     </div>

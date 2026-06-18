@@ -28,9 +28,9 @@
 
 @section('nav')
 <a href="{{ route('painel') }}">Painel</a>
+<a href="{{ route('provas.index') }}">Provas</a>
 <a href="{{ route('turmas.index') }}" class="active">Turmas</a>
 <a href="{{ route('escolas.index') }}">Escolas</a>
-<a href="{{ route('provas.index') }}">Provas</a>
 @endsection
 
 @section('breadcrumb')
@@ -111,6 +111,7 @@
         <th>Turno</th>
         <th>Escola</th>
         <th>Alunos</th>
+        <th>Desempenho médio</th>
         <th>Ano letivo</th>
         <th>Status</th>
         <th></th>
@@ -131,6 +132,18 @@
             {{ $t['escola_nome'] ?? '—' }}
           </td>
           <td style="font-family:var(--font-mono);">{{ $t['total_alunos'] ?? 0 }}</td>
+          <td>
+            @if(($t['media_turma'] ?? null) !== null)
+              @php
+                $pct = min(100, max(0, ($t['media_turma'] / 10) * 100));
+                $cor = $t['media_turma'] >= 7 ? 'var(--success,#168821)' : ($t['media_turma'] >= 5 ? '#ffcd07' : 'var(--danger,#e52207)');
+              @endphp
+              <span class="mini-bar"><div style="width:{{ $pct }}%;background:{{ $cor }};"></div></span>
+              <span style="font-family:var(--font-mono);font-weight:600;">{{ number_format($t['media_turma'], 1, ',', '') }}</span>
+            @else
+              <span style="color:var(--muted);">—</span>
+            @endif
+          </td>
           <td style="font-family:var(--font-mono);">{{ $t['ano_letivo'] }}</td>
           <td>
             @if($t['ativo'])
@@ -145,7 +158,7 @@
         </tr>
       @empty
         <tr>
-          <td colspan="8" style="text-align:center;padding:48px 20px;color:var(--muted);">
+          <td colspan="9" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div style="font-size:36px;margin-bottom:12px;">🏫</div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma encontrada</div>
             <p>Crie a primeira turma usando o botão "+ Nova turma".</p>

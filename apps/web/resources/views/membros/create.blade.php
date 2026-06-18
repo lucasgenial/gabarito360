@@ -143,6 +143,55 @@
       </div>
     </section>
 
+    {{-- Dados Profissionais --}}
+    <section class="section-card">
+      <div class="section-head">
+        <h2>Dados Profissionais</h2>
+        <p>Formação, vínculo institucional e datas relevantes.</p>
+      </div>
+      <div class="section-body">
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="data_nascimento">Data de nascimento</label>
+            <input class="input" type="date" id="data_nascimento" name="data_nascimento" value="{{ old('data_nascimento') }}" />
+          </div>
+          <div class="field">
+            <label for="telefone">Telefone</label>
+            <input class="input" type="text" id="telefone" name="telefone" value="{{ old('telefone') }}" placeholder="(00) 00000-0000" />
+          </div>
+          <div class="field">
+            <label for="data_ingresso">Data de início</label>
+            <input class="input" type="date" id="data_ingresso" name="data_ingresso" value="{{ old('data_ingresso') }}" />
+          </div>
+          <div class="field">
+            <label for="escola_id">Escola vinculada</label>
+            <select class="select" id="escola_id" name="escola_id">
+              <option value="">— Nenhuma (nível rede/núcleo) —</option>
+              @foreach($escolas as $e)
+                <option value="{{ $e['id'] }}" {{ old('escola_id') == $e['id'] ? 'selected' : '' }}>{{ $e['nome'] }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="field full-width">
+            <label for="formacao_academica">Formação acadêmica</label>
+            <input class="input" type="text" id="formacao_academica" name="formacao_academica" value="{{ old('formacao_academica') }}" placeholder="Ex.: Licenciatura em Matemática" />
+          </div>
+          <div class="field">
+            <label for="especializacao">Especialização</label>
+            <input class="input" type="text" id="especializacao" name="especializacao" value="{{ old('especializacao') }}" />
+          </div>
+          <div class="field">
+            <label for="registro_profissional">Registro profissional</label>
+            <input class="input" type="text" id="registro_profissional" name="registro_profissional" value="{{ old('registro_profissional') }}" />
+          </div>
+          <div class="field full-width">
+            <label for="observacoes">Observações</label>
+            <textarea class="input" id="observacoes" name="observacoes" rows="3">{{ old('observacoes') }}</textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="action-bar">
       <a href="{{ route('membros.index') }}" class="btn btn-secondary">Cancelar</a>
       <button type="submit" class="btn btn-primary">Salvar Membro</button>

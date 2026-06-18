@@ -137,7 +137,7 @@
     <section class="section-card">
       <div class="section-head">
         <h2>Dados Pessoais</h2>
-        <p>Atualize nome e e-mail do membro.</p>
+        <p>Atualize nome, e-mail e dados cadastrais do membro.</p>
       </div>
       <div class="section-body">
         <div class="form-grid-2">
@@ -154,23 +154,98 @@
             </div>
             @error('email')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
           </div>
+          <div class="field">
+            <label for="cpf-disp">CPF</label>
+            <input class="input num" type="text" id="cpf-disp" value="{{ $membro['cpf'] ?? '' }}" disabled />
+          </div>
+          <div class="field">
+            <label for="data_nascimento">Data de nascimento</label>
+            <input class="input" type="date" id="data_nascimento" name="data_nascimento" value="{{ old('data_nascimento', $membro['data_nascimento'] ?? '') }}" />
+          </div>
+          <div class="field">
+            <label for="telefone">Telefone</label>
+            <input class="input" type="text" id="telefone" name="telefone" value="{{ old('telefone', $membro['telefone'] ?? '') }}" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {{-- Dados Profissionais --}}
+    <section class="section-card">
+      <div class="section-head">
+        <h2>Dados Profissionais</h2>
+        <p>Formação, vínculo institucional e datas relevantes.</p>
+      </div>
+      <div class="section-body">
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="data_ingresso">Data de início</label>
+            <input class="input" type="date" id="data_ingresso" name="data_ingresso" value="{{ old('data_ingresso', $membro['data_ingresso'] ?? '') }}" />
+          </div>
+          <div class="field">
+            <label for="escola_id">Escola vinculada</label>
+            <select class="select" id="escola_id" name="escola_id">
+              <option value="">— Nenhuma (nível rede/núcleo) —</option>
+              @foreach($escolas as $e)
+                <option value="{{ $e['id'] }}" {{ old('escola_id', $membro['escola_id'] ?? '') == $e['id'] ? 'selected' : '' }}>{{ $e['nome'] }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="field full-width">
+            <label for="formacao_academica">Formação acadêmica</label>
+            <input class="input" type="text" id="formacao_academica" name="formacao_academica" value="{{ old('formacao_academica', $membro['formacao_academica'] ?? '') }}" />
+          </div>
+          <div class="field">
+            <label for="especializacao">Especialização</label>
+            <input class="input" type="text" id="especializacao" name="especializacao" value="{{ old('especializacao', $membro['especializacao'] ?? '') }}" />
+          </div>
+          <div class="field">
+            <label for="registro_profissional">Registro profissional</label>
+            <input class="input" type="text" id="registro_profissional" name="registro_profissional" value="{{ old('registro_profissional', $membro['registro_profissional'] ?? '') }}" />
+          </div>
+          <div class="field full-width">
+            <label for="observacoes">Observações</label>
+            <textarea class="input" id="observacoes" name="observacoes" rows="3">{{ old('observacoes', $membro['observacoes'] ?? '') }}</textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {{-- Acesso ao sistema --}}
+    <section class="section-card">
+      <div class="section-head">
+        <h2>Acesso ao Sistema</h2>
+        <p>Redefina a senha ou exija troca no próximo login.</p>
+      </div>
+      <div class="section-body">
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="nova_senha">Nova senha</label>
+            <input class="input" type="password" id="nova_senha" name="nova_senha" minlength="8" placeholder="Deixe em branco para manter a atual" />
+            @error('nova_senha')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
+          </div>
+          <div class="field">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:30px;">
+              <input type="checkbox" name="forcar_troca_senha" value="1" {{ old('forcar_troca_senha', $membro['forcar_troca_senha'] ?? false) ? 'checked' : '' }} style="accent-color:var(--accent);" />
+              Forçar troca de senha no próximo login
+            </label>
+          </div>
         </div>
       </div>
     </section>
 
     <div class="action-bar">
       <a href="{{ route('membros.index') }}" class="btn btn-ghost">← Voltar</a>
-      <div style="display:flex;gap:10px;">
-        <form method="POST" action="{{ route('membros.toggle', $membro['id']) }}" style="display:inline;">
-          @csrf
-          <button type="submit" class="btn btn-secondary">
-            {{ ($membro['ativo'] ?? true) ? 'Desativar membro' : 'Ativar membro' }}
-          </button>
-        </form>
-        <button type="submit" class="btn btn-primary">Salvar alterações</button>
-      </div>
+      <button type="submit" class="btn btn-primary">Salvar alterações</button>
     </div>
   </div>
+</form>
+
+<form method="POST" action="{{ route('membros.toggle', $membro['id']) }}" style="margin-top:12px;">
+  @csrf
+  <button type="submit" class="btn btn-secondary">
+    {{ ($membro['ativo'] ?? true) ? 'Desativar membro' : 'Ativar membro' }}
+  </button>
 </form>
 
 <div style="height:48px"></div>
