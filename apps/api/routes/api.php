@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\NucleoController;
+use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,15 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::put('me',     [AuthController::class, 'update']);
+        });
+
+        // Turmas
+        Route::prefix('turmas')->group(function () {
+            Route::get('/',            [TurmaController::class, 'index']);
+            Route::post('/',           [TurmaController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
+            Route::get('{id}',         [TurmaController::class, 'show']);
+            Route::put('{id}',         [TurmaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
+            Route::post('{id}/toggle', [TurmaController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar');
         });
 
         // Escolas
