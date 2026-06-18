@@ -27,8 +27,10 @@ Route::prefix('v1')->group(function () {
                 ->middleware('perfil:admin_rede');
             Route::get('dir-nucleo',  [DashboardController::class, 'dirNucleo'])
                 ->middleware('perfil:dir_nucleo');
-            Route::get('dir-escolar', [DashboardController::class, 'dirEscolar'])
+            Route::get('dir-escolar',  [DashboardController::class, 'dirEscolar'])
                 ->middleware('perfil:dir_escolar');
+            Route::get('coordenador',  [DashboardController::class, 'coordenador'])
+                ->middleware('perfil:coordenador');
         });
     });
 

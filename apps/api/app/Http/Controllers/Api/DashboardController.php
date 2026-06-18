@@ -19,6 +19,140 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function coordenador(Request $request): JsonResponse
+    {
+        $usuario = $request->user();
+
+        $escolaId = DB::table('usuario_escopos')
+            ->where('usuario_id', $usuario->id)
+            ->where('escopo_tipo', 'escola')
+            ->value('escopo_id');
+
+        if (!$escolaId) {
+            return ApiResponse::forbidden('Usuário não vinculado a nenhuma escola.');
+        }
+
+        $escola = Escola::findOrFail($escolaId);
+
+        // KPIs
+        $provasAndamento = Prova::where('escola_id', $escolaId)
+            ->whereIn('status', ['publicada', 'em_correcao'])
+            ->count();
+
+        $cartoesAmbiguos = DB::table('cartoes')
+            ->join('provas', 'cartoes.prova_id', '=', 'provas.id')
+            ->where('provas.escola_id', $escolaId)
+            ->where('cartoes.status', 'ambiguo')
+            ->count();
+
+        $cartoesTotal = DB::table('cartoes')
+            ->join('provas', 'cartoes.prova_id', '=', 'provas.id')
+            ->where('provas.escola_id', $escolaId)
+            ->whereIn('cartoes.status', ['pendente', 'ambiguo'])
+            ->count();
+
+        $alunosBaixaMedia = DB::table('notas')
+            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+            ->where('provas.escola_id', $escolaId)
+            ->select('notas.aluno_id')
+            ->groupBy('notas.aluno_id')
+            ->havingRaw('AVG(notas.nota_final) < 6')
+            ->get()
+            ->count();
+
+        $proximasProvas = Prova::where('escola_id', $escolaId)
+            ->where('data_aplicacao', '>=', now()->toDateString())
+            ->where('data_aplicacao', '<=', now()->addDays(7)->toDateString())
+            ->count();
+
+        // Tabela de provas em andamento
+        $provas = DB::table('provas')
+            ->where('provas.escola_id', $escolaId)
+            ->whereIn('provas.status', ['publicada', 'em_correcao'])
+            ->leftJoin('usuarios', 'provas.criado_por', '=', 'usuarios.id')
+            ->select(
+                'provas.id',
+                'provas.titulo',
+                'provas.disciplina',
+                'provas.status',
+                'provas.data_aplicacao',
+                'usuarios.nome as professor_nome'
+            )
+            ->orderByDesc('provas.updated_at')
+            ->limit(8)
+            ->get()
+            ->map(function ($p) {
+                $turmas = DB::table('prova_turmas')
+                    ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+                    ->where('prova_turmas.prova_id', $p->id)
+                    ->pluck('turmas.nome')
+                    ->implode(', ');
+
+                $totalAlunos = DB::table('prova_turmas')
+                    ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                    ->where('prova_turmas.prova_id', $p->id)
+                    ->where('alunos.ativo', true)
+                    ->count();
+
+                $cartoesLidos = DB::table('cartoes')
+                    ->where('prova_id', $p->id)
+                    ->where('status', 'lido')
+                    ->count();
+
+                return [
+                    'id'             => $p->id,
+                    'disciplina'     => $p->disciplina,
+                    'titulo'         => $p->titulo,
+                    'professor'      => $p->professor_nome,
+                    'turmas'         => $turmas ?: '—',
+                    'total_alunos'   => $totalAlunos,
+                    'cartoes_lidos'  => $cartoesLidos,
+                    'status'         => $p->status,
+                    'data_aplicacao' => $p->data_aplicacao,
+                ];
+            });
+
+        // Alunos em atenção (os 5 com menor média)
+        $alunosAtencao = DB::table('notas')
+            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+            ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
+            ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
+            ->where('provas.escola_id', $escolaId)
+            ->select(
+                'alunos.id',
+                'alunos.nome',
+                'turmas.nome as turma',
+                'provas.disciplina',
+                DB::raw('ROUND(AVG(notas.nota_final), 1) as media')
+            )
+            ->groupBy('alunos.id', 'alunos.nome', 'turmas.nome', 'provas.disciplina')
+            ->havingRaw('AVG(notas.nota_final) < 6')
+            ->orderBy('media')
+            ->limit(5)
+            ->get();
+
+        // Agenda: próximas provas da semana
+        $agenda = Prova::where('escola_id', $escolaId)
+            ->where('data_aplicacao', '>=', now()->toDateString())
+            ->where('data_aplicacao', '<=', now()->addDays(7)->toDateString())
+            ->orderBy('data_aplicacao')
+            ->limit(4)
+            ->get(['id', 'titulo', 'disciplina', 'data_aplicacao', 'status']);
+
+        return ApiResponse::success([
+            'escola' => ['id' => $escola->id, 'nome' => $escola->nome],
+            'kpis' => [
+                'provas_andamento'    => $provasAndamento,
+                'cartoes_pendentes'   => $cartoesTotal,
+                'alunos_baixa_media'  => $alunosBaixaMedia,
+                'proximas_provas'     => $proximasProvas,
+            ],
+            'provas'         => $provas,
+            'alunos_atencao' => $alunosAtencao,
+            'agenda'         => $agenda,
+        ]);
+    }
+
     public function dirEscolar(Request $request): JsonResponse
     {
         $usuario = $request->user();
