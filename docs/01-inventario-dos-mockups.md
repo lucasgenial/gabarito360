@@ -752,6 +752,29 @@ Matemática, Português, Ciências, História, Geografia, Inglês
 
 ---
 
+## 30 — Telas Novas do SaaS Multi-Tenant (sem mockup — pendência de aprovação visual)
+
+**Decisão registrada em 2026-06-18:** o sistema passa a ser vendido como SaaS, com
+cadastro autônomo individual/institucional e cobrança recorrente (ver
+`docs/06-regras-de-negocio.md` RN-015/RN-016 e `docs/13-roadmap.md` MP-025 a MP-031).
+As telas abaixo não têm mockup HTML correspondente em `mockups/` — serão construídas
+seguindo o Design System gov.br já em uso, com a mesma abordagem usada para telas
+anteriores sem mockup (`provas/show`, `relatorio-prova`/`relatorio-turma-prova`).
+**Antes da implementação de cada uma, vale uma revisão visual rápida com o usuário**,
+mesmo sem mockup HTML formal, dado que envolvem fluxos novos (cadastro, pagamento).
+
+| Tela                          | Perfil/Contexto                          | MP de origem |
+|--------------------------------|-------------------------------------------|--------------|
+| Cadastro expandido (escolha Individual/Institucional) | Público (pré-login) | MP-028 |
+| Página de Planos/Preços        | Público (pré-login)                       | MP-027       |
+| Checkout (escolher plano + pagamento) | Público (pré-login)                | MP-027       |
+| Minha Assinatura               | Titular da conta                          | MP-027       |
+| Painel da Secretaria           | SECRETARIO_EDUCACAO                       | MP-026       |
+| Painel do Aplicador            | APLICADOR                                 | MP-026       |
+| Tela de migração/absorção de rede individual | ADMIN_REDE/DIR_NUCLEO (gera convite), PROFESSOR titular (confirma) | MP-029 |
+
+---
+
 ## Resumo das Entidades do Domínio
 
 | Entidade     | Telas Onde Aparece                                                          |
@@ -769,6 +792,8 @@ Matemática, Português, Ciências, História, Geografia, Inglês
 | Leitura OMR  | acompanhar-correcao, resultado                                              |
 | Usuario      | login, perfil, perfis-equipe, membro-cadastrar, configuracoes               |
 | Visita       | dashboard-diretor-nucleo                                                    |
+| Secretaria   | painel da secretaria (novo, sem mockup — seção 30)                         |
+| Plano/Assinatura/Pagamento | página de planos, checkout, minha assinatura (novos, sem mockup — seção 30) |
 | Agenda       | dashboard-coordenador                                                       |
 | Integração   | dashboard-admin, configuracoes                                              |
 

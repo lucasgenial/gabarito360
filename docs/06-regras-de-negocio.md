@@ -7,25 +7,49 @@ nos requisitos funcionais (`docs/04-requisitos-funcionais.md`) e nas permissões
 
 ## RN-001 — Autenticação e Acesso
 
-### RN-001.1 — E-mail institucional
-- O sistema aceita apenas e-mails no formato institucional
-- Formato válido: `nome@edu.gov.br` ou variações de domínio governamental
-- Validação por regex no frontend e na API
+### RN-001.1 — E-mail (revisada 2026-06-18)
+- **Cadastro institucional:** aceita e-mail institucional (`nome@edu.gov.br` ou
+  variações de domínio governamental) OU e-mail comum, a critério da secretaria/rede
+  no momento da assinatura — deixou de ser uma exigência rígida, pois redes pequenas
+  e escolas privadas (clientes SaaS) nem sempre têm domínio próprio.
+- **Cadastro individual (professor autônomo):** aceita qualquer e-mail válido. Não há
+  exigência de domínio institucional.
+- Validação de formato de e-mail (RFC básico) continua obrigatória em ambos os casos.
 
 ### RN-001.2 — Perfil único por usuário
 - Cada usuário possui exatamente um perfil ativo
-- O perfil determina o dashboard exibido e todas as permissões concedidas
+- O perfil determina o dashboard exibido e todas as permissões base concedidas
+- Dentro de uma rede individual, o perfil PROFESSOR pode ter permissões elevadas
+  (equivalentes a DIR_ESCOLAR) via o motor de permissões configuráveis (RN-016.3) —
+  isso não constitui um segundo perfil, é uma sobreposição de permissões no mesmo
+  contexto de escola
 - Não é permitido um usuário ter múltiplos perfis simultâneos
 
 ### RN-001.3 — Escopo de acesso
-- O acesso do usuário é limitado ao seu escopo institucional: rede, núcleo, escola, turma ou matrícula
+- O acesso do usuário é limitado ao seu escopo institucional: secretaria, rede,
+  núcleo, escola, turma ou matrícula
 - O escopo é definido no cadastro e não pode ser alterado pelo próprio usuário
+  (exceto pelo próprio fluxo de migração de tenant, RN-016.4)
 - A validação de escopo deve ser feita exclusivamente na API
 
-### RN-001.4 — Aprovação de cadastro
-- Novos cadastros ficam no estado "aguardando aprovação"
-- Apenas o Administrador da Rede pode aprovar novos usuários
-- Usuários não aprovados não conseguem efetuar login
+### RN-001.4 — Aprovação e liberação de acesso (revisada 2026-06-18)
+Existem agora dois fluxos de liberação de acesso, em vez de um único fluxo de
+aprovação manual:
+
+- **Cadastro institucional (SECRETARIO_EDUCACAO, ADMIN_REDE iniciando uma rede
+  nova):** acesso liberado após confirmação de e-mail + assinatura de um plano
+  institucional (trial ou pago) com pagamento confirmado. Não há mais aprovação
+  manual por um humano administrador do sistema.
+- **Convite dentro de uma instituição já existente** (ex.: ADMIN_REDE convida um
+  DIR_ESCOLAR; DIR_ESCOLAR convida um PROFESSOR ou APLICADOR): o convidado recebe
+  acesso imediato ao aceitar o convite por e-mail — não há estado de "aguardando
+  aprovação" nesse caso, pois quem convidou já é uma autoridade validada dentro do
+  escopo.
+- **Cadastro individual (PROFESSOR autônomo):** acesso liberado imediatamente após
+  pagamento confirmado pelo gateway (ou início de período trial, se houver). Sem
+  aprovação manual.
+- Usuários sem e-mail confirmado ou sem assinatura/convite válido não conseguem
+  efetuar login.
 
 ### RN-001.5 — Sessão persistente
 - A opção "Manter conectado" estende a duração do token de autenticação
@@ -37,6 +61,8 @@ nos requisitos funcionais (`docs/04-requisitos-funcionais.md`) e nas permissões
 ## RN-002 — Estrutura Hierárquica
 
 ### RN-002.1 — Hierarquia obrigatória
+- Uma Rede pertence opcionalmente a uma Secretaria (`secretaria_id` nullable —
+  só preenchido quando uma secretaria gerencia múltiplas redes)
 - Uma Escola pertence a exatamente um Núcleo
 - Um Núcleo pertence a exatamente uma Rede
 - Uma Turma pertence a exatamente uma Escola
@@ -50,10 +76,24 @@ nos requisitos funcionais (`docs/04-requisitos-funcionais.md`) e nas permissões
 - A inativação não apaga dados históricos
 
 ### RN-002.3 — Vínculo de usuário ao escopo
+- SECRETARIO_EDUCACAO: vinculado a uma Secretaria
 - ADMIN_REDE: vinculado à Rede
 - DIR_NUCLEO: vinculado a um Núcleo
-- DIR_ESCOLAR, COORDENADOR, PROFESSOR: vinculados a uma Escola
+- DIR_ESCOLAR, COORDENADOR, PROFESSOR, APLICADOR: vinculados a uma Escola
 - ALUNO: vinculado a uma Turma (via entidade Aluno)
+
+### RN-002.4 — Rede individual (SaaS, nova em 2026-06)
+- Toda Rede tem um campo `tipo`: `institucional` ou `individual`
+- Uma Rede do tipo `individual` é criada automaticamente quando um professor conclui
+  o cadastro autônomo (RN-016.1), junto com 1 Núcleo padrão e 1 Escola — de forma
+  transparente: a UI de uma rede individual não exibe os níveis "rede" e "núcleo"
+- Uma Rede do tipo `individual` tem exatamente um usuário PROFESSOR como titular;
+  esse titular pode convidar outros PROFESSOR/APLICADOR para colaborar na mesma
+  escola, mas não pode criar uma segunda escola dentro da mesma rede individual
+  (limite de 1 escola por rede individual)
+- Uma Rede do tipo `individual` pode ser migrada para dentro de uma Rede
+  `institucional` através do fluxo de absorção (RN-016.4); o inverso (institucional
+  virar individual) não é suportado
 
 ---
 
@@ -342,3 +382,79 @@ nota_final = (acertos / total_questoes) × nota_maxima
 
 ### RN-014.3 — Exportação de planilha
 - Não prevista no MVP; planejada para versões futuras
+
+---
+
+## RN-015 — Assinatura e Cobrança (SaaS, nova em 2026-06)
+
+### RN-015.1 — Planos
+- Existem planos do tipo `individual` (voltados a um único professor) e
+  `institucional` (voltados a redes/secretarias, com limites maiores de escolas,
+  turmas e usuários)
+- Cada plano tem: nome, público (individual/institucional), preço, periodicidade
+  (mensal/anual), limites de uso (nº de escolas, turmas, provas/mês, usuários)
+- Planos são gerenciados apenas pela equipe do Gabarito360 (não há tela de criação de
+  planos para clientes — fora de escopo neste momento)
+
+### RN-015.2 — Titularidade da assinatura
+- Quem cria a rede individual ou inicia o cadastro institucional autônomo é o
+  **titular** dessa assinatura
+- Apenas o titular vê e gerencia a assinatura (módulo "Assinatura e Cobrança",
+  `docs/03-perfis-e-permissoes.md`)
+- A titularidade pode ser transferida apenas por solicitação manual ao suporte
+  (fora de escopo de autoatendimento no MVP deste módulo)
+
+### RN-015.3 — Gateway de pagamento
+- Mercado Pago é o gateway oficial para cobrança recorrente (PIX, boleto, cartão)
+- A API nunca armazena dados de cartão — apenas referências (IDs) retornadas pelo
+  gateway
+- Webhooks do Mercado Pago atualizam o status da assinatura (`ativa`, `atrasada`,
+  `cancelada`)
+
+### RN-015.4 — Suspensão por inadimplência
+- Após N dias de atraso (parâmetro configurável, padrão 7 dias) sem confirmação de
+  pagamento, a assinatura passa a `atrasada` e o acesso é bloqueado para todos os
+  usuários daquela rede/escola, exceto o titular, que continua podendo acessar
+  apenas a tela de "Assinatura e Cobrança" para regularizar
+- Dados não são apagados por inadimplência — apenas o acesso é suspenso
+
+### RN-015.5 — Período de teste (trial)
+- Novo cadastro (individual ou institucional) pode iniciar com um período de teste
+  gratuito (parâmetro configurável, padrão 14 dias) antes de exigir pagamento
+- Ao final do trial sem pagamento confirmado, aplica-se RN-015.4
+
+---
+
+## RN-016 — Cadastro Autônomo e Migração de Tenant (SaaS, nova em 2026-06)
+
+### RN-016.1 — Cadastro individual (professor autônomo)
+- O professor escolhe "Conta Individual" na tela de cadastro, informa dados básicos
+  e e-mail (sem exigência de domínio institucional, RN-001.1), escolhe um plano
+  individual e confirma o pagamento (ou inicia trial, RN-015.5)
+- Ao confirmar, o sistema cria automaticamente 1 Rede (`tipo=individual`), 1 Núcleo
+  padrão e 1 Escola, e vincula o professor como titular dentro dessa escola
+
+### RN-016.2 — Cadastro institucional autônomo
+- SECRETARIO_EDUCACAO ou ADMIN_REDE escolhe "Conta Institucional", informa os dados
+  da instituição, escolhe um plano institucional e confirma e-mail + pagamento
+  (ou trial)
+- Ao confirmar, o sistema cria a Secretaria (se aplicável) ou a Rede
+  (`tipo=institucional`) com o usuário como titular
+
+### RN-016.3 — Permissões elevadas em rede individual
+- Dentro de uma rede individual, o motor de permissões configuráveis (RN a definir
+  em `docs/12-arquitetura.md` junto ao MP-029/030) concede ao professor titular,
+  por padrão, todas as permissões equivalentes a DIR_ESCOLAR dentro da própria escola
+- Essas permissões podem ser revogadas individualmente pelo próprio titular para si
+  mesmo não é permitido (ele sempre mantém controle total da própria rede individual)
+
+### RN-016.4 — Migração/absorção de rede individual para institucional
+- Processo manual, iniciado apenas pelo titular da rede individual, nunca pela
+  instituição que está "absorvendo"
+- O titular recebe um convite/código da instituição (gerado por um ADMIN_REDE ou
+  DIR_NUCLEO institucional) e confirma a migração
+- Ao confirmar: a Escola, suas Turmas, Alunos, Provas e histórico são movidos para
+  dentro da Rede institucional (ajuste de `escola_id`/`turma_id` permanece igual,
+  apenas a Escola passa a pertencer a um Núcleo da rede institucional); a assinatura
+  individual é cancelada e o professor passa a ser coberto pelo plano institucional
+- Esse processo é irreversível por autoatendimento (reversão exigiria suporte manual)
