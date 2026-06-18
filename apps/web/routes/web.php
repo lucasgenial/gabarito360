@@ -52,12 +52,14 @@ Route::middleware('autenticado')->group(function () {
     Route::put('/alunos/{id}',         [AlunoController::class, 'update'])->name('alunos.update');
     Route::post('/alunos/{id}/toggle', [AlunoController::class, 'toggle'])->name('alunos.toggle');
 
-    // Turmas (MP-016)
-    Route::get('/turmas',             [TurmaController::class, 'index'])->name('turmas.index');
-    Route::post('/turmas',            [TurmaController::class, 'store'])->name('turmas.store');
-    Route::get('/turmas/{id}',        [TurmaController::class, 'show'])->name('turmas.show');
-    Route::put('/turmas/{id}',        [TurmaController::class, 'update'])->name('turmas.update');
-    Route::post('/turmas/{id}/toggle',[TurmaController::class, 'toggle'])->name('turmas.toggle');
+    // Turmas (MP-016) + Vínculo professor (MP-018)
+    Route::get('/turmas',                              [TurmaController::class, 'index'])->name('turmas.index');
+    Route::post('/turmas',                             [TurmaController::class, 'store'])->name('turmas.store');
+    Route::get('/turmas/{id}',                         [TurmaController::class, 'show'])->name('turmas.show');
+    Route::put('/turmas/{id}',                         [TurmaController::class, 'update'])->name('turmas.update');
+    Route::post('/turmas/{id}/toggle',                 [TurmaController::class, 'toggle'])->name('turmas.toggle');
+    Route::post('/turmas/{id}/professores',            [TurmaController::class, 'vincularProfessor'])->name('turmas.professores.store');
+    Route::delete('/turmas/{id}/professores/{uid}',    [TurmaController::class, 'desvincularProfessor'])->name('turmas.professores.destroy');
 
     // Placeholders para MPs futuros
     Route::get('/provas',       fn () => abort(404))->name('provas.index');

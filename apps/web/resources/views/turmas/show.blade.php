@@ -164,6 +164,83 @@
   </div>
 </div>
 
+{{-- Seção: Professores vinculados --}}
+<h2 class="section-title">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+  Professores
+  <span class="badge" style="margin-left:6px;font-size:13px;">{{ count($professores ?? []) }}</span>
+</h2>
+
+<div class="card card-pad" style="margin-bottom:24px;">
+  {{-- Vincular professor --}}
+  <form method="POST" action="{{ route('turmas.professores.store', $turma['id']) }}"
+        style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+    @csrf
+    <select class="select" name="usuario_id" required style="flex:1;min-width:200px;">
+      <option value="">— Selecione um professor —</option>
+      @foreach($todosProfessores as $p)
+        @php $jaVinculado = collect($professores)->contains('id', $p['id']); @endphp
+        @if(!$jaVinculado)
+          <option value="{{ $p['id'] }}">{{ $p['nome'] }} ({{ $p['email'] }})</option>
+        @endif
+      @endforeach
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Vincular professor</button>
+  </form>
+
+  @if(count($professores ?? []) > 0)
+    <table class="table" style="margin-top:0;">
+      <thead>
+        <tr>
+          <th>Professor(a)</th>
+          <th>E-mail</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach($professores as $p)
+          @php $ini = collect(explode(' ', $p['nome']))->filter()->map(fn($x) => mb_strtoupper(mb_substr($x,0,1)))->take(2)->implode(''); @endphp
+          <tr>
+            <td>
+              <div class="student-name">
+                <div class="student-av">{{ $ini }}</div>
+                <strong>{{ $p['nome'] }}</strong>
+              </div>
+            </td>
+            <td>{{ $p['email'] }}</td>
+            <td>
+              @if($p['ativo'] ?? true)
+                <span class="badge badge-success badge-dot">Ativo</span>
+              @else
+                <span class="badge badge-danger badge-dot">Inativo</span>
+              @endif
+            </td>
+            <td style="text-align:right;">
+              <form method="POST"
+                    action="{{ route('turmas.professores.destroy', [$turma['id'], $p['id']]) }}"
+                    onsubmit="return confirm('Desvincular {{ $p['nome'] }} desta turma?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-sm btn-ghost"
+                        style="color:var(--danger);border-color:var(--danger);">Desvincular</button>
+              </form>
+            </td>
+          </tr>
+        @endforeach
+      </tbody>
+    </table>
+  @else
+    <div style="text-align:center;padding:24px 20px;color:var(--muted);">
+      <div style="font-size:28px;margin-bottom:10px;">👩‍🏫</div>
+      <div style="font-size:14px;">Nenhum professor vinculado a esta turma ainda.</div>
+    </div>
+  @endif
+</div>
+
 {{-- Modal de edição --}}
 <div class="modal-backdrop" id="modal-editar" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">

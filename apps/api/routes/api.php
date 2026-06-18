@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
+use App\Http\Controllers\Api\VinculoProfessorController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -45,7 +46,15 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}',         [TurmaController::class, 'show']);
             Route::put('{id}',         [TurmaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
             Route::post('{id}/toggle', [TurmaController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar');
+            // Vínculos professor ↔ turma (MP-018)
+            Route::get('{id}/professores',                [VinculoProfessorController::class, 'index']);
+            Route::post('{id}/professores',               [VinculoProfessorController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
+            Route::delete('{id}/professores/{usuarioId}', [VinculoProfessorController::class, 'destroy'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
         });
+
+        // Turmas do professor
+        Route::get('usuarios/{id}/turmas', [VinculoProfessorController::class, 'turmasDoProfessor'])
+            ->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
 
         // Escolas
         Route::prefix('escolas')->group(function () {
