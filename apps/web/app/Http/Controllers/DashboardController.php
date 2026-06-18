@@ -24,9 +24,10 @@ class DashboardController extends Controller
         $view   = self::VIEWS[$perfil] ?? 'dashboard.admin';
 
         $dados = match ($perfil) {
-            'admin_rede' => $this->dadosAdmin(),
-            'dir_nucleo' => $this->dadosDirNucleo(),
-            default      => [],
+            'admin_rede'  => $this->dadosAdmin(),
+            'dir_nucleo'  => $this->dadosDirNucleo(),
+            'dir_escolar' => $this->dadosDirEscolar(),
+            default       => [],
         };
 
         return view($view, array_merge([
@@ -49,6 +50,17 @@ class DashboardController extends Controller
     private function dadosDirNucleo(): array
     {
         $resp = $this->api->get('/v1/dashboard/dir-nucleo');
+
+        if (!$resp->successful()) {
+            return ['dashboard' => null];
+        }
+
+        return ['dashboard' => $resp->json('data')];
+    }
+
+    private function dadosDirEscolar(): array
+    {
+        $resp = $this->api->get('/v1/dashboard/dir-escolar');
 
         if (!$resp->successful()) {
             return ['dashboard' => null];

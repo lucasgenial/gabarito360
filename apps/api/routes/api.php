@@ -25,8 +25,10 @@ Route::prefix('v1')->group(function () {
         Route::prefix('dashboard')->group(function () {
             Route::get('admin',      [DashboardController::class, 'admin'])
                 ->middleware('perfil:admin_rede');
-            Route::get('dir-nucleo', [DashboardController::class, 'dirNucleo'])
+            Route::get('dir-nucleo',  [DashboardController::class, 'dirNucleo'])
                 ->middleware('perfil:dir_nucleo');
+            Route::get('dir-escolar', [DashboardController::class, 'dirEscolar'])
+                ->middleware('perfil:dir_escolar');
         });
     });
 

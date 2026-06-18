@@ -19,6 +19,133 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function dirEscolar(Request $request): JsonResponse
+    {
+        $usuario = $request->user();
+
+        $escolaId = DB::table('usuario_escopos')
+            ->where('usuario_id', $usuario->id)
+            ->where('escopo_tipo', 'escola')
+            ->value('escopo_id');
+
+        if (!$escolaId) {
+            return ApiResponse::forbidden('Usuário não vinculado a nenhuma escola.');
+        }
+
+        $escola = Escola::findOrFail($escolaId);
+
+        // KPIs
+        $turmasAtivas = DB::table('turmas')
+            ->where('escola_id', $escolaId)
+            ->where('ativo', true)
+            ->count();
+
+        $totalAlunos = DB::table('alunos')
+            ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+            ->where('turmas.escola_id', $escolaId)
+            ->where('alunos.ativo', true)
+            ->count();
+
+        $provasAplicadas = Prova::where('escola_id', $escolaId)
+            ->whereIn('status', ['corrigida', 'em_correcao', 'publicada'])
+            ->count();
+
+        $mediaEscola = DB::table('notas')
+            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+            ->where('provas.escola_id', $escolaId)
+            ->avg('notas.nota_final');
+
+        // Tabela por turma
+        $turmas = DB::table('turmas')
+            ->where('turmas.escola_id', $escolaId)
+            ->where('turmas.ativo', true)
+            ->select('turmas.id', 'turmas.nome', 'turmas.serie')
+            ->orderBy('turmas.serie')
+            ->orderBy('turmas.nome')
+            ->get()
+            ->map(function ($turma) {
+                $totalAlunos = DB::table('alunos')
+                    ->where('turma_id', $turma->id)
+                    ->where('ativo', true)
+                    ->count();
+
+                $mediaRaw = DB::table('notas')
+                    ->where('turma_id', $turma->id)
+                    ->avg('nota_final');
+                $media = $mediaRaw ? round($mediaRaw, 1) : null;
+
+                $ultimaProva = DB::table('provas')
+                    ->join('prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
+                    ->where('prova_turmas.turma_id', $turma->id)
+                    ->whereIn('provas.status', ['corrigida', 'em_correcao', 'publicada'])
+                    ->orderByDesc('provas.data_aplicacao')
+                    ->value('provas.disciplina');
+
+                $professor = DB::table('usuarios')
+                    ->join('usuario_escopos', 'usuarios.id', '=', 'usuario_escopos.usuario_id')
+                    ->where('usuario_escopos.escopo_tipo', 'turma')
+                    ->where('usuario_escopos.escopo_id', $turma->id)
+                    ->where('usuarios.perfil', 'professor')
+                    ->value('usuarios.nome');
+
+                $status = match (true) {
+                    $media === null     => 'sem_dados',
+                    $media >= 7.5       => 'destaque',
+                    $media >= 7.0       => 'bom_desempenho',
+                    $media >= 6.5       => 'em_dia',
+                    $media >= 6.0       => 'monitorar',
+                    $media >= 5.0       => 'atencao',
+                    default             => 'plano_apoio',
+                };
+
+                return [
+                    'id'           => $turma->id,
+                    'nome'         => $turma->nome,
+                    'serie'        => $turma->serie,
+                    'total_alunos' => $totalAlunos,
+                    'ultima_prova' => $ultimaProva,
+                    'professor'    => $professor,
+                    'media'        => $media,
+                    'status'       => $status,
+                ];
+            });
+
+        // Equipe da escola
+        $equipe = DB::table('usuarios')
+            ->join('usuario_escopos', 'usuarios.id', '=', 'usuario_escopos.usuario_id')
+            ->where('usuario_escopos.escopo_tipo', 'escola')
+            ->where('usuario_escopos.escopo_id', $escolaId)
+            ->where('usuarios.ativo', true)
+            ->select('usuarios.id', 'usuarios.nome', 'usuarios.perfil')
+            ->limit(6)
+            ->get();
+
+        // Próximas provas
+        $proximasProvas = Prova::where('escola_id', $escolaId)
+            ->where('data_aplicacao', '>=', now()->toDateString())
+            ->orderBy('data_aplicacao')
+            ->limit(4)
+            ->get(['id', 'titulo', 'disciplina', 'data_aplicacao', 'status']);
+
+        return ApiResponse::success([
+            'escola' => [
+                'id'    => $escola->id,
+                'nome'  => $escola->nome,
+                'inep'  => $escola->inep,
+                'ativo' => $escola->ativo,
+            ],
+            'kpis' => [
+                'turmas_ativas'   => $turmasAtivas,
+                'total_alunos'    => $totalAlunos,
+                'provas_aplicadas' => $provasAplicadas,
+                'media_escola'    => $mediaEscola ? round($mediaEscola, 1) : null,
+            ],
+            'turmas'        => $turmas,
+            'equipe'        => $equipe,
+            'proximas_provas' => $proximasProvas,
+        ]);
+    }
+
     public function dirNucleo(Request $request): JsonResponse
     {
         $usuario = $request->user();
