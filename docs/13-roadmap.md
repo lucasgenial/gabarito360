@@ -474,30 +474,221 @@ Nenhum MP pode ser iniciado sem que suas dependências estejam concluídas.
 
 ---
 
+## Nota de Sequenciamento (pós MP-022)
+
+A partir de 2026-06, foi decidido priorizar o fechamento de funcionalidades WEB/API
+antes de iniciar o MP-023 (Android). Os MPs 024 a 030 abaixo foram planejados nessa
+janela e devem ser executados **antes** do MP-023, apesar da numeração mais alta —
+nenhum deles altera contrato existente de API de forma incompatível, então não há
+retrabalho para o MP-023 quando ele for iniciado.
+
+---
+
+## MP-024 — Meu Perfil e Configurações da Rede ✅
+
+**Objetivo:** Implementar a tela de perfil do usuário logado e a tela de configurações
+de parâmetros da rede (RN-013.2).
+
+**Dependências:** MP-005, MP-006
+
+**Entregáveis:**
+- Tela: perfil.html (dados pessoais editáveis, alteração de senha com verificação da senha atual)
+- Tela: configuracoes.html (escopo reduzido: meta_media, meta_minima, limiar_seges_min — campos
+  documentados em RN-013.2; demais seções do mockup — tema, idioma, integrações, LGPD — não têm
+  modelo de dados e foram propositalmente omitidas)
+
+**Critérios de Aceite:**
+- [x] Troca de senha exige senha atual correta
+- [x] Configurações restritas a ADMIN_REDE
+- [x] RN-009.5 (nota mínima) passa a ler `redes.meta_minima` dinamicamente
+
+**Commit:** `feat(api,web): implementa Meu Perfil e Configurações da rede` (076e759)
+
+**Status:** Concluído (registro retroativo — implementado antes deste documento ser atualizado).
+
+---
+
+## MP-025 — Visitas Pedagógicas (CRUD)
+
+**Objetivo:** Implementar o agendamento, edição e cancelamento de visitas pedagógicas
+pelo Diretor de Núcleo.
+
+**Origem documentada:** UC-009 (`docs/07-casos-de-uso.md`), tabela `visitas` já existe em
+`docs/09-modelo-de-dados.md`, rotas já especificadas em `docs/10-rotas-api.md` e
+`docs/11-rotas-web.md`. Ação "Agendar Visita" já aparece como card de ação rápida no
+dashboard-diretor-nucleo.html.
+
+**Dependências:** MP-007 (Dashboard Diretor de Núcleo)
+
+**Entregáveis:**
+- `VisitaController` na API (index/store/update/destroy, escopo por núcleo)
+- `VisitaController` no WEB + modal de agendar/editar (AJAX, conforme já indicado em docs/11)
+- Lista "Próximas agendas em campo" no dashboard-diretor-nucleo passa a usar dados reais
+
+**Critérios de Aceite:**
+- [ ] Visita aparece na lista do dashboard imediatamente após ser salva
+- [ ] Apenas DIR_NUCLEO do núcleo correspondente pode editar/cancelar
+- [ ] Urgência (Prioritária/Monitorar/Referência) refletida visualmente
+
+**Commit esperado:** `feat(api,web): implementa CRUD de visitas pedagógicas`
+
+---
+
+## MP-026 — Acompanhamento de Correção por Turma
+
+**Objetivo:** Implementar a visão consolidada de progresso de leitura OMR de todas as
+provas de uma turma.
+
+**Origem documentada:** mockup `acompanhar-correcao-turma.html`, inventário seção 12.
+
+**Dependências:** MP-021 (OMR)
+
+**Entregáveis:**
+- Rota `/turmas/{id}/acompanhar` (WEB) consolidando o status de todos os cartões das
+  provas vinculadas à turma
+- Reaproveita o motor OMR e os componentes visuais já criados no MP-021
+  (`acompanhar-correcao.html`), adaptados para múltiplas provas
+
+**Critérios de Aceite:**
+- [ ] Lista pendências de leitura agregadas por prova dentro da turma
+- [ ] Permissão restrita a COORDENADOR e DIR_ESCOLAR (conforme inventário)
+
+**Commit esperado:** `feat(api,web): implementa acompanhamento de correção por turma`
+
+---
+
+## MP-027 — Relatórios Consolidados (Escola / Núcleo / Rede) + Exportação PDF
+
+**Objetivo:** Implementar as visões agregadas de desempenho por escola, núcleo e rede,
+e a exportação em PDF dos relatórios e do resultado individual.
+
+**Origem documentada:** rotas já especificadas em `docs/10-rotas-api.md` (linhas 153-156)
+e `docs/11-rotas-web.md` (relatorio.escola). **Não há mockup HTML dedicado** para estas
+3 telas — serão construídas seguindo o padrão visual já estabelecido em
+`relatorio-prova.html`/`relatorio-turma-prova.html`, mesma abordagem usada em `provas/show`
+(MP-019), que também não tinha mockup próprio.
+
+**Dependências:** MP-022 (Relatórios)
+
+**Entregáveis:**
+- `/relatorios/escola/{id}`, `/relatorios/nucleo/{id}`, `/relatorios/rede` (API + WEB)
+- `/relatorios/rede/pdf` e `/resultados/{aluno}/{prova}/pdf` (exportação)
+
+**Critérios de Aceite:**
+- [ ] Cada nível mostra KPIs agregados e comparativo entre as unidades do nível abaixo
+- [ ] Escopo de acesso respeita a hierarquia (docs/03)
+- [ ] PDF gerado é fiel ao conteúdo da tela (via window.print() ou equivalente, como já
+  feito no MP-020)
+
+**Commit esperado:** `feat(api,web): implementa relatórios consolidados e exportação PDF`
+
+---
+
+## MP-028 — Fechamento de Gaps Menores (Auditoria de Mockups)
+
+**Objetivo:** Resolver pendências pontuais identificadas na auditoria mockup-vs-implementação
+de 2026-06.
+
+**Dependências:** MP-017 (Alunos), MP-024
+
+**Entregáveis:**
+- Upload/alteração de foto também na edição de aluno (hoje só existe no cadastro)
+- Campo "Status da Matrícula" com 3 estados (Ativo/Trancado/Transferido) no modal de
+  edição de aluno, substituindo o toggle binário atual
+
+**Critérios de Aceite:**
+- [ ] Foto pode ser alterada a qualquer momento, não só no cadastro
+- [ ] Mudança de status de matrícula não quebra o relacionamento com turma/notas
+
+**Commit esperado:** `fix(web): fecha gaps remanescentes da auditoria de mockups`
+
+---
+
+## MP-029 — Motor de Permissões Configuráveis (Fase 1)
+
+**Objetivo:** Criar a infraestrutura de permissões configuráveis por perfil/escola e a
+tela de gestão (`perfis-equipe.html`), **sem** remover ou substituir os middlewares
+`perfil:...` já existentes — o motor novo roda em paralelo, com os valores padrão
+replicando fielmente a matriz de `docs/03-perfis-e-permissoes.md`, para não mudar
+nenhum comportamento atual.
+
+**Origem documentada:** mockup `perfis-equipe.html` (UI completa de toggles por perfil).
+**Decisão registrada em conversa (2026-06-18):** tratar como mudança arquitetural real,
+não como tela cosmética — ver `docs/12-arquitetura.md` (a ser atualizado neste MP).
+
+**Dependências:** MP-013 (Perfis e Permissões), MP-018
+
+**Entregáveis:**
+- Migrations: `permissoes` (catálogo), `perfil_permissoes_padrao` (seed a partir de
+  docs/03), `escola_perfil_permissoes` (overrides por escola)
+- `PermissaoService::pode($usuario, $chave, $escolaId = null)` — resolve override de
+  escola > padrão do perfil > nega por padrão
+- Tela `perfis-equipe.html` implementada de verdade: cards por perfil dentro de uma
+  escola, toggles de permissão, modal "ver membros"
+- Atualização de `docs/03-perfis-e-permissoes.md` e `docs/09-modelo-de-dados.md`
+  com o novo modelo
+- Registro da decisão arquitetural em `docs/12-arquitetura.md`
+
+**Critérios de Aceite:**
+- [ ] Seed inicial reproduz exatamente o comportamento atual (nenhuma regressão)
+- [ ] Toggle de permissão por escola persiste e é lido corretamente por `PermissaoService`
+- [ ] Nenhum middleware `perfil:...` existente foi removido nesta fase
+
+**Commit esperado:** `feat(api,web): implementa motor de permissões configuráveis por perfil/escola`
+
+---
+
+## MP-030 — Migração dos Endpoints Existentes para o Motor de Permissões (Fase 2)
+
+**Objetivo:** Substituir gradualmente os middlewares fixos `perfil:...` por
+`permissao:chave`, usando o motor criado no MP-029.
+
+**Dependências:** MP-029 (validado em uso real antes de iniciar esta fase)
+
+**Entregáveis:**
+- Migração endpoint por endpoint (não em lote), com testes manuais a cada lote migrado
+- Remoção do middleware `perfil:...` somente após todos os pontos de uso migrados
+
+**Critérios de Aceite:**
+- [ ] Cada endpoint migrado mantém exatamente o mesmo comportamento de acesso de antes
+- [ ] Suite de testes manuais (login de cada um dos 6 perfis + ações principais) refeita
+  ao final da migração
+
+**Commit esperado:** `refactor(api): migra autorização fixa para o motor de permissões configuráveis`
+
+---
+
 ## Status dos MPs
 
 | MP     | Título                          | Status      | Dependências       |
 |--------|---------------------------------|-------------|--------------------|
-| MP-001 | Estrutura do Repositório        | Pendente    | —                  |
+| MP-001 | Estrutura do Repositório        | Concluído   | —                  |
 | MP-002 | Documentação Consolidada        | Concluído   | —                  |
-| MP-003 | Modelagem e Banco de Dados      | Pendente    | MP-001, MP-002     |
-| MP-004 | Arquitetura da API (Base)       | Pendente    | MP-003             |
-| MP-005 | Arquitetura do WEB (Base)       | Pendente    | MP-004             |
-| MP-006 | Dashboard Admin                 | Pendente    | MP-004, MP-005     |
-| MP-007 | Dashboard Diretor de Núcleo     | Pendente    | MP-006             |
-| MP-008 | Dashboard Diretor Escolar       | Pendente    | MP-006             |
-| MP-009 | Dashboard Coordenador           | Pendente    | MP-006             |
-| MP-010 | Dashboard Professor             | Pendente    | MP-006             |
-| MP-011 | Dashboard Aluno                 | Pendente    | MP-006             |
-| MP-012 | Autenticação Completa           | Pendente    | MP-005             |
-| MP-013 | Perfis e Permissões             | Pendente    | MP-005             |
-| MP-014 | Núcleos                         | Pendente    | MP-004             |
-| MP-015 | Escolas                         | Pendente    | MP-014             |
-| MP-016 | Turmas                          | Pendente    | MP-015             |
-| MP-017 | Alunos                          | Pendente    | MP-016             |
-| MP-018 | Professores                     | Pendente    | MP-013, MP-016     |
-| MP-019 | Avaliações (Provas)             | Pendente    | MP-016             |
-| MP-020 | Gabaritos                       | Pendente    | MP-019             |
-| MP-021 | OMR                             | Pendente    | MP-020             |
-| MP-022 | Relatórios                      | Pendente    | MP-021             |
-| MP-023 | Aplicativo Android              | Pendente    | MP-004, MP-021     |
+| MP-003 | Modelagem e Banco de Dados      | Concluído   | MP-001, MP-002     |
+| MP-004 | Arquitetura da API (Base)       | Concluído   | MP-003             |
+| MP-005 | Arquitetura do WEB (Base)       | Concluído   | MP-004             |
+| MP-006 | Dashboard Admin                 | Concluído   | MP-004, MP-005     |
+| MP-007 | Dashboard Diretor de Núcleo     | Concluído   | MP-006             |
+| MP-008 | Dashboard Diretor Escolar       | Concluído   | MP-006             |
+| MP-009 | Dashboard Coordenador           | Concluído   | MP-006             |
+| MP-010 | Dashboard Professor             | Concluído   | MP-006             |
+| MP-011 | Dashboard Aluno                 | Concluído   | MP-006             |
+| MP-012 | Autenticação Completa           | Concluído   | MP-005             |
+| MP-013 | Perfis e Permissões             | Concluído   | MP-005             |
+| MP-014 | Núcleos                         | Concluído   | MP-004             |
+| MP-015 | Escolas                         | Concluído   | MP-014             |
+| MP-016 | Turmas                          | Concluído   | MP-015             |
+| MP-017 | Alunos                          | Concluído   | MP-016             |
+| MP-018 | Professores                     | Concluído   | MP-013, MP-016     |
+| MP-019 | Avaliações (Provas)             | Concluído   | MP-016             |
+| MP-020 | Gabaritos                       | Concluído   | MP-019             |
+| MP-021 | OMR                             | Concluído   | MP-020             |
+| MP-022 | Relatórios                      | Concluído   | MP-021             |
+| MP-023 | Aplicativo Android              | Pendente (adiado — ver Nota de Sequenciamento) | MP-004, MP-021 |
+| MP-024 | Meu Perfil e Configurações      | Concluído   | MP-005, MP-006     |
+| MP-025 | Visitas Pedagógicas (CRUD)      | Pendente    | MP-007             |
+| MP-026 | Correção por Turma              | Pendente    | MP-021             |
+| MP-027 | Relatórios Consolidados + PDF   | Pendente    | MP-022             |
+| MP-028 | Gaps Menores (Auditoria)        | Pendente    | MP-017, MP-024     |
+| MP-029 | Motor de Permissões (Fase 1)    | Pendente    | MP-013, MP-018     |
+| MP-030 | Migração p/ Permissões (Fase 2) | Pendente    | MP-029             |
