@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\NucleoController;
+use App\Http\Controllers\Api\ProvaController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\VinculoProfessorController;
@@ -28,6 +29,16 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::put('me',     [AuthController::class, 'update']);
+        });
+
+        // Provas
+        Route::prefix('provas')->group(function () {
+            Route::get('/',             [ProvaController::class, 'index']);
+            Route::post('/',            [ProvaController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::get('{id}',          [ProvaController::class, 'show']);
+            Route::put('{id}',          [ProvaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::post('{id}/publicar',[ProvaController::class, 'publicar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::delete('{id}',       [ProvaController::class, 'destroy'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
         });
 
         // Alunos
