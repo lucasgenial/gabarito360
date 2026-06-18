@@ -57,9 +57,12 @@
       <button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>
       <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-secondary">Ver gabarito</a>
       <a href="{{ route('correcao.show', $prova['id']) }}" class="btn btn-primary">Acompanhar correção →</a>
-    @elseif(in_array($prova['status'], ['em_correcao', 'corrigida']))
+    @elseif($prova['status'] === 'em_correcao')
       <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-secondary">Ver gabarito</a>
       <a href="{{ route('correcao.show', $prova['id']) }}" class="btn btn-primary">Acompanhar correção →</a>
+    @elseif($prova['status'] === 'corrigida')
+      <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-secondary">Ver gabarito</a>
+      <a href="{{ route('relatorios.prova', $prova['id']) }}" class="btn btn-primary">Ver relatório →</a>
     @endif
     <a href="{{ route('provas.index') }}" class="btn btn-ghost">← Voltar</a>
   </div>
@@ -155,10 +158,13 @@
             <div style="width:32px;height:32px;border-radius:6px;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:700;font-size:12px;">
               {{ strtoupper(str_replace(['º ','ª '], '', $t['nome'])) }}
             </div>
-            <div>
+            <div style="flex:1;">
               <div style="font-weight:600;font-size:13px;">{{ $t['nome'] }}</div>
               <div style="font-size:12px;color:var(--muted);">{{ $t['serie'] }}</div>
             </div>
+            @if($prova['status'] === 'corrigida')
+              <a href="{{ route('relatorios.turmaProva', [$t['id'], $prova['id']]) }}" class="btn btn-sm btn-ghost">Relatório</a>
+            @endif
           </div>
         @endforeach
       @else
