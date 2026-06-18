@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CorrecaoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\GabaritoController;
@@ -77,6 +78,13 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/provas/{id}/gabarito/editar',    [GabaritoController::class, 'edit'])->name('provas.gabarito.edit');
     Route::post('/provas/{id}/gabarito',          [GabaritoController::class, 'salvar'])->name('provas.gabarito.salvar');
     Route::post('/provas/{id}/gabarito/publicar', [GabaritoController::class, 'publicar'])->name('provas.gabarito.publicar');
+
+    // Acompanhamento de correção / OMR (MP-021)
+    Route::get('/provas/{id}/acompanhar',       [CorrecaoController::class, 'show'])->name('correcao.show');
+    Route::get('/provas/{id}/acompanhar/status',[CorrecaoController::class, 'status'])->name('correcao.status');
+    Route::post('/provas/{id}/cartoes',         [CorrecaoController::class, 'upload'])->name('correcao.upload');
+    Route::post('/cartoes/{id}/resolver-ambiguidade', [CorrecaoController::class, 'resolverAmbiguidade'])->name('cartoes.resolver-ambiguidade');
+    Route::post('/cartoes/{id}/revisar',              [CorrecaoController::class, 'revisar'])->name('cartoes.revisar');
 });
 
 Route::get('/', fn () => redirect()->route('login'));

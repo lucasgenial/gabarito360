@@ -56,6 +56,10 @@
     @elseif($prova['status'] === 'publicada')
       <button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>
       <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-secondary">Ver gabarito</a>
+      <a href="{{ route('correcao.show', $prova['id']) }}" class="btn btn-primary">Acompanhar correção →</a>
+    @elseif(in_array($prova['status'], ['em_correcao', 'corrigida']))
+      <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-secondary">Ver gabarito</a>
+      <a href="{{ route('correcao.show', $prova['id']) }}" class="btn btn-primary">Acompanhar correção →</a>
     @endif
     <a href="{{ route('provas.index') }}" class="btn btn-ghost">← Voltar</a>
   </div>
@@ -179,7 +183,7 @@
         @else
           <div style="display:flex;align-items:center;gap:8px;"><span>✅</span> Prova publicada</div>
           <div style="display:flex;align-items:center;gap:8px;"><span>📅</span> Aplique nas turmas em {{ $prova['data_aplicacao'] ? \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : 'data a definir' }}</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span>📷</span> Use o OMR para lançar os resultados</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span>📷</span> <a href="{{ route('correcao.show', $prova['id']) }}" style="color:var(--accent);">Envie os cartões-resposta para leitura OMR</a></div>
         @endif
       </div>
     </div>
