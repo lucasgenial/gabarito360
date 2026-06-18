@@ -378,18 +378,35 @@ Log de sincronizações com o SEGES.
 ### planos (novo — MP-027, SaaS)
 
 Catálogo de planos comerciais. Gerenciado apenas pela equipe do Gabarito360 (RN-015.1).
+Preços de tabela definidos em 2026-06-18 (ver RN-015.1).
 
-| Coluna       | Tipo          | Descrição                                      |
-|--------------|---------------|--------------------------------------------------|
-| id           | bigint PK     |                                                  |
-| nome         | varchar(100)  | Ex.: "Professor Individual", "Rede Municipal"   |
-| publico      | enum          | individual, institucional                       |
-| preco        | decimal(10,2) |                                                  |
-| periodicidade| enum          | mensal, anual                                    |
-| limites      | json          | Ex.: {"escolas": 1, "turmas": 10, "usuarios": 5} |
-| ativo        | boolean       | Plano disponível para novas assinaturas          |
-| created_at   | timestamp     |                                                  |
-| updated_at   | timestamp     |                                                  |
+| Coluna              | Tipo          | Descrição                                      |
+|----------------------|---------------|--------------------------------------------------|
+| id                   | bigint PK     |                                                  |
+| nome                 | varchar(100)  | Ex.: "Professor Individual Mensal", "Instituição até 10 licenças" |
+| publico              | enum          | individual, institucional                        |
+| modo                 | enum          | autoatendimento, comercial (comercial = "Fale Conosco", sem checkout automatizado) |
+| preco_fixo           | decimal(10,2) (nullable) | Usado quando o plano não é cobrado por licença (ex.: planos individuais) |
+| preco_por_licenca    | decimal(10,2) (nullable) | Usado em planos institucionais cobrados por professor/licença |
+| licencas_min         | int (nullable)| Ex.: 1 (institucional até 10 licenças)           |
+| licencas_max         | int (nullable)| Ex.: 10 — acima disso, direciona para um plano `modo=comercial` |
+| periodicidade        | enum          | mensal, anual                                    |
+| limites              | json          | Ex.: {"escolas": 1, "turmas": 10}                |
+| ativo                | boolean       | Plano disponível para novas assinaturas          |
+| created_at           | timestamp     |                                                  |
+| updated_at           | timestamp     |                                                  |
+
+**Seed inicial (RN-015.1):**
+1. Professor Individual — Mensal: `publico=individual`, `modo=autoatendimento`, `preco_fixo=9.99`, `periodicidade=mensal`
+2. Professor Individual — Anual: `publico=individual`, `modo=autoatendimento`, `preco_fixo=99.90`, `periodicidade=anual`
+3. Instituição — até 10 licenças: `publico=institucional`, `modo=autoatendimento`, `preco_por_licenca=7.50`, `licencas_min=1`, `licencas_max=10`, `periodicidade=mensal`
+4. Instituição — mais de 10 licenças: `publico=institucional`, `modo=comercial`, `licencas_min=11`, sem preço de tabela
+5. Secretaria / Núcleos: `publico=institucional`, `modo=comercial`, sem preço de tabela
+
+**Nota:** planos `modo=comercial` não passam pelo checkout do Mercado Pago (MP-027) —
+o cadastro autônomo (MP-028) direciona esses casos para um formulário "Fale Conosco"
+que gera um lead, sem criar `assinatura` nem dar acesso até a equipe configurar
+manualmente.
 
 ---
 

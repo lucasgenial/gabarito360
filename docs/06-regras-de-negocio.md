@@ -387,12 +387,27 @@ nota_final = (acertos / total_questoes) × nota_maxima
 
 ## RN-015 — Assinatura e Cobrança (SaaS, nova em 2026-06)
 
-### RN-015.1 — Planos
-- Existem planos do tipo `individual` (voltados a um único professor) e
-  `institucional` (voltados a redes/secretarias, com limites maiores de escolas,
-  turmas e usuários)
-- Cada plano tem: nome, público (individual/institucional), preço, periodicidade
-  (mensal/anual), limites de uso (nº de escolas, turmas, provas/mês, usuários)
+### RN-015.1 — Planos (tabela de preços definida em 2026-06-18)
+
+| Plano                              | Público       | Preço                          | Cobrança                         | Autoatendimento |
+|-------------------------------------|---------------|----------------------------------|-----------------------------------|------------------|
+| Professor Individual — Mensal       | individual    | R$ 9,99/mês                      | mensal recorrente                 | Sim              |
+| Professor Individual — Anual        | individual    | R$ 99,90/ano                     | anual, à vista                    | Sim              |
+| Instituição — até 10 licenças       | institucional | R$ 7,50/licença/mês              | mensal recorrente × nº licenças   | Sim              |
+| Instituição — mais de 10 licenças   | institucional | a definir                        | —                                  | **Não — "Fale Conosco"** |
+| Secretaria / Núcleos                | institucional | a definir                        | —                                  | **Não — "Fale Conosco"** |
+
+- "Licença" = 1 professor/usuário ativo dentro da rede institucional (não conta
+  alunos nem aplicadores separadamente, salvo decisão futura em contrário)
+- Os 3 primeiros planos acima seguem o fluxo de cadastro autônomo + checkout
+  (MP-027/028, via Mercado Pago)
+- Os 2 últimos **não têm checkout automatizado**: o cadastro institucional acima de
+  10 licenças, e qualquer cadastro de Secretaria, termina num formulário "Fale
+  Conosco" que gera um lead para contato comercial manual — a conta só é ativada
+  depois que a equipe do Gabarito360 negociar e configurar manualmente
+- Cada plano de autoatendimento tem: nome, público, preço (fixo ou por licença),
+  periodicidade (mensal/anual), limites de uso (nº de escolas, turmas, provas/mês,
+  licenças mín./máx.)
 - Planos são gerenciados apenas pela equipe do Gabarito360 (não há tela de criação de
   planos para clientes — fora de escopo neste momento)
 

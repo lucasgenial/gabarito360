@@ -596,11 +596,16 @@ checkout, "minha assinatura") a desenhar seguindo o Design System gov.br já em 
 
 **Entregáveis:**
 - Migrations: `planos`, `assinaturas`, `pagamentos`
-- Seed de planos iniciais (ao menos 1 individual e 1 institucional, valores a definir
-  com o usuário antes da implementação)
+- Seed dos 5 planos definidos em RN-015.1 (Professor Mensal R$9,99; Professor Anual
+  R$99,90; Instituição até 10 licenças R$7,50/licença/mês; Instituição +10 licenças
+  e Secretaria/Núcleos como planos `modo=comercial`, sem preço de tabela)
 - Integração com Mercado Pago: criação de cobrança recorrente, webhook de confirmação
-- Tela pública: página de planos/preços (pré-login)
-- Tela: checkout (escolher plano + pagamento)
+  (apenas para planos `modo=autoatendimento`)
+- Tela pública: página de planos/preços (pré-login), exibindo os 3 planos de
+  autoatendimento com preço e os 2 planos comerciais como "Fale Conosco"
+- Tela: checkout (escolher plano, informar nº de licenças se institucional, pagamento)
+- Tela: formulário "Fale Conosco" (planos `modo=comercial`) — captura lead, não cria
+  assinatura nem dá acesso ao sistema; segue para contato comercial manual
 - Tela: "Minha Assinatura" (status, histórico de pagamentos, cancelar, trocar forma de
   pagamento) — visível apenas ao titular (RN-015.2)
 - Job/rotina de verificação de inadimplência (RN-015.4) suspendendo acesso após o prazo
@@ -608,6 +613,9 @@ checkout, "minha assinatura") a desenhar seguindo o Design System gov.br já em 
 **Critérios de Aceite:**
 - [ ] Webhook do Mercado Pago atualiza o status da assinatura corretamente (testar com
   ambiente sandbox do Mercado Pago)
+- [ ] Plano institucional até 10 licenças cobra corretamente `7.50 × nº de licenças`
+- [ ] Tentar cadastrar instituição com mais de 10 licenças, ou perfil Secretaria, sempre
+  cai no formulário "Fale Conosco" — nunca no checkout do Mercado Pago
 - [ ] Nenhum dado de cartão é armazenado pela API (apenas referências do gateway)
 - [ ] Assinatura em trial expira corretamente e bloqueia acesso (exceto à própria tela
   de cobrança) se não houver pagamento

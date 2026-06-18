@@ -768,6 +768,7 @@ mesmo sem mockup HTML formal, dado que envolvem fluxos novos (cadastro, pagament
 | Cadastro expandido (escolha Individual/Institucional) | Público (pré-login) | MP-028 |
 | Página de Planos/Preços        | Público (pré-login)                       | MP-027       |
 | Checkout (escolher plano + pagamento) | Público (pré-login)                | MP-027       |
+| Formulário "Fale Conosco" (institucional +10 licenças / Secretaria) | Público (pré-login) | MP-027 |
 | Minha Assinatura               | Titular da conta                          | MP-027       |
 | Painel da Secretaria           | SECRETARIO_EDUCACAO                       | MP-026       |
 | Painel do Aplicador            | APLICADOR                                 | MP-026       |
