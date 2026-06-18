@@ -48,4 +48,11 @@ class ApiClient
     {
         return $this->http()->delete($path);
     }
+
+    public function postFile(string $path, string $fileField, \Illuminate\Http\UploadedFile $file, array $data = []): Response
+    {
+        return $this->http()
+            ->attach($fileField, $file->get(), $file->getClientOriginalName())
+            ->post($path, $data);
+    }
 }

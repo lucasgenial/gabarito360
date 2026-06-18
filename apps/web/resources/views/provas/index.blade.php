@@ -153,11 +153,13 @@
                 <button type="submit" class="btn btn-sm btn-secondary" title="Publicar">Publicar</button>
               </form>
             @endif
-            <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">
-              @if(in_array($p['status'], ['corrigida','em_correcao'])) Relatório
-              @else Ver
-              @endif
-            </a>
+            @if($p['status'] === 'em_correcao')
+              <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">Acompanhar</a>
+            @else
+              <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">
+                {{ $p['status'] === 'corrigida' ? 'Relatório' : 'Ver' }}
+              </a>
+            @endif
           </td>
         </tr>
       @empty

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AlunoController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CartaoController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\GabaritoController;
@@ -44,6 +45,18 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}/gabarito',          [GabaritoController::class, 'show']);
             Route::post('{id}/gabarito',         [GabaritoController::class, 'salvar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
             Route::post('{id}/gabarito/publicar',[GabaritoController::class, 'publicar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            // Cartões / OMR (MP-021)
+            Route::get('{id}/cartoes',        [CartaoController::class, 'index']);
+            Route::get('{id}/cartoes/status', [CartaoController::class, 'status']);
+            Route::post('{id}/cartoes',       [CartaoController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+        });
+
+        // Cartões / OMR (MP-021)
+        Route::prefix('cartoes')->group(function () {
+            Route::get('{id}',                       [CartaoController::class, 'show']);
+            Route::put('{id}/vincular-aluno',         [CartaoController::class, 'vincularAluno'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::post('{id}/resolver-ambiguidade',  [CartaoController::class, 'resolverAmbiguidade'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::post('{id}/revisar',               [CartaoController::class, 'revisar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
         });
 
         // Alunos
