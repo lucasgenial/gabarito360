@@ -23,8 +23,10 @@ Route::prefix('v1')->group(function () {
 
         // Dashboard
         Route::prefix('dashboard')->group(function () {
-            Route::get('admin', [DashboardController::class, 'admin'])
+            Route::get('admin',      [DashboardController::class, 'admin'])
                 ->middleware('perfil:admin_rede');
+            Route::get('dir-nucleo', [DashboardController::class, 'dirNucleo'])
+                ->middleware('perfil:dir_nucleo');
         });
     });
 
