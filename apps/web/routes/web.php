@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\MembroController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,8 +35,14 @@ Route::middleware('autenticado')->group(function () {
     Route::put('/membros/{id}',        [MembroController::class, 'update'])->name('membros.update');
     Route::post('/membros/{id}/toggle',[MembroController::class, 'toggle'])->name('membros.toggle');
 
+    // Escolas (MP-015)
+    Route::get('/escolas',             [EscolaController::class, 'index'])->name('escolas.index');
+    Route::post('/escolas',            [EscolaController::class, 'store'])->name('escolas.store');
+    Route::get('/escolas/{id}',        [EscolaController::class, 'show'])->name('escolas.show');
+    Route::put('/escolas/{id}',        [EscolaController::class, 'update'])->name('escolas.update');
+    Route::post('/escolas/{id}/toggle',[EscolaController::class, 'toggle'])->name('escolas.toggle');
+
     // Placeholders para MPs futuros
-    Route::get('/escolas',      fn () => abort(404))->name('escolas.index');
     Route::get('/turmas',       fn () => abort(404))->name('turmas.index');
     Route::get('/provas',       fn () => abort(404))->name('provas.index');
 });

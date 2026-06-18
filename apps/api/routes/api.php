@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\UsuarioController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,15 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::put('me',     [AuthController::class, 'update']);
+        });
+
+        // Escolas
+        Route::prefix('escolas')->group(function () {
+            Route::get('/',           [EscolaController::class, 'index']);
+            Route::post('/',          [EscolaController::class, 'store'])->middleware('perfil:admin_rede');
+            Route::get('{id}',        [EscolaController::class, 'show']);
+            Route::put('{id}',        [EscolaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar');
+            Route::post('{id}/toggle',[EscolaController::class, 'toggle'])->middleware('perfil:admin_rede');
         });
 
         // Núcleos
