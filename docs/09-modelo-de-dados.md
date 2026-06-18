@@ -29,11 +29,31 @@ Rede (1) ──── (N) Nucleo (1) ──── (N) Escola (1) ──── (N
 
 ---
 
+### secretarias (novo — MP-025, SaaS)
+
+Nível opcional acima da Rede. Só existe quando uma secretaria (geralmente estadual)
+supervisiona múltiplas redes (geralmente municipais) dentro da mesma assinatura.
+
+| Coluna     | Tipo        | Descrição                              |
+|------------|-------------|------------------------------------------|
+| id         | bigint PK   |                                          |
+| nome       | varchar(200)| Nome da secretaria                      |
+| tipo       | enum        | estadual, federal, consorcio            |
+| uf         | char(2)     | Unidade federativa                      |
+| usuario_titular_id | FK → usuarios | Titular da assinatura (RN-015.2)  |
+| created_at | timestamp   |                                          |
+| updated_at | timestamp   |                                          |
+
+---
+
 ### redes
 
 | Coluna           | Tipo        | Descrição                         |
 |------------------|-------------|-----------------------------------|
 | id               | bigint PK   | Identificador único               |
+| secretaria_id    | FK → secretarias (nullable) | Preenchido apenas quando supervisionada por uma secretaria |
+| modalidade       | enum        | institucional, individual (novo — MP-025, RN-002.4) |
+| usuario_titular_id | FK → usuarios (nullable) | Titular da assinatura quando `modalidade=individual` ou quando a rede institucional foi criada via cadastro autônomo (RN-015.2) |
 | nome             | varchar(200)| Nome da rede de ensino            |
 | tipo             | enum        | municipal, estadual, federal      |
 | uf               | char(2)     | Unidade federativa                |
@@ -42,6 +62,10 @@ Rede (1) ──── (N) Nucleo (1) ──── (N) Escola (1) ──── (N
 | limiar_seges_min | int         | Minutos de atraso aceitáveis SEGES|
 | created_at       | timestamp   |                                   |
 | updated_at       | timestamp   |                                   |
+
+**Nota:** `tipo` (municipal/estadual/federal) e `modalidade` (institucional/individual)
+são campos independentes — uma rede individual de um professor autônomo tem
+`modalidade=individual` e `tipo` é irrelevante/null nesse caso.
 
 ---
 
@@ -125,7 +149,7 @@ Rede (1) ──── (N) Nucleo (1) ──── (N) Escola (1) ──── (N
 | Coluna                 | Tipo          | Descrição                                    |
 |------------------------|---------------|----------------------------------------------|
 | id                     | bigint PK     |                                              |
-| perfil                 | enum          | admin_rede, dir_nucleo, dir_escolar, coordenador, professor, aluno |
+| perfil                 | enum          | secretario_educacao, admin_rede, dir_nucleo, dir_escolar, coordenador, professor, aplicador, aluno (8 perfis — secretario_educacao e aplicador adicionados na MP-026, SaaS) |
 | nome                   | varchar(200)  |                                              |
 | email                  | varchar(150)  | Único no sistema                            |
 | cpf                    | char(11)      | Apenas dígitos                              |
@@ -161,11 +185,15 @@ Vínculo entre usuário e seu contexto institucional.
 |-------------|-------------------|------------------------------------------------|
 | id          | bigint PK         |                                                |
 | usuario_id  | FK → usuarios     |                                                |
-| escopo_tipo | enum              | rede, nucleo, escola, turma, aluno            |
+| escopo_tipo | enum              | secretaria, rede, nucleo, escola, turma, aluno (secretaria adicionado na MP-026, SaaS) |
 | escopo_id   | bigint            | ID do registro correspondente ao tipo          |
 | created_at  | timestamp         |                                                |
 
 **Nota:** Um professor pode ter múltiplas turmas; usa múltiplas linhas com escopo_tipo='turma'
+
+**Nota — APLICADOR:** usa escopo_tipo='escola' (como dir_escolar/coordenador), mas suas
+permissões efetivas dentro da escola são restritas pelo motor de permissões
+configuráveis (MP-029/030), não pelo escopo em si.
 
 ---
 
@@ -347,9 +375,64 @@ Log de sincronizações com o SEGES.
 
 ---
 
+### planos (novo — MP-027, SaaS)
+
+Catálogo de planos comerciais. Gerenciado apenas pela equipe do Gabarito360 (RN-015.1).
+
+| Coluna       | Tipo          | Descrição                                      |
+|--------------|---------------|--------------------------------------------------|
+| id           | bigint PK     |                                                  |
+| nome         | varchar(100)  | Ex.: "Professor Individual", "Rede Municipal"   |
+| publico      | enum          | individual, institucional                       |
+| preco        | decimal(10,2) |                                                  |
+| periodicidade| enum          | mensal, anual                                    |
+| limites      | json          | Ex.: {"escolas": 1, "turmas": 10, "usuarios": 5} |
+| ativo        | boolean       | Plano disponível para novas assinaturas          |
+| created_at   | timestamp     |                                                  |
+| updated_at   | timestamp     |                                                  |
+
+---
+
+### assinaturas (novo — MP-027, SaaS)
+
+| Coluna                | Tipo          | Descrição                                      |
+|-----------------------|---------------|--------------------------------------------------|
+| id                    | bigint PK     |                                                  |
+| plano_id              | FK → planos   |                                                  |
+| titular_id            | FK → usuarios | Usuário titular (RN-015.2)                      |
+| rede_id               | FK → redes (nullable)       | Preenchido se a assinatura é de uma rede |
+| secretaria_id         | FK → secretarias (nullable) | Preenchido se a assinatura é de uma secretaria |
+| status                | enum          | trial, ativa, atrasada, cancelada               |
+| gateway_subscription_id | varchar(100)| Referência da assinatura no Mercado Pago        |
+| trial_termina_em      | timestamp (nullable) |                                           |
+| proxima_cobranca_em   | timestamp (nullable) |                                           |
+| created_at            | timestamp     |                                                  |
+| updated_at            | timestamp     |                                                  |
+
+---
+
+### pagamentos (novo — MP-027, SaaS)
+
+| Coluna                | Tipo          | Descrição                                      |
+|-----------------------|---------------|--------------------------------------------------|
+| id                    | bigint PK     |                                                  |
+| assinatura_id         | FK → assinaturas |                                               |
+| valor                 | decimal(10,2) |                                                  |
+| status                | enum          | pendente, aprovado, rejeitado, reembolsado      |
+| metodo                | enum          | pix, boleto, cartao                              |
+| gateway_payment_id    | varchar(100)  | Referência do pagamento no Mercado Pago         |
+| pago_em               | timestamp (nullable) |                                           |
+| created_at            | timestamp     |                                                  |
+
+**Nota de segurança:** nenhuma dessas tabelas armazena dados de cartão de crédito —
+apenas os IDs de referência retornados pelo Mercado Pago (RN-015.3).
+
+---
+
 ## Relacionamentos Chave
 
 ```
+Secretaria (1:N) Rede [opcional]
 Rede (1:N) Nucleo
 Nucleo (1:N) Escola
 Escola (1:N) Turma
@@ -364,6 +447,9 @@ Prova (1:N) Cartao
 Cartao (1:1) Aluno (após vinculação)
 Cartao (1:N) CartaoResposta
 Cartao (1:1) Nota (após correção)
+Plano (1:N) Assinatura
+Usuario/Titular (1:N) Assinatura
+Assinatura (1:N) Pagamento
 ```
 
 ---

@@ -474,13 +474,31 @@ Nenhum MP pode ser iniciado sem que suas dependências estejam concluídas.
 
 ---
 
-## Nota de Sequenciamento (pós MP-022)
+## Nota de Sequenciamento (pós MP-022, revisada 2026-06-18)
 
 A partir de 2026-06, foi decidido priorizar o fechamento de funcionalidades WEB/API
-antes de iniciar o MP-023 (Android). Os MPs 024 a 030 abaixo foram planejados nessa
-janela e devem ser executados **antes** do MP-023, apesar da numeração mais alta —
-nenhum deles altera contrato existente de API de forma incompatível, então não há
-retrabalho para o MP-023 quando ele for iniciado.
+antes de iniciar o MP-023 (Android). Os MPs 024 em diante abaixo foram planejados
+nessa janela e devem ser executados **antes** do MP-023, apesar da numeração mais
+alta — nenhum deles altera contrato existente de API de forma incompatível, então não
+há retrabalho para o MP-023 quando ele for iniciado.
+
+**Revisão de 2026-06-18:** o plano original (MP-025 a MP-030, focado em fechar gaps de
+mockup e no motor de permissões) foi **reordenado e expandido** para acomodar a decisão
+estratégica de transformar o Gabarito360 em SaaS multi-tenant com cadastro autônomo
+(individual e institucional) e cobrança recorrente. Ver `docs/03-perfis-e-permissoes.md`
+(novos perfis SECRETARIO_EDUCACAO e APLICADOR, novo nível Secretaria), `docs/06-regras-de-negocio.md`
+(RN-001 revisada, RN-002.4, RN-015 e RN-016 novas) e `docs/09-modelo-de-dados.md`
+(secretarias, redes.modalidade, planos, assinaturas, pagamentos). Os MPs de fechamento
+de gaps de mockup (visitas, correção por turma, relatórios) continuam válidos, apenas
+foram empurrados para depois da fundação SaaS, pois esta agora é pré-requisito lógico
+(ex.: o motor de permissões configuráveis, antes pensado só para `perfis-equipe.html`,
+agora é exigido também pelo professor autônomo e pelo aplicador).
+
+**Referência de mercado:** este desenho foi inspirado em dois padrões já validados no
+mercado — o modelo de assinatura individual-ou-organização do ZipGrade (concorrente
+direto, líder em correção de cartão-resposta por app) e o modelo de "Organizations"
+usado por SaaS B2B self-service como Slack/Notion (cadastro autônomo que cria um
+espaço próprio, com caminho de entrada em uma organização maior depois).
 
 ---
 
@@ -508,7 +526,212 @@ de parâmetros da rede (RN-013.2).
 
 ---
 
-## MP-025 — Visitas Pedagógicas (CRUD)
+## MP-025 — Fundação Multi-Tenant (Secretaria + Modalidade de Rede)
+
+**Objetivo:** Preparar o schema para suportar o nível "Secretaria" acima da rede e a
+distinção entre rede institucional e rede individual, sem alterar nenhum comportamento
+visível ainda — é a base sobre a qual os MPs seguintes (027 a 029) constroem.
+
+**Origem documentada:** RN-002.4, RN-002.1 (revisadas), `docs/09-modelo-de-dados.md`
+(tabela `secretarias`, campos `redes.secretaria_id`/`redes.modalidade`/`redes.usuario_titular_id`).
+
+**Dependências:** MP-003 (Modelagem e Banco de Dados)
+
+**Entregáveis:**
+- Migration: cria tabela `secretarias`
+- Migration: adiciona `secretaria_id` (nullable), `modalidade` (enum institucional/individual,
+  default institucional), `usuario_titular_id` (nullable) em `redes`
+- Migration: adiciona `secretaria` ao enum `escopo_tipo` de `usuario_escopos`
+- Nenhuma tela nova nesta MP — é só fundação de dados
+
+**Critérios de Aceite:**
+- [ ] Todas as redes existentes continuam com `modalidade=institucional` após a migration
+- [ ] Nenhum endpoint existente quebra (campos novos são opcionais)
+
+**Commit esperado:** `feat(db): adiciona fundação multi-tenant (secretaria e modalidade de rede)`
+
+---
+
+## MP-026 — Novos Perfis: Secretário de Educação e Aplicador
+
+**Objetivo:** Introduzir os 2 novos perfis do sistema (SECRETARIO_EDUCACAO, APLICADOR),
+seus painéis próprios e as regras de escopo correspondentes.
+
+**Origem documentada:** `docs/03-perfis-e-permissoes.md` (perfis e matriz de permissões
+já reescritos para 8 perfis). **Sem mockup HTML** para os dois novos painéis — a criar
+seguindo o padrão visual dos dashboards existentes (`dashboard-diretor-nucleo.html` como
+referência de estrutura para o painel da secretaria; `dashboard-professor.html` como
+referência de estrutura simplificada para o painel do aplicador).
+
+**Dependências:** MP-025
+
+**Entregáveis:**
+- Migration: adiciona `secretario_educacao` e `aplicador` ao enum `perfil` de `usuarios`
+- Painel da Secretaria (novo): lista de redes vinculadas com KPIs agregados por rede
+- Painel do Aplicador (novo): lista de provas agendadas para o dia na escola, com link
+  direto para "Enviar Cartões" de cada uma — sem acesso a notas/relatórios/cadastros
+- Middleware/regra de autorização restringindo o aplicador exatamente ao descrito na
+  matriz de `docs/03` (capturar/enviar cartões; nada além disso)
+
+**Critérios de Aceite:**
+- [ ] Aplicador não consegue acessar nenhuma rota de notas, relatórios ou cadastro (testar
+  diretamente via API, não só esconder no menu)
+- [ ] Secretário vê apenas redes vinculadas à sua secretaria
+- [ ] Login de cada perfil novo direciona para o painel correto
+
+**Commit esperado:** `feat(api,web): implementa perfis secretario_educacao e aplicador`
+
+---
+
+## MP-027 — Domínio de Assinatura e Cobrança (Mercado Pago)
+
+**Objetivo:** Criar a infraestrutura de planos, assinaturas e pagamentos, integrada ao
+Mercado Pago, e a tela de "Assinatura e Cobrança" para o titular da conta.
+
+**Origem documentada:** RN-015 (nova), tabelas `planos`/`assinaturas`/`pagamentos` em
+`docs/09-modelo-de-dados.md`. **Sem mockup HTML** — telas novas (página de planos,
+checkout, "minha assinatura") a desenhar seguindo o Design System gov.br já em uso.
+
+**Dependências:** MP-025
+
+**Entregáveis:**
+- Migrations: `planos`, `assinaturas`, `pagamentos`
+- Seed de planos iniciais (ao menos 1 individual e 1 institucional, valores a definir
+  com o usuário antes da implementação)
+- Integração com Mercado Pago: criação de cobrança recorrente, webhook de confirmação
+- Tela pública: página de planos/preços (pré-login)
+- Tela: checkout (escolher plano + pagamento)
+- Tela: "Minha Assinatura" (status, histórico de pagamentos, cancelar, trocar forma de
+  pagamento) — visível apenas ao titular (RN-015.2)
+- Job/rotina de verificação de inadimplência (RN-015.4) suspendendo acesso após o prazo
+
+**Critérios de Aceite:**
+- [ ] Webhook do Mercado Pago atualiza o status da assinatura corretamente (testar com
+  ambiente sandbox do Mercado Pago)
+- [ ] Nenhum dado de cartão é armazenado pela API (apenas referências do gateway)
+- [ ] Assinatura em trial expira corretamente e bloqueia acesso (exceto à própria tela
+  de cobrança) se não houver pagamento
+
+**Commit esperado:** `feat(api,web): implementa assinatura e cobrança via Mercado Pago`
+
+---
+
+## MP-028 — Cadastro Autônomo (Individual e Institucional)
+
+**Objetivo:** Implementar os dois fluxos de cadastro autônomo descritos em RN-016.1 e
+RN-016.2, substituindo o fluxo único de "aguardando aprovação manual" (RN-001.4 antiga).
+
+**Origem documentada:** RN-001.1/001.4 (revisadas), RN-016.1, RN-016.2.
+
+**Dependências:** MP-026 (perfis), MP-027 (assinatura — o cadastro autônomo termina
+escolhendo um plano)
+
+**Entregáveis:**
+- Tela de cadastro expandida: escolha entre "Conta Individual" (professor) e "Conta
+  Institucional" (secretaria/rede)
+- Fluxo individual: ao confirmar pagamento/trial, cria automaticamente 1 rede
+  (`modalidade=individual`) + 1 núcleo padrão + 1 escola, com o professor como titular
+- Fluxo institucional: ao confirmar e-mail + pagamento/trial, cria a secretaria (se
+  aplicável) ou a rede institucional com o usuário como titular
+- Convite por e-mail para os demais perfis dentro de uma instituição/rede individual já
+  existente, com acesso liberado imediatamente ao aceitar (RN-001.4)
+
+**Critérios de Aceite:**
+- [ ] Professor autônomo, ao logar pela primeira vez, já vê sua própria escola/turma
+  prontas para uso, sem nenhuma etapa manual de aprovação
+- [ ] UI da rede individual não exibe os níveis "rede"/"núcleo" (RN-002.4)
+- [ ] Convite aceito dá acesso imediato, sem estado de "aguardando aprovação"
+
+**Commit esperado:** `feat(api,web): implementa cadastro autônomo individual e institucional`
+
+---
+
+## MP-029 — Migração/Absorção de Rede Individual para Institucional
+
+**Objetivo:** Implementar o fluxo de absorção de uma rede individual de professor para
+dentro de uma rede institucional, quando uma instituição decide assinar depois.
+
+**Origem documentada:** RN-016.4.
+
+**Dependências:** MP-028
+
+**Entregáveis:**
+- Fluxo de convite/código gerado por um ADMIN_REDE ou DIR_NUCLEO institucional
+- Tela de confirmação para o titular da rede individual aceitar a migração
+- Rotina de migração: move escola/turmas/alunos/provas/histórico da rede individual
+  para dentro de um núcleo da rede institucional; cancela a assinatura individual
+
+**Critérios de Aceite:**
+- [ ] Após a migração, todo o histórico de provas/notas do professor permanece intacto
+  e acessível dentro da nova rede institucional
+- [ ] A assinatura individual é cancelada automaticamente (sem cobrança duplicada)
+- [ ] Processo é irreversível por autoatendimento (exige suporte manual para desfazer)
+
+**Commit esperado:** `feat(api,web): implementa migração de rede individual para institucional`
+
+---
+
+## MP-030 — Motor de Permissões Configuráveis (Fase 1)
+
+**Objetivo:** Criar a infraestrutura de permissões configuráveis por perfil/escola e a
+tela de gestão (`perfis-equipe.html`), **sem** remover ou substituir os middlewares
+`perfil:...` já existentes — o motor novo roda em paralelo, com os valores padrão
+replicando fielmente a matriz de `docs/03-perfis-e-permissoes.md`, para não mudar
+nenhum comportamento atual. Este motor passa a ser usado também para conceder
+permissões elevadas ao professor titular de uma rede individual (RN-016.3) e para
+restringir o aplicador (MP-026) — não é mais só uma tela de configuração, é peça
+estrutural do modelo SaaS.
+
+**Origem documentada:** mockup `perfis-equipe.html` (UI completa de toggles por perfil).
+**Decisão registrada em conversa (2026-06-18):** tratar como mudança arquitetural real,
+não como tela cosmética — ver `docs/12-arquitetura.md` (a ser atualizado neste MP).
+
+**Dependências:** MP-013 (Perfis e Permissões), MP-018, MP-026 (novos perfis), MP-028
+(rede individual já precisa do motor para o professor titular)
+
+**Entregáveis:**
+- Migrations: `permissoes` (catálogo), `perfil_permissoes_padrao` (seed a partir de
+  docs/03), `escola_perfil_permissoes` (overrides por escola)
+- `PermissaoService::pode($usuario, $chave, $escolaId = null)` — resolve override de
+  escola > padrão do perfil > nega por padrão
+- Tela `perfis-equipe.html` implementada de verdade: cards por perfil dentro de uma
+  escola, toggles de permissão, modal "ver membros"
+- Atualização de `docs/03-perfis-e-permissoes.md` e `docs/09-modelo-de-dados.md`
+  com o novo modelo
+- Registro da decisão arquitetural em `docs/12-arquitetura.md`
+
+**Critérios de Aceite:**
+- [ ] Seed inicial reproduz exatamente o comportamento atual (nenhuma regressão)
+- [ ] Toggle de permissão por escola persiste e é lido corretamente por `PermissaoService`
+- [ ] Nenhum middleware `perfil:...` existente foi removido nesta fase
+- [ ] Professor titular de rede individual recebe automaticamente as permissões
+  elevadas via seed/regra específica (RN-016.3), sem configuração manual
+
+**Commit esperado:** `feat(api,web): implementa motor de permissões configuráveis por perfil/escola`
+
+---
+
+## MP-031 — Migração dos Endpoints Existentes para o Motor de Permissões (Fase 2)
+
+**Objetivo:** Substituir gradualmente os middlewares fixos `perfil:...` por
+`permissao:chave`, usando o motor criado no MP-030.
+
+**Dependências:** MP-030 (validado em uso real antes de iniciar esta fase)
+
+**Entregáveis:**
+- Migração endpoint por endpoint (não em lote), com testes manuais a cada lote migrado
+- Remoção do middleware `perfil:...` somente após todos os pontos de uso migrados
+
+**Critérios de Aceite:**
+- [ ] Cada endpoint migrado mantém exatamente o mesmo comportamento de acesso de antes
+- [ ] Suite de testes manuais (login de cada um dos 8 perfis + ações principais) refeita
+  ao final da migração
+
+**Commit esperado:** `refactor(api): migra autorização fixa para o motor de permissões configuráveis`
+
+---
+
+## MP-032 — Visitas Pedagógicas (CRUD)
 
 **Objetivo:** Implementar o agendamento, edição e cancelamento de visitas pedagógicas
 pelo Diretor de Núcleo.
@@ -534,7 +757,7 @@ dashboard-diretor-nucleo.html.
 
 ---
 
-## MP-026 — Acompanhamento de Correção por Turma
+## MP-033 — Acompanhamento de Correção por Turma
 
 **Objetivo:** Implementar a visão consolidada de progresso de leitura OMR de todas as
 provas de uma turma.
@@ -557,7 +780,7 @@ provas de uma turma.
 
 ---
 
-## MP-027 — Relatórios Consolidados (Escola / Núcleo / Rede) + Exportação PDF
+## MP-034 — Relatórios Consolidados (Escola / Núcleo / Rede) + Exportação PDF
 
 **Objetivo:** Implementar as visões agregadas de desempenho por escola, núcleo e rede,
 e a exportação em PDF dos relatórios e do resultado individual.
@@ -584,7 +807,7 @@ e `docs/11-rotas-web.md` (relatorio.escola). **Não há mockup HTML dedicado** p
 
 ---
 
-## MP-028 — Fechamento de Gaps Menores (Auditoria de Mockups)
+## MP-035 — Fechamento de Gaps Menores (Auditoria de Mockups)
 
 **Objetivo:** Resolver pendências pontuais identificadas na auditoria mockup-vs-implementação
 de 2026-06.
@@ -601,60 +824,6 @@ de 2026-06.
 - [ ] Mudança de status de matrícula não quebra o relacionamento com turma/notas
 
 **Commit esperado:** `fix(web): fecha gaps remanescentes da auditoria de mockups`
-
----
-
-## MP-029 — Motor de Permissões Configuráveis (Fase 1)
-
-**Objetivo:** Criar a infraestrutura de permissões configuráveis por perfil/escola e a
-tela de gestão (`perfis-equipe.html`), **sem** remover ou substituir os middlewares
-`perfil:...` já existentes — o motor novo roda em paralelo, com os valores padrão
-replicando fielmente a matriz de `docs/03-perfis-e-permissoes.md`, para não mudar
-nenhum comportamento atual.
-
-**Origem documentada:** mockup `perfis-equipe.html` (UI completa de toggles por perfil).
-**Decisão registrada em conversa (2026-06-18):** tratar como mudança arquitetural real,
-não como tela cosmética — ver `docs/12-arquitetura.md` (a ser atualizado neste MP).
-
-**Dependências:** MP-013 (Perfis e Permissões), MP-018
-
-**Entregáveis:**
-- Migrations: `permissoes` (catálogo), `perfil_permissoes_padrao` (seed a partir de
-  docs/03), `escola_perfil_permissoes` (overrides por escola)
-- `PermissaoService::pode($usuario, $chave, $escolaId = null)` — resolve override de
-  escola > padrão do perfil > nega por padrão
-- Tela `perfis-equipe.html` implementada de verdade: cards por perfil dentro de uma
-  escola, toggles de permissão, modal "ver membros"
-- Atualização de `docs/03-perfis-e-permissoes.md` e `docs/09-modelo-de-dados.md`
-  com o novo modelo
-- Registro da decisão arquitetural em `docs/12-arquitetura.md`
-
-**Critérios de Aceite:**
-- [ ] Seed inicial reproduz exatamente o comportamento atual (nenhuma regressão)
-- [ ] Toggle de permissão por escola persiste e é lido corretamente por `PermissaoService`
-- [ ] Nenhum middleware `perfil:...` existente foi removido nesta fase
-
-**Commit esperado:** `feat(api,web): implementa motor de permissões configuráveis por perfil/escola`
-
----
-
-## MP-030 — Migração dos Endpoints Existentes para o Motor de Permissões (Fase 2)
-
-**Objetivo:** Substituir gradualmente os middlewares fixos `perfil:...` por
-`permissao:chave`, usando o motor criado no MP-029.
-
-**Dependências:** MP-029 (validado em uso real antes de iniciar esta fase)
-
-**Entregáveis:**
-- Migração endpoint por endpoint (não em lote), com testes manuais a cada lote migrado
-- Remoção do middleware `perfil:...` somente após todos os pontos de uso migrados
-
-**Critérios de Aceite:**
-- [ ] Cada endpoint migrado mantém exatamente o mesmo comportamento de acesso de antes
-- [ ] Suite de testes manuais (login de cada um dos 6 perfis + ações principais) refeita
-  ao final da migração
-
-**Commit esperado:** `refactor(api): migra autorização fixa para o motor de permissões configuráveis`
 
 ---
 
@@ -686,9 +855,14 @@ não como tela cosmética — ver `docs/12-arquitetura.md` (a ser atualizado nes
 | MP-022 | Relatórios                      | Concluído   | MP-021             |
 | MP-023 | Aplicativo Android              | Pendente (adiado — ver Nota de Sequenciamento) | MP-004, MP-021 |
 | MP-024 | Meu Perfil e Configurações      | Concluído   | MP-005, MP-006     |
-| MP-025 | Visitas Pedagógicas (CRUD)      | Pendente    | MP-007             |
-| MP-026 | Correção por Turma              | Pendente    | MP-021             |
-| MP-027 | Relatórios Consolidados + PDF   | Pendente    | MP-022             |
-| MP-028 | Gaps Menores (Auditoria)        | Pendente    | MP-017, MP-024     |
-| MP-029 | Motor de Permissões (Fase 1)    | Pendente    | MP-013, MP-018     |
-| MP-030 | Migração p/ Permissões (Fase 2) | Pendente    | MP-029             |
+| MP-025 | Fundação Multi-Tenant (Secretaria/Modalidade) | Pendente | MP-003     |
+| MP-026 | Perfis Secretário Educação e Aplicador | Pendente | MP-025          |
+| MP-027 | Assinatura e Cobrança (Mercado Pago) | Pendente | MP-025            |
+| MP-028 | Cadastro Autônomo (Individual/Institucional) | Pendente | MP-026, MP-027 |
+| MP-029 | Migração Rede Individual → Institucional | Pendente | MP-028     |
+| MP-030 | Motor de Permissões (Fase 1)    | Pendente    | MP-013, MP-018, MP-026, MP-028 |
+| MP-031 | Migração p/ Permissões (Fase 2) | Pendente    | MP-030             |
+| MP-032 | Visitas Pedagógicas (CRUD)      | Pendente    | MP-007             |
+| MP-033 | Correção por Turma              | Pendente    | MP-021             |
+| MP-034 | Relatórios Consolidados + PDF   | Pendente    | MP-022             |
+| MP-035 | Gaps Menores (Auditoria)        | Pendente    | MP-017, MP-024     |
