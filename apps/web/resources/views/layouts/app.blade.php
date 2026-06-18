@@ -46,6 +46,9 @@
           </div>
           <div class="user-menu-links">
             <a href="{{ route('perfil') }}">Meu Perfil</a>
+            @if(session('auth_perfil') === 'admin_rede')
+              <a href="{{ route('configuracoes.index') }}">Configurações</a>
+            @endif
             <hr>
             <form method="POST" action="{{ route('logout') }}">
               @csrf
