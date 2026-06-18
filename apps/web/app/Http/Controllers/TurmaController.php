@@ -59,12 +59,38 @@ class TurmaController extends Controller
             abort(404, 'Turma não encontrada.');
         }
 
-        $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
+        $escolas     = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
+        $professores = $this->api->get("/v1/turmas/{$id}/professores")->json('data.professores') ?? [];
+        $todosProfessores = $this->api->get('/v1/usuarios', ['perfil' => 'professor'])->json('data.usuarios') ?? [];
 
         return view('turmas.show', [
-            'turma'   => $resp->json('data'),
-            'escolas' => $escolas,
+            'turma'            => $resp->json('data'),
+            'escolas'          => $escolas,
+            'professores'      => $professores,
+            'todosProfessores' => $todosProfessores,
         ]);
+    }
+
+    public function vincularProfessor(Request $request, int $id)
+    {
+        $resp = $this->api->post("/v1/turmas/{$id}/professores", $request->only('usuario_id'));
+
+        if ($resp->failed()) {
+            return back()->with('erro', $resp->json('message') ?? 'Erro ao vincular professor.');
+        }
+
+        return back()->with('sucesso', 'Professor vinculado à turma.');
+    }
+
+    public function desvincularProfessor(int $id, int $usuarioId)
+    {
+        $resp = $this->api->delete("/v1/turmas/{$id}/professores/{$usuarioId}");
+
+        if ($resp->failed()) {
+            return back()->with('erro', 'Erro ao desvincular professor.');
+        }
+
+        return back()->with('sucesso', 'Professor desvinculado da turma.');
     }
 
     public function update(Request $request, int $id)
