@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -22,6 +23,15 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::put('me',     [AuthController::class, 'update']);
+        });
+
+        // Usuários / equipe
+        Route::prefix('usuarios')->group(function () {
+            Route::get('/',          [UsuarioController::class, 'index'])->middleware('perfil:admin_rede,dir_escolar');
+            Route::post('/',         [UsuarioController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar');
+            Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('perfil:admin_rede,dir_escolar');
+            Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar');
+            Route::post('{id}/toggle',[UsuarioController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar');
         });
 
         // Dashboard
