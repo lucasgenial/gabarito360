@@ -19,6 +19,8 @@ class Usuario extends Authenticatable
         'cpf',
         'password',
         'ativo',
+        'escola_nome',
+        'ultimo_acesso',
     ];
 
     protected $hidden = [
@@ -27,8 +29,9 @@ class Usuario extends Authenticatable
     ];
 
     protected $casts = [
-        'ativo'    => 'boolean',
-        'password' => 'hashed',
+        'ativo'         => 'boolean',
+        'password'      => 'hashed',
+        'ultimo_acesso' => 'datetime',
     ];
 
     public function escopos()

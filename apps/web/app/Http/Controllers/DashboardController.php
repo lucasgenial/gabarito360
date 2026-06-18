@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ApiClient;
+use Illuminate\View\View;
+
 class DashboardController extends Controller
 {
     private const VIEWS = [
@@ -13,14 +16,32 @@ class DashboardController extends Controller
         'aluno'       => 'dashboard.aluno',
     ];
 
-    public function index()
+    public function __construct(private ApiClient $api) {}
+
+    public function index(): View
     {
         $perfil = session('auth_perfil');
         $view   = self::VIEWS[$perfil] ?? 'dashboard.admin';
 
-        return view($view, [
+        $dados = match ($perfil) {
+            'admin_rede' => $this->dadosAdmin(),
+            default      => [],
+        };
+
+        return view($view, array_merge([
             'nome'   => session('auth_nome'),
             'perfil' => $perfil,
-        ]);
+        ], $dados));
+    }
+
+    private function dadosAdmin(): array
+    {
+        $resp = $this->api->get('/v1/dashboard/admin');
+
+        if (!$resp->successful()) {
+            return ['dashboard' => null];
+        }
+
+        return ['dashboard' => $resp->json('data')];
     }
 }

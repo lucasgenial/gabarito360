@@ -27,6 +27,8 @@ class AuthController extends Controller
             return ApiResponse::unauthorized('Credenciais inválidas.');
         }
 
+        $usuario->update(['ultimo_acesso' => now()]);
+
         $token = $usuario->createToken('api-token')->plainTextToken;
 
         return ApiResponse::success([
