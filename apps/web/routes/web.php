@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\MembroController;
+use App\Http\Controllers\TurmaController;
 use Illuminate\Support\Facades\Route;
 
 // Saúde
@@ -42,8 +43,14 @@ Route::middleware('autenticado')->group(function () {
     Route::put('/escolas/{id}',        [EscolaController::class, 'update'])->name('escolas.update');
     Route::post('/escolas/{id}/toggle',[EscolaController::class, 'toggle'])->name('escolas.toggle');
 
+    // Turmas (MP-016)
+    Route::get('/turmas',             [TurmaController::class, 'index'])->name('turmas.index');
+    Route::post('/turmas',            [TurmaController::class, 'store'])->name('turmas.store');
+    Route::get('/turmas/{id}',        [TurmaController::class, 'show'])->name('turmas.show');
+    Route::put('/turmas/{id}',        [TurmaController::class, 'update'])->name('turmas.update');
+    Route::post('/turmas/{id}/toggle',[TurmaController::class, 'toggle'])->name('turmas.toggle');
+
     // Placeholders para MPs futuros
-    Route::get('/turmas',       fn () => abort(404))->name('turmas.index');
     Route::get('/provas',       fn () => abort(404))->name('provas.index');
 });
 
