@@ -106,6 +106,7 @@
         <th class="hide-sm">Turmas</th>
         <th class="hide-sm">Aplicação</th>
         <th>Status</th>
+        <th>Progresso</th>
         <th></th>
       </tr>
     </thead>
@@ -146,6 +147,36 @@
           <td>
             <span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span>
           </td>
+          <td>
+            @php $prog = $p['progresso'] ?? ['tipo' => 'nenhum']; @endphp
+            @if($prog['tipo'] === 'media')
+              @php
+                $cor = $prog['media'] === null ? 'var(--muted)' : ($prog['media'] >= 7 ? 'var(--success,#168821)' : ($prog['media'] >= 5 ? '#ffcd07' : 'var(--danger,#e52207)'));
+                $pct = $prog['media'] !== null ? min(100, $prog['media'] * 10) : 0;
+              @endphp
+              <div style="display:flex;align-items:center;">
+                <span class="mini-bar" style="width:76px;height:7px;background:var(--surface-2);border-radius:99px;overflow:hidden;display:inline-block;margin-right:8px;"><div style="height:100%;width:{{ $pct }}%;background:{{ $cor }};"></div></span>
+                <span style="font-family:var(--font-mono);">{{ $prog['media'] !== null ? number_format($prog['media'], 1, ',', '') : '—' }}</span>
+              </div>
+              <div class="exam-meta">{{ $prog['cartoes_lidos'] }}/{{ $prog['cartoes_total'] }} cartões</div>
+            @elseif($prog['tipo'] === 'correcao')
+              @php $pct = $prog['total'] > 0 ? round($prog['lidos'] / $prog['total'] * 100) : 0; @endphp
+              <div style="display:flex;align-items:center;">
+                <span class="mini-bar" style="width:76px;height:7px;background:var(--surface-2);border-radius:99px;overflow:hidden;display:inline-block;margin-right:8px;"><div style="height:100%;width:{{ $pct }}%;background:var(--accent);"></div></span>
+                <span style="font-family:var(--font-mono);">{{ $prog['lidos'] }}/{{ $prog['total'] }}</span>
+              </div>
+              <div class="exam-meta">cartões lidos</div>
+            @elseif($prog['tipo'] === 'gabarito')
+              @php $pct = $prog['total'] > 0 ? round($prog['preenchidas'] / $prog['total'] * 100) : 0; @endphp
+              <div style="display:flex;align-items:center;">
+                <span class="mini-bar" style="width:76px;height:7px;background:var(--surface-2);border-radius:99px;overflow:hidden;display:inline-block;margin-right:8px;"><div style="height:100%;width:{{ $pct }}%;background:var(--muted);"></div></span>
+                <span style="font-family:var(--font-mono);">{{ $prog['preenchidas'] }}/{{ $prog['total'] }}</span>
+              </div>
+              <div class="exam-meta">questões no gabarito</div>
+            @else
+              <span style="color:var(--muted);font-size:13px;">Aguardando aplicação</span>
+            @endif
+          </td>
           <td style="text-align:right;white-space:nowrap;">
             @if($p['status'] === 'rascunho')
               <form method="POST" action="{{ route('provas.publicar', $p['id']) }}" style="display:inline;">
@@ -164,7 +195,7 @@
         </tr>
       @empty
         <tr>
-          <td colspan="5" style="text-align:center;padding:48px 20px;color:var(--muted);">
+          <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div style="font-size:36px;margin-bottom:12px;">📝</div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma prova encontrada</div>
             <p>Crie a primeira prova usando o botão "+ Nova prova".</p>

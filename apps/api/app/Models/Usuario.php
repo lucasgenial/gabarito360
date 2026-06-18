@@ -21,6 +21,14 @@ class Usuario extends Authenticatable
         'ativo',
         'escola_nome',
         'ultimo_acesso',
+        'data_nascimento',
+        'telefone',
+        'data_ingresso',
+        'formacao_academica',
+        'especializacao',
+        'registro_profissional',
+        'observacoes',
+        'forcar_troca_senha',
     ];
 
     protected $hidden = [
@@ -29,9 +37,12 @@ class Usuario extends Authenticatable
     ];
 
     protected $casts = [
-        'ativo'         => 'boolean',
-        'password'      => 'hashed',
-        'ultimo_acesso' => 'datetime',
+        'ativo'               => 'boolean',
+        'password'            => 'hashed',
+        'ultimo_acesso'       => 'datetime',
+        'data_nascimento'     => 'date',
+        'data_ingresso'       => 'date',
+        'forcar_troca_senha'  => 'boolean',
     ];
 
     public function escopos()

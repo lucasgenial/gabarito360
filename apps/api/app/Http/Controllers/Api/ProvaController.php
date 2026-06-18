@@ -38,6 +38,38 @@ class ProvaController extends Controller
         };
     }
 
+    private function progresso(Prova $p): array
+    {
+        if ($p->status === 'corrigida') {
+            $totalCartoes = DB::table('cartoes')->where('prova_id', $p->id)->count();
+            $lidos        = DB::table('cartoes')->where('prova_id', $p->id)->whereIn('status', ['lido', 'ambiguo'])->count();
+            $media        = DB::table('notas')->where('prova_id', $p->id)->avg('nota_final');
+
+            return [
+                'tipo'          => 'media',
+                'media'         => $media !== null ? round((float) $media, 1) : null,
+                'cartoes_lidos' => $lidos,
+                'cartoes_total' => $totalCartoes,
+            ];
+        }
+
+        if ($p->status === 'em_correcao') {
+            $totalCartoes = DB::table('cartoes')->where('prova_id', $p->id)->count();
+            $lidos        = DB::table('cartoes')->where('prova_id', $p->id)->whereIn('status', ['lido', 'ambiguo'])->count();
+
+            return ['tipo' => 'correcao', 'lidos' => $lidos, 'total' => $totalCartoes];
+        }
+
+        if ($p->status === 'rascunho') {
+            $gabarito    = DB::table('gabaritos')->where('prova_id', $p->id)->first();
+            $preenchidas = $gabarito ? DB::table('gabarito_questoes')->where('gabarito_id', $gabarito->id)->count() : 0;
+
+            return ['tipo' => 'gabarito', 'preenchidas' => $preenchidas, 'total' => $p->num_questoes];
+        }
+
+        return ['tipo' => 'nenhum'];
+    }
+
     public function index(Request $request): JsonResponse
     {
         $escolaIds = $this->escopoEscolaIds($request);
@@ -89,6 +121,7 @@ class ProvaController extends Controller
                 return array_merge($p->toArray(), [
                     'escola_nome' => $p->escola?->nome,
                     'turmas'      => $turmas,
+                    'progresso'   => $this->progresso($p),
                 ]);
             });
 

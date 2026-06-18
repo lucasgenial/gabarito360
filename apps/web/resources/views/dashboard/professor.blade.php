@@ -158,7 +158,7 @@
             <td><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></td>
             <td>
               <div class="proof-actions">
-                <a class="btn btn-secondary btn-sm" href="#">Ver gabarito</a>
+                <a class="btn btn-secondary btn-sm" href="{{ route('provas.gabarito.show', $p['id']) }}">Ver gabarito</a>
                 <a class="btn btn-ghost btn-sm" href="#">Resultados</a>
                 <a class="btn btn-ghost btn-sm" href="#">Acompanhar</a>
               </div>

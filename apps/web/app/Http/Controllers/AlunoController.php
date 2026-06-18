@@ -41,14 +41,28 @@ class AlunoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'turma_id'  => 'required|integer',
-            'nome'      => 'required|string|max:200',
-            'matricula' => 'required|string|max:20',
+            'turma_id'        => 'required|integer',
+            'nome'            => 'required|string|max:200',
+            'matricula'       => 'required|string|max:20',
+            'data_nascimento' => 'required|date',
+            'cpf'             => 'sometimes|string|nullable',
+            'genero'          => 'sometimes|in:M,F,O|nullable',
+            'foto'            => 'sometimes|image|max:4096|nullable',
         ]);
 
-        $resp = $this->api->post('/v1/alunos', $request->only(
-            'turma_id','nome','matricula','data_nascimento','nome_responsavel'
-        ));
+        $dados = $request->only(
+            'turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
+        );
+
+        if ($cpf = $request->input('cpf')) {
+            $dados['cpf'] = preg_replace('/\D/', '', $cpf);
+        }
+
+        if ($request->hasFile('foto')) {
+            $resp = $this->api->postFile('/v1/alunos', 'foto', $request->file('foto'), $dados);
+        } else {
+            $resp = $this->api->post('/v1/alunos', $dados);
+        }
 
         if ($resp->failed()) {
             return back()->withInput()
@@ -81,11 +95,19 @@ class AlunoController extends Controller
         $request->validate([
             'nome'      => 'required|string|max:200',
             'matricula' => 'required|string|max:20',
+            'cpf'       => 'sometimes|string|nullable',
+            'genero'    => 'sometimes|in:M,F,O|nullable',
         ]);
 
-        $resp = $this->api->put("/v1/alunos/{$id}", $request->only(
-            'turma_id','nome','matricula','data_nascimento','nome_responsavel'
-        ));
+        $dados = $request->only(
+            'turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
+        );
+
+        if ($cpf = $request->input('cpf')) {
+            $dados['cpf'] = preg_replace('/\D/', '', $cpf);
+        }
+
+        $resp = $this->api->put("/v1/alunos/{$id}", $dados);
 
         if ($resp->failed()) {
             return back()->withInput()

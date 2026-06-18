@@ -91,14 +91,22 @@ class AlunoController extends Controller
             'turma_id'        => 'required|integer|exists:turmas,id',
             'nome'            => 'required|string|max:200',
             'matricula'       => 'required|string|max:20|unique:alunos,matricula',
-            'data_nascimento' => 'sometimes|date|nullable',
+            'cpf'             => 'sometimes|string|size:11|unique:alunos,cpf|nullable',
+            'data_nascimento' => 'required|date',
+            'genero'          => 'sometimes|in:M,F,O|nullable',
             'nome_responsavel'=> 'sometimes|string|max:200|nullable',
             'ativo'           => 'sometimes|boolean',
+            'foto'            => 'sometimes|image|max:4096|nullable',
         ]);
+
+        if ($request->hasFile('foto')) {
+            $data['foto_path'] = $request->file('foto')->store('alunos', 'public');
+        }
+        unset($data['foto']);
 
         $aluno = Aluno::create($data);
 
-        return ApiResponse::success($aluno->load('turma:id,nome,serie'), 'Aluno cadastrado com sucesso.', 201);
+        return ApiResponse::success($aluno->load('turma:id,nome,serie'), null, 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -134,14 +142,22 @@ class AlunoController extends Controller
             'turma_id'        => 'sometimes|integer|exists:turmas,id',
             'nome'            => 'sometimes|string|max:200',
             'matricula'       => "sometimes|string|max:20|unique:alunos,matricula,{$id}",
+            'cpf'             => "sometimes|string|size:11|unique:alunos,cpf,{$id}|nullable",
             'data_nascimento' => 'sometimes|date|nullable',
+            'genero'          => 'sometimes|in:M,F,O|nullable',
             'nome_responsavel'=> 'sometimes|string|max:200|nullable',
             'ativo'           => 'sometimes|boolean',
+            'foto'            => 'sometimes|image|max:4096|nullable',
         ]);
+
+        if ($request->hasFile('foto')) {
+            $data['foto_path'] = $request->file('foto')->store('alunos', 'public');
+        }
+        unset($data['foto']);
 
         $aluno->update($data);
 
-        return ApiResponse::success($aluno->fresh(), 'Aluno atualizado com sucesso.');
+        return ApiResponse::success($aluno->fresh());
     }
 
     public function toggle(int $id): JsonResponse

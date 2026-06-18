@@ -54,17 +54,20 @@
   </div>
 @endif
 
-<form method="POST" action="{{ route('alunos.store') }}" class="form-container">
+<form method="POST" action="{{ route('alunos.store') }}" class="form-container" enctype="multipart/form-data">
   @csrf
 
   {{-- Card lateral de preview --}}
   <aside class="identity-card">
+    <img id="preview-foto" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 20px;display:none;" />
     <div class="photo-preview" id="preview-avatar">?</div>
     <div style="margin-bottom:20px;">
       <h3 id="preview-nome" style="font-size:16px;font-weight:700;color:var(--fg);margin-bottom:4px;">Novo Aluno</h3>
       <p id="preview-turma" style="font-size:13px;color:var(--muted);">Série / Turma</p>
     </div>
-    <p style="font-size:12px;color:var(--muted);line-height:1.5;">Preencha os campos ao lado para visualizar o perfil do aluno.</p>
+    <label for="foto" class="btn btn-secondary btn-sm" style="cursor:pointer;">Selecionar Foto</label>
+    <input type="file" id="foto" name="foto" accept="image/*" style="display:none;" onchange="previewFoto(this)" />
+    <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px;">Opcional. Imagem até 4MB.</p>
   </aside>
 
   {{-- Formulário principal --}}
@@ -85,9 +88,25 @@
         @error('matricula')<span class="field-error">{{ $message }}</span>@enderror
       </div>
       <div class="field">
-        <label for="data_nascimento">Data de Nascimento</label>
-        <input class="input" type="date" id="data_nascimento" name="data_nascimento"
+        <label for="data_nascimento">Data de Nascimento *</label>
+        <input class="input" type="date" id="data_nascimento" name="data_nascimento" required
                value="{{ old('data_nascimento') }}" />
+        @error('data_nascimento')<span class="field-error">{{ $message }}</span>@enderror
+      </div>
+      <div class="field">
+        <label for="cpf">CPF do Aluno (opcional)</label>
+        <input class="input num" type="text" id="cpf" name="cpf" maxlength="14"
+               placeholder="000.000.000-00" value="{{ old('cpf') }}" />
+        @error('cpf')<span class="field-error">{{ $message }}</span>@enderror
+      </div>
+      <div class="field">
+        <label for="genero">Gênero</label>
+        <select class="select" id="genero" name="genero">
+          <option value="">Selecione...</option>
+          <option value="M" {{ old('genero') === 'M' ? 'selected' : '' }}>Masculino</option>
+          <option value="F" {{ old('genero') === 'F' ? 'selected' : '' }}>Feminino</option>
+          <option value="O" {{ old('genero') === 'O' ? 'selected' : '' }}>Outro / Não informar</option>
+        </select>
       </div>
       <div class="field" style="grid-column:1/-1">
         <label for="turma_id">Turma de destino *</label>
@@ -125,6 +144,18 @@
 
 @push('scripts')
 <script>
+function previewFoto(input) {
+  if (!input.files || !input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = document.getElementById('preview-foto');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('preview-avatar').style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
 function atualizarPreview() {
   var nome  = document.getElementById('nome').value;
   var sel   = document.getElementById('turma_id');

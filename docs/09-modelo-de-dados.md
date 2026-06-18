@@ -105,32 +105,51 @@ Rede (1) ──── (N) Nucleo (1) ──── (N) Escola (1) ──── (N
 | turma_id         | FK → turmas  |                                       |
 | nome             | varchar(200) | Nome completo do aluno                |
 | matricula        | varchar(20)  | Matrícula única no período letivo     |
+| cpf              | char(11)     | Opcional. Apenas dígitos               |
 | data_nascimento  | date         |                                       |
+| genero           | enum         | M, F, O (opcional)                    |
+| foto_path        | varchar(255) | Caminho do arquivo no disco `public` (opcional) |
 | nome_responsavel | varchar(200) |                                       |
 | ativo            | boolean      |                                       |
 | created_at       | timestamp    |                                       |
 | updated_at       | timestamp    |                                       |
 
-**Índices:** turma_id, matricula (unique por rede + ano_letivo)
+**Índices:** turma_id, matricula (unique por rede + ano_letivo), cpf (unique, permite múltiplos nulos)
+
+**Adicionado em:** MP-024 (auditoria mockup `aluno-cadastrar.html`) — cpf, genero, foto_path.
 
 ---
 
 ### usuarios
 
-| Coluna           | Tipo          | Descrição                                    |
-|------------------|---------------|----------------------------------------------|
-| id               | bigint PK     |                                              |
-| perfil           | enum          | admin_rede, dir_nucleo, dir_escolar, coordenador, professor, aluno |
-| nome             | varchar(200)  |                                              |
-| email            | varchar(150)  | Único no sistema                            |
-| cpf              | char(11)      | Apenas dígitos                              |
-| password         | varchar(255)  | Hash bcrypt                                 |
-| ativo            | boolean       |                                              |
-| remember_token   | varchar(100)  |                                              |
-| created_at       | timestamp     |                                              |
-| updated_at       | timestamp     |                                              |
+| Coluna                 | Tipo          | Descrição                                    |
+|------------------------|---------------|----------------------------------------------|
+| id                     | bigint PK     |                                              |
+| perfil                 | enum          | admin_rede, dir_nucleo, dir_escolar, coordenador, professor, aluno |
+| nome                   | varchar(200)  |                                              |
+| email                  | varchar(150)  | Único no sistema                            |
+| cpf                    | char(11)      | Apenas dígitos                              |
+| password               | varchar(255)  | Hash bcrypt                                 |
+| ativo                  | boolean       |                                              |
+| escola_nome            | varchar(200)  | Denormalizado para exibição rápida (opcional) |
+| ultimo_acesso          | timestamp     | Atualizado a cada login                     |
+| data_nascimento        | date          | Opcional                                    |
+| telefone               | varchar(20)   | Opcional                                    |
+| data_ingresso          | date          | Data de início na rede/escola (opcional)    |
+| formacao_academica     | varchar(200)  | Graduação/licenciatura (opcional)           |
+| especializacao         | varchar(200)  | Opcional                                    |
+| registro_profissional  | varchar(50)   | Opcional                                    |
+| observacoes            | text          | Anotações internas (opcional)               |
+| forcar_troca_senha     | boolean       | Default false. Exige troca no próximo login |
+| remember_token         | varchar(100)  |                                              |
+| created_at             | timestamp     |                                              |
+| updated_at             | timestamp     |                                              |
 
 **Índices:** email (unique), cpf (unique)
+
+**Adicionado em:** MP-024 (auditoria mockups `membro-cadastrar.html`/`membro-editar.html`) — data_nascimento, telefone, data_ingresso, formacao_academica, especializacao, registro_profissional, observacoes, forcar_troca_senha. O vínculo com escola já existia via `usuario_escopos` (escopo_tipo='escola').
+
+**Escopo não coberto nesta rodada:** os mockups também previam uma grade de "Disciplinas e Turmas" (checkboxes) para professores e exclusão permanente de membro — ambos exigem modelagem adicional (relação usuário↔disciplina; revisão de FKs antes de permitir delete) e foram deixados para decisão futura.
 
 ---
 

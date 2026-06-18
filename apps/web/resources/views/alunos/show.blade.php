@@ -153,6 +153,19 @@
             <label for="ed-nasc">Nascimento</label>
             <input class="input" type="date" id="ed-nasc" name="data_nascimento" value="{{ $aluno['data_nascimento'] ?? '' }}" />
           </div>
+          <div class="field">
+            <label for="ed-cpf">CPF</label>
+            <input class="input num" type="text" id="ed-cpf" name="cpf" maxlength="11" placeholder="Apenas números" value="{{ $aluno['cpf'] ?? '' }}" />
+          </div>
+          <div class="field">
+            <label for="ed-genero">Gênero</label>
+            <select class="select" id="ed-genero" name="genero">
+              <option value="">Selecione...</option>
+              <option value="M" {{ ($aluno['genero'] ?? '') === 'M' ? 'selected' : '' }}>Masculino</option>
+              <option value="F" {{ ($aluno['genero'] ?? '') === 'F' ? 'selected' : '' }}>Feminino</option>
+              <option value="O" {{ ($aluno['genero'] ?? '') === 'O' ? 'selected' : '' }}>Outro / Não informar</option>
+            </select>
+          </div>
           <div class="field" style="grid-column:1/-1">
             <label for="ed-turma">Turma</label>
             <select class="select" id="ed-turma" name="turma_id">

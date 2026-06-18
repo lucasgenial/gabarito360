@@ -47,7 +47,7 @@ class NucleoController extends Controller
 
         $nucleo = Nucleo::create($data);
 
-        return ApiResponse::success($nucleo, 'Núcleo criado com sucesso.', 201);
+        return ApiResponse::success($nucleo, null, 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -78,7 +78,7 @@ class NucleoController extends Controller
 
         $nucleo->update($data);
 
-        return ApiResponse::success($nucleo, 'Núcleo atualizado com sucesso.');
+        return ApiResponse::success($nucleo);
     }
 
     public function destroy(int $id): JsonResponse
@@ -90,12 +90,12 @@ class NucleoController extends Controller
         }
 
         if ($nucleo->escolas()->exists()) {
-            return ApiResponse::error('Núcleo possui escolas vinculadas. Reatribua-as antes de excluir.', 422);
+            return ApiResponse::error('Núcleo possui escolas vinculadas. Reatribua-as antes de excluir.', [], 422);
         }
 
         $nucleo->delete();
 
-        return ApiResponse::success(null, 'Núcleo excluído com sucesso.');
+        return ApiResponse::success(null);
     }
 
     private function verificarAcesso(Request $request, int $nucleoId): void
