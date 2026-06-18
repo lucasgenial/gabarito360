@@ -526,7 +526,7 @@ de parâmetros da rede (RN-013.2).
 
 ---
 
-## MP-025 — Fundação Multi-Tenant (Secretaria + Modalidade de Rede)
+## MP-025 — Fundação Multi-Tenant (Secretaria + Modalidade de Rede) ✅
 
 **Objetivo:** Preparar o schema para suportar o nível "Secretaria" acima da rede e a
 distinção entre rede institucional e rede individual, sem alterar nenhum comportamento
@@ -545,10 +545,13 @@ visível ainda — é a base sobre a qual os MPs seguintes (027 a 029) constroem
 - Nenhuma tela nova nesta MP — é só fundação de dados
 
 **Critérios de Aceite:**
-- [ ] Todas as redes existentes continuam com `modalidade=institucional` após a migration
-- [ ] Nenhum endpoint existente quebra (campos novos são opcionais)
+- [x] Todas as redes existentes continuam com `modalidade=institucional` após a migration
+- [x] Nenhum endpoint existente quebra (campos novos são opcionais)
 
-**Commit esperado:** `feat(db): adiciona fundação multi-tenant (secretaria e modalidade de rede)`
+**Commit:** `feat(db): adiciona fundação multi-tenant (secretaria e modalidade de rede)`
+
+**Status:** Concluído (2026-06-18). Testado: rede existente preservou `modalidade=institucional`;
+login e `/v1/escolas`/`/v1/turmas` continuam funcionando sem novas entradas de erro no log.
 
 ---
 
@@ -863,7 +866,7 @@ de 2026-06.
 | MP-022 | Relatórios                      | Concluído   | MP-021             |
 | MP-023 | Aplicativo Android              | Pendente (adiado — ver Nota de Sequenciamento) | MP-004, MP-021 |
 | MP-024 | Meu Perfil e Configurações      | Concluído   | MP-005, MP-006     |
-| MP-025 | Fundação Multi-Tenant (Secretaria/Modalidade) | Pendente | MP-003     |
+| MP-025 | Fundação Multi-Tenant (Secretaria/Modalidade) | Concluído | MP-003    |
 | MP-026 | Perfis Secretário Educação e Aplicador | Pendente | MP-025          |
 | MP-027 | Assinatura e Cobrança (Mercado Pago) | Pendente | MP-025            |
 | MP-028 | Cadastro Autônomo (Individual/Institucional) | Pendente | MP-026, MP-027 |
