@@ -7,7 +7,21 @@ use Illuminate\Support\Facades\DB;
 
 class CalculadoraNota
 {
-    private const PERCENTUAL_APROVACAO = 0.6;
+    /**
+     * Busca a nota mínima de aprovação configurada para a rede da escola da prova
+     * (RN-009.2 / RN-009.5). Assume escala de 0 a 10; quando a prova usa outra
+     * nota_maxima, o limiar é escalado proporcionalmente.
+     */
+    public static function metaMinima(int $escolaId): float
+    {
+        $meta = DB::table('escolas')
+            ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
+            ->join('redes', 'nucleos.rede_id', '=', 'redes.id')
+            ->where('escolas.id', $escolaId)
+            ->value('redes.meta_minima');
+
+        return $meta !== null ? (float) $meta : 6.0;
+    }
 
     /**
      * Calcula (ou recalcula) a nota de um cartão já lido (sem ambiguidades pendentes)
@@ -58,9 +72,8 @@ class CalculadoraNota
             ? round(($acertos / $totalQuestoes) * (float) $prova->nota_maxima, 1)
             : 0.0;
 
-        $statusAprovacao = $notaFinal >= (self::PERCENTUAL_APROVACAO * (float) $prova->nota_maxima)
-            ? 'aprovado'
-            : 'recuperacao';
+        $limiarAprovacao = self::metaMinima($prova->escola_id) / 10 * (float) $prova->nota_maxima;
+        $statusAprovacao = $notaFinal >= $limiarAprovacao ? 'aprovado' : 'recuperacao';
 
         $dados = [
             'prova_id'         => $prova->id,

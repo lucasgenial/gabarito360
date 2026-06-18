@@ -8,6 +8,8 @@ use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\GabaritoController;
 use App\Http\Controllers\MembroController;
 use App\Http\Controllers\ProvaController;
+use App\Http\Controllers\RelatorioController;
+use App\Http\Controllers\ResultadoController;
 use App\Http\Controllers\TurmaController;
 use Illuminate\Support\Facades\Route;
 
@@ -85,6 +87,11 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/provas/{id}/cartoes',         [CorrecaoController::class, 'upload'])->name('correcao.upload');
     Route::post('/cartoes/{id}/resolver-ambiguidade', [CorrecaoController::class, 'resolverAmbiguidade'])->name('cartoes.resolver-ambiguidade');
     Route::post('/cartoes/{id}/revisar',              [CorrecaoController::class, 'revisar'])->name('cartoes.revisar');
+
+    // Resultados e relatórios (MP-022)
+    Route::get('/resultados/{alunoId}/{provaId}', [ResultadoController::class, 'show'])->name('resultados.show');
+    Route::get('/relatorios/prova/{id}', [RelatorioController::class, 'prova'])->name('relatorios.prova');
+    Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');
 });
 
 Route::get('/', fn () => redirect()->route('login'));

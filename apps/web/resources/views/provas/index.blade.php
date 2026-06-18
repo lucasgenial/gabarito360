@@ -155,10 +155,10 @@
             @endif
             @if($p['status'] === 'em_correcao')
               <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">Acompanhar</a>
+            @elseif($p['status'] === 'corrigida')
+              <a href="{{ route('relatorios.prova', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">Relatório</a>
             @else
-              <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">
-                {{ $p['status'] === 'corrigida' ? 'Relatório' : 'Ver' }}
-              </a>
+              <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">Ver</a>
             @endif
           </td>
         </tr>

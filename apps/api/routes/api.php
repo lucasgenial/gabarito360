@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\GabaritoController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\ProvaController;
+use App\Http\Controllers\Api\RelatorioController;
+use App\Http\Controllers\Api\ResultadoController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\VinculoProfessorController;
@@ -66,6 +68,14 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}',         [AlunoController::class, 'show']);
             Route::put('{id}',         [AlunoController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
             Route::post('{id}/toggle', [AlunoController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
+            // Resultado individual (MP-022)
+            Route::get('{id}/resultados/{provaId}', [ResultadoController::class, 'show']);
+        });
+
+        // Relatórios (MP-022)
+        Route::prefix('relatorios')->group(function () {
+            Route::get('prova/{id}',                       [RelatorioController::class, 'prova']);
+            Route::get('turma/{turmaId}/prova/{provaId}',   [RelatorioController::class, 'turmaProva']);
         });
 
         // Turmas
