@@ -19,6 +19,126 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function aluno(Request $request): JsonResponse
+    {
+        $usuario = $request->user();
+
+        // Busca o registro de aluno vinculado ao usuário
+        $alunoId = DB::table('usuario_escopos')
+            ->where('usuario_id', $usuario->id)
+            ->where('escopo_tipo', 'aluno')
+            ->value('escopo_id');
+
+        if (!$alunoId) {
+            return ApiResponse::forbidden('Usuário não vinculado a nenhum aluno.');
+        }
+
+        $aluno = DB::table('alunos')
+            ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+            ->join('escolas', 'turmas.escola_id', '=', 'escolas.id')
+            ->where('alunos.id', $alunoId)
+            ->select('alunos.id', 'alunos.nome', 'turmas.nome as turma', 'turmas.id as turma_id', 'escolas.nome as escola')
+            ->first();
+
+        if (!$aluno) {
+            return ApiResponse::notFound('Aluno não encontrado.');
+        }
+
+        // KPIs
+        $provasRealizadas = Nota::where('aluno_id', $alunoId)->count();
+        $minhaMedia       = Nota::where('aluno_id', $alunoId)->avg('nota_final');
+
+        $melhorDisciplina = DB::table('notas')
+            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+            ->where('notas.aluno_id', $alunoId)
+            ->select('provas.disciplina', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
+            ->groupBy('provas.disciplina')
+            ->orderByDesc('media')
+            ->first();
+
+        $proximaProva = DB::table('provas')
+            ->join('prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
+            ->where('prova_turmas.turma_id', $aluno->turma_id)
+            ->where('provas.data_aplicacao', '>=', now()->toDateString())
+            ->whereIn('provas.status', ['publicada', 'rascunho'])
+            ->orderBy('provas.data_aplicacao')
+            ->select('provas.id', 'provas.disciplina', 'provas.data_aplicacao')
+            ->first();
+
+        // Tabela de notas por disciplina
+        $notas = DB::table('notas')
+            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+            ->where('notas.aluno_id', $alunoId)
+            ->select(
+                'provas.disciplina',
+                DB::raw('MAX(provas.data_aplicacao) as ultima_data'),
+                DB::raw('ROUND(AVG(notas.nota_final),1) as media_bimestral'),
+                DB::raw('(SELECT n2.nota_final FROM notas n2 JOIN provas p2 ON n2.prova_id = p2.id WHERE n2.aluno_id = notas.aluno_id AND p2.disciplina = provas.disciplina ORDER BY p2.data_aplicacao DESC LIMIT 1) as ultima_nota')
+            )
+            ->groupBy('provas.disciplina')
+            ->orderBy('provas.disciplina')
+            ->get()
+            ->map(function ($n) {
+                // Tendência simples: comparar última nota com média
+                $diff = $n->ultima_nota - $n->media_bimestral;
+                $n->tendencia = $diff > 0.3 ? 'up' : ($diff < -0.3 ? 'down' : 'flat');
+                return $n;
+            });
+
+        // Evolução bimestral
+        $ano = now()->year;
+        $bimestres = [];
+        for ($bim = 1; $bim <= 4; $bim++) {
+            $mesInicio = ($bim - 1) * 3 + 1;
+            $mesFim    = $bim * 3;
+            $media = DB::table('notas')
+                ->join('provas', 'notas.prova_id', '=', 'provas.id')
+                ->where('notas.aluno_id', $alunoId)
+                ->whereYear('provas.data_aplicacao', $ano)
+                ->whereMonth('provas.data_aplicacao', '>=', $mesInicio)
+                ->whereMonth('provas.data_aplicacao', '<=', $mesFim)
+                ->avg('notas.nota_final');
+
+            $bimestres[] = [
+                'bimestre' => $bim,
+                'label'    => "{$bim}º bim.",
+                'media'    => $media ? round($media, 1) : null,
+            ];
+        }
+
+        // Próximas provas da turma
+        $proximasProvas = DB::table('provas')
+            ->join('prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
+            ->leftJoin('usuarios', 'provas.criado_por', '=', 'usuarios.id')
+            ->where('prova_turmas.turma_id', $aluno->turma_id)
+            ->where('provas.data_aplicacao', '>=', now()->toDateString())
+            ->whereIn('provas.status', ['publicada', 'rascunho'])
+            ->orderBy('provas.data_aplicacao')
+            ->limit(4)
+            ->select('provas.id', 'provas.disciplina', 'provas.data_aplicacao', 'usuarios.nome as professor')
+            ->get();
+
+        return ApiResponse::success([
+            'aluno' => [
+                'id'     => $aluno->id,
+                'nome'   => $aluno->nome,
+                'turma'  => $aluno->turma,
+                'escola' => $aluno->escola,
+            ],
+            'kpis' => [
+                'provas_realizadas'  => $provasRealizadas,
+                'minha_media'        => $minhaMedia ? round($minhaMedia, 1) : null,
+                'melhor_disciplina'  => $melhorDisciplina?->disciplina,
+                'melhor_media'       => $melhorDisciplina?->media,
+                'proxima_prova_data' => $proximaProva?->data_aplicacao,
+                'proxima_prova_disc' => $proximaProva?->disciplina,
+            ],
+            'notas'          => $notas,
+            'bimestres'      => $bimestres,
+            'proximas_provas' => $proximasProvas,
+        ]);
+    }
+
     public function professor(Request $request): JsonResponse
     {
         $usuario = $request->user();
