@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EscolaController;
@@ -42,6 +43,14 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/escolas/{id}',        [EscolaController::class, 'show'])->name('escolas.show');
     Route::put('/escolas/{id}',        [EscolaController::class, 'update'])->name('escolas.update');
     Route::post('/escolas/{id}/toggle',[EscolaController::class, 'toggle'])->name('escolas.toggle');
+
+    // Alunos (MP-017)
+    Route::get('/alunos',              [AlunoController::class, 'index'])->name('alunos.index');
+    Route::get('/alunos/novo',         [AlunoController::class, 'create'])->name('alunos.create');
+    Route::post('/alunos',             [AlunoController::class, 'store'])->name('alunos.store');
+    Route::get('/alunos/{id}',         [AlunoController::class, 'show'])->name('alunos.show');
+    Route::put('/alunos/{id}',         [AlunoController::class, 'update'])->name('alunos.update');
+    Route::post('/alunos/{id}/toggle', [AlunoController::class, 'toggle'])->name('alunos.toggle');
 
     // Turmas (MP-016)
     Route::get('/turmas',             [TurmaController::class, 'index'])->name('turmas.index');

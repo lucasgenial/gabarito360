@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AlunoController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EscolaController;
@@ -26,6 +27,15 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::put('me',     [AuthController::class, 'update']);
+        });
+
+        // Alunos
+        Route::prefix('alunos')->group(function () {
+            Route::get('/',            [AlunoController::class, 'index']);
+            Route::post('/',           [AlunoController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::get('{id}',         [AlunoController::class, 'show']);
+            Route::put('{id}',         [AlunoController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::post('{id}/toggle', [AlunoController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
         });
 
         // Turmas
