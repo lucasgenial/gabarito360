@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AlunoController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartaoController;
+use App\Http\Controllers\Api\ConfiguracaoController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\GabaritoController;
@@ -120,6 +121,12 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('perfil:admin_rede,dir_escolar');
             Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar');
             Route::post('{id}/toggle',[UsuarioController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar');
+        });
+
+        // Configurações da rede (MP-024)
+        Route::prefix('configuracoes')->group(function () {
+            Route::get('/', [ConfiguracaoController::class, 'show'])->middleware('perfil:admin_rede');
+            Route::put('/', [ConfiguracaoController::class, 'update'])->middleware('perfil:admin_rede');
         });
 
         // Dashboard

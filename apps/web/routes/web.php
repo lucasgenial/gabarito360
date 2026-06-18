@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\CorrecaoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\GabaritoController;
 use App\Http\Controllers\MembroController;
+use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ProvaController;
 use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\ResultadoController;
@@ -32,7 +34,15 @@ Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
-    Route::get('/perfil',  fn () => view('layouts.app'))->name('perfil');
+
+    // Meu perfil (MP-024)
+    Route::get('/perfil',        [PerfilController::class, 'show'])->name('perfil');
+    Route::put('/perfil',        [PerfilController::class, 'update'])->name('perfil.update');
+    Route::put('/perfil/senha',  [PerfilController::class, 'senha'])->name('perfil.senha');
+
+    // Configurações da rede (MP-024)
+    Route::get('/configuracoes', [ConfiguracaoController::class, 'index'])->name('configuracoes.index');
+    Route::put('/configuracoes', [ConfiguracaoController::class, 'update'])->name('configuracoes.update');
 
     // Membros da equipe (MP-013)
     Route::get('/membros',             [MembroController::class, 'index'])->name('membros.index');

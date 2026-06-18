@@ -56,13 +56,19 @@ class AuthController extends Controller
     public function update(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'nome'     => 'sometimes|string|max:200',
-            'password' => 'sometimes|string|min:8|confirmed',
+            'nome'          => 'sometimes|string|max:200',
+            'senha_atual'   => 'required_with:password|string',
+            'password'      => 'sometimes|string|min:8|confirmed',
         ]);
 
         if (isset($data['password'])) {
+            if (!Hash::check($data['senha_atual'], $request->user()->password)) {
+                return ApiResponse::error('Senha atual incorreta.', [], 422);
+            }
             $data['password'] = Hash::make($data['password']);
         }
+
+        unset($data['senha_atual']);
 
         $request->user()->update($data);
 
@@ -135,12 +141,12 @@ class AuthController extends Controller
             ->first();
 
         if (!$record || !Hash::check($request->token, $record->token)) {
-            return ApiResponse::error('Token inválido ou expirado.', 422);
+            return ApiResponse::error('Token inválido ou expirado.', [], 422);
         }
 
         if (now()->diffInHours($record->created_at) >= 24) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-            return ApiResponse::error('Link expirado. Solicite um novo link de recuperação.', 422);
+            return ApiResponse::error('Link expirado. Solicite um novo link de recuperação.', [], 422);
         }
 
         Usuario::where('email', $request->email)
