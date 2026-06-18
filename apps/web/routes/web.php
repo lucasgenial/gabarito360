@@ -9,11 +9,13 @@ Route::get('/health', fn () => response()->json(['status' => 'ok', 'app' => 'gab
 
 // Autenticação pública
 Route::middleware('guest')->group(function () {
-    Route::get('/login',    [LoginController::class, 'index'])->name('login');
-    Route::post('/login',   [LoginController::class, 'store'])->name('login.store');
-    Route::get('/cadastro', [LoginController::class, 'index'])->name('cadastro');
-    Route::post('/cadastro',[LoginController::class, 'index'])->name('cadastro.store');
-    Route::get('/esqueci-senha', fn () => view('auth.login'))->name('esqueci-senha');
+    Route::get('/login',            [LoginController::class, 'index'])->name('login');
+    Route::post('/login',           [LoginController::class, 'store'])->name('login.store');
+    Route::post('/cadastro',        [LoginController::class, 'cadastro'])->name('cadastro.store');
+    Route::get('/esqueci-senha',    [LoginController::class, 'showEsqueciSenha'])->name('esqueci-senha');
+    Route::post('/esqueci-senha',   [LoginController::class, 'postEsqueciSenha'])->name('esqueci-senha.store');
+    Route::get('/redefinir-senha',  [LoginController::class, 'showRedefinirSenha'])->name('redefinir-senha');
+    Route::post('/redefinir-senha', [LoginController::class, 'postRedefinirSenha'])->name('redefinir-senha.store');
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');

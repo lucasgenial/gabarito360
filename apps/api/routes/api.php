@@ -10,7 +10,10 @@ Route::prefix('v1')->group(function () {
 
     // Rotas públicas de autenticação
     Route::prefix('auth')->group(function () {
-        Route::post('login', [AuthController::class, 'login']);
+        Route::post('login',           [AuthController::class, 'login']);
+        Route::post('registro',        [AuthController::class, 'registro']);
+        Route::post('esqueci-senha',   [AuthController::class, 'esqueceuSenha']);
+        Route::post('redefinir-senha', [AuthController::class, 'redefinirSenha']);
     });
 
     // Rotas protegidas
