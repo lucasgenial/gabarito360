@@ -117,7 +117,7 @@
     <input id="aluno-search" class="input" type="search" placeholder="Buscar aluno por nome…"
            style="padding-left:36px;" oninput="filtrarAlunos(this.value)" />
   </div>
-  <a href="{{ route('painel') }}" class="btn btn-primary btn-sm">+ Adicionar aluno</a>
+  <a href="{{ route('alunos.create', ['turma_id' => $turma['id']]) }}" class="btn btn-primary btn-sm">+ Adicionar aluno</a>
 </div>
 
 <div class="card" style="overflow:hidden;">
