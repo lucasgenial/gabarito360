@@ -31,6 +31,8 @@ Route::prefix('v1')->group(function () {
                 ->middleware('perfil:dir_escolar');
             Route::get('coordenador',  [DashboardController::class, 'coordenador'])
                 ->middleware('perfil:coordenador');
+            Route::get('professor',    [DashboardController::class, 'professor'])
+                ->middleware('perfil:professor');
         });
     });
 
