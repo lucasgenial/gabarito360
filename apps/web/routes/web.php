@@ -4,6 +4,7 @@ use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EscolaController;
+use App\Http\Controllers\GabaritoController;
 use App\Http\Controllers\MembroController;
 use App\Http\Controllers\ProvaController;
 use App\Http\Controllers\TurmaController;
@@ -70,6 +71,12 @@ Route::middleware('autenticado')->group(function () {
     Route::put('/provas/{id}',        [ProvaController::class, 'update'])->name('provas.update');
     Route::post('/provas/{id}/publicar', [ProvaController::class, 'publicar'])->name('provas.publicar');
     Route::delete('/provas/{id}',     [ProvaController::class, 'destroy'])->name('provas.destroy');
+
+    // Gabarito (MP-020)
+    Route::get('/provas/{id}/gabarito',           [GabaritoController::class, 'show'])->name('provas.gabarito.show');
+    Route::get('/provas/{id}/gabarito/editar',    [GabaritoController::class, 'edit'])->name('provas.gabarito.edit');
+    Route::post('/provas/{id}/gabarito',          [GabaritoController::class, 'salvar'])->name('provas.gabarito.salvar');
+    Route::post('/provas/{id}/gabarito/publicar', [GabaritoController::class, 'publicar'])->name('provas.gabarito.publicar');
 });
 
 Route::get('/', fn () => redirect()->route('login'));

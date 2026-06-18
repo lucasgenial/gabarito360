@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AlunoController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EscolaController;
+use App\Http\Controllers\Api\GabaritoController;
 use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\ProvaController;
 use App\Http\Controllers\Api\TurmaController;
@@ -39,6 +40,10 @@ Route::prefix('v1')->group(function () {
             Route::put('{id}',          [ProvaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
             Route::post('{id}/publicar',[ProvaController::class, 'publicar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
             Route::delete('{id}',       [ProvaController::class, 'destroy'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            // Gabarito (MP-020)
+            Route::get('{id}/gabarito',          [GabaritoController::class, 'show']);
+            Route::post('{id}/gabarito',         [GabaritoController::class, 'salvar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::post('{id}/gabarito/publicar',[GabaritoController::class, 'publicar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
         });
 
         // Alunos
