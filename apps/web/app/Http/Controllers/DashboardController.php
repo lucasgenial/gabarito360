@@ -25,6 +25,7 @@ class DashboardController extends Controller
 
         $dados = match ($perfil) {
             'admin_rede' => $this->dadosAdmin(),
+            'dir_nucleo' => $this->dadosDirNucleo(),
             default      => [],
         };
 
@@ -37,6 +38,17 @@ class DashboardController extends Controller
     private function dadosAdmin(): array
     {
         $resp = $this->api->get('/v1/dashboard/admin');
+
+        if (!$resp->successful()) {
+            return ['dashboard' => null];
+        }
+
+        return ['dashboard' => $resp->json('data')];
+    }
+
+    private function dadosDirNucleo(): array
+    {
+        $resp = $this->api->get('/v1/dashboard/dir-nucleo');
 
         if (!$resp->successful()) {
             return ['dashboard' => null];
