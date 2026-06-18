@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\NucleoController;
 use App\Http\Controllers\Api\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +24,15 @@ Route::prefix('v1')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::put('me',     [AuthController::class, 'update']);
+        });
+
+        // Núcleos
+        Route::prefix('nucleos')->group(function () {
+            Route::get('/',     [NucleoController::class, 'index'])->middleware('perfil:admin_rede,dir_nucleo');
+            Route::post('/',    [NucleoController::class, 'store'])->middleware('perfil:admin_rede');
+            Route::get('{id}',  [NucleoController::class, 'show'])->middleware('perfil:admin_rede,dir_nucleo');
+            Route::put('{id}',  [NucleoController::class, 'update'])->middleware('perfil:admin_rede,dir_nucleo');
+            Route::delete('{id}',[NucleoController::class, 'destroy'])->middleware('perfil:admin_rede');
         });
 
         // Usuários / equipe
