@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\MembroController;
+use App\Http\Controllers\ProvaController;
 use App\Http\Controllers\TurmaController;
 use Illuminate\Support\Facades\Route;
 
@@ -61,8 +62,14 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/turmas/{id}/professores',            [TurmaController::class, 'vincularProfessor'])->name('turmas.professores.store');
     Route::delete('/turmas/{id}/professores/{uid}',    [TurmaController::class, 'desvincularProfessor'])->name('turmas.professores.destroy');
 
-    // Placeholders para MPs futuros
-    Route::get('/provas',       fn () => abort(404))->name('provas.index');
+    // Provas (MP-019)
+    Route::get('/provas',             [ProvaController::class, 'index'])->name('provas.index');
+    Route::get('/provas/nova',        [ProvaController::class, 'create'])->name('provas.create');
+    Route::post('/provas',            [ProvaController::class, 'store'])->name('provas.store');
+    Route::get('/provas/{id}',        [ProvaController::class, 'show'])->name('provas.show');
+    Route::put('/provas/{id}',        [ProvaController::class, 'update'])->name('provas.update');
+    Route::post('/provas/{id}/publicar', [ProvaController::class, 'publicar'])->name('provas.publicar');
+    Route::delete('/provas/{id}',     [ProvaController::class, 'destroy'])->name('provas.destroy');
 });
 
 Route::get('/', fn () => redirect()->route('login'));
