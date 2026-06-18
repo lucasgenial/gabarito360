@@ -55,13 +55,19 @@
       <div class="alert-erro">{{ session('erro') }}</div>
       @endif
 
+      @if(session('sucesso'))
+      <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-bottom:20px;">
+        {{ session('sucesso') }}
+      </div>
+      @endif
+
       <div class="tabs" role="tablist">
-        <button class="active" data-tab="login" role="tab">Entrar</button>
-        <button data-tab="signup" role="tab">Cadastrar</button>
+        <button class="{{ ($tab ?? 'login') === 'login' ? 'active' : '' }}" data-tab="login" role="tab">Entrar</button>
+        <button class="{{ ($tab ?? 'login') === 'signup' ? 'active' : '' }}" data-tab="signup" role="tab">Cadastrar</button>
       </div>
 
       {{-- Login --}}
-      <form class="pane active" id="pane-login" method="POST" action="{{ route('login.store') }}" novalidate>
+      <form class="pane {{ ($tab ?? 'login') === 'login' ? 'active' : '' }}" id="pane-login" method="POST" action="{{ route('login.store') }}" novalidate>
         @csrf
         <div class="field">
           <label for="email">E-mail institucional</label>
@@ -88,22 +94,52 @@
       </form>
 
       {{-- Cadastro --}}
-      <form class="pane" id="pane-signup" method="POST" action="{{ route('cadastro.store') }}" novalidate>
+      <form class="pane {{ ($tab ?? 'login') === 'signup' ? 'active' : '' }}" id="pane-signup" method="POST" action="{{ route('cadastro.store') }}" novalidate>
         @csrf
+
+        @if(session('erro_signup'))
+        <div class="alert-erro">{{ session('erro_signup') }}</div>
+        @endif
+
+        @if(session('sucesso_signup'))
+        <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-bottom:20px;">
+          {{ session('sucesso_signup') }}
+        </div>
+        @endif
+
         <div class="field">
           <label for="nome">Nome completo</label>
-          <input class="input" type="text" id="nome" name="nome" placeholder="Ex.: Maria Aparecida Santos" />
+          <input class="input" type="text" id="nome" name="nome" value="{{ old('nome') }}" placeholder="Ex.: Maria Aparecida Santos" required />
+          @error('nome')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
         </div>
         <div class="field">
           <label for="cpf">CPF</label>
-          <input class="input num" type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" />
+          <input class="input num" type="text" id="cpf" name="cpf" value="{{ old('cpf') }}" placeholder="000.000.000-00" maxlength="14" required />
+          @error('cpf')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
+        </div>
+        <div class="field">
+          <label for="perfil">Perfil</label>
+          <select class="select" id="perfil" name="perfil" required>
+            <option value="">Selecione seu perfil…</option>
+            <option value="coordenador"  {{ old('perfil') === 'coordenador'  ? 'selected' : '' }}>Coordenação / Secretaria</option>
+            <option value="professor"    {{ old('perfil') === 'professor'    ? 'selected' : '' }}>Professor(a)</option>
+            <option value="dir_escolar"  {{ old('perfil') === 'dir_escolar'  ? 'selected' : '' }}>Diretor(a) Escolar</option>
+            <option value="dir_nucleo"   {{ old('perfil') === 'dir_nucleo'   ? 'selected' : '' }}>Diretor(a) de Núcleo</option>
+          </select>
+          @error('perfil')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
         </div>
         <div class="field">
           <label for="email2">E-mail institucional</label>
-          <input class="input" type="email" id="email2" name="email" placeholder="nome@edu.gov.br" />
+          <input class="input" type="email" id="email2" name="email" value="{{ old('email') }}" placeholder="nome@edu.gov.br" required />
+          @error('email')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
         </div>
-        <label class="checkbox-row" style="margin:4px 0 20px;"><input type="checkbox" name="termos" /> Li e aceito os termos de uso e a LGPD</label>
+        <label class="checkbox-row" style="margin:4px 0 20px;">
+          <input type="checkbox" name="termos" value="1" {{ old('termos') ? 'checked' : '' }} />
+          Li e aceito os <a href="#" style="color:var(--accent);">termos de uso</a> e a LGPD
+        </label>
+        @error('termos')<div style="color:var(--danger);font-size:13px;margin-bottom:12px;">{{ $message }}</div>@enderror
         <button type="submit" class="btn btn-primary btn-block">Criar conta</button>
+        <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:16px;">Seu cadastro aguardará aprovação do administrador.</p>
       </form>
     </div>
   </main>
@@ -120,10 +156,13 @@
       document.getElementById('pane-' + b.dataset.tab).classList.add('active');
     });
   });
-  document.getElementById('cpf').addEventListener('input', function(e) {
-    var v = e.target.value.replace(/\D/g,'').slice(0,11);
-    v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
-    e.target.value = v;
-  });
+  var cpfEl = document.getElementById('cpf');
+  if (cpfEl) {
+    cpfEl.addEventListener('input', function(e) {
+      var v = e.target.value.replace(/\D/g,'').slice(0,11);
+      v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+      e.target.value = v;
+    });
+  }
 </script>
 @endpush
