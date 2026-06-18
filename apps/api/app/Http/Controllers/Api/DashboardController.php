@@ -19,6 +19,120 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    public function professor(Request $request): JsonResponse
+    {
+        $usuario = $request->user();
+
+        // Turmas do professor via escopos
+        $turmaIds = DB::table('usuario_escopos')
+            ->where('usuario_id', $usuario->id)
+            ->where('escopo_tipo', 'turma')
+            ->pluck('escopo_id');
+
+        // KPIs
+        $minhasProvas = Prova::where('criado_por', $usuario->id)->count();
+
+        $cartoesCorrigir = DB::table('cartoes')
+            ->join('provas', 'cartoes.prova_id', '=', 'provas.id')
+            ->where('provas.criado_por', $usuario->id)
+            ->whereIn('cartoes.status', ['pendente', 'ambiguo'])
+            ->count();
+
+        $minhasTurmas = $turmaIds->count();
+
+        $mediaTurmas = DB::table('notas')
+            ->whereIn('notas.turma_id', $turmaIds)
+            ->avg('notas.nota_final');
+
+        // Disciplina principal (a mais usada nas provas do professor)
+        $disciplinaPrincipal = DB::table('provas')
+            ->where('criado_por', $usuario->id)
+            ->select('disciplina', DB::raw('COUNT(*) as total'))
+            ->groupBy('disciplina')
+            ->orderByDesc('total')
+            ->value('disciplina');
+
+        // Tabela de provas do professor (mais recentes)
+        $provas = Prova::where('criado_por', $usuario->id)
+            ->orderByDesc('data_aplicacao')
+            ->limit(8)
+            ->get(['id', 'titulo', 'disciplina', 'status', 'data_aplicacao'])
+            ->map(function ($p) {
+                $turmas = DB::table('prova_turmas')
+                    ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+                    ->where('prova_turmas.prova_id', $p->id)
+                    ->pluck('turmas.nome')
+                    ->implode(', ');
+
+                $totalAlunos = DB::table('prova_turmas')
+                    ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                    ->where('prova_turmas.prova_id', $p->id)
+                    ->where('alunos.ativo', true)
+                    ->count();
+
+                return [
+                    'id'             => $p->id,
+                    'titulo'         => $p->titulo,
+                    'turma'          => $turmas ?: '—',
+                    'data_aplicacao' => $p->data_aplicacao,
+                    'total_alunos'   => $totalAlunos,
+                    'status'         => $p->status,
+                ];
+            });
+
+        // Ranking das turmas do professor
+        $top5 = DB::table('notas')
+            ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
+            ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
+            ->whereIn('notas.turma_id', $turmaIds)
+            ->select('alunos.id', 'alunos.nome', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
+            ->groupBy('alunos.id', 'alunos.nome', 'turmas.nome')
+            ->orderByDesc('media')
+            ->limit(5)
+            ->get();
+
+        $bottom3 = DB::table('notas')
+            ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
+            ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
+            ->whereIn('notas.turma_id', $turmaIds)
+            ->select('alunos.id', 'alunos.nome', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
+            ->groupBy('alunos.id', 'alunos.nome', 'turmas.nome')
+            ->orderBy('media')
+            ->limit(3)
+            ->get();
+
+        // Alunos que precisam de atenção (abaixo de 6, com menor média)
+        $alunosAtencao = DB::table('notas')
+            ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
+            ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
+            ->whereIn('notas.turma_id', $turmaIds)
+            ->select('alunos.id', 'alunos.nome', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
+            ->groupBy('alunos.id', 'alunos.nome', 'turmas.nome')
+            ->havingRaw('AVG(notas.nota_final) < 6')
+            ->orderBy('media')
+            ->limit(3)
+            ->get();
+
+        return ApiResponse::success([
+            'professor' => [
+                'nome'               => $usuario->nome,
+                'disciplina'         => $disciplinaPrincipal,
+                'total_turmas'       => $minhasTurmas,
+                'escola_nome'        => $usuario->escola_nome,
+            ],
+            'kpis' => [
+                'minhas_provas'     => $minhasProvas,
+                'cartoes_corrigir'  => $cartoesCorrigir,
+                'minhas_turmas'     => $minhasTurmas,
+                'media_turmas'      => $mediaTurmas ? round($mediaTurmas, 1) : null,
+            ],
+            'provas'         => $provas,
+            'ranking_top5'   => $top5,
+            'ranking_bottom3' => $bottom3,
+            'alunos_atencao' => $alunosAtencao,
+        ]);
+    }
+
     public function coordenador(Request $request): JsonResponse
     {
         $usuario = $request->user();

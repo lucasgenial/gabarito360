@@ -28,6 +28,7 @@ class DashboardController extends Controller
             'dir_nucleo'  => $this->dadosDirNucleo(),
             'dir_escolar' => $this->dadosDirEscolar(),
             'coordenador' => $this->dadosCoordenador(),
+            'professor'   => $this->dadosProfessor(),
             default       => [],
         };
 
@@ -51,6 +52,17 @@ class DashboardController extends Controller
     private function dadosDirNucleo(): array
     {
         $resp = $this->api->get('/v1/dashboard/dir-nucleo');
+
+        if (!$resp->successful()) {
+            return ['dashboard' => null];
+        }
+
+        return ['dashboard' => $resp->json('data')];
+    }
+
+    private function dadosProfessor(): array
+    {
+        $resp = $this->api->get('/v1/dashboard/professor');
 
         if (!$resp->successful()) {
             return ['dashboard' => null];
