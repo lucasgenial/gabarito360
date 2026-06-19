@@ -13,7 +13,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'perfil' => \App\Http\Middleware\CheckPerfil::class,
+            'perfil'             => \App\Http\Middleware\CheckPerfil::class,
+            'assinatura_ativa'   => \App\Http\Middleware\CheckAssinaturaAtiva::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

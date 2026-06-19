@@ -42,10 +42,11 @@ class LoginController extends Controller
         $data = $response->json('data');
 
         session([
-            'auth_token'  => $data['token'],
-            'auth_perfil' => $data['perfil'],
-            'auth_nome'   => $data['nome'],
-            'auth_email'  => $data['email'],
+            'auth_token'   => $data['token'],
+            'auth_perfil'  => $data['perfil'],
+            'auth_nome'    => $data['nome'],
+            'auth_email'   => $data['email'],
+            'auth_titular' => $data['eh_titular'] ?? false,
         ]);
 
         return redirect()->route('painel');

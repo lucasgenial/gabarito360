@@ -1,14 +1,18 @@
 <?php
 
 use App\Http\Controllers\AlunoController;
+use App\Http\Controllers\AssinaturaController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\CorrecaoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\GabaritoController;
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\MembroController;
 use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\PlanoController;
 use App\Http\Controllers\ProvaController;
 use App\Http\Controllers\RelatorioController;
 use App\Http\Controllers\ResultadoController;
@@ -17,6 +21,19 @@ use Illuminate\Support\Facades\Route;
 
 // Saúde
 Route::get('/health', fn () => response()->json(['status' => 'ok', 'app' => 'gabarito360-web']));
+
+// Página pública de planos (pré-login)
+Route::get('/planos', [PlanoController::class, 'index'])->name('planos.index');
+
+// Fale Conosco (planos comerciais) — público
+Route::get('/fale-conosco',  [LeadController::class, 'index'])->name('leads.index');
+Route::post('/fale-conosco', [LeadController::class, 'store'])->name('leads.store');
+Route::get('/fale-conosco/obrigado', [LeadController::class, 'sucesso'])->name('leads.sucesso');
+
+// Retorno de checkout do Mercado Pago (público, sem auth)
+Route::get('/checkout/sucesso',  [CheckoutController::class, 'sucesso'])->name('checkout.sucesso');
+Route::get('/checkout/falha',    [CheckoutController::class, 'falha'])->name('checkout.falha');
+Route::get('/checkout/pendente', [CheckoutController::class, 'pendente'])->name('checkout.pendente');
 
 // Autenticação pública
 Route::middleware('guest')->group(function () {
@@ -102,6 +119,14 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/resultados/{alunoId}/{provaId}', [ResultadoController::class, 'show'])->name('resultados.show');
     Route::get('/relatorios/prova/{id}', [RelatorioController::class, 'prova'])->name('relatorios.prova');
     Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');
+
+    // Assinatura e Cobrança (MP-027)
+    Route::get('/assinatura',           [AssinaturaController::class, 'index'])->name('assinatura.index');
+    Route::post('/assinatura/cancelar', [AssinaturaController::class, 'cancelar'])->name('assinatura.cancelar');
+
+    // Checkout (MP-027) — requer auth para identificar o titular
+    Route::get('/checkout',  [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 });
 
 Route::get('/', fn () => redirect()->route('login'));

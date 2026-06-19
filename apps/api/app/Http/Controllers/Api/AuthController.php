@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
+use App\Models\Assinatura;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -33,11 +34,14 @@ class AuthController extends Controller
 
         $token = $usuario->createToken('api-token')->plainTextToken;
 
+        $ehTitular = Assinatura::where('titular_id', $usuario->id)->exists();
+
         return ApiResponse::success([
-            'token'  => $token,
-            'perfil' => $usuario->perfil,
-            'nome'   => $usuario->nome,
-            'email'  => $usuario->email,
+            'token'      => $token,
+            'perfil'     => $usuario->perfil,
+            'nome'       => $usuario->nome,
+            'email'      => $usuario->email,
+            'eh_titular' => $ehTitular,
         ], null, 200);
     }
 

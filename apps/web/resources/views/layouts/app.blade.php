@@ -49,6 +49,9 @@
             @if(session('auth_perfil') === 'admin_rede')
               <a href="{{ route('configuracoes.index') }}">Configurações</a>
             @endif
+            @if(session('auth_titular'))
+              <a href="{{ route('assinatura.index') }}">Assinatura e Cobrança</a>
+            @endif
             <hr>
             <form method="POST" action="{{ route('logout') }}">
               @csrf
