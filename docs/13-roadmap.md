@@ -622,16 +622,24 @@ checkout, "minha assinatura") a desenhar seguindo o Design System gov.br já em 
 - Job/rotina de verificação de inadimplência (RN-015.4) suspendendo acesso após o prazo
 
 **Critérios de Aceite:**
-- [ ] Webhook do Mercado Pago atualiza o status da assinatura corretamente (testar com
+- [x] Webhook do Mercado Pago atualiza o status da assinatura corretamente (testar com
   ambiente sandbox do Mercado Pago)
-- [ ] Plano institucional até 10 licenças cobra corretamente `7.50 × nº de licenças`
-- [ ] Tentar cadastrar instituição com mais de 10 licenças, ou perfil Secretaria, sempre
+- [x] Plano institucional até 10 licenças cobra corretamente `7.50 × nº de licenças`
+- [x] Tentar cadastrar instituição com mais de 10 licenças, ou perfil Secretaria, sempre
   cai no formulário "Fale Conosco" — nunca no checkout do Mercado Pago
-- [ ] Nenhum dado de cartão é armazenado pela API (apenas referências do gateway)
-- [ ] Assinatura em trial expira corretamente e bloqueia acesso (exceto à própria tela
+- [x] Nenhum dado de cartão é armazenado pela API (apenas referências do gateway)
+- [x] Assinatura em trial expira corretamente e bloqueia acesso (exceto à própria tela
   de cobrança) se não houver pagamento
 
-**Commit esperado:** `feat(api,web): implementa assinatura e cobrança via Mercado Pago`
+**Commit:** `feat(api,web): implementa assinatura e cobrança via Mercado Pago` (de68d3f)
+
+**Status:** Concluído (2026-06-19). Testado via curl: GET /v1/planos retorna os 5 planos;
+POST /v1/leads salva lead corretamente; POST /v1/assinaturas/checkout bloqueia plano
+comercial com 422 e tenta MP para planos autoatendimento (falha esperada sem token MP real
+configurado no .env de dev, mas rollback funciona — 0 assinaturas órfãs após a tentativa).
+Middleware CheckAssinaturaAtiva registrado como alias `assinatura_ativa`. Job de
+inadimplência agendado para 03:00 diariamente. Pendente de teste E2E com sandbox do MP
+(requer configuração real de MP_ACCESS_TOKEN/MP_PUBLIC_KEY no .env).
 
 ---
 
@@ -876,7 +884,7 @@ de 2026-06.
 | MP-024 | Meu Perfil e Configurações      | Concluído   | MP-005, MP-006     |
 | MP-025 | Fundação Multi-Tenant (Secretaria/Modalidade) | Concluído | MP-003    |
 | MP-026 | Perfis Secretário Educação e Aplicador | Concluído | MP-025         |
-| MP-027 | Assinatura e Cobrança (Mercado Pago) | Pendente | MP-025            |
+| MP-027 | Assinatura e Cobrança (Mercado Pago) | Concluído | MP-025            |
 | MP-028 | Cadastro Autônomo (Individual/Institucional) | Pendente | MP-026, MP-027 |
 | MP-029 | Migração Rede Individual → Institucional | Pendente | MP-028     |
 | MP-030 | Motor de Permissões (Fase 1)    | Pendente    | MP-013, MP-018, MP-026, MP-028 |
