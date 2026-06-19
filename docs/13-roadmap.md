@@ -555,7 +555,7 @@ login e `/v1/escolas`/`/v1/turmas` continuam funcionando sem novas entradas de e
 
 ---
 
-## MP-026 — Novos Perfis: Secretário de Educação e Aplicador
+## MP-026 — Novos Perfis: Secretário de Educação e Aplicador ✅
 
 **Objetivo:** Introduzir os 2 novos perfis do sistema (SECRETARIO_EDUCACAO, APLICADOR),
 seus painéis próprios e as regras de escopo correspondentes.
@@ -577,12 +577,20 @@ referência de estrutura simplificada para o painel do aplicador).
   matriz de `docs/03` (capturar/enviar cartões; nada além disso)
 
 **Critérios de Aceite:**
-- [ ] Aplicador não consegue acessar nenhuma rota de notas, relatórios ou cadastro (testar
+- [x] Aplicador não consegue acessar nenhuma rota de notas, relatórios ou cadastro (testar
   diretamente via API, não só esconder no menu)
-- [ ] Secretário vê apenas redes vinculadas à sua secretaria
-- [ ] Login de cada perfil novo direciona para o painel correto
+- [x] Secretário vê apenas redes vinculadas à sua secretaria
+- [x] Login de cada perfil novo direciona para o painel correto
 
-**Commit esperado:** `feat(api,web): implementa perfis secretario_educacao e aplicador`
+**Commit:** `feat(api,web): implementa perfis secretario_educacao e aplicador`
+
+**Status:** Concluído (2026-06-18). Testado via API e via WEB (login + render do painel)
+para os dois perfis: aplicador recebeu 403 em dashboard/admin, criação de prova e listagem
+de usuários; relatórios e resultados retornam "não encontrado" por escopo vazio (default
+deny, sem alterar `ResultadoController`/`RelatorioController`); envio de cartão alcança o
+controller normalmente (bloqueio era só de perfil, não de rota). Secretário viu apenas a
+rede vinculada à sua secretaria, com KPIs agregados corretos. Dados de teste criados via
+tinker foram removidos após a validação.
 
 ---
 
@@ -867,7 +875,7 @@ de 2026-06.
 | MP-023 | Aplicativo Android              | Pendente (adiado — ver Nota de Sequenciamento) | MP-004, MP-021 |
 | MP-024 | Meu Perfil e Configurações      | Concluído   | MP-005, MP-006     |
 | MP-025 | Fundação Multi-Tenant (Secretaria/Modalidade) | Concluído | MP-003    |
-| MP-026 | Perfis Secretário Educação e Aplicador | Pendente | MP-025          |
+| MP-026 | Perfis Secretário Educação e Aplicador | Concluído | MP-025         |
 | MP-027 | Assinatura e Cobrança (Mercado Pago) | Pendente | MP-025            |
 | MP-028 | Cadastro Autônomo (Individual/Institucional) | Pendente | MP-026, MP-027 |
 | MP-029 | Migração Rede Individual → Institucional | Pendente | MP-028     |

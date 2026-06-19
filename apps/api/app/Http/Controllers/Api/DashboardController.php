@@ -10,6 +10,7 @@ use App\Models\Escola;
 use App\Models\Nota;
 use App\Models\Nucleo;
 use App\Models\Prova;
+use App\Models\Secretaria;
 use App\Models\SincronizacaoSeges;
 use App\Models\Usuario;
 use App\Models\Visita;
@@ -684,6 +685,135 @@ class DashboardController extends Controller
                 'seges_atraso_min'   => $segesAtraso,
             ],
             'ultimos_acessos' => $ultimosAcessos,
+        ]);
+    }
+
+    public function secretaria(Request $request): JsonResponse
+    {
+        $usuario = $request->user();
+
+        $secretariaId = DB::table('usuario_escopos')
+            ->where('usuario_id', $usuario->id)
+            ->where('escopo_tipo', 'secretaria')
+            ->value('escopo_id');
+
+        if (!$secretariaId) {
+            return ApiResponse::forbidden('Usuário não vinculado a nenhuma secretaria.');
+        }
+
+        $secretaria = Secretaria::findOrFail($secretariaId);
+
+        $redeIds = DB::table('redes')->where('secretaria_id', $secretariaId)->pluck('id');
+
+        $totalRedes = $redeIds->count();
+
+        $escolaIds = DB::table('escolas')
+            ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
+            ->whereIn('nucleos.rede_id', $redeIds)
+            ->pluck('escolas.id');
+
+        $totalAlunos = Aluno::whereHas('turma', fn ($q) => $q->whereIn('escola_id', $escolaIds))
+            ->where('ativo', true)
+            ->count();
+
+        $provasRealizadas = Prova::whereIn('escola_id', $escolaIds)
+            ->whereIn('status', ['corrigida', 'em_correcao', 'publicada'])
+            ->count();
+
+        $mediaSecretaria = Nota::whereHas('prova', fn ($q) => $q->whereIn('escola_id', $escolaIds))
+            ->avg('nota_final');
+
+        // Comparativo por rede
+        $redes = DB::table('redes')
+            ->leftJoin('nucleos', 'nucleos.rede_id', '=', 'redes.id')
+            ->leftJoin('escolas', 'escolas.nucleo_id', '=', 'nucleos.id')
+            ->leftJoin('turmas', function ($j) {
+                $j->on('turmas.escola_id', '=', 'escolas.id')->where('turmas.ativo', true);
+            })
+            ->leftJoin('alunos', function ($j) {
+                $j->on('alunos.turma_id', '=', 'turmas.id')->where('alunos.ativo', true);
+            })
+            ->leftJoin('provas', 'provas.escola_id', '=', 'escolas.id')
+            ->leftJoin('notas', 'notas.prova_id', '=', 'provas.id')
+            ->whereIn('redes.id', $redeIds)
+            ->select(
+                'redes.id',
+                'redes.nome',
+                'redes.modalidade',
+                DB::raw('COUNT(DISTINCT escolas.id) as total_escolas'),
+                DB::raw('COUNT(DISTINCT alunos.id) as total_alunos'),
+                DB::raw('ROUND(AVG(notas.nota_final), 1) as media')
+            )
+            ->groupBy('redes.id', 'redes.nome', 'redes.modalidade')
+            ->orderByDesc('media')
+            ->get();
+
+        return ApiResponse::success([
+            'secretaria' => ['id' => $secretaria->id, 'nome' => $secretaria->nome],
+            'kpis' => [
+                'total_redes'       => $totalRedes,
+                'total_alunos'      => $totalAlunos,
+                'provas_realizadas' => $provasRealizadas,
+                'media_secretaria'  => $mediaSecretaria ? round($mediaSecretaria, 1) : null,
+            ],
+            'redes' => $redes,
+        ]);
+    }
+
+    public function aplicador(Request $request): JsonResponse
+    {
+        $usuario = $request->user();
+
+        $escolaId = DB::table('usuario_escopos')
+            ->where('usuario_id', $usuario->id)
+            ->where('escopo_tipo', 'escola')
+            ->value('escopo_id');
+
+        if (!$escolaId) {
+            return ApiResponse::forbidden('Usuário não vinculado a nenhuma escola.');
+        }
+
+        $escola = Escola::findOrFail($escolaId);
+
+        $hoje = now()->toDateString();
+
+        $provasHoje = Prova::where('escola_id', $escolaId)
+            ->where('data_aplicacao', $hoje)
+            ->get(['id', 'titulo', 'disciplina', 'status'])
+            ->map(function ($p) {
+                $turmas = DB::table('prova_turmas')
+                    ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+                    ->where('prova_turmas.prova_id', $p->id)
+                    ->pluck('turmas.nome')
+                    ->implode(', ');
+
+                $totalAlunos = DB::table('prova_turmas')
+                    ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                    ->where('prova_turmas.prova_id', $p->id)
+                    ->where('alunos.ativo', true)
+                    ->count();
+
+                $cartoesEnviados = DB::table('cartoes')
+                    ->where('prova_id', $p->id)
+                    ->count();
+
+                return [
+                    'id'               => $p->id,
+                    'titulo'           => $p->titulo,
+                    'disciplina'       => $p->disciplina,
+                    'turmas'           => $turmas ?: '—',
+                    'total_alunos'     => $totalAlunos,
+                    'cartoes_enviados' => $cartoesEnviados,
+                ];
+            });
+
+        return ApiResponse::success([
+            'escola' => ['id' => $escola->id, 'nome' => $escola->nome],
+            'kpis' => [
+                'provas_hoje'      => $provasHoje->count(),
+                'cartoes_enviados' => $provasHoje->sum('cartoes_enviados'),
+            ],
+            'provas_hoje' => $provasHoje,
         ]);
     }
 }
