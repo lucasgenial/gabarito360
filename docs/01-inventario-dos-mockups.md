@@ -765,6 +765,7 @@ mesmo sem mockup HTML formal, dado que envolvem fluxos novos (cadastro, pagament
 
 | Tela                          | Perfil/Contexto                          | MP de origem |
 |--------------------------------|-------------------------------------------|--------------|
+| **Landing Page (home.html)**   | Público — rota raiz `/`                  | aprovado 2026-06-19 |
 | Cadastro expandido (escolha Individual/Institucional) | Público (pré-login) | MP-028 |
 | Página de Planos/Preços        | Público (pré-login)                       | MP-027       |
 | Checkout (escolher plano + pagamento) | Público (pré-login)                | MP-027       |
@@ -773,6 +774,20 @@ mesmo sem mockup HTML formal, dado que envolvem fluxos novos (cadastro, pagament
 | Painel da Secretaria           | SECRETARIO_EDUCACAO                       | MP-026       |
 | Painel do Aplicador            | APLICADOR                                 | MP-026       |
 | Tela de migração/absorção de rede individual | ADMIN_REDE/DIR_NUCLEO (gera convite), PROFESSOR titular (confirma) | MP-029 |
+
+### Landing Page — Estrutura de Seções (aprovada 2026-06-19)
+
+Tom: SaaS moderno e direto (não govtech institucional). Segue o Design System gov.br para tokens de cor e tipografia, mas com copy e layout voltados para conversão.
+
+| Seção              | Conteúdo                                                                           |
+|--------------------|------------------------------------------------------------------------------------|
+| Hero               | Headline + subheadline + CTA primário (assinar) + CTA secundário (fale conosco)   |
+| Como funciona      | 3 passos: crie a prova → aplique → escaneie com o celular e veja os resultados     |
+| Números / Prova social | 12s/cartão · 98,6% precisão · estatísticas                                    |
+| Funcionalidades    | Grid de 6 cards: OMR, dashboards, relatórios, multi-perfil, multi-rede, SaaS      |
+| Para quem é        | 4 personas: professor individual, escola, rede municipal, secretaria               |
+| Planos (resumo)    | 3 cards autoatendimento + botão "Fale Conosco" para planos comerciais             |
+| CTA final          | "Comece grátis — 14 dias sem cartão de crédito"                                   |
 
 ---
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\CorrecaoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\GabaritoController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\MembroController;
 use App\Http\Controllers\PerfilController;
@@ -21,6 +22,9 @@ use Illuminate\Support\Facades\Route;
 
 // Saúde
 Route::get('/health', fn () => response()->json(['status' => 'ok', 'app' => 'gabarito360-web']));
+
+// Landing page (rota raiz)
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Página pública de planos (pré-login)
 Route::get('/planos', [PlanoController::class, 'index'])->name('planos.index');
@@ -129,4 +133,3 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 });
 
-Route::get('/', fn () => redirect()->route('login'));
