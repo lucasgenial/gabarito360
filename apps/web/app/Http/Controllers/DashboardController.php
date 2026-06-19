@@ -8,11 +8,13 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     private const VIEWS = [
+        'secretario_educacao' => 'dashboard.secretaria',
         'admin_rede'  => 'dashboard.admin',
         'dir_nucleo'  => 'dashboard.diretor-nucleo',
         'dir_escolar' => 'dashboard.diretor-escolar',
         'coordenador' => 'dashboard.coordenador',
         'professor'   => 'dashboard.professor',
+        'aplicador'   => 'dashboard.aplicador',
         'aluno'       => 'dashboard.aluno',
     ];
 
@@ -24,11 +26,13 @@ class DashboardController extends Controller
         $view   = self::VIEWS[$perfil] ?? 'dashboard.admin';
 
         $dados = match ($perfil) {
+            'secretario_educacao' => $this->dadosSecretaria(),
             'admin_rede'  => $this->dadosAdmin(),
             'dir_nucleo'  => $this->dadosDirNucleo(),
             'dir_escolar' => $this->dadosDirEscolar(),
             'coordenador' => $this->dadosCoordenador(),
             'professor'   => $this->dadosProfessor(),
+            'aplicador'   => $this->dadosAplicador(),
             'aluno'       => $this->dadosAluno(),
             default       => [],
         };
@@ -97,6 +101,28 @@ class DashboardController extends Controller
     private function dadosDirEscolar(): array
     {
         $resp = $this->api->get('/v1/dashboard/dir-escolar');
+
+        if (!$resp->successful()) {
+            return ['dashboard' => null];
+        }
+
+        return ['dashboard' => $resp->json('data')];
+    }
+
+    private function dadosSecretaria(): array
+    {
+        $resp = $this->api->get('/v1/dashboard/secretaria');
+
+        if (!$resp->successful()) {
+            return ['dashboard' => null];
+        }
+
+        return ['dashboard' => $resp->json('data')];
+    }
+
+    private function dadosAplicador(): array
+    {
+        $resp = $this->api->get('/v1/dashboard/aplicador');
 
         if (!$resp->successful()) {
             return ['dashboard' => null];

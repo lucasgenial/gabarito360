@@ -79,7 +79,7 @@ class UsuarioController extends Controller
             'nome'                   => 'required|string|max:200',
             'email'                  => 'required|email|unique:usuarios,email',
             'cpf'                    => 'required|string|regex:/^\d{11}$/|unique:usuarios,cpf',
-            'perfil'                 => ['required', Rule::in(['admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aluno'])],
+            'perfil'                 => ['required', Rule::in(['secretario_educacao','admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aplicador','aluno'])],
             'ativo'                  => 'sometimes|boolean',
             'data_nascimento'        => 'sometimes|date|nullable',
             'telefone'               => 'sometimes|string|max:20|nullable',
@@ -89,6 +89,7 @@ class UsuarioController extends Controller
             'registro_profissional'  => 'sometimes|string|max:50|nullable',
             'observacoes'            => 'sometimes|string|nullable',
             'escola_id'              => 'sometimes|integer|exists:escolas,id|nullable',
+            'secretaria_id'          => 'sometimes|integer|exists:secretarias,id|nullable',
         ], [
             'cpf.regex'    => 'CPF deve conter 11 dígitos.',
             'email.unique' => 'E-mail já cadastrado.',
@@ -120,6 +121,15 @@ class UsuarioController extends Controller
             ]);
         }
 
+        if (!empty($data['secretaria_id'])) {
+            DB::table('usuario_escopos')->insert([
+                'usuario_id'  => $usuario->id,
+                'escopo_tipo' => 'secretaria',
+                'escopo_id'   => $data['secretaria_id'],
+                'created_at'  => now(),
+            ]);
+        }
+
         return ApiResponse::success($usuario, null, 201);
     }
 
@@ -136,8 +146,14 @@ class UsuarioController extends Controller
             ->where('escopo_tipo', 'escola')
             ->value('escopo_id');
 
+        $secretariaId = DB::table('usuario_escopos')
+            ->where('usuario_id', $id)
+            ->where('escopo_tipo', 'secretaria')
+            ->value('escopo_id');
+
         return ApiResponse::success(array_merge($usuario->toArray(), [
-            'escola_id' => $escolaId,
+            'escola_id'     => $escolaId,
+            'secretaria_id' => $secretariaId,
         ]));
     }
 
@@ -154,7 +170,7 @@ class UsuarioController extends Controller
         $data = $request->validate([
             'nome'                   => 'sometimes|string|max:200',
             'email'                  => ['sometimes', 'email', Rule::unique('usuarios', 'email')->ignore($id)],
-            'perfil'                 => ['sometimes', Rule::in(['admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aluno'])],
+            'perfil'                 => ['sometimes', Rule::in(['secretario_educacao','admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aplicador','aluno'])],
             'ativo'                  => 'sometimes|boolean',
             'data_nascimento'        => 'sometimes|date|nullable',
             'telefone'               => 'sometimes|string|max:20|nullable',
@@ -164,12 +180,16 @@ class UsuarioController extends Controller
             'registro_profissional'  => 'sometimes|string|max:50|nullable',
             'observacoes'            => 'sometimes|string|nullable',
             'escola_id'              => 'sometimes|integer|exists:escolas,id|nullable',
+            'secretaria_id'          => 'sometimes|integer|exists:secretarias,id|nullable',
             'nova_senha'             => 'sometimes|string|min:8|nullable',
             'forcar_troca_senha'     => 'sometimes|boolean',
         ]);
 
         $escolaId = $data['escola_id'] ?? null;
         unset($data['escola_id']);
+
+        $secretariaId = $data['secretaria_id'] ?? null;
+        unset($data['secretaria_id']);
 
         if (!empty($data['nova_senha'])) {
             $data['password'] = Hash::make($data['nova_senha']);
@@ -189,6 +209,22 @@ class UsuarioController extends Controller
                     'usuario_id'  => $id,
                     'escopo_tipo' => 'escola',
                     'escopo_id'   => $escolaId,
+                    'created_at'  => now(),
+                ]);
+            }
+        }
+
+        if ($request->has('secretaria_id')) {
+            DB::table('usuario_escopos')
+                ->where('usuario_id', $id)
+                ->where('escopo_tipo', 'secretaria')
+                ->delete();
+
+            if ($secretariaId) {
+                DB::table('usuario_escopos')->insert([
+                    'usuario_id'  => $id,
+                    'escopo_tipo' => 'secretaria',
+                    'escopo_id'   => $secretariaId,
                     'created_at'  => now(),
                 ]);
             }
