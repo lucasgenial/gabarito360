@@ -1,24 +1,37 @@
 <?php
 
 use App\Http\Controllers\Api\AlunoController;
+use App\Http\Controllers\Api\AssinaturaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartaoController;
 use App\Http\Controllers\Api\ConfiguracaoController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EscolaController;
 use App\Http\Controllers\Api\GabaritoController;
+use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Api\NucleoController;
+use App\Http\Controllers\Api\PlanoController;
 use App\Http\Controllers\Api\ProvaController;
 use App\Http\Controllers\Api\RelatorioController;
 use App\Http\Controllers\Api\ResultadoController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\VinculoProfessorController;
+use App\Http\Controllers\Api\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
     Route::get('health', fn () => response()->json(['status' => 'ok', 'app' => 'gabarito360-api']));
+
+    // Webhook Mercado Pago (sem autenticação Sanctum — verificado por assinatura HMAC)
+    Route::post('webhooks/mercadopago', [WebhookController::class, 'mercadoPago']);
+
+    // Planos (público)
+    Route::get('planos', [PlanoController::class, 'index']);
+
+    // Fale Conosco (público)
+    Route::post('leads', [LeadController::class, 'store']);
 
     // Rotas públicas de autenticação
     Route::prefix('auth')->group(function () {
@@ -127,6 +140,13 @@ Route::prefix('v1')->group(function () {
         Route::prefix('configuracoes')->group(function () {
             Route::get('/', [ConfiguracaoController::class, 'show'])->middleware('perfil:admin_rede');
             Route::put('/', [ConfiguracaoController::class, 'update'])->middleware('perfil:admin_rede');
+        });
+
+        // Assinaturas (MP-027)
+        Route::prefix('assinaturas')->group(function () {
+            Route::post('checkout',  [AssinaturaController::class, 'checkout']);
+            Route::get('minha',      [AssinaturaController::class, 'minha']);
+            Route::post('cancelar',  [AssinaturaController::class, 'cancelar']);
         });
 
         // Dashboard
