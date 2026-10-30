@@ -34,7 +34,6 @@
   <main class="auth-main">
     <div class="auth-card">
       <div style="margin-bottom:24px;">
-        <div class="eyebrow">Secretaria de Educação</div>
         <h2 style="font-size:26px;margin-top:4px;">Redefinir senha</h2>
         <p style="color:var(--muted);margin-top:8px;font-size:14px;">
           Informe sua nova senha abaixo.

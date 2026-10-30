@@ -134,7 +134,7 @@
             <label for="email">E-mail institucional <span style="color:var(--danger)">*</span></label>
             <div class="input-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-              <input class="input" type="email" id="email" name="email" value="{{ old('email') }}" placeholder="nome@escola.gov.br" required />
+              <input class="input" type="email" id="email" name="email" value="{{ old('email') }}" placeholder="nome@escola.com.br" required />
             </div>
             @error('email')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
           </div>

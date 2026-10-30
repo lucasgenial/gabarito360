@@ -6,7 +6,7 @@
 <title>@yield('title', 'Gabarito360') — Acesso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/gov.css') }}?v={{ @filemtime(public_path('css/gov.css')) }}" />
+<link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" />
 @stack('styles')
 </head>
 <body>
