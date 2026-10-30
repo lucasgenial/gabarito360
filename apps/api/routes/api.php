@@ -148,6 +148,8 @@ Route::prefix('v1')->group(function () {
         });
 
         // Usuários / equipe
+        Route::get('permissoes/perfis', [UsuarioController::class, 'catalogoPerfis'])->middleware('permissao:usuario.ver');
+
         Route::prefix('usuarios')->group(function () {
             Route::get('/',          [UsuarioController::class, 'index'])->middleware('permissao:usuario.ver');
             // Quem cadastra quem e em qual escopo: App\Support\Cadastro (docs/21, etapa 0)
