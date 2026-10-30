@@ -48,6 +48,7 @@
   <div class="eyebrow">Administração</div>
   <h1 class="page-title">Editar Membro</h1>
   <p class="page-sub">Atualize as informações do membro da equipe.</p>
+  <a href="{{ route('membros.permissoes', $membro['id']) }}" class="btn btn-secondary btn-sm" style="margin-top:8px;">🔐 Permissões deste membro</a>
 </div>
 
 @if(session('erro'))

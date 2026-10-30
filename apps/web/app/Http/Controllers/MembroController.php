@@ -15,6 +15,7 @@ class MembroController extends Controller
         'coordenador' => ['label' => 'Coordenador Pedagógico','badge' => 'badge-amber',   'ini' => 'C'],
         'professor'   => ['label' => 'Professor',             'badge' => 'badge-info',    'ini' => 'P'],
         'aplicador'   => ['label' => 'Aplicador',             'badge' => 'badge-muted',   'ini' => 'AP'],
+        'secretario_educacao' => ['label' => 'Secretário de Educação', 'badge' => 'badge-info', 'ini' => 'S'],
         'aluno'       => ['label' => 'Aluno',                 'badge' => 'badge-success', 'ini' => 'AL'],
     ];
 
@@ -48,8 +49,12 @@ class MembroController extends Controller
     {
         $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
         $nucleos = session('auth_perfil') === 'admin_rede' ? ($this->api->get('/v1/nucleos')->json('data.nucleos') ?? []) : [];
+        $turmas  = \App\Support\Acesso::pode('turma.vincular_professor')
+            ? collect($this->api->get('/v1/turmas')->json('data.turmas') ?? [])->where('ativo', true)
+                ->map(fn ($t) => ['id' => $t['id'], 'nome' => $t['nome'], 'escola_id' => $t['escola_id'] ?? null])->sortBy('nome')->values()->all()
+            : [];
 
-        return view('membros.create', ['perfis' => $this->perfisPermitidos(), 'escolas' => $escolas, 'nucleos' => $nucleos]);
+        return view('membros.create', ['perfis' => $this->perfisPermitidos(), 'escolas' => $escolas, 'nucleos' => $nucleos, 'turmas' => $turmas]);
     }
 
     public function store(Request $request)
@@ -78,6 +83,7 @@ class MembroController extends Controller
             'observacoes'            => $request->input('observacoes'),
             'escola_id'              => $request->input('escola_id'),
             'nucleo_id'              => $request->input('nucleo_id'),
+            'turma_ids'              => $request->perfil === 'professor' ? array_map('intval', (array) $request->input('turma_ids', [])) : [],
         ];
 
         $resp = $this->api->post('/v1/usuarios', $dados);
@@ -87,8 +93,9 @@ class MembroController extends Controller
                 ->with('erro', $resp->json('message') ?? 'Erro ao cadastrar membro.');
         }
 
-        return redirect()->route('membros.index')
-            ->with('sucesso', 'Membro cadastrado com sucesso.');
+        // Passo 4: permissões do novo membro (padrão do perfil + extras)
+        return redirect()->route('membros.permissoes', $resp->json('data.id'))
+            ->with('sucesso', 'Membro cadastrado. Confira as permissões padrão do perfil e conceda extras, se precisar.');
     }
 
     public function edit(int $id): View
@@ -159,5 +166,55 @@ class MembroController extends Controller
         $status = $resp->json('data.ativo') ? 'ativado' : 'desativado';
 
         return back()->with('sucesso', "Membro {$status} com sucesso.");
+    }
+
+    /** Permissões do membro: padrão do perfil (com retirada), extras e histórico. */
+    public function permissoes(int $id): View
+    {
+        $resp = $this->api->get("/v1/usuarios/{$id}/permissoes");
+        if ($resp->failed()) {
+            abort(404, 'Membro não encontrado.');
+        }
+
+        return view('membros.permissoes', ['dados' => $resp->json('data'), 'perfis' => self::PERFIS]);
+    }
+
+    public function salvarPermissoes(Request $request, int $id)
+    {
+        $atual = $this->api->get("/v1/usuarios/{$id}/permissoes")->json('data.itens') ?? [];
+        $itens = [];
+        foreach ($atual as $p) {
+            if (empty($p['pode_alterar'])) {
+                continue;
+            }
+            $chave = $p['chave'];
+            if ($p['tipo'] === 'padrao') {
+                $itens[] = ['permissao' => $chave, 'estado' => $request->boolean("retirar.{$chave}") ? 'retirar' : 'padrao'];
+            } else {
+                $conceder = $request->boolean("conceder.{$chave}");
+                $itens[] = ['permissao' => $chave, 'estado' => $conceder ? 'conceder' : 'padrao',
+                            'valida_ate' => $conceder ? ($request->input("valida_ate.{$chave}") ?: null) : null];
+            }
+        }
+        if (!$itens) {
+            return back()->with('erro', 'Você não pode alterar as permissões deste membro.');
+        }
+
+        $resp = $this->api->put("/v1/usuarios/{$id}/permissoes", ['itens' => $itens]);
+        if ($resp->failed()) {
+            $detalhes = collect($resp->json('errors') ?? [])->flatten()->implode(' ');
+
+            return back()->with('erro', trim(($resp->json('message') ?? 'Não foi possível salvar.') . ' ' . $detalhes));
+        }
+
+        return back()->with('sucesso', 'Permissões atualizadas.');
+    }
+
+    /** "O que cada perfil pode" — leitura do catálogo (docs/03 v2). */
+    public function perfis(): View
+    {
+        $resp = $this->api->get('/v1/permissoes/perfis');
+
+        return view('membros.perfis', ['catalogo' => $resp->json('data') ?? [], 'perfis' => self::PERFIS]);
     }
 }
