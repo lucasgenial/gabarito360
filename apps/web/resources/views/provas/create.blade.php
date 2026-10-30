@@ -66,7 +66,7 @@
     {{-- Dados básicos --}}
     <div class="card card-pad">
       <div style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Dados da prova</div>
-      <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-grid-2" style="gap:16px;">
         <div class="field" style="grid-column:1/-1">
           <label for="titulo">Título da prova *</label>
           <input class="input" type="text" id="titulo" name="titulo" required
