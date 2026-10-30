@@ -149,7 +149,7 @@ class PerfisTest extends TestCase
     {
         $this->como('dir_nucleo')->getJson('/api/v1' . $this->uri('/escolas/{b}'))->assertNotFound();
         $this->como('dir_escolar')->getJson('/api/v1' . $this->uri('/escolas/{b}'))->assertNotFound();
-        $this->como('dir_nucleo')->getJson('/api/v1' . $this->uri('/relatorios/nucleo/{n2}'))->assertStatus(403);
+        $this->assertContains($this->como('dir_nucleo')->getJson('/api/v1' . $this->uri('/relatorios/nucleo/{n2}'))->status(), self::NEGADO);
         $this->como('admin_rede')->getJson('/api/v1' . $this->uri('/escolas/{b}'))->assertOk();
     }
 
