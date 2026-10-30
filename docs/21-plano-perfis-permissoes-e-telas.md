@@ -1,6 +1,13 @@
 # 21 — Plano: Perfis, Permissões, Cadastro de Usuários, Menus e Celular
 
-> **Status:** proposta para aprovação (30/10/2026). Nada deste documento foi implementado.
+> **Status:** concluído em 30/10/2026 — etapas 0 a 7 em produção.
+>
+> | Etapa | PR | | Etapa | PR |
+> |---|---|---|---|---|
+> | 0 Segurança do cadastro | #15 | | 4 Menus por permissão | #19 (+ #20 tablet, #21 cache) |
+> | 1 Catálogo (docs/03 v2) | #16 | | 5 Tabelas no celular | #20 |
+> | 2 Motor de permissões | #17 | | 6 Escola no modelo do ECOAR | #22 |
+> | 3 Telas de usuários e permissões | #18 | | 7 Testes por perfil + roteiro (docs/22) | este |
 > Base: `03-perfis-e-permissoes.md`, `13-roadmap.md` (MP-030/031), `19-plano-telas-por-perfil.md`
 > e o código de `main`. Organizado em **etapas grandes** — cada etapa vira um PR testado por
 > perfil, no computador e no celular, antes de ir para produção.
