@@ -56,6 +56,7 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
 
     // Meu perfil (MP-024)
+    Route::view('/referencia-visual', 'referencia.index')->name('referencia');
     Route::get('/perfil',        [PerfilController::class, 'show'])->name('perfil');
     Route::put('/perfil',        [PerfilController::class, 'update'])->name('perfil.update');
     Route::put('/perfil/senha',  [PerfilController::class, 'senha'])->name('perfil.senha');
