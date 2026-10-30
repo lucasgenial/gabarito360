@@ -216,6 +216,17 @@
             </form>
             <p style="font-size:12px;color:var(--muted);margin-top:6px;">PNG ou JPG até 2 MB, de preferência quadrado. Aparece no topo dos relatórios impressos e PDFs.</p>
             @endpode
+            @pode('rede.logo')
+            @if(!empty($escola['rede_id']))
+            <form method="POST" action="{{ route('redes.logo.enviar', $escola['rede_id']) }}" enctype="multipart/form-data" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;">
+              @csrf
+              <span style="font-size:13px;font-weight:600;">Logo do ente{{ !empty($escola['rede_nome']) ? ' (' . $escola['rede_nome'] . ')' : '' }}:</span>
+              <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required class="input" style="max-width:240px;">
+              <button type="submit" class="btn btn-secondary btn-sm">Enviar logo do ente</button>
+            </form>
+            <p style="font-size:12px;color:var(--muted);margin-top:4px;">Governo do estado, prefeitura ou mantenedora (escola privada). Vale para todas as escolas da rede.</p>
+            @endif
+            @endpode
             @pode('resultados.ver')
             <a class="btn btn-primary btn-sm" style="margin-top:6px;" href="{{ route('relatorios.escola', $escola['id']) }}">📈 Relatório da escola</a>
             @endpode

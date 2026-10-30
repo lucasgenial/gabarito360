@@ -80,6 +80,8 @@ Route::middleware('autenticado')->group(function () {
     Route::put('/escolas/{id}',        [EscolaController::class, 'update'])->name('escolas.update');
     Route::post('/escolas/{id}/toggle',[EscolaController::class, 'toggle'])->name('escolas.toggle');
     Route::get('/escolas/{id}/logo',   [EscolaController::class, 'logo'])->name('escolas.logo');
+    Route::get('/redes/{id}/logo',     [EscolaController::class, 'logoRede'])->name('redes.logo');
+    Route::post('/redes/{id}/logo',    [EscolaController::class, 'enviarLogoRede'])->name('redes.logo.enviar');
     Route::post('/escolas/{id}/logo',  [EscolaController::class, 'enviarLogo'])->name('escolas.logo.enviar');
 
     // Alunos (MP-017)

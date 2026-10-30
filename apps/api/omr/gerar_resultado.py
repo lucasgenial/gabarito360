@@ -53,11 +53,14 @@ def gerar(d):
     m = 16 * mm
     y = H - 16 * mm
 
-    # Cabeçalho institucional: logo da escola (se houver) à esquerda, textos centralizados
+    # Cabeçalho institucional: logo do ente (governo/prefeitura/mantenedora) à esquerda,
+    # logo da escola à direita (só a escola: à esquerda), textos centralizados
     topo = y
-    if d.get("logo") and os.path.isfile(d["logo"]):
+    logos = [p for p in (d.get("logo_ente"), d.get("logo")) if p and os.path.isfile(p)]
+    for i, caminho in enumerate(logos):
+        x = m if i == 0 else W - m - 18 * mm
         try:
-            c.drawImage(d["logo"], m, topo - 12 * mm, width=18 * mm, height=18 * mm,
+            c.drawImage(caminho, x, topo - 12 * mm, width=18 * mm, height=18 * mm,
                         preserveAspectRatio=True, anchor="c", mask="auto")
         except Exception:
             pass  # logo inválido não impede o PDF
