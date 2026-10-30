@@ -60,6 +60,14 @@ class AuthTest extends TestCase
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 
+    public function test_nao_existe_cadastro_publico(): void
+    {
+        $this->postJson('/api/v1/auth/registro', [
+            'nome' => 'X', 'email' => 'x@teste.dev', 'cpf' => '12345678901', 'perfil' => 'dir_nucleo', 'termos' => true,
+        ])->assertNotFound();
+        $this->assertDatabaseMissing('usuarios', ['email' => 'x@teste.dev']);
+    }
+
     public function test_rota_protegida_sem_token_retorna_401(): void
     {
         $response = $this->getJson('/api/v1/auth/me');
