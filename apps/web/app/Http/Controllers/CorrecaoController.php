@@ -20,7 +20,22 @@ class CorrecaoController extends Controller
             ->values()
             ->all();
 
-        return view('correcao.index', ['provas' => $provas]);
+        $turmasResp = $this->api->get('/v1/turmas');
+        $turmas = collect($turmasResp->successful() ? ($turmasResp->json('data.turmas') ?? []) : [])
+            ->filter(fn ($t) => $t['ativo'] ?? true)->sortBy('nome')->values()->all();
+
+        return view('correcao.index', ['provas' => $provas, 'turmas' => $turmas]);
+    }
+
+    /** Acompanhamento da correção por turma: provas × alunos (MP-038). */
+    public function turma(int $turmaId): View
+    {
+        $resp = $this->api->get("/v1/turmas/{$turmaId}/correcao");
+        if ($resp->failed()) {
+            abort(404, 'Turma não encontrada.');
+        }
+
+        return view('correcao.turma', ['dados' => $resp->json('data')]);
     }
 
     public function show(int $provaId): View
