@@ -20,37 +20,45 @@ class Acesso
         'aluno'               => 'Aluno',
     ];
 
-    /** Itens de menu: [rótulo, rota, padrões de rota que marcam o item como ativo]. */
+    /**
+     * Itens de menu: [rótulo, rótulo curto (barra do celular), ícone, rota, padrões de rota ativos,
+     * permissões que liberam o item (basta uma)]. O item só aparece com a permissão que a API
+     * exige na tela de destino — assim nenhum item leva a 403 (docs/21, etapa 4).
+     */
     private const ITENS = [
-        'painel'   => ['Painel', 'painel', ['painel']],
-        'provas'   => ['Provas', 'provas.index', ['provas.*', 'relatorios.*', 'resultados.*']],
-        'corrigir' => ['📷 Corrigir', 'correcao.index', ['correcao.*']],
-        'turmas'   => ['Turmas', 'turmas.index', ['turmas.*']],
-        'alunos'   => ['Alunos', 'alunos.index', ['alunos.*']],
-        'escolas'  => ['Escolas', 'escolas.index', ['escolas.*']],
-        'equipe'   => ['Equipe', 'membros.index', ['membros.*']],
-        'relatorios' => ['📈 Relatórios', null, ['relatorios.escola', 'relatorios.nucleo', 'relatorios.rede']],
+        'painel'     => ['Painel', 'Painel', 'casa', 'painel', ['painel'], []],
+        'provas'     => ['Provas', 'Provas', 'prova', 'provas.index', ['provas.*', 'relatorios.prova', 'relatorios.turmaProva', 'resultados.*'], ['prova.ver']],
+        'corrigir'   => ['📷 Corrigir', 'Corrigir', 'camera', 'correcao.index', ['correcao.*'], ['correcao.acompanhar']],
+        'turmas'     => ['Turmas', 'Turmas', 'turma', 'turmas.index', ['turmas.*', 'relatorios.turma', 'relatorios.aluno'], ['turma.ver']],
+        'alunos'     => ['Alunos', 'Alunos', 'aluno', 'alunos.index', ['alunos.*'], ['aluno.gerir', 'aluno.importar', 'aluno.desativar']],
+        'escolas'    => ['Escolas', 'Escolas', 'escola', 'escolas.index', ['escolas.*'], ['escola.criar', 'escola.editar', 'escola.logo', 'nucleo.ver']],
+        'equipe'     => ['Equipe', 'Equipe', 'equipe', 'membros.index', ['membros.*'], ['usuario.ver']],
+        'relatorios' => ['📈 Relatórios', 'Relatórios', 'grafico', null, ['relatorios.escola', 'relatorios.nucleo', 'relatorios.rede'], ['relatorio.rede', 'relatorio.nucleo', 'relatorio.escola']],
     ];
 
-    /** Relatório consolidado do nível de cada perfil (item "Relatórios" do menu). */
-    private const RELATORIO_DO_PERFIL = [
-        'admin_rede'  => 'relatorios.rede',
-        'dir_nucleo'  => 'relatorios.nucleo',
-        'dir_escolar' => 'relatorios.escola',
-        'coordenador' => 'relatorios.escola',
+    /** Relatório consolidado do item "Relatórios": o nível mais alto que a pessoa pode ver. */
+    private const RELATORIO_POR_PERMISSAO = [
+        'relatorio.rede'   => 'relatorios.rede',
+        'relatorio.nucleo' => 'relatorios.nucleo',
+        'relatorio.escola' => 'relatorios.escola',
     ];
 
-    private const MENU = [
-        'secretario_educacao' => ['painel'],
-        'admin_rede'          => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'],
-        'dir_nucleo'          => ['painel', 'provas', 'turmas', 'escolas', 'equipe', 'relatorios'],
-        'dir_escolar'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'],
-        'coordenador'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'equipe', 'relatorios'],
-        'professor'           => ['painel', 'provas', 'corrigir', 'turmas'],
+    /** Ordem do menu no computador (no máximo MAX_TOPO itens; o resto vai para "Mais"). */
+    private const ORDEM = ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'];
+
+    private const MAX_TOPO = 6;
+
+    /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
+    private const PRINCIPAIS = [
+        'secretario_educacao' => ['painel', 'relatorios', 'escolas'],
+        'admin_rede'          => ['painel', 'escolas', 'relatorios', 'equipe'],
+        'dir_nucleo'          => ['painel', 'escolas', 'relatorios', 'equipe'],
+        'dir_escolar'         => ['painel', 'provas', 'turmas', 'relatorios'],
+        'coordenador'         => ['painel', 'corrigir', 'provas', 'turmas'],
+        'professor'           => ['painel', 'corrigir', 'provas', 'turmas'],
         'aplicador'           => ['painel'],
         'aluno'               => ['painel'],
     ];
-
 
     /** Perfis que cada gestor pode cadastrar/gerir (espelha App\Support\Cadastro da API). */
     public const PODE_GERIR = [
@@ -103,20 +111,67 @@ class Acesso
         return self::pode('correcao.alterar') && (!$fechada || self::pode('correcao.reabrir'));
     }
 
-    /** @return array<int, array{rotulo: string, url: string, ativo: bool}> */
-    public static function menu(): array
+    /**
+     * Itens que a pessoa logada pode abrir, na ordem do menu.
+     *
+     * @return array<string, array{rotulo: string, curto: string, icone: string, url: string, ativo: bool}>
+     */
+    public static function itens(): array
     {
         $atual = request()->route()?->getName() ?? '';
-
-        return array_map(function (string $chave) use ($atual) {
-            [$rotulo, $rota, $padroes] = self::ITENS[$chave];
-            $rota ??= self::RELATORIO_DO_PERFIL[self::perfil()] ?? 'painel';
-
-            return [
+        $itens = [];
+        foreach (self::ORDEM as $chave) {
+            [$rotulo, $curto, $icone, $rota, $padroes, $perms] = self::ITENS[$chave];
+            if ($perms && !collect($perms)->contains(fn ($p) => self::pode($p))) {
+                continue;
+            }
+            $rota ??= collect(self::RELATORIO_POR_PERMISSAO)->first(fn ($r, $p) => self::pode($p));
+            $itens[$chave] = [
                 'rotulo' => $rotulo,
+                'curto'  => $curto,
+                'icone'  => $icone,
                 'url'    => route($rota),
                 'ativo'  => collect($padroes)->contains(fn ($p) => \Illuminate\Support\Str::is($p, $atual)),
             ];
-        }, self::MENU[self::perfil()] ?? ['painel']);
+        }
+
+        return $itens;
+    }
+
+    /**
+     * Menu do computador: até MAX_TOPO itens no topo e o restante em "Mais".
+     *
+     * @return array{topo: array, mais: array}
+     */
+    public static function menu(): array
+    {
+        $itens = array_values(self::itens());
+        if (count($itens) <= self::MAX_TOPO) {
+            return ['topo' => $itens, 'mais' => []];
+        }
+
+        return ['topo' => array_slice($itens, 0, self::MAX_TOPO - 1), 'mais' => array_slice($itens, self::MAX_TOPO - 1)];
+    }
+
+    /**
+     * Barra inferior do celular: 4 itens (principais do perfil, completados na ordem do menu)
+     * e, se sobrar algo, "Mais" com a lista completa.
+     *
+     * @return array{barra: array, mais: array}
+     */
+    public static function menuCelular(): array
+    {
+        $itens = self::itens();
+        $barra = array_intersect_key($itens, array_flip(self::PRINCIPAIS[self::perfil()] ?? ['painel']));
+        uksort($barra, fn ($a, $b) => array_search($a, self::PRINCIPAIS[self::perfil()] ?? []) <=> array_search($b, self::PRINCIPAIS[self::perfil()] ?? []));
+        foreach ($itens as $chave => $item) {
+            if (count($barra) >= 4) {
+                break;
+            }
+            $barra[$chave] ??= $item;
+        }
+        $sobra = array_diff_key($itens, $barra);
+
+        return ['barra' => array_values($barra), 'mais' => $sobra ? array_values($itens) : []];
     }
 }
