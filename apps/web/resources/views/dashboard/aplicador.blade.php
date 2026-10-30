@@ -4,11 +4,8 @@
 
 @push('styles')
 <style>
-  .kpi-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; margin-top:24px; }
-  .table-wrap { overflow:hidden; margin-top:20px; }
   .upload-form { display:flex; align-items:center; gap:8px; }
   .upload-form input[type=file] { font-size:12px; max-width:180px; }
-  @media (max-width:480px){ .kpi-grid{grid-template-columns:1fr;} }
 </style>
 @endpush
 
@@ -28,24 +25,10 @@
   $primeiroNome = explode(' ', $nome)[0];
 @endphp
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <div class="eyebrow">Aplicação de Provas</div>
-    <h1 class="page-title">Bom dia, {{ $primeiroNome }}</h1>
-    <p class="page-sub">Provas agendadas para hoje em {{ $dashboard['escola']['nome'] ?? 'sua escola' }}.</p>
-  </div>
-</div>
+<x-pagina chamada="Aplicação de provas" titulo="{{ \App\Support\Acesso::saudacao() }}, {{ $primeiroNome }}" subtitulo="Provas agendadas para hoje em {{ $dashboard['escola']['nome'] ?? 'sua escola' }}." />
 
 <div class="kpi-grid">
   <div class="card kpi">
@@ -84,7 +67,7 @@
           <td class="num">{{ $p['cartoes_enviados'] }}</td>
           <td>
             @if(in_array($p['status'], ['publicada', 'em_correcao', 'corrigida'], true))
-              <a class="btn btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera">📷 Fotografar</a>
+              <a class="btn btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera"><x-icone nome="camera" /> Fotografar</a>
             @else
               <span class="badge badge-muted">aguardando gabarito</span>
             @endif

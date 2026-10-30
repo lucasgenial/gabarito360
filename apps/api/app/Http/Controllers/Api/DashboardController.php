@@ -595,8 +595,9 @@ class DashboardController extends Controller
             ->orderByDesc('media')
             ->get()
             ->map(function ($e) {
-                $media = $e->media ?? 0;
+                $media = $e->media;
                 $e->status = match (true) {
+                    $media === null => 'sem_dados',
                     $media >= 8.0 => 'destaque',
                     $media >= 7.0 => 'acima_meta',
                     $media >= 6.5 => 'monitoramento',

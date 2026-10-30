@@ -7,30 +7,26 @@
   .welcome-card {
     display:grid; grid-template-columns:64px 1fr; gap:18px; align-items:center;
     margin-top:18px; padding:22px 24px;
-    background:linear-gradient(135deg, var(--accent-light), #eef4fb);
-    border:1px solid #b9cce8; border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);
+    background:var(--accent-light);
+    border:1px solid var(--accent); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);
   }
   .welcome-avatar {
     width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
     background:var(--accent); color:#fff; font-size:24px; font-weight:800;
   }
   .welcome-card p { color:var(--fg-2); margin-top:4px; }
-  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px; }
-  .main-grid { display:grid; grid-template-columns:1.7fr 1fr; gap:20px; margin-top:20px; }
-  .side-stack { display:grid; gap:20px; }
-  .section-title { font-size:17px; margin-bottom:14px; font-weight:700; }
   .subject-badge { min-width:92px; justify-content:center; }
   .trend-cell { font-weight:700; font-size:16px; }
-  .trend-up { color:var(--success,#168821); }
-  .trend-down { color:var(--danger,#e52207); }
-  .trend-flat { color:var(--warn-fg,#b06800); }
+  .trend-up { color:var(--success); }
+  .trend-down { color:var(--danger); }
+  .trend-flat { color:var(--warn-fg); }
   .bar-chart { display:flex; align-items:flex-end; gap:10px; height:80px; margin-bottom:6px; }
   .bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
   .bar { width:100%; border-radius:6px 6px 0 0; background:var(--surface-2); transition:height .3s; }
   .bar.active { background:var(--accent); }
   .bar-label { font-size:11px; color:var(--muted); text-align:center; }
   .bar-val { font-size:12px; font-weight:700; color:var(--accent-dark); }
-  .waiting-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:16px; }
+  .waiting-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr)); gap:12px; margin-top:16px; }
   .waiting-card {
     padding:14px; border:1px dashed var(--border); border-radius:var(--radius-md);
     background:var(--surface-2);
@@ -46,11 +42,9 @@
   .exam-meta span { color:var(--muted); font-size:13px; }
   .motivation-card {
     padding:18px; background:var(--accent-light);
-    border:1px solid #b5c9e8; border-left:5px solid var(--accent);
+    border:1px solid var(--accent); border-left:5px solid var(--accent);
     border-radius:var(--radius-md); color:var(--accent-dark);
   }
-  @media (max-width:1080px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .main-grid{grid-template-columns:1fr;} }
-  @media (max-width:640px){ .welcome-card,.kpi-grid,.waiting-grid{grid-template-columns:1fr;} }
 </style>
 @endpush
 

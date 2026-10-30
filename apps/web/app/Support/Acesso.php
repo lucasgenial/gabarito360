@@ -71,6 +71,14 @@ class Acesso
         return self::PODE_GERIR[self::perfil()] ?? [];
     }
 
+    /** Saudação pela hora local. */
+    public static function saudacao(): string
+    {
+        $hora = (int) now('America/Bahia')->format('G');
+
+        return $hora < 12 ? 'Bom dia' : ($hora < 18 ? 'Boa tarde' : 'Boa noite');
+    }
+
     public static function perfil(): ?string
     {
         return session('auth_perfil');
