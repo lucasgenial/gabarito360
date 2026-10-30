@@ -8,7 +8,7 @@ class Nucleo extends Model
 {
     protected $table = 'nucleos';
 
-    protected $fillable = ['rede_id', 'nome'];
+    protected $fillable = ['rede_id', 'nome', 'orgao_regional'];
 
     public function escolas()
     {
