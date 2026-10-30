@@ -44,9 +44,9 @@ class Acesso
     private const MENU = [
         'secretario_educacao' => ['painel'],
         'admin_rede'          => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'],
-        'dir_nucleo'          => ['painel', 'provas', 'turmas', 'escolas', 'relatorios'],
+        'dir_nucleo'          => ['painel', 'provas', 'turmas', 'escolas', 'equipe', 'relatorios'],
         'dir_escolar'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'],
-        'coordenador'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'relatorios'],
+        'coordenador'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'equipe', 'relatorios'],
         'professor'           => ['painel', 'provas', 'corrigir', 'turmas'],
         'aplicador'           => ['painel'],
         'aluno'               => ['painel'],
@@ -67,7 +67,7 @@ class Acesso
         'resultados.ver'     => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor'],
         'turma.gerenciar'    => ['admin_rede', 'dir_escolar', 'coordenador'],
         'aluno.gerenciar'    => ['admin_rede', 'dir_escolar', 'coordenador'],
-        'equipe.gerenciar'   => ['admin_rede', 'dir_escolar'],
+        'equipe.gerenciar'   => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador'],
         'escola.configurar'  => ['admin_rede', 'dir_escolar'],
         'escola.criar'       => ['admin_rede', 'dir_nucleo'],
         'escola.editar'      => ['admin_rede', 'dir_nucleo', 'dir_escolar'],
@@ -76,6 +76,19 @@ class Acesso
         'rede.logo'          => ['admin_rede', 'dir_nucleo'],
         'rede.configurar'    => ['admin_rede'],
     ];
+
+    /** Perfis que cada gestor pode cadastrar/gerir (espelha App\Support\Cadastro da API). */
+    public const PODE_GERIR = [
+        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'dir_nucleo'  => ['dir_escolar', 'coordenador'],
+        'dir_escolar' => ['coordenador', 'professor', 'aplicador', 'aluno'],
+        'coordenador' => ['professor', 'aplicador', 'aluno'],
+    ];
+
+    public static function perfisGeridos(): array
+    {
+        return self::PODE_GERIR[self::perfil()] ?? [];
+    }
 
     public static function perfil(): ?string
     {

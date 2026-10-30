@@ -7,6 +7,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Support\Cadastro;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -20,17 +21,12 @@ class UsuarioController extends Controller
 
         $query = Usuario::query()->where('id', '!=', $usuario->id);
 
-        if (in_array($usuario->perfil, ['dir_escolar', 'coordenador'], true)) {
-            $escolaId = DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'escola')
-                ->value('escopo_id');
-
-            $query->whereIn('id', function ($sub) use ($escolaId) {
-                $sub->select('usuario_id')
-                    ->from('usuario_escopos')
-                    ->where('escopo_tipo', 'escola')
-                    ->where('escopo_id', $escolaId);
+        if (in_array($usuario->perfil, ['dir_escolar', 'coordenador', 'dir_nucleo'], true)) {
+            // Membros das escolas do escopo (diretor de núcleo: todas as escolas do núcleo)
+            $escolas = \App\Support\Escopo::escolaIds($usuario) ?: [0];
+            $query->whereIn('id', function ($sub) use ($escolas) {
+                $sub->select('usuario_id')->from('usuario_escopos')
+                    ->where('escopo_tipo', 'escola')->whereIn('escopo_id', $escolas);
             });
         } elseif ($usuario->perfil !== 'admin_rede') {
             $query->whereRaw('1 = 0');
@@ -73,7 +69,7 @@ class UsuarioController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $this->autorizarGestor($request);
+        $gestor = $request->user();
 
         $data = $request->validate([
             'nome'                   => 'required|string|max:200',
@@ -89,12 +85,16 @@ class UsuarioController extends Controller
             'registro_profissional'  => 'sometimes|string|max:50|nullable',
             'observacoes'            => 'sometimes|string|nullable',
             'escola_id'              => 'sometimes|integer|exists:escolas,id|nullable',
-            'secretaria_id'          => 'sometimes|integer|exists:secretarias,id|nullable',
+            'nucleo_id'              => 'sometimes|integer|exists:nucleos,id|nullable',
         ], [
             'cpf.regex'    => 'CPF deve conter 11 dígitos.',
             'email.unique' => 'E-mail já cadastrado.',
             'cpf.unique'   => 'CPF já cadastrado.',
         ]);
+
+        if ($erro = $this->validarPerfilEEscopo($gestor, $data['perfil'], $data['escola_id'] ?? null, $data['nucleo_id'] ?? null)) {
+            return $erro;
+        }
 
         $usuario = Usuario::create([
             'nome'                  => $data['nome'],
@@ -121,11 +121,11 @@ class UsuarioController extends Controller
             ]);
         }
 
-        if (!empty($data['secretaria_id'])) {
+        if ($data['perfil'] === 'dir_nucleo' && !empty($data['nucleo_id'])) {
             DB::table('usuario_escopos')->insert([
                 'usuario_id'  => $usuario->id,
-                'escopo_tipo' => 'secretaria',
-                'escopo_id'   => $data['secretaria_id'],
+                'escopo_tipo' => 'nucleo',
+                'escopo_id'   => $data['nucleo_id'],
                 'created_at'  => now(),
             ]);
         }
@@ -159,12 +159,14 @@ class UsuarioController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $this->autorizarGestor($request);
-
+        $gestor  = $request->user();
         $usuario = $this->escopoQuery($request)->where('id', $id)->first();
 
         if (!$usuario) {
             return ApiResponse::notFound('Usuário não encontrado.');
+        }
+        if (!Cadastro::podeGerirPerfil($gestor, $usuario->perfil)) {
+            return ApiResponse::error('Você não pode alterar um usuário deste perfil.', [], 403);
         }
 
         $data = $request->validate([
@@ -180,7 +182,6 @@ class UsuarioController extends Controller
             'registro_profissional'  => 'sometimes|string|max:50|nullable',
             'observacoes'            => 'sometimes|string|nullable',
             'escola_id'              => 'sometimes|integer|exists:escolas,id|nullable',
-            'secretaria_id'          => 'sometimes|integer|exists:secretarias,id|nullable',
             'nova_senha'             => 'sometimes|string|min:8|nullable',
             'forcar_troca_senha'     => 'sometimes|boolean',
         ]);
@@ -188,8 +189,13 @@ class UsuarioController extends Controller
         $escolaId = $data['escola_id'] ?? null;
         unset($data['escola_id']);
 
-        $secretariaId = $data['secretaria_id'] ?? null;
-        unset($data['secretaria_id']);
+        $perfilFinal = $data['perfil'] ?? $usuario->perfil;
+        $escolaFinal = $request->has('escola_id') ? $escolaId
+            : DB::table('usuario_escopos')->where('usuario_id', $id)->where('escopo_tipo', 'escola')->value('escopo_id');
+        if (($request->has('perfil') || $request->has('escola_id'))
+            && ($erro = $this->validarPerfilEEscopo($gestor, $perfilFinal, $escolaFinal ? (int) $escolaFinal : null, null, $usuario->perfil === 'dir_nucleo'))) {
+            return $erro;
+        }
 
         if (!empty($data['nova_senha'])) {
             $data['password'] = Hash::make($data['nova_senha']);
@@ -214,33 +220,19 @@ class UsuarioController extends Controller
             }
         }
 
-        if ($request->has('secretaria_id')) {
-            DB::table('usuario_escopos')
-                ->where('usuario_id', $id)
-                ->where('escopo_tipo', 'secretaria')
-                ->delete();
-
-            if ($secretariaId) {
-                DB::table('usuario_escopos')->insert([
-                    'usuario_id'  => $id,
-                    'escopo_tipo' => 'secretaria',
-                    'escopo_id'   => $secretariaId,
-                    'created_at'  => now(),
-                ]);
-            }
-        }
 
         return ApiResponse::success($usuario->fresh());
     }
 
     public function toggle(Request $request, int $id): JsonResponse
     {
-        $this->autorizarGestor($request);
-
         $usuario = $this->escopoQuery($request)->where('id', $id)->first();
 
         if (!$usuario) {
             return ApiResponse::notFound('Usuário não encontrado.');
+        }
+        if (!Cadastro::podeGerirPerfil($request->user(), $usuario->perfil)) {
+            return ApiResponse::error('Você não pode desativar um usuário deste perfil.', [], 403);
         }
 
         $novoStatus = !$usuario->ativo;
@@ -249,10 +241,29 @@ class UsuarioController extends Controller
         return ApiResponse::success(['ativo' => $novoStatus]);
     }
 
-    private function autorizarGestor(Request $request): void
+    /**
+     * Perfil que o gestor pode atribuir e escola/núcleo dentro do escopo dele.
+     * $semEscola: o usuário editado é de nível núcleo (não exige escola).
+     */
+    private function validarPerfilEEscopo($gestor, string $perfil, ?int $escolaId, ?int $nucleoId, bool $semEscola = false): ?JsonResponse
     {
-        if (!in_array($request->user()->perfil, ['admin_rede', 'dir_escolar'])) {
-            abort(403, 'Sem permissão para gerenciar membros.');
+        if (!Cadastro::podeGerirPerfil($gestor, $perfil)) {
+            return ApiResponse::error('Você não pode cadastrar ou atribuir o perfil "' . $perfil . '".', [], 403);
         }
+        if (in_array($perfil, Cadastro::DE_ESCOLA, true)) {
+            if (!$escolaId) {
+                return ApiResponse::error('Informe a escola do usuário.', ['escola_id' => ['Obrigatória para este perfil.']], 422);
+            }
+            if (!Cadastro::escolaNoEscopo($gestor, $escolaId)) {
+                return ApiResponse::error('Escola fora do seu escopo.', [], 403);
+            }
+        }
+        if ($perfil === 'dir_nucleo' && !$semEscola) {
+            if (!$nucleoId || !Cadastro::nucleoNoEscopo($gestor, $nucleoId)) {
+                return ApiResponse::error('Informe um núcleo válido para o diretor de núcleo.', ['nucleo_id' => ['Obrigatório.']], 422);
+            }
+        }
+
+        return null;
     }
 }
