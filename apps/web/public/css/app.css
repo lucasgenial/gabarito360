@@ -640,6 +640,7 @@ img { max-width: 100%; display: block; }
 .tela-correcao .ambig-list li { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-soft);font-size:14px; }
 .tela-correcao .ambig-list li:last-child { border:0; }
 .tela-correcao .resolve-actions { display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap; }
+@media (max-width: 767px) { .tela-correcao .ambig-list li { flex-direction:column;align-items:stretch; } }
 @media(max-width: 1023px) {
   .tela-correcao .progress-head { grid-template-columns:1fr; }
 }
