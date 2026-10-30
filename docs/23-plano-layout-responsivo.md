@@ -151,6 +151,10 @@ A **L0 pode ir para produção já**, independente das decisões abaixo.
 | 5 | Números da página inicial ("+340 escolas", "98,6%") | **Pendente** |
 | 6 | Identidade visual (cores e fonte hoje herdadas do padrão gov.br) | **Pendente** |
 
+**Como a L1 fez a escala:** a área logada usa `zoom` por faixa de largura (1,125 a partir de 1920 px, 1,25 a partir de
+2560 px e 1,5 a partir de 3200 px), porque as telas ainda têm medidas em px; texto, espaços e ícones crescem juntos.
+A impressão volta para 1. Os componentes base estão em `/referencia-visual`.
+
 **Nota sobre a decisão 2:** com o conteúdo na tela toda, a L1 mantém só o que evita linhas ilegíveis: formulários
 e textos corridos em coluna de leitura, e grades que ganham colunas conforme a largura.
 
