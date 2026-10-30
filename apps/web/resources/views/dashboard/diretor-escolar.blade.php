@@ -26,6 +26,7 @@
   .qa span { font-size:13px; color:var(--muted); }
   .side-stack { display:grid; gap:20px; }
   @media (max-width:1080px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .content-grid{grid-template-columns:1fr;} .team-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:1200px){ .content-grid{grid-template-columns:1fr;} }
   @media (max-width:720px){ .kpi-grid,.quick-actions{grid-template-columns:1fr;} .team-grid{grid-template-columns:1fr 1fr;} }
 </style>
 @endpush
