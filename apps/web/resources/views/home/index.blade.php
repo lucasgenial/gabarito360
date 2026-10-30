@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="description" content="Gabarito360 lê cartões-resposta pelo celular com 98,6% de precisão e entrega relatórios instantâneos. Para professor, escola ou rede municipal.">
+<meta name="description" content="Gabarito360 lê cartões-resposta pela câmera do celular, calcula as notas e entrega relatórios por aluno, turma e escola.">
 <title>Gabarito360 — Corrija provas em minutos, não em dias</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -147,7 +147,8 @@ img { display:block; max-width:100%; }
   border-radius:12px; padding:2rem; text-align:center;
 }
 .number-val { font-size:2.75rem; font-weight:900; line-height:1; }
-.number-label { font-size:.9rem; color:rgba(255,255,255,.72); margin-top:.5rem; }
+.number-label { font-size:.9rem; color:rgba(255,255,255,.82); margin-top:.5rem; line-height:1.45; }
+.number-fonte { display:inline-block; margin-top:.6rem; font-size:.78rem; color:#fff; text-decoration:underline; }
 
 /* ─── Seção: features ────────────────────────────────── */
 .features-grid {
@@ -318,36 +319,32 @@ img { display:block; max-width:100%; }
     </div>
     <div class="hero-visual" aria-hidden="true">
       <div class="hero-stat">
-        <div class="hero-stat-icon">⚡</div>
+        <div class="hero-stat-icon">📷</div>
         <div>
-          <div class="hero-stat-val">12s</div>
-          <div class="hero-stat-label">por cartão lido</div>
+          <div class="hero-stat-val">Câmera</div>
+          <div class="hero-stat-label">do celular lê o cartão</div>
         </div>
-        <span class="hero-stat-badge">OMR</span>
       </div>
       <div class="hero-stat">
         <div class="hero-stat-icon">🎯</div>
         <div>
-          <div class="hero-stat-val">98,6%</div>
-          <div class="hero-stat-label">de precisão na leitura</div>
+          <div class="hero-stat-val">Notas</div>
+          <div class="hero-stat-label">calculadas pelo gabarito</div>
         </div>
-        <span class="hero-stat-badge">AI</span>
       </div>
       <div class="hero-stat">
         <div class="hero-stat-icon">📊</div>
         <div>
-          <div class="hero-stat-val">0</div>
-          <div class="hero-stat-label">planilhas manuais</div>
+          <div class="hero-stat-val">Relatórios</div>
+          <div class="hero-stat-label">por aluno, turma e escola</div>
         </div>
-        <span class="hero-stat-badge">AUTO</span>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-icon">🏫</div>
+        <div class="hero-stat-icon">🖨️</div>
         <div>
-          <div class="hero-stat-val">+340</div>
-          <div class="hero-stat-label">escolas usando</div>
+          <div class="hero-stat-val">A4 e PDF</div>
+          <div class="hero-stat-label">prontos para imprimir</div>
         </div>
-        <span class="hero-stat-badge">LIVE</span>
       </div>
     </div>
   </div>
@@ -374,37 +371,39 @@ img { display:block; max-width:100%; }
       <div class="step">
         <div class="step-num">3</div>
         <h3>Escaneie e pronto</h3>
-        <p>Abra o app, aponte a câmera para o cartão. Em 12 segundos a nota está calculada, o relatório está pronto e o aluno já pode consultar.</p>
+        <p>Abra o sistema no celular e aponte a câmera para o cartão. A nota é calculada e os relatórios ficam prontos.</p>
       </div>
     </div>
   </div>
 </section>
 
-{{-- ═══ NÚMEROS ═══ --}}
-<section class="lp-section bg-blue" aria-label="Estatísticas do produto">
+{{-- ═══ PESQUISAS: só dados publicados, com fonte. Estudos de terceiros, não medições do Gabarito360 ═══ --}}
+<section class="lp-section bg-blue" aria-labelledby="pesquisas-title">
   <div class="lp-inner">
     <div style="text-align:center">
-      <div class="section-tag light">Resultados reais</div>
-      <h2 class="section-title" style="color:#fff;margin-bottom:0">Números que falam por si</h2>
+      <div class="section-tag light">O que dizem as pesquisas</div>
+      <h2 class="section-title" id="pesquisas-title" style="color:#fff;margin-bottom:0">Corrigir toma tempo. Devolver o resultado ensina.</h2>
     </div>
     <div class="numbers-grid">
       <div class="number-card">
-        <div class="number-val">12<small style="font-size:1.5rem">s</small></div>
-        <div class="number-label">Tempo médio de leitura por cartão</div>
+        <div class="number-val">6,1<small style="font-size:1.5rem"> h</small></div>
+        <div class="number-label">por semana é o tempo que professores brasileiros em tempo integral relatam gastar corrigindo trabalhos de alunos; a média da OCDE é 4,6 h.</div>
+        <a class="number-fonte" href="https://www.oecd.org/en/publications/results-from-talis-2024-country-notes_e127f9e2-en/brazil_1e93d3b5-en.html" target="_blank" rel="noopener">OCDE, TALIS 2024</a>
       </div>
       <div class="number-card">
-        <div class="number-val">98,6<small style="font-size:1.5rem">%</small></div>
-        <div class="number-label">Precisão de leitura do OMR</div>
+        <div class="number-val">15<small style="font-size:1.5rem">/min</small></div>
+        <div class="number-label">provas corrigidas com a câmera do celular em um estudo com 135 alunos, usando outro aplicativo. Os autores relatam menos erros e menos tempo de correção.</div>
+        <a class="number-fonte" href="https://investigacionuch.ceu.es/documentos/6761cd249431f44fab674f3d" target="_blank" rel="noopener">Castillo García et al., In-RED 2019</a>
       </div>
       <div class="number-card">
-        <div class="number-val">0</div>
-        <div class="number-label">Dados de cartão armazenados — só o Mercado Pago processa</div>
+        <div class="number-val">435</div>
+        <div class="number-label">estudos com mais de 61 mil participantes mostram efeito médio do feedback na aprendizagem (d = 0,48), maior quanto mais informação ele traz.</div>
+        <a class="number-fonte" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6987456" target="_blank" rel="noopener">Wisniewski, Zierer e Hattie, 2020</a>
       </div>
     </div>
   </div>
 </section>
 
-{{-- ═══ FUNCIONALIDADES ═══ --}}
 <section class="lp-section bg-gray" id="funcionalidades" aria-labelledby="features-title">
   <div class="lp-inner">
     <div class="section-tag">Funcionalidades</div>
@@ -458,7 +457,7 @@ img { display:block; max-width:100%; }
         <div class="persona-emoji">🧑‍🏫</div>
         <h3>Professor individual</h3>
         <ul>
-          <li>Corrija provas em 12s por cartão</li>
+          <li>Corrija provas pela câmera do celular</li>
           <li>Relatório de cada aluno automaticamente</li>
           <li>Sem precisar de TI ou secretaria</li>
           <li>Plano a partir de R$ 9,99/mês</li>
@@ -471,7 +470,7 @@ img { display:block; max-width:100%; }
           <li>Todos os professores em uma conta</li>
           <li>Diretores com visão consolidada</li>
           <li>Alertas de alunos em atenção</li>
-          <li>Visitas pedagógicas agendadas</li>
+          <li>Relatórios da escola para imprimir</li>
         </ul>
       </div>
       <div class="persona-card">
@@ -582,7 +581,7 @@ img { display:block; max-width:100%; }
 {{-- ═══ CTA FINAL ═══ --}}
 <section class="final-cta" aria-label="Chamada final para ação">
   <h2>Você ainda corrige prova na mão?</h2>
-  <p>Junte-se a mais de 340 escolas que já correem provas em minutos. Comece grátis, sem cartão de crédito, e descubra o que é ter os relatórios prontos antes de sair da sala.</p>
+  <p>Comece com 14 dias grátis e descubra o que é ter os relatórios prontos antes de sair da sala.</p>
   <a href="{{ route('planos.index') }}" class="btn-final">Começar agora — é grátis por 14 dias</a>
   <a href="{{ route('leads.index') }}" class="btn-final-ghost">Fale Conosco</a>
 </section>
@@ -597,7 +596,6 @@ img { display:block; max-width:100%; }
       <a href="{{ route('planos.index') }}">Planos</a>
       <a href="{{ route('leads.index') }}">Fale Conosco</a>
       <a href="{{ route('login') }}">Entrar</a>
-      <a href="#">Privacidade</a>
     </div>
     <div>© {{ date('Y') }} Gabarito360. Todos os direitos reservados.</div>
   </div>
