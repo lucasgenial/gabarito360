@@ -85,7 +85,7 @@ img { max-width: 100%; display: block; }
 .app-nav a { color: rgba(255,255,255,0.85); padding: 8px 14px; border-radius: 6px; font-size: 14px; font-weight: 500; transition: background .15s; white-space: nowrap; }
 .app-nav a:hover { background: rgba(255,255,255,0.12); text-decoration: none; }
 .app-nav a.active { background: rgba(255,255,255,0.2); color: #fff; }
-@media (max-width: 1024px) { .app-nav { display: none; } }
+@media (max-width: 1023px) { .app-nav { display: none; } }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
 .avatar {
   width: 38px; height: 38px; border-radius: 50%; background: var(--accent-light);
@@ -213,7 +213,7 @@ img { max-width: 100%; display: block; }
 
 /* Celular e tablet (até 1024 px): topo só com logo, contexto e avatar; navegação na barra inferior.
    O menu do topo com 6 itens + Mais não cabe abaixo disso. */
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
   .app-header .container { height: 56px; gap: 12px; }
   body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   .nav-inferior {
@@ -310,6 +310,13 @@ img { max-width: 100%; display: block; }
   .menu-recolhido .lateral-recolher svg { transform: rotate(180deg); }
 }
 
+/* Com o menu lateral sobra menos largura: grades de duas colunas viram uma antes.
+   Os @media das telas ainda olham a largura da janela; saem nas etapas L3 a L6. */
+.editor-grid > *, .content-grid > * { min-width: 0; }
+@media (min-width: 1024px) and (max-width: 1279px) { .editor-grid { grid-template-columns: 1fr !important; } }
+@media (min-width: 1024px) and (max-width: 1439px) { .content-grid { grid-template-columns: 1fr !important; } }
+.table-wrap { overflow-x: auto !important; }
+
 /* ---------- Componentes base (resources/views/components) ---------- */
 .g-pagina { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
 .g-pagina-acoes { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -344,7 +351,7 @@ img { max-width: 100%; display: block; }
 .quadro-cel.rola .fixa { box-shadow: 4px 0 6px -4px rgba(0,0,0,0.18); }
 .quadro-dica { display: none; }
 /* Tablet: a tabela continua tabela; se não couber, rola dentro do card (não a página) */
-@media screen and (min-width: 721px) and (max-width: 1024px) {
+@media screen and (min-width: 721px) and (max-width: 1439px) {
   .card:has(> table.lista-cel), .card-pad:has(> table.lista-cel) { overflow-x: auto !important; }
 }
 .filtros-toggle { display: none; }
