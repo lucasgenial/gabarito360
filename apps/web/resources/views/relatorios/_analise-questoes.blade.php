@@ -13,17 +13,6 @@
   $n        = count($questoes);
   $larg     = max(560, $n * 16 + 40);
 @endphp
-<style>
-  .aq-listas { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px; }
-  .aq-listas li { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px solid var(--border-soft); font-size:14px; }
-  .aq-tabela { width:100%; border-collapse:collapse; font-size:13px; margin-top:10px; }
-  .aq-tabela th, .aq-tabela td { padding:5px 6px; text-align:center; border-bottom:1px solid var(--border-soft); white-space:nowrap; }
-  .aq-tabela th { font-size:11px; color:var(--muted); text-transform:uppercase; }
-  .aq-certa { background:var(--success-light,#e3f5e1); color:var(--success,#168821); font-weight:700; border-radius:4px; }
-  .aq-distr { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); border-radius:4px; }
-  @media (max-width:720px) { .aq-listas { grid-template-columns:1fr; } }
-  @media print { .aq-detalhe[open] summary, .aq-detalhe summary { display:none; } .aq-detalhe { display:block; } }
-</style>
 
 <div class="card card-pad" style="margin-top:20px;">
   <div class="row-between" style="flex-wrap:wrap;">

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('tela', 'tela-resultado')
+
 {{--
   Arquivo: apps/web/resources/views/resultados/show.blade.php
   Função: Resultado do aluno numa prova — nota, resumo e acertos/erros questão por questão.
@@ -25,41 +27,6 @@
     . "\nNota: " . $fmt($nota['nota_final']) . " · {$nota['acertos']} acertos de {$nota['total_questoes']} questões";
 @endphp
 
-@push('styles')
-<style>
-  .res-acoes { display:flex; gap:8px; flex-wrap:wrap; }
-  .res-resumo { display:grid; grid-template-columns:1.3fr repeat(4,1fr); gap:12px; margin-top:16px; }
-  .res-box { border-radius:var(--radius-md); padding:12px 14px; border:1px solid var(--border-soft); background:var(--surface); }
-  .res-box .v { font-family:var(--font-mono); font-size:26px; font-weight:700; line-height:1.1; }
-  .res-box .l { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-top:4px; }
-  .res-box.ok { background:var(--success-light,#e3f5e1); border-color:var(--success,#168821); color:var(--success,#168821); }
-  .res-box.no { background:var(--danger-light,#fde8e4); border-color:var(--danger,#e52207); color:var(--danger,#e52207); }
-  .res-box.bl { background:var(--warn-light,#fff5c2); border-color:var(--warn-fg,#b06800); color:var(--warn-fg,#b06800); }
-  .res-box.an { background:var(--surface-2); color:var(--muted); }
-  .res-folha { display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(var(--linhas),auto); grid-auto-flow:column; gap:6px; margin-top:12px; }
-  .res-q { display:flex; gap:10px; align-items:center; border-radius:6px; padding:7px 10px; font-size:14px; border:1px solid transparent; }
-  .res-q b { font-family:var(--font-mono); min-width:22px; }
-  .res-q.correta { background:var(--success-light,#e3f5e1); border-color:#9fd39b; color:#0f5e17; }
-  .res-q.incorreta { background:var(--danger-light,#fde8e4); border-color:#f1a99f; color:#a3190a; }
-  .res-q.branco { background:var(--warn-light,#fff5c2); border-color:#e8cf72; color:#7a4800; }
-  .res-q.anulada { background:var(--surface-2); color:var(--muted); }
-  @media (max-width:900px) { .res-resumo { grid-template-columns:1fr 1fr; } .res-resumo .res-box:first-child { grid-column:1 / -1; } .res-folha { grid-template-columns:1fr 1fr; grid-template-rows:none; grid-auto-flow:row; } }
-  @media (max-width:480px) { .res-folha { grid-template-columns:1fr; } }
-  @media print {
-    @page { size:A4; margin:12mm; }
-    .app-header, .breadcrumb, .no-print { display:none !important; }
-    body { background:#fff; }
-    .container { padding:0 !important; max-width:none !important; }
-    .card { box-shadow:none !important; border:0 !important; }
-    .res-resumo { grid-template-columns:1.3fr repeat(4,1fr) !important; }
-    .res-resumo .res-box:first-child { grid-column:auto !important; }
-    .res-folha { grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(var(--linhas),auto); grid-auto-flow:column; }
-    .res-q { font-size:11.5px; padding:4px 8px; break-inside:avoid; }
-    * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  }
-</style>
-@endpush
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
 @if($from === 'correcao')
@@ -73,6 +40,10 @@
 @endif
 <span>{{ $aluno['nome'] }}</span>
 @endsection
+
+@push('styles')
+<style>@media print { @page { size: A4; margin: 12mm; } }</style>
+@endpush
 
 @section('content')
 @include('relatorios._cabecalho', ['cabecalho' => $dados['cabecalho'] ?? [], 'titulo' => 'Resultado · ' . $dados['prova']['titulo'], 'subtitulo' => $dados['prova']['disciplina']])
@@ -89,15 +60,15 @@
     @if($from === 'correcao')
       <a class="btn btn-ghost" href="{{ route('correcao.show', $prova['id']) }}">← Voltar à correção</a>
     @endif
-    <button type="button" class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
+    <button type="button" class="btn btn-secondary" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir</button>
     <a class="btn btn-secondary" href="{{ $urlPdf }}?baixar=1">⬇ PDF</a>
-    <button type="button" class="btn btn-primary" id="btn-whats" style="background:#1fa855;border-color:#1fa855;">📲 WhatsApp</button>
+    <button type="button" class="btn btn-primary" id="btn-whats" style="background:#1fa855;border-color:#1fa855;"><x-icone nome="compartilhar" /> WhatsApp</button>
     @php $podeMexer = \App\Support\Acesso::podeAlterarCorrecao(!empty($dados['correcao']['fechada'])); @endphp
     @if($dados['cartao_id'] && $podeMexer)
       <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-revisar').style.display='flex'">Revisar leitura</button>
-      <button type="button" class="btn btn-ghost" style="color:var(--danger);" id="btn-excluir-correcao">🗑 Excluir correção</button>
+      <button type="button" class="btn btn-ghost" style="color:var(--danger);" id="btn-excluir-correcao"><x-icone nome="lixeira" /> Excluir correção</button>
     @elseif(!empty($dados['correcao']['fechada']))
-      <span class="badge badge-warn" title="Peça à coordenação para reabrir">🔒 correção fechada</span>
+      <span class="badge badge-warn" title="Peça à coordenação para reabrir"><x-icone nome="cadeado" /> correção fechada</span>
     @endif
   </div>
 </div>
@@ -118,7 +89,7 @@
 <div class="card card-pad" style="margin-top:16px;">
   <div class="row-between">
     <h3 style="font-size:17px;">Questão por questão</h3>
-    <span class="no-print" style="font-size:12px;color:var(--muted);">🟩 acertou · 🟥 errou · 🟨 em branco · ⬜ anulada</span>
+    <span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>
   </div>
   {{-- Colunas de cima para baixo, como no cartão-resposta (no celular, lista corrida) --}}
   <div class="res-folha" style="--linhas:{{ (int) ceil(count($folha) / 3) }};">
