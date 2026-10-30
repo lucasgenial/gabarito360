@@ -8,6 +8,7 @@ use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Support\Cadastro;
+use App\Support\Permissao;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -239,6 +240,121 @@ class UsuarioController extends Controller
         $usuario->update(['ativo' => $novoStatus]);
 
         return ApiResponse::success(['ativo' => $novoStatus]);
+    }
+
+    /**
+     * Permissões de um usuário: padrão do perfil (e se foi retirada), extras concedidas,
+     * o que quem está vendo pode definir, e o registro de mudanças (docs/03 §1).
+     */
+    public function permissoes(Request $request, int $id): JsonResponse
+    {
+        $gestor = $request->user();
+        $alvo   = $id === $gestor->id ? $gestor : $this->escopoQuery($request)->where('id', $id)->first();
+        if (!$alvo) {
+            return ApiResponse::notFound('Usuário não encontrado.');
+        }
+
+        $pessoais = DB::table('usuario_permissoes as up')->leftJoin('usuarios as u', 'u.id', '=', 'up.definida_por')
+            ->where('up.usuario_id', $alvo->id)
+            ->get(['up.permissao', 'up.efeito', 'up.valida_ate', 'up.updated_at', 'u.nome as definida_por'])->keyBy('permissao');
+        $tipos = DB::table('perfil_permissoes')->where('perfil', $alvo->perfil)->pluck('tipo', 'permissao');
+
+        $itens = DB::table('permissoes')->orderBy('modulo')->orderBy('chave')->get(['chave', 'modulo', 'descricao'])
+            ->filter(fn ($p) => isset($tipos[$p->chave]))
+            ->map(function ($p) use ($tipos, $pessoais, $gestor, $alvo) {
+                $pessoal = $pessoais->get($p->chave);
+                $tipo    = $tipos[$p->chave];
+                $efeito  = $tipo === 'padrao' ? 'retirar' : 'conceder';
+
+                return [
+                    'chave'        => $p->chave,
+                    'modulo'       => $p->modulo,
+                    'descricao'    => $p->descricao,
+                    'tipo'         => $tipo,                                   // padrao | extra
+                    'estado'       => $pessoal->efeito ?? 'padrao',            // padrao | conceder | retirar
+                    'valida_ate'   => $pessoal->valida_ate ?? null,
+                    'definida_por' => $pessoal->definida_por ?? null,
+                    'definida_em'  => $pessoal->updated_at ?? null,
+                    'pode_alterar' => $gestor->id !== $alvo->id && Permissao::podeDefinir($gestor, $alvo, $p->chave, $efeito) === null,
+                ];
+            })->values();
+
+        $log = DB::table('usuario_permissoes_log as l')->leftJoin('usuarios as u', 'u.id', '=', 'l.feita_por')
+            ->where('l.usuario_id', $alvo->id)->orderByDesc('l.id')->limit(30)
+            ->get(['l.permissao', 'l.acao', 'l.valida_ate', 'l.created_at', 'u.nome as feita_por']);
+
+        return ApiResponse::success([
+            'usuario'  => ['id' => $alvo->id, 'nome' => $alvo->nome, 'perfil' => $alvo->perfil],
+            'efetivas' => Permissao::efetivas($alvo),
+            'itens'    => $itens,
+            'historico' => $log,
+        ]);
+    }
+
+    /**
+     * Define extras/retiradas: itens = [{permissao, estado: padrao|conceder|retirar, valida_ate?}].
+     * "padrao" desfaz a extra ou a retirada. Cada mudança é validada e registrada.
+     */
+    public function definirPermissoes(Request $request, int $id): JsonResponse
+    {
+        $gestor = $request->user();
+        $alvo   = $this->escopoQuery($request)->where('id', $id)->first();
+        if (!$alvo) {
+            return ApiResponse::notFound('Usuário não encontrado.');
+        }
+
+        $data = $request->validate([
+            'itens'              => 'required|array|min:1',
+            'itens.*.permissao'  => 'required|string|exists:permissoes,chave',
+            'itens.*.estado'     => ['required', Rule::in(['padrao', 'conceder', 'retirar'])],
+            'itens.*.valida_ate' => 'sometimes|nullable|date|after_or_equal:today',
+        ]);
+
+        // 1) valida tudo antes de gravar qualquer coisa
+        $erros = [];
+        $mudancas = [];
+        foreach ($data['itens'] as $item) {
+            $chave  = $item['permissao'];
+            $atual  = DB::table('usuario_permissoes')->where('usuario_id', $alvo->id)->where('permissao', $chave)->first();
+            $estado = $item['estado'];
+            if (($atual->efeito ?? 'padrao') === $estado && ($item['valida_ate'] ?? null) == ($atual->valida_ate ?? null)) {
+                continue; // nada muda
+            }
+            // Para desfazer, vale a regra do efeito que existia
+            $efeito = $estado === 'padrao' ? ($atual->efeito ?? 'conceder') : $estado;
+            if ($motivo = Permissao::podeDefinir($gestor, $alvo, $chave, $efeito)) {
+                $erros[$chave] = [$motivo];
+                continue;
+            }
+            $mudancas[] = [$item, $atual];
+        }
+        if ($erros) {
+            return ApiResponse::error('Algumas permissões não puderam ser definidas.', $erros, 403);
+        }
+
+        // 2) grava e registra
+        DB::transaction(function () use ($mudancas, $gestor, $alvo) {
+            foreach ($mudancas as [$item, $atual]) {
+                $chave  = $item['permissao'];
+                $estado = $item['estado'];
+                if ($estado === 'padrao') {
+                    DB::table('usuario_permissoes')->where('usuario_id', $alvo->id)->where('permissao', $chave)->delete();
+                } else {
+                    DB::table('usuario_permissoes')->updateOrInsert(
+                        ['usuario_id' => $alvo->id, 'permissao' => $chave],
+                        ['efeito' => $estado, 'valida_ate' => $item['valida_ate'] ?? null, 'definida_por' => $gestor->id,
+                         'updated_at' => now(), 'created_at' => $atual->created_at ?? now()]
+                    );
+                }
+                DB::table('usuario_permissoes_log')->insert([
+                    'usuario_id' => $alvo->id, 'permissao' => $chave, 'acao' => $estado === 'padrao' ? 'remover' : $estado,
+                    'valida_ate' => $item['valida_ate'] ?? null, 'feita_por' => $gestor->id, 'created_at' => now(),
+                ]);
+            }
+        });
+        Permissao::limparCache();
+
+        return ApiResponse::success(['efetivas' => Permissao::efetivas($alvo)], 'Permissões atualizadas.');
     }
 
     /**

@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'perfil'             => \App\Http\Middleware\CheckPerfil::class,
+            'permissao'          => \App\Http\Middleware\CheckPermissao::class,
             'assinatura_ativa'   => \App\Http\Middleware\CheckAssinaturaAtiva::class,
         ]);
     })

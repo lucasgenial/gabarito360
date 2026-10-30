@@ -4,9 +4,8 @@ namespace App\Support;
 
 /**
  * Arquivo: apps/web/app/Support/Acesso.php
- * Função: Menu e ações visíveis por perfil (docs/03-perfis-e-permissoes.md —
- *         "Navegação por Perfil" e matrizes de permissão). Serve só à interface:
- *         quem decide o acesso aos dados é a API.
+ * Função: Menu por perfil e ações visíveis pelas permissões efetivas do usuário
+ *         (docs/03 v2). Serve só à interface: quem decide o acesso aos dados é a API.
  */
 class Acesso
 {
@@ -52,30 +51,6 @@ class Acesso
         'aluno'               => ['painel'],
     ];
 
-    /** Ações da interface → perfis que as veem (espelha as matrizes do doc 03). */
-    private const ACOES = [
-        'prova.criar'        => ['admin_rede', 'coordenador', 'professor'],
-        'prova.editar'       => ['admin_rede', 'coordenador', 'professor'],
-        'gabarito.ver'       => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor'],
-        'cartoes.imprimir'   => ['admin_rede', 'dir_escolar', 'coordenador', 'professor'],
-        'cartoes.enviar'     => ['admin_rede', 'dir_escolar', 'coordenador', 'professor', 'aplicador'],
-        'correcao.ver'       => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor'],
-        'correcao.resolver'  => ['admin_rede', 'dir_escolar', 'coordenador', 'professor'],
-        'correcao.fechar'    => ['admin_rede', 'dir_escolar', 'coordenador', 'professor'],
-        // Supervisão: reabre a correção e continua alterando com ela fechada
-        'correcao.reabrir'   => ['admin_rede', 'dir_escolar', 'coordenador'],
-        'resultados.ver'     => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor'],
-        'turma.gerenciar'    => ['admin_rede', 'dir_escolar', 'coordenador'],
-        'aluno.gerenciar'    => ['admin_rede', 'dir_escolar', 'coordenador'],
-        'equipe.gerenciar'   => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador'],
-        'escola.configurar'  => ['admin_rede', 'dir_escolar'],
-        'escola.criar'       => ['admin_rede', 'dir_nucleo'],
-        'escola.editar'      => ['admin_rede', 'dir_nucleo', 'dir_escolar'],
-        'escola.desativar'   => ['admin_rede', 'dir_nucleo'],
-        'escola.logo'        => ['admin_rede', 'dir_escolar', 'coordenador'],
-        'rede.logo'          => ['admin_rede', 'dir_nucleo'],
-        'rede.configurar'    => ['admin_rede'],
-    ];
 
     /** Perfis que cada gestor pode cadastrar/gerir (espelha App\Support\Cadastro da API). */
     public const PODE_GERIR = [
@@ -100,15 +75,32 @@ class Acesso
         return self::ROTULOS[$perfil ?? self::perfil()] ?? 'Usuário';
     }
 
-    public static function pode(string $acao): bool
+    /**
+     * Permissões efetivas do usuário logado (padrão do perfil + extras − retiradas),
+     * vindas da API no login. Sessões antigas (sem a lista) buscam uma vez em /auth/me.
+     */
+    public static function permissoes(): array
     {
-        return in_array(self::perfil(), self::ACOES[$acao] ?? [], true);
+        $lista = session('auth_permissoes');
+        if (!is_array($lista) && session('auth_token')) {
+            $resp  = app(\App\Services\ApiClient::class)->get('/v1/auth/me');
+            $lista = $resp->successful() ? ($resp->json('data.permissoes') ?? []) : [];
+            session(['auth_permissoes' => $lista]);
+        }
+
+        return is_array($lista) ? $lista : [];
+    }
+
+    /** Chave do catálogo (docs/03 v2), ex.: pode('cartao.enviar'). A API confere de novo. */
+    public static function pode(string $chave): bool
+    {
+        return in_array($chave, self::permissoes(), true);
     }
 
     /** Pode enviar/excluir/alterar cartões, considerando a correção aberta ou fechada. */
     public static function podeAlterarCorrecao(bool $fechada): bool
     {
-        return self::pode('correcao.resolver') && (!$fechada || self::pode('correcao.reabrir'));
+        return self::pode('correcao.alterar') && (!$fechada || self::pode('correcao.reabrir'));
     }
 
     /** @return array<int, array{rotulo: string, url: string, ativo: bool}> */

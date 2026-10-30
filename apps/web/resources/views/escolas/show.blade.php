@@ -227,7 +227,7 @@
             <p style="font-size:12px;color:var(--muted);margin-top:4px;">Governo do estado, prefeitura ou mantenedora (escola privada). Vale para todas as escolas da rede.</p>
             @endif
             @endpode
-            @pode('resultados.ver')
+            @pode('resultado.ver')
             <a class="btn btn-primary btn-sm" style="margin-top:6px;" href="{{ route('relatorios.escola', $escola['id']) }}">📈 Relatório da escola</a>
             @endpode
           </div>
