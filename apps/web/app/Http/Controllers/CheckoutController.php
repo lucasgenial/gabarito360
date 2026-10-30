@@ -15,7 +15,7 @@ class CheckoutController extends Controller
     {
         $planoId = $request->query('plano_id');
 
-        $resposta = $this->api->get('/planos');
+        $resposta = $this->api->get('/v1/planos');
         $planos   = collect($resposta['data'] ?? []);
         $plano    = $planoId ? $planos->firstWhere('id', (int) $planoId) : null;
 
@@ -29,7 +29,7 @@ class CheckoutController extends Controller
             'licencas' => 'nullable|integer|min:1|max:10',
         ]);
 
-        $resposta = $this->api->post('/assinaturas/checkout', [
+        $resposta = $this->api->post('/v1/assinaturas/checkout', [
             'plano_id' => (int) $request->input('plano_id'),
             'licencas' => (int) ($request->input('licencas', 1)),
         ]);

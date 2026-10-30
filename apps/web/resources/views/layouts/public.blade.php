@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" />
 @stack('styles')
 </head>
-<body>
+<body class="area-publica">
 
 <header class="app-header">
   <div class="container">
@@ -42,7 +42,7 @@
 </div>
 
 <footer style="text-align:center;padding:2rem;color:var(--color-secondary-06);font-size:.875rem;margin-top:3rem;border-top:1px solid var(--color-secondary-03)">
-  © {{ date('Y') }} Gabarito360 · <a href="{{ route('leads.index') }}">Fale Conosco</a> · <a href="#">Privacidade</a>
+  © {{ date('Y') }} Gabarito360 · <a href="{{ route('leads.index') }}">Fale Conosco</a>
 </footer>
 
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>

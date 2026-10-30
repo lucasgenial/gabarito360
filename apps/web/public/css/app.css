@@ -86,7 +86,10 @@ img { max-width: 100%; display: block; }
 .app-nav a { color: rgba(255,255,255,0.85); padding: 8px 14px; border-radius: 6px; font-size: 14px; font-weight: 500; transition: background .15s; white-space: nowrap; }
 .app-nav a:hover { background: rgba(255,255,255,0.12); text-decoration: none; }
 .app-nav a.active { background: rgba(255,255,255,0.2); color: #fff; }
-@media (max-width: 1023px) { .app-nav { display: none; } }
+@media (max-width: 767px) {
+  .area-publica .app-header .container { flex-wrap: wrap; height: auto; padding-top: 8px; padding-bottom: 8px; gap: 4px 12px; }
+  .area-publica .app-nav { order: 3; width: 100%; margin-left: 0; }
+}
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
 .avatar {
   width: 38px; height: 38px; border-radius: 50%; background: var(--accent-light);
@@ -816,6 +819,26 @@ img { max-width: 100%; display: block; }
 
 /* Gráficos não crescem com a tela toda (os rótulos cresceriam junto) */
 @media screen { .card svg[viewBox]:not(.nav-icone) { max-height: 340px; } }
+
+/* ---------- Páginas públicas e login (docs/23, L7) ---------- */
+/* Nomes de cor usados por planos, checkout, contato e assinatura: apontam para o tema */
+:root {
+  --color-primary-default: var(--accent); --color-primary-02: var(--accent-light); --color-primary-03: var(--accent);
+  --color-secondary-01: var(--surface-2); --color-secondary-02: var(--border-soft); --color-secondary-03: var(--border);
+  --color-secondary-06: var(--muted); --color-secondary-07: var(--fg-2); --color-secondary-08: var(--fg); --color-secondary-09: var(--fg);
+  --color-success-01: var(--success-light); --color-success-02: var(--success-light); --color-success-03: var(--success); --color-success-04: var(--success);
+  --color-warning-01: var(--warn-light); --color-warning-02: var(--warn-light); --color-warning-03: var(--warn); --color-warning-04: var(--warn-fg); --color-warning-05: var(--warn-fg);
+  --color-danger-01: var(--danger-light); --color-danger-02: var(--danger-light); --color-danger-03: var(--danger); --color-danger-04: var(--danger);
+}
+.area-publica { zoom: var(--escala); }
+@media print { .area-publica { zoom: 1; } }
+.alert { border: 1px solid; border-radius: var(--radius-md); padding: 12px 16px; font-size: 14px; font-weight: 600; }
+.alert-success { background: var(--success-light); color: var(--success); border-color: var(--success); }
+.alert-danger { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.btn-outline { background: transparent; color: var(--accent); border-color: var(--accent); }
+.btn-outline:hover { background: var(--accent-light); text-decoration: none; }
+.app-header .btn-outline { color: #fff; border-color: rgba(255,255,255,.6); }
+.app-header .btn-outline:hover { background: rgba(255,255,255,.12); }
 
 /* ---------- Componentes base (resources/views/components) ---------- */
 .g-pagina { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 12px; }

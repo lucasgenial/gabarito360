@@ -11,7 +11,7 @@ class PlanoController extends Controller
 
     public function index(): View
     {
-        $resposta = $this->api->get('/planos');
+        $resposta = $this->api->get('/v1/planos');
         $planos   = $resposta['data'] ?? [];
 
         $individuais     = array_values(array_filter($planos, fn ($p) => $p['publico'] === 'individual' && $p['modo'] === 'autoatendimento'));
