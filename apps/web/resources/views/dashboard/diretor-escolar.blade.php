@@ -139,7 +139,7 @@
       <div class="eyebrow">Desempenho por turma</div>
       <h3 style="font-size:18px;">Consolidação das últimas provas</h3>
     </div>
-    <table class="table">
+    <table class="table lista-cel">
       <thead>
         <tr>
           <th>Turma</th>

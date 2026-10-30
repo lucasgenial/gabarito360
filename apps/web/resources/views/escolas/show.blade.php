@@ -290,7 +290,7 @@
           <h3 style="margin:0;">Turmas cadastradas</h3>
           <button class="btn btn-sm btn-secondary" onclick="document.getElementById('tab-btn-turmas').click()">Ver todas</button>
         </div>
-        <table class="data-table">
+        <table class="data-table lista-cel">
           <thead>
             <tr>
               <th>Turma</th>
@@ -398,7 +398,7 @@
       <a href="{{ route('turmas.index') }}" class="btn btn-sm btn-primary">+ Nova turma</a>
     </div>
     @if(count($escola['turmas'] ?? []) > 0)
-    <table class="data-table">
+    <table class="data-table lista-cel">
       <thead>
         <tr>
           <th>Turma</th>
@@ -444,7 +444,7 @@
       <a href="{{ route('provas.create') }}" class="btn btn-sm btn-primary">+ Nova prova</a>
     </div>
     @if(count($escola['provas'] ?? []) > 0)
-    <table class="data-table">
+    <table class="data-table lista-cel">
       <thead>
         <tr>
           <th>Prova</th>
@@ -507,7 +507,7 @@
       <a href="{{ route('alunos.create') }}" class="btn btn-sm btn-primary">+ Cadastrar</a>
     </div>
     @if(count($escola['alunos'] ?? []) > 0)
-    <table class="data-table">
+    <table class="data-table lista-cel">
       <thead>
         <tr>
           <th>Aluno</th>
