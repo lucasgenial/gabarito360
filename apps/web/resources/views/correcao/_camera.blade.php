@@ -59,6 +59,7 @@
 var UPLOAD_URL = '{{ route('correcao.upload', $prova['id'], false) }}';
 var CAM_CARTOES_URL = '/cartoes';
 var CAM_CSRF = '{{ csrf_token() }}';
+var CAM_DISCIPLINA = @json($prova['disciplina'] ?? '');
 function esc(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
 var ALUNOS = {!! json_encode(collect($alunos)->map(function ($a) { return ['id' => $a['id'], 'nome' => $a['nome'], 'turma' => $a['turma_nome'] ?? '']; })->values(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!};
 
@@ -120,12 +121,15 @@ function enviarCartao(file) {
     return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: false, j: { erro: erroHttp(r.status) } }; });
   }).then(function (res) {
       var d = res.j;
-      if (!res.ok) { li.innerHTML = '⚠️ <b>Erro:</b> ' + esc(d.erro || 'falha no envio'); return li.innerHTML; }
+      if (!res.ok) { li.innerHTML = '⛔ <b>Não corrigido.</b> ' + esc(d.erro || 'falha no envio'); return li.innerHTML; }
       var quem = d.aluno_nome ? '<b>' + esc(d.aluno_nome) + '</b>' : '<b style="color:var(--danger)">Aluno não identificado</b>';
       var nota = d.acertos !== null && d.acertos !== undefined ? ' — <b>' + d.acertos + '/' + d.total + '</b> acertos · nota ' + Number(d.nota_final).toFixed(1).replace('.', ',') : '';
       var amb = d.ambiguas ? ' · <span style="color:var(--warning,#c27c0e)">' + d.ambiguas + ' questão(ões) para revisar</span>' : '';
       var lg = d.lingua ? ' · ' + (d.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : '';
-      var mov = d.prova_corrigida ? '<div style="font-size:13px;margin-top:3px;">↪ Cartão de <b>' + esc(d.prova_corrigida) + '</b>: corrigido na prova certa.</div>' : '';
+      var mov = d.prova_corrigida
+        ? '<div style="font-size:13px;margin-top:4px;padding:6px 8px;border-radius:6px;background:var(--warn-light,#fff5c2);color:var(--warn-fg,#7a4800);">'
+          + '⚠️ Este cartão <b>não é de ' + esc(CAM_DISCIPLINA) + '</b>: é de <b>' + esc(d.prova_corrigida) + '</b>. Ele foi corrigido em ' + esc(d.prova_corrigida) + ', com o gabarito certo.</div>'
+        : '';
       var resumo = (d.aluno_nome && !d.ambiguas ? '✅ ' : '📝 ') + quem + nota + lg + amb + mov;
       li.innerHTML = resumo + (d.aluno_nome ? '' : (ALUNOS.length ? seletorAluno(d.id) : '<div style="font-size:13px;color:var(--muted);margin-top:4px;">QR ilegível ou cartão em branco: o professor vincula o aluno depois.</div>'));
       if (typeof atualizar === 'function') atualizar();

@@ -127,7 +127,7 @@ Route::middleware('autenticado')->group(function () {
 
     // Resultados e relatórios (MP-022)
     Route::get('/resultados/{alunoId}/{provaId}', [ResultadoController::class, 'show'])->name('resultados.show');
-    Route::get('/resultados/{alunoId}/{provaId}/folha', [ResultadoController::class, 'folha'])->name('resultados.folha');
+    Route::get('/resultados/{alunoId}/{provaId}/pdf', [ResultadoController::class, 'pdf'])->name('resultados.pdf');
     Route::get('/relatorios/prova/{id}', [RelatorioController::class, 'prova'])->name('relatorios.prova');
     Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');
 
