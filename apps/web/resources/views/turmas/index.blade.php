@@ -92,7 +92,7 @@
             @if(($t['media_turma'] ?? null) !== null)
               @php
                 $pct = min(100, max(0, ($t['media_turma'] / 10) * 100));
-                $cor = $t['media_turma'] >= 7 ? 'var(--success)' : ($t['media_turma'] >= 5 ? 'var(--warn-fg)' : 'var(--danger)');
+                $cor = $t['media_turma'] >= 7 ? 'var(--success)' : ($t['media_turma'] >= 5 ? 'var(--warn)' : 'var(--danger)');
               @endphp
               <span class="mini-bar"><div style="width:{{ $pct }}%;background:{{ $cor }};"></div></span>
               <span style="font-family:var(--font-mono);font-weight:600;">{{ number_format($t['media_turma'], 1, ',', '') }}</span>

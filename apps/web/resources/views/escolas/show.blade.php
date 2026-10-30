@@ -9,8 +9,8 @@
 
 @section('content')
 {{-- Hero --}}
-<div class="escola-hero" style="margin:-24px -var(--container-pad) 0;padding-left:var(--container-pad);padding-right:var(--container-pad);">
-  <div style="max-width:var(--content-max);margin:0 auto;">
+<div class="escola-hero">
+  <div>
     <div class="hero-breadcrumb">
       <a href="{{ route('escolas.index') }}">Escolas</a>
       <span style="opacity:.5;">/</span>
