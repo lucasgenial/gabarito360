@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AlunoController;
 use App\Http\Controllers\Api\AssinaturaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartaoController;
+use App\Http\Controllers\Api\CensoController;
 use App\Http\Controllers\Api\ConfiguracaoController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EscolaController;
@@ -137,6 +138,10 @@ Route::prefix('v1')->group(function () {
             Route::put('{id}',        [EscolaController::class, 'update'])->middleware('permissao:escola.editar');
             Route::post('{id}/toggle',[EscolaController::class, 'toggle'])->middleware('permissao:escola.desativar');
         });
+
+        // Censo Escolar (INEP): consulta no cadastro de escola (docs/21, etapa 6)
+        Route::get('censo/escolas',        [CensoController::class, 'pesquisar'])->middleware('permissao:escola.criar');
+        Route::get('censo/escolas/{inep}', [CensoController::class, 'buscar'])->middleware('permissao:escola.criar');
 
         // Núcleos
         Route::prefix('nucleos')->group(function () {

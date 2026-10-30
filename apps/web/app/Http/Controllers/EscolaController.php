@@ -17,35 +17,99 @@ class EscolaController extends Controller
         $escolas = $resp->successful() ? $resp->json('data.escolas') : [];
         $kpis    = $resp->successful() ? $resp->json('data.kpis')    : [];
 
-        $nucleos = $this->api->get('/v1/nucleos')->json('data.nucleos') ?? [];
-
         return view('escolas.index', [
             'escolas' => $escolas,
             'kpis'    => $kpis,
-            'nucleos' => $nucleos,
             'busca'   => $request->query('busca', ''),
         ]);
     }
 
-    public function store(Request $request)
+    /** Oferta da escola (mesmas chaves de App\Models\Escola na API). */
+    private const OFERTA = [
+        'turnos'      => ['manha' => 'Manhã', 'tarde' => 'Tarde', 'noite' => 'Noite', 'integral' => 'Integral'],
+        'etapas'      => ['infantil' => 'Educação Infantil', 'fundamental_iniciais' => 'Fundamental — anos iniciais',
+                          'fundamental_finais' => 'Fundamental — anos finais', 'medio' => 'Ensino Médio',
+                          'eja' => 'EJA', 'profissional' => 'Educação Profissional'],
+        'modalidades' => ['regular' => 'Ensino regular', 'especial' => 'Educação especial',
+                          'eja' => 'Educação de Jovens e Adultos', 'profissional' => 'Educação profissional',
+                          'campo' => 'Educação do campo', 'indigena' => 'Educação indígena', 'quilombola' => 'Educação quilombola'],
+    ];
+
+    private const CAMPOS = ['nucleo_id', 'nome', 'inep', 'tipo_rede', 'tipo', 'escola_sede_id', 'situacao_funcionamento',
+        'localizacao', 'orgao_regional', 'logradouro', 'numero', 'complemento', 'bairro', 'cep', 'cidade', 'co_municipio',
+        'uf', 'latitude', 'longitude', 'telefone', 'email'];
+
+    /** Núcleos e escolas sede que o usuário pode usar no cadastro (só para quem cadastra escolas). */
+    private function opcoesCadastro(): array
     {
-        $request->validate([
-            'nucleo_id' => 'required|integer',
-            'nome'      => 'required|string|max:200',
-            'inep'      => 'required|string|size:8',
-            'tipo_rede' => 'required|string',
-        ]);
+        if (!\App\Support\Acesso::pode('escola.criar')) {
+            return ['nucleos' => [], 'sedes' => []];
+        }
+        $sedes = collect($this->api->get('/v1/escolas')->json('data.escolas') ?? [])
+            ->filter(fn ($e) => ($e['tipo'] ?? 'sede') === 'sede')
+            ->map(fn ($e) => ['id' => $e['id'], 'nome' => $e['nome'], 'inep' => $e['inep'], 'nucleo_id' => $e['nucleo_id']])
+            ->values()->all();
 
-        $resp = $this->api->post('/v1/escolas', $request->only(
-            'nucleo_id','nome','inep','tipo_rede','logradouro','cidade','uf','telefone','email'
-        ));
+        return ['nucleos' => $this->api->get('/v1/nucleos')->json('data.nucleos') ?? [], 'sedes' => $sedes];
+    }
 
+    public function create(): View
+    {
+        abort_unless(\App\Support\Acesso::pode('escola.criar'), 403, 'Só o diretor de núcleo e o administrador cadastram escolas.');
+
+        return view('escolas.form', ['escola' => null, 'opcoes' => self::OFERTA] + $this->opcoesCadastro());
+    }
+
+    public function edit(int $id): View
+    {
+        $resp = $this->api->get("/v1/escolas/{$id}");
         if ($resp->failed()) {
-            return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao criar escola.');
+            abort(404, 'Escola não encontrada.');
         }
 
-        return redirect()->route('escolas.index')->with('sucesso', 'Escola criada com sucesso.');
+        return view('escolas.form', ['escola' => $resp->json('data'), 'opcoes' => self::OFERTA] + $this->opcoesCadastro());
+    }
+
+    /** Campos do formulário para a API: vazios viram null, CEP só com dígitos, listas da oferta. */
+    private function dados(Request $request): array
+    {
+        $d = collect($request->only(self::CAMPOS))->map(fn ($v) => is_string($v) && trim($v) === '' ? null : (is_string($v) ? trim($v) : $v))->all();
+        if (!empty($d['cep'])) {
+            $d['cep'] = preg_replace('/\D/', '', $d['cep']);
+        }
+        if (!empty($d['inep'])) {
+            $d['inep'] = preg_replace('/\D/', '', $d['inep']);
+        }
+        if (!empty($d['uf'])) {
+            $d['uf'] = strtoupper($d['uf']);
+        }
+        foreach (array_keys(self::OFERTA) as $lista) {
+            $d[$lista] = array_values((array) $request->input($lista, []));
+        }
+        if (!\App\Support\Acesso::pode('escola.criar')) {
+            unset($d['nucleo_id'], $d['inep'], $d['tipo'], $d['escola_sede_id']);
+        }
+
+        return $d;
+    }
+
+    /** Erro da API de volta ao formulário (mensagem geral + erros por campo). */
+    private function voltarComErro($resp, string $padrao)
+    {
+        return back()->withInput()->withErrors($resp->json('errors') ?? [])
+            ->with('erro', $resp->json('message') ?? $padrao);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate(['nome' => 'required|string|max:200', 'inep' => 'required|string', 'nucleo_id' => 'required|integer']);
+
+        $resp = $this->api->post('/v1/escolas', $this->dados($request));
+        if ($resp->failed()) {
+            return $this->voltarComErro($resp, 'Erro ao cadastrar a escola.');
+        }
+
+        return redirect()->route('escolas.show', $resp->json('data.id'))->with('sucesso', 'Escola cadastrada.');
     }
 
     public function show(int $id): View
@@ -56,31 +120,36 @@ class EscolaController extends Controller
             abort(404, 'Escola não encontrada.');
         }
 
-        $nucleos = $this->api->get('/v1/nucleos')->json('data.nucleos') ?? [];
-
-        return view('escolas.show', [
-            'escola'  => $resp->json('data'),
-            'nucleos' => $nucleos,
-        ]);
+        return view('escolas.show', ['escola' => $resp->json('data'), 'opcoes' => self::OFERTA]);
     }
 
     public function update(Request $request, int $id)
     {
-        $request->validate([
-            'nome'      => 'required|string|max:200',
-            'tipo_rede' => 'required|string',
-        ]);
+        $request->validate(['nome' => 'required|string|max:200']);
 
-        $resp = $this->api->put("/v1/escolas/{$id}", $request->only(
-            'nucleo_id','nome','inep','tipo_rede','logradouro','cidade','uf','telefone','email'
-        ));
-
+        $resp = $this->api->put("/v1/escolas/{$id}", $this->dados($request));
         if ($resp->failed()) {
-            return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao atualizar escola.');
+            return $this->voltarComErro($resp, 'Erro ao atualizar a escola.');
         }
 
-        return redirect()->route('escolas.show', $id)->with('sucesso', 'Escola atualizada.');
+        return redirect()->route('escolas.show', $id)->with('sucesso', 'Dados da escola atualizados.');
+    }
+
+    /** Consulta ao Censo Escolar pelo INEP (preenche o formulário). */
+    public function censoBuscar(Request $request)
+    {
+        $inep = preg_replace('/\D/', '', (string) $request->query('inep'));
+        $resp = $this->api->get("/v1/censo/escolas/{$inep}");
+
+        return response()->json($resp->json(), $resp->status());
+    }
+
+    /** Escolas do Censo pelo nome (para quem não sabe o INEP). */
+    public function censoPesquisar(Request $request)
+    {
+        $resp = $this->api->get('/v1/censo/escolas', $request->only('busca', 'municipio'));
+
+        return response()->json($resp->json(), $resp->status());
     }
 
     public function toggle(int $id)

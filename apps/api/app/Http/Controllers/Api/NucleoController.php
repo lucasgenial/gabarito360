@@ -30,6 +30,7 @@ class NucleoController extends Controller
                 'id'           => $n->id,
                 'rede_id'      => $n->rede_id,
                 'nome'         => $n->nome,
+                'orgao_regional' => $n->orgao_regional,
                 'total_escolas'=> $n->escolas->count(),
                 'created_at'   => $n->created_at,
             ];
@@ -43,6 +44,7 @@ class NucleoController extends Controller
         $data = $request->validate([
             'nome'    => 'required|string|max:200',
             'rede_id' => 'required|integer|exists:redes,id',
+            'orgao_regional' => 'nullable|string|max:20',
         ]);
 
         $nucleo = Nucleo::create($data);
@@ -74,6 +76,7 @@ class NucleoController extends Controller
         $data = $request->validate([
             'nome'    => 'sometimes|string|max:200',
             'rede_id' => 'sometimes|integer|exists:redes,id',
+            'orgao_regional' => 'sometimes|nullable|string|max:20',
         ]);
 
         $nucleo->update($data);
