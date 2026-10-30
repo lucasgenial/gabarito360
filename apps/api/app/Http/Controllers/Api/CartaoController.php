@@ -10,6 +10,7 @@ use App\Models\Prova;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
 use App\Services\Omr\GeradorCartoes;
+use App\Support\Correcao;
 use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -85,6 +86,9 @@ class CartaoController extends Controller
         if (!$cartao || !$prova) {
             return ApiResponse::notFound('Cartão não encontrado.');
         }
+        if ($bloqueio = Correcao::bloqueio($request->user(), $prova)) {
+            return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
+        }
 
         if ($cartao->imagem_url) {
             Storage::disk('public')->delete($cartao->imagem_url);
@@ -148,6 +152,7 @@ class CartaoController extends Controller
             'ambiguidades' => $ambiguosLista,
             'recentes'     => $recentes,
             'prova_status' => $prova->status,
+            'correcao'     => Correcao::situacao($prova->fresh()),
         ]);
     }
 
@@ -156,6 +161,9 @@ class CartaoController extends Controller
         $prova = $this->encontrarProva($request, $provaId, envio: true);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
+        }
+        if ($bloqueio = Correcao::bloqueio($request->user(), $prova)) {
+            return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
         if (!in_array($prova->status, ['publicada', 'em_correcao', 'corrigida'], true)) {
@@ -269,8 +277,11 @@ class CartaoController extends Controller
     public function vincularAluno(Request $request, int $id): JsonResponse
     {
         $cartao = Cartao::find($id);
-        if (!$cartao || !$this->encontrarProva($request, $cartao->prova_id)) {
+        if (!$cartao || !($prova = $this->encontrarProva($request, $cartao->prova_id))) {
             return ApiResponse::notFound('Cartão não encontrado.');
+        }
+        if ($bloqueio = Correcao::bloqueio($request->user(), $prova)) {
+            return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
         $data = $request->validate([
@@ -291,8 +302,11 @@ class CartaoController extends Controller
         $usuario = $request->user();
 
         $cartao = Cartao::find($id);
-        if (!$cartao || !$this->encontrarProva($request, $cartao->prova_id)) {
+        if (!$cartao || !($prova = $this->encontrarProva($request, $cartao->prova_id))) {
             return ApiResponse::notFound('Cartão não encontrado.');
+        }
+        if ($bloqueio = Correcao::bloqueio($usuario, $prova)) {
+            return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
         $data = $request->validate([
@@ -349,8 +363,11 @@ class CartaoController extends Controller
         $usuario = $request->user();
 
         $cartao = Cartao::find($id);
-        if (!$cartao || !$this->encontrarProva($request, $cartao->prova_id)) {
+        if (!$cartao || !($prova = $this->encontrarProva($request, $cartao->prova_id))) {
             return ApiResponse::notFound('Cartão não encontrado.');
+        }
+        if ($bloqueio = Correcao::bloqueio($usuario, $prova)) {
+            return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
         if ($cartao->status !== 'lido') {
@@ -383,5 +400,31 @@ class CartaoController extends Controller
         CalculadoraNota::calcular($cartao->fresh());
 
         return ApiResponse::success(['revisado' => true]);
+    }
+
+    /** Fecha a correção: a partir daqui só a supervisão altera, exclui ou inclui cartões. */
+    public function fecharCorrecao(Request $request, int $provaId): JsonResponse
+    {
+        $prova = $this->encontrarProva($request, $provaId);
+        if (!$prova) {
+            return ApiResponse::notFound('Prova não encontrada.');
+        }
+        if (!Correcao::fechada($prova)) {
+            $prova->update(['correcao_fechada_em' => now(), 'correcao_fechada_por' => $request->user()->id]);
+        }
+
+        return ApiResponse::success(Correcao::situacao($prova->fresh()), 'Correção fechada.');
+    }
+
+    /** Reabre a correção (só supervisão): professor/corretor voltam a enviar, excluir e alterar. */
+    public function reabrirCorrecao(Request $request, int $provaId): JsonResponse
+    {
+        $prova = $this->encontrarProva($request, $provaId);
+        if (!$prova) {
+            return ApiResponse::notFound('Prova não encontrada.');
+        }
+        $prova->update(['correcao_fechada_em' => null, 'correcao_fechada_por' => null]);
+
+        return ApiResponse::success(Correcao::situacao($prova->fresh()), 'Correção reaberta.');
     }
 }

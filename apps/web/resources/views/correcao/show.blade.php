@@ -50,9 +50,39 @@
   <button class="btn btn-ghost" id="btn-upload" onclick="abrirUpload()">Envio manual</button>
 </div>
 
-@pode('cartoes.enviar')
-  @include('correcao._camera')
-@endpode
+@php
+  $corr      = $status['correcao'] ?? ['fechada' => false];
+  $fechada   = !empty($corr['fechada']);
+  $podeMexer = \App\Support\Acesso::podeAlterarCorrecao($fechada);
+@endphp
+
+{{-- Correção aberta/fechada --}}
+<div class="card card-pad no-print" style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;{{ $fechada ? 'border-color:var(--warn-fg,#b06800);background:var(--warn-light,#fff5c2);' : '' }}">
+  @if($fechada)
+    <div style="flex:1;min-width:220px;font-size:14px;">
+      🔒 <b>Correção fechada</b>{{ !empty($corr['fechada_por']) ? ' por ' . $corr['fechada_por'] : '' }}{{ !empty($corr['fechada_em']) ? ' em ' . \Carbon\Carbon::parse($corr['fechada_em'])->timezone('America/Bahia')->format('d/m/Y \à\s H:i') : '' }}.
+      <div style="font-size:12px;color:var(--muted);">{{ $podeMexer ? 'Você (supervisão) ainda pode excluir e incluir correções.' : 'Para enviar, excluir ou alterar cartões, peça à coordenação para reabrir.' }}</div>
+    </div>
+    @pode('correcao.reabrir')
+      <form method="POST" action="{{ route('correcao.reabrir', $prova['id']) }}" onsubmit="return confirm('Reabrir a correção? Professores e corretores voltam a poder enviar, excluir e alterar.')">
+        @csrf<button type="submit" class="btn btn-secondary">🔓 Reabrir correção</button>
+      </form>
+    @endpode
+  @else
+    <div style="flex:1;min-width:220px;font-size:14px;">🟢 <b>Correção aberta</b><div style="font-size:12px;color:var(--muted);">Ao terminar, feche a correção para evitar alterações.</div></div>
+    @pode('correcao.fechar')
+      <form method="POST" action="{{ route('correcao.fechar', $prova['id']) }}" onsubmit="return confirm('Fechar a correção? Depois disso só a coordenação/direção poderá alterar, excluir, incluir ou reabrir.')">
+        @csrf<button type="submit" class="btn btn-secondary">🔒 Fechar correção</button>
+      </form>
+    @endpode
+  @endif
+</div>
+
+@if($podeMexer || session('auth_perfil') === 'aplicador')
+  @pode('cartoes.enviar')
+    @include('correcao._camera')
+  @endpode
+@endif
 
 @if(session('sucesso'))
   <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
@@ -147,7 +177,7 @@ var STATUS_URL = '{{ route('correcao.status', $prova['id'], false) }}';
 var CARTOES_URL = '/cartoes';
 var LISTA_URL = '{{ route('correcao.cartoes', $prova['id'], false) }}';
 var PROVA_ID = {{ (int) $prova['id'] }};
-var PODE_EXCLUIR = {{ \App\Support\Acesso::pode('correcao.resolver') ? 'true' : 'false' }};
+var PODE_EXCLUIR = {{ $podeMexer ? 'true' : 'false' }};
 var NOTA_MAX = {{ (float) ($prova['nota_maxima'] ?? 10) }};
 
 // ---------- Alunos corrigidos ----------

@@ -59,10 +59,12 @@
              style="padding-left:36px;width:240px;" value="{{ $busca }}"
              oninput="filtrarEscolas(this.value)" />
     </div>
+    @pode('escola.criar')
     <button class="btn btn-primary" onclick="abrirModal()">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       Nova escola
     </button>
+    @endpode
   </div>
 </div>
 
@@ -149,8 +151,10 @@
           <div class="escola-stat"><div class="val">{{ $e['total_provas'] ?? 0 }}</div><div class="lbl">Provas</div></div>
         </div>
         <div class="escola-actions">
+          @pode('escola.editar')
           <button class="btn btn-sm btn-secondary"
                   onclick='abrirModalEditar(@json($e))'>Editar</button>
+          @endpode
           <a href="{{ route('escolas.show', $e['id']) }}" class="btn btn-sm btn-primary">Ver mais</a>
         </div>
       </div>
@@ -159,7 +163,7 @@
     <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);">
       <div style="font-size:48px;margin-bottom:16px;">🏫</div>
       <h3 style="font-size:18px;font-weight:700;color:var(--fg-2);margin-bottom:8px;">Nenhuma escola encontrada</h3>
-      <p>Cadastre a primeira escola usando o botão "Nova escola".</p>
+      @pode('escola.criar')<p>Cadastre a primeira escola usando o botão "Nova escola".</p>@endpode
     </div>
   @endforelse
 </div>
