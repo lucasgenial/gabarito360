@@ -27,7 +27,9 @@
 
   --font-body: 'Rawline', 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-display: 'Rawline', 'Raleway', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-mono: 'Roboto Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
+  /* Números na fonte do texto, com algarismos alinhados (a mono separava a vírgula: "1 , 8") */
+  --font-mono: var(--font-body);
+  --font-code: 'Roboto Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -49,6 +51,7 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-size: 16px;
+  font-variant-numeric: lining-nums tabular-nums;
   line-height: 1.5;
 }
 a { color: var(--accent); text-decoration: none; }
@@ -79,7 +82,7 @@ img { max-width: 100%; display: block; }
 .brand .logo {
   width: 34px; height: 34px; border-radius: 8px; background: #fff;
   display: grid; place-items: center; color: var(--accent); font-weight: 900;
-  font-family: var(--font-mono); font-size: 13px;
+  font-family: var(--font-code); font-size: 13px;
 }
 .app-nav { display: flex; gap: 4px; margin-left: 12px; }
 .app-nav a {
@@ -88,6 +91,17 @@ img { max-width: 100%; display: block; }
 }
 .app-nav a:hover { background: rgba(255,255,255,0.12); text-decoration: none; }
 .app-nav a.active { background: rgba(255,255,255,0.2); color: #fff; }
+/* Menu do topo nunca quebra linha (docs/23, L0) */
+.app-nav a, .nav-mais summary { white-space: nowrap; }
+.app-header .container { min-width: 0; }
+/* Selo de contexto (escola/rede): curto, com reticências; some quando o menu precisa do espaço */
+.header-right .badge { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+@media (max-width: 1365px) { .header-right .badge { display: none; } }
+/* Tabela mais larga que o cartão rola por dentro dele */
+.table-wrap { overflow-x: auto; }
+/* Topo das páginas (título + ações): as ações descem de linha quando não cabem */
+.row-between { flex-wrap: wrap; }
+.row-between > div[style*="display:flex"], .row-between > div[style*="display: flex"] { flex-wrap: wrap; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
 .avatar {
   width: 38px; height: 38px; border-radius: 50%; background: var(--accent-light);
@@ -193,7 +207,7 @@ img { max-width: 100%; display: block; }
 }
 .table td { padding: 14px 16px; border-bottom: 1px solid var(--border-soft); }
 .table tbody tr:hover { background: var(--surface-2); }
-.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.num { font-family: var(--font-mono); font-variant-numeric: lining-nums tabular-nums; }
 
 /* ---------- KPI stat ---------- */
 .kpi { padding: 20px 22px; }

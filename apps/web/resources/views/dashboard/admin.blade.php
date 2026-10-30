@@ -33,8 +33,12 @@
 </style>
 @endpush
 
+@php
+  $redesAdm = collect($dashboard['redes'] ?? []);
+  $nomeRede = $redesAdm->count() === 1 ? $redesAdm->first()['nome'] : ($redesAdm->count() . ' redes');
+@endphp
 @section('context-badge')
-<span class="badge badge-info badge-dot">Rede Municipal</span>
+<span class="badge badge-info badge-dot" title="{{ $redesAdm->pluck('nome')->implode(' · ') }}">{{ $nomeRede }}</span>
 @endsection
 
 @section('breadcrumb')
@@ -65,12 +69,12 @@
   <div>
     <div class="eyebrow">Visão da rede</div>
     <h1 class="page-title">Painel administrativo</h1>
-    <p class="page-sub">{{ $nome }} · Administrador · Rede Municipal · acompanhamento consolidado do período letivo {{ now()->year }}</p>
+    <p class="page-sub">{{ $nome }} · Administrador · {{ $nomeRede }} · acompanhamento consolidado do período letivo {{ now()->year }}</p>
   </div>
   <a href="{{ route('relatorios.rede') }}" class="btn btn-primary">📈 Relatório da rede</a>
 </div>
 
-<div class="notice">Sistema de Avaliação — Rede Municipal de Ensino — Período Letivo {{ now()->year }}</div>
+<div class="notice">Sistema de Avaliação — {{ $redesAdm->pluck('nome')->implode(' · ') ?: 'Rede de ensino' }} — Período Letivo {{ now()->year }}</div>
 
 {{-- KPIs --}}
 <div class="kpi-grid">
