@@ -87,6 +87,8 @@ class UsuarioController extends Controller
             'observacoes'            => 'sometimes|string|nullable',
             'escola_id'              => 'sometimes|integer|exists:escolas,id|nullable',
             'nucleo_id'              => 'sometimes|integer|exists:nucleos,id|nullable',
+            'turma_ids'              => 'sometimes|array',
+            'turma_ids.*'            => 'integer|exists:turmas,id',
         ], [
             'cpf.regex'    => 'CPF deve conter 11 dígitos.',
             'email.unique' => 'E-mail já cadastrado.',
@@ -95,6 +97,17 @@ class UsuarioController extends Controller
 
         if ($erro = $this->validarPerfilEEscopo($gestor, $data['perfil'], $data['escola_id'] ?? null, $data['nucleo_id'] ?? null)) {
             return $erro;
+        }
+        // Turmas do professor: só da escola dele e só por quem vincula professor à turma
+        $turmaIds = $data['perfil'] === 'professor' ? array_values(array_unique($data['turma_ids'] ?? [])) : [];
+        if ($turmaIds) {
+            if (!Permissao::pode($gestor, 'turma.vincular_professor')) {
+                return ApiResponse::error('Você não pode vincular professores a turmas.', [], 403);
+            }
+            $foraDaEscola = DB::table('turmas')->whereIn('id', $turmaIds)->where('escola_id', '!=', $data['escola_id'])->exists();
+            if ($foraDaEscola) {
+                return ApiResponse::error('As turmas precisam ser da escola do professor.', ['turma_ids' => ['Turma de outra escola.']], 422);
+            }
         }
 
         $usuario = Usuario::create([
@@ -119,6 +132,12 @@ class UsuarioController extends Controller
                 'escopo_tipo' => 'escola',
                 'escopo_id'   => $data['escola_id'],
                 'created_at'  => now(),
+            ]);
+        }
+
+        foreach ($turmaIds as $turmaId) {
+            DB::table('usuario_escopos')->insert([
+                'usuario_id' => $usuario->id, 'escopo_tipo' => 'turma', 'escopo_id' => $turmaId, 'created_at' => now(),
             ]);
         }
 
@@ -240,6 +259,23 @@ class UsuarioController extends Controller
         $usuario->update(['ativo' => $novoStatus]);
 
         return ApiResponse::success(['ativo' => $novoStatus]);
+    }
+
+    /** "O que cada perfil pode": padrão e extras concedíveis de cada perfil (docs/03 v2). */
+    public function catalogoPerfis(): JsonResponse
+    {
+        $descr = DB::table('permissoes')->get(['chave', 'modulo', 'descricao'])->keyBy('chave');
+        $porPerfil = DB::table('perfil_permissoes')->orderBy('permissao')->get()->groupBy('perfil')
+            ->map(fn ($linhas) => [
+                'padrao' => $linhas->where('tipo', 'padrao')->pluck('permissao')->values(),
+                'extra'  => $linhas->where('tipo', 'extra')->pluck('permissao')->values(),
+            ]);
+
+        return ApiResponse::success([
+            'permissoes' => $descr->values(),
+            'perfis'     => $porPerfil,
+            'cadastra'   => Cadastro::PODE_GERIR,
+        ]);
     }
 
     /**

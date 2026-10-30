@@ -68,6 +68,9 @@ Route::middleware('autenticado')->group(function () {
     // Membros da equipe (MP-013)
     Route::get('/membros',             [MembroController::class, 'index'])->name('membros.index');
     Route::get('/membros/novo',        [MembroController::class, 'create'])->name('membros.create');
+    Route::get('/membros/perfis',      [MembroController::class, 'perfis'])->name('membros.perfis');
+    Route::get('/membros/{id}/permissoes', [MembroController::class, 'permissoes'])->name('membros.permissoes');
+    Route::put('/membros/{id}/permissoes', [MembroController::class, 'salvarPermissoes'])->name('membros.permissoes.salvar');
     Route::post('/membros',            [MembroController::class, 'store'])->name('membros.store');
     Route::get('/membros/{id}/editar', [MembroController::class, 'edit'])->name('membros.edit');
     Route::put('/membros/{id}',        [MembroController::class, 'update'])->name('membros.update');

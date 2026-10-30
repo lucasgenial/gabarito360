@@ -37,6 +37,13 @@
   <div class="eyebrow">Administração</div>
   <h1 class="page-title">Cadastrar Novo Membro</h1>
   <p class="page-sub">Preencha os dados para adicionar um novo integrante à equipe.</p>
+  {{-- Passos do cadastro (o 4º abre depois de salvar) --}}
+  <ol style="display:flex;gap:6px 14px;flex-wrap:wrap;list-style:none;padding:0;margin:12px 0 0;font-size:13px;">
+    <li><b style="color:var(--accent);">1</b> Perfil e acesso</li>
+    <li><b style="color:var(--accent);">2</b> Dados pessoais</li>
+    <li><b style="color:var(--accent);">3</b> Dados profissionais</li>
+    <li style="color:var(--muted);"><b>4</b> Permissões (depois de salvar)</li>
+  </ol>
 </div>
 
 @if(session('erro'))
@@ -166,6 +173,19 @@
             </select>
           </div>
           @endif
+          @if(!empty($turmas))
+          <div class="field full-width" id="campo-turmas" style="display:none;">
+            <label>Turmas do professor</label>
+            <div id="lista-turmas" style="display:flex;gap:8px 16px;flex-wrap:wrap;padding-top:6px;">
+              @foreach($turmas as $t)
+                <label data-escola="{{ $t['escola_id'] }}" style="display:flex;gap:6px;align-items:center;font-size:14px;cursor:pointer;">
+                  <input type="checkbox" name="turma_ids[]" value="{{ $t['id'] }}" {{ in_array($t['id'], (array) old('turma_ids', [])) ? 'checked' : '' }} style="width:18px;height:18px;"> {{ $t['nome'] }}
+                </label>
+              @endforeach
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">O professor vê as provas e corrige os cartões dessas turmas.</div>
+          </div>
+          @endif
           <div class="field" id="campo-escola">
             <label for="escola_id">Escola vinculada <span style="color:var(--danger)">*</span></label>
             <select class="select" id="escola_id" name="escola_id">
@@ -270,7 +290,19 @@
     var cn = document.getElementById('campo-nucleo'), ce = document.getElementById('campo-escola');
     if (cn) cn.style.display = perfilEl.value === 'dir_nucleo' ? '' : 'none';
     if (ce) ce.style.display = nucleo ? 'none' : '';
+    // Turmas: só para professor, e só as da escola escolhida
+    var ct = document.getElementById('campo-turmas'), esc = document.getElementById('escola_id');
+    if (ct) {
+      ct.style.display = perfilEl.value === 'professor' ? '' : 'none';
+      document.querySelectorAll('#lista-turmas label').forEach(function (l) {
+        var mostra = !esc.value || l.dataset.escola === esc.value;
+        l.style.display = mostra ? '' : 'none';
+        if (!mostra) l.querySelector('input').checked = false;
+      });
+    }
   }
+  var escSel = document.getElementById('escola_id');
+  if (escSel) escSel.addEventListener('change', campoEscopo);
   perfilEl.addEventListener('change', campoEscopo);
   campoEscopo();
   emailEl.addEventListener('input', update);

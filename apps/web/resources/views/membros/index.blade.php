@@ -53,7 +53,10 @@
     <h1 class="page-title">Membros da Equipe</h1>
     <p class="page-sub">Gerencie os usuários e perfis de acesso do sistema.</p>
   </div>
-  <a href="{{ route('membros.create') }}" class="btn btn-primary">+ Novo Membro</a>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{{ route('membros.perfis') }}" class="btn btn-ghost">O que cada perfil pode</a>
+    @pode('usuario.gerir')<a href="{{ route('membros.create') }}" class="btn btn-primary">+ Novo Membro</a>@endpode
+  </div>
 </div>
 
 @if(session('sucesso'))
@@ -146,6 +149,7 @@
                 <td>
                   <div style="display:flex;gap:6px;flex-wrap:wrap;">
                     <a href="{{ route('membros.edit', $m['id']) }}" class="btn btn-secondary btn-sm">Editar</a>
+                    <a href="{{ route('membros.permissoes', $m['id']) }}" class="btn btn-ghost btn-sm">Permissões</a>
                     <form method="POST" action="{{ route('membros.toggle', $m['id']) }}" style="display:inline;">
                       @csrf
                       <button type="submit" class="btn btn-ghost btn-sm">
