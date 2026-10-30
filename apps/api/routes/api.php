@@ -149,11 +149,12 @@ Route::prefix('v1')->group(function () {
 
         // Usuários / equipe
         Route::prefix('usuarios')->group(function () {
-            Route::get('/',          [UsuarioController::class, 'index'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
-            Route::post('/',         [UsuarioController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar');
-            Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('perfil:admin_rede,dir_escolar');
-            Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar');
-            Route::post('{id}/toggle',[UsuarioController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar');
+            Route::get('/',          [UsuarioController::class, 'index'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
+            // Quem cadastra quem e em qual escopo: App\Support\Cadastro (docs/21, etapa 0)
+            Route::post('/',         [UsuarioController::class, 'store'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
+            Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
+            Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
+            Route::post('{id}/toggle',[UsuarioController::class, 'toggle'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
         });
 
         // Configurações da rede (MP-024)
