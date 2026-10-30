@@ -25,14 +25,23 @@ class ResultadoController extends Controller
         ]);
     }
 
-    /** Acertos e erros por questão (JSON) para o modal da tela de correção. */
-    public function folha(int $alunoId, int $provaId)
+    /** PDF do resultado (gerado pela API) para baixar, imprimir ou enviar por WhatsApp. */
+    public function pdf(int $alunoId, int $provaId)
     {
-        $resp = $this->api->get("/v1/alunos/{$alunoId}/resultados/{$provaId}");
+        $resp = $this->api->getArquivo("/v1/alunos/{$alunoId}/resultados/{$provaId}/pdf");
+        if ($resp->failed() || !str_contains((string) $resp->header('Content-Type'), 'pdf')) {
+            abort(404, $resp->json('message') ?? 'Não foi possível gerar o PDF.');
+        }
 
-        return response()->json(
-            $resp->failed() ? ['erro' => $resp->json('message') ?? 'Resultado indisponível.'] : $resp->json('data'),
-            $resp->failed() ? 404 : 200
-        );
+        $nome = 'resultado-aluno-' . $alunoId . '-prova-' . $provaId . '.pdf';
+        if (preg_match('/filename="?([^";]+)"?/', (string) $resp->header('Content-Disposition'), $m)) {
+            $nome = $m[1];
+        }
+
+        return response($resp->body(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => (request()->boolean('baixar') ? 'attachment' : 'inline') . '; filename="' . $nome . '"',
+        ]);
     }
+
 }
