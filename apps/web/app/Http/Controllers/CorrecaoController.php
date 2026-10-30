@@ -113,6 +113,24 @@ class CorrecaoController extends Controller
         return back()->with('sucesso', 'Cartão enviado para processamento.');
     }
 
+    public function fechar(int $provaId)
+    {
+        $resp = $this->api->post("/v1/provas/{$provaId}/correcao/fechar");
+
+        return back()->with($resp->failed() ? 'erro' : 'sucesso', $resp->failed()
+            ? ($resp->json('message') ?? 'Não foi possível fechar a correção.')
+            : 'Correção fechada. Agora só a coordenação/direção altera ou reabre.');
+    }
+
+    public function reabrir(int $provaId)
+    {
+        $resp = $this->api->post("/v1/provas/{$provaId}/correcao/reabrir");
+
+        return back()->with($resp->failed() ? 'erro' : 'sucesso', $resp->failed()
+            ? ($resp->json('message') ?? 'Não foi possível reabrir a correção.')
+            : 'Correção reaberta. Professores e corretores podem enviar, excluir e alterar de novo.');
+    }
+
     /** Alunos corrigidos (JSON para a tela de correção). */
     public function cartoes(int $provaId)
     {

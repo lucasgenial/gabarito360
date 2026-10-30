@@ -119,6 +119,11 @@ class EscolaController extends Controller
             'ativo'     => 'sometimes|boolean',
         ]);
 
+        // Diretor de núcleo só cadastra escola no próprio núcleo
+        if ($erro = $this->nucleoForaDoEscopo($request, (int) $data['nucleo_id'])) {
+            return $erro;
+        }
+
         $escola = Escola::create($data);
 
         return ApiResponse::success($escola, null, 201);
@@ -246,7 +251,7 @@ class EscolaController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $escola = Escola::find($id);
+        $escola = $this->escolaNoEscopo($request, $id);
 
         if (!$escola) {
             return ApiResponse::notFound('Escola não encontrada.');
@@ -265,14 +270,22 @@ class EscolaController extends Controller
             'ativo'     => 'sometimes|boolean',
         ]);
 
+        // Diretor escolar edita os dados da própria escola, mas não muda núcleo nem ativação
+        if ($request->user()->perfil === 'dir_escolar') {
+            unset($data['nucleo_id'], $data['ativo']);
+        }
+        if (isset($data['nucleo_id']) && ($erro = $this->nucleoForaDoEscopo($request, (int) $data['nucleo_id']))) {
+            return $erro;
+        }
+
         $escola->update($data);
 
         return ApiResponse::success($escola->fresh());
     }
 
-    public function toggle(int $id): JsonResponse
+    public function toggle(Request $request, int $id): JsonResponse
     {
-        $escola = Escola::find($id);
+        $escola = $this->escolaNoEscopo($request, $id);
 
         if (!$escola) {
             return ApiResponse::notFound('Escola não encontrada.');
@@ -284,6 +297,25 @@ class EscolaController extends Controller
             ['ativo' => $escola->ativo],
             $escola->ativo ? 'Escola ativada.' : 'Escola desativada.'
         );
+    }
+
+    private function escolaNoEscopo(Request $request, int $id): ?Escola
+    {
+        $ids = Escopo::escolaIds($request->user());
+
+        return ($ids === null || in_array($id, $ids, true)) ? Escola::find($id) : null;
+    }
+
+    private function nucleoForaDoEscopo(Request $request, int $nucleoId): ?JsonResponse
+    {
+        $u = $request->user();
+        if ($u->perfil !== 'dir_nucleo') {
+            return null;
+        }
+        $meu = DB::table('usuario_escopos')->where('usuario_id', $u->id)
+            ->where('escopo_tipo', 'nucleo')->where('escopo_id', $nucleoId)->exists();
+
+        return $meu ? null : ApiResponse::error('Você só pode cadastrar escolas no seu núcleo.', [], 403);
     }
 
     /** Logo da escola (cabeçalho dos relatórios). Qualquer usuário autenticado pode ver. */

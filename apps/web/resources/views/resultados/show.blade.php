@@ -92,8 +92,12 @@
     <button type="button" class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
     <a class="btn btn-secondary" href="{{ $urlPdf }}?baixar=1">⬇ PDF</a>
     <button type="button" class="btn btn-primary" id="btn-whats" style="background:#1fa855;border-color:#1fa855;">📲 WhatsApp</button>
-    @if($dados['cartao_id'])
+    @php $podeMexer = \App\Support\Acesso::podeAlterarCorrecao(!empty($dados['correcao']['fechada'])); @endphp
+    @if($dados['cartao_id'] && $podeMexer)
       <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-revisar').style.display='flex'">Revisar leitura</button>
+      <button type="button" class="btn btn-ghost" style="color:var(--danger);" id="btn-excluir-correcao">🗑 Excluir correção</button>
+    @elseif(!empty($dados['correcao']['fechada']))
+      <span class="badge badge-warn" title="Peça à coordenação para reabrir">🔒 correção fechada</span>
     @endif
   </div>
 </div>
@@ -175,6 +179,22 @@
 
 @push('scripts')
 <script>
+// Excluir a correção do aluno (apaga foto, respostas e nota) para fotografar de novo
+(function () {
+  var b = document.getElementById('btn-excluir-correcao');
+  if (!b) return;
+  b.addEventListener('click', function () {
+    if (!confirm('Excluir a correção de {{ addslashes($aluno['nome']) }} nesta prova?\nA foto, as respostas e a nota serão apagadas e você poderá fotografar o cartão de novo.')) return;
+    fetch('/cartoes/{{ (int) $dados['cartao_id'] }}', { method: 'DELETE', credentials: 'same-origin',
+      headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (!res.ok) { alert(res.j.erro || 'Não foi possível excluir.'); return; }
+        window.location.href = @json(route('correcao.show', $prova['id'], false));
+      });
+  });
+})();
+
 // Envia o PDF pelo compartilhamento do celular (WhatsApp aparece na lista); sem suporte a
 // arquivos, baixa o PDF e abre o WhatsApp com o resumo para anexar.
 (function () {
