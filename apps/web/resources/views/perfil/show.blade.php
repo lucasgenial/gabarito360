@@ -23,13 +23,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}">Painel</a>
-<a href="{{ route('provas.index') }}">Provas</a>
-<a href="{{ route('turmas.index') }}">Turmas</a>
-<a href="{{ route('escolas.index') }}">Escolas</a>
-@endsection
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
 <span>Meu Perfil</span>

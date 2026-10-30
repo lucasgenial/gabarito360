@@ -54,11 +54,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}" class="active">Painel</a>
-<a href="{{ route('provas.index') }}">Minhas Provas</a>
-@endsection
-
 @section('context-badge')
 @php $turmaAluno = $dashboard['aluno']['turma'] ?? null; @endphp
 @if($turmaAluno)

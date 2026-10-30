@@ -23,13 +23,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}">Painel</a>
-<a href="{{ route('provas.index') }}" class="active">Provas</a>
-<a href="{{ route('turmas.index') }}">Turmas</a>
-<a href="{{ route('escolas.index') }}">Escolas</a>
-@endsection
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
 <a href="{{ route('provas.index') }}">Provas</a><span class="sep">/</span>
@@ -45,6 +38,7 @@
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
     @if($prova['status'] === 'rascunho')
+      @pode('prova.editar')
       <button class="btn btn-secondary" onclick="abrirModal()">Editar</button>
       <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" class="btn btn-primary">Editar gabarito →</a>
       <form method="POST" action="{{ route('provas.destroy', $prova['id']) }}"
@@ -53,8 +47,9 @@
         @method('DELETE')
         <button type="submit" class="btn btn-ghost" style="color:var(--danger);">Excluir</button>
       </form>
+      @endpode
     @elseif($prova['status'] === 'publicada')
-      <button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>
+      @pode('prova.editar')<button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>@endpode
       <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-secondary">Ver gabarito</a>
       <a href="{{ route('correcao.show', $prova['id']) }}" class="btn btn-primary">Acompanhar correção →</a>
     @elseif($prova['status'] === 'em_correcao')
@@ -162,13 +157,17 @@
               <div style="font-weight:600;font-size:13px;">{{ $t['nome'] }}</div>
               <div style="font-size:12px;color:var(--muted);">{{ $t['serie'] }}</div>
             </div>
+            @pode('cartoes.imprimir')
             <a href="{{ route('correcao.pdf', $prova['id']) }}?turma_id={{ $t['id'] }}" target="_blank" class="btn btn-sm btn-ghost" title="Cartões-resposta com nome e QR de cada aluno">🖨 Cartões</a>
+            @endpode
             @if(in_array($prova['status'], ['em_correcao', 'corrigida'], true))
               <a href="{{ route('relatorios.turmaProva', [$t['id'], $prova['id']]) }}" class="btn btn-sm btn-ghost">Relatório</a>
             @endif
           </div>
         @endforeach
+        @pode('cartoes.imprimir')
         <a href="{{ route('correcao.pdf', $prova['id']) }}?brancos=5" target="_blank" class="btn btn-sm btn-ghost" style="margin-top:8px;">🖨 5 cartões em branco</a>
+        @endpode
       @else
         <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">
           Nenhuma turma vinculada.<br>

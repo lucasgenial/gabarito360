@@ -113,6 +113,7 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/provas/{id}/gabarito/publicar', [GabaritoController::class, 'publicar'])->name('provas.gabarito.publicar');
 
     // Acompanhamento de correção / OMR (MP-021)
+    Route::get('/corrigir',                     [CorrecaoController::class, 'index'])->name('correcao.index');
     Route::get('/provas/{id}/acompanhar',       [CorrecaoController::class, 'show'])->name('correcao.show');
     Route::get('/provas/{id}/acompanhar/status',[CorrecaoController::class, 'status'])->name('correcao.status');
     Route::post('/provas/{id}/cartoes',         [CorrecaoController::class, 'upload'])->name('correcao.upload');

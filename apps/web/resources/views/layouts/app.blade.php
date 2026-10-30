@@ -28,12 +28,19 @@
       <span class="logo">G360</span> Gabarito360
     </a>
 
-    <nav class="app-nav">
-      @yield('nav')
+    {{-- Menu único por perfil (App\Support\Acesso, doc 03 "Navegação por Perfil") --}}
+    <nav class="app-nav" aria-label="Menu principal">
+      @foreach(\App\Support\Acesso::menu() as $item)
+        <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']])>{{ $item['rotulo'] }}</a>
+      @endforeach
     </nav>
 
     <div class="header-right">
-      @yield('context-badge')
+      @hasSection('context-badge')
+        @yield('context-badge')
+      @else
+        <span class="badge badge-info badge-dot">{{ \App\Support\Acesso::rotulo() }}</span>
+      @endif
       <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
       <div class="user-menu-container">
         <div class="avatar" id="user-menu-trigger">
@@ -42,13 +49,13 @@
         <div class="user-menu" id="user-menu">
           <div class="user-menu-header">
             <div class="user-name">{{ session('auth_nome') }}</div>
-            <div class="user-role">{{ session('auth_email') }}</div>
+            <div class="user-role">{{ \App\Support\Acesso::rotulo() }} · {{ session('auth_email') }}</div>
           </div>
           <div class="user-menu-links">
             <a href="{{ route('perfil') }}">Meu Perfil</a>
-            @if(session('auth_perfil') === 'admin_rede')
+            @pode('rede.configurar')
               <a href="{{ route('configuracoes.index') }}">Configurações</a>
-            @endif
+            @endpode
             @if(session('auth_titular'))
               <a href="{{ route('assinatura.index') }}">Assinatura e Cobrança</a>
             @endif

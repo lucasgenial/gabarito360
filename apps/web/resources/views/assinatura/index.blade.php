@@ -92,12 +92,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}">Painel</a>
-<a href="{{ route('planos.index') }}">Planos</a>
-<a href="{{ route('assinatura.index') }}" class="active">Assinatura</a>
-@endsection
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a> › Assinatura e Cobrança
 @endsection

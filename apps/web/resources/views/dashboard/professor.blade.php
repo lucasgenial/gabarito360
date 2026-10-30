@@ -38,13 +38,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}" class="active">Painel</a>
-<a href="{{ route('provas.index') }}">Provas</a>
-<a href="{{ route('turmas.index') }}">Turmas</a>
-<a href="{{ route('escolas.index') }}">Escolas</a>
-@endsection
-
 @section('context-badge')
 @php
   $prof = $dashboard['professor'] ?? null;
@@ -89,7 +82,10 @@
       @if($prof && $prof['total_turmas']) · {{ $prof['total_turmas'] }} {{ $prof['total_turmas'] == 1 ? 'turma ativa' : 'turmas ativas' }}@endif
     </p>
   </div>
-  <a href="{{ route('provas.index') }}" class="btn btn-primary">+ Nova Prova</a>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{{ route('correcao.index') }}" class="btn btn-primary">📷 Corrigir cartões</a>
+    @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-secondary">+ Nova prova</a>@endpode
+  </div>
 </div>
 
 {{-- KPIs --}}
@@ -133,46 +129,10 @@
   {{-- Tabela de provas --}}
   <div class="card card-pad">
     <div class="row-between" style="margin-bottom:12px;">
-      <h2 class="section-title" style="margin-bottom:0;">Minhas provas</h2>
+      <h2 class="section-title" style="margin-bottom:0;">Provas das minhas turmas</h2>
       <span class="badge badge-muted">Ano letivo {{ now()->year }}</span>
     </div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Prova</th>
-          <th>Turma</th>
-          <th>Data</th>
-          <th>Alunos</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse($provas as $p)
-          @php $cfg = $statusConfig[$p['status']] ?? ['badge' => 'badge-muted', 'label' => $p['status']]; @endphp
-          <tr>
-            <td>{{ $p['titulo'] }}</td>
-            <td>{{ $p['turma'] }}</td>
-            <td class="num">{{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}</td>
-            <td class="num">{{ $p['total_alunos'] }}</td>
-            <td><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></td>
-            <td>
-              <div class="proof-actions">
-                <a class="btn btn-secondary btn-sm" href="{{ route('provas.gabarito.show', $p['id']) }}">Ver gabarito</a>
-                <a class="btn btn-ghost btn-sm" href="#">Resultados</a>
-                <a class="btn btn-ghost btn-sm" href="#">Acompanhar</a>
-              </div>
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">
-              Nenhuma prova cadastrada ainda.
-            </td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
+    @include('dashboard._provas-ciclo', ['provas' => $provas])
   </div>
 
   {{-- Coluna lateral --}}
@@ -259,15 +219,15 @@
 {{-- Ações rápidas --}}
 <h2 class="section-title" style="margin-top:28px;">Ações rápidas</h2>
 <div class="quick-actions">
-  <a class="qa" href="{{ route('provas.index') }}">
+  <a class="qa" href="{{ route('provas.create') }}">
     <div class="qa-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></div>
     <b>Nova Prova</b>
     <span>Monte gabarito e organize aplicação por turma.</span>
   </a>
-  <a class="qa" href="#">
+  <a class="qa" href="{{ route('correcao.index') }}">
     <div class="qa-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
     <b>Capturar Cartões</b>
-    <span>Abra o fluxo de leitura dos cartões da próxima turma.</span>
+    <span>Escolha a prova e fotografe os cartões pelo celular.</span>
   </a>
   <a class="qa" href="{{ route('turmas.index') }}">
     <div class="qa-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM16 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.5 19a4.5 4.5 0 0 1 9 0M13 19a3.5 3.5 0 0 1 7 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>

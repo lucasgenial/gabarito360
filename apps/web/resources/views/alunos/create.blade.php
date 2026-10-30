@@ -14,13 +14,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}">Painel</a>
-<a href="{{ route('turmas.index') }}" class="active">Turmas</a>
-<a href="{{ route('escolas.index') }}">Escolas</a>
-<a href="{{ route('provas.index') }}">Provas</a>
-@endsection
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
 <a href="{{ route('turmas.index') }}">Turmas</a><span class="sep">/</span>

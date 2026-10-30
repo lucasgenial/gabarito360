@@ -14,6 +14,7 @@ use App\Models\Secretaria;
 use App\Models\SincronizacaoSeges;
 use App\Models\Usuario;
 use App\Models\Visita;
+use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -150,13 +151,13 @@ class DashboardController extends Controller
             ->where('escopo_tipo', 'turma')
             ->pluck('escopo_id');
 
-        // KPIs
-        $minhasProvas = Prova::where('criado_por', $usuario->id)->count();
+        // KPIs — provas visíveis: criadas por ele ou das turmas em que está vinculado
+        $provaIds     = Escopo::provas($usuario)->pluck('provas.id');
+        $minhasProvas = $provaIds->count();
 
         $cartoesCorrigir = DB::table('cartoes')
-            ->join('provas', 'cartoes.prova_id', '=', 'provas.id')
-            ->where('provas.criado_por', $usuario->id)
-            ->whereIn('cartoes.status', ['pendente', 'ambiguo'])
+            ->whereIn('prova_id', $provaIds)
+            ->whereIn('status', ['pendente', 'ambiguo'])
             ->count();
 
         $minhasTurmas = $turmaIds->count();
@@ -167,18 +168,19 @@ class DashboardController extends Controller
 
         // Disciplina principal (a mais usada nas provas do professor)
         $disciplinaPrincipal = DB::table('provas')
-            ->where('criado_por', $usuario->id)
+            ->whereIn('id', $provaIds)
             ->select('disciplina', DB::raw('COUNT(*) as total'))
             ->groupBy('disciplina')
             ->orderByDesc('total')
             ->value('disciplina');
 
         // Tabela de provas do professor (mais recentes)
-        $provas = Prova::where('criado_por', $usuario->id)
+        $provas = Escopo::provas($usuario)
+            ->orderByRaw("FIELD(status, 'em_correcao', 'publicada', 'rascunho', 'corrigida')")
             ->orderByDesc('data_aplicacao')
-            ->limit(8)
+            ->limit(12)
             ->get(['id', 'titulo', 'disciplina', 'status', 'data_aplicacao'])
-            ->map(function ($p) {
+            ->map(function ($p) use ($turmaIds) {
                 $turmas = DB::table('prova_turmas')
                     ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
                     ->where('prova_turmas.prova_id', $p->id)
@@ -194,9 +196,13 @@ class DashboardController extends Controller
                 return [
                     'id'             => $p->id,
                     'titulo'         => $p->titulo,
+                    'disciplina'     => $p->disciplina,
                     'turma'          => $turmas ?: '—',
+                    // Cartões por turma: só as turmas do professor (todas, se ele criou a prova)
+                    'turmas_lista'   => $this->turmasDaProva($p->id, $turmaIds->all()),
                     'data_aplicacao' => $p->data_aplicacao,
                     'total_alunos'   => $totalAlunos,
+                    'cartoes_lidos'  => DB::table('cartoes')->where('prova_id', $p->id)->where('status', 'lido')->count(),
                     'status'         => $p->status,
                 ];
             });
@@ -252,6 +258,21 @@ class DashboardController extends Controller
             'ranking_bottom3' => $bottom3,
             'alunos_atencao' => $alunosAtencao,
         ]);
+    }
+
+    /** Turmas vinculadas à prova [{id, nome}], opcionalmente limitadas a $somente (vazio = todas). */
+    private function turmasDaProva(int $provaId, array $somente = []): array
+    {
+        $todas = DB::table('prova_turmas')
+            ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+            ->where('prova_turmas.prova_id', $provaId)
+            ->orderBy('turmas.nome')
+            ->get(['turmas.id', 'turmas.nome']);
+
+        $minhas = $todas->whereIn('id', $somente);
+
+        return ($minhas->isNotEmpty() ? $minhas : $todas)
+            ->map(fn ($t) => ['id' => (int) $t->id, 'nome' => $t->nome])->values()->all();
     }
 
     public function coordenador(Request $request): JsonResponse
@@ -340,6 +361,7 @@ class DashboardController extends Controller
                     'titulo'         => $p->titulo,
                     'professor'      => $p->professor_nome,
                     'turmas'         => $turmas ?: '—',
+                    'turmas_lista'   => $this->turmasDaProva($p->id),
                     'total_alunos'   => $totalAlunos,
                     'cartoes_lidos'  => $cartoesLidos,
                     'status'         => $p->status,

@@ -98,11 +98,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}">Painel</a>
-<a href="{{ route('planos.index') }}">Planos</a>
-@endsection
-
 @section('content')
 <div class="breadcrumb">
   <a href="{{ route('painel') }}">Início</a> › <a href="{{ route('planos.index') }}">Planos</a> › Checkout
