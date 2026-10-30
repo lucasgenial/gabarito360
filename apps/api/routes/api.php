@@ -67,6 +67,8 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}/cartoes',        [CartaoController::class, 'index']);
             Route::get('{id}/cartoes/status', [CartaoController::class, 'status']);
             Route::get('{id}/cartoes/pdf',    [CartaoController::class, 'pdf']);
+            Route::post('{id}/correcao/fechar',  [CartaoController::class, 'fecharCorrecao'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::post('{id}/correcao/reabrir', [CartaoController::class, 'reabrirCorrecao'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
             Route::post('{id}/cartoes',       [CartaoController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor,aplicador');
         });
 
@@ -129,10 +131,11 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}/logo',   [EscolaController::class, 'logo']);
             Route::post('{id}/logo',  [EscolaController::class, 'enviarLogo'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
             Route::get('/',           [EscolaController::class, 'index']);
-            Route::post('/',          [EscolaController::class, 'store'])->middleware('perfil:admin_rede');
+            // Cadastro de escola: admin da rede e diretor de núcleo (no próprio núcleo)
+            Route::post('/',          [EscolaController::class, 'store'])->middleware('perfil:admin_rede,dir_nucleo');
             Route::get('{id}',        [EscolaController::class, 'show']);
-            Route::put('{id}',        [EscolaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar');
-            Route::post('{id}/toggle',[EscolaController::class, 'toggle'])->middleware('perfil:admin_rede');
+            Route::put('{id}',        [EscolaController::class, 'update'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar');
+            Route::post('{id}/toggle',[EscolaController::class, 'toggle'])->middleware('perfil:admin_rede,dir_nucleo');
         });
 
         // Núcleos
