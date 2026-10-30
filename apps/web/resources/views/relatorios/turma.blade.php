@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('tela', 'tela-rel-turma')
+
 {{--
   Arquivo: apps/web/resources/views/relatorios/turma.blade.php
   Função: Relatório consolidado da turma em todas as provas — média e aprovação por área,
@@ -17,25 +19,6 @@
 
 @section('title', 'Relatório da turma ' . $turma['nome'])
 
-@push('styles')
-<style>
-  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
-  .kpis .card { padding:14px 16px; }
-  .kpis .v { font-family:var(--font-mono); font-size:26px; font-weight:700; }
-  .kpis .l { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
-  .tab { width:100%; border-collapse:collapse; font-size:14px; }
-  .tab th, .tab td { padding:8px 10px; border-bottom:1px solid var(--border-soft); text-align:center; white-space:nowrap; }
-  .tab th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
-  .tab td.esq, .tab th.esq { text-align:left; }
-  .nota { font-family:var(--font-mono); font-weight:700; padding:2px 7px; border-radius:5px; }
-  .nota.ok { background:var(--success-light,#e3f5e1); color:var(--success,#168821); }
-  .nota.baixa { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); }
-  .legenda { display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--muted); }
-  .legenda i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:middle; }
-  @media (max-width:720px) { .kpis { grid-template-columns:1fr 1fr; } }
-</style>
-@endpush
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
 <a href="{{ route('turmas.show', $turma['id']) }}">{{ $turma['nome'] }}</a><span class="sep">/</span>
@@ -51,8 +34,8 @@
     <p class="page-sub">{{ collect([$turma['escola_nome'], $turma['serie'], $kpis['alunos'] . ' alunos', $kpis['provas'] . ' provas'])->filter()->implode(' · ') }}</p>
   </div>
   <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;">
-    <a class="btn btn-ghost" href="{{ route('correcao.turma', $turma['id']) }}">📊 Acompanhar correção</a>
-    <button type="button" class="btn btn-secondary" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <a class="btn btn-ghost" href="{{ route('correcao.turma', $turma['id']) }}"><x-icone nome="grafico" /> Acompanhar correção</a>
+    <button type="button" class="btn btn-secondary" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir / PDF</button>
   </div>
 </div>
 

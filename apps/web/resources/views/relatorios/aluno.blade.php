@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('tela', 'tela-rel-aluno')
+
 {{--
   Arquivo: apps/web/resources/views/relatorios/aluno.blade.php
   Função: Boletim do aluno — todas as provas da turma com nota, acertos, média da turma e
@@ -13,21 +15,6 @@
 @endphp
 
 @section('title', 'Boletim — ' . $aluno['nome'])
-
-@push('styles')
-<style>
-  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
-  .kpis .card { padding:14px 16px; }
-  .kpis .v { font-family:var(--font-mono); font-size:26px; font-weight:700; }
-  .kpis .l { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
-  .tab { width:100%; border-collapse:collapse; font-size:14px; }
-  .tab th, .tab td { padding:9px 10px; border-bottom:1px solid var(--border-soft); text-align:center; }
-  .tab th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
-  .tab .esq { text-align:left; }
-  .nota { font-family:var(--font-mono); font-weight:700; font-size:16px; }
-  @media (max-width:720px) { .kpis { grid-template-columns:1fr 1fr; } .tab .opc { display:none; } }
-</style>
-@endpush
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -44,9 +31,9 @@
     <p class="page-sub">{{ collect(['Turma ' . $turma['nome'], $aluno['matricula'] ? 'Matrícula ' . $aluno['matricula'] : null, $aluno['nome_responsavel'] ? 'Responsável: ' . $aluno['nome_responsavel'] : null])->filter()->implode(' · ') }}</p>
   </div>
   <div class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;">
-    <button type="button" class="btn btn-secondary" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <button type="button" class="btn btn-secondary" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir / PDF</button>
     <a class="btn btn-primary" style="background:#1fa855;border-color:#1fa855;" target="_blank" rel="noopener"
-       href="https://wa.me/?text={{ rawurlencode($textoWhats) }}">📲 WhatsApp</a>
+       href="https://wa.me/?text={{ rawurlencode($textoWhats) }}"><x-icone nome="compartilhar" /> WhatsApp</a>
     <a class="btn btn-ghost" href="{{ route('alunos.show', $aluno['id']) }}">Cadastro</a>
   </div>
 </div>
@@ -105,7 +92,7 @@
             <td class="esq"><b>{{ $p['disciplina'] }}</b><div style="font-size:12px;color:var(--muted);">{{ $p['titulo'] }}{{ $p['lingua'] ? ' · ' . ($p['lingua'] === 'ESP' ? 'Espanhol' : 'Inglês') : '' }}</div></td>
             <td>
               @if($p['nota'] !== null)
-                <span class="nota" style="color:{{ $p['nota'] >= $p['nota_maxima'] * 0.6 ? 'var(--success,#168821)' : 'var(--danger,#e52207)' }};">{{ $fmt($p['nota']) }}</span>
+                <span class="nota" style="color:{{ $p['nota'] >= $p['nota_maxima'] * 0.6 ? 'var(--success)' : 'var(--danger)' }};">{{ $fmt($p['nota']) }}</span>
               @else
                 <span style="color:var(--muted);">não corrigida</span>
               @endif

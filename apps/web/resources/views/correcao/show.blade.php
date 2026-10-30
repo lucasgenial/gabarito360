@@ -1,37 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Acompanhar correção — ' . $prova['titulo'])
+@section('tela', 'tela-correcao')
 
-@push('styles')
-<style>
-  .progress-head { display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px; }
-  .stat-row { display:flex;gap:28px;align-items:center;flex-wrap:wrap; }
-  .stat-grid { display:grid;grid-template-columns:repeat(2,auto);gap:18px 28px; }
-  .stat-grid .v { font-family:var(--font-mono);font-size:26px;font-weight:700; }
-  .stat-grid .l { font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px; }
-  .progress-track { height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:18px; }
-  .progress-track > div { height:100%;background:var(--accent);width:0;transition:width .25s; }
-  .exam-meta { font-size:13px;color:var(--muted);margin-top:2px; }
-  .activity li { display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-soft);font-size:14px;align-items:center; }
-  .activity li:last-child { border:0; }
-  .act-ico { width:34px;height:34px;border-radius:8px;display:grid;place-items:center;flex-shrink:0; }
-  .act-time { color:var(--muted);font-size:12px;margin-top:2px; }
-  .ambig-list li { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-soft);font-size:14px; }
-  .ambig-list li:last-child { border:0; }
-  .resolve-actions { display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap; }
-  @media(max-width:900px){ .progress-head{grid-template-columns:1fr;} }
-  .corr-list { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px; }
-  .corr-item { display:flex; gap:12px; align-items:flex-start; padding:10px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface); }
-  .corr-thumb { width:64px; height:88px; object-fit:cover; border-radius:6px; background:var(--surface-2); cursor:zoom-in; flex-shrink:0; border:1px solid var(--border-soft); }
-  .corr-info { flex:1; min-width:0; font-size:13px; }
-  .corr-info b { display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .corr-nota { font-family:var(--font-mono); font-size:20px; font-weight:700; text-align:right; }
-  .corr-acoes { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
-  .g360-modal { position:fixed; inset:0; z-index:1100; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; padding:12px; }
-  .g360-modal .caixa { background:var(--surface); border-radius:var(--radius-lg); width:100%; max-width:640px; max-height:92vh; overflow:auto; padding:16px; }
-  .foto-img { max-width:100%; max-height:78vh; border-radius:6px; background:#fff; display:block; margin:0 auto; }
-</style>
-@endpush
+@section('title', 'Acompanhar correção — ' . $prova['titulo'])
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -57,22 +28,22 @@
 @endphp
 
 {{-- Correção aberta/fechada --}}
-<div class="card card-pad no-print" style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;{{ $fechada ? 'border-color:var(--warn-fg,#b06800);background:var(--warn-light,#fff5c2);' : '' }}">
+<div class="card card-pad no-print" style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;{{ $fechada ? 'border-color:var(--warn-fg);background:var(--warn-light);' : '' }}">
   @if($fechada)
     <div style="flex:1;min-width:220px;font-size:14px;">
-      🔒 <b>Correção fechada</b>{{ !empty($corr['fechada_por']) ? ' por ' . $corr['fechada_por'] : '' }}{{ !empty($corr['fechada_em']) ? ' em ' . \Carbon\Carbon::parse($corr['fechada_em'])->timezone('America/Bahia')->format('d/m/Y \à\s H:i') : '' }}.
+      <x-icone nome="cadeado" /> <b>Correção fechada</b>{{ !empty($corr['fechada_por']) ? ' por ' . $corr['fechada_por'] : '' }}{{ !empty($corr['fechada_em']) ? ' em ' . \Carbon\Carbon::parse($corr['fechada_em'])->timezone('America/Bahia')->format('d/m/Y \à\s H:i') : '' }}.
       <div style="font-size:12px;color:var(--muted);">{{ $podeMexer ? 'Você (supervisão) ainda pode excluir e incluir correções.' : 'Para enviar, excluir ou alterar cartões, peça à coordenação para reabrir.' }}</div>
     </div>
     @pode('correcao.reabrir')
       <form method="POST" action="{{ route('correcao.reabrir', $prova['id']) }}" onsubmit="return confirm('Reabrir a correção? Professores e corretores voltam a poder enviar, excluir e alterar.')">
-        @csrf<button type="submit" class="btn btn-secondary">🔓 Reabrir correção</button>
+        @csrf<button type="submit" class="btn btn-secondary"><x-icone nome="cadeado" /> Reabrir correção</button>
       </form>
     @endpode
   @else
-    <div style="flex:1;min-width:220px;font-size:14px;">🟢 <b>Correção aberta</b><div style="font-size:12px;color:var(--muted);">Ao terminar, feche a correção para evitar alterações.</div></div>
+    <div style="flex:1;min-width:220px;font-size:14px;"><b>Correção aberta</b><div style="font-size:12px;color:var(--muted);">Ao terminar, feche a correção para evitar alterações.</div></div>
     @pode('correcao.fechar')
       <form method="POST" action="{{ route('correcao.fechar', $prova['id']) }}" onsubmit="return confirm('Fechar a correção? Depois disso só a coordenação/direção poderá alterar, excluir, incluir ou reabrir.')">
-        @csrf<button type="submit" class="btn btn-secondary">🔒 Fechar correção</button>
+        @csrf<button type="submit" class="btn btn-secondary"><x-icone nome="cadeado" /> Fechar correção</button>
       </form>
     @endpode
   @endif
@@ -85,12 +56,12 @@
 @endif
 
 @if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
+  <div style="background:var(--success-light);color:var(--success);border:1px solid var(--success);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
     {{ session('sucesso') }}
   </div>
 @endif
 @if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
+  <div style="background:var(--danger-light);color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
     {{ session('erro') }}
   </div>
 @endif
@@ -102,7 +73,7 @@
       <div class="stat-grid">
         <div><div class="v" id="v-lidos" style="color:var(--accent);">{{ $status['lidos'] }}</div><div class="l">Cartões lidos</div></div>
         <div><div class="v" id="v-pendentes" style="color:var(--muted)">{{ $status['pendentes'] }}</div><div class="l">Pendentes</div></div>
-        <div><div class="v" id="v-ambiguos" style="color:var(--warn-fg,#b45309)">{{ $status['ambiguos'] }}</div><div class="l">Ambíguos</div></div>
+        <div><div class="v" id="v-ambiguos" style="color:var(--warn-fg)">{{ $status['ambiguos'] }}</div><div class="l">Ambíguos</div></div>
         <div><div class="v" id="v-total" style="color:var(--muted)">{{ $status['total'] }}</div><div class="l">Total de cartões</div></div>
       </div>
     </div>
@@ -211,7 +182,7 @@ function desenharCorrigidos() {
       : c.status === 'ambiguo' ? '<span class="badge badge-warn">' + c.ambiguas + ' p/ revisar</span>'
       : '<span class="badge badge-muted">lendo</span>';
     var nota = (c.nota_final !== null && c.nota_final !== undefined)
-      ? '<div class="corr-nota" style="color:' + (Number(c.nota_final) >= NOTA_MAX * 0.6 ? 'var(--success,#168821)' : 'var(--danger,#e52207)') + '">' + fmtNota(c.nota_final) + '</div>'
+      ? '<div class="corr-nota" style="color:' + (Number(c.nota_final) >= NOTA_MAX * 0.6 ? 'var(--success)' : 'var(--danger)') + '">' + fmtNota(c.nota_final) + '</div>'
         + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
       : '';
     var foto = c.tem_imagem
@@ -219,10 +190,10 @@ function desenharCorrigidos() {
       : '<div class="corr-thumb" style="display:grid;place-items:center;font-size:11px;color:var(--muted);">sem foto</div>';
     var acoes = '';
     if (c.aluno_id && c.nota_final !== null && c.nota_final !== undefined) {
-      acoes += '<a class="btn btn-sm btn-secondary" href="/resultados/' + c.aluno_id + '/' + PROVA_ID + '?from=correcao">📋 Acertos e erros</a>';
+      acoes += '<a class="btn btn-sm btn-secondary" href="/resultados/' + c.aluno_id + '/' + PROVA_ID + '?from=correcao"><x-icone nome="prova" /> Acertos e erros</a>';
     }
     if (!c.aluno_id && typeof seletorAluno === 'function' && typeof ALUNOS !== 'undefined' && ALUNOS.length) acoes += seletorAluno(c.id);
-    if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">🗑 Excluir</button>';
+    if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')"><x-icone nome="lixeira" /> Excluir</button>';
     return '<li class="corr-item">' + foto + '<div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
       + '<div style="margin-top:4px;">' + st + '</div><div class="corr-acoes">' + acoes + '</div></div><div>' + nota + '</div></li>';
   }).join('');
@@ -327,7 +298,7 @@ function renderAtividade(recentes) {
     var li = document.createElement('li');
     var nome = r.aluno_nome || 'Aluno não identificado';
     var nota = r.nota_final !== null ? parseFloat(r.nota_final).toFixed(1).replace('.', ',') : '—';
-    li.innerHTML = '<div class="act-ico" style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);">✓</div><div><b>' + nome + '</b> — nota ' + nota + '<div class="act-time">' + tempoRelativo(r.updated_at) + '</div></div>';
+    li.innerHTML = '<div class="act-ico" style="background:var(--success-light);color:var(--success);">✓</div><div><b>' + nome + '</b> — nota ' + nota + '<div class="act-time">' + tempoRelativo(r.updated_at) + '</div></div>';
     ul.appendChild(li);
   });
 }
