@@ -51,7 +51,8 @@
     body { background:#fff; }
     .container { padding:0 !important; max-width:none !important; }
     .card { box-shadow:none !important; border:0 !important; }
-    .res-resumo { grid-template-columns:1.3fr repeat(4,1fr); }
+    .res-resumo { grid-template-columns:1.3fr repeat(4,1fr) !important; }
+    .res-resumo .res-box:first-child { grid-column:auto !important; }
     .res-folha { grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(var(--linhas),auto); grid-auto-flow:column; }
     .res-q { font-size:11.5px; padding:4px 8px; break-inside:avoid; }
     * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
