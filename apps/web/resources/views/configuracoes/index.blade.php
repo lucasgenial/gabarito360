@@ -1,18 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Configurações')
+@section('tela', 'tela-config')
 
-@push('styles')
-<style>
-  .section-card { background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:24px; }
-  .section-head { padding:20px 24px 16px;border-bottom:1px solid var(--border-soft); }
-  .section-head h2 { font-size:16px;font-weight:700; }
-  .section-head p { font-size:13px;color:var(--muted);margin-top:2px; }
-  .section-body { padding:24px; }
-  .form-row { display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 20px; }
-  @media (max-width:900px){ .form-row{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Configurações')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -21,23 +11,12 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;margin-bottom:0;">
-  <div>
-    <h1 class="page-title">Configurações</h1>
-    <p class="page-sub">Parâmetros gerais aplicados a toda a rede de ensino</p>
-  </div>
-</div>
+<x-pagina titulo="Configurações">
+  <x-slot:sub>Parâmetros gerais aplicados a toda a rede de ensino</x-slot:sub>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 <div class="section-card">
   <div class="section-head">

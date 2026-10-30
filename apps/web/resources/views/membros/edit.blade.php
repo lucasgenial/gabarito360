@@ -1,28 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Editar Membro')
+@section('tela', 'tela-membro')
 
-@push('styles')
-<style>
-  .member-layout { display:grid; grid-template-columns:280px 1fr; gap:24px; margin-top:20px; align-items:start; }
-  .identity-card { background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); padding:24px 20px; position:sticky; top:88px; text-align:center; }
-  .avatar-circle { width:120px; height:120px; margin:0 auto 14px; border-radius:50%; background:linear-gradient(135deg,var(--accent) 0%,#0c326f 100%); display:grid; place-items:center; font-size:38px; font-weight:800; color:#fff; }
-  .identity-label { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:4px; }
-  .identity-value { font-size:14px; color:var(--fg); font-weight:600; word-break:break-word; }
-  .identity-block + .identity-block { margin-top:12px; }
-  .form-main { display:flex; flex-direction:column; gap:18px; }
-  .section-card { background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); }
-  .section-head { padding:18px 22px 14px; border-bottom:1px solid var(--border-soft); }
-  .section-head h2 { font-size:16px; font-weight:700; margin-bottom:4px; }
-  .section-head p { font-size:13px; color:var(--muted); }
-  .section-body { padding:20px 22px 22px; }
-  .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
-  .full-width { grid-column:1/-1; }
-  .action-bar { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-top:8px; }
-  @media (max-width:960px){ .member-layout{grid-template-columns:1fr;} .identity-card{position:static;} }
-  @media (max-width:680px){ .form-grid-2{grid-template-columns:1fr;} .action-bar{flex-direction:column;} .action-bar .btn{width:100%;} }
-</style>
-@endpush
+@section('title', 'Editar Membro')
 
 @section('breadcrumb')
 <span>Início</span><span class="sep">/</span>
@@ -48,14 +28,10 @@
   <div class="eyebrow">Administração</div>
   <h1 class="page-title">Editar Membro</h1>
   <p class="page-sub">Atualize as informações do membro da equipe.</p>
-  <a href="{{ route('membros.permissoes', $membro['id']) }}" class="btn btn-secondary btn-sm" style="margin-top:8px;">🔐 Permissões deste membro</a>
+  <a href="{{ route('membros.permissoes', $membro['id']) }}" class="btn btn-secondary btn-sm" style="margin-top:8px;">Permissões deste membro</a>
 </div>
 
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 <form method="POST" action="{{ route('membros.update', $membro['id']) }}" class="member-layout">
   @csrf

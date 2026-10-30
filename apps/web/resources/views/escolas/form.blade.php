@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('tela', 'tela-escola-form')
+
 {{--
   Arquivo: apps/web/resources/views/escolas/form.blade.php
   Função: Cadastro e edição de escola no modelo do ECOAR-MQA (docs/21, etapa 6).
@@ -19,37 +21,6 @@
 
 @section('title', $novo ? 'Cadastrar escola' : 'Editar escola')
 
-@push('styles')
-<style>
-  .esc-form { display:flex; flex-direction:column; gap:16px; margin-top:16px; max-width:900px; }
-  .sec { background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); }
-  .sec-head { padding:16px 20px 12px; border-bottom:1px solid var(--border-soft); }
-  .sec-head h2 { font-size:16px; font-weight:700; }
-  .sec-head p { font-size:13px; color:var(--muted); margin-top:2px; }
-  .sec-body { padding:18px 20px 6px; }
-  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
-  .g3 { display:grid; grid-template-columns:2fr 1fr 1fr; gap:0 16px; }
-  .cheia { grid-column:1/-1; }
-  .checks { display:flex; flex-wrap:wrap; gap:8px 18px; margin-bottom:16px; }
-  .checks label { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500; cursor:pointer; min-height:32px; }
-  .checks input { width:18px; height:18px; }
-  .censo-busca { display:flex; gap:8px; }
-  .censo-busca .input { flex:1; }
-  .censo-res { list-style:none; padding:0; margin:8px 0 0; border:1px solid var(--border-soft); border-radius:8px; max-height:280px; overflow-y:auto; }
-  .censo-res li button { width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--border-soft); padding:10px 12px; cursor:pointer; font:inherit; }
-  .censo-res li button:hover { background:var(--surface-2); }
-  .censo-res small { color:var(--muted); display:block; }
-  .aviso { border-radius:8px; padding:10px 14px; font-size:14px; margin:4px 0 14px; }
-  .aviso.ok { background:var(--success-light,#e3f5e1); color:var(--success,#168821); }
-  .aviso.erro { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); }
-  .aviso.info { background:var(--accent-light); color:var(--accent-dark); }
-  .acoes { display:flex; justify-content:flex-end; gap:10px; padding:4px 0 24px; }
-  .bloqueado { background:var(--surface-2); color:var(--muted); }
-  .erro-campo { color:var(--danger,#e52207); font-size:13px; margin-top:4px; }
-  @media (max-width:720px) { .g2, .g3 { grid-template-columns:1fr; } .censo-busca { flex-direction:column; } .acoes { flex-direction:column-reverse; } .acoes .btn { width:100%; } }
-</style>
-@endpush
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
 <a href="{{ route('escolas.index') }}">Escolas</a><span class="sep">/</span>
@@ -64,8 +35,8 @@
   <p class="page-sub">Mesmos dados do Censo Escolar (INEP) usados no ECOAR. {{ $novo ? 'Digite o código INEP: os dados são preenchidos e você só confere.' : '' }}</p>
 </div>
 
-@if(session('erro'))<div class="aviso erro" style="margin-top:12px;">{{ session('erro') }}</div>@endif
-@if($errors->any())<div class="aviso erro" style="margin-top:12px;">Confira os campos destacados abaixo.</div>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
+@if($errors->any())<x-aviso tipo="erro">Confira os campos destacados abaixo.</x-aviso>@endif
 
 <form method="POST" action="{{ $novo ? route('escolas.store') : route('escolas.update', $e['id']) }}" class="esc-form" id="esc-form">
   @csrf

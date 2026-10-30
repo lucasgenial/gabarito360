@@ -1,23 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Nova Prova')
+@section('tela', 'tela-prova-nova')
 
-@push('styles')
-<style>
-  .editor-grid { display:grid;grid-template-columns:320px 1fr;gap:20px;margin-top:20px;align-items:start; }
-  .sticky { position:sticky;top:84px; }
-  .stepper { display:flex;gap:0;margin-bottom:4px; }
-  .step { display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600; }
-  .step .dot { width:24px;height:24px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-size:12px; }
-  .step.active .dot { background:var(--accent);color:#fff; }
-  .step.done .dot { background:var(--success,#168821);color:#fff; }
-  .step .line { width:40px;height:2px;background:var(--border);margin:0 10px; }
-  .preview-prova { background:var(--surface-2,#f4f6f9);border-radius:var(--radius-md);padding:16px;margin-top:16px;font-size:13px; }
-  .preview-prova .pk { color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px; }
-  .preview-prova .pv { font-weight:600;color:var(--fg); }
-  @media(max-width:900px){ .editor-grid{grid-template-columns:1fr;} .sticky{position:static;} }
-</style>
-@endpush
+@section('title', 'Nova Prova')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -27,20 +12,13 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <h1 class="page-title">Criar prova e gabarito oficial</h1>
-    <p class="page-sub">Defina os dados da prova e as turmas onde será aplicada</p>
-  </div>
-</div>
+<x-pagina titulo="Criar prova e gabarito oficial">
+  <x-slot:sub>Defina os dados da prova e as turmas onde será aplicada</x-slot:sub>
+</x-pagina>
 
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 @if($errors->any())
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;margin-top:16px;">
+  <div style="background:var(--danger-light);color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;margin-top:16px;">
     <ul style="margin:0;padding-left:18px;">
       @foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach
     </ul>
@@ -77,7 +55,7 @@
         <div class="pk" style="margin-top:10px;">Aplicação</div>
         <div class="pv" id="prev-data">Não definida</div>
       </div>
-      <div style="margin-top:16px;padding:12px;background:var(--accent-light);border-radius:var(--radius-sm);font-size:12px;color:var(--accent-dark,#0c326f);">
+      <div style="margin-top:16px;padding:12px;background:var(--accent-light);border-radius:var(--radius-sm);font-size:12px;color:var(--accent-dark);">
         <strong>Etapa 2:</strong> Após salvar, você será levado à tela de gabarito para marcar as respostas corretas.
       </div>
     </div>
@@ -88,7 +66,7 @@
     {{-- Dados básicos --}}
     <div class="card card-pad">
       <div style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Dados da prova</div>
-      <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-grid-2" style="gap:16px;">
         <div class="field" style="grid-column:1/-1">
           <label for="titulo">Título da prova *</label>
           <input class="input" type="text" id="titulo" name="titulo" required

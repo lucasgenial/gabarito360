@@ -1,31 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Gabarito oficial — ' . $prova['titulo'])
+@section('tela', 'tela-gabarito')
 
-@push('styles')
-<style>
-  .editor-grid { display:grid;grid-template-columns:320px 1fr;gap:20px;margin-top:20px;align-items:start; }
-  .sticky { position:sticky;top:84px; }
-  .gabarito-card { padding:22px; }
-  .info-row { display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:14px; }
-  .info-row:last-child { border:0; }
-  .info-row b { color:var(--fg); }
-  .q-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:8px 28px;margin-top:16px; }
-  .q-row { display:flex;align-items:center;gap:14px;padding:8px 10px;border-radius:8px; }
-  .q-num { font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--accent);width:28px;flex-shrink:0; }
-  .bubbles { display:flex;gap:8px; }
-  .bubble { width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--muted);background:var(--surface);user-select:none; }
-  .bubble.marked { background:var(--accent);border-color:var(--accent);color:#fff; }
-  .bubble.anulada { background:var(--danger,#e52207);border-color:var(--danger,#e52207);color:#fff; }
-  @media print {
-    .app-header,.breadcrumb,.no-print { display:none!important; }
-    .editor-grid { grid-template-columns:1fr; }
-    .sticky { position:static; }
-    .q-grid { grid-template-columns:repeat(3,1fr); }
-  }
-  @media(max-width:900px){ .editor-grid{grid-template-columns:1fr;} .sticky{position:static;} .q-grid{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Gabarito oficial — ' . $prova['titulo'])
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -49,7 +26,7 @@
 </div>
 
 @if(session('sucesso'))
-  <div class="no-print" style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
+  <div class="no-print" style="background:var(--success-light);color:var(--success);border:1px solid var(--success);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
     {{ session('sucesso') }}
   </div>
 @endif
@@ -89,7 +66,7 @@
 
     @if(count($questoes) === 0)
       <div style="text-align:center;padding:48px 20px;color:var(--muted);">
-        <div style="font-size:32px;margin-bottom:10px;">📋</div>
+        <div class="icone-grande"><x-icone nome="prova" /></div>
         <div style="font-size:14px;">Nenhuma questão preenchida no gabarito.</div>
       </div>
     @else
