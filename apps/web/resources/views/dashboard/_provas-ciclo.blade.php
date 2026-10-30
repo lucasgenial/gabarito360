@@ -1,7 +1,7 @@
 {{--
   Arquivo: apps/web/resources/views/dashboard/_provas-ciclo.blade.php
   Função: Lista de provas do painel com as ações do ciclo de avaliação
-          (🖨 Cartões por turma · 📷 Corrigir · 📊 Resultados), visíveis conforme o perfil.
+          (Cartões por turma · Corrigir · Resultados), visíveis conforme o perfil.
   Espera: $provas = [{id, titulo, disciplina?, status, turmas_lista[{id,nome}], total_alunos,
           cartoes_lidos?, professor?, data_aplicacao?}]
 --}}
@@ -62,16 +62,16 @@
           @endpode
         @else
           @pode('cartao.enviar')
-            <a class="btn btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera">📷 Corrigir</a>
+            <a class="btn btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera"><x-icone nome="camera" /> Corrigir</a>
           @endpode
           @pode('cartao.imprimir')
             @foreach($p['turmas_lista'] ?? [] as $t)
-              <a class="btn btn-secondary" target="_blank" href="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $t['id'] }}" title="Cartões-resposta com nome e QR">🖨 {{ $t['nome'] }}</a>
+              <a class="btn btn-secondary" target="_blank" href="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $t['id'] }}" title="Cartões-resposta com nome e QR"><x-icone nome="imprimir" /> {{ $t['nome'] }}</a>
             @endforeach
           @endpode
           @if(in_array($p['status'], ['em_correcao', 'corrigida'], true))
             @pode('resultado.ver')
-              <a class="btn btn-ghost" href="{{ route('relatorios.prova', $p['id']) }}">📊 Resultados</a>
+              <a class="btn btn-ghost" href="{{ route('relatorios.prova', $p['id']) }}"><x-icone nome="grafico" /> Resultados</a>
             @endpode
           @endif
         @endif

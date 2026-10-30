@@ -4,10 +4,6 @@
 
 @push('styles')
 <style>
-  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px; }
-  .table-wrap { overflow:hidden; margin-top:20px; }
-  @media (max-width:1080px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:480px){ .kpi-grid{grid-template-columns:1fr;} }
 </style>
 @endpush
 
@@ -33,13 +29,7 @@
   ];
 @endphp
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <div class="eyebrow">Acompanhamento estadual</div>
-    <h1 class="page-title">Painel {{ $nomeSecret }}</h1>
-    <p class="page-sub">{{ $nome }} · supervisão de {{ $kpis['total_redes'] ?? '—' }} redes · consolidação {{ now()->year }}</p>
-  </div>
-</div>
+<x-pagina chamada="Acompanhamento da secretaria" titulo="Painel {{ $nomeSecret }}" subtitulo="{{ $nome }} · supervisão de {{ $kpis['total_redes'] ?? '—' }} redes · consolidação {{ now()->year }}" />
 
 {{-- KPIs --}}
 <div class="kpi-grid">
