@@ -127,6 +127,160 @@ class RelatorioController extends Controller
     }
 
     /**
+     * Relatório consolidado da turma em todas as provas: média e aprovação por prova,
+     * comparação com as outras turmas da escola e ranking dos alunos.
+     */
+    public function turma(Request $request, int $turmaId): JsonResponse
+    {
+        $turma = $this->turmaNoEscopo($request, $turmaId);
+        if (!$turma) {
+            return ApiResponse::notFound('Turma não encontrada.');
+        }
+
+        $alunos = DB::table('alunos')->where('turma_id', $turmaId)->where('ativo', true)
+            ->orderBy('nome')->get(['id', 'nome', 'matricula']);
+        $provas = $this->provasDaTurma($request, $turmaId);
+
+        $notas = DB::table('notas')->where('turma_id', $turmaId)->whereIn('prova_id', $provas->pluck('id'))
+            ->get(['aluno_id', 'prova_id', 'nota_final', 'acertos', 'total_questoes'])
+            ->keyBy(fn ($n) => $n->aluno_id . ':' . $n->prova_id);
+
+        $resumoProvas = $provas->map(function ($p) use ($turmaId, $turma, $notas, $alunos) {
+            $daProva = $alunos->map(fn ($a) => $notas->get($a->id . ':' . $p->id))->filter();
+            $max     = (float) $p->nota_maxima;
+            // Média da mesma prova nas outras turmas da escola (comparativo)
+            $porTurma = DB::table('notas')->join('turmas', 'turmas.id', '=', 'notas.turma_id')
+                ->where('notas.prova_id', $p->id)->where('turmas.escola_id', $turma->escola_id)
+                ->select('turmas.id', 'turmas.nome', DB::raw('ROUND(AVG(notas.nota_final), 2) as media'), DB::raw('COUNT(*) as alunos'))
+                ->groupBy('turmas.id', 'turmas.nome')->orderBy('turmas.nome')->get();
+
+            return [
+                'id'            => (int) $p->id,
+                'disciplina'    => $p->disciplina,
+                'titulo'        => $p->titulo,
+                'status'        => $p->status,
+                'nota_maxima'   => $max,
+                'corrigidos'    => $daProva->count(),
+                'media'         => $daProva->isNotEmpty() ? round((float) $daProva->avg('nota_final'), 1) : null,
+                'aprovacao_pct' => $daProva->isNotEmpty() ? round($daProva->filter(fn ($n) => $n->nota_final >= $max * 0.6)->count() / $daProva->count() * 100) : null,
+                'maior'         => $daProva->isNotEmpty() ? (float) $daProva->max('nota_final') : null,
+                'menor'         => $daProva->isNotEmpty() ? (float) $daProva->min('nota_final') : null,
+                'por_turma'     => $porTurma->map(fn ($t) => ['turma_id' => (int) $t->id, 'turma' => $t->nome, 'media' => round((float) $t->media, 1), 'alunos' => (int) $t->alunos])->all(),
+            ];
+        })->values();
+
+        $ranking = $alunos->map(function ($a) use ($provas, $notas) {
+            $daAluno = [];
+            foreach ($provas as $p) {
+                $n = $notas->get($a->id . ':' . $p->id);
+                $daAluno[$p->id] = $n ? (float) $n->nota_final : null;
+            }
+            $feitas = array_filter($daAluno, fn ($v) => $v !== null);
+
+            return [
+                'id'      => (int) $a->id,
+                'nome'    => $a->nome,
+                'notas'   => $daAluno,
+                'feitas'  => count($feitas),
+                'media'   => $feitas ? round(array_sum($feitas) / count($feitas), 1) : null,
+            ];
+        })->sortByDesc(fn ($a) => [$a['media'] ?? -1, $a['feitas']])->values()
+            ->map(function ($a, $i) { $a['posicao'] = $a['media'] !== null ? $i + 1 : null; return $a; });
+
+        $todas = $notas->values();
+
+        return ApiResponse::success([
+            'turma'   => $turma,
+            'kpis'    => [
+                'alunos'          => $alunos->count(),
+                'provas'          => $provas->count(),
+                'media_geral'     => $todas->isNotEmpty() ? round((float) $todas->avg('nota_final'), 1) : null,
+                'notas_lancadas'  => $todas->count(),
+                'notas_esperadas' => $alunos->count() * $provas->count(),
+                'alunos_completos'=> $ranking->where('feitas', $provas->count())->count(),
+            ],
+            'provas'  => $resumoProvas,
+            'ranking' => $ranking,
+        ]);
+    }
+
+    /** Boletim do aluno: todas as provas da turma, nota, média e posição na turma. */
+    public function aluno(Request $request, int $alunoId): JsonResponse
+    {
+        $aluno = DB::table('alunos')->where('id', $alunoId)->first(['id', 'nome', 'matricula', 'turma_id', 'nome_responsavel']);
+        $turma = $aluno ? $this->turmaNoEscopo($request, (int) $aluno->turma_id) : null;
+        if (!$aluno || !$turma) {
+            return ApiResponse::notFound('Aluno não encontrado.');
+        }
+
+        $provas = $this->provasDaTurma($request, (int) $aluno->turma_id);
+        $linhas = $provas->map(function ($p) use ($aluno) {
+            $daTurma = DB::table('notas')->where('prova_id', $p->id)->where('turma_id', $aluno->turma_id)
+                ->orderByDesc('nota_final')->get(['aluno_id', 'nota_final', 'acertos', 'total_questoes']);
+            $minha = $daTurma->firstWhere('aluno_id', $aluno->id);
+            $pos   = $minha ? $daTurma->search(fn ($n) => (float) $n->nota_final === (float) $minha->nota_final) + 1 : null;
+            $lingua = $minha ? DB::table('cartoes')->join('notas', 'notas.cartao_id', '=', 'cartoes.id')
+                ->where('notas.prova_id', $p->id)->where('notas.aluno_id', $aluno->id)->value('cartoes.lingua') : null;
+
+            return [
+                'id'          => (int) $p->id,
+                'disciplina'  => $p->disciplina,
+                'titulo'      => $p->titulo,
+                'data'        => $p->data_aplicacao,
+                'nota_maxima' => (float) $p->nota_maxima,
+                'nota'        => $minha ? (float) $minha->nota_final : null,
+                'acertos'     => $minha->acertos ?? null,
+                'total'       => $minha->total_questoes ?? null,
+                'lingua'      => $lingua,
+                'media_turma' => $daTurma->isNotEmpty() ? round((float) $daTurma->avg('nota_final'), 1) : null,
+                'posicao'     => $pos,
+                'corrigidos'  => $daTurma->count(),
+            ];
+        })->values();
+
+        $feitas = $linhas->filter(fn ($l) => $l['nota'] !== null);
+
+        return ApiResponse::success([
+            'aluno'  => $aluno,
+            'turma'  => $turma,
+            'provas' => $linhas,
+            'kpis'   => [
+                'provas'        => $linhas->count(),
+                'feitas'        => $feitas->count(),
+                'media'         => $feitas->isNotEmpty() ? round((float) $feitas->avg('nota'), 1) : null,
+                'media_turma'   => $feitas->isNotEmpty() ? round((float) $feitas->avg('media_turma'), 1) : null,
+                'acertos'       => $feitas->sum('acertos'),
+                'questoes'      => $feitas->sum('total'),
+            ],
+        ]);
+    }
+
+    /** Turma dentro do escopo do usuário (com o nome da escola), ou null. */
+    private function turmaNoEscopo(Request $request, int $turmaId): ?object
+    {
+        $usuario = $request->user();
+        $ids     = Escopo::turmaIds($usuario);
+        if (in_array($usuario->perfil, ['aplicador', 'aluno'], true) || ($ids !== null && !in_array($turmaId, $ids, true))) {
+            return null;
+        }
+
+        return DB::table('turmas')->leftJoin('escolas', 'escolas.id', '=', 'turmas.escola_id')
+            ->where('turmas.id', $turmaId)
+            ->first(['turmas.id', 'turmas.nome', 'turmas.serie', 'turmas.escola_id', 'escolas.nome as escola_nome']);
+    }
+
+    /** Provas da turma já aplicáveis e visíveis ao usuário, por disciplina. */
+    private function provasDaTurma(Request $request, int $turmaId)
+    {
+        return Escopo::provas($request->user())
+            ->join('prova_turmas', 'prova_turmas.prova_id', '=', 'provas.id')
+            ->where('prova_turmas.turma_id', $turmaId)
+            ->whereIn('provas.status', ['publicada', 'em_correcao', 'corrigida'])
+            ->orderBy('provas.disciplina')
+            ->get(['provas.id', 'provas.titulo', 'provas.disciplina', 'provas.status', 'provas.data_aplicacao', 'provas.nota_maxima']);
+    }
+
+    /**
      * Análise por questão: % de acerto, distribuição das marcações (A–E/branco) e a
      * alternativa errada mais marcada. Considera só cartões lidos e com aluno; quem
      * marcou Espanhol é comparado com o gabarito de Espanhol (mesma regra da nota).

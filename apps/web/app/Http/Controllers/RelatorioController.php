@@ -20,6 +20,26 @@ class RelatorioController extends Controller
         return view('relatorios.prova', $resp->json('data'));
     }
 
+    public function turma(int $turmaId): View
+    {
+        $resp = $this->api->get("/v1/relatorios/turma/{$turmaId}");
+        if ($resp->failed()) {
+            abort(404, $resp->json('message') ?? 'Relatório não encontrado.');
+        }
+
+        return view('relatorios.turma', $resp->json('data'));
+    }
+
+    public function aluno(int $alunoId): View
+    {
+        $resp = $this->api->get("/v1/relatorios/aluno/{$alunoId}");
+        if ($resp->failed()) {
+            abort(404, $resp->json('message') ?? 'Boletim não encontrado.');
+        }
+
+        return view('relatorios.aluno', $resp->json('data'));
+    }
+
     public function turmaProva(int $turmaId, int $provaId): View
     {
         $resp = $this->api->get("/v1/relatorios/turma/{$turmaId}/prova/{$provaId}");
