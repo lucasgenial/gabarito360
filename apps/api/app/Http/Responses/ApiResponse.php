@@ -6,11 +6,14 @@ use Illuminate\Http\JsonResponse;
 
 class ApiResponse
 {
-    public static function success(mixed $data, ?array $meta = null, int $code = 200): JsonResponse
+    /** $meta: array de metadados ou uma mensagem de sucesso (ex.: "Escola desativada."). */
+    public static function success(mixed $data, array|string|null $meta = null, int $code = 200): JsonResponse
     {
         $response = ['data' => $data];
 
-        if ($meta !== null) {
+        if (is_string($meta)) {
+            $response['message'] = $meta;
+        } elseif ($meta !== null) {
             $response['meta'] = $meta;
         }
 
