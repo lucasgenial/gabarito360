@@ -43,7 +43,6 @@ Route::get('/checkout/pendente', [CheckoutController::class, 'pendente'])->name(
 Route::middleware('guest')->group(function () {
     Route::get('/login',            [LoginController::class, 'index'])->name('login');
     Route::post('/login',           [LoginController::class, 'store'])->name('login.store');
-    Route::post('/cadastro',        [LoginController::class, 'cadastro'])->name('cadastro.store');
     Route::get('/esqueci-senha',    [LoginController::class, 'showEsqueciSenha'])->name('esqueci-senha');
     Route::post('/esqueci-senha',   [LoginController::class, 'postEsqueciSenha'])->name('esqueci-senha.store');
     Route::get('/redefinir-senha',  [LoginController::class, 'showRedefinirSenha'])->name('redefinir-senha');

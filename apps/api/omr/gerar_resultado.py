@@ -53,7 +53,7 @@ def gerar(d):
     m = 16 * mm
     y = H - 16 * mm
 
-    # Cabeçalho institucional: logo do ente (governo/prefeitura/mantenedora) à esquerda,
+    # Cabeçalho institucional: logo do ente (rede ou mantenedora) à esquerda,
     # logo da escola à direita (só a escola: à esquerda), textos centralizados
     topo = y
     logos = [p for p in (d.get("logo_ente"), d.get("logo")) if p and os.path.isfile(p)]

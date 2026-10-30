@@ -16,7 +16,7 @@ class CatalogoPermissoes
     public const LISTA = [
         // 4.1 Rede, núcleos e escolas
         ['rede.configurar',          'escolas',   'Parâmetros da rede (metas etc.)',                        '-v------'],
-        ['rede.logo',                'escolas',   'Enviar logo do ente (governo/prefeitura/mantenedora)',   '-vvo----'],
+        ['rede.logo',                'escolas',   'Enviar logo da rede ou da mantenedora',                 '-vvo----'],
         ['nucleo.ver',               'escolas',   'Ver núcleos',                                            'vvv-----'],
         ['nucleo.gerir',             'escolas',   'Criar/editar/excluir núcleo',                            '-vo-----'],
         ['escola.ver',               'escolas',   'Ver dados da escola',                                    'vvvvvvv-'],

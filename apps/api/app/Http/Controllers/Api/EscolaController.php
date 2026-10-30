@@ -440,7 +440,7 @@ class EscolaController extends Controller
         return ApiResponse::success(['tem_logo' => true]);
     }
 
-    /** Logo do ente da rede (governo do estado, prefeitura ou mantenedora). */
+    /** Logo do ente da rede ou da mantenedora. */
     public function logoRede(int $redeId)
     {
         $caminho = Cabecalho::logoPath(DB::table('redes')->where('id', $redeId)->value('logo_path'));

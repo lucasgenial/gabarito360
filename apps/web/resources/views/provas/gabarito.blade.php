@@ -18,7 +18,7 @@
   .bubble.marked { background:var(--accent);border-color:var(--accent);color:#fff; }
   .bubble.anulada { background:var(--danger,#e52207);border-color:var(--danger,#e52207);color:#fff; }
   @media print {
-    .govbar,.app-header,.breadcrumb,.no-print { display:none!important; }
+    .app-header,.breadcrumb,.no-print { display:none!important; }
     .editor-grid { grid-template-columns:1fr; }
     .sticky { position:static; }
     .q-grid { grid-template-columns:repeat(3,1fr); }
