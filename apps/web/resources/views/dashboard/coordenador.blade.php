@@ -35,13 +35,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}" class="active">Painel</a>
-<a href="{{ route('provas.index') }}">Provas</a>
-<a href="{{ route('turmas.index') }}">Turmas</a>
-<a href="{{ route('escolas.index') }}">Escolas</a>
-@endsection
-
 @section('context-badge')
 <span class="badge badge-info badge-dot">{{ $dashboard['escola']['nome'] ?? 'Escola' }}</span>
 @endsection
@@ -82,7 +75,10 @@
     <h1 class="page-title">Painel da escola</h1>
     <p class="page-sub">{{ $nome }} ({{ $iniciais }}) · Coordenador(a) · {{ $escola['nome'] ?? '' }}</p>
   </div>
-  <a href="{{ route('provas.index') }}" class="btn btn-primary">Criar prova</a>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{{ route('correcao.index') }}" class="btn btn-primary">📷 Corrigir cartões</a>
+    @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-secondary">+ Criar prova</a>@endpode
+  </div>
 </div>
 
 {{-- KPIs --}}
@@ -125,40 +121,7 @@
       <h2 class="section-title" style="margin-bottom:0;">Provas em andamento</h2>
       <span class="badge badge-muted">Atualizado às {{ now()->format('H:i') }}</span>
     </div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Disciplina</th>
-          <th>Professor(a)</th>
-          <th>Turma</th>
-          <th>Alunos</th>
-          <th>Lidos</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse($provas as $p)
-          @php $cfg = $statusConfig[$p['status']] ?? ['badge' => 'badge-muted', 'label' => $p['status']]; @endphp
-          <tr>
-            <td>
-              <strong>{{ $p['disciplina'] }}</strong>
-              <small>{{ $p['titulo'] }}</small>
-            </td>
-            <td>{{ $p['professor'] ?? '—' }}</td>
-            <td>{{ $p['turmas'] }}</td>
-            <td class="num">{{ $p['total_alunos'] }}</td>
-            <td class="num">{{ $p['cartoes_lidos'] }}</td>
-            <td><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">
-              Nenhuma prova em andamento.
-            </td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
+    @include('dashboard._provas-ciclo', ['provas' => $provas])
   </div>
 
   {{-- Coluna lateral --}}
@@ -224,14 +187,14 @@
 {{-- Ações rápidas --}}
 <h2 class="section-title" style="margin-top:28px;">Ações rápidas</h2>
 <div class="quick-actions">
-  <a class="qa" href="{{ route('provas.index') }}">
+  <a class="qa" href="{{ route('provas.create') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
     </div>
     <b>Criar Prova</b>
     <span>Cadastre avaliação e gere cartões para aplicação.</span>
   </a>
-  <a class="qa" href="#">
+  <a class="qa" href="{{ route('correcao.index') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18h16M7 15l3-3 3 2 4-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>

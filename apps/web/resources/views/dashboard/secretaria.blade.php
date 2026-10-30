@@ -11,10 +11,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}" class="active">Painel</a>
-@endsection
-
 @section('context-badge')
 <span class="badge badge-info badge-dot">{{ $dashboard['secretaria']['nome'] ?? 'Secretaria' }}</span>
 @endsection

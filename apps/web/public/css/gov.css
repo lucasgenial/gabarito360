@@ -211,9 +211,18 @@ img { max-width: 100%; display: block; }
 .stack > * + * { margin-top: 16px; }
 
 @media (max-width: 720px) {
-  .app-nav { display: none; }
+  /* Celular: menu vira uma faixa rolável abaixo do cabeçalho (professor/aplicador corrigem pelo celular) */
+  .app-header .container { flex-wrap: wrap; height: auto; gap: 8px 12px; padding-top: 10px; }
+  .app-nav {
+    order: 3; flex-basis: 100%; margin: 0 -16px; padding: 0 12px 8px;
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .app-nav::-webkit-scrollbar { display: none; }
+  .app-nav a { white-space: nowrap; padding: 8px 12px; }
+  .header-right .badge { display: none; }
   .page-title { font-size: 24px; }
   .container { padding: 0 16px; }
+  .table-wrap, .table-scroll { overflow-x: auto; }
 }
 
 /* ============================================================

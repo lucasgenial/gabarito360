@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Prova;
+use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,30 +13,24 @@ use Illuminate\Validation\Rule;
 
 class ProvaController extends Controller
 {
-    private function escopoEscolaIds(Request $request): ?array
+    /** Impede criar/editar prova em escola ou turma fora do escopo do usuário. */
+    private function foraDoEscopo($usuario, int $escolaId, array $turmaIds): ?JsonResponse
     {
-        $usuario = $request->user();
+        $escolas = Escopo::escolaIds($usuario);
+        if ($escolas !== null && !in_array($escolaId, $escolas, true)) {
+            return ApiResponse::error('Escola fora do seu escopo.', [], 403);
+        }
 
-        return match ($usuario->perfil) {
-            'admin_rede' => null,
-            'dir_nucleo' => DB::table('escolas')
-                ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
-                ->join('usuario_escopos', function ($j) use ($usuario) {
-                    $j->on('nucleos.id', '=', 'usuario_escopos.escopo_id')
-                      ->where('usuario_escopos.usuario_id', $usuario->id)
-                      ->where('usuario_escopos.escopo_tipo', 'nucleo');
-                })
-                ->pluck('escolas.id')->all(),
-            'dir_escolar', 'coordenador' => DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'escola')
-                ->pluck('escopo_id')->all(),
-            'professor' => DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'escola')
-                ->pluck('escopo_id')->all(),
-            default => [],
-        };
+        $turmas = Escopo::turmaIds($usuario);
+        $invalidas = DB::table('turmas')->whereIn('id', $turmaIds)
+            ->where(fn ($q) => $q->where('escola_id', '!=', $escolaId)
+                ->when($turmas !== null, fn ($q2) => $q2->orWhereNotIn('id', $turmas ?: [0])))
+            ->count();
+        if ($invalidas > 0) {
+            return ApiResponse::error('Turma fora do seu escopo ou de outra escola.', [], 403);
+        }
+
+        return null;
     }
 
     private function progresso(Prova $p): array
@@ -72,26 +67,7 @@ class ProvaController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $escolaIds = $this->escopoEscolaIds($request);
-        $usuario   = $request->user();
-        $query     = Prova::query();
-
-        if ($escolaIds !== null) {
-            $query->whereIn('escola_id', $escolaIds);
-        }
-
-        // Professor só vê provas que criou ou das turmas dele
-        if ($usuario->perfil === 'professor') {
-            $turmaIds = DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'turma')
-                ->pluck('escopo_id');
-
-            $query->where(function ($q) use ($usuario, $turmaIds) {
-                $q->where('criado_por', $usuario->id)
-                  ->orWhereIn('id', DB::table('prova_turmas')->whereIn('turma_id', $turmaIds)->pluck('prova_id'));
-            });
-        }
+        $query = Escopo::provas($request->user());
 
         if ($busca = $request->query('busca')) {
             $query->where(function ($q) use ($busca) {
@@ -112,21 +88,25 @@ class ProvaController extends Controller
             ->orderByDesc('created_at')
             ->get()
             ->map(function (Prova $p) {
-                $turmas = DB::table('prova_turmas')
+                $turmasLista = DB::table('prova_turmas')
                     ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
                     ->where('prova_turmas.prova_id', $p->id)
-                    ->pluck('turmas.nome')
-                    ->all();
+                    ->orderBy('turmas.nome')
+                    ->get(['turmas.id', 'turmas.nome']);
 
                 return array_merge($p->toArray(), [
-                    'escola_nome' => $p->escola?->nome,
-                    'turmas'      => $turmas,
+                    'escola_nome'  => $p->escola?->nome,
+                    'turmas'       => $turmasLista->pluck('nome')->all(),
+                    'turmas_lista' => $turmasLista->map(fn ($t) => ['id' => (int) $t->id, 'nome' => $t->nome])->all(),
+                    'total_alunos' => DB::table('prova_turmas')
+                        ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                        ->where('prova_turmas.prova_id', $p->id)->where('alunos.ativo', true)->count(),
+                    'cartoes_lidos' => DB::table('cartoes')->where('prova_id', $p->id)->where('status', 'lido')->count(),
                     'progresso'   => $this->progresso($p),
                 ]);
             });
 
-        $baseQ = Prova::query();
-        if ($escolaIds !== null) $baseQ->whereIn('escola_id', $escolaIds);
+        $baseQ = Escopo::provas($request->user());
 
         $kpis = [
             'total'      => $baseQ->count(),
@@ -163,6 +143,10 @@ class ProvaController extends Controller
         $turmaIds = $data['turma_ids'] ?? [];
         unset($data['turma_ids']);
 
+        if ($erro = $this->foraDoEscopo($usuario, (int) $data['escola_id'], $turmaIds)) {
+            return $erro;
+        }
+
         $data['criado_por'] = $usuario->id;
         $data['status']     = 'rascunho';
 
@@ -178,14 +162,7 @@ class ProvaController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $escolaIds = $this->escopoEscolaIds($request);
-        $query     = Prova::with('escola:id,nome');
-
-        if ($escolaIds !== null) {
-            $query->whereIn('escola_id', $escolaIds);
-        }
-
-        $prova = $query->find($id);
+        $prova = Escopo::provas($request->user())->with('escola:id,nome')->find($id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
@@ -205,7 +182,7 @@ class ProvaController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $prova = Prova::find($id);
+        $prova = Escopo::prova($request->user(), $id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
@@ -232,6 +209,10 @@ class ProvaController extends Controller
             $turmaIds = $data['turma_ids'];
             unset($data['turma_ids']);
 
+            if ($erro = $this->foraDoEscopo($request->user(), (int) $prova->escola_id, $turmaIds)) {
+                return $erro;
+            }
+
             DB::table('prova_turmas')->where('prova_id', $id)->delete();
             if ($turmaIds) {
                 $inserts = array_map(fn ($tid) => ['prova_id' => $id, 'turma_id' => $tid], $turmaIds);
@@ -244,9 +225,9 @@ class ProvaController extends Controller
         return ApiResponse::success($prova->fresh(), null, 200);
     }
 
-    public function publicar(int $id): JsonResponse
+    public function publicar(Request $request, int $id): JsonResponse
     {
-        $prova = Prova::find($id);
+        $prova = Escopo::prova($request->user(), $id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
@@ -261,9 +242,9 @@ class ProvaController extends Controller
         return ApiResponse::success(['status' => 'publicada'], null, 200);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(Request $request, int $id): JsonResponse
     {
-        $prova = Prova::find($id);
+        $prova = Escopo::prova($request->user(), $id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');

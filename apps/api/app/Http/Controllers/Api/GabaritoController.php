@@ -4,15 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
+use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class GabaritoController extends Controller
 {
-    public function show(int $provaId): JsonResponse
+    public function show(Request $request, int $provaId): JsonResponse
     {
-        $prova = DB::table('provas')->find($provaId);
+        $prova = Escopo::provaComConteudo($request->user(), $provaId);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
@@ -34,6 +35,7 @@ class GabaritoController extends Controller
             ->map(fn($q) => [
                 'numero_questao' => (int) $q->numero_questao,
                 'alternativa'    => $q->alternativa,
+                'alternativa_espanhol' => $q->alternativa_espanhol ?? null,
                 'peso'           => (float) $q->peso,
                 'anulada'        => (bool) $q->anulada,
             ])
@@ -54,7 +56,7 @@ class GabaritoController extends Controller
 
     public function salvar(Request $request, int $provaId): JsonResponse
     {
-        $prova = DB::table('provas')->find($provaId);
+        $prova = Escopo::provaComConteudo($request->user(), $provaId);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
@@ -114,7 +116,7 @@ class GabaritoController extends Controller
     {
         $usuario = $request->user();
 
-        $prova = DB::table('provas')->find($provaId);
+        $prova = Escopo::provaComConteudo($request->user(), $provaId);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }

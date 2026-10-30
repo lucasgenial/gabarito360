@@ -10,11 +10,29 @@ class CorrecaoController extends Controller
 {
     public function __construct(private ApiClient $api) {}
 
+    /** "📷 Corrigir": provas aplicáveis do usuário, para escolher qual corrigir. */
+    public function index(): View
+    {
+        $resp   = $this->api->get('/v1/provas');
+        $provas = collect($resp->successful() ? ($resp->json('data.provas') ?? []) : [])
+            ->filter(fn ($p) => in_array($p['status'], ['publicada', 'em_correcao', 'corrigida'], true))
+            ->sortBy(fn ($p) => [$p['status'] === 'corrigida' ? 1 : 0, $p['disciplina']])
+            ->values()
+            ->all();
+
+        return view('correcao.index', ['provas' => $provas]);
+    }
+
     public function show(int $provaId): View
     {
         $resp = $this->api->get("/v1/provas/{$provaId}");
         if ($resp->failed()) {
             abort(404, 'Prova não encontrada.');
+        }
+
+        // Aplicador só envia cartões (doc 03): tela só com a câmera, sem notas nem ambíguos.
+        if (session('auth_perfil') === 'aplicador') {
+            return view('correcao.camera', ['prova' => $resp->json('data'), 'alunos' => []]);
         }
 
         $statusResp = $this->api->get("/v1/provas/{$provaId}/cartoes/status");

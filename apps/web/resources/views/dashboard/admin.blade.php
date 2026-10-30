@@ -33,13 +33,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}" class="active">Painel</a>
-<a href="{{ route('provas.index') }}">Provas</a>
-<a href="{{ route('turmas.index') }}">Turmas</a>
-<a href="{{ route('escolas.index') }}">Escolas</a>
-@endsection
-
 @section('context-badge')
 <span class="badge badge-info badge-dot">Rede Municipal</span>
 @endsection
@@ -228,7 +221,7 @@
         <div class="eyebrow">Usuários e acessos</div>
         <h3 style="font-size:18px;">Últimos acessos registrados</h3>
       </div>
-      <a href="#" class="btn btn-secondary btn-sm">Gerenciar usuários</a>
+      <a href="{{ route('membros.index') }}" class="btn btn-secondary btn-sm">Gerenciar usuários</a>
     </div>
   </div>
   <table class="table">
@@ -281,7 +274,7 @@
     <b>Nova Escola</b>
     <span>Cadastrar unidade e vincular ao núcleo responsável.</span>
   </a>
-  <a class="qa" href="#">
+  <a class="qa" href="{{ route('membros.index') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="10" r="2" stroke="currentColor" stroke-width="2"/><path d="M4 18c1.6-2.6 7.4-2.6 9 0M14 18c.8-1.5 3.2-2.1 5-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
