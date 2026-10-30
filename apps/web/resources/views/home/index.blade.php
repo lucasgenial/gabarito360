@@ -387,7 +387,7 @@ img { display:block; max-width:100%; }
     <div class="numbers-grid">
       <div class="number-card">
         <div class="number-val">6,1<small style="font-size:1.5rem"> h</small></div>
-        <div class="number-label">por semana é o tempo que professores brasileiros relatam gastar corrigindo trabalhos de alunos; a média da OCDE é 4,6 h.</div>
+        <div class="number-label">por semana é o tempo que professores brasileiros em tempo integral relatam gastar corrigindo trabalhos de alunos; a média da OCDE é 4,6 h.</div>
         <a class="number-fonte" href="https://www.oecd.org/en/publications/results-from-talis-2024-country-notes_e127f9e2-en/brazil_1e93d3b5-en.html" target="_blank" rel="noopener">OCDE, TALIS 2024</a>
       </div>
       <div class="number-card">
