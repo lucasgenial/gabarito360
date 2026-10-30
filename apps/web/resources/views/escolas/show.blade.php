@@ -370,8 +370,11 @@
         <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Ações rápidas</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
           <a href="{{ route('escolas.index') }}" class="btn btn-secondary btn-sm">← Voltar para escolas</a>
+          @pode('escola.editar')
           <button onclick="document.getElementById('modal-editar').style.display='flex';document.body.style.overflow='hidden';"
                   class="btn btn-ghost btn-sm">Editar dados da escola</button>
+          @endpode
+          @pode('escola.desativar')
           <form method="POST" action="{{ route('escolas.toggle', $escola['id']) }}"
                 onsubmit="return confirm('{{ $escola['ativo'] ? 'Desativar' : 'Ativar' }} esta escola?')">
             @csrf
@@ -380,6 +383,7 @@
               {{ $escola['ativo'] ? 'Desativar escola' : 'Ativar escola' }}
             </button>
           </form>
+          @endpode
         </div>
       </div>
     </div>

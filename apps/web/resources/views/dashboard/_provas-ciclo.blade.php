@@ -44,7 +44,10 @@
             @if(!empty($p['data_aplicacao'])) · {{ \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m') }}@endif
           </div>
         </div>
-        <span class="badge {{ $badge }}">{{ $rotulo }}</span>
+        <span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
+          <span class="badge {{ $badge }}">{{ $rotulo }}</span>
+          @if(!empty($p['correcao_fechada_em']))<span class="badge badge-warn" title="Correção fechada">🔒 fechada</span>@endif
+        </span>
       </div>
 
       @if($aplicavel)

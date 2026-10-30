@@ -61,11 +61,17 @@ class Acesso
         'cartoes.enviar'     => ['admin_rede', 'dir_escolar', 'coordenador', 'professor', 'aplicador'],
         'correcao.ver'       => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor'],
         'correcao.resolver'  => ['admin_rede', 'dir_escolar', 'coordenador', 'professor'],
+        'correcao.fechar'    => ['admin_rede', 'dir_escolar', 'coordenador', 'professor'],
+        // Supervisão: reabre a correção e continua alterando com ela fechada
+        'correcao.reabrir'   => ['admin_rede', 'dir_escolar', 'coordenador'],
         'resultados.ver'     => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor'],
         'turma.gerenciar'    => ['admin_rede', 'dir_escolar', 'coordenador'],
         'aluno.gerenciar'    => ['admin_rede', 'dir_escolar', 'coordenador'],
         'equipe.gerenciar'   => ['admin_rede', 'dir_escolar'],
         'escola.configurar'  => ['admin_rede', 'dir_escolar'],
+        'escola.criar'       => ['admin_rede', 'dir_nucleo'],
+        'escola.editar'      => ['admin_rede', 'dir_nucleo', 'dir_escolar'],
+        'escola.desativar'   => ['admin_rede', 'dir_nucleo'],
         'escola.logo'        => ['admin_rede', 'dir_escolar', 'coordenador'],
         'rede.logo'          => ['admin_rede', 'dir_nucleo'],
         'rede.configurar'    => ['admin_rede'],
@@ -84,6 +90,12 @@ class Acesso
     public static function pode(string $acao): bool
     {
         return in_array(self::perfil(), self::ACOES[$acao] ?? [], true);
+    }
+
+    /** Pode enviar/excluir/alterar cartões, considerando a correção aberta ou fechada. */
+    public static function podeAlterarCorrecao(bool $fechada): bool
+    {
+        return self::pode('correcao.resolver') && (!$fechada || self::pode('correcao.reabrir'));
     }
 
     /** @return array<int, array{rotulo: string, url: string, ativo: bool}> */

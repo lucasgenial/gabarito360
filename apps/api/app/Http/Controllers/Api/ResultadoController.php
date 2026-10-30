@@ -7,6 +7,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Aluno;
 use App\Models\Prova;
 use App\Support\Cabecalho;
+use App\Support\Correcao;
 use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -161,6 +162,7 @@ class ResultadoController extends Controller
                 'status_aprovacao' => $nota->status_aprovacao,
             ],
             'cabecalho'       => Cabecalho::escola((int) $prova->escola_id),
+            'correcao'        => Correcao::situacao($prova),
             'cartao_id'       => $nota->cartao_id,
             'lingua'          => $cartao?->lingua,
             'media_turma'     => $mediaTurma !== null ? round((float) $mediaTurma, 1) : null,
