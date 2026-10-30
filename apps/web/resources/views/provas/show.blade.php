@@ -1,27 +1,8 @@
 @extends('layouts.app')
 
-@section('title', $prova['titulo'])
+@section('tela', 'tela-prova')
 
-@push('styles')
-<style>
-  .status-hero { display:flex;align-items:center;gap:12px;padding:16px 20px;border-radius:var(--radius-md);border:1px solid;margin-top:20px; }
-  .info-row { display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:14px; }
-  .info-row:last-child { border:0; }
-  .info-row .lbl { color:var(--muted);min-width:140px;flex-shrink:0;font-weight:500; }
-  .detail-grid { display:grid;grid-template-columns:1.5fr 1fr;gap:20px;margin-top:20px; }
-  /* Modal */
-  .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px; }
-  .modal-backdrop.open { display:flex; }
-  .modal { background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,.22);width:100%;max-width:560px;max-height:90vh;overflow-y:auto; }
-  .modal-head { padding:20px 24px 16px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between; }
-  .modal-head h2 { font-size:17px;font-weight:700; }
-  .modal-close { width:32px;height:32px;border-radius:50%;background:none;border:0;cursor:pointer;font-size:20px;color:var(--muted);display:grid;place-items:center; }
-  .modal-close:hover { background:var(--surface-2); }
-  .modal-body { padding:22px; }
-  .modal-foot { padding:14px 22px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end;gap:10px; }
-  @media(max-width:900px){ .detail-grid{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', $prova['titulo'])
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -31,12 +12,8 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <h1 class="page-title">{{ $prova['titulo'] }}</h1>
-    <p class="page-sub">{{ $prova['disciplina'] }} · {{ $prova['serie'] }} · {{ $prova['num_questoes'] }} questões</p>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+<x-pagina titulo="{{ $prova['titulo'] }}">
+  <x-slot:sub>{{ $prova['disciplina'] }} · {{ $prova['serie'] }} · {{ $prova['num_questoes'] }} questões</x-slot:sub>
     @if($prova['status'] === 'rascunho')
       @pode('prova.editar')
       <button class="btn btn-secondary" onclick="abrirModal()">Editar</button>
@@ -60,37 +37,22 @@
       <a href="{{ route('relatorios.prova', $prova['id']) }}" class="btn btn-primary">Ver relatório →</a>
     @endif
     <a href="{{ route('provas.index') }}" class="btn btn-ghost">← Voltar</a>
-  </div>
-</div>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
-{{-- Status banner --}}
+{{-- Status --}}
 @php
   $statusInfo = [
-    'rascunho'    => ['bg'=>'rgba(19,81,180,.08)', 'border'=>'rgba(19,81,180,.3)', 'color'=>'var(--accent)', 'icon'=>'✏️', 'msg'=>'Esta prova está em rascunho. Publique-a quando o gabarito estiver pronto.'],
-    'publicada'   => ['bg'=>'rgba(22,136,33,.08)', 'border'=>'rgba(22,136,33,.3)', 'color'=>'var(--success,#168821)', 'icon'=>'✅', 'msg'=>'Prova publicada. Aguardando aplicação e lançamento dos cartões-resposta.'],
-    'em_correcao' => ['bg'=>'rgba(245,158,11,.08)', 'border'=>'rgba(245,158,11,.3)', 'color'=>'#b45309', 'icon'=>'🔄', 'msg'=>'Correção em andamento. Os cartões-resposta estão sendo processados.'],
-    'corrigida'   => ['bg'=>'rgba(22,136,33,.08)', 'border'=>'rgba(22,136,33,.3)', 'color'=>'var(--success,#168821)', 'icon'=>'🏆', 'msg'=>'Prova corrigida. Resultados disponíveis no relatório.'],
+    'rascunho'    => ['info', 'Rascunho', 'Publique a prova quando o gabarito estiver pronto.'],
+    'publicada'   => ['sucesso', 'Publicada', 'Aguardando a aplicação e o envio dos cartões-resposta.'],
+    'em_correcao' => ['atencao', 'Em correção', 'Os cartões-resposta estão sendo processados.'],
+    'corrigida'   => ['sucesso', 'Corrigida', 'Resultados disponíveis no relatório.'],
   ];
-  $si = $statusInfo[$prova['status']] ?? $statusInfo['rascunho'];
+  [$tipoStatus, $rotuloStatus, $msgStatus] = $statusInfo[$prova['status']] ?? $statusInfo['rascunho'];
 @endphp
-<div class="status-hero" style="background:{{ $si['bg'] }};border-color:{{ $si['border'] }};color:{{ $si['color'] }};">
-  <span style="font-size:24px;">{{ $si['icon'] }}</span>
-  <div>
-    <div style="font-weight:700;">Status: {{ ['rascunho'=>'Rascunho','publicada'=>'Publicada','em_correcao'=>'Em correção','corrigida'=>'Corrigida'][$prova['status']] }}</div>
-    <div style="font-size:13px;opacity:.8;margin-top:2px;">{{ $si['msg'] }}</div>
-  </div>
-</div>
+<x-aviso :tipo="$tipoStatus">Status: {{ $rotuloStatus }}. <span style="font-weight:400;">{{ $msgStatus }}</span></x-aviso>
 
 {{-- Grid de detalhes --}}
 <div class="detail-grid">
@@ -150,7 +112,7 @@
       @if(count($prova['turmas'] ?? []) > 0)
         @foreach($prova['turmas'] as $t)
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-soft);">
-            <div style="width:32px;height:32px;border-radius:6px;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:700;font-size:12px;">
+            <div style="width:32px;height:32px;border-radius:6px;background:var(--accent-light);color:var(--accent-dark);display:grid;place-items:center;font-weight:700;font-size:12px;">
               {{ strtoupper(str_replace(['º ','ª '], '', $t['nome'])) }}
             </div>
             <div style="flex:1;">
@@ -158,7 +120,7 @@
               <div style="font-size:12px;color:var(--muted);">{{ $t['serie'] }}</div>
             </div>
             @pode('cartao.imprimir')
-            <a href="{{ route('correcao.pdf', $prova['id']) }}?turma_id={{ $t['id'] }}" target="_blank" class="btn btn-sm btn-ghost" title="Cartões-resposta com nome e QR de cada aluno">🖨 Cartões</a>
+            <a href="{{ route('correcao.pdf', $prova['id']) }}?turma_id={{ $t['id'] }}" target="_blank" class="btn btn-sm btn-ghost" title="Cartões-resposta com nome e QR de cada aluno"><x-icone nome="imprimir" /> Cartões</a>
             @endpode
             @if(in_array($prova['status'], ['em_correcao', 'corrigida'], true))
               <a href="{{ route('relatorios.turmaProva', [$t['id'], $prova['id']]) }}" class="btn btn-sm btn-ghost">Relatório</a>
@@ -166,7 +128,7 @@
           </div>
         @endforeach
         @pode('cartao.imprimir')
-        <a href="{{ route('correcao.pdf', $prova['id']) }}?brancos=5" target="_blank" class="btn btn-sm btn-ghost" style="margin-top:8px;">🖨 5 cartões em branco</a>
+        <a href="{{ route('correcao.pdf', $prova['id']) }}?brancos=5" target="_blank" class="btn btn-sm btn-ghost" style="margin-top:8px;"><x-icone nome="imprimir" /> 5 cartões em branco</a>
         @endpode
       @else
         <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">
@@ -182,15 +144,15 @@
       <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent);">Próximas etapas</h3>
       <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--fg-2);">
         @if($prova['status'] === 'rascunho')
-          <div style="display:flex;align-items:center;gap:8px;"><span>1️⃣</span> Verifique os dados da prova</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span>2️⃣</span> <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" style="color:var(--accent);">Configure o gabarito</a></div>
-          <div style="display:flex;align-items:center;gap:8px;"><span>3️⃣</span> Publique o gabarito</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span>4️⃣</span> Aplique a prova nas turmas</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span>5️⃣</span> Lance os cartões-resposta (OMR)</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">1</span> Verifique os dados da prova</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">2</span> <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" style="color:var(--accent);">Configure o gabarito</a></div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">3</span> Publique o gabarito</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">4</span> Aplique a prova nas turmas</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">5</span> Lance os cartões-resposta (OMR)</div>
         @else
-          <div style="display:flex;align-items:center;gap:8px;"><span>✅</span> Prova publicada</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span>📅</span> Aplique nas turmas em {{ $prova['data_aplicacao'] ? \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : 'data a definir' }}</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span>📷</span> <a href="{{ route('correcao.show', $prova['id']) }}" style="color:var(--accent);">Envie os cartões-resposta para leitura OMR</a></div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">1</span> Prova publicada</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">2</span> Aplique nas turmas em {{ $prova['data_aplicacao'] ? \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : 'data a definir' }}</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">3</span> <a href="{{ route('correcao.show', $prova['id']) }}" style="color:var(--accent);">Envie os cartões-resposta para leitura OMR</a></div>
         @endif
       </div>
     </div>
