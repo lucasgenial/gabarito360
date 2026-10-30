@@ -37,7 +37,7 @@ img { display:block; max-width:100%; }
   padding:0 1.5rem;
 }
 .lp-nav-inner {
-  max-width:1080px; margin:0 auto;
+  max-width:1320px; margin:0 auto;
   display:flex; align-items:center; gap:2rem;
   height:60px;
 }
@@ -63,11 +63,11 @@ img { display:block; max-width:100%; }
 .lp-section { padding:5rem 1.5rem; }
 .lp-section.bg-gray { background:var(--gray1); }
 .lp-section.bg-blue { background:var(--blue); color:#fff; }
-.lp-inner { max-width:1080px; margin:0 auto; }
+.lp-inner { max-width:1320px; margin:0 auto; }
 
 /* ─── Hero ──────────────────────────────────────────── */
 .hero {
-  min-height:calc(100vh - 60px);
+  min-height:calc(100vh / var(--escala) - 60px);
   display:flex; align-items:center;
   background:linear-gradient(135deg, #0c326f 0%, #1351b4 60%, #2670e8 100%);
   color:#fff; padding:4rem 1.5rem;
@@ -269,7 +269,7 @@ img { display:block; max-width:100%; }
 }
 </style>
 </head>
-<body>
+<body class="area-publica">
 
 {{-- ═══ NAV ═══ --}}
 <nav class="lp-nav" aria-label="Navegação principal">
