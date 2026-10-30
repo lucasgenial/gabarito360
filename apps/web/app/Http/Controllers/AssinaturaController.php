@@ -12,7 +12,7 @@ class AssinaturaController extends Controller
 
     public function index(): View
     {
-        $resposta    = $this->api->get('/assinaturas/minha');
+        $resposta    = $this->api->get('/v1/assinaturas/minha');
         $assinatura  = $resposta['data'] ?? null;
 
         return view('assinatura.index', compact('assinatura'));
@@ -20,7 +20,7 @@ class AssinaturaController extends Controller
 
     public function cancelar(): RedirectResponse
     {
-        $this->api->post('/assinaturas/cancelar', []);
+        $this->api->post('/v1/assinaturas/cancelar', []);
 
         return redirect()->route('assinatura.index')
             ->with('sucesso', 'Assinatura cancelada com sucesso.');

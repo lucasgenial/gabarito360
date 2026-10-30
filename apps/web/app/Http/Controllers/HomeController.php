@@ -34,7 +34,7 @@ class HomeController extends Controller
     public function index(): View
     {
         try {
-            $resposta = $this->api->get('/planos');
+            $resposta = $this->api->get('/v1/planos');
             $planos   = collect($resposta['data'] ?? [])
                 ->filter(fn ($p) => $p['modo'] === 'autoatendimento' && $p['ativo'])
                 ->values()

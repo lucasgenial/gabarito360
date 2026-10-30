@@ -15,7 +15,7 @@ class LeadController extends Controller
     {
         $planoId = $request->query('plano_id');
 
-        $resposta = $this->api->get('/planos');
+        $resposta = $this->api->get('/v1/planos');
         $planos   = collect($resposta['data'] ?? [])
             ->filter(fn ($p) => $p['modo'] === 'comercial')
             ->values();
@@ -38,7 +38,7 @@ class LeadController extends Controller
             'mensagem'           => 'nullable|string|max:2000',
         ]);
 
-        $this->api->post('/leads', $request->only([
+        $this->api->post('/v1/leads', $request->only([
             'plano_id', 'nome', 'email', 'telefone',
             'instituicao', 'cargo', 'licencas_estimadas', 'mensagem',
         ]));
