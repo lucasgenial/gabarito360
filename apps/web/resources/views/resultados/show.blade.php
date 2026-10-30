@@ -1,128 +1,144 @@
 @extends('layouts.app')
 
+{{--
+  Arquivo: apps/web/resources/views/resultados/show.blade.php
+  Função: Resultado do aluno numa prova — nota, resumo e acertos/erros questão por questão.
+          Página pensada para imprimir, baixar em PDF e enviar por WhatsApp ao aluno ou
+          aos responsáveis (mockup resultado.html).
+--}}
+
 @section('title', 'Resultado — ' . $dados['aluno']['nome'])
+
+@php
+  $aluno  = $dados['aluno'];
+  $prova  = $dados['prova'];
+  $nota   = $dados['nota'];
+  $folha  = $dados['folha'];
+  $maxima = (float) ($prova['nota_maxima'] ?? 10);
+  $aprov  = (float) $nota['nota_final'] >= $maxima * 0.6;
+  $cont   = collect($folha)->countBy('situacao');
+  $lingua = !empty($dados['lingua']) ? ($dados['lingua'] === 'ESP' ? 'Espanhol' : 'Inglês') : null;
+  $fmt    = fn ($n) => number_format((float) $n, 1, ',', '.');
+  $urlPdf = route('resultados.pdf', [$aluno['id'], $prova['id']], false);
+  $resumoTexto = "Resultado — {$prova['titulo']} ({$prova['disciplina']})\n{$aluno['nome']}"
+    . ($aluno['turma_nome'] ? " · {$aluno['turma_nome']}" : '')
+    . "\nNota: " . $fmt($nota['nota_final']) . " · {$nota['acertos']} acertos de {$nota['total_questoes']} questões";
+@endphp
 
 @push('styles')
 <style>
-  .result-head { display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-top:20px; }
-  .perf-row { display:flex;align-items:center;gap:28px; }
-  .perf-meta { display:grid;grid-template-columns:repeat(3,auto);gap:26px; }
-  .perf-meta .v { font-family:var(--font-mono);font-size:26px;font-weight:700; }
-  .perf-meta .l { font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px; }
-  .answer-sheet { display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:8px;margin-top:14px; }
-  .ans { border-radius:8px;padding:8px 4px;text-align:center;border:1.5px solid var(--border-soft);font-family:var(--font-mono);position:relative; }
-  .ans .qn { font-size:11px;color:var(--muted); }
-  .ans .av { font-size:16px;font-weight:700;margin-top:2px; }
-  .ans.ok { background:var(--success-light);border-color:#bfe3bd; } .ans.ok .av { color:var(--success); }
-  .ans.no { background:var(--danger-light);border-color:#f4c4bd; } .ans.no .av { color:var(--danger); }
-  .ans.bl { background:var(--warn-light,#fdf6e3);border-color:#efdd8a; } .ans.bl .av { color:var(--warn-fg,#b45309); }
-  .ans.an { background:var(--surface-2);border-color:var(--border); } .ans.an .av { color:var(--muted); }
-  .sheet-legend { display:flex;gap:18px;font-size:13px;color:var(--muted);margin-top:14px;flex-wrap:wrap; }
-  .sheet-legend i { width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:middle; }
-  @media print { .no-print { display:none!important; } }
-  @media (max-width:900px){ .result-head{grid-template-columns:1fr;} .perf-row{flex-direction:column;align-items:flex-start;gap:18px;} }
+  .res-acoes { display:flex; gap:8px; flex-wrap:wrap; }
+  .res-resumo { display:grid; grid-template-columns:1.3fr repeat(4,1fr); gap:12px; margin-top:16px; }
+  .res-box { border-radius:var(--radius-md); padding:12px 14px; border:1px solid var(--border-soft); background:var(--surface); }
+  .res-box .v { font-family:var(--font-mono); font-size:26px; font-weight:700; line-height:1.1; }
+  .res-box .l { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-top:4px; }
+  .res-box.ok { background:var(--success-light,#e3f5e1); border-color:var(--success,#168821); color:var(--success,#168821); }
+  .res-box.no { background:var(--danger-light,#fde8e4); border-color:var(--danger,#e52207); color:var(--danger,#e52207); }
+  .res-box.bl { background:var(--warn-light,#fff5c2); border-color:var(--warn-fg,#b06800); color:var(--warn-fg,#b06800); }
+  .res-box.an { background:var(--surface-2); color:var(--muted); }
+  .res-folha { display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(var(--linhas),auto); grid-auto-flow:column; gap:6px; margin-top:12px; }
+  .res-q { display:flex; gap:10px; align-items:center; border-radius:6px; padding:7px 10px; font-size:14px; border:1px solid transparent; }
+  .res-q b { font-family:var(--font-mono); min-width:22px; }
+  .res-q.correta { background:var(--success-light,#e3f5e1); border-color:#9fd39b; color:#0f5e17; }
+  .res-q.incorreta { background:var(--danger-light,#fde8e4); border-color:#f1a99f; color:#a3190a; }
+  .res-q.branco { background:var(--warn-light,#fff5c2); border-color:#e8cf72; color:#7a4800; }
+  .res-q.anulada { background:var(--surface-2); color:var(--muted); }
+  .so-impressao { display:none; }
+  @media (max-width:900px) { .res-resumo { grid-template-columns:1fr 1fr; } .res-resumo .res-box:first-child { grid-column:1 / -1; } .res-folha { grid-template-columns:1fr 1fr; grid-template-rows:none; grid-auto-flow:row; } }
+  @media (max-width:480px) { .res-folha { grid-template-columns:1fr; } }
+  @media print {
+    @page { size:A4; margin:12mm; }
+    .govbar, .app-header, .breadcrumb, .no-print { display:none !important; }
+    .so-impressao { display:block; }
+    body { background:#fff; }
+    .container { padding:0 !important; max-width:none !important; }
+    .card { box-shadow:none !important; border:0 !important; }
+    .res-resumo { grid-template-columns:1.3fr repeat(4,1fr); }
+    .res-folha { grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(var(--linhas),auto); grid-auto-flow:column; }
+    .res-q { font-size:11.5px; padding:4px 8px; break-inside:avoid; }
+    * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
 </style>
 @endpush
 
 @section('breadcrumb')
-@php
-  $aluno   = $dados['aluno'];
-  $prova   = $dados['prova'];
-@endphp
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
-@if($from === 'prova')
-  <a href="{{ route('provas.index') }}">Provas</a><span class="sep">/</span>
-  <a href="{{ route('relatorios.prova', $prova['id']) }}">Relatório da Prova</a><span class="sep">/</span>
-  <span>{{ $aluno['nome'] }}</span>
+@if($from === 'correcao')
+  <a href="{{ route('correcao.show', $prova['id']) }}">Correção — {{ $prova['disciplina'] }}</a><span class="sep">/</span>
+@elseif($from === 'prova')
+  <a href="{{ route('relatorios.prova', $prova['id']) }}">Relatório da prova</a><span class="sep">/</span>
 @elseif($from === 'rel-turma' && $aluno['turma_id'])
-  <a href="{{ route('turmas.index') }}">Turmas</a><span class="sep">/</span>
+  <a href="{{ route('relatorios.turmaProva', [$aluno['turma_id'], $prova['id']]) }}">Relatório da turma</a><span class="sep">/</span>
+@elseif($aluno['turma_id'])
   <a href="{{ route('turmas.show', $aluno['turma_id']) }}">{{ $aluno['turma_nome'] }}</a><span class="sep">/</span>
-  <a href="{{ route('relatorios.turmaProva', [$aluno['turma_id'], $prova['id']]) }}">Relatório da Prova</a><span class="sep">/</span>
-  <span>{{ $aluno['nome'] }}</span>
-@else
-  <a href="{{ route('turmas.index') }}">Turmas</a><span class="sep">/</span>
-  @if($aluno['turma_id'])
-    <a href="{{ route('turmas.show', $aluno['turma_id']) }}">{{ $aluno['turma_nome'] }}</a><span class="sep">/</span>
-  @endif
-  <span>{{ $aluno['nome'] }}</span>
 @endif
+<span>{{ $aluno['nome'] }}</span>
 @endsection
 
 @section('content')
 
-<div class="row-between no-print" style="margin-top:12px;">
-  <div style="display:flex;align-items:center;gap:16px;">
-    <div class="avatar" style="width:52px;height:52px;font-size:18px;">{{ strtoupper(implode('', array_map(fn($p) => $p[0], array_slice(explode(' ', $aluno['nome']), 0, 2)))) }}</div>
-    <div>
-      <h1 class="page-title" style="margin:0;">{{ $aluno['nome'] }}</h1>
-      <p class="page-sub">{{ $aluno['turma_nome'] }} · {{ $prova['titulo'] }}{{ $prova['data_aplicacao'] ? ' · ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }}</p>
-    </div>
+{{-- Cabeçalho só na impressão --}}
+<div class="so-impressao" style="text-align:center;margin-bottom:10px;">
+  <div style="font-weight:800;font-size:15px;color:#0c326f;">{{ $prova['escola_nome'] ?? '' }}</div>
+  <div style="font-size:12px;color:#555;">{{ $prova['titulo'] }} · {{ $prova['disciplina'] }}{{ $prova['data_aplicacao'] ? ' · ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }}</div>
+</div>
+
+<div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
+  <div>
+    <div class="eyebrow no-print">{{ $prova['disciplina'] }} · {{ $prova['titulo'] }}</div>
+    <h1 class="page-title" style="margin:4px 0 2px;">{{ $aluno['nome'] }}</h1>
+    <p class="page-sub">
+      {{ collect([$aluno['turma_nome'] ? 'Turma ' . $aluno['turma_nome'] : null, $aluno['matricula'] ? 'Matrícula ' . $aluno['matricula'] : null, $lingua])->filter()->implode(' · ') }}
+    </p>
   </div>
-  <div style="display:flex;gap:10px;">
-    <button class="btn btn-secondary" onclick="window.print()">Exportar PDF</button>
+  <div class="res-acoes no-print">
+    @if($from === 'correcao')
+      <a class="btn btn-ghost" href="{{ route('correcao.show', $prova['id']) }}">← Voltar à correção</a>
+    @endif
+    <button type="button" class="btn btn-secondary" onclick="window.print()">🖨 Imprimir</button>
+    <a class="btn btn-secondary" href="{{ $urlPdf }}?baixar=1">⬇ PDF</a>
+    <button type="button" class="btn btn-primary" id="btn-whats" style="background:#1fa855;border-color:#1fa855;">📲 WhatsApp</button>
     @if($dados['cartao_id'])
-      <button class="btn btn-secondary" onclick="document.getElementById('modal-revisar').style.display='flex'">Revisar leitura</button>
+      <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-revisar').style.display='flex'">Revisar leitura</button>
     @endif
   </div>
 </div>
 
-<div class="result-head">
-  <div class="card card-pad">
-    <div class="perf-row">
-      <div id="donut-nota"></div>
-      <div class="perf-meta">
-        <div><div class="v" id="nota-final" style="color:{{ $dados['nota']['status_aprovacao'] === 'aprovado' ? 'var(--success)' : 'var(--danger)' }};">{{ number_format($dados['nota']['nota_final'], 1, ',', '.') }}</div><div class="l">Nota final</div></div>
-        <div><div class="v">{{ $dados['nota']['acertos'] }}</div><div class="l">Acertos</div></div>
-        <div><div class="v">{{ $dados['nota']['total_questoes'] }}</div><div class="l">Questões</div></div>
-      </div>
-    </div>
-    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
-      <span class="badge {{ $dados['nota']['status_aprovacao'] === 'aprovado' ? 'badge-success' : 'badge-danger' }} badge-dot">
-        {{ $dados['nota']['status_aprovacao'] === 'aprovado' ? 'Aprovada' : 'Recuperação' }}
-      </span>
-      @if($dados['media_turma'] !== null)
-        <span class="badge badge-info">
-          {{ $dados['nota']['nota_final'] >= $dados['media_turma'] ? 'Acima' : 'Abaixo' }} da média da turma ({{ number_format($dados['media_turma'], 1, ',', '.') }})
-        </span>
-      @endif
-    </div>
+{{-- Resumo --}}
+<div class="res-resumo">
+  <div class="res-box {{ $aprov ? 'ok' : 'no' }}">
+    <div class="v" style="font-size:34px;">{{ $fmt($nota['nota_final']) }}</div>
+    <div class="l">Nota (de {{ $fmt($maxima) }}){{ $dados['media_turma'] !== null ? ' · média da turma ' . $fmt($dados['media_turma']) : '' }}</div>
   </div>
-  <div class="card card-pad">
-    <h3 style="font-size:16px;margin-bottom:6px;">Confiança da leitura</h3>
-    @if($dados['confianca_geral'] !== null)
-      <p style="font-size:28px;font-weight:700;font-family:var(--font-mono);color:var(--accent);">{{ number_format($dados['confianca_geral'] * 100, 1, ',', '.') }}%</p>
-      <p class="field-help">Confiança média da leitura OMR neste cartão-resposta.</p>
-    @else
-      <p style="color:var(--muted);font-size:14px;">Não disponível.</p>
-    @endif
-  </div>
+  <div class="res-box ok"><div class="v">{{ $cont['correta'] ?? 0 }}</div><div class="l">Acertos</div></div>
+  <div class="res-box no"><div class="v">{{ $cont['incorreta'] ?? 0 }}</div><div class="l">Erros</div></div>
+  <div class="res-box bl"><div class="v">{{ $cont['branco'] ?? 0 }}</div><div class="l">Em branco</div></div>
+  <div class="res-box an"><div class="v">{{ $cont['anulada'] ?? 0 }}</div><div class="l">Anuladas</div></div>
 </div>
 
-<div class="card card-pad" style="margin-top:20px;">
+{{-- Questão por questão --}}
+<div class="card card-pad" style="margin-top:16px;">
   <div class="row-between">
-    <h3 style="font-size:17px;">Folha de respostas corrigida</h3>
-    @if($dados['confianca_geral'] !== null)
-      <span class="badge badge-info">Leitura OMR · {{ number_format($dados['confianca_geral'] * 100, 1, ',', '.') }}% de confiança</span>
-    @endif
+    <h3 style="font-size:17px;">Questão por questão</h3>
+    <span class="no-print" style="font-size:12px;color:var(--muted);">🟩 acertou · 🟥 errou · 🟨 em branco · ⬜ anulada</span>
   </div>
-  <div class="answer-sheet">
-    @foreach($dados['folha'] as $q)
-      @php
-        $cls = match($q['situacao']) { 'correta' => 'ok', 'incorreta' => 'no', 'branco' => 'bl', default => 'an' };
-        $show = $q['marcada'] ?? '—';
-      @endphp
-      <div class="ans {{ $cls }}" title="Questão {{ $q['numero_questao'] }} · gabarito {{ $q['gabarito'] }}{{ $q['marcada'] && $q['marcada'] !== $q['gabarito'] ? ' · marcou ' . $q['marcada'] : '' }}">
-        <div class="qn">{{ $q['numero_questao'] < 10 ? '0' : '' }}{{ $q['numero_questao'] }}</div>
-        <div class="av">{{ $show }}</div>
+  {{-- Colunas de cima para baixo, como no cartão-resposta (no celular, lista corrida) --}}
+  <div class="res-folha" style="--linhas:{{ (int) ceil(count($folha) / 3) }};">
+    @foreach($folha as $q)
+      <div class="res-q {{ $q['situacao'] }}">
+        <b>{{ str_pad($q['numero_questao'], 2, '0', STR_PAD_LEFT) }}</b>
+        <span>
+          @switch($q['situacao'])
+            @case('correta') acertou ({{ $q['marcada'] }}) @break
+            @case('incorreta') marcou <b>{{ $q['marcada'] }}</b> · certa <b>{{ $q['gabarito'] }}</b> @break
+            @case('branco') {{ !empty($q['ambigua']) ? 'marcação dupla/fraca' : 'em branco' }} · certa <b>{{ $q['gabarito'] }}</b> @break
+            @default anulada
+          @endswitch
+        </span>
       </div>
     @endforeach
   </div>
-  <div class="sheet-legend">
-    <span><i style="background:var(--success)"></i>Correta</span>
-    <span><i style="background:var(--danger)"></i>Incorreta</span>
-    <span><i style="background:var(--warn-fg,#b45309)"></i>Em branco</span>
-    <span><i style="background:var(--muted)"></i>Anulada</span>
-  </div>
+  <p class="so-impressao" style="font-size:10px;color:#777;margin-top:10px;text-align:center;">Feito com Gabarito360 · gabarito360.com.br</p>
 </div>
 
 @if($dados['cartao_id'])
@@ -138,7 +154,7 @@
         <div class="field">
           <label>Questão *</label>
           <select class="select" name="numero_questao" required>
-            @foreach($dados['folha'] as $q)
+            @foreach($folha as $q)
               <option value="{{ $q['numero_questao'] }}">Questão {{ $q['numero_questao'] }} (marcou: {{ $q['marcada'] ?? '—' }})</option>
             @endforeach
           </select>
@@ -161,14 +177,35 @@
 </div>
 @endif
 
-<div style="height:48px"></div>
+<div style="height:48px" class="no-print"></div>
 @endsection
 
 @push('scripts')
 <script>
-var donut = document.getElementById('donut-nota');
-donut.dataset.donut = {{ (int) round($dados['nota']['nota_final'] / max($prova['nota_maxima'], 0.1) * 100) }};
-donut.dataset.color = '{{ $dados['nota']['status_aprovacao'] === 'aprovado' ? '#168821' : '#e52207' }}';
-if (typeof drawDonut === 'function') drawDonut(donut);
+// Envia o PDF pelo compartilhamento do celular (WhatsApp aparece na lista); sem suporte a
+// arquivos, baixa o PDF e abre o WhatsApp com o resumo para anexar.
+(function () {
+  var btn = document.getElementById('btn-whats');
+  var PDF_URL = @json($urlPdf);
+  var TEXTO = @json($resumoTexto);
+  btn.addEventListener('click', function () {
+    var rotulo = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Gerando PDF…';
+    fetch(PDF_URL, { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error('falha ao gerar o PDF'); return r.blob(); })
+      .then(function (blob) {
+        var nome = 'resultado-{{ \Illuminate\Support\Str::slug($aluno['nome'] . ' ' . $prova['disciplina']) }}.pdf';
+        var arq = new File([blob], nome, { type: 'application/pdf' });
+        if (navigator.canShare && navigator.canShare({ files: [arq] })) {
+          return navigator.share({ files: [arq], title: 'Resultado', text: TEXTO }).catch(function () {});
+        }
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+        window.open('https://wa.me/?text=' + encodeURIComponent(TEXTO + '\n(PDF em anexo)'), '_blank');
+      })
+      .catch(function (e) { alert('Não foi possível enviar: ' + e.message); })
+      .finally(function () { btn.disabled = false; btn.textContent = rotulo; });
+  });
+})();
 </script>
 @endpush

@@ -30,13 +30,6 @@
   .g360-modal { position:fixed; inset:0; z-index:1100; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; padding:12px; }
   .g360-modal .caixa { background:var(--surface); border-radius:var(--radius-lg); width:100%; max-width:640px; max-height:92vh; overflow:auto; padding:16px; }
   .foto-img { max-width:100%; max-height:78vh; border-radius:6px; background:#fff; display:block; margin:0 auto; }
-  .folha-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:6px; margin-top:12px; }
-  .folha-q { border-radius:6px; padding:6px 8px; font-size:13px; font-family:var(--font-mono); border:1px solid transparent; }
-  .folha-q.correta { background:var(--success-light,#e3f5e1); color:var(--success,#168821); border-color:var(--success,#168821); }
-  .folha-q.incorreta { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); border-color:var(--danger,#e52207); }
-  .folha-q.branco, .folha-q.ambigua { background:var(--warn-light,#fff5c2); color:var(--warn-fg,#b06800); border-color:var(--warn-fg,#b06800); }
-  .folha-q.anulada { background:var(--surface-2); color:var(--muted); }
-  .folha-leg { display:flex; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:10px; }
 </style>
 @endpush
 
@@ -107,19 +100,6 @@
   </div>
 </div>
 
-<div class="g360-modal" id="folha-modal" onclick="if (event.target === this) fecharModal('folha-modal')">
-  <div class="caixa">
-    <div class="row-between"><b id="folha-titulo">Acertos e erros</b><button type="button" class="btn btn-sm btn-ghost" onclick="fecharModal('folha-modal')">✕</button></div>
-    <div id="folha-resumo" style="font-size:14px;margin-top:6px;"></div>
-    <div class="folha-grid" id="folha-grid"></div>
-    <div class="folha-leg">
-      <span>🟩 acertou</span><span>🟥 errou (marcou → certa)</span><span>🟨 em branco/ambígua</span><span>⬜ anulada</span>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-      <a class="btn btn-sm btn-secondary" id="folha-link" href="#">Abrir resultado completo</a>
-    </div>
-  </div>
-</div>
 
 <div class="card card-pad" style="margin-top:20px;">
   <h3 style="font-size:17px;margin-bottom:8px;">Cartões processados recentemente</h3>
@@ -209,7 +189,7 @@ function desenharCorrigidos() {
       : '<div class="corr-thumb" style="display:grid;place-items:center;font-size:11px;color:var(--muted);">sem foto</div>';
     var acoes = '';
     if (c.aluno_id && c.nota_final !== null && c.nota_final !== undefined) {
-      acoes += '<button type="button" class="btn btn-sm btn-secondary" onclick="verFolha(' + c.aluno_id + ')">📋 Acertos e erros</button>';
+      acoes += '<a class="btn btn-sm btn-secondary" href="/resultados/' + c.aluno_id + '/' + PROVA_ID + '?from=correcao">📋 Acertos e erros</a>';
     }
     if (!c.aluno_id && typeof seletorAluno === 'function' && typeof ALUNOS !== 'undefined' && ALUNOS.length) acoes += seletorAluno(c.id);
     if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">🗑 Excluir</button>';
@@ -225,32 +205,6 @@ function verFoto(id) {
   document.getElementById('foto-img').src = CARTOES_URL + '/' + id + '/imagem';
   abrirModal('foto-modal');
 }
-// Relatório de acertos e erros do aluno, questão por questão
-function verFolha(alunoId) {
-  var grid = document.getElementById('folha-grid');
-  grid.innerHTML = '<span style="color:var(--muted);font-size:13px;">Carregando…</span>';
-  document.getElementById('folha-resumo').innerHTML = '';
-  document.getElementById('folha-link').href = '/resultados/' + alunoId + '/' + PROVA_ID;
-  abrirModal('folha-modal');
-  fetch('/resultados/' + alunoId + '/' + PROVA_ID + '/folha', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      if (!d.folha) { grid.innerHTML = escH(d.erro || 'Resultado indisponível.'); return; }
-      var cont = { correta: 0, incorreta: 0, branco: 0, anulada: 0 };
-      d.folha.forEach(function (q) { cont[q.situacao] = (cont[q.situacao] || 0) + 1; });
-      document.getElementById('folha-titulo').textContent = d.aluno.nome + (d.aluno.turma_nome ? ' · ' + d.aluno.turma_nome : '');
-      document.getElementById('folha-resumo').innerHTML = '<b>' + fmtNota(d.nota.nota_final) + '</b> · ' + cont.correta + ' acertos · '
-        + cont.incorreta + ' erros · ' + cont.branco + ' em branco' + (d.lingua ? ' · ' + (d.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : '');
-      grid.innerHTML = d.folha.map(function (q) {
-        var n = ('0' + q.numero_questao).slice(-2), cls = q.ambigua && q.situacao === 'branco' ? 'ambigua' : q.situacao;
-        var txt = q.situacao === 'correta' ? '✓ ' + escH(q.marcada)
-          : q.situacao === 'incorreta' ? escH(q.marcada) + ' → ' + escH(q.gabarito)
-          : q.situacao === 'anulada' ? 'anulada'
-          : (q.ambigua ? '? → ' : '— → ') + escH(q.gabarito);
-        return '<div class="folha-q ' + cls + '"><b>' + n + '</b> ' + txt + '</div>';
-      }).join('');
-    }).catch(function () { grid.innerHTML = 'Não foi possível carregar o resultado.'; });
-}
 function excluirCorrecao(id) {
   var c = corrDados.filter(function (x) { return x.id === id; })[0] || {};
   if (!confirm('Excluir a correção de ' + (c.aluno_nome || 'este cartão') + '?\nA foto e a nota serão apagadas e você poderá fotografar o cartão de novo.')) return;
@@ -262,7 +216,7 @@ function excluirCorrecao(id) {
     });
 }
 document.getElementById('corr-busca').addEventListener('input', desenharCorrigidos);
-document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fecharModal('foto-modal'); fecharModal('folha-modal'); } });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fecharModal('foto-modal'); } });
 carregarCorrigidos();
 setInterval(carregarCorrigidos, 6000);
 var CSRF = '{{ csrf_token() }}';

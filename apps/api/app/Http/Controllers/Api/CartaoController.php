@@ -178,6 +178,13 @@ class CartaoController extends Controller
 
         ProcessarCartaoJob::dispatch($cartao->id);
 
+        // Recusado pelo QR (cartão de outra prova que não pode recebê-lo): explica o motivo.
+        if (!Cartao::whereKey($cartao->id)->exists()) {
+            $motivo = \Illuminate\Support\Facades\Cache::pull(ProcessarCartaoJob::chaveRecusa($cartao->id))
+                ?? 'Este cartão não pôde ser corrigido nesta prova.';
+            return ApiResponse::error($motivo, ['motivo' => 'outra_prova'], 422);
+        }
+
         // Com fila síncrona o cartão já foi lido: devolve o resultado para o celular.
         $cartao->refresh()->load('aluno:id,nome');
 

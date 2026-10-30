@@ -13,6 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -39,7 +40,12 @@ class ProcessarCartaoJob implements ShouldQueue
         if ($driver instanceof OmrIdentificacaoInterface) {
             // Cartão de outra prova (ex.: fotografou o de Linguagens na tela de Ciências Humanas):
             // vai para a prova do QR, se for da mesma escola, e é relido com o gabarito dela.
-            $outra = $this->provaDoQr($cartao, $driver->identificacao());
+            $provaQr = (int) ($driver->identificacao()['prova_id'] ?? 0);
+            $outra   = $this->provaDoQr($cartao, $driver->identificacao());
+            if ($provaQr && $provaQr !== (int) $prova->id && !$outra) {
+                $this->recusar($cartao, $prova, $provaQr);
+                return;
+            }
             if ($outra) {
                 $anterior = $prova;
                 $cartao->update(['prova_id' => $outra->id]);
@@ -120,6 +126,32 @@ class ProcessarCartaoJob implements ShouldQueue
             && (int) $outra->escola_id === (int) $cartao->prova->escola_id
             && in_array($outra->status, ['publicada', 'em_correcao', 'corrigida'], true))
             ? $outra : null;
+    }
+
+    /**
+     * QR de outra prova que não pode receber este cartão (outra escola ou prova não publicada):
+     * não corrige com o gabarito errado — apaga o envio e deixa o motivo para a resposta do upload.
+     */
+    private function recusar(Cartao $cartao, Prova $prova, int $provaQr): void
+    {
+        $outra = Prova::find($provaQr);
+        $motivo = ($outra && (int) $outra->escola_id === (int) $prova->escola_id)
+            ? "Este cartão não é de {$prova->disciplina}: é da prova \"{$outra->disciplina}\" ({$outra->titulo}), "
+              . 'que ainda não está publicada para correção. Publique o gabarito dela e fotografe de novo.'
+            : "Este cartão não é de {$prova->disciplina}: o QR é de uma prova de outra escola ou que você não acessa. "
+              . 'Confira se imprimiu o cartão na prova certa.';
+
+        Cache::put(self::chaveRecusa($cartao->id), $motivo, now()->addMinutes(10));
+        if ($cartao->imagem_url) {
+            Storage::disk('public')->delete($cartao->imagem_url);
+        }
+        $cartao->delete();
+        AtualizadorStatusProva::atualizar($prova);
+    }
+
+    public static function chaveRecusa(int $cartaoId): string
+    {
+        return "g360:cartao-recusado:{$cartaoId}";
     }
 
     /** Nova foto do mesmo aluno na mesma prova substitui a anterior (sem cartão duplicado). */
