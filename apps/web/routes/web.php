@@ -131,6 +131,8 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/resultados/{alunoId}/{provaId}/pdf', [ResultadoController::class, 'pdf'])->name('resultados.pdf');
     Route::get('/relatorios/prova/{id}', [RelatorioController::class, 'prova'])->name('relatorios.prova');
     Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');
+    Route::get('/relatorios/turma/{turmaId}', [RelatorioController::class, 'turma'])->name('relatorios.turma');
+    Route::get('/relatorios/aluno/{alunoId}', [RelatorioController::class, 'aluno'])->name('relatorios.aluno');
 
     // Assinatura e Cobrança (MP-027)
     Route::get('/assinatura',           [AssinaturaController::class, 'index'])->name('assinatura.index');

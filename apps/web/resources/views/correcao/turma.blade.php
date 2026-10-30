@@ -65,7 +65,10 @@
     <h1 class="page-title">{{ $turma['nome'] }}</h1>
     <p class="page-sub">{{ collect([$turma['escola_nome'], $turma['serie'], $resumo['alunos'] . ' alunos ativos'])->filter()->implode(' · ') }}</p>
   </div>
-  <a class="btn btn-primary" href="{{ route('correcao.index') }}">📷 Corrigir cartões</a>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}">📈 Relatório da turma</a>
+    <a class="btn btn-primary" href="{{ route('correcao.index') }}">📷 Corrigir cartões</a>
+  </div>
 </div>
 
 <div class="kpis">
