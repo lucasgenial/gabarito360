@@ -45,9 +45,9 @@
     </p>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    @pode('correcao.ver')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}">📊 Acompanhar correção</a>@endpode
-    @pode('resultados.ver')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}">📈 Relatório da turma</a>@endpode
-    @pode('turma.gerenciar')
+    @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}">📊 Acompanhar correção</a>@endpode
+    @pode('resultado.ver')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}">📈 Relatório da turma</a>@endpode
+    @pode('turma.gerir')
     <button class="btn btn-secondary" onclick="abrirModal()">Editar turma</button>
     <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}"
           onsubmit="return confirm('{{ $turma['ativo'] ? 'Desativar' : 'Ativar' }} esta turma?')">

@@ -73,7 +73,7 @@
     </ul>
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    @pode('resultados.ver')<a class="btn btn-primary" href="{{ route('relatorios.aluno', $aluno['id']) }}">📄 Boletim</a>@endpode
+    @pode('resultado.ver')<a class="btn btn-primary" href="{{ route('relatorios.aluno', $aluno['id']) }}">📄 Boletim</a>@endpode
     <button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>
     <form method="POST" action="{{ route('alunos.toggle', $aluno['id']) }}"
           onsubmit="return confirm('{{ $aluno['ativo'] ? 'Desativar' : 'Ativar' }} este aluno?')">
