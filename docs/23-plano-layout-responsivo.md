@@ -140,6 +140,8 @@ tabela `lista-cel` e `quadro-cel` (etapa 5), `<x-formulario>`/`<x-campo>`, `<x-a
 Ordem sugerida: L0 → L1 → L2 → L3 → L4 → L5 → L6 → L7, com L8 a partir de L1.
 A **L0 pode ir para produção já**, independente das decisões abaixo.
 
+**L8 concluída em 30/10/2026.** Antes de cada PR, rode `bash scripts/auditoria/rodar.sh <branch>`. Ela mede as telas em 6 larguras e procura rolagem lateral, erro de JavaScript e mais de 12 fotos pedidas ao abrir. O GitHub roda sozinho os testes e `scripts/verificar_telas.py` em cada PR. As telas geradas têm dados reais e nunca entram no repositório.
+
 ## 6. Decisões
 
 | # | Decisão | Resposta (30/10/2026) |
@@ -148,7 +150,7 @@ A **L0 pode ir para produção já**, independente das decisões abaixo.
 | 2 | Largura máxima | **Tela toda**, em qualquer monitor (substitui os limites da seção 4.2; ver nota abaixo) |
 | 3 | Faixa superior | **Remover tudo que remete a gov** (faixa, textos, exemplos, nomes) |
 | 4 | Login | **Limpar**: sem estatísticas, sem "gov.br", sem a aba Cadastrar |
-| 5 | Números da página inicial ("+340 escolas", "98,6%") | **Pendente** |
+| 5 | Números da página inicial ("+340 escolas", "98,6%") | **Remover os fictícios**. Só números de pesquisas científicas, com fonte (PR #35) |
 | 6 | Identidade visual (cores e fonte hoje herdadas do padrão gov.br) | **Pendente** |
 
 **Como a L1 fez a escala:** a área logada usa `zoom` por faixa de largura (1,125 a partir de 1920 px, 1,25 a partir de
