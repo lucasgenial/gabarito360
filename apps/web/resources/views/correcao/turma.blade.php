@@ -35,13 +35,19 @@
   .quadro { border-collapse:separate; border-spacing:0; width:100%; font-size:13px; }
   .quadro th, .quadro td { padding:7px 10px; border-bottom:1px solid var(--border-soft); text-align:center; white-space:nowrap; }
   .quadro th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); background:var(--surface); }
-  .quadro .aluno { text-align:left; position:sticky; left:0; background:var(--surface); z-index:1; max-width:220px; overflow:hidden; text-overflow:ellipsis; }
+  .quadro .aluno { text-align:left; position:sticky; left:0; background:var(--surface); z-index:1; }
+  .quadro .aluno a, .quadro .aluno span { display:block; max-width:220px; overflow:hidden; text-overflow:ellipsis; }
   .cel { display:inline-block; min-width:44px; padding:3px 6px; border-radius:6px; font-family:var(--font-mono); font-weight:700; text-decoration:none; }
   .cel.ok { background:var(--success-light,#e3f5e1); color:var(--success,#168821); }
   .cel.baixa { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); }
   .cel.amb { background:var(--warn-light,#fff5c2); color:var(--warn-fg,#b06800); }
   .cel.falta { color:var(--muted); font-weight:400; }
-  @media (max-width:720px) { .kpis { grid-template-columns:1fr 1fr; } }
+  @media (max-width:720px) {
+    .kpis { grid-template-columns:1fr 1fr; }
+    .quadro { width:auto; }
+    .quadro th, .quadro td { padding:6px; }
+    .quadro .aluno a, .quadro .aluno span { max-width:118px; font-size:12px; }
+  }
 </style>
 @endpush
 
@@ -117,7 +123,7 @@
     <table class="quadro">
       <thead>
         <tr>
-          <th class="aluno">Aluno</th>
+          <th class="aluno"><span>Aluno</span></th>
           @foreach($provas as $p)<th title="{{ $p['titulo'] }}">{{ $p['disciplina'] }}</th>@endforeach
           <th>Média</th>
         </tr>
