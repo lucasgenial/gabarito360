@@ -68,6 +68,7 @@ class GabaritoController extends Controller
             'questoes'                  => 'required|array|min:1',
             'questoes.*.numero_questao' => 'required|integer|min:1|max:100',
             'questoes.*.alternativa'    => 'required|string|in:A,B,C,D,E',
+            'questoes.*.alternativa_espanhol' => 'nullable|string|in:A,B,C,D,E',
             'questoes.*.peso'           => 'nullable|numeric|min:0',
             'questoes.*.anulada'        => 'nullable|boolean',
         ]);
@@ -93,6 +94,7 @@ class GabaritoController extends Controller
                     'gabarito_id'    => $gabaritoId,
                     'numero_questao' => (int) $q['numero_questao'],
                     'alternativa'    => strtoupper($q['alternativa']),
+                    'alternativa_espanhol' => !empty($q['alternativa_espanhol']) ? strtoupper($q['alternativa_espanhol']) : null,
                     'peso'           => $q['peso'] ?? 1.0,
                     'anulada'        => $q['anulada'] ?? false,
                 ];

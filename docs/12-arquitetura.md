@@ -307,6 +307,14 @@ O WEB implementa o Padrão Digital de Governo (gov.br Design System).
 
 ---
 
+## Motor OMR Nativo (MP-021)
+
+- `apps/api/omr/` contém scripts Python (OpenCV/ReportLab) executados pela API via `Illuminate\Support\Facades\Process`.
+- O driver é escolhido por `OMR_DRIVER` (`nativo` | `simulado`) em `config/omr.php`.
+- Detalhes, decisões e dependências: `docs/18-omr-nativo-e-cartoes.md`.
+
+---
+
 ## Evolução Arquitetural Prevista
 
 | Fase   | Mudança                                             | Impacto         |

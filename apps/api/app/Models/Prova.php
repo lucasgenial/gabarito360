@@ -11,11 +11,12 @@ class Prova extends Model
     protected $fillable = [
         'escola_id', 'criado_por', 'titulo', 'disciplina', 'serie',
         'num_questoes', 'num_alternativas', 'nota_maxima', 'tipo_pontuacao',
-        'anular_se_todas', 'gerar_cartao_pdf', 'status', 'data_aplicacao',
+        'anular_se_todas', 'opcao_lingua', 'gerar_cartao_pdf', 'status', 'data_aplicacao',
     ];
 
     protected $casts = [
         'anular_se_todas' => 'boolean',
+        'opcao_lingua' => 'boolean',
         'gerar_cartao_pdf' => 'boolean',
         'data_aplicacao' => 'date',
     ];
