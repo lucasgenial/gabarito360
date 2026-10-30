@@ -122,7 +122,7 @@
       <input type="checkbox" id="so-falta"> Mostrar só quem falta corrigir
     </label>
   </div>
-  <div class="quadro-wrap">
+  <div class="quadro-wrap quadro-cel">
     <table class="quadro">
       <thead>
         <tr>

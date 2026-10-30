@@ -63,7 +63,7 @@
     <div class="eyebrow">Aplicação do dia</div>
     <h3 style="font-size:18px;">Provas para enviar cartões</h3>
   </div>
-  <table class="table">
+  <table class="table lista-cel">
     <thead>
       <tr>
         <th>Prova</th>

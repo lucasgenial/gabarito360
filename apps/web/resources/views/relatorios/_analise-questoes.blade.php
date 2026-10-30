@@ -72,13 +72,13 @@
     <details class="aq-detalhe" style="margin-top:14px;">
       <summary style="cursor:pointer;font-weight:600;font-size:14px;">Ver marcações de cada questão (A–E)</summary>
       @php $letras = array_keys(collect($questoes)->first()['distribuicao'] ?? []); @endphp
-      <div style="overflow-x:auto;">
+      <div class="quadro-cel" style="overflow-x:auto;">
         <table class="aq-tabela">
-          <thead><tr><th>Questão</th>@foreach($letras as $l)<th>{{ $l === 'branco' ? 'Branco' : $l }}</th>@endforeach<th>Acerto</th></tr></thead>
+          <thead><tr><th class="fixa">Questão</th>@foreach($letras as $l)<th>{{ $l === 'branco' ? 'Branco' : $l }}</th>@endforeach<th>Acerto</th></tr></thead>
           <tbody>
             @foreach($questoes as $q)
               <tr>
-                <td><b>{{ str_pad($q['numero'], 2, '0', STR_PAD_LEFT) }}</b>@if($q['gabarito_espanhol']) <span style="font-size:10px;color:var(--muted);">ING {{ $q['gabarito'] }} · ESP {{ $q['gabarito_espanhol'] }}</span>@endif</td>
+                <td class="fixa"><b>{{ str_pad($q['numero'], 2, '0', STR_PAD_LEFT) }}</b>@if($q['gabarito_espanhol']) <span style="font-size:10px;color:var(--muted);">ING {{ $q['gabarito'] }} · ESP {{ $q['gabarito_espanhol'] }}</span>@endif</td>
                 @foreach($letras as $l)
                   <td><span class="{{ $l === $q['gabarito'] ? 'aq-certa' : ($l === $q['distrator'] ? 'aq-distr' : '') }}" style="padding:1px 6px;">{{ $q['distribuicao'][$l] ?? 0 }}</span></td>
                 @endforeach
