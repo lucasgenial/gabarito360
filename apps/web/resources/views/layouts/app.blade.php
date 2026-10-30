@@ -9,33 +9,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" />
 @stack('styles')
+{{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
+<script>try { if (localStorage.getItem('g360-menu') === 'recolhido') document.documentElement.classList.add('menu-recolhido'); } catch (e) {}</script>
 </head>
 <body class="area-logada">
 
-{{-- Header --}}
+<div class="app-casca">
+
+{{-- Menu lateral (a partir de 1024 px), montado pelas permissões efetivas (App\Support\Acesso) --}}
+<aside class="app-lateral" aria-label="Menu principal">
+  <a class="brand" href="{{ route('painel') }}">
+    <span class="logo">G360</span> <span class="lateral-rotulo">Gabarito360</span>
+  </a>
+  <nav class="lateral-menu">
+    @foreach(\App\Support\Acesso::menu() as $item)
+      <a href="{{ $item['url'] }}" title="{{ $item['curto'] }}" @class(['active' => $item['ativo']]) @if($item['ativo']) aria-current="page" @endif>
+        @include('layouts._icone', ['nome' => $item['icone']])<span class="lateral-rotulo">{{ $item['curto'] }}</span>
+      </a>
+    @endforeach
+  </nav>
+  <button type="button" class="lateral-recolher" id="menu-recolher" aria-label="Recolher ou expandir o menu" title="Recolher ou expandir o menu">
+    <svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    <span class="lateral-rotulo">Recolher menu</span>
+  </button>
+</aside>
+
+<div class="app-corpo">
+{{-- Topo: logo só no celular/tablet (no computador ele fica no menu lateral) --}}
 <header class="app-header">
   <div class="container">
-    <a class="brand" href="{{ route('painel') }}">
+    <a class="brand topo-marca" href="{{ route('painel') }}">
       <span class="logo">G360</span> Gabarito360
     </a>
-
-    {{-- Menu montado pelas permissões efetivas (App\Support\Acesso, docs/21 etapa 4) --}}
-    @php $menuTopo = \App\Support\Acesso::menu(); @endphp
-    <nav class="app-nav" aria-label="Menu principal">
-      @foreach($menuTopo['topo'] as $item)
-        <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']])>{{ $item['rotulo'] }}</a>
-      @endforeach
-      @if($menuTopo['mais'])
-        <details class="nav-mais">
-          <summary @class(['active' => collect($menuTopo['mais'])->contains('ativo', true)])>Mais ▾</summary>
-          <div class="nav-mais-lista">
-            @foreach($menuTopo['mais'] as $item)
-              <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']])>{{ $item['rotulo'] }}</a>
-            @endforeach
-          </div>
-        </details>
-      @endif
-    </nav>
 
     <div class="header-right">
       @hasSection('context-badge')
@@ -88,6 +93,9 @@
   @yield('content')
 </div>
 
+</div>{{-- .app-corpo --}}
+</div>{{-- .app-casca --}}
+
 {{-- Celular: barra inferior fixa com os 4 itens principais + "Mais" (docs/21 etapa 4) --}}
 @php $menuCel = \App\Support\Acesso::menuCelular(); @endphp
 @if(count($menuCel['barra']) > 1 || $menuCel['mais'])
@@ -127,6 +135,13 @@
 </script>
 @endif
 
+<script>
+// Recolher/expandir o menu lateral; a preferência fica neste navegador
+document.getElementById('menu-recolher').addEventListener('click', function () {
+  var r = document.documentElement.classList.toggle('menu-recolhido');
+  try { localStorage.setItem('g360-menu', r ? 'recolhido' : 'aberto'); } catch (e) {}
+});
+</script>
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
 <script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
 @stack('scripts')
