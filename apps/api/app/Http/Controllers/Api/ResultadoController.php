@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Aluno;
 use App\Models\Prova;
+use App\Support\Cabecalho;
 use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -54,6 +55,8 @@ class ResultadoController extends Controller
                 'lingua'      => $dados['lingua'],
                 'media_turma' => $dados['media_turma'],
                 'folha'       => $dados['folha'],
+                'logo'        => Cabecalho::logoPath($escola->logo_path ?? null),
+                'detalhe'     => $dados['cabecalho']['detalhe'] ?? null,
             ], JSON_UNESCAPED_UNICODE))
             ->run([config('omr.python'), 'gerar_resultado.py']);
 
@@ -155,6 +158,7 @@ class ResultadoController extends Controller
                 'nota_final'       => (float) $nota->nota_final,
                 'status_aprovacao' => $nota->status_aprovacao,
             ],
+            'cabecalho'       => Cabecalho::escola((int) $prova->escola_id),
             'cartao_id'       => $nota->cartao_id,
             'lingua'          => $cartao?->lingua,
             'media_turma'     => $mediaTurma !== null ? round((float) $mediaTurma, 1) : null,

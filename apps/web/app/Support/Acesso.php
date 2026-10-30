@@ -30,14 +30,23 @@ class Acesso
         'alunos'   => ['Alunos', 'alunos.index', ['alunos.*']],
         'escolas'  => ['Escolas', 'escolas.index', ['escolas.*']],
         'equipe'   => ['Equipe', 'membros.index', ['membros.*']],
+        'relatorios' => ['📈 Relatórios', null, ['relatorios.escola', 'relatorios.nucleo', 'relatorios.rede']],
+    ];
+
+    /** Relatório consolidado do nível de cada perfil (item "Relatórios" do menu). */
+    private const RELATORIO_DO_PERFIL = [
+        'admin_rede'  => 'relatorios.rede',
+        'dir_nucleo'  => 'relatorios.nucleo',
+        'dir_escolar' => 'relatorios.escola',
+        'coordenador' => 'relatorios.escola',
     ];
 
     private const MENU = [
         'secretario_educacao' => ['painel'],
-        'admin_rede'          => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe'],
-        'dir_nucleo'          => ['painel', 'provas', 'turmas', 'escolas'],
-        'dir_escolar'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe'],
-        'coordenador'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos'],
+        'admin_rede'          => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'],
+        'dir_nucleo'          => ['painel', 'provas', 'turmas', 'escolas', 'relatorios'],
+        'dir_escolar'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'],
+        'coordenador'         => ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'relatorios'],
         'professor'           => ['painel', 'provas', 'corrigir', 'turmas'],
         'aplicador'           => ['painel'],
         'aluno'               => ['painel'],
@@ -57,6 +66,7 @@ class Acesso
         'aluno.gerenciar'    => ['admin_rede', 'dir_escolar', 'coordenador'],
         'equipe.gerenciar'   => ['admin_rede', 'dir_escolar'],
         'escola.configurar'  => ['admin_rede', 'dir_escolar'],
+        'escola.logo'        => ['admin_rede', 'dir_escolar', 'coordenador'],
         'rede.configurar'    => ['admin_rede'],
     ];
 
@@ -82,6 +92,7 @@ class Acesso
 
         return array_map(function (string $chave) use ($atual) {
             [$rotulo, $rota, $padroes] = self::ITENS[$chave];
+            $rota ??= self::RELATORIO_DO_PERFIL[self::perfil()] ?? 'painel';
 
             return [
                 'rotulo' => $rotulo,

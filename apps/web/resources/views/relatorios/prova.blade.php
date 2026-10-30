@@ -23,6 +23,7 @@
 @endsection
 
 @section('content')
+@include('relatorios._cabecalho', ['cabecalho' => $cabecalho ?? [], 'titulo' => 'Relatório da prova · ' . $prova['titulo'], 'subtitulo' => $prova['disciplina']])
 
 <div class="row-between" style="margin-top:12px;">
   <div>

@@ -25,8 +25,6 @@
   .tab th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
   .tab .esq { text-align:left; }
   .nota { font-family:var(--font-mono); font-weight:700; font-size:16px; }
-  .so-impressao { display:none; }
-  @media print { .so-impressao { display:block; } }
   @media (max-width:720px) { .kpis { grid-template-columns:1fr 1fr; } .tab .opc { display:none; } }
 </style>
 @endpush
@@ -38,11 +36,7 @@
 @endsection
 
 @section('content')
-<div class="so-impressao" style="text-align:center;margin-bottom:8px;">
-  <div style="font-weight:800;font-size:15px;color:#0c326f;">{{ $turma['escola_nome'] }}</div>
-  <div style="font-size:12px;color:#555;">Boletim de avaliações</div>
-</div>
-
+@include('relatorios._cabecalho', ['cabecalho' => $cabecalho ?? [], 'titulo' => 'Boletim de avaliações', 'subtitulo' => 'Turma ' . $turma['nome']])
 <div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
   <div>
     <div class="eyebrow no-print">Boletim do aluno</div>
@@ -126,7 +120,5 @@
     </table>
   </div>
 </div>
-
-<p class="so-impressao" style="font-size:10px;color:#777;text-align:center;margin-top:10px;">Feito com Gabarito360 · gabarito360.com.br</p>
 <div style="height:48px" class="no-print"></div>
 @endsection

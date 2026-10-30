@@ -7,7 +7,10 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Escola;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Support\Cabecalho;
+use App\Support\Escopo;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class EscolaController extends Controller
@@ -276,5 +279,35 @@ class EscolaController extends Controller
             ['ativo' => $escola->ativo],
             $escola->ativo ? 'Escola ativada.' : 'Escola desativada.'
         );
+    }
+
+    /** Logo da escola (cabeçalho dos relatórios). Qualquer usuário autenticado pode ver. */
+    public function logo(int $id)
+    {
+        $caminho = Cabecalho::logoPath(DB::table('escolas')->where('id', $id)->value('logo_path'));
+        if (!$caminho) {
+            return ApiResponse::notFound('Escola sem logo.');
+        }
+
+        return response()->file($caminho, ['Cache-Control' => 'private, max-age=3600']);
+    }
+
+    /** Envia/troca o logo da escola (PNG/JPG até 2 MB). */
+    public function enviarLogo(Request $request, int $id): JsonResponse
+    {
+        $escolas = Escopo::escolaIds($request->user());
+        $escola  = DB::table('escolas')->where('id', $id)->first(['id', 'logo_path']);
+        if (!$escola || ($escolas !== null && !in_array($id, $escolas, true))) {
+            return ApiResponse::notFound('Escola não encontrada.');
+        }
+
+        $request->validate(['logo' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048']);
+        $novo = $request->file('logo')->store('escolas/logos', 'public');
+        if ($escola->logo_path) {
+            Storage::disk('public')->delete($escola->logo_path);
+        }
+        DB::table('escolas')->where('id', $id)->update(['logo_path' => $novo, 'updated_at' => now()]);
+
+        return ApiResponse::success(['tem_logo' => true]);
     }
 }
