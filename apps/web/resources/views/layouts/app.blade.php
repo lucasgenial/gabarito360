@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" />
 @stack('styles')
 </head>
-<body>
+<body class="area-logada">
 
 {{-- Header --}}
 <header class="app-header">
