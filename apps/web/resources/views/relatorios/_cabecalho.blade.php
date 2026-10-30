@@ -1,7 +1,7 @@
 {{--
   Arquivo: apps/web/resources/views/relatorios/_cabecalho.blade.php
-  Função: Cabeçalho padrão (o rodapé com o número da página vem do @page no gov.css) dos relatórios impressos/PDF (A4): logo do ente
-          (governo/prefeitura/mantenedora) à esquerda e da escola à direita,
+  Função: Cabeçalho padrão (o rodapé com o número da página vem do @page no app.css) dos relatórios impressos/PDF (A4): logo do ente
+          (rede ou mantenedora) à esquerda e da escola à direita,
           rede, escola, INEP e cidade/UF, faixa com o título e data de emissão.
           Só aparece na impressão (na tela, a página tem o próprio título).
   Espera: $cabecalho = {escola_id, nome, rede, nucleo, detalhe, tem_logo}, $titulo, $subtitulo (opcional)

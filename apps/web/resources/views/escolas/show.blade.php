@@ -224,7 +224,7 @@
               <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required class="input" style="max-width:240px;">
               <button type="submit" class="btn btn-secondary btn-sm">Enviar logo do ente</button>
             </form>
-            <p style="font-size:12px;color:var(--muted);margin-top:4px;">Governo do estado, prefeitura ou mantenedora (escola privada). Vale para todas as escolas da rede.</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:4px;">Logo da rede ou da mantenedora. Vale para todas as escolas da rede.</p>
             @endif
             @endpode
             @pode('resultado.ver')

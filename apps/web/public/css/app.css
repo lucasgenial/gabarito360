@@ -1,6 +1,5 @@
 /* ============================================================
-   Gabarito360 — Design System gov.br (compartilhado)
-   Padrão Digital de Governo brasileiro
+   Gabarito360 — estilos compartilhados
    ============================================================ */
 :root {
   --bg: #f8f8f8;
@@ -12,12 +11,12 @@
   --border: #cccccc;
   --border-soft: #e6e9ed;
 
-  --accent: #1351b4;          /* azul institucional gov.br */
+  --accent: #1351b4;          /* azul principal */
   --accent-dark: #0c326f;     /* hover/active */
   --accent-light: #c5d4eb;    /* fundo sutil */
   --accent-on: #ffffff;
 
-  --success: #168821;         /* verde gov.br */
+  --success: #168821;         /* verde */
   --success-light: #e3f5e1;
   --warn: #ffcd07;            /* amarelo atenção */
   --warn-fg: #6b5400;
@@ -58,17 +57,6 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.2; letter-spacing: -0.01em; font-weight: 700; }
 img { max-width: 100%; display: block; }
-
-/* ---------- Faixa governamental (topo institucional) ---------- */
-.govbar {
-  background: #071d41;
-  color: #fff;
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  padding: 6px 0;
-}
-.govbar .container { display: flex; align-items: center; gap: 16px; }
-.govbar a { color: #fff; opacity: 0.9; font-size: 12px; }
 
 /* ---------- Header app ---------- */
 .app-header {
@@ -391,7 +379,7 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
   }
   html { font-size: 10pt; }
   body { background: #fff !important; color: #111 !important; }
-  .govbar, .app-header, .breadcrumb, .no-print, .theme-btn, .btn, button, .eyebrow, details > summary { display: none !important; }
+  .app-header, .breadcrumb, .no-print, .theme-btn, .btn, button, .eyebrow, details > summary { display: none !important; }
   .container { max-width: none !important; width: auto !important; padding: 0 !important; margin: 0 !important; }
 
   /* Cabeçalho padrão */

@@ -35,7 +35,6 @@
   <main class="auth-main">
     <div class="auth-card">
       <div style="margin-bottom:24px;">
-        <div class="eyebrow">Secretaria de Educação</div>
         <h2 style="font-size:26px;margin-top:4px;">Recuperar senha</h2>
         <p style="color:var(--muted);margin-top:8px;font-size:14px;">
           Informe seu e-mail cadastrado para receber o link de recuperação.
@@ -56,7 +55,7 @@
           <label for="email">E-mail institucional</label>
           <div class="input-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-            <input class="input" type="email" id="email" name="email" value="{{ old('email') }}" placeholder="nome@edu.gov.br" required autofocus />
+            <input class="input" type="email" id="email" name="email" value="{{ old('email') }}" placeholder="nome@escola.com.br" required autofocus />
           </div>
           @error('email')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
         </div>

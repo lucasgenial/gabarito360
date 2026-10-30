@@ -16,9 +16,7 @@ class LoginController extends Controller
             return redirect()->route('painel');
         }
 
-        return view('auth.login', [
-            'tab' => $request->query('tab', 'login'),
-        ]);
+        return view('auth.login');
     }
 
     public function store(Request $request)
@@ -51,40 +49,6 @@ class LoginController extends Controller
         ]);
 
         return redirect()->route('painel');
-    }
-
-    public function cadastro(Request $request)
-    {
-        $request->validate([
-            'nome'   => 'required|string|max:200',
-            'email'  => 'required|email',
-            'cpf'    => 'required|string',
-            'perfil' => 'required|string',
-            'termos' => 'required|accepted',
-        ], [
-            'termos.required' => 'Você precisa aceitar os termos de uso e a LGPD.',
-            'termos.accepted' => 'Você precisa aceitar os termos de uso e a LGPD.',
-        ]);
-
-        $cpfLimpo = preg_replace('/\D/', '', $request->cpf);
-
-        $resp = $this->api->post('/v1/auth/registro', [
-            'nome'   => $request->nome,
-            'email'  => $request->email,
-            'cpf'    => $cpfLimpo,
-            'perfil' => $request->perfil,
-            'termos' => true,
-        ]);
-
-        if ($resp->failed()) {
-            $msg = $resp->json('message') ?? 'Erro ao criar conta. Verifique os dados e tente novamente.';
-            return redirect()->route('login', ['tab' => 'signup'])
-                ->withInput()
-                ->with('erro_signup', $msg);
-        }
-
-        return redirect()->route('login', ['tab' => 'signup'])
-            ->with('sucesso_signup', 'Cadastro realizado! Aguarde a aprovação do administrador.');
     }
 
     public function showEsqueciSenha()
