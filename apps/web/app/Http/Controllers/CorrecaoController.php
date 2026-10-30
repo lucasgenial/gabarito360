@@ -98,6 +98,39 @@ class CorrecaoController extends Controller
         return back()->with('sucesso', 'Cartão enviado para processamento.');
     }
 
+    /** Alunos corrigidos (JSON para a tela de correção). */
+    public function cartoes(int $provaId)
+    {
+        $resp = $this->api->get("/v1/provas/{$provaId}/cartoes");
+
+        return response()->json($resp->failed() ? ['cartoes' => []] : $resp->json('data'), $resp->failed() ? $resp->status() : 200);
+    }
+
+    /** Foto do cartão, repassada da API (não fica em URL pública). */
+    public function imagem(int $cartaoId)
+    {
+        $resp = $this->api->getArquivo("/v1/cartoes/{$cartaoId}/imagem");
+        if ($resp->failed() || !str_starts_with((string) $resp->header('Content-Type'), 'image/')) {
+            abort(404);
+        }
+
+        return response($resp->body(), 200, [
+            'Content-Type'  => $resp->header('Content-Type'),
+            'Cache-Control' => 'private, max-age=600',
+        ]);
+    }
+
+    /** Exclui a correção do aluno para fotografar de novo. */
+    public function excluir(int $cartaoId)
+    {
+        $resp = $this->api->delete("/v1/cartoes/{$cartaoId}");
+
+        return response()->json(
+            $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível excluir.'] : $resp->json('data'),
+            $resp->failed() ? 422 : 200
+        );
+    }
+
     public function vincularAluno(Request $request, int $cartaoId)
     {
         $request->validate(['aluno_id' => 'required|integer']);

@@ -38,15 +38,62 @@ class CartaoController extends Controller
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        $cartoes = Cartao::with('aluno:id,nome,matricula')
-            ->where('prova_id', $provaId)
-            ->orderByDesc('created_at')
-            ->get()
-            ->map(fn (Cartao $c) => array_merge($c->toArray(), [
-                'aluno_nome' => $c->aluno?->nome,
-            ]));
+        // Lista para a tela de correção: aluno, turma, nota e se há foto (a foto vem por /cartoes/{id}/imagem)
+        $cartoes = DB::table('cartoes')
+            ->leftJoin('alunos', 'alunos.id', '=', 'cartoes.aluno_id')
+            ->leftJoin('turmas', 'turmas.id', '=', 'alunos.turma_id')
+            ->leftJoin('notas', 'notas.cartao_id', '=', 'cartoes.id')
+            ->where('cartoes.prova_id', $provaId)
+            ->orderBy('alunos.nome')
+            ->orderByDesc('cartoes.id')
+            ->get([
+                'cartoes.id', 'cartoes.status', 'cartoes.aluno_id', 'cartoes.lingua', 'cartoes.created_at',
+                'cartoes.imagem_url', 'alunos.nome as aluno_nome', 'alunos.matricula', 'turmas.nome as turma',
+                'notas.acertos', 'notas.total_questoes', 'notas.nota_final',
+            ])
+            ->map(function ($c) {
+                $c->tem_imagem = (bool) $c->imagem_url;
+                unset($c->imagem_url);
+                $c->ambiguas = DB::table('cartao_respostas')->where('cartao_id', $c->id)->where('ambigua', true)->count();
+                return $c;
+            });
 
         return ApiResponse::success(['cartoes' => $cartoes]);
+    }
+
+    /** Foto do cartão (dado de aluno: só para quem acessa a prova; nunca por URL pública). */
+    public function imagem(Request $request, int $id)
+    {
+        $cartao = Cartao::find($id);
+        if (!$cartao || !$cartao->imagem_url || !$this->encontrarProva($request, $cartao->prova_id)) {
+            return ApiResponse::notFound('Imagem não encontrada.');
+        }
+
+        $caminho = Storage::disk('public')->path($cartao->imagem_url);
+        if (!is_file($caminho)) {
+            return ApiResponse::notFound('Imagem não encontrada.');
+        }
+
+        return response()->file($caminho, ['Cache-Control' => 'private, max-age=600']);
+    }
+
+    /** Exclui a correção (cartão, respostas, nota e foto) para o aluno ser fotografado de novo. */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $cartao = Cartao::find($id);
+        $prova  = $cartao ? $this->encontrarProva($request, $cartao->prova_id) : null;
+        if (!$cartao || !$prova) {
+            return ApiResponse::notFound('Cartão não encontrado.');
+        }
+
+        if ($cartao->imagem_url) {
+            Storage::disk('public')->delete($cartao->imagem_url);
+        }
+        $cartao->delete(); // respostas, nota e logs de ambiguidade saem em cascata
+
+        AtualizadorStatusProva::atualizar($prova->fresh());
+
+        return ApiResponse::success(['excluido' => true]);
     }
 
     public function status(Request $request, int $provaId): JsonResponse
