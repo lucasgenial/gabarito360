@@ -12,7 +12,7 @@
 {{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
 <script>try { if (localStorage.getItem('g360-menu') === 'recolhido') document.documentElement.classList.add('menu-recolhido'); } catch (e) {}</script>
 </head>
-<body class="area-logada">
+<body class="area-logada @yield('tela')">
 
 <div class="app-casca">
 

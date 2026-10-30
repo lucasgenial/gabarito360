@@ -1,30 +1,8 @@
 @extends('layouts.app')
 
-@section('title', $turma['nome'])
+@section('tela', 'tela-turma')
 
-@push('styles')
-<style>
-  .kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:22px; }
-  .student-av { width:36px;height:36px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0; }
-  .student-name { display:flex;align-items:center;gap:12px; }
-  .mini-bar { width:80px;height:7px;background:var(--border-soft);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px; }
-  .mini-bar > div { height:100%; }
-  .section-title { font-size:18px;font-weight:700;margin:32px 0 16px;display:flex;align-items:center;gap:8px; }
-  /* Modal editar */
-  .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px; }
-  .modal-backdrop.open { display:flex; }
-  .modal { background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,.22);width:100%;max-width:520px;max-height:90vh;overflow-y:auto; }
-  .modal-head { padding:22px 24px 18px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between; }
-  .modal-head h2 { font-size:18px;font-weight:700; }
-  .modal-close { width:34px;height:34px;border-radius:50%;background:none;border:0;cursor:pointer;font-size:20px;color:var(--muted);display:grid;place-items:center; }
-  .modal-close:hover { background:var(--surface-2); }
-  .modal-body { padding:24px; }
-  .modal-foot { padding:16px 24px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end;gap:10px; }
-  .form-row-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
-  @media(max-width:980px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} }
-  @media(max-width:560px){ .kpi-grid{grid-template-columns:1fr;} .form-row-2{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', $turma['nome'])
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -34,19 +12,13 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <h1 class="page-title">{{ $turma['nome'] }}</h1>
-    <p class="page-sub">
-      {{ $turma['serie'] }} ·
+<x-pagina titulo="{{ $turma['nome'] }}">
+  <x-slot:sub>{{ $turma['serie'] }} ·
       {{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$turma['turno']] ?? $turma['turno'] }} ·
       <b>{{ $turma['total_alunos'] ?? 0 }}</b> aluno(s) ·
-      {{ $turma['escola_nome'] ?? '' }}
-    </p>
-  </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap;">
-    @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}">📊 Acompanhar correção</a>@endpode
-    @pode('resultado.ver')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}">📈 Relatório da turma</a>@endpode
+      {{ $turma['escola_nome'] ?? '' }}</x-slot:sub>
+    @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}"><x-icone nome="grafico" /> Acompanhar correção</a>@endpode
+    @pode('resultado.ver')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}"><x-icone nome="grafico" /> Relatório da turma</a>@endpode
     @pode('turma.gerir')
     <button class="btn btn-secondary" onclick="abrirModal()">Editar turma</button>
     <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}"
@@ -58,19 +30,10 @@
       </button>
     </form>
     @endpode
-  </div>
-</div>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 {{-- KPIs --}}
 <div class="kpi-grid">
@@ -97,7 +60,7 @@
 </div>
 
 {{-- Seção de alunos --}}
-<h2 class="section-title">
+<h2 class="section-title secao-topo">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
     <circle cx="9" cy="7" r="4"/>
@@ -154,7 +117,7 @@
       @empty
         <tr id="empty-row">
           <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);">
-            <div style="font-size:36px;margin-bottom:12px;">👤</div>
+            <div class="icone-grande"><x-icone nome="aluno" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhum aluno matriculado</div>
             <p>Os alunos aparecerão aqui após o cadastro no módulo de Alunos.</p>
           </td>
@@ -168,7 +131,7 @@
 </div>
 
 {{-- Seção: Provas da turma --}}
-<h2 class="section-title">
+<h2 class="section-title secao-topo">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
     <path d="M14 2v6h6"/>
@@ -195,7 +158,7 @@
         $statusCfg = [
           'rascunho'    => ['cls'=>'badge-info',   'label'=>'Rascunho'],
           'publicada'   => ['cls'=>'badge-success', 'label'=>'Publicada'],
-          'em_correcao' => ['cls'=>'',              'label'=>'Em correção',  'style'=>'background:rgba(245,158,11,.15);color:#b45309;'],
+          'em_correcao' => ['cls'=>'badge-warn', 'label'=>'Em correção', 'style'=>''],
           'corrigida'   => ['cls'=>'badge-success', 'label'=>'Corrigida'],
         ];
       @endphp
@@ -222,7 +185,7 @@
   </table>
   @else
   <div style="text-align:center;padding:48px 20px;color:var(--muted);">
-    <div style="font-size:36px;margin-bottom:12px;">📝</div>
+    <div class="icone-grande"><x-icone nome="prova" /></div>
     <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma prova aplicada</div>
     <p>As provas vinculadas a esta turma aparecerão aqui.</p>
   </div>
@@ -230,7 +193,7 @@
 </div>
 
 {{-- Seção: Professores vinculados --}}
-<h2 class="section-title">
+<h2 class="section-title secao-topo">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
     <circle cx="12" cy="7" r="4"/>
@@ -300,7 +263,7 @@
     </table>
   @else
     <div style="text-align:center;padding:24px 20px;color:var(--muted);">
-      <div style="font-size:28px;margin-bottom:10px;">👩‍🏫</div>
+      <div class="icone-grande"><x-icone nome="turma" /></div>
       <div style="font-size:14px;">Nenhum professor vinculado a esta turma ainda.</div>
     </div>
   @endif
