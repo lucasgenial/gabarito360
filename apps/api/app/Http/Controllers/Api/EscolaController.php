@@ -8,6 +8,7 @@ use App\Models\Escola;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Support\Cabecalho;
+use App\Support\Censo;
 use App\Support\Escopo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -57,7 +58,7 @@ class EscolaController extends Controller
             $query->where('ativo', (bool) $request->query('ativo'));
         }
 
-        $escolas = $query->with('nucleo:id,nome')
+        $escolas = $query->with('nucleo:id,nome', 'sede:id,nome')
             ->orderBy('nome')
             ->get()
             ->map(function (Escola $e) {
@@ -75,6 +76,7 @@ class EscolaController extends Controller
                     'total_alunos' => $totalAlunosEscola,
                     'total_provas' => $provas,
                     'nucleo_nome'  => $e->nucleo?->nome,
+                    'sede_nome'    => $e->sede?->nome,
                 ]);
             });
 
@@ -104,29 +106,103 @@ class EscolaController extends Controller
         ]);
     }
 
+    private const MENSAGENS = [
+        'inep.regex'   => 'O código INEP tem 8 dígitos (consulte no Censo Escolar).',
+        'inep.unique'  => 'Já existe uma escola cadastrada com este código INEP.',
+        'cep.regex'    => 'O CEP tem 8 dígitos.',
+        'co_municipio.digits' => 'O código IBGE do município tem 7 dígitos.',
+    ];
+
+    /** Regras dos campos da escola (modelo do ECOAR / Censo Escolar). */
+    private function regras(?int $id = null): array
+    {
+        $req = $id ? 'sometimes' : 'required';
+
+        return [
+            'nucleo_id'              => "{$req}|integer|exists:nucleos,id",
+            'nome'                   => "{$req}|string|max:200",
+            'inep'                   => [$req, 'regex:/^\d{8}$/', Rule::unique('escolas', 'inep')->ignore($id)],
+            'tipo_rede'              => [$req, Rule::in(['estadual', 'municipal', 'federal', 'privada'])],
+            'tipo'                   => ['sometimes', Rule::in(['sede', 'anexo', 'unidade_vinculada'])],
+            'escola_sede_id'         => 'nullable|integer|exists:escolas,id',
+            'situacao_funcionamento' => ['nullable', Rule::in(['ativa', 'paralisada', 'extinta'])],
+            'localizacao'            => ['nullable', Rule::in(['urbana', 'rural'])],
+            'orgao_regional'         => 'nullable|string|max:20',
+            'logradouro'             => 'nullable|string|max:255',
+            'numero'                 => 'nullable|string|max:20',
+            'complemento'            => 'nullable|string|max:100',
+            'bairro'                 => 'nullable|string|max:100',
+            'cep'                    => ['nullable', 'regex:/^\d{8}$/'],
+            'cidade'                 => 'nullable|string|max:100',
+            'co_municipio'           => 'nullable|integer|digits:7',
+            'uf'                     => 'nullable|string|size:2',
+            'latitude'               => 'nullable|numeric|between:-90,90',
+            'longitude'              => 'nullable|numeric|between:-180,180',
+            'telefone'               => 'nullable|string|max:20',
+            'email'                  => 'nullable|email|max:150',
+            'turnos'                 => 'nullable|array',
+            'turnos.*'               => Rule::in(array_keys(Escola::TURNOS)),
+            'etapas'                 => 'nullable|array',
+            'etapas.*'               => Rule::in(array_keys(Escola::ETAPAS)),
+            'modalidades'            => 'nullable|array',
+            'modalidades.*'          => Rule::in(array_keys(Escola::MODALIDADES)),
+            'ativo'                  => 'sometimes|boolean',
+        ];
+    }
+
+    /** Anexo/unidade vinculada precisa de uma escola sede do mesmo núcleo; sede não tem sede. */
+    private function validarSede(Request $request, array &$data, ?Escola $atual = null): ?JsonResponse
+    {
+        $tipo = $data['tipo'] ?? $atual?->tipo ?? 'sede';
+        if ($tipo === 'sede') {
+            $data['escola_sede_id'] = null;
+            return null;
+        }
+        $sedeId = $data['escola_sede_id'] ?? $atual?->escola_sede_id;
+        $nucleo = (int) ($data['nucleo_id'] ?? $atual?->nucleo_id);
+        $sede   = $sedeId ? Escola::find($sedeId) : null;
+        $ids    = Escopo::escolaIds($request->user());
+        if (!$sede || $sede->tipo !== 'sede' || $sede->id === $atual?->id || ($ids !== null && !in_array($sede->id, $ids, true))) {
+            return ApiResponse::error('Escolha a escola sede deste anexo.', ['escola_sede_id' => ['Escola sede inválida.']], 422);
+        }
+        if ($sede->nucleo_id !== $nucleo) {
+            return ApiResponse::error('O anexo precisa ser do mesmo núcleo da escola sede.', ['escola_sede_id' => ['Núcleo diferente da sede.']], 422);
+        }
+
+        return null;
+    }
+
     public function store(Request $request): JsonResponse
     {
-        $data = $request->validate([
-            'nucleo_id' => 'required|integer|exists:nucleos,id',
-            'nome'      => 'required|string|max:200',
-            'inep'      => 'required|string|size:8|unique:escolas,inep',
-            'tipo_rede' => ['required', Rule::in(['estadual','municipal','federal','privada'])],
-            'logradouro'=> 'sometimes|string|max:255|nullable',
-            'cidade'    => 'sometimes|string|max:100|nullable',
-            'uf'        => 'sometimes|string|size:2|nullable',
-            'telefone'  => 'sometimes|string|max:20|nullable',
-            'email'     => 'sometimes|email|nullable',
-            'ativo'     => 'sometimes|boolean',
-        ]);
+        $data = $request->validate($this->regras(), self::MENSAGENS);
 
         // Diretor de núcleo só cadastra escola no próprio núcleo
         if ($erro = $this->nucleoForaDoEscopo($request, (int) $data['nucleo_id'])) {
             return $erro;
         }
+        if ($erro = $this->validarSede($request, $data)) {
+            return $erro;
+        }
+
+        // Escola encontrada no Censo: origem "censo" (a reimportação mantém os dados em dia)
+        $censo = DB::table('censo_escolas')->where('codigo_inep', $data['inep'])->first(['ano_censo', 'orgao_regional']);
+        $data['origem']    = $censo ? 'censo' : 'manual';
+        $data['ano_censo'] = $censo?->ano_censo;
+        $data['orgao_regional'] ??= $censo?->orgao_regional;
 
         $escola = Escola::create($data);
+        $this->aprenderOrgaoRegional($escola);
 
         return ApiResponse::success($escola, null, 201);
+    }
+
+    /** O núcleo sem código de órgão regional passa a ter o da primeira escola do Censo cadastrada nele. */
+    private function aprenderOrgaoRegional(Escola $escola): void
+    {
+        if ($escola->orgao_regional) {
+            DB::table('nucleos')->where('id', $escola->nucleo_id)->whereNull('orgao_regional')
+                ->update(['orgao_regional' => $escola->orgao_regional, 'updated_at' => now()]);
+        }
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -235,7 +311,13 @@ class EscolaController extends Controller
         $rede = DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
             ->where('nucleos.id', $escola->nucleo_id)->first(['redes.id', 'redes.nome']);
 
+        $anexos = Escola::where('escola_sede_id', $id)->orderBy('nome')
+            ->get(['id', 'nome', 'inep', 'tipo', 'cidade', 'ativo'])
+            ->filter(fn ($a) => $ids === null || in_array($a->id, $ids, true))->values();
+
         return ApiResponse::success(array_merge($escola->toArray(), [
+            'sede'      => $escola->escola_sede_id ? Escola::find($escola->escola_sede_id, ['id', 'nome', 'inep']) : null,
+            'anexos'    => $anexos,
             'rede_id'   => $rede?->id,
             'rede_nome' => $rede?->nome,
             'total_turmas' => $totalTurmas,
@@ -257,28 +339,38 @@ class EscolaController extends Controller
             return ApiResponse::notFound('Escola não encontrada.');
         }
 
-        $data = $request->validate([
-            'nucleo_id' => 'sometimes|integer|exists:nucleos,id',
-            'nome'      => 'sometimes|string|max:200',
-            'inep'      => ['sometimes', 'string', 'size:8', Rule::unique('escolas','inep')->ignore($id)],
-            'tipo_rede' => ['sometimes', Rule::in(['estadual','municipal','federal','privada'])],
-            'logradouro'=> 'sometimes|string|max:255|nullable',
-            'cidade'    => 'sometimes|string|max:100|nullable',
-            'uf'        => 'sometimes|string|size:2|nullable',
-            'telefone'  => 'sometimes|string|max:20|nullable',
-            'email'     => 'sometimes|email|nullable',
-            'ativo'     => 'sometimes|boolean',
-        ]);
+        $data = $request->validate($this->regras($id), self::MENSAGENS);
 
-        // Diretor escolar edita os dados da própria escola, mas não muda núcleo nem ativação
-        if ($request->user()->perfil === 'dir_escolar') {
-            unset($data['nucleo_id'], $data['ativo']);
+        // Quem não cadastra escolas (diretor escolar) edita os dados da própria escola,
+        // mas não muda INEP, núcleo, vínculo sede/anexo nem ativação
+        if (!\App\Support\Permissao::pode($request->user(), 'escola.criar')) {
+            unset($data['nucleo_id'], $data['ativo'], $data['inep'], $data['tipo'], $data['escola_sede_id']);
         }
         if (isset($data['nucleo_id']) && ($erro = $this->nucleoForaDoEscopo($request, (int) $data['nucleo_id']))) {
             return $erro;
         }
+        if ((isset($data['tipo']) || array_key_exists('escola_sede_id', $data)) && ($erro = $this->validarSede($request, $data, $escola))) {
+            return $erro;
+        }
+        // Sede com anexos não pode virar anexo
+        if (($data['tipo'] ?? 'sede') !== 'sede' && $escola->anexos()->exists()) {
+            return ApiResponse::error('Esta escola tem anexos; ela precisa continuar como sede.', ['tipo' => ['Escola com anexos.']], 422);
+        }
+
+        // INEP trocado (ex.: "PENDENTE" → código real) e achado no Censo: passa a ser do Censo
+        if (isset($data['inep']) && $data['inep'] !== $escola->inep) {
+            $censo = DB::table('censo_escolas')->where('codigo_inep', $data['inep'])->first(['ano_censo', 'orgao_regional']);
+            $data['origem']    = $censo ? 'censo' : 'manual';
+            $data['ano_censo'] = $censo?->ano_censo;
+            $data['orgao_regional'] ??= $censo?->orgao_regional;
+        }
+        // Edição à mão de escola do Censo: a reimportação não sobrescreve mais (regra do ECOAR)
+        if (($data['origem'] ?? $escola->origem) === 'censo') {
+            $data['edicao_manual'] = true;
+        }
 
         $escola->update($data);
+        $this->aprenderOrgaoRegional($escola->fresh());
 
         return ApiResponse::success($escola->fresh());
     }
