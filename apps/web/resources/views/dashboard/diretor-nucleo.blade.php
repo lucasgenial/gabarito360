@@ -54,7 +54,7 @@
   ];
 @endphp
 
-<x-pagina chamada="Acompanhamento regional" titulo="Painel {{ $nomeNucleo }}" subtitulo="{{ $nome }} · supervisão de {{ $kpis['total_escolas'] ?? '—' }} escolas da regional · consolidação {{ now()->year }}" />
+<x-pagina chamada="Acompanhamento regional" titulo="Painel {{ $nomeNucleo }}" subtitulo="{{ $nome }} · {{ ($kpis['total_escolas'] ?? 0) == 1 ? '1 escola' : ($kpis['total_escolas'] ?? '—') . ' escolas' }} na regional · consolidação {{ now()->year }}" />
 
 {{-- KPIs --}}
 <div class="kpi-grid">
@@ -116,7 +116,7 @@
       <tbody>
         @forelse($escolas as $e)
           @php
-            $cfg   = $statusConfig[$e['status']] ?? ['badge' => 'badge-muted', 'label' => 'N/D'];
+            $cfg   = $statusConfig[$e['status']] ?? ['badge' => 'badge-muted', 'label' => 'Sem dados'];
             $media = $e['media'] ?? null;
           @endphp
           <tr>

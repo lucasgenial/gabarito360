@@ -84,7 +84,7 @@
       {{ $kpis['alunos_baixa_media'] ?? '—' }}
     </div>
     <div class="kpi-trend {{ ($kpis['alunos_baixa_media'] ?? 0) > 0 ? 'down' : '' }}">
-      {{ ($kpis['alunos_baixa_media'] ?? 0) > 0 ? '▼ acompanhamento necessário' : '● todos acima da média' }}
+      {{ ($kpis['alunos_baixa_media'] ?? 0) > 0 ? '▼ acompanhamento necessário' : '● nenhum aluno em atenção' }}
     </div>
   </div>
   <div class="card kpi">
