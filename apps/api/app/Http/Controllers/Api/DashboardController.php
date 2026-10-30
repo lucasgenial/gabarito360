@@ -520,10 +520,14 @@ class DashboardController extends Controller
 
         return ApiResponse::success([
             'escola' => [
-                'id'    => $escola->id,
-                'nome'  => $escola->nome,
-                'inep'  => $escola->inep,
-                'ativo' => $escola->ativo,
+                'id'     => $escola->id,
+                'nome'   => $escola->nome,
+                'inep'   => $escola->inep,
+                'ativo'  => $escola->ativo,
+                'cidade' => $escola->cidade,
+                'uf'     => $escola->uf,
+                'etapas' => $escola->etapas ?? [],
+                'turnos' => $escola->turnos ?? [],
             ],
             'kpis' => [
                 'turmas_ativas'   => $turmasAtivas,
@@ -646,7 +650,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function admin(): JsonResponse
+    public function admin(Request $request): JsonResponse
     {
         $totalEscolas   = Escola::count();
         $totalAtivas    = Escola::where('ativo', true)->count();
@@ -691,7 +695,12 @@ class DashboardController extends Controller
             ->limit(5)
             ->get(['id', 'nome', 'perfil', 'escola_nome', 'ultimo_acesso']);
 
+        // Rede(s) do admin: a do escopo dele ou, sem escopo, todas
+        $redeIds = DB::table('usuario_escopos')->where('usuario_id', $request->user()->id)->where('escopo_tipo', 'rede')->pluck('escopo_id');
+        $redes   = DB::table('redes')->when($redeIds->isNotEmpty(), fn ($q) => $q->whereIn('id', $redeIds))->orderBy('nome')->get(['id', 'nome', 'tipo']);
+
         return ApiResponse::success([
+            'redes' => $redes,
             'kpis' => [
                 'total_escolas'     => $totalEscolas,
                 'total_escolas_ativas' => $totalAtivas,
