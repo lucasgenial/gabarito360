@@ -5,43 +5,16 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Prova;
+use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RelatorioController extends Controller
 {
-    private function escopoEscolaIds(Request $request): ?array
-    {
-        $usuario = $request->user();
-
-        return match ($usuario->perfil) {
-            'admin_rede' => null,
-            'dir_nucleo' => DB::table('escolas')
-                ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
-                ->join('usuario_escopos', function ($j) use ($usuario) {
-                    $j->on('nucleos.id', '=', 'usuario_escopos.escopo_id')
-                      ->where('usuario_escopos.usuario_id', $usuario->id)
-                      ->where('usuario_escopos.escopo_tipo', 'nucleo');
-                })
-                ->pluck('escolas.id')->all(),
-            'dir_escolar', 'coordenador', 'professor' => DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'escola')
-                ->pluck('escopo_id')->all(),
-            default => [],
-        };
-    }
-
     private function encontrarProva(Request $request, int $provaId): ?Prova
     {
-        $escolaIds = $this->escopoEscolaIds($request);
-        $query     = Prova::query();
-        if ($escolaIds !== null) {
-            $query->whereIn('escola_id', $escolaIds);
-        }
-
-        return $query->find($provaId);
+        return Escopo::provaComConteudo($request->user(), $provaId);
     }
 
     private function metaRede(int $escolaId): float

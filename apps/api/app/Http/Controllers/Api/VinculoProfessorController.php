@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Turma;
+use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +36,7 @@ class VinculoProfessorController extends Controller
 
     public function store(Request $request, int $turmaId): JsonResponse
     {
-        $turma = Turma::find($turmaId);
+        $turma = $this->turmaNoEscopo($request, $turmaId);
 
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');
@@ -66,15 +67,18 @@ class VinculoProfessorController extends Controller
                 'escopo_tipo' => 'turma',
                 'escopo_id'   => $turmaId,
                 'created_at'  => now(),
-                'updated_at'  => now(),
             ]);
         }
 
         return ApiResponse::success(['vinculado' => true], null, 201);
     }
 
-    public function destroy(int $turmaId, int $usuarioId): JsonResponse
+    public function destroy(Request $request, int $turmaId, int $usuarioId): JsonResponse
     {
+        if (!$this->turmaNoEscopo($request, $turmaId)) {
+            return ApiResponse::notFound('Turma não encontrada.');
+        }
+
         DB::table('usuario_escopos')
             ->where('usuario_id', $usuarioId)
             ->where('escopo_tipo', 'turma')
@@ -82,6 +86,13 @@ class VinculoProfessorController extends Controller
             ->delete();
 
         return ApiResponse::success(['removido' => true]);
+    }
+
+    private function turmaNoEscopo(Request $request, int $turmaId): ?Turma
+    {
+        $ids = Escopo::turmaIds($request->user());
+
+        return ($ids === null || in_array($turmaId, $ids, true)) ? Turma::find($turmaId) : null;
     }
 
     public function turmasDoProfessor(int $usuarioId): JsonResponse

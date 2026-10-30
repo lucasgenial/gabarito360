@@ -15,13 +15,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}">Painel</a>
-<a href="{{ route('provas.index') }}" class="active">Provas</a>
-<a href="{{ route('turmas.index') }}">Turmas</a>
-<a href="{{ route('escolas.index') }}">Escolas</a>
-@endsection
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span><span>Provas</span>
 @endsection
@@ -33,7 +26,7 @@
     <h1 class="page-title">Provas e gabaritos</h1>
     <p class="page-sub"><b>{{ count($provas) }}</b> prova(s) encontrada(s)</p>
   </div>
-  <a href="{{ route('provas.create') }}" class="btn btn-primary">+ Nova prova</a>
+  @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-primary">+ Nova prova</a>@endpode
 </div>
 
 @if(session('sucesso'))
@@ -178,7 +171,7 @@
             @endif
           </td>
           <td style="text-align:right;white-space:nowrap;">
-            @if($p['status'] === 'rascunho')
+            @if($p['status'] === 'rascunho' && \App\Support\Acesso::pode('prova.editar'))
               <form method="POST" action="{{ route('provas.publicar', $p['id']) }}" style="display:inline;">
                 @csrf
                 <button type="submit" class="btn btn-sm btn-secondary" title="Publicar">Publicar</button>

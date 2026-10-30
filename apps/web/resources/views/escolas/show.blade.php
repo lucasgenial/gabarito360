@@ -86,13 +86,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}">Painel</a>
-<a href="{{ route('escolas.index') }}" class="active">Escolas</a>
-<a href="{{ route('turmas.index') }}">Turmas</a>
-<a href="{{ route('provas.index') }}">Provas</a>
-@endsection
-
 {{-- Hero (fora do layout padrão de breadcrumb/content) --}}
 @section('breadcrumb')@endsection
 
