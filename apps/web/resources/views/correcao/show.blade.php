@@ -79,7 +79,7 @@
 </div>
 
 @if($podeMexer || session('auth_perfil') === 'aplicador')
-  @pode('cartoes.enviar')
+  @pode('cartao.enviar')
     @include('correcao._camera')
   @endpode
 @endif

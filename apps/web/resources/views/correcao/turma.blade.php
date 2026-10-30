@@ -97,8 +97,8 @@
           @if($p['media'] !== null) · média <b>{{ $fmt($p['media']) }}</b>@endif
         </div>
         <div class="acoes">
-          @pode('cartoes.enviar')<a class="btn btn-sm btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera">📷 Corrigir</a>@endpode
-          @pode('cartoes.imprimir')<a class="btn btn-sm btn-secondary" target="_blank" href="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $turma['id'] }}">🖨 Cartões</a>@endpode
+          @pode('cartao.enviar')<a class="btn btn-sm btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera">📷 Corrigir</a>@endpode
+          @pode('cartao.imprimir')<a class="btn btn-sm btn-secondary" target="_blank" href="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $turma['id'] }}">🖨 Cartões</a>@endpode
           <a class="btn btn-sm btn-ghost" href="{{ route('correcao.show', $p['id']) }}">Acompanhar</a>
           @if($p['lidos'] > 0)
             <a class="btn btn-sm btn-ghost" href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}">📊 Relatório</a>

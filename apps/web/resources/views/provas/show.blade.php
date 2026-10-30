@@ -157,7 +157,7 @@
               <div style="font-weight:600;font-size:13px;">{{ $t['nome'] }}</div>
               <div style="font-size:12px;color:var(--muted);">{{ $t['serie'] }}</div>
             </div>
-            @pode('cartoes.imprimir')
+            @pode('cartao.imprimir')
             <a href="{{ route('correcao.pdf', $prova['id']) }}?turma_id={{ $t['id'] }}" target="_blank" class="btn btn-sm btn-ghost" title="Cartões-resposta com nome e QR de cada aluno">🖨 Cartões</a>
             @endpode
             @if(in_array($prova['status'], ['em_correcao', 'corrigida'], true))
@@ -165,7 +165,7 @@
             @endif
           </div>
         @endforeach
-        @pode('cartoes.imprimir')
+        @pode('cartao.imprimir')
         <a href="{{ route('correcao.pdf', $prova['id']) }}?brancos=5" target="_blank" class="btn btn-sm btn-ghost" style="margin-top:8px;">🖨 5 cartões em branco</a>
         @endpode
       @else
