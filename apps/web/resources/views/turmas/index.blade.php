@@ -1,30 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Turmas')
+@section('tela', 'tela-turmas')
 
-@push('styles')
-<style>
-  .turma-av { width:36px;height:36px;border-radius:8px;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:700;font-size:12px;flex-shrink:0; }
-  .turma-name { display:flex;align-items:center;gap:12px; }
-  .mini-bar { width:80px;height:7px;background:var(--border-soft);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px; }
-  .mini-bar > div { height:100%; }
-  .kpi-strip { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px; }
-  .kpi-strip .kv { font-family:var(--font-mono);font-size:28px;font-weight:700; }
-  .kpi-strip .kl { font-size:12px;color:var(--muted);margin-top:2px; }
-  /* Modal */
-  .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px; }
-  .modal-backdrop.open { display:flex; }
-  .modal { background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,.22);width:100%;max-width:520px;max-height:90vh;overflow-y:auto; }
-  .modal-head { padding:22px 24px 18px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between; }
-  .modal-head h2 { font-size:18px;font-weight:700; }
-  .modal-close { width:34px;height:34px;border-radius:50%;background:none;border:0;cursor:pointer;font-size:20px;color:var(--muted);display:grid;place-items:center; }
-  .modal-close:hover { background:var(--surface-2); }
-  .modal-body { padding:24px; }
-  .modal-foot { padding:16px 24px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end;gap:10px; }
-  .form-row-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
-  @media(max-width:600px){ .kpi-strip{grid-template-columns:1fr;} .form-row-2{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Turmas')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span><span>Turmas</span>
@@ -32,30 +10,15 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <h1 class="page-title">Turmas</h1>
-    <p class="page-sub">
-      <b>{{ count($turmas) }}</b> turma(s) ·
-      <b>{{ $kpis['total_alunos'] ?? 0 }}</b> alunos no total
-    </p>
-  </div>
-  <div style="display:flex;gap:10px;">
+<x-pagina titulo="Turmas">
+  <x-slot:sub><b>{{ count($turmas) }}</b> turma(s) ·
+      <b>{{ $kpis['total_alunos'] ?? 0 }}</b> alunos no total</x-slot:sub>
     <button class="btn btn-secondary" onclick="abrirModal('modal-importar')">Importar planilha</button>
     <button class="btn btn-primary" onclick="abrirModal('modal-criar')">+ Nova turma</button>
-  </div>
-</div>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 {{-- KPIs --}}
 <div class="kpi-strip">
@@ -64,7 +27,7 @@
     <div class="kl">Turmas cadastradas</div>
   </div>
   <div class="card card-pad" style="padding:16px 20px;">
-    <div class="kv" style="color:var(--success,#168821);">{{ $kpis['total_ativas'] ?? 0 }}</div>
+    <div class="kv" style="color:var(--success);">{{ $kpis['total_ativas'] ?? 0 }}</div>
     <div class="kl">Turmas ativas</div>
   </div>
   <div class="card card-pad" style="padding:16px 20px;">
@@ -129,7 +92,7 @@
             @if(($t['media_turma'] ?? null) !== null)
               @php
                 $pct = min(100, max(0, ($t['media_turma'] / 10) * 100));
-                $cor = $t['media_turma'] >= 7 ? 'var(--success,#168821)' : ($t['media_turma'] >= 5 ? '#ffcd07' : 'var(--danger,#e52207)');
+                $cor = $t['media_turma'] >= 7 ? 'var(--success)' : ($t['media_turma'] >= 5 ? 'var(--warn)' : 'var(--danger)');
               @endphp
               <span class="mini-bar"><div style="width:{{ $pct }}%;background:{{ $cor }};"></div></span>
               <span style="font-family:var(--font-mono);font-weight:600;">{{ number_format($t['media_turma'], 1, ',', '') }}</span>
@@ -152,7 +115,7 @@
       @empty
         <tr>
           <td colspan="9" style="text-align:center;padding:48px 20px;color:var(--muted);">
-            <div style="font-size:36px;margin-bottom:12px;">🏫</div>
+            <div class="icone-grande"><x-icone nome="escola" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma encontrada</div>
             <p>Crie a primeira turma usando o botão "+ Nova turma".</p>
           </td>
@@ -223,7 +186,7 @@
       <button type="button" class="modal-close" onclick="fecharModal('modal-importar')">&times;</button>
     </div>
     <div class="modal-body" style="text-align:center;padding:40px 24px;">
-      <div style="font-size:48px;margin-bottom:16px;">📊</div>
+      <div class="icone-grande"><x-icone nome="grafico" /></div>
       <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;">Importação em breve</h3>
       <p style="color:var(--muted);font-size:14px;">A importação de alunos via planilha XLSX estará disponível no MP-017.</p>
     </div>

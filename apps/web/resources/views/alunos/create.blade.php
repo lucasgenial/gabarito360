@@ -1,18 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Cadastrar Aluno')
+@section('tela', 'tela-aluno-novo')
 
-@push('styles')
-<style>
-  .form-container { display:grid;grid-template-columns:280px 1fr;gap:32px;margin-top:24px;align-items:start; }
-  .identity-card { text-align:center;padding:32px 24px;background:var(--surface);border-radius:var(--radius-md);border:1px solid var(--border);box-shadow:var(--shadow-sm); }
-  .photo-preview { width:120px;height:120px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;margin:0 auto 20px;font-size:36px;font-weight:800; }
-  .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:20px; }
-  .form-actions { margin-top:32px;padding-top:24px;border-top:1px solid var(--border-soft);display:flex;gap:12px;justify-content:flex-end; }
-  @media(max-width:850px){ .form-container{grid-template-columns:1fr;} .identity-card{max-width:400px;margin:0 auto;width:100%;} }
-  @media(max-width:600px){ .form-grid{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Cadastrar Aluno')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -25,20 +15,13 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <h1 class="page-title">Cadastrar Novo Aluno</h1>
-    <p class="page-sub">Preencha os dados básicos para matricular o aluno no sistema.</p>
-  </div>
-</div>
+<x-pagina titulo="Cadastrar Novo Aluno">
+  <x-slot:sub>Preencha os dados básicos para matricular o aluno no sistema.</x-slot:sub>
+</x-pagina>
 
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 @if($errors->any())
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;margin-top:16px;">
+  <div style="background:var(--danger-light);color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;margin-top:16px;">
     <ul style="margin:0;padding-left:18px;">
       @foreach($errors->all() as $err)
         <li>{{ $err }}</li>

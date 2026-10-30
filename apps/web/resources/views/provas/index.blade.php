@@ -1,19 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Provas e Gabaritos')
+@section('tela', 'tela-provas')
 
-@push('styles')
-<style>
-  .exam-meta { font-size:13px;color:var(--muted);margin-top:2px; }
-  .mini-bar { width:76px;height:7px;background:var(--border-soft);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px; }
-  .mini-bar > div { height:100%; }
-  .kpi-strip { display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:20px; }
-  .kpi-strip .kv { font-family:var(--font-mono);font-size:24px;font-weight:700; }
-  .kpi-strip .kl { font-size:11px;color:var(--muted);margin-top:2px; }
-  @media(max-width:900px){ .kpi-strip{grid-template-columns:repeat(3,1fr);} .hide-sm{display:none;} }
-  @media(max-width:600px){ .kpi-strip{grid-template-columns:repeat(2,1fr);} }
-</style>
-@endpush
+@section('title', 'Provas e Gabaritos')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span><span>Provas</span>
@@ -21,24 +10,13 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <h1 class="page-title">Provas e gabaritos</h1>
-    <p class="page-sub"><b>{{ count($provas) }}</b> prova(s) encontrada(s)</p>
-  </div>
+<x-pagina titulo="Provas e gabaritos">
+  <x-slot:sub><b>{{ count($provas) }}</b> prova(s) encontrada(s)</x-slot:sub>
   @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-primary">+ Nova prova</a>@endpode
-</div>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 {{-- KPIs --}}
 <div class="kpi-strip">
@@ -55,11 +33,11 @@
     <div class="kl">Publicadas</div>
   </div>
   <div class="card card-pad" style="padding:14px 16px;">
-    <div class="kv" style="color:#f59e0b;">{{ $kpis['correcao'] ?? 0 }}</div>
+    <div class="kv" style="color:var(--warn-fg);">{{ $kpis['correcao'] ?? 0 }}</div>
     <div class="kl">Em correção</div>
   </div>
   <div class="card card-pad" style="padding:14px 16px;">
-    <div class="kv" style="color:var(--success,#168821);">{{ $kpis['corrigida'] ?? 0 }}</div>
+    <div class="kv" style="color:var(--success);">{{ $kpis['corrigida'] ?? 0 }}</div>
     <div class="kl">Corrigidas</div>
   </div>
 </div>
@@ -109,7 +87,7 @@
           $statusCfg = [
             'rascunho'    => ['cls'=>'badge-info',   'label'=>'Rascunho'],
             'publicada'   => ['cls'=>'badge-success', 'label'=>'Publicada'],
-            'em_correcao' => ['cls'=>'',              'label'=>'Em correção',  'style'=>'background:rgba(245,158,11,.15);color:#b45309;'],
+            'em_correcao' => ['cls'=>'badge-warn', 'label'=>'Em correção', 'style'=>''],
             'corrigida'   => ['cls'=>'badge-success', 'label'=>'Corrigida'],
           ];
           $sc = $statusCfg[$p['status']] ?? ['cls'=>'badge-info','label'=>$p['status']];
@@ -117,7 +95,7 @@
         <tr>
           <td>
             <div style="display:flex;align-items:center;gap:10px;">
-              <div style="width:36px;height:36px;border-radius:8px;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;flex-shrink:0;font-size:18px;">📝</div>
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--accent-light);color:var(--accent-dark);display:grid;place-items:center;flex-shrink:0;"><x-icone nome="prova" /></div>
               <div>
                 <div style="font-weight:600;">{{ $p['titulo'] }}</div>
                 <div class="exam-meta">{{ $p['disciplina'] }} · {{ $p['serie'] }} · {{ $p['num_questoes'] }} questões</div>
@@ -144,7 +122,7 @@
             @php $prog = $p['progresso'] ?? ['tipo' => 'nenhum']; @endphp
             @if($prog['tipo'] === 'media')
               @php
-                $cor = $prog['media'] === null ? 'var(--muted)' : ($prog['media'] >= 7 ? 'var(--success,#168821)' : ($prog['media'] >= 5 ? '#ffcd07' : 'var(--danger,#e52207)'));
+                $cor = $prog['media'] === null ? 'var(--muted)' : ($prog['media'] >= 7 ? 'var(--success)' : ($prog['media'] >= 5 ? 'var(--warn)' : 'var(--danger)'));
                 $pct = $prog['media'] !== null ? min(100, $prog['media'] * 10) : 0;
               @endphp
               <div style="display:flex;align-items:center;">
@@ -189,7 +167,7 @@
       @empty
         <tr>
           <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);">
-            <div style="font-size:36px;margin-bottom:12px;">📝</div>
+            <div class="icone-grande"><x-icone nome="prova" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma prova encontrada</div>
             <p>Crie a primeira prova usando o botão "+ Nova prova".</p>
           </td>

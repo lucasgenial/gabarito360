@@ -1,26 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Membros da Equipe')
+@section('tela', 'tela-equipe')
 
-@push('styles')
-<style>
-  .kpi-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
-  .kpi-card-role { background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-lg); padding:18px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:12px; }
-  .kpi-role { font-size:14px; font-weight:700; }
-  .kpi-num { font-family:var(--font-mono); font-size:26px; font-weight:700; color:var(--accent); line-height:1; }
-  .kpi-meta { font-size:12px; color:var(--muted); }
-  .badge-purple { background:#efe7ff; color:#6d28d9; }
-  .badge-amber  { background:#fff4d6; color:#a16207; }
-  .member-avatar { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:13px; background:var(--accent-light); color:var(--accent-dark); flex-shrink:0; }
-  .member-cell { display:flex; align-items:center; gap:12px; }
-  .member-name { font-weight:700; font-size:14px; }
-  .member-email { font-size:12px; color:var(--muted); }
-  .filter-bar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:20px; }
-  .filter-bar .input { flex:1; min-width:200px; max-width:360px; }
-  @media (max-width:900px){ .kpi-strip{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:560px){ .kpi-strip{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Membros da Equipe')
 
 @section('breadcrumb')
 <span>Início</span><span class="sep">/</span><span>Membros da Equipe</span>
@@ -47,28 +29,14 @@
   ];
 @endphp
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <div class="eyebrow">Administração</div>
-    <h1 class="page-title">Membros da Equipe</h1>
-    <p class="page-sub">Gerencie os usuários e perfis de acesso do sistema.</p>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+<x-pagina chamada="Administração" titulo="Membros da Equipe">
+  <x-slot:sub>Gerencie os usuários e perfis de acesso do sistema.</x-slot:sub>
     <a href="{{ route('membros.perfis') }}" class="btn btn-ghost">O que cada perfil pode</a>
     @pode('usuario.gerir')<a href="{{ route('membros.create') }}" class="btn btn-primary">+ Novo Membro</a>@endpode
-  </div>
-</div>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 {{-- KPIs por perfil --}}
 <div class="kpi-strip" style="margin-top:20px;">
