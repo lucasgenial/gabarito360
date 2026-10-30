@@ -94,4 +94,45 @@ class EscolaController extends Controller
         $status = $resp->json('data.ativo') ? 'ativada' : 'desativada';
         return back()->with('sucesso', "Escola {$status} com sucesso.");
     }
+
+    /** Logo da escola (para o cabeçalho dos relatórios impressos). */
+    public function logo(int $id)
+    {
+        $resp = $this->api->getArquivo("/v1/escolas/{$id}/logo");
+        if ($resp->failed() || !str_starts_with((string) $resp->header('Content-Type'), 'image/')) {
+            abort(404);
+        }
+
+        return response($resp->body(), 200, ['Content-Type' => $resp->header('Content-Type'), 'Cache-Control' => 'private, max-age=3600']);
+    }
+
+    public function enviarLogo(Request $request, int $id)
+    {
+        $request->validate(['logo' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048']);
+        $resp = $this->api->postFile("/v1/escolas/{$id}/logo", 'logo', $request->file('logo'));
+
+        return back()->with($resp->failed() ? 'erro' : 'sucesso', $resp->failed()
+            ? ($resp->json('message') ?? 'Não foi possível enviar o logo.')
+            : 'Logo atualizado. Ele aparece no cabeçalho dos relatórios impressos.');
+    }
+
+    public function logoRede(int $id)
+    {
+        $resp = $this->api->getArquivo("/v1/redes/{$id}/logo");
+        if ($resp->failed() || !str_starts_with((string) $resp->header('Content-Type'), 'image/')) {
+            abort(404);
+        }
+
+        return response($resp->body(), 200, ['Content-Type' => $resp->header('Content-Type'), 'Cache-Control' => 'private, max-age=3600']);
+    }
+
+    public function enviarLogoRede(Request $request, int $id)
+    {
+        $request->validate(['logo' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048']);
+        $resp = $this->api->postFile("/v1/redes/{$id}/logo", 'logo', $request->file('logo'));
+
+        return back()->with($resp->failed() ? 'erro' : 'sucesso', $resp->failed()
+            ? ($resp->json('message') ?? 'Não foi possível enviar o logo do ente.')
+            : 'Logo do ente atualizado. Ele aparece à esquerda no cabeçalho dos relatórios.');
+    }
 }

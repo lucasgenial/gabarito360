@@ -5,7 +5,7 @@
  *         folha questão por questão (acertou / errou com marcada → certa /
  *         em branco / anulada), para imprimir ou enviar ao aluno e responsáveis.
  *  Uso:  python3 gerar_resultado.py < dados.json
- *        dados: {saida, rede, escola, titulo, disciplina, data, nota_maxima,
+ *        dados: {saida, rede, escola, detalhe, logo (caminho, opcional), titulo, disciplina, data, nota_maxima,
  *                aluno:{nome, matricula, turma}, nota:{nota_final, acertos, total_questoes},
  *                lingua, media_turma, folha:[{numero_questao, gabarito, marcada, situacao}]}
  *  Saída (stdout, JSON): {ok, arquivo}
@@ -53,16 +53,32 @@ def gerar(d):
     m = 16 * mm
     y = H - 16 * mm
 
-    # Cabeçalho institucional
+    # Cabeçalho institucional: logo do ente (governo/prefeitura/mantenedora) à esquerda,
+    # logo da escola à direita (só a escola: à esquerda), textos centralizados
+    topo = y
+    logos = [p for p in (d.get("logo_ente"), d.get("logo")) if p and os.path.isfile(p)]
+    for i, caminho in enumerate(logos):
+        x = m if i == 0 else W - m - 18 * mm
+        try:
+            c.drawImage(caminho, x, topo - 12 * mm, width=18 * mm, height=18 * mm,
+                        preserveAspectRatio=True, anchor="c", mask="auto")
+        except Exception:
+            pass  # logo inválido não impede o PDF
     c.setFillColor(GRAY3)
     c.setFont("Raleway-SemiBold", 8)
     if d.get("rede"):
         c.drawCentredString(W / 2, y, d["rede"].upper())
         y -= 5 * mm
     c.setFillColor(BLUE2)
-    caber(c, d.get("escola") or "", "Raleway-ExtraBold", 12, W - 2 * m)
+    caber(c, d.get("escola") or "", "Raleway-ExtraBold", 12, W - 2 * m - 44 * mm)
     c.drawCentredString(W / 2, y, d.get("escola") or "")
-    y -= 9 * mm
+    y -= 4.5 * mm
+    if d.get("detalhe"):
+        c.setFillColor(GRAY3)
+        c.setFont("Raleway-Regular", 8)
+        c.drawCentredString(W / 2, y, d["detalhe"])
+        y -= 4 * mm
+    y = min(y, topo - 14 * mm) - 3 * mm
 
     # Faixa da prova
     c.setFillColor(BLUE)

@@ -30,6 +30,18 @@ class RelatorioController extends Controller
         return view('relatorios.turma', $resp->json('data'));
     }
 
+    /** Relatório consolidado de escola, núcleo ou rede (sem id: a unidade do usuário). */
+    public function consolidado(\Illuminate\Http\Request $request, ?int $id = null): View
+    {
+        $nivel = $request->route()->defaults['nivel'] ?? $request->route('nivel');
+        $resp  = $this->api->get("/v1/relatorios/{$nivel}" . ($id ? "/{$id}" : ''));
+        if ($resp->failed()) {
+            abort(404, $resp->json('message') ?? 'Relatório não encontrado.');
+        }
+
+        return view('relatorios.consolidado', $resp->json('data') + ['nivel' => $nivel]);
+    }
+
     public function aluno(int $alunoId): View
     {
         $resp = $this->api->get("/v1/relatorios/aluno/{$alunoId}");

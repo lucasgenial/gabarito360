@@ -43,17 +43,16 @@
   .res-q.incorreta { background:var(--danger-light,#fde8e4); border-color:#f1a99f; color:#a3190a; }
   .res-q.branco { background:var(--warn-light,#fff5c2); border-color:#e8cf72; color:#7a4800; }
   .res-q.anulada { background:var(--surface-2); color:var(--muted); }
-  .so-impressao { display:none; }
   @media (max-width:900px) { .res-resumo { grid-template-columns:1fr 1fr; } .res-resumo .res-box:first-child { grid-column:1 / -1; } .res-folha { grid-template-columns:1fr 1fr; grid-template-rows:none; grid-auto-flow:row; } }
   @media (max-width:480px) { .res-folha { grid-template-columns:1fr; } }
   @media print {
     @page { size:A4; margin:12mm; }
     .govbar, .app-header, .breadcrumb, .no-print { display:none !important; }
-    .so-impressao { display:block; }
     body { background:#fff; }
     .container { padding:0 !important; max-width:none !important; }
     .card { box-shadow:none !important; border:0 !important; }
-    .res-resumo { grid-template-columns:1.3fr repeat(4,1fr); }
+    .res-resumo { grid-template-columns:1.3fr repeat(4,1fr) !important; }
+    .res-resumo .res-box:first-child { grid-column:auto !important; }
     .res-folha { grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(var(--linhas),auto); grid-auto-flow:column; }
     .res-q { font-size:11.5px; padding:4px 8px; break-inside:avoid; }
     * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -76,12 +75,7 @@
 @endsection
 
 @section('content')
-
-{{-- Cabeçalho só na impressão --}}
-<div class="so-impressao" style="text-align:center;margin-bottom:10px;">
-  <div style="font-weight:800;font-size:15px;color:#0c326f;">{{ $prova['escola_nome'] ?? '' }}</div>
-  <div style="font-size:12px;color:#555;">{{ $prova['titulo'] }} · {{ $prova['disciplina'] }}{{ $prova['data_aplicacao'] ? ' · ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }}</div>
-</div>
+@include('relatorios._cabecalho', ['cabecalho' => $dados['cabecalho'] ?? [], 'titulo' => 'Resultado · ' . $dados['prova']['titulo'], 'subtitulo' => $dados['prova']['disciplina']])
 
 <div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
   <div>
@@ -138,7 +132,6 @@
       </div>
     @endforeach
   </div>
-  <p class="so-impressao" style="font-size:10px;color:#777;margin-top:10px;text-align:center;">Feito com Gabarito360 · gabarito360.com.br</p>
 </div>
 
 @if($dados['cartao_id'])

@@ -79,6 +79,10 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/escolas/{id}',        [EscolaController::class, 'show'])->name('escolas.show');
     Route::put('/escolas/{id}',        [EscolaController::class, 'update'])->name('escolas.update');
     Route::post('/escolas/{id}/toggle',[EscolaController::class, 'toggle'])->name('escolas.toggle');
+    Route::get('/escolas/{id}/logo',   [EscolaController::class, 'logo'])->name('escolas.logo');
+    Route::get('/redes/{id}/logo',     [EscolaController::class, 'logoRede'])->name('redes.logo');
+    Route::post('/redes/{id}/logo',    [EscolaController::class, 'enviarLogoRede'])->name('redes.logo.enviar');
+    Route::post('/escolas/{id}/logo',  [EscolaController::class, 'enviarLogo'])->name('escolas.logo.enviar');
 
     // Alunos (MP-017)
     Route::get('/alunos',              [AlunoController::class, 'index'])->name('alunos.index');
@@ -133,6 +137,9 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');
     Route::get('/relatorios/turma/{turmaId}', [RelatorioController::class, 'turma'])->name('relatorios.turma');
     Route::get('/relatorios/aluno/{alunoId}', [RelatorioController::class, 'aluno'])->name('relatorios.aluno');
+    Route::get('/relatorios/escola/{id?}', [RelatorioController::class, 'consolidado'])->defaults('nivel', 'escola')->name('relatorios.escola');
+    Route::get('/relatorios/nucleo/{id?}', [RelatorioController::class, 'consolidado'])->defaults('nivel', 'nucleo')->name('relatorios.nucleo');
+    Route::get('/relatorios/rede/{id?}',   [RelatorioController::class, 'consolidado'])->defaults('nivel', 'rede')->name('relatorios.rede');
 
     // Assinatura e Cobrança (MP-027)
     Route::get('/assinatura',           [AssinaturaController::class, 'index'])->name('assinatura.index');

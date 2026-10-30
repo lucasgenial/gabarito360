@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Prova;
+use App\Support\Cabecalho;
 use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -99,6 +100,7 @@ class RelatorioController extends Controller
 
         return ApiResponse::success([
             'prova'  => array_merge($prova->toArray(), ['turmas' => $turmas]),
+            'cabecalho' => Cabecalho::escola((int) $prova->escola_id),
             'kpis'     => $this->kpis($prova),
             'alunos'   => $this->tabelaAlunos($id),
             'questoes' => $this->analiseQuestoes($prova),
@@ -120,6 +122,7 @@ class RelatorioController extends Controller
         return ApiResponse::success([
             'prova'  => $prova,
             'turma'  => $turma,
+            'cabecalho' => Cabecalho::escola((int) $prova->escola_id),
             'kpis'     => $this->kpis($prova, $turmaId),
             'alunos'   => $this->tabelaAlunos($provaId, $turmaId),
             'questoes' => $this->analiseQuestoes($prova, $turmaId),
@@ -191,6 +194,7 @@ class RelatorioController extends Controller
 
         return ApiResponse::success([
             'turma'   => $turma,
+            'cabecalho' => Cabecalho::escola((int) $turma->escola_id),
             'kpis'    => [
                 'alunos'          => $alunos->count(),
                 'provas'          => $provas->count(),
@@ -243,6 +247,7 @@ class RelatorioController extends Controller
         return ApiResponse::success([
             'aluno'  => $aluno,
             'turma'  => $turma,
+            'cabecalho' => Cabecalho::escola((int) $turma->escola_id),
             'provas' => $linhas,
             'kpis'   => [
                 'provas'        => $linhas->count(),

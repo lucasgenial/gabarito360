@@ -43,6 +43,7 @@
 @endsection
 
 @section('content')
+@include('relatorios._cabecalho', ['cabecalho' => $cabecalho ?? [], 'titulo' => 'Relatório consolidado da turma', 'subtitulo' => 'Turma ' . $turma['nome']])
 <div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
   <div>
     <div class="eyebrow">Relatório consolidado</div>
