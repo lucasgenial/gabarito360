@@ -123,7 +123,7 @@
       <div class="eyebrow">Mapa de desempenho escolar</div>
       <h3 style="font-size:18px;">Comparativo das escolas do núcleo</h3>
     </div>
-    <table class="table">
+    <table class="table lista-cel">
       <thead>
         <tr>
           <th>Escola</th>

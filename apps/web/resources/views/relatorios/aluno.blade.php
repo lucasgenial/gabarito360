@@ -97,7 +97,7 @@
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Provas</h3>
   <div style="overflow-x:auto;">
-    <table class="tab">
+    <table class="tab lista-cel">
       <thead><tr><th class="esq">Prova</th><th>Nota</th><th>Acertos</th><th class="opc">Média turma</th><th>Posição</th><th class="no-print"></th></tr></thead>
       <tbody>
         @foreach($provas as $p)

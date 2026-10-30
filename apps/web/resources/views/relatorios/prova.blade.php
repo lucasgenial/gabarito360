@@ -84,7 +84,7 @@
   <div class="card-pad" style="padding-bottom:0;">
     <h3 style="font-size:17px;">Resultado por aluno</h3>
   </div>
-  <table class="table">
+  <table class="table lista-cel">
     <thead><tr><th>Aluno</th><th>Turma</th><th>Nota</th><th>Status</th><th></th></tr></thead>
     <tbody>
       @forelse($alunos as $a)

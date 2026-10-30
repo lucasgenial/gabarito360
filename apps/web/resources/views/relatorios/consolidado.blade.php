@@ -98,11 +98,11 @@
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Comparativo entre {{ $grupo === 'turma' ? 'turmas' : 'escolas' }}</h3>
   @php $disciplinas = collect($areas)->pluck('disciplina'); @endphp
-  <div style="overflow-x:auto;">
+  <div class="quadro-cel" style="overflow-x:auto;">
     <table class="tab">
       <thead>
         <tr>
-          <th>#</th><th class="esq">{{ $grupo === 'turma' ? 'Turma' : 'Escola' }}</th>
+          <th>#</th><th class="esq fixa">{{ $grupo === 'turma' ? 'Turma' : 'Escola' }}</th>
           @foreach($disciplinas as $d)<th>{{ \Illuminate\Support\Str::limit($d, 14) }}</th>@endforeach
           <th>Média</th><th>Aprov.</th><th>Alunos</th>
         </tr>
@@ -111,7 +111,7 @@
         @foreach($grupos as $i => $g)
           <tr>
             <td>{{ $g['media'] !== null ? ($i + 1) . 'º' : '—' }}</td>
-            <td class="esq">
+            <td class="esq fixa">
               @if($grupo === 'turma')
                 <a href="{{ route('relatorios.turma', $g['id']) }}" style="color:inherit;"><b>{{ $g['nome'] }}</b></a>
               @else

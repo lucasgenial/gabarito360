@@ -171,7 +171,7 @@
       <h2 class="section-title" style="margin-bottom:0;">Minhas notas</h2>
       <span class="badge badge-muted">{{ $bimAtual }}º bimestre</span>
     </div>
-    <table class="table">
+    <table class="table lista-cel">
       <thead>
         <tr>
           <th>Disciplina</th>

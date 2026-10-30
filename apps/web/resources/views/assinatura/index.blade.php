@@ -175,7 +175,7 @@
       @if(empty($assinatura['historico_pagamentos']))
         <p style="color:var(--color-secondary-06);font-size:.875rem">Nenhum pagamento registrado ainda.</p>
       @else
-        <table class="historico-table">
+        <table class="historico-table lista-cel">
           <thead>
             <tr>
               <th>Data</th>

@@ -118,7 +118,7 @@
 </div>
 
 <div class="card" style="overflow:hidden;">
-  <table class="table" id="alunos-table">
+  <table class="table lista-cel" id="alunos-table">
     <thead>
       <tr>
         <th>Aluno</th>
@@ -179,7 +179,7 @@
 
 <div class="card" style="overflow:hidden;margin-bottom:24px;">
   @if(count($turma['provas'] ?? []) > 0)
-  <table class="table">
+  <table class="table lista-cel">
     <thead>
       <tr>
         <th>Prova</th>
@@ -257,7 +257,7 @@
   </form>
 
   @if(count($professores ?? []) > 0)
-    <table class="table" style="margin-top:0;">
+    <table class="table lista-cel" style="margin-top:0;">
       <thead>
         <tr>
           <th>Professor(a)</th>

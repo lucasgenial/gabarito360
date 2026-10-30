@@ -77,7 +77,7 @@
     <div class="eyebrow">Mapa de desempenho</div>
     <h3 style="font-size:18px;">Comparativo das redes</h3>
   </div>
-  <table class="table">
+  <table class="table lista-cel">
     <thead>
       <tr>
         <th>Rede</th>
