@@ -6,42 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Aluno;
 use App\Models\Prova;
+use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ResultadoController extends Controller
 {
-    private function escopoEscolaIds(Request $request): ?array
-    {
-        $usuario = $request->user();
-
-        return match ($usuario->perfil) {
-            'admin_rede' => null,
-            'dir_nucleo' => DB::table('escolas')
-                ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
-                ->join('usuario_escopos', function ($j) use ($usuario) {
-                    $j->on('nucleos.id', '=', 'usuario_escopos.escopo_id')
-                      ->where('usuario_escopos.usuario_id', $usuario->id)
-                      ->where('usuario_escopos.escopo_tipo', 'nucleo');
-                })
-                ->pluck('escolas.id')->all(),
-            'dir_escolar', 'coordenador', 'professor' => DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'escola')
-                ->pluck('escopo_id')->all(),
-            default => [],
-        };
-    }
-
     public function show(Request $request, int $alunoId, int $provaId): JsonResponse
     {
-        $escolaIds = $this->escopoEscolaIds($request);
-        $provaQuery = Prova::query();
-        if ($escolaIds !== null) {
-            $provaQuery->whereIn('escola_id', $escolaIds);
-        }
-        $prova = $provaQuery->find($provaId);
+        $prova = Escopo::provaComConteudo($request->user(), $provaId);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }

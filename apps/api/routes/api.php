@@ -52,7 +52,7 @@ Route::prefix('v1')->group(function () {
         // Provas
         Route::prefix('provas')->group(function () {
             Route::get('/',             [ProvaController::class, 'index']);
-            Route::post('/',            [ProvaController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::post('/',            [ProvaController::class, 'store'])->middleware('perfil:admin_rede,coordenador,professor'); // doc 03: diretor não cria prova
             Route::get('{id}',          [ProvaController::class, 'show']);
             Route::put('{id}',          [ProvaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
             Route::post('{id}/publicar',[ProvaController::class, 'publicar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');

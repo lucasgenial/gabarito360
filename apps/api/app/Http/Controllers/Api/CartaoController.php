@@ -10,6 +10,7 @@ use App\Models\Prova;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
 use App\Services\Omr\GeradorCartoes;
+use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,38 +18,17 @@ use Illuminate\Support\Facades\Storage;
 
 class CartaoController extends Controller
 {
-    private function escopoEscolaIds(Request $request): ?array
+    /**
+     * Prova dentro do escopo do usuário. O aplicador só pode ENVIAR cartões
+     * (doc 03, †APLIC): nas demais ações a prova não é encontrada para ele.
+     */
+    private function encontrarProva(Request $request, int $provaId, bool $envio = false): ?Prova
     {
-        $usuario = $request->user();
-
-        return match ($usuario->perfil) {
-            'admin_rede' => null,
-            'dir_nucleo' => DB::table('escolas')
-                ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
-                ->join('usuario_escopos', function ($j) use ($usuario) {
-                    $j->on('nucleos.id', '=', 'usuario_escopos.escopo_id')
-                      ->where('usuario_escopos.usuario_id', $usuario->id)
-                      ->where('usuario_escopos.escopo_tipo', 'nucleo');
-                })
-                ->pluck('escolas.id')->all(),
-            'dir_escolar', 'coordenador', 'professor' => DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'escola')
-                ->pluck('escopo_id')->all(),
-            default => [],
-        };
-    }
-
-    private function encontrarProva(Request $request, int $provaId): ?Prova
-    {
-        $escolaIds = $this->escopoEscolaIds($request);
-        $query     = Prova::query();
-
-        if ($escolaIds !== null) {
-            $query->whereIn('escola_id', $escolaIds);
+        if ($request->user()->perfil === 'aplicador' && !$envio) {
+            return null;
         }
 
-        return $query->find($provaId);
+        return Escopo::prova($request->user(), $provaId);
     }
 
     public function index(Request $request, int $provaId): JsonResponse
@@ -126,7 +106,7 @@ class CartaoController extends Controller
 
     public function store(Request $request, int $provaId): JsonResponse
     {
-        $prova = $this->encontrarProva($request, $provaId);
+        $prova = $this->encontrarProva($request, $provaId, envio: true);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
@@ -153,6 +133,17 @@ class CartaoController extends Controller
 
         // Com fila síncrona o cartão já foi lido: devolve o resultado para o celular.
         $cartao->refresh()->load('aluno:id,nome');
+
+        // Aplicador não vê notas (doc 03): só a confirmação de leitura e o aluno.
+        if ($request->user()->perfil === 'aplicador') {
+            return ApiResponse::success([
+                'id'         => $cartao->id,
+                'status'     => $cartao->status === 'pendente' ? 'processando' : $cartao->status,
+                'aluno_id'   => $cartao->aluno_id,
+                'aluno_nome' => $cartao->aluno?->nome,
+            ], null, 202);
+        }
+
         $nota = DB::table('notas')->where('cartao_id', $cartao->id)->first();
 
         return ApiResponse::success([

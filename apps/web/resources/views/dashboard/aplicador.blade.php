@@ -12,10 +12,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}" class="active">Painel</a>
-@endsection
-
 @section('context-badge')
 <span class="badge badge-info badge-dot">{{ $dashboard['escola']['nome'] ?? 'Aplicador' }}</span>
 @endsection
@@ -87,11 +83,11 @@
           <td class="num">{{ $p['total_alunos'] }}</td>
           <td class="num">{{ $p['cartoes_enviados'] }}</td>
           <td>
-            <form class="upload-form" method="POST" action="{{ route('correcao.upload', $p['id']) }}" enctype="multipart/form-data">
-              @csrf
-              <input type="file" name="imagem" accept="image/*" required />
-              <button type="submit" class="btn btn-secondary" style="padding:6px 10px;font-size:12px;">Enviar</button>
-            </form>
+            @if(in_array($p['status'], ['publicada', 'em_correcao', 'corrigida'], true))
+              <a class="btn btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera">📷 Fotografar</a>
+            @else
+              <span class="badge badge-muted">aguardando gabarito</span>
+            @endif
           </td>
         </tr>
       @empty

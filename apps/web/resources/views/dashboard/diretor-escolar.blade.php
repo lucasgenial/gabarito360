@@ -30,13 +30,6 @@
 </style>
 @endpush
 
-@section('nav')
-<a href="{{ route('painel') }}" class="active">Painel</a>
-<a href="{{ route('provas.index') }}">Provas</a>
-<a href="{{ route('turmas.index') }}">Turmas</a>
-<a href="{{ route('escolas.index') }}">Escolas</a>
-@endsection
-
 @section('context-badge')
 <span class="badge badge-info badge-dot">{{ $dashboard['escola']['nome'] ?? 'Escola' }}</span>
 @endsection
