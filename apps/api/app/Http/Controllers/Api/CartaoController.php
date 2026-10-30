@@ -148,6 +148,9 @@ class CartaoController extends Controller
 
         return ApiResponse::success([
             'id'         => $cartao->id,
+            // Preenchido quando o QR indicou outra prova e o cartão foi corrigido nela
+            'prova_corrigida' => (int) $cartao->prova_id !== $provaId
+                ? DB::table('provas')->where('id', $cartao->prova_id)->value('disciplina') : null,
             'status'     => $cartao->status === 'pendente' ? 'processando' : $cartao->status,
             'aluno_id'   => $cartao->aluno_id,
             'aluno_nome' => $cartao->aluno?->nome,

@@ -12,6 +12,10 @@ class AtualizadorStatusProva
         $total = DB::table('cartoes')->where('prova_id', $prova->id)->count();
 
         if ($total === 0) {
+            // Sem cartões (ex.: o único foi movido para a prova do QR): volta a "publicada"
+            if (in_array($prova->status, ['em_correcao', 'corrigida'], true)) {
+                $prova->update(['status' => 'publicada']);
+            }
             return;
         }
 

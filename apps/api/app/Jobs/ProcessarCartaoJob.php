@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Cartao;
+use App\Models\Prova;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
 use App\Services\Omr\OmrDriverInterface;
@@ -35,9 +36,22 @@ class ProcessarCartaoJob implements ShouldQueue
         $caminho = Storage::disk('public')->path($cartao->imagem_url);
         $leituras = $driver->processar($caminho, $prova->num_questoes, $prova->num_alternativas);
 
-        // Identificação pelo QR do cartão nativo (aluno e língua estrangeira)
         if ($driver instanceof OmrIdentificacaoInterface) {
+            // Cartão de outra prova (ex.: fotografou o de Linguagens na tela de Ciências Humanas):
+            // vai para a prova do QR, se for da mesma escola, e é relido com o gabarito dela.
+            $outra = $this->provaDoQr($cartao, $driver->identificacao());
+            if ($outra) {
+                $anterior = $prova;
+                $cartao->update(['prova_id' => $outra->id]);
+                $cartao->refresh();
+                $prova    = $outra;
+                $leituras = $driver->processar($caminho, $prova->num_questoes, $prova->num_alternativas);
+                AtualizadorStatusProva::atualizar($anterior);
+            }
+
+            // Identificação pelo QR do cartão nativo (aluno e língua estrangeira)
             $this->aplicarIdentificacao($cartao, $driver->identificacao());
+            $this->substituirLeiturasAnteriores($cartao);
         }
 
         DB::table('cartao_respostas')->where('cartao_id', $cartao->id)->delete();
@@ -90,6 +104,41 @@ class ProcessarCartaoJob implements ShouldQueue
         }
 
         AtualizadorStatusProva::atualizar($prova);
+    }
+
+    /** Prova indicada pelo QR quando difere da prova do envio e pode receber o cartão. */
+    private function provaDoQr(Cartao $cartao, array $id): ?Prova
+    {
+        $provaQr = (int) ($id['prova_id'] ?? 0);
+        if (!$provaQr || $provaQr === (int) $cartao->prova_id) {
+            return null;
+        }
+
+        $outra = Prova::find($provaQr);
+
+        return ($outra
+            && (int) $outra->escola_id === (int) $cartao->prova->escola_id
+            && in_array($outra->status, ['publicada', 'em_correcao', 'corrigida'], true))
+            ? $outra : null;
+    }
+
+    /** Nova foto do mesmo aluno na mesma prova substitui a anterior (sem cartão duplicado). */
+    private function substituirLeiturasAnteriores(Cartao $cartao): void
+    {
+        if (!$cartao->aluno_id) {
+            return;
+        }
+
+        Cartao::where('prova_id', $cartao->prova_id)
+            ->where('aluno_id', $cartao->aluno_id)
+            ->where('id', '!=', $cartao->id)
+            ->get()
+            ->each(function (Cartao $antigo) {
+                if ($antigo->imagem_url) {
+                    Storage::disk('public')->delete($antigo->imagem_url);
+                }
+                $antigo->delete(); // respostas, nota e logs saem em cascata
+            });
     }
 
     private function aplicarIdentificacao(Cartao $cartao, array $id): void
