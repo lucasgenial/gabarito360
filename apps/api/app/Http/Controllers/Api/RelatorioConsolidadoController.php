@@ -26,8 +26,8 @@ class RelatorioConsolidadoController extends Controller
         $usuario = $request->user();
         $escolas = Escopo::escolaIds($usuario);
         $id ??= $escolas[0] ?? null;
-        if (!in_array($usuario->perfil, ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador'], true)
-            || !$id || ($escolas !== null && !in_array($id, $escolas, true))) {
+        // A rota exige relatorio.escola (padrão ou extra); aqui só o escopo da pessoa conta
+        if (!$id || ($escolas !== null && !in_array($id, $escolas, true))) {
             return ApiResponse::notFound('Escola não encontrada.');
         }
 
@@ -53,12 +53,9 @@ class RelatorioConsolidadoController extends Controller
     public function nucleo(Request $request, ?int $id = null): JsonResponse
     {
         $usuario = $request->user();
-        if (!in_array($usuario->perfil, ['admin_rede', 'dir_nucleo'], true)) {
-            return ApiResponse::notFound('Núcleo não encontrado.');
-        }
-        $meus = $usuario->perfil === 'dir_nucleo'
-            ? DB::table('usuario_escopos')->where('usuario_id', $usuario->id)->where('escopo_tipo', 'nucleo')->pluck('escopo_id')->map(fn ($v) => (int) $v)->all()
-            : null;
+        // A rota exige relatorio.nucleo; o admin da rede vê todos, os demais só os núcleos do seu escopo
+        $meus = $usuario->perfil === 'admin_rede' ? null
+            : DB::table('usuario_escopos')->where('usuario_id', $usuario->id)->where('escopo_tipo', 'nucleo')->pluck('escopo_id')->map(fn ($v) => (int) $v)->all();
         $id ??= $meus[0] ?? null;
         if (!$id || ($meus !== null && !in_array($id, $meus, true))) {
             return ApiResponse::notFound('Núcleo não encontrado.');
@@ -133,7 +130,7 @@ class RelatorioConsolidadoController extends Controller
             ->get([
                 'notas.aluno_id', 'alunos.nome as aluno_nome', 'notas.prova_id', 'provas.disciplina',
                 'notas.turma_id', 'turmas.nome as turma_nome', 'turmas.escola_id', 'escolas.nome as escola_nome',
-                DB::raw('notas.nota_final * 10 / GREATEST(provas.nota_maxima, 0.1) as nota10'),
+                DB::raw('notas.nota_final * 10 / (CASE WHEN provas.nota_maxima > 0.1 THEN provas.nota_maxima ELSE 0.1 END) as nota10'),
             ])
             ->map(function ($n) { $n->nota10 = (float) $n->nota10; return $n; });
     }
