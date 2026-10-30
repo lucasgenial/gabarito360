@@ -139,9 +139,9 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');
     Route::get('/relatorios/turma/{turmaId}', [RelatorioController::class, 'turma'])->name('relatorios.turma');
     Route::get('/relatorios/aluno/{alunoId}', [RelatorioController::class, 'aluno'])->name('relatorios.aluno');
-    Route::get('/relatorios/escola/{id?}', [RelatorioController::class, 'consolidado'])->defaults('nivel', 'escola')->name('relatorios.escola');
-    Route::get('/relatorios/nucleo/{id?}', [RelatorioController::class, 'consolidado'])->defaults('nivel', 'nucleo')->name('relatorios.nucleo');
-    Route::get('/relatorios/rede/{id?}',   [RelatorioController::class, 'consolidado'])->defaults('nivel', 'rede')->name('relatorios.rede');
+    Route::get('/relatorios/escola/{id?}', [RelatorioController::class, 'escola'])->name('relatorios.escola');
+    Route::get('/relatorios/nucleo/{id?}', [RelatorioController::class, 'nucleo'])->name('relatorios.nucleo');
+    Route::get('/relatorios/rede/{id?}',   [RelatorioController::class, 'rede'])->name('relatorios.rede');
 
     // Assinatura e Cobrança (MP-027)
     Route::get('/assinatura',           [AssinaturaController::class, 'index'])->name('assinatura.index');
