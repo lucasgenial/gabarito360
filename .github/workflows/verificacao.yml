@@ -30,6 +30,7 @@ jobs:
         with:
           php-version: '8.3'
           extensions: gd, pdo_sqlite
+      - run: mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
       - run: composer install --no-interaction --no-progress
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
