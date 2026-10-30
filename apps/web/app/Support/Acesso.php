@@ -22,12 +22,12 @@ class Acesso
 
     /**
      * Itens de menu: [rótulo, rótulo curto (barra do celular), ícone, rota, padrões de rota ativos,
-     * permissões que liberam o item (basta uma)]. O item só aparece com a permissão que a API
+     * permissões que liberam o item (basta uma; "a+b" exige as duas)]. O item só aparece com a permissão que a API
      * exige na tela de destino — assim nenhum item leva a 403 (docs/21, etapa 4).
      */
     private const ITENS = [
         'painel'     => ['Painel', 'Painel', 'casa', 'painel', ['painel'], []],
-        'provas'     => ['Provas', 'Provas', 'prova', 'provas.index', ['provas.*', 'relatorios.prova', 'relatorios.turmaProva', 'resultados.*'], ['prova.ver']],
+        'provas'     => ['Provas', 'Provas', 'prova', 'provas.index', ['provas.*', 'relatorios.prova', 'relatorios.turmaProva', 'resultados.*'], ['prova.ver+gabarito.ver']],
         'corrigir'   => ['📷 Corrigir', 'Corrigir', 'camera', 'correcao.index', ['correcao.*'], ['correcao.acompanhar']],
         'turmas'     => ['Turmas', 'Turmas', 'turma', 'turmas.index', ['turmas.*', 'relatorios.turma', 'relatorios.aluno'], ['turma.ver']],
         'alunos'     => ['Alunos', 'Alunos', 'aluno', 'alunos.index', ['alunos.*'], ['aluno.gerir', 'aluno.importar', 'aluno.desativar']],
@@ -43,7 +43,7 @@ class Acesso
         'relatorio.escola' => 'relatorios.escola',
     ];
 
-    /** Ordem do menu no computador (no máximo MAX_TOPO itens; o resto vai para "Mais"). */
+    /** Ordem do menu no computador (até MAX_TOPO itens; o resto vai para "Mais"). */
     private const ORDEM = ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'];
 
     private const MAX_TOPO = 6;
@@ -122,7 +122,7 @@ class Acesso
         $itens = [];
         foreach (self::ORDEM as $chave) {
             [$rotulo, $curto, $icone, $rota, $padroes, $perms] = self::ITENS[$chave];
-            if ($perms && !collect($perms)->contains(fn ($p) => self::pode($p))) {
+            if ($perms && !collect($perms)->contains(fn ($p) => collect(explode('+', $p))->every(fn ($c) => self::pode($c)))) {
                 continue;
             }
             $rota ??= collect(self::RELATORIO_POR_PERMISSAO)->first(fn ($r, $p) => self::pode($p));
@@ -139,7 +139,7 @@ class Acesso
     }
 
     /**
-     * Menu do computador: até MAX_TOPO itens no topo e o restante em "Mais".
+     * Menu do computador: até MAX_TOPO itens no topo e o restante em "Mais" (docs/21: 6 + "Mais").
      *
      * @return array{topo: array, mais: array}
      */
@@ -150,7 +150,7 @@ class Acesso
             return ['topo' => $itens, 'mais' => []];
         }
 
-        return ['topo' => array_slice($itens, 0, self::MAX_TOPO - 1), 'mais' => array_slice($itens, self::MAX_TOPO - 1)];
+        return ['topo' => array_slice($itens, 0, self::MAX_TOPO), 'mais' => array_slice($itens, self::MAX_TOPO)];
     }
 
     /**
