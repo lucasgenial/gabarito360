@@ -20,7 +20,7 @@ class UsuarioController extends Controller
 
         $query = Usuario::query()->where('id', '!=', $usuario->id);
 
-        if ($usuario->perfil === 'dir_escolar') {
+        if (in_array($usuario->perfil, ['dir_escolar', 'coordenador'], true)) {
             $escolaId = DB::table('usuario_escopos')
                 ->where('usuario_id', $usuario->id)
                 ->where('escopo_tipo', 'escola')

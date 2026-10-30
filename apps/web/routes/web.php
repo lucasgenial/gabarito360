@@ -114,6 +114,7 @@ Route::middleware('autenticado')->group(function () {
 
     // Acompanhamento de correção / OMR (MP-021)
     Route::get('/corrigir',                     [CorrecaoController::class, 'index'])->name('correcao.index');
+    Route::get('/turmas/{id}/acompanhar',       [CorrecaoController::class, 'turma'])->name('correcao.turma');
     Route::get('/provas/{id}/acompanhar',       [CorrecaoController::class, 'show'])->name('correcao.show');
     Route::get('/provas/{id}/acompanhar/status',[CorrecaoController::class, 'status'])->name('correcao.status');
     Route::get('/provas/{id}/acompanhar/cartoes',[CorrecaoController::class, 'cartoes'])->name('correcao.cartoes');
