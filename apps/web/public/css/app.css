@@ -276,6 +276,57 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
+   Fundação do layout (docs/23, L1)
+   Régua única de larguras — usar só estes valores em @media:
+     xs < 480 · sm 480–767 · md 768–1023 · lg 1024–1439 · xl 1440–1919 · 2xl ≥ 1920
+   ============================================================ */
+:root {
+  /* Escala de texto */
+  --text-xs: 12px; --text-sm: 14px; --text-md: 16px; --text-lg: 18px;
+  --text-xl: 22px; --text-2xl: 28px; --text-3xl: 36px;
+  /* Margem lateral do conteúdo: cresce com a tela */
+  --margem: clamp(16px, 2.5vw, 56px);
+  /* Escala da área logada em telas grandes (texto, espaços e ícones juntos) */
+  --escala: 1;
+}
+@media (min-width: 1920px) { :root { --escala: 1.125; } }
+@media (min-width: 2560px) { :root { --escala: 1.25; } }
+@media (min-width: 3200px) { :root { --escala: 1.5; } }
+
+/* Área logada: conteúdo na tela toda (decisão 2) */
+.area-logada { zoom: var(--escala); }
+.area-logada .container { max-width: none; padding-left: var(--margem); padding-right: var(--margem); }
+/* vh não acompanha o zoom: modais e fotos continuam cabendo na tela */
+.area-logada .modal, .area-logada .g360-modal .caixa { max-height: calc(90vh / var(--escala)) !important; }
+.area-logada .foto-img { max-height: calc(78vh / var(--escala)); }
+/* Coluna de leitura: formulários e textos não acompanham a tela toda */
+.coluna-leitura { max-width: 960px; margin-left: auto; margin-right: auto; }
+
+/* ---------- Componentes base (resources/views/components) ---------- */
+.g-pagina { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+.g-pagina-acoes { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.g-indicadores { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 16px; margin-top: 16px; }
+.g-indicador { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 16px 20px; min-width: 0; }
+.g-indicador-rotulo { font-size: var(--text-sm); color: var(--muted); }
+.g-indicador-valor { font-size: var(--text-2xl); font-weight: 800; line-height: 1.2; margin-top: 4px; }
+.g-indicador-detalhe { font-size: var(--text-xs); color: var(--muted); margin-top: 4px; }
+.g-indicador.sucesso .g-indicador-valor { color: var(--success); }
+.g-indicador.perigo .g-indicador-valor { color: var(--danger); }
+.g-indicador.destaque .g-indicador-valor { color: var(--accent); }
+.g-cartao { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); margin-top: 16px; }
+.g-cartao-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 16px 20px 0; }
+.g-cartao-cab h2 { font-size: var(--text-lg); font-weight: 700; }
+.g-cartao-corpo { padding: 16px 20px; }
+.g-aviso { border: 1px solid; border-radius: var(--radius-md); padding: 12px 16px; font-size: var(--text-sm); font-weight: 600; margin-top: 16px; }
+.g-aviso.sucesso { background: var(--success-light); color: var(--success); border-color: var(--success); }
+.g-aviso.erro { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.g-aviso.atencao { background: var(--warn-light); color: var(--warn-fg); border-color: var(--warn); }
+.g-aviso.info { background: var(--accent-light); color: var(--accent-dark); border-color: var(--accent); }
+.g-vazio { text-align: center; padding: 40px 20px; color: var(--muted); }
+.g-vazio .nav-icone { width: 36px; height: 36px; margin-bottom: 8px; }
+.g-vazio b { display: block; color: var(--fg-2); font-size: var(--text-md); margin-bottom: 4px; }
+
+/* ============================================================
    Tabelas no celular (docs/21, etapa 5)
    - table.lista-cel: cada linha vira um cartão; rótulos vêm do cabeçalho (data-rotulo, app.js)
    - .quadro-cel: quadro largo rola só por dentro, coluna .fixa presa à esquerda
@@ -370,6 +421,7 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 /* ---------- Impressão A4 (relatórios, boletim e resultados) ---------- */
 .impressao-cab { display: none; }
 @media print {
+  .area-logada { zoom: 1; }
   .nav-inferior, .nav-folha, .nav-mais { display: none !important; }
   body { padding-bottom: 0 !important; }
   /* Rodapé nativo da página (repete em todas e numera) */
