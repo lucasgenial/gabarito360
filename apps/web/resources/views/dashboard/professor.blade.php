@@ -124,7 +124,7 @@
       <h2 class="section-title">Ranking de desempenho da turma</h2>
       <div class="ranking-grid">
         <div>
-          <div class="eyebrow" style="margin-bottom:10px;">Top 5</div>
+          <div class="eyebrow" style="margin-bottom:10px;">Maiores notas</div>
           <ul class="rank-list">
             @forelse($top5 as $i => $a)
               <li>
@@ -143,7 +143,7 @@
           </ul>
         </div>
         <div>
-          <div class="eyebrow" style="margin-bottom:10px;color:var(--danger);">Bottom 3</div>
+          <div class="eyebrow" style="margin-bottom:10px;color:var(--danger);">Menores notas</div>
           <ul class="rank-list">
             @forelse($bottom3 as $i => $a)
               @php $cls = $a['media'] < 5 ? 'danger' : 'warn'; @endphp
@@ -191,7 +191,7 @@
         </div>
       @else
         <div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0;">
-          Todos os alunos estão acima da média.
+          Nenhum aluno em atenção no momento.
         </div>
       @endif
     </div>

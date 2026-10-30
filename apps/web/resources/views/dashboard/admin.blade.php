@@ -106,7 +106,7 @@
         <div class="eyebrow">Status da rede</div>
         <h3 style="font-size:18px;">Desempenho médio por escola</h3>
       </div>
-      <span class="badge badge-info">Top 5 da última consolidação</span>
+      <span class="badge badge-info">5 melhores da última consolidação</span>
     </div>
 
     @if(count($top5))
