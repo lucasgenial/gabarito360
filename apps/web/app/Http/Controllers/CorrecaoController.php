@@ -142,7 +142,7 @@ class CorrecaoController extends Controller
     /** Foto do cartão, repassada da API (não fica em URL pública). */
     public function imagem(int $cartaoId)
     {
-        $resp = $this->api->getArquivo("/v1/cartoes/{$cartaoId}/imagem");
+        $resp = $this->api->get("/v1/cartoes/{$cartaoId}/imagem");
         if ($resp->failed() || !str_starts_with((string) $resp->header('Content-Type'), 'image/')) {
             abort(404);
         }

@@ -97,7 +97,8 @@
 <div class="g360-modal" id="foto-modal" onclick="if (event.target === this) fecharModal('foto-modal')">
   <div class="caixa">
     <div class="row-between" style="margin-bottom:10px;"><b id="foto-titulo"></b><button type="button" class="btn btn-sm btn-ghost" onclick="fecharModal('foto-modal')">✕</button></div>
-    <img id="foto-img" class="foto-img" alt="Foto do cartão-resposta">
+    <img id="foto-img" class="foto-img" alt="Foto do cartão-resposta" onerror="if (this.getAttribute('src')) { this.style.display = 'none'; document.getElementById('foto-erro').style.display = 'block'; }">
+    <p id="foto-erro" style="display:none;">Não foi possível abrir a foto. Feche e tente de novo.</p>
   </div>
 </div>
 
@@ -188,16 +189,14 @@ function desenharCorrigidos() {
       ? '<div class="corr-nota" style="color:' + (Number(c.nota_final) >= NOTA_MAX * 0.6 ? 'var(--success)' : 'var(--danger)') + '">' + fmtNota(c.nota_final) + '</div>'
         + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
       : '';
-    var foto = c.tem_imagem
-      ? '<img class="corr-thumb" loading="lazy" src="' + CARTOES_URL + '/' + c.id + '/imagem" alt="Foto do cartão" onclick="verFoto(' + c.id + ')">'
-      : '<div class="corr-thumb" style="display:grid;place-items:center;font-size:11px;color:var(--muted);">sem foto</div>';
-    var acoes = '';
+    // Foto só ao clicar: cada imagem ocupa dois processos do servidor (web e API)
+    var acoes = c.tem_imagem ? '<button type="button" class="btn btn-sm btn-ghost" onclick="verFoto(' + c.id + ')">Ver foto</button>' : '';
     if (c.aluno_id && c.nota_final !== null && c.nota_final !== undefined) {
       acoes += '<a class="btn btn-sm btn-secondary" href="/resultados/' + c.aluno_id + '/' + PROVA_ID + '?from=correcao">Acertos e erros</a>';
     }
     if (!c.aluno_id && typeof seletorAluno === 'function' && typeof ALUNOS !== 'undefined' && ALUNOS.length) acoes += seletorAluno(c.id);
     if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">Excluir</button>';
-    return '<li class="corr-item">' + foto + '<div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
+    return '<li class="corr-item"><div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
       + '<div style="margin-top:4px;">' + st + '</div><div class="corr-acoes">' + acoes + '</div></div><div>' + nota + '</div></li>';
   }).join('');
 }
@@ -206,6 +205,8 @@ function fecharModal(id) { document.getElementById(id).style.display = 'none'; i
 function verFoto(id) {
   var c = corrDados.filter(function (x) { return x.id === id; })[0] || {};
   document.getElementById('foto-titulo').textContent = (c.aluno_nome || 'Aluno não identificado') + (c.turma ? ' · ' + c.turma : '');
+  document.getElementById('foto-erro').style.display = 'none';
+  document.getElementById('foto-img').style.display = '';
   document.getElementById('foto-img').src = CARTOES_URL + '/' + id + '/imagem';
   abrirModal('foto-modal');
 }
@@ -222,7 +223,7 @@ function excluirCorrecao(id) {
 document.getElementById('corr-busca').addEventListener('input', desenharCorrigidos);
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fecharModal('foto-modal'); } });
 carregarCorrigidos();
-setInterval(carregarCorrigidos, 6000);
+setInterval(function () { if (!document.hidden) carregarCorrigidos(); }, 20000);
 var CSRF = '{{ csrf_token() }}';
 
 function abrirUpload() { document.getElementById('modal-upload').style.display = 'flex'; }
@@ -336,7 +337,7 @@ function atualizar() {
 }
 
 atualizar();
-setInterval(atualizar, 5000);
+setInterval(function () { if (!document.hidden) atualizar(); }, 10000);
 
 </script>
 @endpush
