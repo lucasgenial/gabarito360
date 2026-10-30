@@ -38,10 +38,15 @@ class LeadController extends Controller
             'mensagem'           => 'nullable|string|max:2000',
         ]);
 
-        $this->api->post('/v1/leads', $request->only([
+        $resposta = $this->api->post('/v1/leads', $request->only([
             'plano_id', 'nome', 'email', 'telefone',
             'instituicao', 'cargo', 'licencas_estimadas', 'mensagem',
         ]));
+
+        // Sem isto a mensagem se perde em silêncio e a pessoa vê "enviado"
+        if ($resposta->failed()) {
+            return back()->withInput()->withErrors(['lead' => $resposta->json('message') ?? 'Não foi possível enviar agora. Tente de novo.']);
+        }
 
         return redirect()->route('leads.sucesso');
     }

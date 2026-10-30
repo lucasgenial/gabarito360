@@ -36,7 +36,7 @@ class HomeController extends Controller
         try {
             $resposta = $this->api->get('/v1/planos');
             $planos   = collect($resposta['data'] ?? [])
-                ->filter(fn ($p) => $p['modo'] === 'autoatendimento' && $p['ativo'])
+                ->filter(fn ($p) => $p['modo'] === 'autoatendimento' && ($p['ativo'] ?? true))
                 ->values()
                 ->all();
         } catch (\Throwable) {
