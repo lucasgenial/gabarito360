@@ -29,9 +29,12 @@
     <h1 class="page-title">{{ $prova['titulo'] }}</h1>
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ implode(' · ', $prova['turmas'] ?? []) }}{{ $prova['data_aplicacao'] ? ' · aplicada em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }} · {{ $kpis['cartoes_lidos'] }}/{{ $kpis['cartoes_total'] }} cartões corrigidos</p>
   </div>
-  <span class="badge {{ $prova['status'] === 'corrigida' ? 'badge-success' : 'badge-info' }} badge-dot">
-    {{ ['rascunho'=>'Rascunho','publicada'=>'Publicada','em_correcao'=>'Em correção','corrigida'=>'Corrigida'][$prova['status']] ?? $prova['status'] }}
-  </span>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button class="btn btn-secondary no-print" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <span class="badge {{ $prova['status'] === 'corrigida' ? 'badge-success' : 'badge-info' }} badge-dot">
+      {{ ['rascunho'=>'Rascunho','publicada'=>'Publicada','em_correcao'=>'Em correção','corrigida'=>'Corrigida'][$prova['status']] ?? $prova['status'] }}
+    </span>
+  </div>
 </div>
 
 <div class="kpi-grid">
@@ -63,8 +66,7 @@
 
 <div class="result-head">
   <div class="card card-pad">
-    <h3 style="font-size:16px;margin-bottom:6px;">Aproveitamento por aluno</h3>
-    <p class="field-help">A análise de acertos por tema/assunto será disponibilizada em uma versão futura, quando as questões puderem ser classificadas por tema no cadastro da prova.</p>
+    @include('relatorios._distribuicao-notas', ['alunos' => $alunos, 'notaMaxima' => $prova['nota_maxima']])
   </div>
   <div class="card card-pad">
     <h3 style="font-size:16px;margin-bottom:6px;text-align:center;">Aproveitamento médio</h3>
@@ -74,6 +76,8 @@
     <p style="text-align:center;color:var(--muted);font-size:14px;margin-top:8px;">Nota média {{ number_format($kpis['media'], 1, ',', '.') }} de {{ number_format($prova['nota_maxima'], 1, ',', '.') }} · meta da rede {{ number_format($kpis['meta_rede'], 1, ',', '.') }}</p>
   </div>
 </div>
+
+@include('relatorios._analise-questoes', ['questoes' => $questoes ?? []])
 
 <div class="card" style="margin-top:20px;overflow:hidden;">
   <div class="card-pad" style="padding-bottom:0;">
