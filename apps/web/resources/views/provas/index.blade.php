@@ -122,7 +122,7 @@
             @php $prog = $p['progresso'] ?? ['tipo' => 'nenhum']; @endphp
             @if($prog['tipo'] === 'media')
               @php
-                $cor = $prog['media'] === null ? 'var(--muted)' : ($prog['media'] >= 7 ? 'var(--success)' : ($prog['media'] >= 5 ? 'var(--warn-fg)' : 'var(--danger)'));
+                $cor = $prog['media'] === null ? 'var(--muted)' : ($prog['media'] >= 7 ? 'var(--success)' : ($prog['media'] >= 5 ? 'var(--warn)' : 'var(--danger)'));
                 $pct = $prog['media'] !== null ? min(100, $prog['media'] * 10) : 0;
               @endphp
               <div style="display:flex;align-items:center;">
