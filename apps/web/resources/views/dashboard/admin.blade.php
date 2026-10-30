@@ -4,32 +4,21 @@
 
 @push('styles')
 <style>
-  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px; }
-  .notice { margin-top:20px; padding:14px 18px; border:1px solid var(--accent); background:var(--accent-light); color:var(--accent-dark); border-radius:var(--radius-md); font-weight:700; }
-  .main-grid { display:grid; grid-template-columns:1.8fr 1fr; gap:20px; margin-top:20px; }
   .chart-head, .section-head { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:10px; }
   .alert-list { display:grid; gap:12px; }
   .alert-item { display:flex; gap:12px; padding:14px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface-2); }
   .alert-ico { width:40px; height:40px; display:grid; place-items:center; border-radius:10px; flex-shrink:0; background:var(--warn-light); color:var(--warn-fg); }
   .alert-item strong { display:block; font-size:14px; }
   .alert-item span { color:var(--muted); font-size:13px; }
-  .table-card { margin-top:20px; overflow:hidden; }
-  .quick-actions { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:20px; }
-  .qa { display:flex; flex-direction:column; gap:10px; padding:18px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface); transition:border-color .15s, box-shadow .15s; text-decoration:none; }
-  .qa:hover { border-color:var(--accent); box-shadow:var(--shadow-sm); }
-  .qa-ico { width:40px; height:40px; display:grid; place-items:center; border-radius:10px; background:var(--accent-light); color:var(--accent-dark); }
-  .qa b { font-size:15px; color:var(--fg); }
-  .qa span { font-size:13px; color:var(--muted); }
+  .table-card { margin-top:20px; overflow-x:auto; }
   .status-cell { white-space:nowrap; }
   .bar-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
   .bar-label { font-size:13px; min-width:160px; color:var(--fg); }
   .bar-track { flex:1; height:10px; background:var(--surface-2); border-radius:99px; overflow:hidden; }
   .bar-fill { height:100%; border-radius:99px; background:var(--accent); transition:width .4s; }
-  .bar-fill.warn { background:#ffcd07; }
-  .bar-fill.danger { background:#e52207; }
-  .bar-val { font-size:13px; font-weight:600; min-width:36px; text-align:right; font-family:var(--mono); color:var(--fg); }
-  @media (max-width:1080px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .main-grid,.quick-actions{grid-template-columns:1fr 1fr;} }
-  @media (max-width:720px){ .main-grid,.quick-actions{grid-template-columns:1fr;} .kpi-grid{grid-template-columns:1fr;} }
+  .bar-fill.warn { background:var(--warn); }
+  .bar-fill.danger { background:var(--danger); }
+  .bar-val { font-size:13px; font-weight:600; min-width:36px; text-align:right; color:var(--fg); }
 </style>
 @endpush
 
@@ -65,16 +54,11 @@
   $maxMedia = $top5 ? collect($top5)->max('media') : 10;
 @endphp
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <div class="eyebrow">Visão da rede</div>
-    <h1 class="page-title">Painel administrativo</h1>
-    <p class="page-sub">{{ $nome }} · Administrador · {{ $nomeRede }} · acompanhamento consolidado do período letivo {{ now()->year }}</p>
-  </div>
-  <a href="{{ route('relatorios.rede') }}" class="btn btn-primary">📈 Relatório da rede</a>
-</div>
+<x-pagina chamada="Visão da rede" titulo="Painel administrativo" subtitulo="{{ $nome }} · Administrador · {{ $nomeRede }} · período letivo {{ now()->year }}">
+  <a href="{{ route('relatorios.rede') }}" class="btn btn-primary"><x-icone nome="grafico" /> Relatório da rede</a>
+</x-pagina>
 
-<div class="notice">Sistema de Avaliação — {{ $redesAdm->pluck('nome')->implode(' · ') ?: 'Rede de ensino' }} — Período Letivo {{ now()->year }}</div>
+<x-aviso tipo="info">Sistema de Avaliação — {{ $redesAdm->pluck('nome')->implode(' · ') ?: 'Rede de ensino' }} — Período Letivo {{ now()->year }}</x-aviso>
 
 {{-- KPIs --}}
 <div class="kpi-grid">
@@ -122,7 +106,7 @@
         <div class="eyebrow">Status da rede</div>
         <h3 style="font-size:18px;">Desempenho médio por escola</h3>
       </div>
-      <span class="badge badge-info">Top 5 da última consolidação</span>
+      <span class="badge badge-info">5 melhores da última consolidação</span>
     </div>
 
     @if(count($top5))
@@ -203,8 +187,8 @@
       @endif
 
       @if(!$alertas || $totalAlertas === 0)
-      <div class="alert-item" style="border-color:var(--success-fg,#168821);background:var(--success-light,#e3f5e1);">
-        <div class="alert-ico" style="background:var(--success-light,#e3f5e1);color:var(--success-fg,#168821);">
+      <div class="alert-item" style="border-color:var(--success-fg);background:var(--success-light);">
+        <div class="alert-ico" style="background:var(--success-light);color:var(--success-fg);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div>

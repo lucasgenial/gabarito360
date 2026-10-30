@@ -6,10 +6,7 @@
 <style>
   .school-banner { margin-top:20px; padding:20px 24px; border:1px solid var(--accent); background:var(--accent-light); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; }
   .school-meta { color:var(--accent-dark); font-weight:700; margin-top:4px; font-size:14px; }
-  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px; }
-  .content-grid { display:grid; grid-template-columns:1.7fr 1fr; gap:20px; margin-top:20px; }
-  .table-wrap { overflow:hidden; }
-  .team-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px; }
+  .team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:12px; margin-top:14px; }
   .person-card { display:flex; align-items:center; gap:12px; padding:14px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface-2); }
   .person-card .avatar-mini { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:14px; background:var(--accent-light); color:var(--accent-dark); flex-shrink:0; }
   .person-card strong { display:block; font-size:14px; }
@@ -18,16 +15,6 @@
   .list-item { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding:14px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface-2); }
   .list-item strong { display:block; font-size:14px; }
   .list-item span { color:var(--muted); font-size:13px; }
-  .quick-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px; }
-  .qa { display:flex; flex-direction:column; gap:10px; padding:18px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface); transition:border-color .15s, box-shadow .15s; text-decoration:none; }
-  .qa:hover { border-color:var(--accent); box-shadow:var(--shadow-sm); }
-  .qa-ico { width:40px; height:40px; display:grid; place-items:center; border-radius:10px; background:var(--accent-light); color:var(--accent-dark); }
-  .qa b { font-size:15px; color:var(--fg); }
-  .qa span { font-size:13px; color:var(--muted); }
-  .side-stack { display:grid; gap:20px; }
-  @media (max-width:1080px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .content-grid{grid-template-columns:1fr;} .team-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:1200px){ .content-grid{grid-template-columns:1fr;} }
-  @media (max-width:720px){ .kpi-grid,.quick-actions{grid-template-columns:1fr;} .team-grid{grid-template-columns:1fr 1fr;} }
 </style>
 @endpush
 
@@ -77,14 +64,9 @@
   ];
 @endphp
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <div class="eyebrow">Gestão escolar</div>
-    <h1 class="page-title">Painel {{ $nomeEscola }}</h1>
-    <p class="page-sub">{{ $nome }} · acompanhamento pedagógico da unidade · período letivo {{ now()->year }}</p>
-  </div>
+<x-pagina chamada="Gestão escolar" titulo="Painel {{ $nomeEscola }}" subtitulo="{{ $nome }} · acompanhamento pedagógico da unidade · período letivo {{ now()->year }}">
   <a href="{{ route('turmas.index') }}" class="btn btn-primary">Ver turmas ativas</a>
-</div>
+</x-pagina>
 
 {{-- Banner da escola --}}
 @if($escola)

@@ -4,37 +4,25 @@
 
 @push('styles')
 <style>
-  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px; }
-  .main-grid { display:grid; grid-template-columns:1.8fr 1fr; gap:20px; margin-top:20px; }
-  .side-stack { display:grid; gap:20px; }
-  .section-title { font-size:17px; margin-bottom:14px; font-weight:700; }
   .proof-actions { display:flex; flex-wrap:wrap; gap:8px; }
   .proof-actions .btn { padding:6px 10px; font-size:12px; }
-  .ranking-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .ranking-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr)); gap:16px; }
   .rank-list { list-style:none; padding:0; margin:0; }
   .rank-list li { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface); }
   .rank-list li + li { margin-top:10px; }
   .rank-pos { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; background:var(--surface-2); color:var(--accent-dark); font-size:12px; font-weight:700; }
-  .rank-pos.danger { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); }
-  .rank-pos.warn { background:var(--warn-light,#fff5c2); color:var(--warn-fg,#b06800); }
+  .rank-pos.danger { background:var(--danger-light); color:var(--danger); }
+  .rank-pos.warn { background:var(--warn-light); color:var(--warn-fg); }
   .student-line { display:flex; align-items:center; gap:10px; min-width:0; }
   .student-line b { font-size:14px; display:block; }
   .student-line span { font-size:12px; color:var(--muted); }
-  .attention-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .attention-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr)); gap:14px; }
   .attention-grid article { padding:16px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface); }
   .student-card-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .student-avatar { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; background:var(--accent-light); color:var(--accent-dark); font-weight:700; font-size:14px; }
   .trend { font-size:13px; font-weight:700; }
-  .trend.down { color:var(--danger,#e52207); }
-  .trend.flat { color:var(--warn-fg,#b06800); }
-  .quick-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px; }
-  .qa { display:flex; flex-direction:column; gap:12px; padding:18px; border-radius:var(--radius-lg); border:1px solid var(--border-soft); background:var(--surface); text-decoration:none; }
-  .qa:hover { border-color:var(--accent); box-shadow:var(--shadow-sm); }
-  .qa-ico { width:42px; height:42px; border-radius:10px; display:grid; place-items:center; background:var(--accent-light); color:var(--accent-dark); }
-  .qa b { color:var(--fg); font-size:15px; }
-  .qa span { color:var(--muted); font-size:13px; }
-  @media (max-width:1100px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .main-grid,.ranking-grid{grid-template-columns:1fr;} .attention-grid{grid-template-columns:1fr 1fr;} }
-  @media (max-width:640px){ .kpi-grid,.quick-actions,.attention-grid{grid-template-columns:1fr;} }
+  .trend.down { color:var(--danger); }
+  .trend.flat { color:var(--warn-fg); }
 </style>
 @endpush
 
@@ -73,20 +61,14 @@
   ];
 @endphp
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <div class="eyebrow">Docência</div>
-    <h1 class="page-title">Bom dia, {{ $primeiroNome }} 👋</h1>
-    <p class="page-sub">Suas turmas
-      @if($prof && $prof['disciplina']) · {{ $prof['disciplina'] }}@endif
-      @if($prof && $prof['total_turmas']) · {{ $prof['total_turmas'] }} {{ $prof['total_turmas'] == 1 ? 'turma ativa' : 'turmas ativas' }}@endif
-    </p>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <a href="{{ route('correcao.index') }}" class="btn btn-primary">📷 Corrigir cartões</a>
-    @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-secondary">+ Nova prova</a>@endpode
-  </div>
-</div>
+@php
+  $subProf = collect(['Suas turmas', $prof['disciplina'] ?? null,
+    !empty($prof['total_turmas']) ? $prof['total_turmas'] . ($prof['total_turmas'] == 1 ? ' turma ativa' : ' turmas ativas') : null])->filter()->implode(' · ');
+@endphp
+<x-pagina chamada="Docência" titulo="{{ \App\Support\Acesso::saudacao() }}, {{ $primeiroNome }}" subtitulo="{{ $subProf }}">
+  <a href="{{ route('correcao.index') }}" class="btn btn-primary"><x-icone nome="camera" /> Corrigir cartões</a>
+  @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-secondary">+ Nova prova</a>@endpode
+</x-pagina>
 
 {{-- KPIs --}}
 <div class="kpi-grid">
@@ -97,10 +79,10 @@
   </div>
   <div class="card kpi">
     <div class="kpi-label">Cartões p/ corrigir</div>
-    <div class="kpi-value" style="{{ ($kpis['cartoes_corrigir'] ?? 0) > 0 ? 'color:var(--warn-fg,#b06800)' : '' }}">
+    <div class="kpi-value" style="{{ ($kpis['cartoes_corrigir'] ?? 0) > 0 ? 'color:var(--warn-fg)' : '' }}">
       {{ $kpis['cartoes_corrigir'] ?? '—' }}
     </div>
-    <div class="kpi-trend" style="{{ ($kpis['cartoes_corrigir'] ?? 0) > 0 ? 'color:var(--warn-fg,#b06800)' : '' }}">
+    <div class="kpi-trend" style="{{ ($kpis['cartoes_corrigir'] ?? 0) > 0 ? 'color:var(--warn-fg)' : '' }}">
       {{ ($kpis['cartoes_corrigir'] ?? 0) > 0 ? '● leituras pendentes' : '● tudo corrigido' }}
     </div>
   </div>
@@ -142,7 +124,7 @@
       <h2 class="section-title">Ranking de desempenho da turma</h2>
       <div class="ranking-grid">
         <div>
-          <div class="eyebrow" style="margin-bottom:10px;">Top 5</div>
+          <div class="eyebrow" style="margin-bottom:10px;">Maiores notas</div>
           <ul class="rank-list">
             @forelse($top5 as $i => $a)
               <li>
@@ -161,7 +143,7 @@
           </ul>
         </div>
         <div>
-          <div class="eyebrow" style="margin-bottom:10px;color:var(--danger,#e52207);">Bottom 3</div>
+          <div class="eyebrow" style="margin-bottom:10px;color:var(--danger);">Menores notas</div>
           <ul class="rank-list">
             @forelse($bottom3 as $i => $a)
               @php $cls = $a['media'] < 5 ? 'danger' : 'warn'; @endphp
@@ -209,7 +191,7 @@
         </div>
       @else
         <div style="color:var(--muted);font-size:13px;text-align:center;padding:16px 0;">
-          Todos os alunos estão acima da média.
+          Nenhum aluno em atenção no momento.
         </div>
       @endif
     </div>
