@@ -73,6 +73,7 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}/cartoes',        [CartaoController::class, 'index'])->middleware('permissao:correcao.acompanhar,cartao.enviar');
             Route::get('{id}/cartoes/status', [CartaoController::class, 'status'])->middleware('permissao:correcao.acompanhar,cartao.enviar');
             Route::get('{id}/cartoes/pdf',    [CartaoController::class, 'pdf'])->middleware('permissao:cartao.imprimir');
+            Route::get('{id}/revisao',           [CartaoController::class, 'revisao'])->middleware('permissao:correcao.acompanhar');
             Route::post('{id}/correcao/fechar',  [CartaoController::class, 'fecharCorrecao'])->middleware('permissao:correcao.fechar');
             Route::post('{id}/correcao/reabrir', [CartaoController::class, 'reabrirCorrecao'])->middleware('permissao:correcao.reabrir');
             Route::post('{id}/cartoes',       [CartaoController::class, 'store'])->middleware('permissao:cartao.enviar');

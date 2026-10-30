@@ -229,6 +229,37 @@ class PerfisTest extends TestCase
         $this->assertNull(DB::table('provas')->where('id', $pa)->value('correcao_fechada_em'));
     }
 
+    public function test_revisao_lista_a_fila_e_aceita_em_branco_e_anulada(): void
+    {
+        $cartao = DB::table('cartoes')->insertGetId(['prova_id' => $this->id['pa'], 'status' => 'ambiguo']);
+        foreach ([1, 2] as $q) {
+            DB::table('cartao_respostas')->insert(['cartao_id' => $cartao, 'numero_questao' => $q, 'ambigua' => true,
+                'alternativas_detectadas' => json_encode([['alternativa' => 'B', 'confianca' => 0.6]])]);
+        }
+
+        $this->como('professor');
+        $fila = $this->getJson("/api/v1/provas/{$this->id['pa']}/revisao")->assertOk()->json('data.itens');
+        $this->assertCount(2, $fila);
+        $this->assertSame(['B'], $fila[0]['detectadas']);
+
+        $resolver = "/api/v1/cartoes/{$cartao}/resolver-ambiguidade";
+        $this->postJson($resolver, ['numero_questao' => 1, 'alternativa' => 'BRANCO'])->assertOk()->assertJsonPath('data.cartao_status', 'ambiguo');
+        $this->postJson($resolver, ['numero_questao' => 2, 'alternativa' => 'ANULADA'])->assertOk()->assertJsonPath('data.cartao_status', 'lido');
+
+        $this->assertSame(0, DB::table('cartao_respostas')->where('cartao_id', $cartao)->whereNotNull('alternativa')->count());
+        $this->assertSame(['-', 'N'], DB::table('ambiguidade_logs')->orderBy('id')->pluck('alternativa_escolhida')->all());
+        $this->assertCount(0, $this->getJson("/api/v1/provas/{$this->id['pa']}/revisao")->json('data.itens'));
+    }
+
+    public function test_recorte_segue_a_geometria_do_cartao(): void
+    {
+        // 45 questões e 5 alternativas: questão 1 com a última bolinha em x = 69,67 mm e y = 116 mm
+        $r = \App\Services\Omr\ImagensCartao::recorte(1, 45, 5);
+        $this->assertEqualsWithDelta((69.6667 - 32 - 11) / 210, $r['x'], 0.0001);
+        $this->assertEqualsWithDelta(111 / 297, $r['y'], 0.0001);
+        $this->assertEqualsWithDelta(48 / 210, $r['largura'], 0.0001);
+    }
+
     public function test_login_devolve_as_permissoes_efetivas(): void
     {
         $r = $this->postJson('/api/v1/auth/login', ['email' => 'professor@teste.dev', 'password' => 'x'])->assertOk();
