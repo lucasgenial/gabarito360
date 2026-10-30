@@ -6,6 +6,7 @@ use App\Models\Cartao;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
 use App\Services\Omr\OmrDriverInterface;
+use App\Services\Omr\OmrIdentificacaoInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -33,6 +34,11 @@ class ProcessarCartaoJob implements ShouldQueue
 
         $caminho = Storage::disk('public')->path($cartao->imagem_url);
         $leituras = $driver->processar($caminho, $prova->num_questoes, $prova->num_alternativas);
+
+        // Identificação pelo QR do cartão nativo (aluno e língua estrangeira)
+        if ($driver instanceof OmrIdentificacaoInterface) {
+            $this->aplicarIdentificacao($cartao, $driver->identificacao());
+        }
 
         DB::table('cartao_respostas')->where('cartao_id', $cartao->id)->delete();
 
@@ -84,5 +90,32 @@ class ProcessarCartaoJob implements ShouldQueue
         }
 
         AtualizadorStatusProva::atualizar($prova);
+    }
+
+    private function aplicarIdentificacao(Cartao $cartao, array $id): void
+    {
+        $dados = [];
+
+        if (!empty($id['lingua']) && $cartao->prova->opcao_lingua) {
+            $dados['lingua'] = $id['lingua'];
+        }
+
+        // Só vincula o aluno do QR se o cartão é desta prova e o aluno está numa turma dela.
+        $alunoQr = (int) ($id['aluno_id'] ?? 0);
+        if (!$cartao->aluno_id && $alunoQr && (int) ($id['prova_id'] ?? 0) === (int) $cartao->prova_id) {
+            $pertence = DB::table('alunos')
+                ->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
+                ->where('prova_turmas.prova_id', $cartao->prova_id)
+                ->where('alunos.id', $alunoQr)
+                ->exists();
+            if ($pertence) {
+                $dados['aluno_id'] = $alunoQr;
+            }
+        }
+
+        if ($dados) {
+            $cartao->update($dados);
+            $cartao->refresh();
+        }
     }
 }

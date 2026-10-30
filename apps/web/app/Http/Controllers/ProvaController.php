@@ -51,7 +51,7 @@ class ProvaController extends Controller
         $payload = $request->only(
             'escola_id','titulo','disciplina','serie','num_questoes',
             'num_alternativas','nota_maxima','tipo_pontuacao',
-            'anular_se_todas','gerar_cartao_pdf','data_aplicacao'
+            'anular_se_todas','opcao_lingua','gerar_cartao_pdf','data_aplicacao'
         );
 
         if ($request->has('turma_ids')) {
@@ -90,7 +90,7 @@ class ProvaController extends Controller
     {
         $payload = $request->only(
             'titulo','disciplina','serie','num_questoes','num_alternativas',
-            'nota_maxima','tipo_pontuacao','anular_se_todas','gerar_cartao_pdf','data_aplicacao'
+            'nota_maxima','tipo_pontuacao','anular_se_todas','opcao_lingua','gerar_cartao_pdf','data_aplicacao'
         );
 
         if ($request->has('turma_ids')) {

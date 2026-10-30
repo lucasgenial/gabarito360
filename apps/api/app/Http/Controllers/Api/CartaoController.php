@@ -9,6 +9,7 @@ use App\Models\Cartao;
 use App\Models\Prova;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
+use App\Services\Omr\GeradorCartoes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -113,7 +114,10 @@ class CartaoController extends Controller
             'lidos'        => $lidos,
             'pendentes'    => $pendentes,
             'ambiguos'     => $ambiguos,
-            'concluida'    => $total > 0 && $lidos === $total,
+            'concluida'    => $prova->fresh()->status === 'corrigida',
+            'esperados'    => DB::table('alunos')
+                ->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
+                ->where('prova_turmas.prova_id', $provaId)->where('alunos.ativo', true)->count(),
             'ambiguidades' => $ambiguosLista,
             'recentes'     => $recentes,
             'prova_status' => $prova->status,
@@ -127,7 +131,7 @@ class CartaoController extends Controller
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        if (!in_array($prova->status, ['publicada', 'em_correcao'], true)) {
+        if (!in_array($prova->status, ['publicada', 'em_correcao', 'corrigida'], true)) {
             return ApiResponse::error('A prova precisa estar publicada para receber cartões.', [], 422);
         }
 
@@ -147,7 +151,49 @@ class CartaoController extends Controller
 
         ProcessarCartaoJob::dispatch($cartao->id);
 
-        return ApiResponse::success(['id' => $cartao->id, 'status' => 'processando'], null, 202);
+        // Com fila síncrona o cartão já foi lido: devolve o resultado para o celular.
+        $cartao->refresh()->load('aluno:id,nome');
+        $nota = DB::table('notas')->where('cartao_id', $cartao->id)->first();
+
+        return ApiResponse::success([
+            'id'         => $cartao->id,
+            'status'     => $cartao->status === 'pendente' ? 'processando' : $cartao->status,
+            'aluno_id'   => $cartao->aluno_id,
+            'aluno_nome' => $cartao->aluno?->nome,
+            'lingua'     => $cartao->lingua,
+            'acertos'    => $nota->acertos ?? null,
+            'total'      => $nota->total_questoes ?? null,
+            'nota_final' => $nota->nota_final ?? null,
+            'ambiguas'   => DB::table('cartao_respostas')->where('cartao_id', $cartao->id)->where('ambigua', true)->count(),
+        ], null, 202);
+    }
+
+    /**
+     * PDF dos cartões-resposta nativos (um por aluno + brancos), com QR de identificação.
+     * Exceção documentada à regra "API só JSON": é download de arquivo, não tela.
+     */
+    public function pdf(Request $request, int $provaId, GeradorCartoes $gerador)
+    {
+        $prova = $this->encontrarProva($request, $provaId);
+        if (!$prova) {
+            return ApiResponse::notFound('Prova não encontrada.');
+        }
+
+        $data = $request->validate([
+            'turma_id' => 'sometimes|integer|nullable',
+            'brancos'  => 'sometimes|integer|min:0|max:200',
+        ]);
+
+        try {
+            $arquivo = $gerador->gerar($prova, $data['turma_id'] ?? null, (int) ($data['brancos'] ?? 0));
+        } catch (\Throwable $e) {
+            report($e);
+            return ApiResponse::error('Não foi possível gerar os cartões: ' . $e->getMessage(), [], 500);
+        }
+
+        $nome = 'cartoes-' . \Illuminate\Support\Str::slug($prova->titulo . ' ' . $prova->disciplina) . '.pdf';
+
+        return response()->download($arquivo, $nome, ['Content-Type' => 'application/pdf'])->deleteFileAfterSend();
     }
 
     public function show(Request $request, int $id): JsonResponse

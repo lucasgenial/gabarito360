@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function () {
             // Cartões / OMR (MP-021)
             Route::get('{id}/cartoes',        [CartaoController::class, 'index']);
             Route::get('{id}/cartoes/status', [CartaoController::class, 'status']);
+            Route::get('{id}/cartoes/pdf',    [CartaoController::class, 'pdf']);
             Route::post('{id}/cartoes',       [CartaoController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor,aplicador');
         });
 

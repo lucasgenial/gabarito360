@@ -162,11 +162,13 @@
               <div style="font-weight:600;font-size:13px;">{{ $t['nome'] }}</div>
               <div style="font-size:12px;color:var(--muted);">{{ $t['serie'] }}</div>
             </div>
-            @if($prova['status'] === 'corrigida')
+            <a href="{{ route('correcao.pdf', $prova['id']) }}?turma_id={{ $t['id'] }}" target="_blank" class="btn btn-sm btn-ghost" title="Cartões-resposta com nome e QR de cada aluno">🖨 Cartões</a>
+            @if(in_array($prova['status'], ['em_correcao', 'corrigida'], true))
               <a href="{{ route('relatorios.turmaProva', [$t['id'], $prova['id']]) }}" class="btn btn-sm btn-ghost">Relatório</a>
             @endif
           </div>
         @endforeach
+        <a href="{{ route('correcao.pdf', $prova['id']) }}?brancos=5" target="_blank" class="btn btn-sm btn-ghost" style="margin-top:8px;">🖨 5 cartões em branco</a>
       @else
         <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">
           Nenhuma turma vinculada.<br>
