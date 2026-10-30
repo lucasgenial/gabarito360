@@ -255,3 +255,12 @@ html[data-theme="dark"] .user-menu-header { background: var(--surface-2); border
 html[data-theme="dark"] .user-menu-links a { color: var(--fg-2); }
 html[data-theme="dark"] .user-menu-links a:hover { background: var(--surface-2); }
 html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
+
+/* ---------- Impressão (relatórios e resultados) ---------- */
+@media print {
+  @page { size: A4; margin: 12mm; }
+  .govbar, .app-header, .breadcrumb, .no-print, .theme-btn { display: none !important; }
+  body { background: #fff !important; }
+  .card { box-shadow: none !important; break-inside: avoid; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
