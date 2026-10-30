@@ -1,17 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Alunos')
+@section('tela', 'tela-alunos')
 
-@push('styles')
-<style>
-  .student-av { width:36px;height:36px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0; }
-  .student-name { display:flex;align-items:center;gap:12px; }
-  .kpi-strip { display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:20px; }
-  .kpi-strip .kv { font-family:var(--font-mono);font-size:28px;font-weight:700; }
-  .kpi-strip .kl { font-size:12px;color:var(--muted);margin-top:2px; }
-  @media(max-width:600px){ .kpi-strip{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Alunos')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span><span>Alunos</span>
@@ -19,19 +10,12 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <h1 class="page-title">Alunos</h1>
-    <p class="page-sub"><b>{{ $kpis['total_alunos'] ?? 0 }}</b> aluno(s) cadastrado(s)</p>
-  </div>
+<x-pagina titulo="Alunos">
+  <x-slot:sub><b>{{ $kpis['total_alunos'] ?? 0 }}</b> aluno(s) cadastrado(s)</x-slot:sub>
   <a href="{{ route('alunos.create') }}" class="btn btn-primary">+ Cadastrar aluno</a>
-</div>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 
 {{-- KPIs --}}
 <div class="kpi-strip">
@@ -40,7 +24,7 @@
     <div class="kl">Total de alunos</div>
   </div>
   <div class="card card-pad" style="padding:16px 20px;">
-    <div class="kv" style="color:var(--success,#168821);">{{ $kpis['total_ativos'] ?? 0 }}</div>
+    <div class="kv" style="color:var(--success);">{{ $kpis['total_ativos'] ?? 0 }}</div>
     <div class="kl">Alunos ativos</div>
   </div>
 </div>
@@ -106,7 +90,7 @@
       @empty
         <tr>
           <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);">
-            <div style="font-size:36px;margin-bottom:12px;">👤</div>
+            <div class="icone-grande"><x-icone nome="aluno" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhum aluno encontrado</div>
             <p>Cadastre o primeiro aluno usando o botão "+ Cadastrar aluno".</p>
           </td>

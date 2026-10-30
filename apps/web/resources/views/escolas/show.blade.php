@@ -1,105 +1,23 @@
 @extends('layouts.app')
 
-@section('title', $escola['nome'])
+@section('tela', 'tela-escola')
 
-@push('styles')
-<style>
-  /* Hero */
-  .escola-hero { background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dark,#0c326f) 100%); color:#fff; padding:32px 0 0; }
-  .escola-hero-inner { display:flex; align-items:flex-start; gap:20px; }
-  .escola-hero-icon { width:60px;height:60px;background:rgba(255,255,255,.18);border-radius:var(--radius-md);display:grid;place-items:center;font-size:30px;flex-shrink:0;border:1.5px solid rgba(255,255,255,.3); }
-  .escola-hero-info { flex:1;min-width:0; }
-  .escola-hero-info h1 { font-size:22px;font-weight:800;line-height:1.2; }
-  .escola-hero-meta { display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:13px;opacity:.88; }
-  .escola-hero-meta span { display:flex;align-items:center;gap:5px; }
-  .hero-actions { display:flex;gap:8px;margin-top:16px;flex-wrap:wrap; }
-  .btn-hero { background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.35);font-size:13px;padding:7px 16px;border-radius:var(--radius-sm);cursor:pointer;font-weight:600;text-decoration:none;transition:background .15s;display:inline-flex;align-items:center;gap:6px; }
-  .btn-hero:hover { background:rgba(255,255,255,.32);color:#fff;text-decoration:none; }
-  .btn-hero-solid { background:#fff;color:var(--accent-dark,#0c326f);border:1.5px solid #fff; }
-  .btn-hero-solid:hover { background:rgba(255,255,255,.88); }
-  /* Breadcrumb no hero */
-  .hero-breadcrumb { display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,.7);padding-bottom:6px; }
-  .hero-breadcrumb a { color:rgba(255,255,255,.8);text-decoration:none; }
-  .hero-breadcrumb a:hover { color:#fff; }
-  /* Tabs no hero */
-  .tabs-row { display:flex;gap:0;padding:0;margin-top:20px; }
-  .tab-btn { padding:10px 20px;font-size:14px;font-weight:600;color:rgba(255,255,255,.7);background:transparent;border:none;border-bottom:3px solid transparent;cursor:pointer;transition:color .15s,border-color .15s;white-space:nowrap; }
-  .tab-btn.active { color:#fff;border-bottom-color:#fff; }
-  .tab-btn:hover:not(.active) { color:rgba(255,255,255,.9); }
-  /* Panels */
-  .tab-panel { display:none; }
-  .tab-panel.active { display:block; }
-  /* KPIs */
-  .kpi-strip { display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:24px 0; }
-  .kpi-card { background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow-sm); }
-  .kpi-label { font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em; }
-  .kpi-value { font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--accent);margin:4px 0 2px; }
-  .kpi-delta { font-size:12px; }
-  .kpi-delta.up { color:var(--success,#168821); }
-  .kpi-delta.neutral { color:var(--muted); }
-  /* Detail grid */
-  .detail-grid { display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:20px; }
-  /* Info card */
-  .info-card { background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:20px 22px;box-shadow:var(--shadow-sm); }
-  .info-card h3 { font-size:15px;font-weight:700;margin-bottom:14px;color:var(--fg); }
-  .info-row { display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13px; }
-  .info-row:last-child { border:0; }
-  .info-row .lbl { color:var(--muted);min-width:110px;flex-shrink:0;font-weight:500; }
-  .info-row .val { color:var(--fg);font-weight:500; }
-  /* Bar chart */
-  .bar-chart { display:flex;flex-direction:column;gap:10px; }
-  .bar-row { display:flex;align-items:center;gap:10px;font-size:13px; }
-  .bar-label { min-width:90px;color:var(--muted);font-size:12px;text-align:right; }
-  .bar-track { flex:1;height:10px;background:var(--border-soft);border-radius:99px;overflow:hidden; }
-  .bar-fill { height:100%;border-radius:99px;background:var(--accent);transition:width .6s ease; }
-  .bar-val { min-width:32px;font-family:var(--font-mono);font-size:12px;color:var(--fg-2);font-weight:600; }
-  /* Sparkline */
-  .spark-labels { display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px; }
-  /* Table */
-  .data-table { width:100%;border-collapse:collapse;font-size:13px; }
-  .data-table th { text-align:left;padding:10px 12px;background:var(--surface-2,#f4f6f9);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--border); }
-  .data-table td { padding:11px 12px;border-bottom:1px solid var(--border-soft);color:var(--fg-2);vertical-align:middle; }
-  .data-table tr:last-child td { border:0; }
-  .data-table tr:hover td { background:rgba(0,0,0,.02); }
-  /* Prova row */
-  .prova-row { display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-soft); }
-  .prova-row:last-child { border:0; }
-  .prova-ico { width:36px;height:36px;border-radius:8px;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;flex-shrink:0;font-size:18px; }
-  .prova-info { flex:1;min-width:0; }
-  .prova-name { font-size:14px;font-weight:600; }
-  .prova-meta { font-size:12px;color:var(--muted);margin-top:2px; }
-  .prova-score { font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--accent); }
-  /* Team grid */
-  .team-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px; }
-  .team-card { background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between; }
-  .team-avatar { width:42px;height:42px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:700;font-size:15px;flex-shrink:0; }
-  .team-name { font-size:14px;font-weight:600; }
-  .team-role { font-size:12px;color:var(--muted);margin-top:2px; }
-  .team-section-label { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:12px; }
-  /* Donut */
-  .donut-wrap { display:flex;align-items:center;gap:18px; }
-  .donut-legend { display:flex;flex-direction:column;gap:8px;font-size:13px; }
-  .donut-item { display:flex;align-items:center;gap:8px; }
-  .donut-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
-  @media(max-width:900px){ .kpi-strip{grid-template-columns:repeat(3,1fr);} .detail-grid{grid-template-columns:1fr;} }
-  @media(max-width:560px){ .kpi-strip{grid-template-columns:repeat(2,1fr);} .tabs-row{overflow-x:auto;} }
-</style>
-@endpush
+@section('title', $escola['nome'])
 
 {{-- Hero (fora do layout padrão de breadcrumb/content) --}}
 @section('breadcrumb')@endsection
 
 @section('content')
 {{-- Hero --}}
-<div class="escola-hero" style="margin:-24px -var(--container-pad,0) 0;padding-left:var(--container-pad,24px);padding-right:var(--container-pad,24px);">
-  <div style="max-width:var(--content-max,1200px);margin:0 auto;">
+<div class="escola-hero">
+  <div>
     <div class="hero-breadcrumb">
       <a href="{{ route('escolas.index') }}">Escolas</a>
       <span style="opacity:.5;">/</span>
       <span>{{ $escola['nome'] }}</span>
     </div>
     <div class="escola-hero-inner">
-      <div class="escola-hero-icon">🏫</div>
+      <div class="escola-hero-icon"><x-icone nome="escola" /></div>
       <div class="escola-hero-info">
         <h1>{{ $escola['nome'] }}</h1>
         <div class="escola-hero-meta">
@@ -150,16 +68,8 @@
   </div>
 </div>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:20px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:20px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 {{-- ═══ TAB: Visão Geral ═══════════════════════════════════════ --}}
 <div class="tab-panel active" id="tab-visao-geral">
@@ -228,7 +138,7 @@
             @endif
             @endpode
             @pode('resultado.ver')
-            <a class="btn btn-primary btn-sm" style="margin-top:6px;" href="{{ route('relatorios.escola', $escola['id']) }}">📈 Relatório da escola</a>
+            <a class="btn btn-primary btn-sm" style="margin-top:6px;" href="{{ route('relatorios.escola', $escola['id']) }}"><x-icone nome="grafico" /> Relatório da escola</a>
             @endpode
           </div>
         </div>
@@ -382,14 +292,14 @@
       </div>
       @else
       <div class="info-card" style="text-align:center;padding:32px 20px;">
-        <div style="font-size:36px;margin-bottom:12px;">👥</div>
+        <div class="icone-grande"><x-icone nome="equipe" /></div>
         <div style="font-size:14px;color:var(--muted);">Nenhum membro vinculado a esta escola.</div>
         <a href="{{ route('membros.create') }}" class="btn btn-sm btn-primary" style="margin-top:14px;">Adicionar membro</a>
       </div>
       @endif
 
       <div class="info-card" style="text-align:center;padding:24px;">
-        <div style="font-size:28px;margin-bottom:10px;">⚙️</div>
+        <div class="icone-grande"><x-icone nome="ajustes" /></div>
         <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Ações rápidas</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
           <a href="{{ route('escolas.index') }}" class="btn btn-secondary btn-sm">← Voltar para escolas</a>
@@ -450,7 +360,7 @@
     </table>
     @else
     <div style="text-align:center;padding:48px 20px;color:var(--muted);">
-      <div style="font-size:40px;margin-bottom:14px;">🏫</div>
+      <div class="icone-grande"><x-icone nome="escola" /></div>
       <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma cadastrada</div>
       <p>As turmas desta escola aparecerão aqui após o cadastro no módulo de Turmas.</p>
     </div>
@@ -485,7 +395,7 @@
             $statusCfg = [
               'rascunho'    => ['cls'=>'badge-info',   'label'=>'Rascunho'],
               'publicada'   => ['cls'=>'badge-success', 'label'=>'Publicada'],
-              'em_correcao' => ['cls'=>'',              'label'=>'Em correção',  'style'=>'background:rgba(245,158,11,.15);color:#b45309;'],
+              'em_correcao' => ['cls'=>'badge-warn', 'label'=>'Em correção', 'style'=>''],
               'corrigida'   => ['cls'=>'badge-success', 'label'=>'Corrigida'],
             ];
             $sc = $statusCfg[$p['status']] ?? ['cls'=>'badge-info','label'=>$p['status']];
@@ -513,7 +423,7 @@
     </table>
     @else
     <div style="text-align:center;padding:48px 20px;color:var(--muted);">
-      <div style="font-size:40px;margin-bottom:14px;">📝</div>
+      <div class="icone-grande"><x-icone nome="prova" /></div>
       <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma prova cadastrada</div>
       <p>As provas desta escola aparecerão aqui após a criação no módulo de Provas.</p>
     </div>
@@ -563,7 +473,7 @@
     </table>
     @else
     <div style="text-align:center;padding:48px 20px;color:var(--muted);">
-      <div style="font-size:40px;margin-bottom:14px;">🎓</div>
+      <div class="icone-grande"><x-icone nome="aluno" /></div>
       <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhum aluno matriculado</div>
       <p>Os alunos desta escola aparecerão aqui após o cadastro nas turmas.</p>
     </div>
@@ -589,7 +499,7 @@
 
   @if($equipeAgrupada->isEmpty())
     <div class="info-card" style="text-align:center;padding:60px 20px;color:var(--muted);">
-      <div style="font-size:48px;margin-bottom:16px;">👥</div>
+      <div class="icone-grande"><x-icone nome="equipe" /></div>
       <h3 style="font-size:18px;font-weight:700;color:var(--fg-2);margin-bottom:8px;">Equipe vazia</h3>
       <p>Nenhum membro vinculado a esta escola ainda.</p>
       <a href="{{ route('membros.create') }}" class="btn btn-primary" style="margin-top:16px;">Adicionar primeiro membro</a>
