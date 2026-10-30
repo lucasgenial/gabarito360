@@ -82,7 +82,7 @@ img { max-width: 100%; display: block; }
 .brand .logo {
   width: 34px; height: 34px; border-radius: 8px; background: #fff;
   display: grid; place-items: center; color: var(--accent); font-weight: 900;
-  font-family: var(--font-mono); font-size: 13px;
+  font-family: var(--font-code); font-size: 13px;
 }
 .app-nav { display: flex; gap: 4px; margin-left: 12px; }
 .app-nav a {
@@ -97,6 +97,8 @@ img { max-width: 100%; display: block; }
 /* Selo de contexto (escola/rede): curto, com reticências; some quando o menu precisa do espaço */
 .header-right .badge { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
 @media (max-width: 1365px) { .header-right .badge { display: none; } }
+/* Tabela mais larga que o cartão rola por dentro dele */
+.table-wrap { overflow-x: auto; }
 /* Topo das páginas (título + ações): as ações descem de linha quando não cabem */
 .row-between { flex-wrap: wrap; }
 .row-between > div[style*="display:flex"], .row-between > div[style*="display: flex"] { flex-wrap: wrap; }
@@ -205,7 +207,7 @@ img { max-width: 100%; display: block; }
 }
 .table td { padding: 14px 16px; border-bottom: 1px solid var(--border-soft); }
 .table tbody tr:hover { background: var(--surface-2); }
-.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.num { font-family: var(--font-mono); font-variant-numeric: lining-nums tabular-nums; }
 
 /* ---------- KPI stat ---------- */
 .kpi { padding: 20px 22px; }
