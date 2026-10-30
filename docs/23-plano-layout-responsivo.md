@@ -157,5 +157,5 @@ A **L0 pode ir para produção já**, independente das decisões abaixo.
 - `diretor-painel_1280.png` — menu quebrando em duas linhas por causa do selo da escola;
 - `admin-painel_3840.png` — 4K: conteúdo em 1/3 da tela, texto pequeno, "Rede Municipal", "October", "1 , 8";
 - `visitante-login_3840.png` — login em 4K;
-- `diretor-provas-gabarito-show_375.png` — gabarito com rolagem lateral no celular;
+- `diretor-provas-gabarito-show_375.png` — gabarito com rolagem lateral no celular (captura feita com largura mínima de 500 px do Chrome sem janela e cortada em 375; a medida de 68 px de rolagem veio do navegador em 375 px real);
 - `diretor-membros-create_1920.png` — formulário em Full HD (referência de boa leitura, mas largura fixa).
