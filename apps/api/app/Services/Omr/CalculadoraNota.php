@@ -63,7 +63,11 @@ class CalculadoraNota
             $totalQuestoes++;
 
             $resposta = $respostas->get($numero);
-            if ($resposta && $resposta->alternativa === $questao->alternativa) {
+            // Prova com opção de língua: quem marcou Espanhol usa o gabarito alternativo.
+            $esperada = ($prova->opcao_lingua && $cartao->lingua === 'ESP' && !empty($questao->alternativa_espanhol))
+                ? $questao->alternativa_espanhol
+                : $questao->alternativa;
+            if ($resposta && $resposta->alternativa === $esperada) {
                 $acertos++;
             }
         }
