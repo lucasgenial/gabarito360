@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'autenticado' => \App\Http\Middleware\Autenticado::class,
         ]);
         $middleware->redirectGuestsTo('/login');
+        // Produção roda atrás do Cloudflare Tunnel (https termina no Cloudflare e chega aqui em http).
+        // Confiar no X-Forwarded-Proto faz o Laravel gerar URLs https; sem isso o navegador
+        // bloqueia formulários/fetch para http (o "Failed to fetch" no envio da foto).
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
