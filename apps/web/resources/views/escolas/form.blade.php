@@ -76,7 +76,7 @@
   <section class="sec">
     <div class="sec-head">
       <h2>1. Código INEP</h2>
-      <p>Base do Censo Escolar {{ $anoCenso ?? '' }}. Não sabe o código? Busque pelo nome da escola.</p>
+      <p>Base do Censo Escolar. Não sabe o código? Busque pelo nome da escola (e o município, se quiser).</p>
     </div>
     <div class="sec-body">
       <div class="field">
@@ -92,7 +92,7 @@
       <div class="field">
         <label for="censo-nome">Buscar pelo nome</label>
         <div class="censo-busca">
-          <input class="input" id="censo-nome" placeholder="Ex.: Eraldo Tinoco" autocomplete="off">
+          <input class="input" id="censo-nome" placeholder="Ex.: Eraldo Tinoco Porto Seguro" autocomplete="off">
           <button type="button" class="btn btn-ghost" id="btn-nome">Procurar</button>
         </div>
         <ul class="censo-res" id="censo-res" hidden></ul>
@@ -268,6 +268,18 @@
     }
     if (nucleo) { $('nucleo_id').value = nucleo; atualizarSede(); }
     var msg = '<b>Dados do Censo Escolar ' + esc(e.ano_censo) + ' preenchidos.</b> Confira e salve.';
+    // Anexo no Censo ("ANEXO - …"): vínculo de anexo e a sede, se ela já estiver cadastrada
+    if (e.tipo === 'anexo' && $('tipo')) {
+      $('tipo').value = 'anexo';
+      if (d.sede_sugerida && d.sede_sugerida.id) {
+        $('escola_sede_id').value = d.sede_sugerida.id;
+        if (d.sede_sugerida.nucleo_id) $('nucleo_id').value = d.sede_sugerida.nucleo_id;
+        msg += '<br>No Censo esta escola é <b>anexo</b> de ' + esc(d.sede_sugerida.nome) + ' — vínculo já marcado.';
+      } else if (d.sede_sugerida) {
+        msg += '<br>No Censo esta escola é <b>anexo</b> de ' + esc(d.sede_sugerida.nome) + ' (INEP ' + esc(d.sede_sugerida.inep) + '), que ainda não está cadastrada. Cadastre a sede primeiro.';
+      }
+      atualizarSede();
+    }
     if (e.orgao_regional) msg += ' Órgão regional (NTE) no Censo: <b>' + esc(e.orgao_regional) + '</b>' + (nucleo ? '' : ' — escolha o núcleo.');
     if (e.situacao_funcionamento && e.situacao_funcionamento !== 'ativa') msg += '<br>Atenção: no Censo a escola está <b>' + esc(e.situacao_funcionamento) + '</b>.';
     if (d.ja_cadastrada && String(d.ja_cadastrada.id) !== '{{ $e['id'] ?? '' }}') {

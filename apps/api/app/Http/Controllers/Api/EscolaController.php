@@ -349,12 +349,12 @@ class EscolaController extends Controller
         if (isset($data['nucleo_id']) && ($erro = $this->nucleoForaDoEscopo($request, (int) $data['nucleo_id']))) {
             return $erro;
         }
-        if ((isset($data['tipo']) || array_key_exists('escola_sede_id', $data)) && ($erro = $this->validarSede($request, $data, $escola))) {
-            return $erro;
-        }
         // Sede com anexos não pode virar anexo
         if (($data['tipo'] ?? 'sede') !== 'sede' && $escola->anexos()->exists()) {
             return ApiResponse::error('Esta escola tem anexos; ela precisa continuar como sede.', ['tipo' => ['Escola com anexos.']], 422);
+        }
+        if ((isset($data['tipo']) || array_key_exists('escola_sede_id', $data)) && ($erro = $this->validarSede($request, $data, $escola))) {
+            return $erro;
         }
 
         // INEP trocado (ex.: "PENDENTE" → código real) e achado no Censo: passa a ser do Censo
