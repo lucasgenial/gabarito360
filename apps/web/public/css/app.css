@@ -610,7 +610,16 @@ img { max-width: 100%; display: block; }
   .tela-escola-form .acoes { flex-direction: column-reverse; }
   .tela-escola-form .acoes .btn { width: 100%; }
 }
-@media print { .tela-gabarito .editor-grid { grid-template-columns: 1fr; } .tela-gabarito .sticky { position: static; } .tela-gabarito .q-grid { grid-template-columns: repeat(3, 1fr); } }
+@media print {
+  .tela-gabarito .editor-grid { grid-template-columns: 1fr; }
+  .tela-gabarito .sticky { position: static; }
+  /* A4: 3 colunas só cabem com bolhas menores */
+  .tela-gabarito .q-grid { grid-template-columns: repeat(3, 1fr); gap: 2px 10px; margin-top: 6px; }
+  .tela-gabarito .q-row { gap: 6px; padding: 2px 4px; break-inside: avoid; }
+  .tela-gabarito .q-num { width: 20px; font-size: 11px; }
+  .tela-gabarito .bubbles { gap: 3px; }
+  .tela-gabarito .bubble { width: 24px; height: 24px; font-size: 11px; border-width: 1px; }
+}
 
 /* ---------- Componentes base (resources/views/components) ---------- */
 .g-pagina { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
