@@ -26,11 +26,21 @@ deploy_api() {
     php artisan storage:link || true
 
     setup_omr
+    setup_php_upload
 
     chmod -R 775 storage bootstrap/cache
     chown -R www-data:www-data storage bootstrap/cache
 
     log "API pronta."
+}
+
+setup_php_upload() {
+    # Fotos de cartão vindas do celular passam fácil do padrão de 2 MB do PHP
+    local ini=/etc/php/8.3/fpm/conf.d/99-gabarito360.ini
+    if [ ! -f "$ini" ]; then
+        printf 'upload_max_filesize = 12M\npost_max_size = 16M\n' > "$ini"
+        systemctl reload php8.3-fpm || true
+    fi
 }
 
 setup_omr() {

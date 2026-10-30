@@ -116,8 +116,8 @@
 
 @push('scripts')
 <script>
-var STATUS_URL = '{{ route('correcao.status', $prova['id']) }}';
-var CARTOES_URL = '{{ url('cartoes') }}';
+var STATUS_URL = '{{ route('correcao.status', $prova['id'], false) }}';
+var CARTOES_URL = '/cartoes';
 var CSRF = '{{ csrf_token() }}';
 
 function abrirUpload() { document.getElementById('modal-upload').style.display = 'flex'; }
