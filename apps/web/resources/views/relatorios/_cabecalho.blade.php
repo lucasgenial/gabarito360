@@ -1,6 +1,6 @@
 {{--
   Arquivo: apps/web/resources/views/relatorios/_cabecalho.blade.php
-  Função: Cabeçalho e rodapé padrão dos relatórios impressos/PDF (A4): logo do ente
+  Função: Cabeçalho padrão (o rodapé com o número da página vem do @page no gov.css) dos relatórios impressos/PDF (A4): logo do ente
           (governo/prefeitura/mantenedora) à esquerda e da escola à direita,
           rede, escola, INEP e cidade/UF, faixa com o título e data de emissão.
           Só aparece na impressão (na tela, a página tem o próprio título).
@@ -34,4 +34,3 @@
   <div class="ic-faixa"><span>{{ $titulo }}</span>@if(!empty($subtitulo))<span>{{ $subtitulo }}</span>@endif</div>
   <div class="ic-emissao">Emitido em {{ now()->timezone('America/Bahia')->format('d/m/Y \à\s H:i') }}</div>
 </div>
-<div class="impressao-rodape">Gabarito360 · gabarito360.com.br</div>
