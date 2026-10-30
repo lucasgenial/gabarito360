@@ -28,12 +28,12 @@ class Acesso
     private const ITENS = [
         'painel'     => ['Painel', 'Painel', 'casa', 'painel', ['painel'], []],
         'provas'     => ['Provas', 'Provas', 'prova', 'provas.index', ['provas.*', 'relatorios.prova', 'relatorios.turmaProva', 'resultados.*'], ['prova.ver+gabarito.ver']],
-        'corrigir'   => ['📷 Corrigir', 'Corrigir', 'camera', 'correcao.index', ['correcao.*'], ['correcao.acompanhar']],
+        'corrigir'   => ['Corrigir', 'Corrigir', 'camera', 'correcao.index', ['correcao.*'], ['correcao.acompanhar']],
         'turmas'     => ['Turmas', 'Turmas', 'turma', 'turmas.index', ['turmas.*', 'relatorios.turma', 'relatorios.aluno'], ['turma.ver']],
         'alunos'     => ['Alunos', 'Alunos', 'aluno', 'alunos.index', ['alunos.*'], ['aluno.gerir', 'aluno.importar', 'aluno.desativar']],
         'escolas'    => ['Escolas', 'Escolas', 'escola', 'escolas.index', ['escolas.*'], ['escola.criar', 'escola.editar', 'escola.logo', 'nucleo.ver']],
         'equipe'     => ['Equipe', 'Equipe', 'equipe', 'membros.index', ['membros.*'], ['usuario.ver']],
-        'relatorios' => ['📈 Relatórios', 'Relatórios', 'grafico', null, ['relatorios.escola', 'relatorios.nucleo', 'relatorios.rede'], ['relatorio.rede', 'relatorio.nucleo', 'relatorio.escola']],
+        'relatorios' => ['Relatórios', 'Relatórios', 'grafico', null, ['relatorios.escola', 'relatorios.nucleo', 'relatorios.rede'], ['relatorio.rede', 'relatorio.nucleo', 'relatorio.escola']],
     ];
 
     /** Relatório consolidado do item "Relatórios": o nível mais alto que a pessoa pode ver. */
