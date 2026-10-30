@@ -296,9 +296,9 @@
           @endpode
         </div>
         @forelse($escola['anexos'] ?? [] as $a)
-          <div class="info-row">
-            <span class="lbl"><a href="{{ route('escolas.show', $a['id']) }}">{{ $a['nome'] }}</a></span>
-            <span class="val" style="font-size:13px;">INEP {{ $a['inep'] }}{{ !empty($a['cidade']) ? ' · ' . $a['cidade'] : '' }}{{ $a['ativo'] ? '' : ' · inativo' }}</span>
+          <div style="padding:10px 0;border-bottom:1px solid var(--border-soft);overflow-wrap:anywhere;">
+            <a href="{{ route('escolas.show', $a['id']) }}" style="font-weight:600;">{{ $a['nome'] }}</a>
+            <div style="font-size:13px;color:var(--muted);">INEP {{ $a['inep'] }}{{ !empty($a['cidade']) ? ' · ' . $a['cidade'] : '' }}{{ $a['ativo'] ? '' : ' · inativo' }}</div>
           </div>
         @empty
           <p class="field-help">Nenhum anexo cadastrado para esta escola.</p>
