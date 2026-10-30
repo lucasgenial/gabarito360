@@ -89,7 +89,7 @@
 <div class="card card-pad" style="margin-top:16px;">
   <div class="row-between">
     <h3 style="font-size:17px;">Questão por questão</h3>
-    <span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · ⬜ anulada</span>
+    <span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>
   </div>
   {{-- Colunas de cima para baixo, como no cartão-resposta (no celular, lista corrida) --}}
   <div class="res-folha" style="--linhas:{{ (int) ceil(count($folha) / 3) }};">
