@@ -14,7 +14,7 @@
   $val       = fn ($campo, $padrao = null) => old($campo, $e[$campo] ?? $padrao);
   $gestor    = \App\Support\Acesso::pode('escola.criar');
   $marcados  = fn ($campo) => (array) old($campo, $e[$campo] ?? []);
-  $tipoAtual = $val('tipo', request('sede') ? 'anexo' : 'sede');
+  $tipoAtual = $val('tipo', request()->query('sede') ? 'anexo' : 'sede');
 @endphp
 
 @section('title', $novo ? 'Cadastrar escola' : 'Editar escola')
@@ -135,7 +135,7 @@
             <option value="">Selecione a sede…</option>
             @foreach($sedes as $s)
               @continue(($e['id'] ?? null) === $s['id'])
-              <option value="{{ $s['id'] }}" data-nucleo="{{ $s['nucleo_id'] }}" @selected((string) $val('escola_sede_id', request('sede')) === (string) $s['id'])>{{ $s['nome'] }} ({{ $s['inep'] }})</option>
+              <option value="{{ $s['id'] }}" data-nucleo="{{ $s['nucleo_id'] }}" @selected((string) $val('escola_sede_id', request()->query('sede')) === (string) $s['id'])>{{ $s['nome'] }} ({{ $s['inep'] }})</option>
             @endforeach
           </select>
           <div class="field-help">O anexo fica no mesmo núcleo da sede.</div>
