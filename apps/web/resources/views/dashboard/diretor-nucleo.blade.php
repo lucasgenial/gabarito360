@@ -4,33 +4,20 @@
 
 @push('styles')
 <style>
-  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px; }
-  .content-grid { display:grid; grid-template-columns:1.7fr 1fr; gap:20px; margin-top:20px; }
-  .stack-grid { display:grid; gap:20px; }
-  .table-wrap { overflow:hidden; }
   .trend { display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:13px; }
-  .trend.up { color:var(--success,#168821); }
-  .trend.down { color:var(--danger,#e52207); }
+  .trend.up { color:var(--success); }
+  .trend.down { color:var(--danger); }
   .trend.flat { color:var(--muted); }
-  .bim-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; align-items:end; }
+  .bim-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(110px,100%),1fr)); gap:12px; margin-top:16px; align-items:end; }
   .bim-item { text-align:center; }
   .bim-bar { height:140px; background:var(--surface-2); border-radius:var(--radius-md); display:flex; align-items:flex-end; padding:6px; }
-  .bim-bar span { width:100%; border-radius:8px; background:linear-gradient(180deg, var(--accent), var(--accent-dark,#0c326f)); }
+  .bim-bar span { width:100%; border-radius:8px; background:linear-gradient(180deg, var(--accent), var(--accent-dark)); }
   .bim-item strong { display:block; margin-top:8px; font-size:13px; }
-  .bim-item small { color:var(--muted); font-family:var(--font-mono,monospace); }
+  .bim-item small { color:var(--muted); font-family:var(--font-mono); }
   .visit-list { display:grid; gap:12px; margin-top:8px; }
   .visit-item { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:14px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface-2); }
   .visit-item strong { display:block; font-size:14px; }
   .visit-item span.sub { color:var(--muted); font-size:13px; }
-  .quick-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px; }
-  .qa { display:flex; flex-direction:column; gap:10px; padding:18px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface); transition:border-color .15s, box-shadow .15s; text-decoration:none; }
-  .qa:hover { border-color:var(--accent); box-shadow:var(--shadow-sm); }
-  .qa-ico { width:40px; height:40px; display:grid; place-items:center; border-radius:10px; background:var(--accent-light); color:var(--accent-dark); }
-  .qa b { font-size:15px; color:var(--fg); }
-  .qa span { font-size:13px; color:var(--muted); }
-  @media (max-width:1080px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .content-grid{grid-template-columns:1fr;} }
-  @media (max-width:720px){ .kpi-grid,.quick-actions,.bim-grid{grid-template-columns:1fr 1fr;} }
-  @media (max-width:480px){ .kpi-grid,.quick-actions,.bim-grid{grid-template-columns:1fr;} }
 </style>
 @endpush
 
@@ -67,14 +54,7 @@
   ];
 @endphp
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <div class="eyebrow">Acompanhamento regional</div>
-    <h1 class="page-title">Painel {{ $nomeNucleo }}</h1>
-    <p class="page-sub">{{ $nome }} · supervisão de {{ $kpis['total_escolas'] ?? '—' }} escolas da regional · consolidação {{ now()->year }}</p>
-  </div>
-  <a href="#" class="btn btn-primary">Agendar reunião de acompanhamento</a>
-</div>
+<x-pagina chamada="Acompanhamento regional" titulo="Painel {{ $nomeNucleo }}" subtitulo="{{ $nome }} · supervisão de {{ $kpis['total_escolas'] ?? '—' }} escolas da regional · consolidação {{ now()->year }}" />
 
 {{-- KPIs --}}
 <div class="kpi-grid">
@@ -224,13 +204,6 @@
     </div>
     <b>Relatório Comparativo</b>
     <span>Gerar quadro entre escolas, séries e desempenho por prova.</span>
-  </a>
-  <a class="qa" href="#">
-    <div class="qa-ico">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 14v4M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </div>
-    <b>Agendar Visita</b>
-    <span>Registrar visitas técnicas e acompanhamento pedagógico.</span>
   </a>
 </div>
 

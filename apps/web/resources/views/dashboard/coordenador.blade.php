@@ -4,9 +4,6 @@
 
 @push('styles')
 <style>
-  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:24px; }
-  .content-grid { display:grid; grid-template-columns:1.8fr 1fr; gap:20px; margin-top:20px; }
-  .section-title { font-size:17px; margin-bottom:14px; font-weight:700; }
   .table td strong { display:block; color:var(--fg); }
   .table td small { color:var(--muted); font-size:12px; }
   .attention-list, .agenda-list { list-style:none; padding:0; margin:0; }
@@ -14,24 +11,15 @@
   .attention-list li:last-child, .agenda-list li:last-child { border-bottom:0; }
   .student-mark, .agenda-ico { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; flex-shrink:0; font-weight:700; font-size:14px; }
   .student-mark { background:var(--surface-2); color:var(--accent-dark); }
-  .student-mark.danger { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); }
-  .student-mark.warn { background:var(--warn-light,#fff5c2); color:var(--warn-fg,#b06800); }
+  .student-mark.danger { background:var(--danger-light); color:var(--danger); }
+  .student-mark.warn { background:var(--warn-light); color:var(--warn-fg); }
   .student-meta, .agenda-meta { min-width:0; }
   .student-meta b, .agenda-meta b { display:block; font-size:14px; }
   .student-meta span, .agenda-meta span { color:var(--muted); font-size:13px; }
-  .agenda-date { font-family:var(--font-mono,monospace); font-size:12px; color:var(--accent-dark); margin-top:4px; }
+  .agenda-date { font-family:var(--font-mono); font-size:12px; color:var(--accent-dark); margin-top:4px; }
   .agenda-ico { background:var(--accent-light); color:var(--accent-dark); }
-  .agenda-ico.success { background:var(--success-light,#e3f5e1); color:var(--success,#168821); }
-  .agenda-ico.warn { background:var(--warn-light,#fff5c2); color:var(--warn-fg,#b06800); }
-  .side-stack { display:grid; gap:20px; }
-  .quick-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px; }
-  .qa { display:flex; flex-direction:column; gap:12px; padding:18px; border-radius:var(--radius-lg); border:1px solid var(--border-soft); background:var(--surface); text-decoration:none; }
-  .qa:hover { border-color:var(--accent); box-shadow:var(--shadow-sm); }
-  .qa-ico { width:42px; height:42px; border-radius:10px; display:grid; place-items:center; background:var(--accent-light); color:var(--accent-dark); }
-  .qa b { color:var(--fg); font-size:15px; }
-  .qa span { color:var(--muted); font-size:13px; }
-  @media (max-width:1080px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .content-grid{grid-template-columns:1fr;} }
-  @media (max-width:640px){ .kpi-grid,.quick-actions{grid-template-columns:1fr;} }
+  .agenda-ico.success { background:var(--success-light); color:var(--success); }
+  .agenda-ico.warn { background:var(--warn-light); color:var(--warn-fg); }
 </style>
 @endpush
 
@@ -69,17 +57,10 @@
   ];
 @endphp
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <div class="eyebrow">Coordenação pedagógica</div>
-    <h1 class="page-title">Painel da escola</h1>
-    <p class="page-sub">{{ $nome }} ({{ $iniciais }}) · Coordenador(a) · {{ $escola['nome'] ?? '' }}</p>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <a href="{{ route('correcao.index') }}" class="btn btn-primary">📷 Corrigir cartões</a>
-    @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-secondary">+ Criar prova</a>@endpode
-  </div>
-</div>
+<x-pagina chamada="Coordenação pedagógica" titulo="Painel da escola" subtitulo="{{ $nome }} · Coordenador(a) · {{ $escola['nome'] ?? '' }}">
+  <a href="{{ route('correcao.index') }}" class="btn btn-primary"><x-icone nome="camera" /> Corrigir cartões</a>
+  @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-secondary">+ Criar prova</a>@endpode
+</x-pagina>
 
 {{-- KPIs --}}
 <div class="kpi-grid">
@@ -90,16 +71,16 @@
   </div>
   <div class="card kpi">
     <div class="kpi-label">Cartões pendentes de leitura</div>
-    <div class="kpi-value" style="{{ ($kpis['cartoes_pendentes'] ?? 0) > 0 ? 'color:var(--warn-fg,#b06800)' : '' }}">
+    <div class="kpi-value" style="{{ ($kpis['cartoes_pendentes'] ?? 0) > 0 ? 'color:var(--warn-fg)' : '' }}">
       {{ $kpis['cartoes_pendentes'] ?? '—' }}
     </div>
-    <div class="kpi-trend" style="{{ ($kpis['cartoes_pendentes'] ?? 0) > 0 ? 'color:var(--warn-fg,#b06800)' : '' }}">
+    <div class="kpi-trend" style="{{ ($kpis['cartoes_pendentes'] ?? 0) > 0 ? 'color:var(--warn-fg)' : '' }}">
       {{ ($kpis['cartoes_pendentes'] ?? 0) > 0 ? '● revisão necessária' : '● tudo em dia' }}
     </div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Alunos abaixo da média</div>
-    <div class="kpi-value" style="{{ ($kpis['alunos_baixa_media'] ?? 0) > 0 ? 'color:var(--danger,#e52207)' : '' }}">
+    <div class="kpi-value" style="{{ ($kpis['alunos_baixa_media'] ?? 0) > 0 ? 'color:var(--danger)' : '' }}">
       {{ $kpis['alunos_baixa_media'] ?? '—' }}
     </div>
     <div class="kpi-trend {{ ($kpis['alunos_baixa_media'] ?? 0) > 0 ? 'down' : '' }}">
