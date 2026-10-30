@@ -2,7 +2,7 @@
 
 {{--
   Arquivo: apps/web/resources/views/correcao/index.blade.php
-  Função: "📷 Corrigir" — escolha da prova a corrigir (publicada/em correção/corrigida),
+  Função: "<x-icone nome="camera" /> Corrigir" — escolha da prova a corrigir (publicada/em correção/corrigida),
           com atalhos para a câmera e para os cartões de cada turma (doc 19, MP-037).
 --}}
 
@@ -16,7 +16,7 @@
 <div style="margin-top:12px;">
   <div class="eyebrow">Correção pelo celular</div>
   <h1 class="page-title">Qual prova você vai corrigir?</h1>
-  <p class="page-sub">Toque em <b>📷 Corrigir</b> e fotografe os cartões. O aluno é identificado pelo QR impresso.</p>
+  <p class="page-sub">Toque em <b><x-icone nome="camera" /> Corrigir</b> e fotografe os cartões. O aluno é identificado pelo QR impresso.</p>
 </div>
 
 <div class="card card-pad" style="margin-top:16px;">
@@ -28,7 +28,7 @@
   <p class="page-sub" style="font-size:13px;">Quem já foi corrigido em cada prova e quem falta.</p>
   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
     @foreach($turmas as $t)
-      <a class="btn btn-secondary" href="{{ route('correcao.turma', $t['id']) }}">📊 {{ $t['nome'] }}</a>
+      <a class="btn btn-secondary" href="{{ route('correcao.turma', $t['id']) }}"><x-icone nome="grafico" /> {{ $t['nome'] }}</a>
     @endforeach
   </div>
 @endif

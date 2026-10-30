@@ -7,23 +7,6 @@
           Usado no acompanhamento da prova e no modo só-câmera (aplicador).
           Espera: $prova e $alunos (vazio = sem vincular; a API não devolve nota ao aplicador).
 --}}
-<style>
-  .cam-tela { position:fixed; inset:0; z-index:1000; background:#000; display:flex; flex-direction:column; touch-action:none; }
-  .cam-tela[hidden] { display:none; }
-  .cam-tela canvas { flex:1; width:100%; min-height:0; display:block; }
-  .cam-topo { position:absolute; top:0; left:0; right:0; display:flex; align-items:center; gap:10px; padding:12px 14px;
-    background:linear-gradient(rgba(0,0,0,.65), transparent); color:#fff; font-size:15px; font-weight:600; }
-  .cam-topo span { flex:1; text-shadow:0 1px 2px #000; }
-  .cam-btn-redondo { width:44px; height:44px; border-radius:50%; border:0; background:rgba(255,255,255,.18); color:#fff; font-size:20px; cursor:pointer; }
-  .cam-base { position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:space-around;
-    padding:16px 14px 22px; background:linear-gradient(transparent, rgba(0,0,0,.7)); color:#fff; font-size:13px; }
-  .cam-disparo { width:74px; height:74px; border-radius:50%; border:5px solid #fff; background:rgba(255,255,255,.25); cursor:pointer; }
-  .cam-disparo:active { background:#fff; }
-  .cam-auto { display:flex; flex-direction:column; align-items:center; gap:4px; width:64px; }
-  .cam-ultimo { position:absolute; left:12px; right:12px; bottom:120px; background:rgba(255,255,255,.95); color:#111; border-radius:10px;
-    padding:10px 12px; font-size:14px; box-shadow:0 4px 16px rgba(0,0,0,.4); }
-  .cam-ultimo:empty { display:none; }
-</style>
 
 <div class="card card-pad" id="camera" style="margin-top:16px;scroll-margin-top:90px;">
   <div style="display:flex;flex-wrap:wrap;gap:10px;">
@@ -124,17 +107,17 @@ function enviarCartao(file) {
       if (!res.ok) { li.innerHTML = '⛔ <b>Não corrigido.</b> ' + esc(d.erro || 'falha no envio'); return li.innerHTML; }
       var quem = d.aluno_nome ? '<b>' + esc(d.aluno_nome) + '</b>' : '<b style="color:var(--danger)">Aluno não identificado</b>';
       var nota = d.acertos !== null && d.acertos !== undefined ? ' — <b>' + d.acertos + '/' + d.total + '</b> acertos · nota ' + Number(d.nota_final).toFixed(1).replace('.', ',') : '';
-      var amb = d.ambiguas ? ' · <span style="color:var(--warning,#c27c0e)">' + d.ambiguas + ' questão(ões) para revisar</span>' : '';
+      var amb = d.ambiguas ? ' · <span style="color:var(--warning)">' + d.ambiguas + ' questão(ões) para revisar</span>' : '';
       var lg = d.lingua ? ' · ' + (d.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : '';
       var mov = d.prova_corrigida
-        ? '<div style="font-size:13px;margin-top:4px;padding:6px 8px;border-radius:6px;background:var(--warn-light,#fff5c2);color:var(--warn-fg,#7a4800);">'
-          + '⚠️ Este cartão <b>não é de ' + esc(CAM_DISCIPLINA) + '</b>: é de <b>' + esc(d.prova_corrigida) + '</b>. Ele foi corrigido em ' + esc(d.prova_corrigida) + ', com o gabarito certo.</div>'
+        ? '<div style="font-size:13px;margin-top:4px;padding:6px 8px;border-radius:6px;background:var(--warn-light);color:var(--warn-fg);">'
+          + '⚠ Este cartão <b>não é de ' + esc(CAM_DISCIPLINA) + '</b>: é de <b>' + esc(d.prova_corrigida) + '</b>. Ele foi corrigido em ' + esc(d.prova_corrigida) + ', com o gabarito certo.</div>'
         : '';
       var resumo = (d.aluno_nome && !d.ambiguas ? '✅ ' : '📝 ') + quem + nota + lg + amb + mov;
       li.innerHTML = resumo + (d.aluno_nome ? '' : (ALUNOS.length ? seletorAluno(d.id) : '<div style="font-size:13px;color:var(--muted);margin-top:4px;">QR ilegível ou cartão em branco: o professor vincula o aluno depois.</div>'));
       if (typeof atualizar === 'function') atualizar();
       return resumo;
-    }).catch(function (e) { li.innerHTML = '⚠️ <b>Sem conexão:</b> ' + esc(e.message) + '. Verifique a internet e tente de novo.'; return li.innerHTML; });
+    }).catch(function (e) { li.innerHTML = '⚠ <b>Sem conexão:</b> ' + esc(e.message) + '. Verifique a internet e tente de novo.'; return li.innerHTML; });
 }
 document.getElementById('cam-input').addEventListener('change', function (e) {
   Array.prototype.forEach.call(e.target.files, enviarCartao); e.target.value = '';
