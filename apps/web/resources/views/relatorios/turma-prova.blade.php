@@ -1,21 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Relatório da turma — ' . $prova['titulo'])
+@section('tela', 'tela-rel-prova')
 
-@push('styles')
-<style>
-  .kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:22px; }
-  .result-head { display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-top:20px; }
-  .student-name { display:flex;align-items:center;gap:12px; }
-  .student-name .av { width:36px;height:36px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0; }
-  .btn-result { background:var(--success-light);color:var(--success); }
-  .btn-result:hover { filter:brightness(0.95); }
-  .mini-bar { width:100px;height:7px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-right:8px;display:inline-block;vertical-align:middle; }
-  .mini-bar > div { height:100%; }
-  @media (max-width:980px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .result-head{grid-template-columns:1fr;} }
-  @media (max-width:560px){ .kpi-grid{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Relatório da turma — ' . $prova['titulo'])
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -33,7 +20,7 @@
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ $turma['nome'] }}{{ $prova['data_aplicacao'] ? ' · aplicada em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }} · {{ $kpis['cartoes_total'] > 0 ? round($kpis['cartoes_lidos'] / $kpis['cartoes_total'] * 100) : 0 }}% corrigido</p>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
-    <button class="btn btn-secondary no-print" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <button class="btn btn-secondary no-print" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir / PDF</button>
     <span class="badge {{ $prova['status'] === 'corrigida' ? 'badge-success' : 'badge-info' }} badge-dot">
       {{ ['rascunho'=>'Rascunho','publicada'=>'Publicada','em_correcao'=>'Em correção','corrigida'=>'Corrigida'][$prova['status']] ?? $prova['status'] }}
     </span>
@@ -90,7 +77,7 @@
       @forelse($alunos as $a)
         @php
           $pct = $prova['nota_maxima'] > 0 ? round($a['nota_final'] / $prova['nota_maxima'] * 100) : 0;
-          $cor = $pct >= 70 ? 'var(--success)' : ($pct >= 50 ? 'var(--warn-fg,#b45309)' : 'var(--danger)');
+          $cor = $pct >= 70 ? 'var(--success)' : ($pct >= 50 ? 'var(--warn-fg)' : 'var(--danger)');
         @endphp
         <tr>
           <td>

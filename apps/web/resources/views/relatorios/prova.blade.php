@@ -1,19 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Relatório — ' . $prova['titulo'])
+@section('tela', 'tela-rel-prova')
 
-@push('styles')
-<style>
-  .kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:22px; }
-  .result-head { display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-top:20px; }
-  .student-name { display:flex;align-items:center;gap:12px; }
-  .student-name .av { width:36px;height:36px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0; }
-  .btn-result { background:var(--success-light);color:var(--success); }
-  .btn-result:hover { filter:brightness(0.95); }
-  @media (max-width:980px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} .result-head{grid-template-columns:1fr;} }
-  @media (max-width:560px){ .kpi-grid{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Relatório — ' . $prova['titulo'])
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -31,7 +20,7 @@
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ implode(' · ', $prova['turmas'] ?? []) }}{{ $prova['data_aplicacao'] ? ' · aplicada em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }} · {{ $kpis['cartoes_lidos'] }}/{{ $kpis['cartoes_total'] }} cartões corrigidos</p>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
-    <button class="btn btn-secondary no-print" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <button class="btn btn-secondary no-print" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir / PDF</button>
     <span class="badge {{ $prova['status'] === 'corrigida' ? 'badge-success' : 'badge-info' }} badge-dot">
       {{ ['rascunho'=>'Rascunho','publicada'=>'Publicada','em_correcao'=>'Em correção','corrigida'=>'Corrigida'][$prova['status']] ?? $prova['status'] }}
     </span>

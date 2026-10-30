@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('tela', 'tela-rel-consolidado')
+
 {{--
   Arquivo: apps/web/resources/views/relatorios/consolidado.blade.php
   Função: Relatório consolidado de escola, núcleo ou rede (MP-034): indicadores, média por
@@ -13,25 +15,6 @@
 @endphp
 
 @section('title', $rotNivel . (isset($unidade) ? ' — ' . $unidade['nome'] : ''))
-
-@push('styles')
-<style>
-  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
-  .kpis .card { padding:14px 16px; }
-  .kpis .v { font-family:var(--font-mono); font-size:26px; font-weight:700; }
-  .kpis .l { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
-  .tab { width:100%; border-collapse:collapse; font-size:14px; }
-  .tab th, .tab td { padding:8px 10px; border-bottom:1px solid var(--border-soft); text-align:center; }
-  .tab th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
-  .tab .esq { text-align:left; }
-  .m { font-family:var(--font-mono); font-weight:700; padding:2px 6px; border-radius:5px; }
-  .m.ok { background:var(--success-light,#e3f5e1); color:var(--success,#168821); }
-  .m.baixa { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); }
-  .duas { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
-  .duas li { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px solid var(--border-soft); font-size:14px; }
-  @media (max-width:720px) { .kpis { grid-template-columns:1fr 1fr; } .duas { grid-template-columns:1fr; } }
-</style>
-@endpush
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span><span>{{ $rotNivel }}</span>
@@ -60,7 +43,7 @@
     @if($nivel === 'rede' && !empty($redes) && count($redes) > 1)
       @foreach($redes as $r)@if($r['id'] != $unidade['id'])<a class="btn btn-ghost" href="{{ route('relatorios.rede', $r['id']) }}">{{ $r['nome'] }}</a>@endif @endforeach
     @endif
-    <button type="button" class="btn btn-secondary" onclick="window.print()">🖨 Imprimir / PDF</button>
+    <button type="button" class="btn btn-secondary" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir / PDF</button>
   </div>
 </div>
 
