@@ -200,6 +200,28 @@
   <div class="detail-grid">
     {{-- Coluna principal: dados da escola --}}
     <div style="display:flex;flex-direction:column;gap:18px;">
+      {{-- Logo e relatório da escola (cabeçalho dos relatórios impressos) --}}
+      <div class="info-card">
+        <h3>Logo e relatório</h3>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+          <img src="{{ route('escolas.logo', $escola['id']) }}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';"
+               style="width:72px;height:72px;object-fit:contain;border:1px solid var(--border-soft);border-radius:8px;background:#fff;">
+          <div style="display:none;width:72px;height:72px;place-items:center;border:1px dashed var(--border);border-radius:8px;font-size:11px;color:var(--muted);text-align:center;">sem logo</div>
+          <div style="flex:1;min-width:200px;">
+            @pode('escola.logo')
+            <form method="POST" action="{{ route('escolas.logo.enviar', $escola['id']) }}" enctype="multipart/form-data" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              @csrf
+              <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required class="input" style="max-width:260px;">
+              <button type="submit" class="btn btn-secondary btn-sm">Enviar logo</button>
+            </form>
+            <p style="font-size:12px;color:var(--muted);margin-top:6px;">PNG ou JPG até 2 MB, de preferência quadrado. Aparece no topo dos relatórios impressos e PDFs.</p>
+            @endpode
+            @pode('resultados.ver')
+            <a class="btn btn-primary btn-sm" style="margin-top:6px;" href="{{ route('relatorios.escola', $escola['id']) }}">📈 Relatório da escola</a>
+            @endpode
+          </div>
+        </div>
+      </div>
       <div class="info-card">
         <h3>Dados da escola</h3>
         <div class="info-row">

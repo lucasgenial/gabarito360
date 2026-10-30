@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\ResultadoController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
 use App\Http\Controllers\Api\AcompanhamentoTurmaController;
+use App\Http\Controllers\Api\RelatorioConsolidadoController;
 use App\Http\Controllers\Api\VinculoProfessorController;
 use App\Http\Controllers\Api\WebhookController;
 use Illuminate\Support\Facades\Route;
@@ -97,6 +98,9 @@ Route::prefix('v1')->group(function () {
             Route::get('turma/{turmaId}/prova/{provaId}',   [RelatorioController::class, 'turmaProva']);
             Route::get('turma/{turmaId}',                   [RelatorioController::class, 'turma']);
             Route::get('aluno/{alunoId}',                   [RelatorioController::class, 'aluno']);
+            Route::get('escola/{id?}',                      [RelatorioConsolidadoController::class, 'escola']);
+            Route::get('nucleo/{id?}',                      [RelatorioConsolidadoController::class, 'nucleo']);
+            Route::get('rede/{id?}',                        [RelatorioConsolidadoController::class, 'rede']);
         });
 
         // Turmas
@@ -119,6 +123,8 @@ Route::prefix('v1')->group(function () {
 
         // Escolas
         Route::prefix('escolas')->group(function () {
+            Route::get('{id}/logo',   [EscolaController::class, 'logo']);
+            Route::post('{id}/logo',  [EscolaController::class, 'enviarLogo'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
             Route::get('/',           [EscolaController::class, 'index']);
             Route::post('/',          [EscolaController::class, 'store'])->middleware('perfil:admin_rede');
             Route::get('{id}',        [EscolaController::class, 'show']);

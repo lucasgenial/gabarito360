@@ -218,7 +218,7 @@
     <b>Ver todas as Escolas</b>
     <span>Acessar dados detalhados das unidades sob supervisão.</span>
   </a>
-  <a class="qa" href="#">
+  <a class="qa" href="{{ route('relatorios.nucleo') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18V8m6 10V5m6 13v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 21h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>

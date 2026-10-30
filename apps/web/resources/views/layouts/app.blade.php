@@ -87,6 +87,7 @@
 </div>
 
 <script src="{{ asset('js/app.js') }}"></script>
+<script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
 @stack('scripts')
 </body>
 </html>

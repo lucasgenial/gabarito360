@@ -67,7 +67,7 @@
     <h1 class="page-title">Painel administrativo</h1>
     <p class="page-sub">{{ $nome }} · Administrador · Rede Municipal · acompanhamento consolidado do período letivo {{ now()->year }}</p>
   </div>
-  <a href="#" class="btn btn-primary">Gerar visão executiva</a>
+  <a href="{{ route('relatorios.rede') }}" class="btn btn-primary">📈 Relatório da rede</a>
 </div>
 
 <div class="notice">Sistema de Avaliação — Rede Municipal de Ensino — Período Letivo {{ now()->year }}</div>
@@ -281,7 +281,7 @@
     <b>Gerenciar Usuários</b>
     <span>Revisar permissões, perfis institucionais e acessos.</span>
   </a>
-  <a class="qa" href="#">
+  <a class="qa" href="{{ route('relatorios.rede') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3v18M12 8v13M17 12v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
