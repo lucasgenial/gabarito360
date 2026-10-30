@@ -148,7 +148,7 @@ Na tela `resultado.html`:
   - Campo para nome do aluno
   - Campo para matrícula
   - Grid de bolhas (A-E) para cada questão
-  - Código de identificação da prova (QR code ou código de barras — a definir)
+  - Código de identificação da prova: **QR code** (ver `18-omr-nativo-e-cartoes.md`)
 
 ### Identificação do Aluno no Cartão
 - O motor OMR precisa associar o cartão ao aluno correto
@@ -156,7 +156,7 @@ Na tela `resultado.html`:
   1. Aluno preenche matrícula manualmente no campo → OMR lê + validação humana
   2. Cartão pré-impresso com nome/matrícula → OMR identifica automaticamente
   3. Vinculação manual pós-leitura → usuário associa cartão ao aluno
-- **Estratégia para o MVP:** a definir no plano de execução (MP-021)
+- **Estratégia adotada (MP-021):** 2 (pré-impresso com QR) + 3 (vinculação manual para cartões em branco) — ver `18-omr-nativo-e-cartoes.md`
 
 ---
 
@@ -176,7 +176,7 @@ Na tela `resultado.html`:
 - Array de respostas com confiança por questão
 - Status geral do cartão (lido/ambíguo)
 
-### Bibliotecas Candidatas (a confirmar no MP-021)
+### Bibliotecas (definido no MP-021: Python + OpenCV via `Process`, ver doc 18)
 - Python: OpenCV + NumPy (via microsserviço ou fila)
 - PHP: integração via shell ou API interna
 - Alternativa: serviço externo de OMR via API REST

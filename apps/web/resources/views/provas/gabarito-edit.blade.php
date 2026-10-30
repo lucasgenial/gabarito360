@@ -96,6 +96,25 @@
       <div style="font-size:12px;color:var(--muted);margin-top:8px;">Preencha todas as questões para poder publicar.</div>
     </div>
 
+    @if(!empty($prova['opcao_lingua']))
+      @php $espInit = collect($questoes)->keyBy('numero_questao'); $optsEsp = array_slice(['A','B','C','D','E'], 0, $prova['num_alternativas']); @endphp
+      <div class="card card-pad">
+        <b style="font-size:14px;">Língua estrangeira — opção Espanhol</b>
+        <div style="font-size:12px;color:var(--muted);margin:4px 0 10px;">As bolhas ao lado são a opção <b>Inglês</b>. Informe aqui as respostas de Espanhol (01 a 05).</div>
+        @for($n = 1; $n <= min(5, $prova['num_questoes']); $n++)
+          <div class="row-between" style="padding:4px 0;">
+            <span class="num" style="font-weight:700;">{{ str_pad($n, 2, '0', STR_PAD_LEFT) }}</span>
+            <select class="select" form="form-salvar" name="alternativas_espanhol[{{ $n }}]" style="width:90px;" {{ $publicado ? 'disabled' : '' }}>
+              <option value="">—</option>
+              @foreach($optsEsp as $o)
+                <option value="{{ $o }}" {{ (($espInit[$n]['alternativa_espanhol'] ?? null) === $o) ? 'selected' : '' }}>{{ $o }}</option>
+              @endforeach
+            </select>
+          </div>
+        @endfor
+      </div>
+    @endif
+
     <div style="display:flex;flex-direction:column;gap:10px;">
       @if(!$publicado)
         <button type="button" id="btn-salvar" class="btn btn-secondary" onclick="salvarGabarito()">Salvar rascunho</button>

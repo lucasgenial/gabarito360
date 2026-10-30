@@ -23,11 +23,32 @@ deploy_api() {
     php artisan route:cache
     php artisan view:cache
     php artisan migrate --force
+    php artisan storage:link || true
+
+    setup_omr
 
     chmod -R 775 storage bootstrap/cache
     chown -R www-data:www-data storage bootstrap/cache
 
     log "API pronta."
+}
+
+setup_omr() {
+    # Motor OMR nativo + gerador de cartões (Python/OpenCV) — ver apps/api/omr/
+    log "=== Ambiente Python do OMR ==="
+    cd "$REPO_DIR/apps/api/omr"
+    if [ ! -x .venv/bin/python ]; then
+        command -v python3 >/dev/null || { log "ERRO: instale python3 (apt install python3 python3-venv)"; exit 1; }
+        python3 -m venv .venv
+    fi
+    .venv/bin/pip install -q --upgrade pip
+    .venv/bin/pip install -q -r requirements.txt
+    .venv/bin/python -c "import cv2, reportlab; print('OMR ok: OpenCV', cv2.__version__)"
+    chown -R www-data:www-data .venv
+    cd "$REPO_DIR/apps/api"
+    # OMR_PYTHON no .env deve apontar para $REPO_DIR/apps/api/omr/.venv/bin/python
+    grep -q '^OMR_PYTHON=' .env || echo "OMR_PYTHON=$REPO_DIR/apps/api/omr/.venv/bin/python" >> .env
+    php artisan config:cache
 }
 
 deploy_web() {
