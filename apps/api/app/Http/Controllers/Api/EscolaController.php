@@ -227,7 +227,12 @@ class EscolaController extends Controller
                 ];
             });
 
+        $rede = DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
+            ->where('nucleos.id', $escola->nucleo_id)->first(['redes.id', 'redes.nome']);
+
         return ApiResponse::success(array_merge($escola->toArray(), [
+            'rede_id'   => $rede?->id,
+            'rede_nome' => $rede?->nome,
             'total_turmas' => $totalTurmas,
             'total_alunos' => $totalAlunosEscola,
             'total_provas' => $provas,
@@ -307,6 +312,40 @@ class EscolaController extends Controller
             Storage::disk('public')->delete($escola->logo_path);
         }
         DB::table('escolas')->where('id', $id)->update(['logo_path' => $novo, 'updated_at' => now()]);
+
+        return ApiResponse::success(['tem_logo' => true]);
+    }
+
+    /** Logo do ente da rede (governo do estado, prefeitura ou mantenedora). */
+    public function logoRede(int $redeId)
+    {
+        $caminho = Cabecalho::logoPath(DB::table('redes')->where('id', $redeId)->value('logo_path'));
+        if (!$caminho) {
+            return ApiResponse::notFound('Rede sem logo.');
+        }
+
+        return response()->file($caminho, ['Cache-Control' => 'private, max-age=3600']);
+    }
+
+    /** Envia/troca o logo do ente: admin da rede ou diretor de núcleo de um núcleo da rede. */
+    public function enviarLogoRede(Request $request, int $redeId): JsonResponse
+    {
+        $usuario = $request->user();
+        $rede    = DB::table('redes')->where('id', $redeId)->first(['id', 'logo_path']);
+        $permite = $usuario->perfil === 'admin_rede' || ($usuario->perfil === 'dir_nucleo' && DB::table('usuario_escopos')
+            ->join('nucleos', 'nucleos.id', '=', 'usuario_escopos.escopo_id')
+            ->where('usuario_escopos.usuario_id', $usuario->id)->where('usuario_escopos.escopo_tipo', 'nucleo')
+            ->where('nucleos.rede_id', $redeId)->exists());
+        if (!$rede || !$permite) {
+            return ApiResponse::notFound('Rede não encontrada.');
+        }
+
+        $request->validate(['logo' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048']);
+        $novo = $request->file('logo')->store('redes/logos', 'public');
+        if ($rede->logo_path) {
+            Storage::disk('public')->delete($rede->logo_path);
+        }
+        DB::table('redes')->where('id', $redeId)->update(['logo_path' => $novo, 'updated_at' => now()]);
 
         return ApiResponse::success(['tem_logo' => true]);
     }

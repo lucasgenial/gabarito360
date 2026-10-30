@@ -67,6 +67,7 @@ class Acesso
         'equipe.gerenciar'   => ['admin_rede', 'dir_escolar'],
         'escola.configurar'  => ['admin_rede', 'dir_escolar'],
         'escola.logo'        => ['admin_rede', 'dir_escolar', 'coordenador'],
+        'rede.logo'          => ['admin_rede', 'dir_nucleo'],
         'rede.configurar'    => ['admin_rede'],
     ];
 

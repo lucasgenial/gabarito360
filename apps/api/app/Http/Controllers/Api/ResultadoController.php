@@ -56,6 +56,8 @@ class ResultadoController extends Controller
                 'media_turma' => $dados['media_turma'],
                 'folha'       => $dados['folha'],
                 'logo'        => Cabecalho::logoPath($escola->logo_path ?? null),
+                'logo_ente'   => Cabecalho::logoPath(DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
+                    ->where('nucleos.id', $escola->nucleo_id ?? 0)->value('redes.logo_path')),
                 'detalhe'     => $dados['cabecalho']['detalhe'] ?? null,
             ], JSON_UNESCAPED_UNICODE))
             ->run([config('omr.python'), 'gerar_resultado.py']);

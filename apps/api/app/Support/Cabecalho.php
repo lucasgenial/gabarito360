@@ -19,15 +19,16 @@ class Cabecalho
             ->leftJoin('redes', 'redes.id', '=', 'nucleos.rede_id')
             ->where('escolas.id', $escolaId)
             ->first(['escolas.id', 'escolas.nome', 'escolas.inep', 'escolas.cidade', 'escolas.uf', 'escolas.logo_path',
-                     'nucleos.nome as nucleo', 'redes.nome as rede']) : null;
+                     'nucleos.nome as nucleo', 'redes.id as rede_id', 'redes.nome as rede', 'redes.logo_path as rede_logo']) : null;
 
         if (!$e) {
-            return ['escola_id' => null, 'nome' => null, 'rede' => null, 'nucleo' => null, 'detalhe' => null, 'tem_logo' => false];
+            return ['escola_id' => null, 'nome' => null, 'rede_id' => null, 'rede' => null, 'nucleo' => null, 'detalhe' => null, 'tem_logo' => false, 'tem_logo_rede' => false];
         }
 
         return [
             'escola_id' => (int) $e->id,
             'nome'      => $e->nome,
+            'rede_id'   => $e->rede_id ? (int) $e->rede_id : null,
             'rede'      => $e->rede,
             'nucleo'    => $e->nucleo,
             'detalhe'   => collect([
@@ -35,13 +36,17 @@ class Cabecalho
                 trim(($e->cidade ?? '') . ($e->uf ? ' – ' . $e->uf : ''), ' –') ?: null,
             ])->filter()->implode(' · ') ?: null,
             'tem_logo'  => self::logoPath($e->logo_path) !== null,
+            'tem_logo_rede' => self::logoPath($e->rede_logo) !== null,
         ];
     }
 
-    /** Cabeçalho de núcleo ou rede (sem escola específica). */
-    public static function unidade(string $nome, ?string $rede = null): array
+    /** Cabeçalho de núcleo ou rede (sem escola específica): mostra o logo do ente, se houver. */
+    public static function unidade(string $nome, ?string $rede = null, ?int $redeId = null): array
     {
-        return ['escola_id' => null, 'nome' => $nome, 'rede' => $rede, 'nucleo' => null, 'detalhe' => null, 'tem_logo' => false];
+        $logoRede = $redeId ? DB::table('redes')->where('id', $redeId)->value('logo_path') : null;
+
+        return ['escola_id' => null, 'nome' => $nome, 'rede_id' => $redeId, 'rede' => $rede, 'nucleo' => null, 'detalhe' => null,
+                'tem_logo' => false, 'tem_logo_rede' => self::logoPath($logoRede) !== null];
     }
 
     /** Caminho absoluto do logo, se o arquivo existir. */

@@ -122,6 +122,9 @@ Route::prefix('v1')->group(function () {
             ->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
 
         // Escolas
+        Route::get('redes/{id}/logo',  [EscolaController::class, 'logoRede']);
+        Route::post('redes/{id}/logo', [EscolaController::class, 'enviarLogoRede'])->middleware('perfil:admin_rede,dir_nucleo');
+
         Route::prefix('escolas')->group(function () {
             Route::get('{id}/logo',   [EscolaController::class, 'logo']);
             Route::post('{id}/logo',  [EscolaController::class, 'enviarLogo'])->middleware('perfil:admin_rede,dir_escolar,coordenador');

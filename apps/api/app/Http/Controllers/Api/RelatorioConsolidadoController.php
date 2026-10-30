@@ -65,7 +65,7 @@ class RelatorioConsolidadoController extends Controller
         }
 
         $nucleo = DB::table('nucleos')->leftJoin('redes', 'redes.id', '=', 'nucleos.rede_id')
-            ->where('nucleos.id', $id)->first(['nucleos.id', 'nucleos.nome', 'redes.nome as rede']);
+            ->where('nucleos.id', $id)->first(['nucleos.id', 'nucleos.nome', 'redes.id as rede_id', 'redes.nome as rede']);
         if (!$nucleo) {
             return ApiResponse::notFound('Núcleo não encontrado.');
         }
@@ -75,7 +75,7 @@ class RelatorioConsolidadoController extends Controller
 
         return ApiResponse::success(array_merge([
             'nivel'   => 'nucleo',
-            'cabecalho' => Cabecalho::unidade($nucleo->nome, $nucleo->rede),
+            'cabecalho' => Cabecalho::unidade($nucleo->nome, $nucleo->rede, $nucleo->rede_id ? (int) $nucleo->rede_id : null),
             'unidade' => ['id' => $nucleo->id, 'nome' => $nucleo->nome, 'detalhe' => $nucleo->rede],
             'grupo'   => 'escola',
             'grupos'  => $this->comparativo($notas, 'escola_id', 'escola_nome',
@@ -107,7 +107,7 @@ class RelatorioConsolidadoController extends Controller
 
         return ApiResponse::success(array_merge([
             'nivel'   => 'rede',
-            'cabecalho' => Cabecalho::unidade($rede->nome),
+            'cabecalho' => Cabecalho::unidade($rede->nome, null, (int) $rede->id),
             'unidade' => ['id' => $rede->id, 'nome' => $rede->nome, 'detalhe' => null],
             'grupo'   => 'escola',
             'grupos'  => $this->comparativo($notas, 'escola_id', 'escola_nome',
