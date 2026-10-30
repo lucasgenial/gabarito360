@@ -71,6 +71,8 @@ Route::prefix('v1')->group(function () {
         // Cartões / OMR (MP-021)
         Route::prefix('cartoes')->group(function () {
             Route::get('{id}',                       [CartaoController::class, 'show']);
+            Route::get('{id}/imagem',                [CartaoController::class, 'imagem']);
+            Route::delete('{id}',                    [CartaoController::class, 'destroy'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
             Route::put('{id}/vincular-aluno',         [CartaoController::class, 'vincularAluno'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
             Route::post('{id}/resolver-ambiguidade',  [CartaoController::class, 'resolverAmbiguidade'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
             Route::post('{id}/revisar',               [CartaoController::class, 'revisar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');

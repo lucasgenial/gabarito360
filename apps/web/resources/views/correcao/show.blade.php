@@ -20,6 +20,23 @@
   .ambig-list li:last-child { border:0; }
   .resolve-actions { display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap; }
   @media(max-width:900px){ .progress-head{grid-template-columns:1fr;} }
+  .corr-list { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px; }
+  .corr-item { display:flex; gap:12px; align-items:flex-start; padding:10px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface); }
+  .corr-thumb { width:64px; height:88px; object-fit:cover; border-radius:6px; background:var(--surface-2); cursor:zoom-in; flex-shrink:0; border:1px solid var(--border-soft); }
+  .corr-info { flex:1; min-width:0; font-size:13px; }
+  .corr-info b { display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .corr-nota { font-family:var(--font-mono); font-size:20px; font-weight:700; text-align:right; }
+  .corr-acoes { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+  .g360-modal { position:fixed; inset:0; z-index:1100; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; padding:12px; }
+  .g360-modal .caixa { background:var(--surface); border-radius:var(--radius-lg); width:100%; max-width:640px; max-height:92vh; overflow:auto; padding:16px; }
+  .foto-img { max-width:100%; max-height:78vh; border-radius:6px; background:#fff; display:block; margin:0 auto; }
+  .folha-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:6px; margin-top:12px; }
+  .folha-q { border-radius:6px; padding:6px 8px; font-size:13px; font-family:var(--font-mono); border:1px solid transparent; }
+  .folha-q.correta { background:var(--success-light,#e3f5e1); color:var(--success,#168821); border-color:var(--success,#168821); }
+  .folha-q.incorreta { background:var(--danger-light,#fde8e4); color:var(--danger,#e52207); border-color:var(--danger,#e52207); }
+  .folha-q.branco, .folha-q.ambigua { background:var(--warn-light,#fff5c2); color:var(--warn-fg,#b06800); border-color:var(--warn-fg,#b06800); }
+  .folha-q.anulada { background:var(--surface-2); color:var(--muted); }
+  .folha-leg { display:flex; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-top:10px; }
 </style>
 @endpush
 
@@ -74,6 +91,36 @@
   </div>
 </div>
 
+{{-- Alunos corrigidos: foto do cartão, nota, acertos/erros e exclusão para fotografar de novo --}}
+<div class="card card-pad" style="margin-top:20px;" id="corrigidos">
+  <div class="row-between" style="flex-wrap:wrap;margin-bottom:12px;">
+    <h3 style="font-size:17px;">Alunos corrigidos <span class="badge badge-muted" id="corr-qtd">0</span></h3>
+    <input class="input" id="corr-busca" type="search" placeholder="Buscar aluno…" style="max-width:240px;">
+  </div>
+  <ul class="corr-list" id="corr-lista"><li style="color:var(--muted);font-size:13px;">Carregando…</li></ul>
+</div>
+
+<div class="g360-modal" id="foto-modal" onclick="if (event.target === this) fecharModal('foto-modal')">
+  <div class="caixa">
+    <div class="row-between" style="margin-bottom:10px;"><b id="foto-titulo"></b><button type="button" class="btn btn-sm btn-ghost" onclick="fecharModal('foto-modal')">✕</button></div>
+    <img id="foto-img" class="foto-img" alt="Foto do cartão-resposta">
+  </div>
+</div>
+
+<div class="g360-modal" id="folha-modal" onclick="if (event.target === this) fecharModal('folha-modal')">
+  <div class="caixa">
+    <div class="row-between"><b id="folha-titulo">Acertos e erros</b><button type="button" class="btn btn-sm btn-ghost" onclick="fecharModal('folha-modal')">✕</button></div>
+    <div id="folha-resumo" style="font-size:14px;margin-top:6px;"></div>
+    <div class="folha-grid" id="folha-grid"></div>
+    <div class="folha-leg">
+      <span>🟩 acertou</span><span>🟥 errou (marcou → certa)</span><span>🟨 em branco/ambígua</span><span>⬜ anulada</span>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="btn btn-sm btn-secondary" id="folha-link" href="#">Abrir resultado completo</a>
+    </div>
+  </div>
+</div>
+
 <div class="card card-pad" style="margin-top:20px;">
   <h3 style="font-size:17px;margin-bottom:8px;">Cartões processados recentemente</h3>
   <ul class="activity" id="activity-list"></ul>
@@ -118,6 +165,106 @@
 <script>
 var STATUS_URL = '{{ route('correcao.status', $prova['id'], false) }}';
 var CARTOES_URL = '/cartoes';
+var LISTA_URL = '{{ route('correcao.cartoes', $prova['id'], false) }}';
+var PROVA_ID = {{ (int) $prova['id'] }};
+var PODE_EXCLUIR = {{ \App\Support\Acesso::pode('correcao.resolver') ? 'true' : 'false' }};
+var NOTA_MAX = {{ (float) ($prova['nota_maxima'] ?? 10) }};
+
+// ---------- Alunos corrigidos ----------
+var corrDados = [], corrAssinatura = '';
+function escH(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
+function fmtNota(n) { return Number(n).toFixed(1).replace('.', ','); }
+function carregarCorrigidos() {
+  fetch(LISTA_URL, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var lista = d.cartoes || [], assin = JSON.stringify(lista);
+      if (assin === corrAssinatura) return; // nada mudou: não redesenha (evita piscar as fotos)
+      corrAssinatura = assin; corrDados = lista; desenharCorrigidos();
+    }).catch(function () {});
+}
+function desenharCorrigidos() {
+  var termo = (document.getElementById('corr-busca').value || '').toLowerCase();
+  var itens = corrDados.filter(function (c) {
+    return !termo || (c.aluno_nome || 'aluno não identificado').toLowerCase().indexOf(termo) >= 0 || String(c.matricula || '').indexOf(termo) >= 0;
+  });
+  document.getElementById('corr-qtd').textContent = corrDados.length;
+  var ul = document.getElementById('corr-lista');
+  if (!itens.length) {
+    ul.innerHTML = '<li style="color:var(--muted);font-size:13px;">' + (corrDados.length ? 'Nenhum aluno encontrado.' : 'Nenhum cartão corrigido ainda.') + '</li>';
+    return;
+  }
+  ul.innerHTML = itens.map(function (c) {
+    var nome = c.aluno_nome ? escH(c.aluno_nome) : '<span style="color:var(--danger)">Aluno não identificado</span>';
+    var sub = [c.turma, c.matricula, c.lingua ? (c.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : null].filter(Boolean).map(escH).join(' · ');
+    var st = c.status === 'lido' ? '<span class="badge badge-success">lido</span>'
+      : c.status === 'ambiguo' ? '<span class="badge badge-warn">' + c.ambiguas + ' p/ revisar</span>'
+      : '<span class="badge badge-muted">lendo</span>';
+    var nota = (c.nota_final !== null && c.nota_final !== undefined)
+      ? '<div class="corr-nota" style="color:' + (Number(c.nota_final) >= NOTA_MAX * 0.6 ? 'var(--success,#168821)' : 'var(--danger,#e52207)') + '">' + fmtNota(c.nota_final) + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
+      : '';
+    var foto = c.tem_imagem
+      ? '<img class="corr-thumb" loading="lazy" src="' + CARTOES_URL + '/' + c.id + '/imagem" alt="Foto do cartão" onclick="verFoto(' + c.id + ')">'
+      : '<div class="corr-thumb" style="display:grid;place-items:center;font-size:11px;color:var(--muted);">sem foto</div>';
+    var acoes = '';
+    if (c.aluno_id && c.nota_final !== null && c.nota_final !== undefined) {
+      acoes += '<button type="button" class="btn btn-sm btn-secondary" onclick="verFolha(' + c.aluno_id + ')">📋 Acertos e erros</button>';
+    }
+    if (!c.aluno_id && typeof seletorAluno === 'function' && typeof ALUNOS !== 'undefined' && ALUNOS.length) acoes += seletorAluno(c.id);
+    if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">🗑 Excluir</button>';
+    return '<li class="corr-item">' + foto + '<div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
+      + '<div style="margin-top:4px;">' + st + '</div><div class="corr-acoes">' + acoes + '</div></div><div>' + nota + '</div></li>';
+  }).join('');
+}
+function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+function fecharModal(id) { document.getElementById(id).style.display = 'none'; if (id === 'foto-modal') document.getElementById('foto-img').src = ''; }
+function verFoto(id) {
+  var c = corrDados.filter(function (x) { return x.id === id; })[0] || {};
+  document.getElementById('foto-titulo').textContent = (c.aluno_nome || 'Aluno não identificado') + (c.turma ? ' · ' + c.turma : '');
+  document.getElementById('foto-img').src = CARTOES_URL + '/' + id + '/imagem';
+  abrirModal('foto-modal');
+}
+// Relatório de acertos e erros do aluno, questão por questão
+function verFolha(alunoId) {
+  var grid = document.getElementById('folha-grid');
+  grid.innerHTML = '<span style="color:var(--muted);font-size:13px;">Carregando…</span>';
+  document.getElementById('folha-resumo').innerHTML = '';
+  document.getElementById('folha-link').href = '/resultados/' + alunoId + '/' + PROVA_ID;
+  abrirModal('folha-modal');
+  fetch('/resultados/' + alunoId + '/' + PROVA_ID + '/folha', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d.folha) { grid.innerHTML = escH(d.erro || 'Resultado indisponível.'); return; }
+      var cont = { correta: 0, incorreta: 0, branco: 0, anulada: 0 };
+      d.folha.forEach(function (q) { cont[q.situacao] = (cont[q.situacao] || 0) + 1; });
+      document.getElementById('folha-titulo').textContent = d.aluno.nome + (d.aluno.turma_nome ? ' · ' + d.aluno.turma_nome : '');
+      document.getElementById('folha-resumo').innerHTML = '<b>' + fmtNota(d.nota.nota_final) + '</b> · ' + cont.correta + ' acertos · '
+        + cont.incorreta + ' erros · ' + cont.branco + ' em branco' + (d.lingua ? ' · ' + (d.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : '');
+      grid.innerHTML = d.folha.map(function (q) {
+        var n = ('0' + q.numero_questao).slice(-2), cls = q.ambigua && q.situacao === 'branco' ? 'ambigua' : q.situacao;
+        var txt = q.situacao === 'correta' ? '✓ ' + escH(q.marcada)
+          : q.situacao === 'incorreta' ? escH(q.marcada) + ' → ' + escH(q.gabarito)
+          : q.situacao === 'anulada' ? 'anulada'
+          : (q.ambigua ? '? → ' : '— → ') + escH(q.gabarito);
+        return '<div class="folha-q ' + cls + '"><b>' + n + '</b> ' + txt + '</div>';
+      }).join('');
+    }).catch(function () { grid.innerHTML = 'Não foi possível carregar o resultado.'; });
+}
+function excluirCorrecao(id) {
+  var c = corrDados.filter(function (x) { return x.id === id; })[0] || {};
+  if (!confirm('Excluir a correção de ' + (c.aluno_nome || 'este cartão') + '?\nA foto e a nota serão apagadas e você poderá fotografar o cartão de novo.')) return;
+  fetch(CARTOES_URL + '/' + id, { method: 'DELETE', credentials: 'same-origin', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF } })
+    .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+    .then(function (res) {
+      if (!res.ok) { alert(res.j.erro || 'Não foi possível excluir.'); return; }
+      corrAssinatura = ''; carregarCorrigidos(); atualizar();
+    });
+}
+document.getElementById('corr-busca').addEventListener('input', desenharCorrigidos);
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fecharModal('foto-modal'); fecharModal('folha-modal'); } });
+carregarCorrigidos();
+setInterval(carregarCorrigidos, 6000);
 var CSRF = '{{ csrf_token() }}';
 
 function abrirUpload() { document.getElementById('modal-upload').style.display = 'flex'; }

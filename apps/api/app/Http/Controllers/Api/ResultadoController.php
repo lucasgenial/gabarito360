@@ -46,12 +46,16 @@ class ResultadoController extends Controller
         foreach ($questoesGabarito as $numero => $questao) {
             $resposta = $respostas->get($numero);
             $marcada  = $resposta?->alternativa;
+            // Mesmo critério da CalculadoraNota: aluno de Espanhol usa o gabarito alternativo
+            $esperada = ($prova->opcao_lingua && $cartao?->lingua === 'ESP' && !empty($questao->alternativa_espanhol))
+                ? $questao->alternativa_espanhol
+                : $questao->alternativa;
 
             if ($questao->anulada) {
                 $situacao = 'anulada';
             } elseif ($marcada === null) {
                 $situacao = 'branco';
-            } elseif ($marcada === $questao->alternativa) {
+            } elseif ($marcada === $esperada) {
                 $situacao = 'correta';
             } else {
                 $situacao = 'incorreta';
@@ -59,8 +63,9 @@ class ResultadoController extends Controller
 
             $folha[] = [
                 'numero_questao' => $numero,
-                'gabarito'       => $questao->alternativa,
+                'gabarito'       => $esperada,
                 'marcada'        => $marcada,
+                'ambigua'        => (bool) ($resposta?->ambigua ?? false),
                 'situacao'       => $situacao,
             ];
         }
@@ -94,6 +99,7 @@ class ResultadoController extends Controller
                 'status_aprovacao' => $nota->status_aprovacao,
             ],
             'cartao_id'       => $nota->cartao_id,
+            'lingua'          => $cartao?->lingua,
             'media_turma'     => $mediaTurma !== null ? round((float) $mediaTurma, 1) : null,
             'confianca_geral' => $cartao ? (float) $cartao->confianca_geral : null,
             'folha'           => $folha,

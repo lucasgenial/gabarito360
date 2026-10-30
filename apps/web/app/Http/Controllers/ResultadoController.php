@@ -24,4 +24,15 @@ class ResultadoController extends Controller
             'turma' => $request->query('turma'),
         ]);
     }
+
+    /** Acertos e erros por questão (JSON) para o modal da tela de correção. */
+    public function folha(int $alunoId, int $provaId)
+    {
+        $resp = $this->api->get("/v1/alunos/{$alunoId}/resultados/{$provaId}");
+
+        return response()->json(
+            $resp->failed() ? ['erro' => $resp->json('message') ?? 'Resultado indisponível.'] : $resp->json('data'),
+            $resp->failed() ? 404 : 200
+        );
+    }
 }
