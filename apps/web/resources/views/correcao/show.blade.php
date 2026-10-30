@@ -189,16 +189,30 @@ function desenharCorrigidos() {
       ? '<div class="corr-nota" style="color:' + (Number(c.nota_final) >= NOTA_MAX * 0.6 ? 'var(--success)' : 'var(--danger)') + '">' + fmtNota(c.nota_final) + '</div>'
         + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
       : '';
-    // Foto só ao clicar: cada imagem ocupa dois processos do servidor (web e API)
+    var foto = c.miniatura_url
+      ? '<img class="corr-thumb" data-src="' + escH(c.miniatura_url) + '" alt="Foto do cartão" onclick="verFoto(' + c.id + ')">'
+      : '<div class="corr-thumb" style="display:grid;place-items:center;font-size:11px;color:var(--muted);">sem miniatura</div>';
     var acoes = c.tem_imagem ? '<button type="button" class="btn btn-sm btn-ghost" onclick="verFoto(' + c.id + ')">Ver foto</button>' : '';
     if (c.aluno_id && c.nota_final !== null && c.nota_final !== undefined) {
       acoes += '<a class="btn btn-sm btn-secondary" href="/resultados/' + c.aluno_id + '/' + PROVA_ID + '?from=correcao">Acertos e erros</a>';
     }
     if (!c.aluno_id && typeof seletorAluno === 'function' && typeof ALUNOS !== 'undefined' && ALUNOS.length) acoes += seletorAluno(c.id);
     if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">Excluir</button>';
-    return '<li class="corr-item"><div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
+    return '<li class="corr-item">' + foto + '<div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
       + '<div style="margin-top:4px;">' + st + '</div><div class="corr-acoes">' + acoes + '</div></div><div>' + nota + '</div></li>';
   }).join('');
+  filaMiniaturas = Array.prototype.slice.call(ul.querySelectorAll('img[data-src]'));
+  proximaMiniatura();
+}
+// Poucas por vez, para uma turma inteira não ocupar todos os processos da API
+var filaMiniaturas = [], miniaturasAtivas = 0;
+function proximaMiniatura() {
+  while (miniaturasAtivas < 4 && filaMiniaturas.length) {
+    var img = filaMiniaturas.shift();
+    miniaturasAtivas++;
+    img.onload = img.onerror = function () { miniaturasAtivas--; proximaMiniatura(); };
+    img.src = img.getAttribute('data-src');
+  }
 }
 function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
 function fecharModal(id) { document.getElementById(id).style.display = 'none'; if (id === 'foto-modal') document.getElementById('foto-img').src = ''; }
@@ -207,7 +221,7 @@ function verFoto(id) {
   document.getElementById('foto-titulo').textContent = (c.aluno_nome || 'Aluno não identificado') + (c.turma ? ' · ' + c.turma : '');
   document.getElementById('foto-erro').style.display = 'none';
   document.getElementById('foto-img').style.display = '';
-  document.getElementById('foto-img').src = CARTOES_URL + '/' + id + '/imagem';
+  document.getElementById('foto-img').src = c.foto_url || (CARTOES_URL + '/' + id + '/imagem');
   abrirModal('foto-modal');
 }
 function excluirCorrecao(id) {

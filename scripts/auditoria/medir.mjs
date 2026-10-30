@@ -13,6 +13,7 @@ const BASE = 'http://auditoria.local';
 const CARTOES = Array.from({ length: 47 }, (_, i) => ({
   id: i + 1, aluno_id: i + 1, aluno_nome: `Aluno ${i + 1}`, turma: '3A', matricula: String(i + 1),
   lingua: 'ING', status: 'lido', ambiguas: 0, nota_final: 5, acertos: 20, total_questoes: 45, tem_imagem: true,
+  miniatura_url: `/api/v1/cartoes/${i + 1}/arquivo/miniatura?signature=teste`,
 }));
 const STATUS = { total: 47, lidos: 47, pendentes: 0, ambiguos: 0, concluida: false, esperados: 54,
   ambiguidades: [], recentes: [], prova_status: 'em_correcao', correcao: {} };

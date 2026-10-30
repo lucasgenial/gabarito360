@@ -6,6 +6,7 @@ use App\Models\Cartao;
 use App\Models\Prova;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
+use App\Services\Omr\ImagensCartao;
 use App\Services\Omr\OmrDriverInterface;
 use App\Services\Omr\OmrIdentificacaoInterface;
 use Illuminate\Bus\Queueable;
@@ -25,7 +26,7 @@ class ProcessarCartaoJob implements ShouldQueue
 
     public function __construct(public int $cartaoId) {}
 
-    public function handle(OmrDriverInterface $driver): void
+    public function handle(OmrDriverInterface $driver, ImagensCartao $imagens): void
     {
         $cartao = Cartao::find($this->cartaoId);
         if (!$cartao) {
@@ -108,6 +109,8 @@ class ProcessarCartaoJob implements ShouldQueue
         if ($status === 'lido') {
             CalculadoraNota::calcular($cartao);
         }
+
+        $imagens->gerar($cartao);
 
         AtualizadorStatusProva::atualizar($prova);
     }

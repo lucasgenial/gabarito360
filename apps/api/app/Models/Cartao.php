@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Omr\ImagensCartao;
 use Illuminate\Database\Eloquent\Model;
 
 class Cartao extends Model
@@ -12,6 +13,11 @@ class Cartao extends Model
         'prova_id', 'aluno_id', 'lingua', 'imagem_url', 'status',
         'confianca_geral', 'resolvido_por', 'resolvido_em', 'revisado_por', 'revisado_em',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleted(fn (Cartao $cartao) => app(ImagensCartao::class)->apagar($cartao->id));
+    }
 
     public function prova()
     {
