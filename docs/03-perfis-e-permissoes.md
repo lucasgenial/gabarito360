@@ -1,354 +1,191 @@
-# 03 — Perfis e Permissões
+# 03 — Perfis e Permissões (catálogo oficial)
+
+> **Versão 2 — 30/10/2026** (etapa 1 do `docs/21-plano-perfis-permissoes-e-telas.md`).
+> Substitui as matrizes da versão de 18/06/2026. Este documento é a **fonte única** do que cada
+> perfil pode fazer: o motor de permissões (etapa 2) é semeado a partir dele, as rotas da API e os
+> botões das telas devem obedecê-lo. Mudanças aqui exigem aprovação do responsável pelo produto.
 
 ---
 
-## ⚠️ Mudança Estrutural (2026-06-18)
+## 1. Conceitos
 
-O Gabarito360 passa a ser vendido como **produto SaaS multi-tenant**, com dois caminhos de
-cadastro/assinatura:
+| Conceito | Significado |
+|----------|-------------|
+| **Perfil** | Papel do usuário (8 perfis, seção 2). Define o **escopo** e as **permissões padrão**. |
+| **Escopo** | Até onde o usuário enxerga: secretaria, rede, núcleo, escola ou turmas. **Sempre verificado na API**. |
+| **Permissão** | Uma ação com chave estável (ex.: `prova.criar`). Catálogo na seção 4. |
+| **Padrão do perfil** (✓) | Permissões que todo usuário do perfil tem ao ser cadastrado. |
+| **Extra** (○) | Permissão que **não** é padrão do perfil mas **pode ser concedida** a uma pessoa por quem a cadastra/gere. |
+| **Nunca** (—) | Não pode ser dada a esse perfil, nem como extra. |
+| **Retirada** | Uma permissão padrão pode ser **retirada** de uma pessoa específica (ex.: professor que não fecha correção). |
 
-1. **Individual:** um professor se cadastra sozinho, escolhe um plano, paga e passa a
-   gerenciar sua própria escola/turmas/alunos/provas, sem depender de nenhuma rede
-   institucional.
-2. **Institucional:** uma secretaria de educação, rede municipal/estadual ou escola se
-   cadastra como instituição (fluxo já existente, hoje sujeito a aprovação manual),
-   cadastra sua estrutura (núcleos, escolas, turmas) e convida sua equipe.
-
-Isso adiciona **2 novos perfis** (SECRETARIO_EDUCACAO, APLICADOR) e **1 novo nível
-hierárquico** (Secretaria, acima da Rede). O sistema passa a reconhecer **8 perfis**.
-Ver `docs/13-roadmap.md` (MP-025 em diante) para o plano de implementação.
-
----
-
-## Perfis Oficiais
-
-| Código              | Perfil                  | Escopo de Visibilidade                          |
-|---------------------|--------------------------|-------------------------------------------------|
-| SECRETARIO_EDUCACAO  | Secretário de Educação   | Todas as redes vinculadas à sua secretaria      |
-| ADMIN_REDE           | Administrador Rede       | Toda a rede (institucional ou individual)       |
-| DIR_NUCLEO           | Diretor de Núcleo        | Escolas do núcleo                                |
-| DIR_ESCOLAR          | Diretor Escolar          | Sua escola                                       |
-| COORDENADOR          | Coordenador              | Sua escola (foco pedagógico)                     |
-| PROFESSOR            | Professor                | Suas turmas e provas                             |
-| APLICADOR            | Aplicador                | Provas do dia que precisa aplicar, em sua escola |
-| ALUNO                | Aluno                    | Seus próprios dados                              |
-
-Nenhum perfil adicional pode ser criado sem aprovação documentada.
-
-**Nota sobre conta individual (professor autônomo):** ao se cadastrar como conta
-individual, o professor recebe o perfil **PROFESSOR**, mas dentro da escola que o
-sistema cria automaticamente para ele, suas permissões são equivalentes às de um
-DIR_ESCOLAR (cadastra suas próprias turmas, alunos, outros professores/aplicadores que
-convidar). Isso é resolvido via o motor de permissões configuráveis (MP-029), não por
-um perfil novo — o "perfil" continua sendo PROFESSOR, o que muda é o conjunto de
-permissões dentro daquele contexto de escola.
+Regras de concessão (valem para extras e retiradas):
+1. Só concede uma permissão quem **também a tem** (padrão ou extra).
+2. Só concede **dentro do próprio escopo** (a escola do diretor, o núcleo do diretor de núcleo…).
+3. Só concede a quem ele **pode gerir** (seção 3 — perfis abaixo do seu).
+4. Toda concessão/retirada é **registrada**: quem deu, para quem, o quê, em qual escopo, quando e
+   até quando (validade opcional, ex.: aplicador só no dia da prova).
+5. O escopo nunca é ampliado por permissão extra: um professor com `relatorio.escola` vê o relatório
+   **da escola dele**, não de outras.
 
 ---
 
-## Hierarquia de Acesso
+## 2. Perfis
 
-```
-SECRETARIO_EDUCACAO (supervisiona N redes de uma secretaria)
-    └── REDE (institucional OU individual — ver nota abaixo)
-            └── ADMIN_REDE
-                    └── DIR_NUCLEO (por núcleo)
-                            └── DIR_ESCOLAR (por escola)
-                                    └── COORDENADOR (por escola)
-                                            └── PROFESSOR (por turma)
-                                            └── APLICADOR (por escola, restrito ao dia de aplicação)
-                                                    └── ALUNO (por matrícula)
-```
-
-**Nota — Rede individual:** quando um professor se cadastra sozinho, o sistema cria
-automaticamente, de forma transparente (sem o professor precisar ver essas telas):
-1 `rede` com `tipo = 'individual'`, 1 `nucleo` padrão dentro dela, e 1 `escola` (a dele).
-Ele assume o perfil PROFESSOR com permissões elevadas (ver nota acima) dentro dessa
-escola. A estrutura de dados continua igual à institucional — só a UI esconde os
-níveis "rede"/"núcleo" para esse tipo de conta. Isso permite que, se uma prefeitura
-assinar depois, a escola do professor possa ser **migrada** para dentro da rede
-institucional (MP-030) sem mudança de schema.
+| Perfil | Escopo | Faz (resumo) | Não faz | Restrições |
+|--------|--------|--------------|---------|------------|
+| **Secretário de Educação** (`secretario_educacao`) | redes da sua secretaria | relatórios consolidados das redes | operar escola, prova, correção, usuários | somente leitura |
+| **Administrador da Rede** (`admin_rede`) | toda a rede | tudo dentro da rede | — | não vê outras redes; titularidade da assinatura é separada (seção 6) |
+| **Diretor de Núcleo** (`dir_nucleo`) | escolas do seu núcleo | cadastra/edita/desativa **escolas e anexos** do núcleo, logo do ente, cadastra diretores e coordenadores, relatórios do núcleo e das escolas | criar prova, corrigir, cadastrar professor/aluno | não muda escolas para outro núcleo |
+| **Diretor Escolar** (`dir_escolar`) | sua escola | edita dados e logo da escola, gere a equipe (coordenador, professor, aplicador, aluno), turmas e alunos, acompanha e **reabre correções**, relatórios da escola | cadastrar escola, criar/editar prova ou gabarito | não muda núcleo nem ativação da escola |
+| **Coordenador** (`coordenador`) | sua escola | provas e gabaritos, cartões, correção (inclusive **fechada**), reabre correção, turmas, alunos, vínculo professor↔turma, equipe (professor, aplicador, aluno), logo da escola, relatórios da escola | cadastrar escola, gerir diretor | — |
+| **Professor** (`professor`) | **suas turmas** (vínculo professor↔turma) | provas das suas turmas, gabarito, cartões, corrigir com a correção **aberta**, fechar correção, resultados e relatórios das suas turmas | alterar com correção fechada, ver outras turmas, gerir usuários | em conta individual (SaaS) recebe permissões de diretor na própria escola (seção 6) |
+| **Aplicador** (`aplicador`) | provas **do dia** da sua escola | fotografar/enviar cartões | ver nota, gabarito, relatório, acompanhar correção | só provas com data de aplicação = hoje; nunca com correção fechada |
+| **Aluno** (`aluno`) | seus próprios dados | ver seus resultados e boletim | ver qualquer dado de outro aluno | depende do vínculo usuário↔aluno (pendente) |
 
 ---
 
-## Permissões por Módulo
+## 3. Quem cadastra e gere quem
 
-### Autenticação e Cadastro
+Implementado em `apps/api/app/Support/Cadastro.php` (etapa 0). Vale para cadastrar, editar,
+mudar perfil, trocar senha, desativar **e conceder/retirar permissões**.
 
-| Ação                              | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|------------------------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Login                              | ✓       | ✓     | ✓       | ✓       | ✓     | ✓    | ✓     | ✓     |
-| Cadastro institucional autônomo    | ✓*      | ✓*    | -       | -       | -     | -    | -     | -     |
-| Cadastro individual autônomo       | -       | -     | -       | -       | -     | ✓**  | -     | -     |
-| Cadastro de usuário (convite)      | -       | ✓     | -       | ✓***    | -     | -    | -     | -     |
-| Redefinir senha                    | ✓       | ✓     | ✓       | ✓       | ✓     | ✓    | ✓     | ✓     |
-| Gerenciar usuários                 | -       | ✓     | -       | ✓***    | -     | -    | -     | -     |
+| Quem | Pode cadastrar/gerir | Onde |
+|------|----------------------|------|
+| Administrador da Rede | admin da rede, diretor de núcleo, diretor escolar, coordenador, professor, aplicador, aluno | toda a rede |
+| Diretor de Núcleo | diretor escolar, coordenador | escolas do núcleo |
+| Diretor Escolar | coordenador, professor, aplicador, aluno | sua escola |
+| Coordenador | professor, aplicador, aluno | sua escola |
+| Professor, Aplicador, Aluno | ninguém | — |
 
-*SEC_EDU/ADMIN: cadastro institucional sujeito a confirmação de e-mail + assinatura ativa (ver RN-001 revisada), não mais aprovação manual.
-**PROF: cadastro individual sujeito apenas a pagamento confirmado.
-***DIR_ESC: apenas usuários de sua escola, incluindo agora PROFESSOR e APLICADOR.
+O **Secretário de Educação** é cadastrado pela equipe do Gabarito360 (contratação institucional).
 
 ---
 
-### Secretaria (novo)
+## 4. Catálogo de permissões
 
-| Ação                        | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|------------------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Ver dados da secretaria      | ✓       | -     | -       | -       | -     | -    | -     | -     |
-| Criar rede dentro da secretaria | ✓    | -     | -       | -       | -     | -    | -     | -     |
-| Relatório consolidado (todas as redes da secretaria) | ✓ | - | - | - | - | - | - | - |
+Colunas: **SEC** secretário · **ADM** admin da rede · **NUC** diretor de núcleo · **DIR** diretor
+escolar · **COO** coordenador · **PRO** professor · **APL** aplicador · **ALU** aluno.
+✓ padrão · ○ pode ser concedida como extra · — nunca.
 
----
+### 4.1 Rede, núcleos e escolas
 
-### Rede
+| Chave | Ação | SEC | ADM | NUC | DIR | COO | PRO | APL | ALU |
+|-------|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `rede.configurar` | parâmetros da rede (metas, etc.) | — | ✓ | — | — | — | — | — | — |
+| `rede.logo` | enviar logo do ente (governo/prefeitura/mantenedora) | — | ✓ | ✓ | ○ | — | — | — | — |
+| `nucleo.ver` | ver núcleos | ✓ | ✓ | ✓ | — | — | — | — | — |
+| `nucleo.gerir` | criar/editar/excluir núcleo | — | ✓ | ○¹ | — | — | — | — | — |
+| `escola.ver` | ver dados da escola | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| `escola.criar` | cadastrar escola e **anexos** | — | ✓ | ✓ | — | — | — | — | — |
+| `escola.editar` | editar dados da escola | — | ✓ | ✓ | ✓ | ○ | — | — | — |
+| `escola.desativar` | ativar/desativar escola | — | ✓ | ✓ | — | — | — | — | — |
+| `escola.logo` | enviar logo da escola | — | ✓ | ✓ | ✓ | ✓ | — | — | — |
 
-| Ação              | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|-------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Ver dados da rede | ✓*      | ✓     | -       | -       | -     | -    | -     | -     |
-| Editar rede       | -       | ✓     | -       | -       | -     | -    | -     | -     |
-| Relatório da rede | ✓*      | ✓     | -       | -       | -     | -    | -     | -     |
+¹ diretor de núcleo só edita o próprio núcleo.
 
-*SEC_EDU: apenas redes vinculadas à sua secretaria.
+### 4.2 Equipe e usuários
 
----
+| Chave | Ação | SEC | ADM | NUC | DIR | COO | PRO | APL | ALU |
+|-------|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `usuario.ver` | ver a equipe do escopo | — | ✓ | ✓ | ✓ | ✓ | ○ | — | — |
+| `usuario.gerir` | cadastrar/editar/desativar (conforme seção 3) | — | ✓ | ✓ | ✓ | ✓ | — | — | — |
+| `usuario.permissoes` | conceder/retirar permissões (regras da seção 1) | — | ✓ | ✓ | ✓ | ○ | — | — | — |
 
-### Núcleos
+### 4.3 Turmas e alunos
 
-| Ação               | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|--------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Listar núcleos     | -       | ✓     | ✓*      | -       | -     | -    | -     | -     |
-| Criar núcleo       | -       | ✓     | -       | -       | -     | -    | -     | -     |
-| Editar núcleo      | -       | ✓     | ✓*      | -       | -     | -    | -     | -     |
-| Relatório núcleo   | -       | ✓     | ✓*      | -       | -     | -    | -     | -     |
-| Agendar visita     | -       | ✓     | ✓*      | -       | -     | -    | -     | -     |
+| Chave | Ação | SEC | ADM | NUC | DIR | COO | PRO | APL | ALU |
+|-------|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `turma.ver` | ver turmas (professor: as suas) | — | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `turma.gerir` | criar/editar turma | — | ✓ | — | ✓ | ✓ | ○ | — | — |
+| `turma.desativar` | ativar/desativar turma | — | ✓ | — | ✓ | ○ | — | — | — |
+| `turma.vincular_professor` | vincular/desvincular professor | — | ✓ | — | ✓ | ✓ | — | — | — |
+| `aluno.ver` | ver alunos (professor: das suas turmas) | — | ✓ | ✓ | ✓ | ✓ | ✓ | — | ○² |
+| `aluno.gerir` | cadastrar/editar aluno | — | ✓ | — | ✓ | ✓ | ○ | — | — |
+| `aluno.importar` | importar alunos por planilha | — | ✓ | — | ✓ | ✓ | ○ | — | — |
+| `aluno.desativar` | ativar/desativar aluno | — | ✓ | — | ✓ | ✓ | — | — | — |
 
-*DIR_NUC: apenas seu núcleo
+² aluno: somente o próprio cadastro.
 
----
+### 4.4 Provas e gabaritos
 
-### Escolas
+| Chave | Ação | SEC | ADM | NUC | DIR | COO | PRO | APL | ALU |
+|-------|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `prova.ver` | ver provas (professor: das suas turmas; aplicador: só identificação das do dia) | — | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| `prova.criar` | criar prova | — | ✓ | — | ○ | ✓ | ✓ | — | — |
+| `prova.editar` | editar, publicar e excluir rascunho | — | ✓ | — | ○ | ✓ | ✓ | — | — |
+| `gabarito.ver` | ver gabarito | — | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `gabarito.editar` | editar/publicar gabarito | — | ✓ | — | ○ | ✓ | ✓ | — | — |
 
-| Ação                | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|---------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Listar escolas      | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓**  | ✓**   | -     |
-| Criar escola        | -       | ✓     | -       | -       | -     | ✓‡   | -     | -     |
-| Editar escola       | -       | ✓     | -       | ✓**     | -     | ✓**‡ | -     | -     |
-| Desativar escola    | -       | ✓     | -       | -       | -     | -    | -     | -     |
-| Reativar escola     | -       | ✓     | -       | -       | -     | -    | -     | -     |
-| Ver detalhes escola | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓**  | ✓**   | -     |
+### 4.5 Cartões e correção
 
-*DIR_NUC: escolas do seu núcleo
-**DIR_ESC/COORD/PROF/APLIC: apenas sua escola
-‡PROF: apenas em conta individual, e apenas a própria escola auto-criada no cadastro (não pode criar uma segunda)
+| Chave | Ação | SEC | ADM | NUC | DIR | COO | PRO | APL | ALU |
+|-------|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `cartao.imprimir` | gerar PDF dos cartões-resposta | — | ✓ | — | ✓ | ✓ | ✓ | ○ | — |
+| `cartao.enviar` | fotografar/enviar cartões | — | ✓ | — | ✓ | ✓ | ✓ | ✓ | — |
+| `correcao.acompanhar` | acompanhar correção (prova e turma) | — | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `correcao.alterar` | resolver ambíguos, vincular aluno, revisar leitura, **excluir correção** (correção aberta) | — | ✓ | — | ✓ | ✓ | ✓ | — | — |
+| `correcao.fechar` | fechar a correção | — | ✓ | — | ✓ | ✓ | ✓ | — | — |
+| `correcao.reabrir` | reabrir a correção **e** alterar/excluir/incluir com ela fechada | — | ✓ | — | ✓ | ✓ | ○ | — | — |
 
----
+### 4.6 Resultados e relatórios
 
-### Turmas
+| Chave | Ação | SEC | ADM | NUC | DIR | COO | PRO | APL | ALU |
+|-------|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `resultado.ver` | acertos e erros do aluno (aluno: só o próprio) | — | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ |
+| `resultado.compartilhar` | PDF/WhatsApp do resultado e boletim | — | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ |
+| `relatorio.prova` | relatório da prova e da turma na prova (análise por questão) | — | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `relatorio.turma` | relatório consolidado da turma e boletim | — | ✓ | ✓ | ✓ | ✓ | ✓ | — | — |
+| `relatorio.escola` | relatório da escola | — | ✓ | ✓ | ✓ | ✓ | ○ | — | — |
+| `relatorio.nucleo` | relatório do núcleo | — | ✓ | ✓ | — | — | — | — | — |
+| `relatorio.rede` | relatório da rede | ✓³ | ✓ | — | — | — | — | — | — |
+| `relatorio.secretaria` | consolidado da secretaria | ✓ | — | — | — | — | — | — | — |
 
-| Ação               | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|--------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Listar turmas      | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | ✓***  | -     |
-| Criar turma        | -       | ✓     | -       | ✓**     | ✓**   | ✓‡   | -     | -     |
-| Editar turma       | -       | ✓     | -       | ✓**     | ✓**   | ✓‡   | -     | -     |
-| Importar planilha  | -       | ✓     | -       | ✓**     | ✓**   | ✓‡   | -     | -     |
-| Ver detalhe turma  | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | ✓***  | -     |
-
-*DIR_NUC: turmas das escolas do núcleo
-**DIR_ESC/COORD: turmas de sua escola
-***PROF/APLIC: apenas suas turmas / turmas com prova agendada para o dia
-‡PROF: apenas dentro da própria escola, em conta individual
-
----
-
-### Alunos
-
-| Ação                   | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|------------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Listar alunos          | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | -     | -     |
-| Cadastrar aluno        | -       | ✓     | -       | ✓**     | ✓**   | ✓‡   | -     | -     |
-| Editar aluno           | -       | ✓     | -       | ✓**     | ✓**   | ✓‡   | -     | -     |
-| Ver detalhe aluno      | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | -     | ✓**** |
-| Exportar ficha PDF     | -       | ✓     | -       | ✓**     | ✓**   | ✓*** | -     | ✓**** |
-| Ver histórico avaliação| -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | -     | ✓**** |
-
-*DIR_NUC: alunos das escolas do núcleo
-**DIR_ESC/COORD: alunos de sua escola
-***PROF: alunos de suas turmas
-****ALUNO: apenas seus próprios dados
-‡PROF: apenas dentro da própria escola, em conta individual
+³ secretário: redes da sua secretaria.
 
 ---
 
-### Equipe / Membros
+## 5. Regras transversais (já em produção)
 
-| Ação                  | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|-----------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Listar membros        | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓‡   | -     | -     |
-| Cadastrar membro      | -       | ✓     | -       | ✓**     | -     | ✓‡   | -     | -     |
-| Convidar aplicador    | -       | ✓     | -       | ✓**     | ✓**   | ✓‡   | -     | -     |
-| Editar membro         | -       | ✓     | -       | ✓**     | -     | ✓‡   | -     | -     |
-| Alterar perfil membro | -       | ✓     | -       | ✓**     | -     | -    | -     | -     |
-| Desativar membro      | -       | ✓     | -       | ✓**     | -     | ✓‡   | -     | -     |
-
-*DIR_NUC: membros das escolas do núcleo
-**DIR_ESC: membros de sua escola
-‡PROF: apenas em conta individual, dentro da própria escola (pode convidar outros professores/aplicadores para colaborar)
+- **Escopo na API** em toda consulta e alteração (`App\Support\Escopo`); a tela só esconde botões.
+- **Correção fechada** (`provas.correcao_fechada_em`): sem `correcao.reabrir`, ninguém envia, exclui,
+  vincula ou revisa; quem tem `correcao.reabrir` continua alterando e pode reabrir.
+- **Cartão de outra prova**: o QR manda o cartão para a prova certa da mesma escola; se não puder,
+  o envio é recusado com o motivo.
+- **Aplicador** nunca recebe nota, gabarito ou relatório na resposta da API.
+- **Fotos de cartões** e PDFs só são servidos a quem acessa a prova (nunca por URL pública).
 
 ---
 
-### Provas
+## 6. Assinatura (SaaS) e conta individual
 
-| Ação                  | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|-----------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Listar provas         | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | ✓†    | -     |
-| Criar prova           | -       | ✓     | -       | -       | ✓**   | ✓*** | -     | -     |
-| Editar prova rascunho | -       | ✓     | -       | -       | ✓**   | ✓*** | -     | -     |
-| Publicar gabarito     | -       | ✓     | -       | -       | ✓**   | ✓*** | -     | -     |
-| Ver gabarito          | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | -     | -     |
-| Exportar gabarito PDF | -       | ✓     | -       | ✓**     | ✓**   | ✓*** | -     | -     |
-
-*DIR_NUC: provas das escolas do núcleo
-**DIR_ESC/COORD: provas de sua escola
-***PROF: apenas suas próprias provas
-†APLIC: apenas provas agendadas para o dia, na sua escola — sem ver conteúdo/gabarito, só identificação e turma
+- **Assinatura e cobrança** não dependem do perfil: só o **titular** da conta (quem contratou) vê e
+  gere plano, pagamentos e cancelamento.
+- **Professor em conta individual**: continua com perfil `professor`, mas na escola criada para ele
+  recebe como **extras automáticas** as permissões de diretor escolar daquela escola (`escola.editar`,
+  `turma.gerir`, `aluno.gerir`, `aluno.importar`, `usuario.gerir` para professor/aplicador, `relatorio.escola`).
 
 ---
 
-### OMR e Correção
+## 7. Divergências entre o código atual e este catálogo (corrigir na etapa 2)
 
-| Ação                        | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|-----------------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Acompanhar correção (prova) | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | -     | -     |
-| Capturar/enviar cartões     | -       | ✓     | -       | -       | ✓**   | ✓*** | ✓†    | -     |
-| Resolver ambíguos           | -       | ✓     | -       | -       | ✓**   | ✓*** | -     | -     |
-| Revisar leitura             | -       | ✓     | -       | -       | ✓**   | ✓*** | -     | -     |
-| Atualizar leitura           | -       | ✓     | -       | -       | ✓**   | ✓*** | -     | -     |
-
-†APLIC: única ação permitida ao aplicador no módulo de correção — enviar os cartões da prova que aplicou no dia. Não acompanha progresso, não resolve ambíguos, não vê notas.
-
----
-
-### Resultados
-
-| Ação                        | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|-----------------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Ver resultado individual    | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | -     | ✓**** |
-| Exportar resultado PDF      | -       | ✓     | -       | ✓**     | ✓**   | ✓*** | -     | ✓**** |
-| Ver relatório da prova      | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | -     | -     |
-| Ver relatório da turma      | -       | ✓     | ✓*      | ✓**     | ✓**   | ✓*** | -     | -     |
-| Ver relatório da escola     | -       | ✓     | ✓*      | ✓**     | -     | -    | -     | -     |
-| Ver relatório do núcleo     | -       | ✓     | ✓**     | -       | -     | -    | -     | -     |
-| Ver relatório da rede       | -       | ✓     | -       | -       | -     | -    | -     | -     |
-| Ver relatório da secretaria | ✓       | -     | -       | -       | -     | -    | -     | -     |
-| Gerar visão executiva rede  | -       | ✓     | -       | -       | -     | -    | -     | -     |
-
-*DIR_NUC: dados das escolas do núcleo
-**DIR_ESC/COORD: dados de sua escola; DIR_NUC: relatório do próprio núcleo
-***PROF: dados de suas turmas
-****ALUNO: apenas seus próprios resultados
+| Onde | Hoje no código | Catálogo |
+|------|----------------|----------|
+| `PUT/POST/DELETE /provas/{id}`, `/provas/{id}/gabarito*` | diretor escolar **pode** editar/publicar/excluir prova e gabarito | `prova.editar`/`gabarito.editar` só como **extra** para diretor |
+| `POST/PUT /alunos` | professor **pode** cadastrar/editar aluno | `aluno.gerir` só como **extra** para professor |
+| `POST /turmas/{id}/toggle` | coordenador não pode | coordenador pode receber como extra (ok) |
+| tela "Equipe" | professor não vê | `usuario.ver` como extra para professor |
+| `GET /nucleos` | diretor escolar não vê | coerente (—) |
+| perfil Aluno | sem vínculo usuário↔aluno: não vê nada | `resultado.ver` do próprio aluno (depende do vínculo) |
 
 ---
 
-### Configurações
+## 8. Histórico de decisões incorporadas
 
-| Ação                         | SEC_EDU | ADMIN | DIR_NUC | DIR_ESC | COORD | PROF | APLIC | ALUNO |
-|------------------------------|---------|-------|---------|---------|-------|------|-------|-------|
-| Configurações do sistema     | -       | ✓     | -       | -       | -     | -    | -     | -     |
-| Configurações da escola      | -       | ✓     | -       | ✓**     | -     | ✓**‡| -     | -     |
-| Parâmetros de avaliação      | -       | ✓     | -       | ✓**     | -     | ✓**‡| -     | -     |
-| Integrações externas         | -       | ✓     | -       | -       | -     | -    | -     | -     |
-| Meu Perfil                   | ✓       | ✓     | ✓       | ✓       | ✓     | ✓    | ✓     | ✓     |
-
-‡PROF: apenas em conta individual
-
----
-
-### Assinatura e Cobrança (novo)
-
-O acesso a este módulo não é determinado pelo perfil, e sim por **titularidade da
-conta**: quem criou a rede individual (PROF) ou a estrutura institucional
-(SEC_EDU/ADMIN_REDE no momento do cadastro autônomo) é o titular financeiro e o único
-que vê/gerencia a assinatura. Outros membros da mesma escola/rede não têm acesso a
-este módulo, independentemente do perfil.
-
-| Ação                         | Titular | Demais usuários |
-|-------------------------------|---------|------------------|
-| Ver plano atual e status      | ✓       | -                |
-| Escolher/trocar plano         | ✓       | -                |
-| Ver histórico de pagamentos   | ✓       | -                |
-| Cancelar assinatura           | ✓       | -                |
-| Atualizar forma de pagamento  | ✓       | -                |
-
----
-
-## Dashboard por Perfil
-
-| Perfil               | Dashboard                    | Arquivo mockup                   |
-|-----------------------|------------------------------|----------------------------------|
-| SECRETARIO_EDUCACAO   | Painel da Secretaria (novo)  | *(sem mockup — a criar)*         |
-| ADMIN_REDE            | Painel Administrativo        | dashboard-admin.html             |
-| DIR_NUCLEO            | Painel do Núcleo             | dashboard-diretor-nucleo.html    |
-| DIR_ESCOLAR           | Painel da Escola             | dashboard-diretor-escolar.html   |
-| COORDENADOR           | Painel do Coordenador        | dashboard-coordenador.html       |
-| PROFESSOR             | Painel do Professor          | dashboard-professor.html         |
-| APLICADOR             | Painel do Aplicador (novo)   | *(sem mockup — a criar)*         |
-| ALUNO                 | Painel do Aluno              | dashboard-aluno.html             |
-
----
-
-## Navegação por Perfil
-
-### SECRETARIO_EDUCACAO
-- Painel
-- Redes (da minha secretaria)
-- Relatório Consolidado
-
-### ADMIN_REDE / DIR_NUCLEO / DIR_ESCOLAR / COORDENADOR / PROFESSOR (institucional)
-- Painel
-- Provas
-- Turmas
-- Escolas
-
-### PROFESSOR (conta individual)
-- Painel
-- Provas
-- Turmas
-- Alunos
-- (sem "Escolas" — só tem a própria)
-
-### APLICADOR
-- Painel (lista de provas do dia)
-- Enviar Cartões
-
-### ALUNO
-- Painel
-- Minhas Provas
-
----
-
-## Contexto do Badge no Header
-
-| Perfil               | Badge Exibido                              |
-|------------------------|---------------------------------------------|
-| SECRETARIO_EDUCACAO    | Nome da secretaria (ex.: Secretaria Estadual)|
-| ADMIN_REDE             | Nome da rede (ex.: Rede Municipal)           |
-| DIR_NUCLEO             | Nome do núcleo (ex.: Núcleo Norte)           |
-| DIR_ESCOLAR            | Nome da escola (ex.: EMEF Tiradentes)        |
-| COORDENADOR            | Nome da escola                               |
-| PROFESSOR (institucional) | Disciplina + nº turmas                    |
-| PROFESSOR (individual) | "Conta Individual" + plano atual             |
-| APLICADOR              | Nome da escola + "Aplicador"                 |
-| ALUNO                  | Turma (ex.: 9º Ano A)                        |
-
----
-
-## Política de Isolamento de Dados
-
-- Cada usuário só pode acessar dados dentro do seu escopo
-- O escopo é definido no momento da criação do usuário
-- Um professor não pode ver provas de outro professor
-- Um aluno não pode ver resultados de outros alunos
-- Um diretor escolar não pode ver dados de outra escola
-- **Uma rede individual nunca é visível para outra rede individual, nem para redes
-  institucionais, exceto durante um processo explícito de migração/absorção (MP-030),
-  conduzido apenas pelo titular da rede individual confirmando a migração**
-- A validação de escopo deve ser feita na API (não apenas no frontend)
+- 29/10/2026 — Diretor escolar não cria prova (doc 19, decisão 3).
+- 29/10/2026 — Professor vê todas as provas das turmas em que está vinculado (doc 19, decisão 1).
+- 30/10/2026 — Coordenador vê o relatório da escola.
+- 30/10/2026 — Escolas e anexos: cadastro só por diretor de núcleo/admin; diretor escolar edita a própria.
+- 30/10/2026 — Correção aberta/fechada; reabrir só pela supervisão.
+- 30/10/2026 — Logo da escola e do ente (público: governo/prefeitura; privado: mantenedora).
+- 30/10/2026 — Quem cadastra quem (seção 3) e permissões extras/retiradas com registro (doc 21).
