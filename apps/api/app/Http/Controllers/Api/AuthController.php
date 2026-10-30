@@ -82,37 +82,6 @@ class AuthController extends Controller
         return ApiResponse::success($request->user()->fresh());
     }
 
-    public function registro(Request $request): JsonResponse
-    {
-        $request->validate([
-            'nome'   => 'required|string|max:200',
-            'email'  => 'required|email|unique:usuarios,email',
-            'cpf'    => 'required|string|regex:/^\d{11}$/',
-            'perfil' => 'required|in:coordenador,professor,dir_escolar,dir_nucleo',
-            'termos' => 'required|accepted',
-        ], [
-            'cpf.regex'        => 'O CPF deve conter 11 dígitos numéricos.',
-            'email.unique'     => 'Este e-mail já está cadastrado.',
-            'termos.required'  => 'É necessário aceitar os termos de uso e a LGPD.',
-            'termos.accepted'  => 'É necessário aceitar os termos de uso e a LGPD.',
-        ]);
-
-        Usuario::create([
-            'nome'     => $request->nome,
-            'email'    => $request->email,
-            'cpf'      => $request->cpf,
-            'perfil'   => $request->perfil,
-            'password' => Hash::make(Str::random(32)),
-            'ativo'    => false,
-        ]);
-
-        return ApiResponse::success(
-            ['mensagem' => 'Cadastro realizado. Aguarde a aprovação do administrador.'],
-            null,
-            201
-        );
-    }
-
     public function esqueceuSenha(Request $request): JsonResponse
     {
         $request->validate(['email' => 'required|email']);
