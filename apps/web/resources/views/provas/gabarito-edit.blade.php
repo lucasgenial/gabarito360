@@ -1,32 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Gabarito — ' . $prova['titulo'])
+@section('tela', 'tela-gabarito-editar')
 
-@push('styles')
-<style>
-  .editor-grid { display:grid;grid-template-columns:300px 1fr;gap:20px;margin-top:20px;align-items:start; }
-  .sticky { position:sticky;top:84px; }
-  .stepper { display:flex;gap:0;margin-bottom:4px;flex-wrap:wrap; }
-  .step { display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600; }
-  .step .dot { width:24px;height:24px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-size:12px; }
-  .step.active .dot { background:var(--accent);color:#fff; }
-  .step.done .dot { background:var(--success,#168821);color:#fff; }
-  .step .line { width:40px;height:2px;background:var(--border);margin:0 10px; }
-  .progress-track { height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:8px; }
-  .progress-track > div { height:100%;background:var(--success,#168821);width:0;transition:width .25s; }
-  .gabarito-card { padding:22px; }
-  .q-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:8px 28px;margin-top:16px; }
-  .q-row { display:flex;align-items:center;gap:14px;padding:8px 10px;border-radius:8px; }
-  .q-row:hover { background:var(--surface-2); }
-  .q-row[data-answer] .q-num { color:var(--accent); }
-  .q-num { font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--muted);width:28px;flex-shrink:0; }
-  .bubbles { display:flex;gap:8px; }
-  .bubble { width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--muted);background:var(--surface);user-select:none;cursor:pointer;transition:border-color .15s,background .15s,color .15s; }
-  .bubble:hover { border-color:var(--accent);color:var(--accent); }
-  .bubble.marked { background:var(--accent);border-color:var(--accent);color:#fff; }
-  @media(max-width:900px){ .editor-grid{grid-template-columns:1fr;} .sticky{position:static;} .q-grid{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Gabarito — ' . $prova['titulo'])
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -37,28 +13,17 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
-  <div>
-    <h1 class="page-title">Gabarito oficial</h1>
-    <p class="page-sub">{{ $prova['disciplina'] }} · {{ $prova['serie'] }} · {{ $prova['num_questoes'] }} questões</p>
-  </div>
+<x-pagina titulo="Gabarito oficial">
+  <x-slot:sub>{{ $prova['disciplina'] }} · {{ $prova['serie'] }} · {{ $prova['num_questoes'] }} questões</x-slot:sub>
   <a href="{{ route('provas.show', $prova['id']) }}" class="btn btn-ghost">← Voltar</a>
-</div>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 @if($publicado)
-  <div style="background:rgba(22,136,33,.08);color:var(--success,#168821);border:1px solid rgba(22,136,33,.3);border-radius:var(--radius-md);padding:14px 18px;font-size:14px;font-weight:600;margin-top:16px;display:flex;align-items:center;gap:10px;">
-    <span style="font-size:20px;">🔒</span>
+  <div style="background:rgba(22,136,33,.08);color:var(--success);border:1px solid rgba(22,136,33,.3);border-radius:var(--radius-md);padding:14px 18px;font-size:14px;font-weight:600;margin-top:16px;display:flex;align-items:center;gap:10px;">
+    
     <div>Gabarito publicado — não pode ser editado. <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:8px;">Ver gabarito</a></div>
   </div>
 @endif
