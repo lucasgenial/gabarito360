@@ -26,7 +26,7 @@ class ImagensCartaoTest extends TestCase
         Storage::disk('public')->put('cartoes/1/foto.jpg', 'original');
         Storage::disk('public')->put(ImagensCartao::caminho(7, 'miniatura'), 'leve');
 
-        DB::statement('PRAGMA foreign_keys = OFF');
+        DB::statement('PRAGMA defer_foreign_keys = ON'); // a transação do teste nunca confirma
         DB::table('cartoes')->insert(['id' => 7, 'prova_id' => 1, 'imagem_url' => 'cartoes/1/foto.jpg', 'status' => 'lido']);
         $this->cartao = Cartao::find(7);
     }
