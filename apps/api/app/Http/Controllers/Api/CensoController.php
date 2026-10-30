@@ -25,27 +25,45 @@ class CensoController extends Controller
         }
 
         $existente = DB::table('escolas')->where('inep', $c->codigo_inep)->first(['id', 'nome']);
+        $escola    = Censo::paraEscola($c);
+
+        // "ANEXO - <NOME DA SEDE> - <LOCAL>": sugere o vínculo de anexo e a sede, se ela já estiver cadastrada
+        $sede = null;
+        if (preg_match('/^ANEXO\s*-\s*(.+?)(\s+-\s+.*)?$/u', $c->nome, $m)) {
+            $escola['tipo'] = 'anexo';
+            $inepSede = DB::table('censo_escolas')->where('nome', trim($m[1]))->where('co_municipio', $c->co_municipio)->value('codigo_inep');
+            $s = $inepSede ? DB::table('escolas')->where('inep', $inepSede)->first(['id', 'nome', 'nucleo_id']) : null;
+            $sede = $s ? ['id' => $s->id, 'nome' => $s->nome, 'nucleo_id' => $s->nucleo_id, 'inep' => $inepSede]
+                       : ($inepSede ? ['id' => null, 'nome' => Censo::titulo(trim($m[1])), 'inep' => $inepSede] : null);
+        }
 
         return ApiResponse::success([
-            'escola'          => Censo::paraEscola($c),
+            'escola'          => $escola,
             'nucleo_sugerido' => $this->nucleoDoOrgao($request, $c->orgao_regional),
+            'sede_sugerida'   => $sede,
             'ja_cadastrada'   => $existente ? ['id' => $existente->id, 'nome' => $existente->nome] : null,
         ]);
     }
 
-    /** GET /censo/escolas?busca=&municipio= — até 20 escolas pelo nome (para quem não sabe o INEP). */
+    /** GET /censo/escolas?busca= — até 30 escolas pelo nome e/ou município (cada palavra em um dos dois); sedes antes de anexos. */
     public function pesquisar(Request $request): JsonResponse
     {
         $busca = trim((string) $request->query('busca', ''));
         if (mb_strlen($busca) < 3) {
             return ApiResponse::success(['escolas' => []]);
         }
-        $q = DB::table('censo_escolas')->where('nome', 'like', '%' . str_replace(' ', '%', $busca) . '%');
+        $q = DB::table('censo_escolas');
+        foreach (preg_split('/\s+/', $busca) as $palavra) {
+            if (mb_strlen($palavra) < 2) {
+                continue;
+            }
+            $q->where(fn ($w) => $w->where('nome', 'like', "%{$palavra}%")->orWhere('no_municipio', 'like', "%{$palavra}%"));
+        }
         if ($m = trim((string) $request->query('municipio', ''))) {
             $q->where('no_municipio', 'like', "%{$m}%");
         }
 
-        $escolas = $q->orderBy('nome')->limit(20)->get()->map(fn ($c) => [
+        $escolas = $q->orderByRaw("CASE WHEN nome LIKE 'ANEXO%' THEN 1 ELSE 0 END")->orderBy('nome')->limit(30)->get()->map(fn ($c) => [
             'inep'      => $c->codigo_inep,
             'nome'      => Censo::titulo($c->nome),
             'municipio' => Censo::titulo($c->no_municipio) . '/' . $c->sg_uf,
