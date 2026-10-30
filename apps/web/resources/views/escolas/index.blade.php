@@ -38,16 +38,16 @@
 
 @section('content')
 
-<div class="row-between" style="margin-top:12px;">
+<div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
   <div>
     <h1 class="page-title">Escolas</h1>
     <p class="page-sub">Gerencie todas as unidades escolares cadastradas no sistema</p>
   </div>
-  <div style="display:flex;gap:10px;align-items:center;">
-    <div style="position:relative;">
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <div style="position:relative;max-width:100%;">
       <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input id="search-escolas" type="search" class="input" placeholder="Buscar escola…"
-             style="padding-left:36px;width:240px;" value="{{ $busca }}"
+             style="padding-left:36px;width:240px;max-width:100%;" value="{{ $busca }}"
              oninput="filtrarEscolas(this.value)" />
     </div>
     @pode('escola.criar')
