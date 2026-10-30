@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\AcompanhamentoTurmaController;
 use App\Http\Controllers\Api\RelatorioConsolidadoController;
 use App\Http\Controllers\Api\VinculoProfessorController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Services\Omr\ImagensCartao;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -35,6 +36,11 @@ Route::prefix('v1')->group(function () {
 
     // Fale Conosco (público)
     Route::post('leads', [LeadController::class, 'store']);
+
+    // Foto do cartão por link temporário assinado: o navegador busca direto, sem passar pela web
+    Route::get('cartoes/{id}/arquivo/{tipo}', [CartaoController::class, 'arquivo'])
+        ->whereNumber('id')->whereIn('tipo', ImagensCartao::TIPOS)
+        ->middleware('signed:relative')->name('cartoes.arquivo');
 
     // Rotas públicas de autenticação
     Route::prefix('auth')->group(function () {
