@@ -193,6 +193,15 @@
           </div>
         </label>
         <label style="display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;">
+          <input type="checkbox" name="opcao_lingua" value="1"
+                 {{ old('opcao_lingua') ? 'checked' : '' }}
+                 style="width:18px;height:18px;" />
+          <div>
+            <div style="font-weight:600;">Opção de língua estrangeira (padrão ENEM)</div>
+            <div style="font-size:12px;color:var(--muted);">Questões 01 a 05 com gabarito de Inglês ou Espanhol; o aluno marca a opção no cartão</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:center;gap:12px;cursor:pointer;font-size:14px;">
           <input type="checkbox" name="gerar_cartao_pdf" value="1" checked
                  style="width:18px;height:18px;" />
           <div>
