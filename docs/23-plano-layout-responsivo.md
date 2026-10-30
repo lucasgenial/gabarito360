@@ -1,6 +1,6 @@
 # 23 — Plano de layout e design responsivo (do celular ao 4K)
 
-> **Status:** proposta para aprovação (30/10/2026). Nada deste documento foi implementado.
+> **Status:** aprovado em 30/10/2026. L0 em produção (PR #25); remoção de gov e limpeza do login na sequência.
 > Segue a regra do projeto: planejar em passos grandes antes de modificar.
 > Base para o app Android: o que for padronizado aqui vira a referência visual do app.
 
@@ -106,7 +106,7 @@ Um único padrão visual e de layout para **todas as telas e perfis**, que:
   Aproveita a largura das telas grandes e acaba com a quebra do menu do topo.
   *(Alternativa: manter o menu no topo, compacto, com o selo da escola fora dele — ver decisão 1.)*
 - Ícones desenhados (os mesmos da barra do celular) em todos os itens; sem emojis.
-- Faixa superior: trocar "Governo Federal" pela identificação do **ente da rede** (com o logo já cadastrado) ou remover.
+- Faixa superior removida (decisão 3).
 
 ### 4.5 Componentes únicos
 Tudo no `gov.css` + componentes Blade, e as telas passam a só montar:
@@ -140,16 +140,19 @@ tabela `lista-cel` e `quadro-cel` (etapa 5), `<x-formulario>`/`<x-campo>`, `<x-a
 Ordem sugerida: L0 → L1 → L2 → L3 → L4 → L5 → L6 → L7, com L8 a partir de L1.
 A **L0 pode ir para produção já**, independente das decisões abaixo.
 
-## 6. Decisões que preciso de você
+## 6. Decisões
 
-1. **Menu no computador:** **lateral** (recomendado: aproveita telas grandes e não quebra) **ou** topo compacto?
-2. **Largura máxima:** 1600 px no padrão e 1920 px em listas/relatórios — ou ocupar a tela toda em qualquer largura?
-3. **Faixa superior "Governo Federal":** trocar pela identificação do ente da rede (logo + nome) ou remover?
-4. **Login:** remover as estatísticas, a frase "gov.br" e a aba "Cadastrar"? (O "Cadastrar" hoje não faz sentido:
-   quem cadastra usuários é o gestor.)
-5. **Página inicial pública:** os números "+340 escolas" e "98,6%" são de marketing — manter, trocar por dados reais ou retirar?
-6. **Identidade visual:** manter o padrão gov.br (azul institucional, fonte Rawline/Raleway) ou você tem uma
-   identidade própria do Gabarito360 (cores, logo) para aplicar agora?
+| # | Decisão | Resposta (30/10/2026) |
+|---|---|---|
+| 1 | Menu no computador | **Lateral** |
+| 2 | Largura máxima | **Tela toda**, em qualquer monitor (substitui os limites da seção 4.2; ver nota abaixo) |
+| 3 | Faixa superior | **Remover tudo que remete a gov** (faixa, textos, exemplos, nomes) |
+| 4 | Login | **Limpar**: sem estatísticas, sem "gov.br", sem a aba Cadastrar |
+| 5 | Números da página inicial ("+340 escolas", "98,6%") | **Pendente** |
+| 6 | Identidade visual (cores e fonte hoje herdadas do padrão gov.br) | **Pendente** |
+
+**Nota sobre a decisão 2:** com o conteúdo na tela toda, a L1 mantém só o que evita linhas ilegíveis: formulários
+e textos corridos em coluna de leitura, e grades que ganham colunas conforme a largura.
 
 ## 7. Evidências
 

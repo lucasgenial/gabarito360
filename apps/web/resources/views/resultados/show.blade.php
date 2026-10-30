@@ -47,7 +47,7 @@
   @media (max-width:480px) { .res-folha { grid-template-columns:1fr; } }
   @media print {
     @page { size:A4; margin:12mm; }
-    .govbar, .app-header, .breadcrumb, .no-print { display:none !important; }
+    .app-header, .breadcrumb, .no-print { display:none !important; }
     body { background:#fff; }
     .container { padding:0 !important; max-width:none !important; }
     .card { box-shadow:none !important; border:0 !important; }
