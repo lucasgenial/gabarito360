@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\RelatorioController;
 use App\Http\Controllers\Api\ResultadoController;
 use App\Http\Controllers\Api\TurmaController;
 use App\Http\Controllers\Api\UsuarioController;
+use App\Http\Controllers\Api\AcompanhamentoTurmaController;
 use App\Http\Controllers\Api\VinculoProfessorController;
 use App\Http\Controllers\Api\WebhookController;
 use Illuminate\Support\Facades\Route;
@@ -104,6 +105,7 @@ Route::prefix('v1')->group(function () {
             Route::put('{id}',         [TurmaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
             Route::post('{id}/toggle', [TurmaController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar');
             // Vínculos professor ↔ turma (MP-018)
+            Route::get('{id}/correcao',                   [AcompanhamentoTurmaController::class, 'show']);
             Route::get('{id}/professores',                [VinculoProfessorController::class, 'index']);
             Route::post('{id}/professores',               [VinculoProfessorController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
             Route::delete('{id}/professores/{usuarioId}', [VinculoProfessorController::class, 'destroy'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
@@ -133,7 +135,7 @@ Route::prefix('v1')->group(function () {
 
         // Usuários / equipe
         Route::prefix('usuarios')->group(function () {
-            Route::get('/',          [UsuarioController::class, 'index'])->middleware('perfil:admin_rede,dir_escolar');
+            Route::get('/',          [UsuarioController::class, 'index'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
             Route::post('/',         [UsuarioController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar');
             Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('perfil:admin_rede,dir_escolar');
             Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar');
