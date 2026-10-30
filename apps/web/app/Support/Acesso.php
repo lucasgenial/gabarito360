@@ -43,10 +43,8 @@ class Acesso
         'relatorio.escola' => 'relatorios.escola',
     ];
 
-    /** Ordem do menu no computador (até MAX_TOPO itens; o resto vai para "Mais"). */
+    /** Ordem do menu lateral. */
     private const ORDEM = ['painel', 'provas', 'corrigir', 'turmas', 'relatorios', 'escolas', 'alunos', 'equipe'];
-
-    private const MAX_TOPO = 6;
 
     /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
     private const PRINCIPAIS = [
@@ -139,18 +137,13 @@ class Acesso
     }
 
     /**
-     * Menu do computador: até MAX_TOPO itens no topo e o restante em "Mais" (docs/21: 6 + "Mais").
+     * Menu lateral do computador: todos os itens que a pessoa pode abrir.
      *
-     * @return array{topo: array, mais: array}
+     * @return array<int, array{rotulo: string, curto: string, icone: string, url: string, ativo: bool}>
      */
     public static function menu(): array
     {
-        $itens = array_values(self::itens());
-        if (count($itens) <= self::MAX_TOPO) {
-            return ['topo' => $itens, 'mais' => []];
-        }
-
-        return ['topo' => array_slice($itens, 0, self::MAX_TOPO), 'mais' => array_slice($itens, self::MAX_TOPO)];
+        return array_values(self::itens());
     }
 
     /**
