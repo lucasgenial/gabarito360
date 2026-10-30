@@ -155,10 +155,21 @@
             <label for="data_ingresso">Data de início</label>
             <input class="input" type="date" id="data_ingresso" name="data_ingresso" value="{{ old('data_ingresso') }}" />
           </div>
-          <div class="field">
-            <label for="escola_id">Escola vinculada</label>
+          @if(!empty($nucleos))
+          <div class="field" id="campo-nucleo" style="display:none;">
+            <label for="nucleo_id">Núcleo <span style="color:var(--danger)">*</span></label>
+            <select class="select" id="nucleo_id" name="nucleo_id">
+              <option value="">— Selecione o núcleo —</option>
+              @foreach($nucleos as $n)
+                <option value="{{ $n['id'] }}" {{ old('nucleo_id') == $n['id'] ? 'selected' : '' }}>{{ $n['nome'] }}</option>
+              @endforeach
+            </select>
+          </div>
+          @endif
+          <div class="field" id="campo-escola">
+            <label for="escola_id">Escola vinculada <span style="color:var(--danger)">*</span></label>
             <select class="select" id="escola_id" name="escola_id">
-              <option value="">— Nenhuma (nível rede/núcleo) —</option>
+              <option value="">— Selecione a escola —</option>
               @foreach($escolas as $e)
                 <option value="{{ $e['id'] }}" {{ old('escola_id') == $e['id'] ? 'selected' : '' }}>{{ $e['nome'] }}</option>
               @endforeach
@@ -253,6 +264,15 @@
 
   nomeEl.addEventListener('input', update);
   perfilEl.addEventListener('change', update);
+  // Diretor de núcleo é ligado a um núcleo; os demais perfis, a uma escola
+  function campoEscopo() {
+    var nucleo = perfilEl.value === 'dir_nucleo' || perfilEl.value === 'admin_rede';
+    var cn = document.getElementById('campo-nucleo'), ce = document.getElementById('campo-escola');
+    if (cn) cn.style.display = perfilEl.value === 'dir_nucleo' ? '' : 'none';
+    if (ce) ce.style.display = nucleo ? 'none' : '';
+  }
+  perfilEl.addEventListener('change', campoEscopo);
+  campoEscopo();
   emailEl.addEventListener('input', update);
 
   cpfEl.addEventListener('input', function() {

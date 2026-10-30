@@ -14,8 +14,15 @@ class MembroController extends Controller
         'dir_escolar' => ['label' => 'Diretor Escolar',       'badge' => 'badge-purple',  'ini' => 'D'],
         'coordenador' => ['label' => 'Coordenador Pedagógico','badge' => 'badge-amber',   'ini' => 'C'],
         'professor'   => ['label' => 'Professor',             'badge' => 'badge-info',    'ini' => 'P'],
+        'aplicador'   => ['label' => 'Aplicador',             'badge' => 'badge-muted',   'ini' => 'AP'],
         'aluno'       => ['label' => 'Aluno',                 'badge' => 'badge-success', 'ini' => 'AL'],
     ];
+
+    /** Só os perfis que o usuário logado pode cadastrar/atribuir (a API confere de novo). */
+    private function perfisPermitidos(): array
+    {
+        return array_intersect_key(self::PERFIS, array_flip(\App\Support\Acesso::perfisGeridos()));
+    }
 
     public function __construct(private ApiClient $api) {}
 
@@ -40,8 +47,9 @@ class MembroController extends Controller
     public function create(): View
     {
         $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
+        $nucleos = session('auth_perfil') === 'admin_rede' ? ($this->api->get('/v1/nucleos')->json('data.nucleos') ?? []) : [];
 
-        return view('membros.create', ['perfis' => self::PERFIS, 'escolas' => $escolas]);
+        return view('membros.create', ['perfis' => $this->perfisPermitidos(), 'escolas' => $escolas, 'nucleos' => $nucleos]);
     }
 
     public function store(Request $request)
@@ -69,6 +77,7 @@ class MembroController extends Controller
             'registro_profissional'  => $request->input('registro_profissional'),
             'observacoes'            => $request->input('observacoes'),
             'escola_id'              => $request->input('escola_id'),
+            'nucleo_id'              => $request->input('nucleo_id'),
         ];
 
         $resp = $this->api->post('/v1/usuarios', $dados);
@@ -94,7 +103,7 @@ class MembroController extends Controller
 
         return view('membros.edit', [
             'membro'  => $resp->json('data'),
-            'perfis'  => self::PERFIS,
+            'perfis'  => $this->perfisPermitidos(),
             'escolas' => $escolas,
         ]);
     }
