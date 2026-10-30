@@ -218,3 +218,64 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('[data-bars]').forEach(drawBarChart);
   });
 });
+
+/* ---------- Tabelas e filtros no celular (docs/21, etapa 5) ---------- */
+// Listas: cada célula recebe o rótulo da coluna (mostrado no cartão do celular)
+function rotularListas(root) {
+  (root || document).querySelectorAll('table.lista-cel').forEach(function (t) {
+    var cab = [];
+    t.querySelectorAll('thead tr:first-child th').forEach(function (th) {
+      for (var i = 0; i < (th.colSpan || 1); i++) cab.push(th.textContent.trim());
+    });
+    t.querySelectorAll('tbody tr').forEach(function (tr) {
+      var col = 0;
+      Array.prototype.forEach.call(tr.children, function (td) {
+        if (!td.hasAttribute('data-rotulo')) td.setAttribute('data-rotulo', td.colSpan > 1 ? '' : (cab[col] || ''));
+        col += td.colSpan || 1;
+      });
+    });
+  });
+}
+
+// Quadros: dica "arraste para o lado" só quando o quadro é mais largo que a tela
+function marcarQuadros() {
+  document.querySelectorAll('.quadro-cel').forEach(function (q) {
+    var dica = q.previousElementSibling;
+    if (!dica || !dica.classList.contains('quadro-dica')) {
+      dica = document.createElement('div');
+      dica.className = 'quadro-dica no-print';
+      dica.textContent = '↔ Arraste o quadro para o lado para ver todas as colunas';
+      q.parentNode.insertBefore(dica, q);
+    }
+    var rola = q.scrollWidth > q.clientWidth + 2;
+    q.classList.toggle('rola', rola);
+    dica.classList.toggle('ativa', rola);
+  });
+}
+
+// Filtros: no celular, busca à vista e selects em "Mais filtros" (aberto se algum estiver em uso)
+function prepararFiltros() {
+  document.querySelectorAll('form.filtros-cel').forEach(function (f) {
+    if (f.querySelector('.filtros-toggle')) return;
+    var selects = f.querySelectorAll(':scope > select');
+    if (!selects.length) return;
+    var emUso = Array.prototype.filter.call(selects, function (s) { return s.value; }).length;
+    if (emUso) f.classList.add('aberto');
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn btn-ghost filtros-toggle';
+    var rotulo = function () { b.textContent = (f.classList.contains('aberto') ? 'Menos filtros' : 'Mais filtros') + (emUso ? ' (' + emUso + ')' : ''); };
+    rotulo();
+    b.addEventListener('click', function () { f.classList.toggle('aberto'); rotulo(); });
+    selects[0].parentNode.insertBefore(b, selects[0]);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  rotularListas();
+  marcarQuadros();
+  prepararFiltros();
+  window.addEventListener('resize', marcarQuadros);
+  // Quadros dentro de <details> só têm largura quando abertos
+  document.querySelectorAll('details').forEach(function (d) { d.addEventListener('toggle', marcarQuadros); });
+});

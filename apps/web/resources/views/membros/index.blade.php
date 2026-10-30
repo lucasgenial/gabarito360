@@ -85,7 +85,7 @@
 </div>
 
 {{-- Filtros --}}
-<form method="GET" action="{{ route('membros.index') }}" class="filter-bar">
+<form method="GET" action="{{ route('membros.index') }}" class="filter-bar filtros-cel">
   <input class="input" type="text" name="busca" placeholder="Buscar por nome ou e-mail…" value="{{ $filtroBusc }}">
   <select class="select" name="perfil" style="width:auto;">
     <option value="">Todos os perfis</option>
@@ -113,7 +113,7 @@
           <h2 style="font-size:16px;font-weight:700;">{{ $perfilCfg['label'] }}</h2>
           <span class="badge {{ $perfilCfg['badge'] }}">{{ $membros->count() }} {{ $membros->count() === 1 ? 'membro' : 'membros' }}</span>
         </div>
-        <table class="table">
+        <table class="table lista-cel">
           <thead>
             <tr>
               <th>Membro</th>

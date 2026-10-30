@@ -270,6 +270,55 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
+   Tabelas no celular (docs/21, etapa 5)
+   - table.lista-cel: cada linha vira um cartão; rótulos vêm do cabeçalho (data-rotulo, app.js)
+   - .quadro-cel: quadro largo rola só por dentro, coluna .fixa presa à esquerda
+   - form.filtros-cel: busca à vista, demais filtros em "Mais filtros"
+   ============================================================ */
+.quadro-cel .fixa { position: sticky; left: 0; z-index: 1; background: var(--surface); }
+.quadro-cel.rola .fixa { box-shadow: 4px 0 6px -4px rgba(0,0,0,0.18); }
+.quadro-dica { display: none; }
+.filtros-toggle { display: none; }
+
+@media screen and (max-width: 720px) {
+  table.lista-cel, table.lista-cel tbody, table.lista-cel tr, table.lista-cel td { display: block; width: 100%; }
+  table.lista-cel thead { display: none; }
+  table.lista-cel tr {
+    background: var(--surface); border: 1px solid var(--border-soft); border-radius: 10px;
+    margin: 10px 0; padding: 4px 14px;
+  }
+  .card > table.lista-cel tr, .card-pad table.lista-cel tr { margin: 10px; width: auto; }
+  table.lista-cel tbody tr:hover, table.lista-cel tr:hover td { background: var(--surface); }
+  table.lista-cel td {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 8px 0 !important; border: 0 !important; border-bottom: 1px solid var(--border-soft) !important;
+    text-align: right !important; white-space: normal;
+  }
+  table.lista-cel td:last-child { border-bottom: 0 !important; }
+  table.lista-cel td::before {
+    content: attr(data-rotulo); flex-shrink: 0; text-align: left;
+    font-size: 12px; font-weight: 600; color: var(--muted); text-transform: none; letter-spacing: 0;
+  }
+  /* 1ª célula = título do cartão (sem rótulo) */
+  table.lista-cel td:first-child { display: block; text-align: left !important; font-size: 15px; padding-top: 12px !important; }
+  table.lista-cel td:first-child::before, table.lista-cel td[data-rotulo=""]::before { content: none; }
+  /* Células de ações (sem cabeçalho): botões à direita, ao alcance do polegar */
+  table.lista-cel td[data-rotulo=""]:not(:first-child) { justify-content: flex-end; flex-wrap: wrap; }
+  table.lista-cel td[data-rotulo=""] .btn { min-height: 40px; }
+  /* Linha vazia ("Nenhum … encontrado") */
+  table.lista-cel td[colspan] { text-align: center !important; }
+  table.lista-cel .hide-sm { display: none !important; }
+
+  .quadro-cel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .quadro-dica.ativa { display: block; font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+
+  form.filtros-cel { display: flex !important; flex-direction: column; align-items: stretch !important; gap: 10px !important; }
+  form.filtros-cel > * { width: 100% !important; min-width: 0 !important; max-width: none !important; flex: none !important; }
+  form.filtros-cel:not(.aberto) > select { display: none; }
+  form.filtros-cel .filtros-toggle { display: block; }
+}
+
+/* ============================================================
    Tema escuro — tokens sobrescritos via html[data-theme="dark"]
    ============================================================ */
 html[data-theme="dark"] {

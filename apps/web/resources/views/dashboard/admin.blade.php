@@ -224,7 +224,7 @@
       <a href="{{ route('membros.index') }}" class="btn btn-secondary btn-sm">Gerenciar usuários</a>
     </div>
   </div>
-  <table class="table">
+  <table class="table lista-cel">
     <thead>
       <tr>
         <th>Nome</th>

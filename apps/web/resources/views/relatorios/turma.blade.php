@@ -104,8 +104,8 @@
 {{-- Resumo por prova --}}
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Resumo por prova</h3>
-  <div style="overflow-x:auto;">
-    <table class="tab">
+  <div>
+    <table class="tab lista-cel">
       <thead><tr><th class="esq">Prova</th><th>Corrigidos</th><th>Média</th><th>Aprovação</th><th>Maior</th><th>Menor</th><th class="no-print"></th></tr></thead>
       <tbody>
         @foreach($provas as $p)
@@ -127,16 +127,16 @@
 {{-- Ranking --}}
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Ranking dos alunos</h3>
-  <div style="overflow-x:auto;">
+  <div class="quadro-cel" style="overflow-x:auto;">
     <table class="tab">
       <thead>
-        <tr><th>#</th><th class="esq">Aluno</th>@foreach($provas as $p)<th title="{{ $p['titulo'] }}">{{ \Illuminate\Support\Str::limit($p['disciplina'], 14) }}</th>@endforeach<th>Média</th></tr>
+        <tr><th>#</th><th class="esq fixa">Aluno</th>@foreach($provas as $p)<th title="{{ $p['titulo'] }}">{{ \Illuminate\Support\Str::limit($p['disciplina'], 14) }}</th>@endforeach<th>Média</th></tr>
       </thead>
       <tbody>
         @foreach($ranking as $a)
           <tr>
             <td><b>{{ $a['posicao'] ? $a['posicao'] . 'º' : '—' }}</b></td>
-            <td class="esq"><a href="{{ route('relatorios.aluno', $a['id']) }}" style="color:inherit;">{{ $a['nome'] }}</a></td>
+            <td class="esq fixa"><a href="{{ route('relatorios.aluno', $a['id']) }}" style="color:inherit;">{{ $a['nome'] }}</a></td>
             @foreach($provas as $p)
               @php $n = $a['notas'][$p['id']] ?? null; @endphp
               <td>
