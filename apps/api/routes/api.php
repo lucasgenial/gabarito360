@@ -95,6 +95,8 @@ Route::prefix('v1')->group(function () {
         Route::prefix('relatorios')->group(function () {
             Route::get('prova/{id}',                       [RelatorioController::class, 'prova']);
             Route::get('turma/{turmaId}/prova/{provaId}',   [RelatorioController::class, 'turmaProva']);
+            Route::get('turma/{turmaId}',                   [RelatorioController::class, 'turma']);
+            Route::get('aluno/{alunoId}',                   [RelatorioController::class, 'aluno']);
         });
 
         // Turmas
