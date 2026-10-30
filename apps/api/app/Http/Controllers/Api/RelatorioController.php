@@ -99,8 +99,9 @@ class RelatorioController extends Controller
 
         return ApiResponse::success([
             'prova'  => array_merge($prova->toArray(), ['turmas' => $turmas]),
-            'kpis'   => $this->kpis($prova),
-            'alunos' => $this->tabelaAlunos($id),
+            'kpis'     => $this->kpis($prova),
+            'alunos'   => $this->tabelaAlunos($id),
+            'questoes' => $this->analiseQuestoes($prova),
         ]);
     }
 
@@ -119,8 +120,68 @@ class RelatorioController extends Controller
         return ApiResponse::success([
             'prova'  => $prova,
             'turma'  => $turma,
-            'kpis'   => $this->kpis($prova, $turmaId),
-            'alunos' => $this->tabelaAlunos($provaId, $turmaId),
+            'kpis'     => $this->kpis($prova, $turmaId),
+            'alunos'   => $this->tabelaAlunos($provaId, $turmaId),
+            'questoes' => $this->analiseQuestoes($prova, $turmaId),
         ]);
+    }
+
+    /**
+     * Análise por questão: % de acerto, distribuição das marcações (A–E/branco) e a
+     * alternativa errada mais marcada. Considera só cartões lidos e com aluno; quem
+     * marcou Espanhol é comparado com o gabarito de Espanhol (mesma regra da nota).
+     */
+    private function analiseQuestoes(Prova $prova, ?int $turmaId = null): array
+    {
+        $gabarito = DB::table('gabaritos')->where('prova_id', $prova->id)->first();
+        if (!$gabarito) {
+            return [];
+        }
+        $questoes = DB::table('gabarito_questoes')->where('gabarito_id', $gabarito->id)
+            ->orderBy('numero_questao')->get()->keyBy('numero_questao');
+
+        $respostas = DB::table('cartao_respostas as r')
+            ->join('cartoes as c', 'c.id', '=', 'r.cartao_id')
+            ->join('alunos as a', 'a.id', '=', 'c.aluno_id')
+            ->where('c.prova_id', $prova->id)
+            ->where('c.status', 'lido')
+            ->when($turmaId, fn ($q) => $q->where('a.turma_id', $turmaId))
+            ->get(['r.numero_questao', 'r.alternativa', 'c.lingua']);
+
+        $letras = array_slice(['A', 'B', 'C', 'D', 'E'], 0, (int) $prova->num_alternativas);
+        $saida  = [];
+        foreach ($questoes as $n => $q) {
+            $daQuestao = $respostas->where('numero_questao', $n);
+            $dist = array_fill_keys($letras, 0) + ['branco' => 0];
+            $acertos = 0;
+            foreach ($daQuestao as $r) {
+                $dist[$r->alternativa ?? 'branco'] = ($dist[$r->alternativa ?? 'branco'] ?? 0) + 1;
+                $esperada = ($prova->opcao_lingua && $r->lingua === 'ESP' && !empty($q->alternativa_espanhol))
+                    ? $q->alternativa_espanhol : $q->alternativa;
+                if (!$q->anulada && $r->alternativa === $esperada) {
+                    $acertos++;
+                }
+            }
+            $total = $daQuestao->count();
+
+            // Distrator: alternativa errada mais marcada (considera o gabarito de Inglês/único)
+            $erradas = array_diff_key(array_intersect_key($dist, array_flip($letras)), [$q->alternativa => 0]);
+            arsort($erradas);
+            $distrator = $erradas && reset($erradas) > 0 ? key($erradas) : null;
+
+            $saida[] = [
+                'numero'               => (int) $n,
+                'gabarito'             => $q->alternativa,
+                'gabarito_espanhol'    => $q->alternativa_espanhol ?? null,
+                'anulada'              => (bool) $q->anulada,
+                'total'                => $total,
+                'acertos'              => $acertos,
+                'pct'                  => $total > 0 ? round($acertos / $total * 100) : null,
+                'distribuicao'         => $dist,
+                'distrator'            => $distrator,
+            ];
+        }
+
+        return $saida;
     }
 }
