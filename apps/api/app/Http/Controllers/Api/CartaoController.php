@@ -9,6 +9,7 @@ use App\Models\Cartao;
 use App\Models\Prova;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
+use App\Services\Omr\ImagensCartao;
 use App\Services\Omr\GeradorCartoes;
 use App\Support\Correcao;
 use App\Support\Escopo;
@@ -32,7 +33,7 @@ class CartaoController extends Controller
         return Escopo::prova($request->user(), $provaId);
     }
 
-    public function index(Request $request, int $provaId): JsonResponse
+    public function index(Request $request, int $provaId, ImagensCartao $imagens): JsonResponse
     {
         $prova = $this->encontrarProva($request, $provaId);
         if (!$prova) {
@@ -52,8 +53,12 @@ class CartaoController extends Controller
                 'cartoes.imagem_url', 'alunos.nome as aluno_nome', 'alunos.matricula', 'turmas.nome as turma',
                 'notas.acertos', 'notas.total_questoes', 'notas.nota_final',
             ])
-            ->map(function ($c) {
+            ->map(function ($c) use ($imagens) {
                 $c->tem_imagem = (bool) $c->imagem_url;
+                $c->foto_url = $c->imagem_url ? $imagens->url($c->id, 'original') : null;
+                $c->miniatura_url = Storage::disk('public')->exists(ImagensCartao::caminho($c->id, 'miniatura'))
+                    ? $imagens->url($c->id, 'miniatura')
+                    : null;
                 unset($c->imagem_url);
                 $c->ambiguas = DB::table('cartao_respostas')->where('cartao_id', $c->id)->where('ambigua', true)->count();
                 return $c;
@@ -76,6 +81,19 @@ class CartaoController extends Controller
         }
 
         return response()->file($caminho, ['Cache-Control' => 'private, max-age=600']);
+    }
+
+    /** Foto por link assinado: a assinatura já prova o acesso e a resposta não ocupa a web. */
+    public function arquivo(int $id, string $tipo)
+    {
+        $cartao = Cartao::find($id);
+        $relativo = $tipo === 'original' ? $cartao?->imagem_url : ImagensCartao::caminho($id, $tipo);
+        $caminho = $cartao && $relativo ? Storage::disk('public')->path($relativo) : null;
+        if (!$caminho || !is_file($caminho)) {
+            return ApiResponse::notFound('Imagem não encontrada.');
+        }
+
+        return response()->file($caminho, ['Cache-Control' => 'private, max-age=3600']);
     }
 
     /** Exclui a correção (cartão, respostas, nota e foto) para o aluno ser fotografado de novo. */
