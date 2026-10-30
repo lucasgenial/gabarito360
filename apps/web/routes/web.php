@@ -79,6 +79,10 @@ Route::middleware('autenticado')->group(function () {
     // Escolas (MP-015)
     Route::get('/escolas',             [EscolaController::class, 'index'])->name('escolas.index');
     Route::post('/escolas',            [EscolaController::class, 'store'])->name('escolas.store');
+    Route::get('/escolas/nova',        [EscolaController::class, 'create'])->name('escolas.create');
+    Route::get('/escolas/censo/buscar',    [EscolaController::class, 'censoBuscar'])->name('escolas.censo.buscar');
+    Route::get('/escolas/censo/pesquisar', [EscolaController::class, 'censoPesquisar'])->name('escolas.censo.pesquisar');
+    Route::get('/escolas/{id}/editar', [EscolaController::class, 'edit'])->whereNumber('id')->name('escolas.edit');
     Route::get('/escolas/{id}',        [EscolaController::class, 'show'])->name('escolas.show');
     Route::put('/escolas/{id}',        [EscolaController::class, 'update'])->name('escolas.update');
     Route::post('/escolas/{id}/toggle',[EscolaController::class, 'toggle'])->name('escolas.toggle');

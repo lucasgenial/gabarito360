@@ -25,15 +25,6 @@
   .kpi-strip .kpi-v { font-family:var(--font-mono); font-size:28px; font-weight:700; }
   .kpi-strip .kpi-l { font-size:12px; color:var(--muted); margin-top:2px; }
   /* Modal */
-  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; display:none; align-items:center; justify-content:center; padding:24px; }
-  .modal-backdrop.open { display:flex; }
-  .modal { background:var(--surface); border-radius:var(--radius-lg); box-shadow:0 24px 64px rgba(0,0,0,.22); width:100%; max-width:560px; max-height:90vh; overflow-y:auto; }
-  .modal-head { padding:22px 24px 18px; border-bottom:1px solid var(--border-soft); display:flex; align-items:center; justify-content:space-between; }
-  .modal-head h2 { font-size:18px; font-weight:700; }
-  .modal-close { width:34px; height:34px; border-radius:50%; background:none; border:0; cursor:pointer; font-size:20px; color:var(--muted); display:grid; place-items:center; }
-  .modal-close:hover { background:var(--surface-2); }
-  .modal-body { padding:24px; }
-  .modal-foot { padding:16px 24px; border-top:1px solid var(--border-soft); display:flex; justify-content:flex-end; gap:10px; }
   .form-section { margin-bottom:20px; }
   .form-section-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:12px; }
   .form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
@@ -60,10 +51,10 @@
              oninput="filtrarEscolas(this.value)" />
     </div>
     @pode('escola.criar')
-    <button class="btn btn-primary" onclick="abrirModal()">
+    <a class="btn btn-primary" href="{{ route('escolas.create') }}">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       Nova escola
-    </button>
+    </a>
     @endpode
   </div>
 </div>
@@ -108,6 +99,9 @@
         <div style="flex:1;min-width:0;">
           <div class="escola-name">{{ $e['nome'] }}</div>
           <div class="escola-code">INEP: {{ $e['inep'] }}</div>
+          @if(($e['tipo'] ?? 'sede') !== 'sede')
+            <div class="escola-code">{{ $e['tipo'] === 'anexo' ? 'Anexo' : 'Unidade vinculada' }}{{ !empty($e['sede_nome']) ? ' de ' . $e['sede_nome'] : '' }}</div>
+          @endif
         </div>
         <div style="margin-left:auto;flex-shrink:0;">
           @if($e['ativo'])
@@ -152,8 +146,7 @@
         </div>
         <div class="escola-actions">
           @pode('escola.editar')
-          <button class="btn btn-sm btn-secondary"
-                  onclick='abrirModalEditar(@json($e))'>Editar</button>
+          <a class="btn btn-sm btn-ghost" href="{{ route('escolas.edit', $e['id']) }}">Editar</a>
           @endpode
           <a href="{{ route('escolas.show', $e['id']) }}" class="btn btn-sm btn-primary">Ver mais</a>
         </div>
@@ -169,212 +162,10 @@
 </div>
 
 {{-- Modal de criação --}}
-<div class="modal-backdrop" id="modal-criar" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo-criar">
-    <div class="modal-head">
-      <h2 id="modal-titulo-criar">Nova Escola</h2>
-      <button type="button" class="modal-close" onclick="fecharModal('modal-criar')">&times;</button>
-    </div>
-    <form method="POST" action="{{ route('escolas.store') }}">
-      @csrf
-      <div class="modal-body">
-        <div class="form-section">
-          <div class="form-section-label">Identificação</div>
-          <div class="form-row-2">
-            <div class="field full-modal">
-              <label for="cr-nome">Nome da escola *</label>
-              <input class="input" type="text" id="cr-nome" name="nome" required placeholder="Ex.: E.E. Prof. João Pessoa" />
-            </div>
-            <div class="field">
-              <label for="cr-inep">Código INEP *</label>
-              <input class="input num" type="text" id="cr-inep" name="inep" required placeholder="35000001" maxlength="8" />
-            </div>
-            <div class="field">
-              <label for="cr-tipo">Tipo de rede *</label>
-              <select class="select" id="cr-tipo" name="tipo_rede" required>
-                <option value="">—</option>
-                <option value="estadual">Estadual</option>
-                <option value="municipal">Municipal</option>
-                <option value="federal">Federal</option>
-                <option value="privada">Privada</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="cr-nucleo">Núcleo</label>
-              <select class="select" id="cr-nucleo" name="nucleo_id">
-                <option value="">— Selecione —</option>
-                @foreach($nucleos as $n)
-                  <option value="{{ $n['id'] }}">{{ $n['nome'] }}</option>
-                @endforeach
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="form-section">
-          <div class="form-section-label">Contato e localização</div>
-          <div class="form-row-2">
-            <div class="field" style="grid-column:1/-1">
-              <label for="cr-logradouro">Endereço</label>
-              <input class="input" type="text" id="cr-logradouro" name="logradouro" placeholder="Rua, número, bairro" />
-            </div>
-            <div class="field">
-              <label for="cr-cidade">Cidade</label>
-              <input class="input" type="text" id="cr-cidade" name="cidade" />
-            </div>
-            <div class="field">
-              <label for="cr-uf">UF</label>
-              <input class="input" type="text" id="cr-uf" name="uf" maxlength="2" placeholder="SP" />
-            </div>
-            <div class="field">
-              <label for="cr-telefone">Telefone</label>
-              <input class="input" type="text" id="cr-telefone" name="telefone" placeholder="(00) 0000-0000" />
-            </div>
-            <div class="field">
-              <label for="cr-email">E-mail</label>
-              <input class="input" type="email" id="cr-email" name="email" placeholder="escola@edu.gov.br" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-foot">
-        <button type="button" class="btn btn-ghost" onclick="fecharModal('modal-criar')">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Criar escola</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-{{-- Modal de edição --}}
-<div class="modal-backdrop" id="modal-editar" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo-editar">
-    <div class="modal-head">
-      <h2 id="modal-titulo-editar">Editar Escola</h2>
-      <button type="button" class="modal-close" onclick="fecharModal('modal-editar')">&times;</button>
-    </div>
-    <form method="POST" id="form-editar">
-      @csrf
-      @method('PUT')
-      <div class="modal-body">
-        <div class="form-section">
-          <div class="form-section-label">Identificação</div>
-          <div class="form-row-2">
-            <div class="field" style="grid-column:1/-1">
-              <label for="ed-nome">Nome da escola *</label>
-              <input class="input" type="text" id="ed-nome" name="nome" required />
-            </div>
-            <div class="field">
-              <label for="ed-inep">Código INEP</label>
-              <input class="input num" type="text" id="ed-inep" name="inep" maxlength="8" />
-            </div>
-            <div class="field">
-              <label for="ed-tipo">Tipo de rede *</label>
-              <select class="select" id="ed-tipo" name="tipo_rede" required>
-                <option value="estadual">Estadual</option>
-                <option value="municipal">Municipal</option>
-                <option value="federal">Federal</option>
-                <option value="privada">Privada</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="ed-nucleo">Núcleo</label>
-              <select class="select" id="ed-nucleo" name="nucleo_id">
-                <option value="">— Selecione —</option>
-                @foreach($nucleos as $n)
-                  <option value="{{ $n['id'] }}">{{ $n['nome'] }}</option>
-                @endforeach
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="form-section">
-          <div class="form-section-label">Contato e localização</div>
-          <div class="form-row-2">
-            <div class="field" style="grid-column:1/-1">
-              <label for="ed-logradouro">Endereço</label>
-              <input class="input" type="text" id="ed-logradouro" name="logradouro" />
-            </div>
-            <div class="field">
-              <label for="ed-cidade">Cidade</label>
-              <input class="input" type="text" id="ed-cidade" name="cidade" />
-            </div>
-            <div class="field">
-              <label for="ed-uf">UF</label>
-              <input class="input" type="text" id="ed-uf" name="uf" maxlength="2" />
-            </div>
-            <div class="field">
-              <label for="ed-telefone">Telefone</label>
-              <input class="input" type="text" id="ed-telefone" name="telefone" />
-            </div>
-            <div class="field">
-              <label for="ed-email">E-mail</label>
-              <input class="input" type="email" id="ed-email" name="email" />
-            </div>
-          </div>
-        </div>
-        <div class="form-section">
-          <div class="form-section-label">Zona de risco</div>
-          <form method="POST" id="form-toggle-inline" style="margin-top:8px;">
-            @csrf
-          </form>
-          <button type="submit" form="form-toggle-inline" class="btn btn-ghost btn-sm" id="btn-toggle"
-                  style="color:var(--danger);border-color:var(--danger);">
-            Desativar escola
-          </button>
-        </div>
-      </div>
-      <div class="modal-foot">
-        <button type="button" class="btn btn-ghost" onclick="fecharModal('modal-editar')">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Salvar alterações</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div style="height:48px"></div>
 @endsection
 
 @push('scripts')
 <script>
-function abrirModal() {
-  var m = document.getElementById('modal-criar');
-  m.classList.add('open');
-  m.setAttribute('aria-hidden','false');
-  document.body.style.overflow = 'hidden';
-}
-
-function abrirModalEditar(escola) {
-  var m = document.getElementById('modal-editar');
-  var f = document.getElementById('form-editar');
-  var base = '/escolas/' + escola.id;
-
-  f.action = base;
-  document.getElementById('ed-nome').value      = escola.nome || '';
-  document.getElementById('ed-inep').value      = escola.inep || '';
-  document.getElementById('ed-tipo').value      = escola.tipo_rede || '';
-  document.getElementById('ed-nucleo').value    = escola.nucleo_id || '';
-  document.getElementById('ed-logradouro').value= escola.logradouro || '';
-  document.getElementById('ed-cidade').value    = escola.cidade || '';
-  document.getElementById('ed-uf').value        = escola.uf || '';
-  document.getElementById('ed-telefone').value  = escola.telefone || '';
-  document.getElementById('ed-email').value     = escola.email || '';
-
-  var toggleForm = document.getElementById('form-toggle-inline');
-  toggleForm.action = base + '/toggle';
-  var btnToggle = document.getElementById('btn-toggle');
-  btnToggle.textContent = escola.ativo ? 'Desativar escola' : 'Ativar escola';
-
-  m.classList.add('open');
-  m.setAttribute('aria-hidden','false');
-  document.body.style.overflow = 'hidden';
-}
-
-function fecharModal(id) {
-  var m = document.getElementById(id);
-  m.classList.remove('open');
-  m.setAttribute('aria-hidden','true');
-  document.body.style.overflow = '';
-}
-
 function filtrarEscolas(busca) {
   var termo = busca.toLowerCase().trim();
   var cards = document.querySelectorAll('#escola-grid .escola-card');
@@ -382,20 +173,5 @@ function filtrarEscolas(busca) {
     card.style.display = (!termo || card.dataset.nome.includes(termo)) ? '' : 'none';
   });
 }
-
-// Fecha modal ao clicar no backdrop
-['modal-criar','modal-editar'].forEach(function(id) {
-  var m = document.getElementById(id);
-  m.addEventListener('click', function(e) {
-    if (e.target === m) fecharModal(id);
-  });
-});
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    fecharModal('modal-criar');
-    fecharModal('modal-editar');
-  }
-});
 </script>
 @endpush

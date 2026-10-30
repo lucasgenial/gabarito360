@@ -235,40 +235,40 @@
       </div>
       <div class="info-card">
         <h3>Dados da escola</h3>
+        @php
+          $endereco = collect([trim(($escola['logradouro'] ?? '') . (!empty($escola['numero']) ? ', ' . $escola['numero'] : '')),
+                               $escola['complemento'] ?? null, $escola['bairro'] ?? null])->filter()->implode(' · ');
+          $rotOferta = fn ($campo) => collect($escola[$campo] ?? [])->map(fn ($k) => $opcoes[$campo][$k] ?? $k)->implode(', ');
+          $linhas = [
+            'Nome'         => $escola['nome'],
+            'INEP'         => $escola['inep'] === 'PENDENTE' ? 'Pendente — informe em "Editar dados da escola"' : $escola['inep'],
+            'Vínculo'      => ['sede' => 'Sede', 'anexo' => 'Anexo', 'unidade_vinculada' => 'Unidade vinculada'][$escola['tipo'] ?? 'sede'] ?? null,
+            'Esfera'       => ['estadual'=>'Estadual','municipal'=>'Municipal','federal'=>'Federal','privada'=>'Privada'][$escola['tipo_rede']] ?? $escola['tipo_rede'],
+            'Núcleo'       => ($escola['nucleo_nome'] ?? null) . (!empty($escola['orgao_regional']) ? ' (NTE ' . $escola['orgao_regional'] . ')' : ''),
+            'Situação'     => ['ativa' => 'Em atividade', 'paralisada' => 'Paralisada', 'extinta' => 'Extinta'][$escola['situacao_funcionamento'] ?? ''] ?? null,
+            'Localização'  => ['urbana' => 'Urbana', 'rural' => 'Rural'][$escola['localizacao'] ?? ''] ?? null,
+            'Endereço'     => $endereco ?: null,
+            'Município'    => !empty($escola['cidade']) ? $escola['cidade'] . ' / ' . ($escola['uf'] ?? '') . (!empty($escola['co_municipio']) ? ' · IBGE ' . $escola['co_municipio'] : '') : null,
+            'CEP'          => !empty($escola['cep']) ? substr($escola['cep'], 0, 5) . '-' . substr($escola['cep'], 5) : null,
+            'Telefone'     => $escola['telefone'] ?? null,
+            'E-mail'       => $escola['email'] ?? null,
+            'Turnos'       => $rotOferta('turnos') ?: null,
+            'Etapas'       => $rotOferta('etapas') ?: null,
+            'Modalidades'  => $rotOferta('modalidades') ?: null,
+            'Origem'       => ($escola['origem'] ?? 'manual') === 'censo' ? 'Censo Escolar ' . ($escola['ano_censo'] ?? '') . (!empty($escola['edicao_manual']) ? ' (editada à mão)' : '') : 'Cadastro manual',
+          ];
+        @endphp
+        @foreach($linhas as $rot => $v)
+          @continue($v === null || $v === '')
+          <div class="info-row">
+            <span class="lbl">{{ $rot }}</span>
+            <span class="val" @if($rot === 'INEP') style="font-family:var(--font-mono);" @endif>{{ $v }}</span>
+          </div>
+        @endforeach
+        @if(!empty($escola['sede']))
         <div class="info-row">
-          <span class="lbl">Nome</span>
-          <span class="val">{{ $escola['nome'] }}</span>
-        </div>
-        <div class="info-row">
-          <span class="lbl">INEP</span>
-          <span class="val" style="font-family:var(--font-mono);">{{ $escola['inep'] }}</span>
-        </div>
-        @if($escola['logradouro'] ?? null)
-        <div class="info-row">
-          <span class="lbl">Endereço</span>
-          <span class="val">{{ $escola['logradouro'] }}@if($escola['cidade'] ?? null), {{ $escola['cidade'] }} / {{ $escola['uf'] ?? '' }}@endif</span>
-        </div>
-        @endif
-        @if($escola['telefone'] ?? null)
-        <div class="info-row">
-          <span class="lbl">Telefone</span>
-          <span class="val">{{ $escola['telefone'] }}</span>
-        </div>
-        @endif
-        @if($escola['email'] ?? null)
-        <div class="info-row">
-          <span class="lbl">E-mail</span>
-          <span class="val">{{ $escola['email'] }}</span>
-        </div>
-        @endif
-        <div class="info-row">
-          <span class="lbl">Rede</span>
-          <span class="val">{{ ['estadual'=>'Estadual','municipal'=>'Municipal','federal'=>'Federal','privada'=>'Privada'][$escola['tipo_rede']] ?? $escola['tipo_rede'] }}</span>
-        </div>
-        @if($escola['nucleo_nome'] ?? null)
-        <div class="info-row">
-          <span class="lbl">Núcleo</span>
-          <span class="val">{{ $escola['nucleo_nome'] }}</span>
+          <span class="lbl">Escola sede</span>
+          <span class="val"><a href="{{ route('escolas.show', $escola['sede']['id']) }}">{{ $escola['sede']['nome'] }}</a></span>
         </div>
         @endif
         <div class="info-row">
@@ -281,7 +281,30 @@
             @endif
           </span>
         </div>
+        @pode('escola.editar')
+          <a class="btn btn-secondary btn-sm" style="margin-top:12px;" href="{{ route('escolas.edit', $escola['id']) }}">Editar dados da escola</a>
+        @endpode
       </div>
+
+      {{-- Anexos (escolas ligadas a esta sede), como no ECOAR --}}
+      @if(($escola['tipo'] ?? 'sede') === 'sede' && (count($escola['anexos'] ?? []) || \App\Support\Acesso::pode('escola.criar')))
+      <div class="info-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <h3 style="margin:0;">Anexos ({{ count($escola['anexos'] ?? []) }})</h3>
+          @pode('escola.criar')
+            <a class="btn btn-sm btn-primary" href="{{ route('escolas.create', ['sede' => $escola['id']]) }}">+ Cadastrar anexo</a>
+          @endpode
+        </div>
+        @forelse($escola['anexos'] ?? [] as $a)
+          <div class="info-row">
+            <span class="lbl"><a href="{{ route('escolas.show', $a['id']) }}">{{ $a['nome'] }}</a></span>
+            <span class="val" style="font-size:13px;">INEP {{ $a['inep'] }}{{ !empty($a['cidade']) ? ' · ' . $a['cidade'] : '' }}{{ $a['ativo'] ? '' : ' · inativo' }}</span>
+          </div>
+        @empty
+          <p class="field-help">Nenhum anexo cadastrado para esta escola.</p>
+        @endforelse
+      </div>
+      @endif
 
       {{-- Turmas resumo --}}
       @if(count($escola['turmas'] ?? []) > 0)
@@ -371,8 +394,7 @@
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
           <a href="{{ route('escolas.index') }}" class="btn btn-secondary btn-sm">← Voltar para escolas</a>
           @pode('escola.editar')
-          <button onclick="document.getElementById('modal-editar').style.display='flex';document.body.style.overflow='hidden';"
-                  class="btn btn-ghost btn-sm">Editar dados da escola</button>
+          <a href="{{ route('escolas.edit', $escola['id']) }}" class="btn btn-ghost btn-sm">Editar dados da escola</a>
           @endpode
           @pode('escola.desativar')
           <form method="POST" action="{{ route('escolas.toggle', $escola['id']) }}"
@@ -603,75 +625,6 @@
   @endif
 </div>
 
-{{-- Modal edição inline --}}
-<div class="modal-backdrop" id="modal-editar" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;">
-  <div style="background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,.22);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;">
-    <div style="padding:22px 24px 18px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between;">
-      <h2 style="font-size:18px;font-weight:700;">Editar escola</h2>
-      <button type="button" onclick="document.getElementById('modal-editar').style.display='none';document.body.style.overflow='';"
-              style="width:34px;height:34px;border-radius:50%;background:none;border:0;cursor:pointer;font-size:20px;color:var(--muted);display:grid;place-items:center;">&times;</button>
-    </div>
-    <form method="POST" action="{{ route('escolas.update', $escola['id']) }}">
-      @csrf
-      @method('PUT')
-      <div style="padding:24px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="field" style="grid-column:1/-1">
-            <label for="ed-nome">Nome *</label>
-            <input class="input" type="text" id="ed-nome" name="nome" value="{{ $escola['nome'] }}" required />
-          </div>
-          <div class="field">
-            <label for="ed-inep">INEP</label>
-            <input class="input num" type="text" id="ed-inep" name="inep" value="{{ $escola['inep'] }}" maxlength="8" />
-          </div>
-          <div class="field">
-            <label for="ed-tipo">Tipo de rede *</label>
-            <select class="select" id="ed-tipo" name="tipo_rede" required>
-              @foreach(['estadual'=>'Estadual','municipal'=>'Municipal','federal'=>'Federal','privada'=>'Privada'] as $v => $l)
-                <option value="{{ $v }}" {{ ($escola['tipo_rede'] ?? '') === $v ? 'selected' : '' }}>{{ $l }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div class="field">
-            <label for="ed-nucleo">Núcleo</label>
-            <select class="select" id="ed-nucleo" name="nucleo_id">
-              <option value="">— Selecione —</option>
-              @foreach($nucleos as $n)
-                <option value="{{ $n['id'] }}" {{ ($escola['nucleo_id'] ?? '') == $n['id'] ? 'selected' : '' }}>{{ $n['nome'] }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div class="field" style="grid-column:1/-1">
-            <label for="ed-logradouro">Endereço</label>
-            <input class="input" type="text" id="ed-logradouro" name="logradouro" value="{{ $escola['logradouro'] ?? '' }}" />
-          </div>
-          <div class="field">
-            <label for="ed-cidade">Cidade</label>
-            <input class="input" type="text" id="ed-cidade" name="cidade" value="{{ $escola['cidade'] ?? '' }}" />
-          </div>
-          <div class="field">
-            <label for="ed-uf">UF</label>
-            <input class="input" type="text" id="ed-uf" name="uf" value="{{ $escola['uf'] ?? '' }}" maxlength="2" />
-          </div>
-          <div class="field">
-            <label for="ed-tel">Telefone</label>
-            <input class="input" type="text" id="ed-tel" name="telefone" value="{{ $escola['telefone'] ?? '' }}" />
-          </div>
-          <div class="field">
-            <label for="ed-email">E-mail</label>
-            <input class="input" type="email" id="ed-email" name="email" value="{{ $escola['email'] ?? '' }}" />
-          </div>
-        </div>
-      </div>
-      <div style="padding:16px 24px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end;gap:10px;">
-        <button type="button" class="btn btn-ghost"
-                onclick="document.getElementById('modal-editar').style.display='none';document.body.style.overflow='';">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Salvar alterações</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <div style="height:48px;"></div>
 @endsection
 
@@ -686,12 +639,5 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
   });
 });
 
-var modal = document.getElementById('modal-editar');
-modal.addEventListener('click', function(e) {
-  if (e.target === modal) { modal.style.display='none'; document.body.style.overflow=''; }
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' && modal.style.display !== 'none') { modal.style.display='none'; document.body.style.overflow=''; }
-});
 </script>
 @endpush
