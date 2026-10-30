@@ -44,7 +44,7 @@ class Acesso
     ];
 
     /** Ordem do menu no computador (até MAX_TOPO itens; o resto vai para "Mais"). */
-    private const ORDEM = ['painel', 'provas', 'corrigir', 'turmas', 'alunos', 'escolas', 'equipe', 'relatorios'];
+    private const ORDEM = ['painel', 'provas', 'corrigir', 'turmas', 'relatorios', 'escolas', 'alunos', 'equipe'];
 
     private const MAX_TOPO = 6;
 
