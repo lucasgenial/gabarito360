@@ -46,7 +46,8 @@
     .kpis { grid-template-columns:1fr 1fr; }
     .quadro { width:auto; }
     .quadro th, .quadro td { padding:6px; }
-    .quadro .aluno a, .quadro .aluno span { max-width:118px; font-size:12px; }
+    .quadro .aluno a, .quadro .aluno span { max-width:130px; font-size:12px; white-space:normal; overflow:visible; line-height:1.25; }
+    .quadro .aluno { white-space:normal; }
   }
 </style>
 @endpush

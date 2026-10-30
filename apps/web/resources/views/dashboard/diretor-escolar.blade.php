@@ -91,7 +91,18 @@
   <div>
     <div class="eyebrow" style="color:var(--accent-dark);">Unidade escolar</div>
     <h3 style="font-size:24px;color:var(--accent-dark);margin-top:4px;">{{ $escola['nome'] }}</h3>
-    <div class="school-meta">INEP {{ $escola['inep'] }} · Ensino Fundamental · Turnos manhã e tarde</div>
+    @php
+      $rotEtapas = ['infantil' => 'Educação Infantil', 'fundamental_iniciais' => 'Fundamental (anos iniciais)', 'fundamental_finais' => 'Fundamental (anos finais)',
+                    'medio' => 'Ensino Médio', 'eja' => 'EJA', 'profissional' => 'Educação Profissional'];
+      $rotTurnos = ['manha' => 'manhã', 'tarde' => 'tarde', 'noite' => 'noite', 'integral' => 'integral'];
+      $meta = array_filter([
+        'INEP ' . $escola['inep'],
+        !empty($escola['cidade']) ? $escola['cidade'] . (!empty($escola['uf']) ? '/' . $escola['uf'] : '') : null,
+        collect($escola['etapas'] ?? [])->map(fn ($k) => $rotEtapas[$k] ?? $k)->implode(', ') ?: null,
+        !empty($escola['turnos']) ? 'Turnos: ' . collect($escola['turnos'])->map(fn ($k) => $rotTurnos[$k] ?? $k)->implode(', ') : null,
+      ]);
+    @endphp
+    <div class="school-meta">{{ implode(' · ', $meta) }}</div>
   </div>
   <span class="badge {{ $escola['ativo'] ? 'badge-info' : 'badge-muted' }}" style="font-size:13px;">
     {{ $escola['ativo'] ? 'Escola Ativa' : 'Escola Inativa' }}
