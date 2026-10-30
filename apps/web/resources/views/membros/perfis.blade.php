@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('tela', 'tela-perfis')
+
 {{--
   Arquivo: apps/web/resources/views/membros/perfis.blade.php
   Função: "O que cada perfil pode" — leitura do catálogo (docs/03 v2): permissões padrão,
@@ -16,19 +18,6 @@
 @endphp
 
 @section('title', 'O que cada perfil pode')
-
-@push('styles')
-<style>
-  .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
-  .chips button { border:1px solid var(--border); background:var(--surface); border-radius:99px; padding:7px 12px; font-size:13px; cursor:pointer; }
-  .chips button.ativo { background:var(--accent); color:#fff; border-color:var(--accent); }
-  .perfil-bloco { display:none; }
-  .perfil-bloco.ativo { display:block; }
-  .lista-perm li { padding:6px 0; border-bottom:1px solid var(--border-soft); font-size:14px; display:flex; justify-content:space-between; gap:8px; }
-  .duas-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  @media (max-width:720px) { .duas-col { grid-template-columns:1fr; } }
-</style>
-@endpush
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -54,7 +43,7 @@
     </div>
     <div class="duas-col" style="margin-top:12px;">
       <div class="card card-pad">
-        <h3 style="font-size:16px;color:#168821;">Padrão do perfil ({{ count($g['padrao']) }})</h3>
+        <h3 style="font-size:16px;color:var(--success);">Padrão do perfil ({{ count($g['padrao']) }})</h3>
         @foreach($modulos as $mod => $rot)
           @php $ch = collect($g['padrao'])->filter(fn ($c) => ($descr[$c]['modulo'] ?? '') === $mod); @endphp
           @if($ch->isNotEmpty())

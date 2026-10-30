@@ -1,27 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Meu Perfil')
+@section('tela', 'tela-perfil')
 
-@push('styles')
-<style>
-  .profile-layout { display:grid;grid-template-columns:280px 1fr;gap:24px;margin-top:24px;align-items:start; }
-  .profile-card { background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:28px 24px;text-align:center; }
-  .avatar-lg { width:80px;height:80px;border-radius:50%;background:var(--accent-light);color:var(--accent-dark,#0c326f);display:grid;place-items:center;font-weight:800;font-size:28px;font-family:var(--font-mono);margin:0 auto 16px;border:3px solid var(--accent); }
-  .profile-name { font-size:20px;font-weight:700;color:var(--fg); }
-  .profile-role { font-size:13px;color:var(--muted);margin-top:4px; }
-  .profile-institution { margin-top:16px;padding-top:16px;border-top:1px solid var(--border-soft);font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px;text-align:left; }
-  .profile-institution span { display:flex;gap:8px;align-items:center; }
-  .profile-institution strong { color:var(--fg-2);font-size:13px; }
-  .profile-main { display:flex;flex-direction:column;gap:24px; }
-  .section-card { background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden; }
-  .section-head { padding:20px 24px 16px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between; }
-  .section-head h2 { font-size:16px;font-weight:700; }
-  .section-head p { font-size:13px;color:var(--muted);margin-top:2px; }
-  .section-body { padding:24px; }
-  .form-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:0 20px; }
-  @media (max-width:900px){ .profile-layout{grid-template-columns:1fr;} .form-grid-2{grid-template-columns:1fr;} }
-</style>
-@endpush
+@section('title', 'Meu Perfil')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
@@ -42,23 +23,12 @@
   $iniciais = strtoupper(implode('', array_map(fn($p) => $p[0], array_slice(explode(' ', $usuario['nome']), 0, 2))));
 @endphp
 
-<div class="row-between" style="margin-top:12px;margin-bottom:0;">
-  <div>
-    <h1 class="page-title">Meu Perfil</h1>
-    <p class="page-sub">Gerencie seus dados pessoais e sua senha de acesso</p>
-  </div>
-</div>
+<x-pagina titulo="Meu Perfil">
+  <x-slot:sub>Gerencie seus dados pessoais e sua senha de acesso</x-slot:sub>
+</x-pagina>
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light,#e3f5e1);color:var(--success,#168821);border:1px solid var(--success,#168821);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light,#fde8e4);color:var(--danger,#e52207);border:1px solid var(--danger,#e52207);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 <div class="profile-layout">
   <div class="profile-card">
@@ -67,10 +37,10 @@
     <div class="profile-role">{{ $perfilLabels[$usuario['perfil']] ?? $usuario['perfil'] }}</div>
     <div class="profile-institution">
       @if($usuario['escola_nome'])
-        <span>🏫 <strong>{{ $usuario['escola_nome'] }}</strong></span>
+        <span><x-icone nome="escola" /> <strong>{{ $usuario['escola_nome'] }}</strong></span>
       @endif
-      <span>📧 <strong>{{ $usuario['email'] }}</strong></span>
-      <span>📅 <strong>Desde {{ \Carbon\Carbon::parse($usuario['created_at'])->format('m/Y') }}</strong></span>
+      <span><strong>{{ $usuario['email'] }}</strong></span>
+      <span><strong>Desde {{ \Carbon\Carbon::parse($usuario['created_at'])->format('m/Y') }}</strong></span>
     </div>
   </div>
 

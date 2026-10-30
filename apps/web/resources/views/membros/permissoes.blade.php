@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('tela', 'tela-permissoes')
+
 {{--
   Arquivo: apps/web/resources/views/membros/permissoes.blade.php
   Função: Permissões de um membro (docs/03 v2): padrão do perfil (pode ser retirada),
@@ -19,24 +21,6 @@
 
 @section('title', 'Permissões — ' . $u['nome'])
 
-@push('styles')
-<style>
-  .perm-grupo { margin-top:16px; }
-  .perm-item { display:flex; gap:12px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; padding:10px 0; border-bottom:1px solid var(--border-soft); }
-  .perm-item:last-child { border:0; }
-  .perm-txt { flex:1; min-width:200px; }
-  .perm-txt b { font-size:14px; }
-  .perm-txt code { font-size:11px; color:var(--muted); }
-  .perm-quem { font-size:12px; color:var(--muted); margin-top:2px; }
-  .perm-ctrl { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .perm-ctrl label { display:flex; gap:6px; align-items:center; font-size:13px; cursor:pointer; }
-  .perm-ctrl input[type=checkbox] { width:18px; height:18px; }
-  .perm-ctrl input[type=date] { max-width:160px; }
-  .riscado { text-decoration:line-through; color:var(--muted); }
-  .barra-salvar { position:sticky; bottom:0; background:var(--surface); border-top:1px solid var(--border-soft); padding:12px 0; margin-top:16px; display:flex; gap:8px; justify-content:flex-end; z-index:5; }
-</style>
-@endpush
-
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
 <a href="{{ route('membros.index') }}">Equipe</a><span class="sep">/</span>
@@ -44,17 +28,11 @@
 @endsection
 
 @section('content')
-<div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
-  <div>
-    <div class="eyebrow">Passo 4 · Permissões</div>
-    <h1 class="page-title">{{ $u['nome'] }}</h1>
-    <p class="page-sub">{{ $perfis[$u['perfil']]['label'] ?? $u['perfil'] }} · {{ count($dados['efetivas']) }} permissões efetivas</p>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+<x-pagina chamada="Passo 4 · Permissões" titulo="{{ $u['nome'] }}">
+  <x-slot:sub>{{ $perfis[$u['perfil']]['label'] ?? $u['perfil'] }} · {{ count($dados['efetivas']) }} permissões efetivas</x-slot:sub>
     <a class="btn btn-ghost" href="{{ route('membros.perfis') }}">O que cada perfil pode</a>
     <a class="btn btn-secondary" href="{{ route('membros.edit', $u['id']) }}">Dados do membro</a>
-  </div>
-</div>
+</x-pagina>
 
 @if(session('sucesso'))<div class="card card-pad" style="margin-top:12px;border-color:var(--success);color:var(--success);font-weight:600;">{{ session('sucesso') }}</div>@endif
 @if(session('erro'))<div class="card card-pad" style="margin-top:12px;border-color:var(--danger);color:var(--danger);font-weight:600;">{{ session('erro') }}</div>@endif
