@@ -176,7 +176,7 @@ class DashboardController extends Controller
 
         // Tabela de provas do professor (mais recentes)
         $provas = Escopo::provas($usuario)
-            ->orderByRaw("FIELD(status, 'em_correcao', 'publicada', 'rascunho', 'corrigida')")
+            ->orderByRaw("CASE status WHEN 'em_correcao' THEN 1 WHEN 'publicada' THEN 2 WHEN 'rascunho' THEN 3 ELSE 4 END")
             ->orderByDesc('data_aplicacao')
             ->limit(12)
             ->get(['id', 'titulo', 'disciplina', 'status', 'data_aplicacao'])
