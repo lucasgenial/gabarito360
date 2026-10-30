@@ -312,7 +312,9 @@ img { max-width: 100%; display: block; }
 
 /* Com o menu lateral sobra menos largura: grades de duas colunas viram uma antes.
    Os @media das telas ainda olham a largura da janela; saem nas etapas L3 a L6. */
-.editor-grid > *, .content-grid > * { min-width: 0; }
+/* Colunas de grade podem encolher: nomes longos quebram em vez de alargar a página */
+[class*="grid"] > * { min-width: 0; }
+.card strong, .card b, .card td { overflow-wrap: anywhere; }
 @media (min-width: 1024px) and (max-width: 1279px) { .editor-grid { grid-template-columns: 1fr !important; } }
 @media (min-width: 1024px) and (max-width: 1439px) { .content-grid { grid-template-columns: 1fr !important; } }
 .table-wrap { overflow-x: auto !important; }
@@ -387,9 +389,6 @@ img { max-width: 100%; display: block; }
   table.lista-cel td[colspan] { text-align: center !important; }
   table.lista-cel .hide-sm { display: none !important; }
 
-  /* Grades de painel: colunas podem encolher (nomes longos quebram em vez de alargar a página) */
-  [class*="grid"] > * { min-width: 0; }
-  .card strong, .card b, .card td { overflow-wrap: anywhere; }
 
   .quadro-cel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .quadro-cel .fixa { min-width: 110px; max-width: 140px; white-space: normal !important; font-size: 13px; line-height: 1.25; }
