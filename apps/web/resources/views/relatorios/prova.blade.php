@@ -122,7 +122,7 @@
 <script>
 var donut = document.getElementById('donut-media');
 donut.dataset.donut = {{ (int) round($kpis['media'] / max($prova['nota_maxima'], 0.1) * 100) }};
-donut.dataset.color = {{ $kpis['media'] >= $kpis['meta_rede'] ? "'#168821'" : "'#1351b4'" }};
+donut.dataset.color = '{{ $kpis['media'] >= $kpis['meta_rede'] ? '#168821' : '#1351b4' }}';
 if (typeof drawDonut === 'function') drawDonut(donut);
 </script>
 @endpush
