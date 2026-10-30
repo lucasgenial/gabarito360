@@ -87,6 +87,7 @@ Route::prefix('v1')->group(function () {
             Route::post('{id}/toggle', [AlunoController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
             // Resultado individual (MP-022)
             Route::get('{id}/resultados/{provaId}', [ResultadoController::class, 'show']);
+            Route::get('{id}/resultados/{provaId}/pdf', [ResultadoController::class, 'pdf']);
         });
 
         // Relatórios (MP-022)
