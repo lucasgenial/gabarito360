@@ -28,11 +28,22 @@
       <span class="logo">G360</span> Gabarito360
     </a>
 
-    {{-- Menu único por perfil (App\Support\Acesso, doc 03 "Navegação por Perfil") --}}
+    {{-- Menu montado pelas permissões efetivas (App\Support\Acesso, docs/21 etapa 4) --}}
+    @php $menuTopo = \App\Support\Acesso::menu(); @endphp
     <nav class="app-nav" aria-label="Menu principal">
-      @foreach(\App\Support\Acesso::menu() as $item)
+      @foreach($menuTopo['topo'] as $item)
         <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']])>{{ $item['rotulo'] }}</a>
       @endforeach
+      @if($menuTopo['mais'])
+        <details class="nav-mais">
+          <summary @class(['active' => collect($menuTopo['mais'])->contains('ativo', true)])>Mais ▾</summary>
+          <div class="nav-mais-lista">
+            @foreach($menuTopo['mais'] as $item)
+              <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']])>{{ $item['rotulo'] }}</a>
+            @endforeach
+          </div>
+        </details>
+      @endif
     </nav>
 
     <div class="header-right">
@@ -85,6 +96,45 @@
   {{-- Conteúdo --}}
   @yield('content')
 </div>
+
+{{-- Celular: barra inferior fixa com os 4 itens principais + "Mais" (docs/21 etapa 4) --}}
+@php $menuCel = \App\Support\Acesso::menuCelular(); @endphp
+@if(count($menuCel['barra']) > 1 || $menuCel['mais'])
+<nav class="nav-inferior" aria-label="Menu principal (celular)">
+  @foreach($menuCel['barra'] as $item)
+    <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']]) @if($item['ativo']) aria-current="page" @endif>
+      @include('layouts._icone', ['nome' => $item['icone']])<span>{{ $item['curto'] }}</span>
+    </a>
+  @endforeach
+  @if($menuCel['mais'])
+    <button type="button" class="nav-inferior-mais" aria-expanded="false" aria-controls="nav-folha">
+      @include('layouts._icone', ['nome' => 'mais'])<span>Mais</span>
+    </button>
+  @endif
+</nav>
+@if($menuCel['mais'])
+<div class="nav-folha" id="nav-folha" hidden>
+  <div class="nav-folha-fundo" data-fechar></div>
+  <div class="nav-folha-painel" role="dialog" aria-label="Todas as opções">
+    <div class="nav-folha-cab"><b>Menu</b><button type="button" class="btn btn-ghost btn-sm" data-fechar>Fechar</button></div>
+    @foreach($menuCel['mais'] as $item)
+      <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']])>@include('layouts._icone', ['nome' => $item['icone']]) {{ $item['curto'] }}</a>
+    @endforeach
+    <a href="{{ route('perfil') }}">@include('layouts._icone', ['nome' => 'aluno']) Meu perfil</a>
+  </div>
+</div>
+@endif
+<script>
+(function () {
+  var f = document.getElementById('nav-folha'), b = document.querySelector('.nav-inferior-mais');
+  if (!f || !b) return;
+  function abrir(sim) { f.hidden = !sim; b.setAttribute('aria-expanded', sim ? 'true' : 'false'); document.body.style.overflow = sim ? 'hidden' : ''; }
+  b.addEventListener('click', function () { abrir(f.hidden); });
+  f.querySelectorAll('[data-fechar]').forEach(function (x) { x.addEventListener('click', function () { abrir(false); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') abrir(false); });
+})();
+</script>
+@endif
 
 <script src="{{ asset('js/app.js') }}"></script>
 <script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
