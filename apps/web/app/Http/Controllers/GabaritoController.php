@@ -35,8 +35,9 @@ class GabaritoController extends Controller
         foreach ($request->input('alternativas', []) as $num => $alt) {
             if ($alt) {
                 $questoes[] = [
-                    'numero_questao' => (int) $num,
-                    'alternativa'    => $alt,
+                    'numero_questao'       => (int) $num,
+                    'alternativa'          => $alt,
+                    'alternativa_espanhol' => $request->input("alternativas_espanhol.{$num}") ?: null,
                 ];
             }
         }

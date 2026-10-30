@@ -24,10 +24,14 @@ class CorrecaoController extends Controller
         ];
 
         $turmas = $resp->json('data.turmas') ?? [];
+        // Alunos de todas as turmas da prova (para vincular cartões sem QR/em branco)
         $alunos = [];
-        if (count($turmas) > 0) {
-            $alunosResp = $this->api->get('/v1/alunos', ['turma_id' => $turmas[0]['id']]);
-            $alunos     = $alunosResp->successful() ? ($alunosResp->json('data.alunos') ?? []) : [];
+        foreach ($turmas as $t) {
+            $alunosResp = $this->api->get('/v1/alunos', ['turma_id' => $t['id']]);
+            foreach ($alunosResp->successful() ? ($alunosResp->json('data.alunos') ?? []) : [] as $a) {
+                $a['turma_nome'] = $t['nome'];
+                $alunos[] = $a;
+            }
         }
 
         return view('correcao.show', [
@@ -62,11 +66,49 @@ class CorrecaoController extends Controller
             $request->filled('aluno_id') ? ['aluno_id' => $request->input('aluno_id')] : []
         );
 
+        if ($request->expectsJson()) {
+            return response()->json(
+                $resp->failed() ? ['erro' => $resp->json('message') ?? 'Erro ao enviar cartão.'] : $resp->json('data'),
+                $resp->failed() ? 422 : 200
+            );
+        }
+
         if ($resp->failed()) {
             return back()->with('erro', $resp->json('message') ?? 'Erro ao enviar cartão.');
         }
 
         return back()->with('sucesso', 'Cartão enviado para processamento.');
+    }
+
+    public function vincularAluno(Request $request, int $cartaoId)
+    {
+        $request->validate(['aluno_id' => 'required|integer']);
+        $resp = $this->api->put("/v1/cartoes/{$cartaoId}/vincular-aluno", $request->only('aluno_id'));
+
+        return response()->json(
+            $resp->failed() ? ['erro' => $resp->json('message') ?? 'Erro ao vincular aluno.'] : $resp->json('data'),
+            $resp->failed() ? 422 : 200
+        );
+    }
+
+    /** Baixa o PDF dos cartões-resposta (gerado pela API) para impressão. */
+    public function pdf(Request $request, int $provaId)
+    {
+        $resp = $this->api->getArquivo("/v1/provas/{$provaId}/cartoes/pdf", array_filter([
+            'turma_id' => $request->query('turma_id'),
+            'brancos'  => $request->query('brancos', 0),
+        ], fn ($v) => $v !== null && $v !== ''));
+
+        if ($resp->failed() || !str_contains((string) $resp->header('Content-Type'), 'pdf')) {
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível gerar os cartões.');
+        }
+
+        $nome = 'cartoes-prova-' . $provaId . ($request->query('turma_id') ? '-turma-' . $request->query('turma_id') : '') . '.pdf';
+
+        return response($resp->body(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $nome . '"',
+        ]);
     }
 
     public function resolverAmbiguidade(Request $request, int $cartaoId)

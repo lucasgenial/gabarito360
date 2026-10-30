@@ -1,0 +1,27 @@
+{
+  "titulo": "Simulado ENEM 2026",
+  "serie": "3ª série",
+  "num_alternativas": 5,
+  "nota_maxima": 10,
+  "anular_se_todas": true,
+  "fonte": "Resoluções FGV DGPE — Simulado ENEM 2026 (3ª série)",
+  "provas": [
+    {
+      "disciplina": "Linguagens",
+      "gabarito": "DDBAAEECAECEDBDDDBCDAEBDCDCAEDABCCBCDCABEECBA",
+      "gabarito_espanhol": "DDEBA----------------------------------------"
+    },
+    {
+      "disciplina": "Ciências Humanas",
+      "gabarito": "DAAACEDCBDBDCEDCBEBEDEACDBBDBBEBABBAACEDCCCCB"
+    },
+    {
+      "disciplina": "Ciências da Natureza",
+      "gabarito": "AEDCBBBAECDAEBECDDCDAECCDBDBCCECBDBACABBBACBA"
+    },
+    {
+      "disciplina": "Matemática",
+      "gabarito": "CACEDABAAEACABBDEDCCBCCBCCACEBEECDCCBCAECAEDB"
+    }
+  ]
+}

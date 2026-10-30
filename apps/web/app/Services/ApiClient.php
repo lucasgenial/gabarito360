@@ -51,8 +51,15 @@ class ApiClient
 
     public function postFile(string $path, string $fileField, \Illuminate\Http\UploadedFile $file, array $data = []): Response
     {
-        return $this->http()
+        // Upload de cartão roda o OMR de forma síncrona na API: dá mais tempo.
+        return $this->http()->timeout(90)
             ->attach($fileField, $file->get(), $file->getClientOriginalName())
             ->post($path, $data);
+    }
+
+    /** GET que retorna arquivo (PDF etc.) — timeout maior para geração. */
+    public function getArquivo(string $path, array $query = []): Response
+    {
+        return $this->http()->timeout(180)->get($path, $query);
     }
 }
