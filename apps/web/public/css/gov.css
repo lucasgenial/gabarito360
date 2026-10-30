@@ -256,11 +256,52 @@ html[data-theme="dark"] .user-menu-links a { color: var(--fg-2); }
 html[data-theme="dark"] .user-menu-links a:hover { background: var(--surface-2); }
 html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 
-/* ---------- Impressão (relatórios e resultados) ---------- */
+/* ---------- Impressão A4 (relatórios, boletim e resultados) ---------- */
+.impressao-cab { display: none; }
 @media print {
-  @page { size: A4; margin: 12mm; }
-  .govbar, .app-header, .breadcrumb, .no-print, .theme-btn { display: none !important; }
-  body { background: #fff !important; }
-  .card { box-shadow: none !important; break-inside: avoid; }
+  /* Rodapé nativo da página (repete em todas e numera) */
+  @page {
+    size: A4; margin: 10mm 11mm 14mm;
+    @bottom-center { content: "Gabarito360 · gabarito360.com.br · página " counter(page) " de " counter(pages); font-size: 7.5pt; color: #888; }
+  }
+  html { font-size: 10pt; }
+  body { background: #fff !important; color: #111 !important; }
+  .govbar, .app-header, .breadcrumb, .no-print, .theme-btn, .btn, button, .eyebrow, details > summary { display: none !important; }
+  .container { max-width: none !important; width: auto !important; padding: 0 !important; margin: 0 !important; }
+
+  /* Cabeçalho padrão */
+  .impressao-cab { display: block; margin-bottom: 8px; }
+  .ic-topo { display: flex; align-items: center; gap: 10px; }
+  .ic-logo { width: 17mm; height: 17mm; object-fit: contain; flex-shrink: 0; }
+  .ic-sem-logo { display: grid; place-items: center; border-radius: 3mm; background: #1351b4; color: #fff; font-weight: 900; font-size: 9pt; }
+  .ic-espaco { visibility: hidden; }
+  .ic-textos { flex: 1; text-align: center; }
+  .ic-rede { font-size: 7.5pt; letter-spacing: .06em; text-transform: uppercase; color: #6b6b6b; font-weight: 600; }
+  .ic-escola { font-size: 13pt; font-weight: 800; color: #0c326f; }
+  .ic-detalhe { font-size: 8pt; color: #6b6b6b; }
+  .ic-faixa { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; padding: 6px 10px; border-radius: 6px;
+    background: #1351b4; color: #fff; font-weight: 800; font-size: 9.5pt; text-transform: uppercase; letter-spacing: .02em; }
+  .ic-emissao { font-size: 7.5pt; color: #888; text-align: right; margin-top: 3px; }
+
+  /* Títulos e blocos compactos */
+  .page-title { font-size: 15pt !important; margin: 4px 0 2px !important; }
+  .page-sub { font-size: 9pt !important; }
+  h2, h3 { font-size: 11pt !important; break-after: avoid; }
+  .card-pad:has(> h3:only-child) { break-after: avoid; }
+  .card, .card-pad { box-shadow: none !important; padding: 7px 9px !important; }
+  .card { border: 1px solid #ddd !important; border-radius: 6px !important; margin-top: 7px !important; }
+  .kpi-grid, .kpis { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; margin-top: 7px !important; }
+  .result-head, .content-grid, .main-grid, .progress-head, .aq-listas { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 7px !important; margin-top: 7px !important; }
+  .kpi-value, .kpis .v, .res-box .v { font-size: 14pt !important; }
+  .kpi-label, .kpis .l, .res-box .l, .kpi-trend { font-size: 7.5pt !important; }
+
+  /* Nada é cortado: sem áreas com rolagem, gráficos e tabelas na largura do A4 */
+  [style*="overflow-x"], [style*="overflow:hidden"], .quadro-wrap, .table-wrap, .table-scroll { overflow: visible !important; }
+  svg { max-width: 100% !important; min-width: 0 !important; height: auto !important; max-height: 70mm; }
+  table { width: 100% !important; font-size: 8pt !important; border-collapse: collapse !important; }
+  th, td { padding: 2.5px 4px !important; white-space: normal !important; }
+  .quadro .aluno, .quadro .aluno a, .quadro .aluno span { position: static !important; max-width: none !important; }
+  tr, li, .kpi, .res-box, .res-q, .prova-card, .corr-item { break-inside: avoid; }
+  a { color: inherit !important; text-decoration: none !important; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

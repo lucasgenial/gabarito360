@@ -25,6 +25,7 @@
 @endsection
 
 @section('content')
+@include('relatorios._cabecalho', ['cabecalho' => $cabecalho ?? [], 'titulo' => 'Turma ' . $turma['nome'] . ' · ' . $prova['titulo'], 'subtitulo' => $prova['disciplina']])
 
 <div class="row-between" style="margin-top:12px;">
   <div>
