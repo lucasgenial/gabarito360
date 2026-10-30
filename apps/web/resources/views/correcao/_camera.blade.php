@@ -125,7 +125,8 @@ function enviarCartao(file) {
       var nota = d.acertos !== null && d.acertos !== undefined ? ' — <b>' + d.acertos + '/' + d.total + '</b> acertos · nota ' + Number(d.nota_final).toFixed(1).replace('.', ',') : '';
       var amb = d.ambiguas ? ' · <span style="color:var(--warning,#c27c0e)">' + d.ambiguas + ' questão(ões) para revisar</span>' : '';
       var lg = d.lingua ? ' · ' + (d.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : '';
-      var resumo = (d.aluno_nome && !d.ambiguas ? '✅ ' : '📝 ') + quem + nota + lg + amb;
+      var mov = d.prova_corrigida ? '<div style="font-size:13px;margin-top:3px;">↪ Cartão de <b>' + esc(d.prova_corrigida) + '</b>: corrigido na prova certa.</div>' : '';
+      var resumo = (d.aluno_nome && !d.ambiguas ? '✅ ' : '📝 ') + quem + nota + lg + amb + mov;
       li.innerHTML = resumo + (d.aluno_nome ? '' : (ALUNOS.length ? seletorAluno(d.id) : '<div style="font-size:13px;color:var(--muted);margin-top:4px;">QR ilegível ou cartão em branco: o professor vincula o aluno depois.</div>'));
       if (typeof atualizar === 'function') atualizar();
       return resumo;
