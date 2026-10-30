@@ -116,6 +116,9 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/corrigir',                     [CorrecaoController::class, 'index'])->name('correcao.index');
     Route::get('/provas/{id}/acompanhar',       [CorrecaoController::class, 'show'])->name('correcao.show');
     Route::get('/provas/{id}/acompanhar/status',[CorrecaoController::class, 'status'])->name('correcao.status');
+    Route::get('/provas/{id}/acompanhar/cartoes',[CorrecaoController::class, 'cartoes'])->name('correcao.cartoes');
+    Route::get('/cartoes/{id}/imagem',          [CorrecaoController::class, 'imagem'])->name('cartoes.imagem');
+    Route::delete('/cartoes/{id}',              [CorrecaoController::class, 'excluir'])->name('cartoes.excluir');
     Route::post('/provas/{id}/cartoes',         [CorrecaoController::class, 'upload'])->name('correcao.upload');
     Route::get('/provas/{id}/cartoes/pdf',      [CorrecaoController::class, 'pdf'])->name('correcao.pdf');
     Route::post('/cartoes/{id}/resolver-ambiguidade', [CorrecaoController::class, 'resolverAmbiguidade'])->name('cartoes.resolver-ambiguidade');
@@ -124,6 +127,7 @@ Route::middleware('autenticado')->group(function () {
 
     // Resultados e relatórios (MP-022)
     Route::get('/resultados/{alunoId}/{provaId}', [ResultadoController::class, 'show'])->name('resultados.show');
+    Route::get('/resultados/{alunoId}/{provaId}/folha', [ResultadoController::class, 'folha'])->name('resultados.folha');
     Route::get('/relatorios/prova/{id}', [RelatorioController::class, 'prova'])->name('relatorios.prova');
     Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');
 
