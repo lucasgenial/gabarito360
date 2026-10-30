@@ -61,16 +61,16 @@
             <a class="btn btn-primary" href="{{ route('provas.gabarito.edit', $p['id']) }}">Continuar gabarito</a>
           @endpode
         @else
-          @pode('cartoes.enviar')
+          @pode('cartao.enviar')
             <a class="btn btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera">📷 Corrigir</a>
           @endpode
-          @pode('cartoes.imprimir')
+          @pode('cartao.imprimir')
             @foreach($p['turmas_lista'] ?? [] as $t)
               <a class="btn btn-secondary" target="_blank" href="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $t['id'] }}" title="Cartões-resposta com nome e QR">🖨 {{ $t['nome'] }}</a>
             @endforeach
           @endpode
           @if(in_array($p['status'], ['em_correcao', 'corrigida'], true))
-            @pode('resultados.ver')
+            @pode('resultado.ver')
               <a class="btn btn-ghost" href="{{ route('relatorios.prova', $p['id']) }}">📊 Resultados</a>
             @endpode
           @endif

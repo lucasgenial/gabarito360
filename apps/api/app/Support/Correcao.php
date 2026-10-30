@@ -9,13 +9,11 @@ use Illuminate\Support\Facades\DB;
 /**
  * Arquivo: apps/api/app/Support/Correcao.php
  * Função: Regras da correção aberta/fechada. Aberta: professor/corretor enviam, excluem,
- *         vinculam e revisam. Fechada: só a supervisão (coordenador, diretor escolar,
- *         admin) altera, exclui, inclui ou reabre.
+ *         vinculam e revisam. Fechada: só quem tem `correcao.reabrir` (padrão: coordenador,
+ *         diretor escolar, admin) altera, exclui, inclui ou reabre.
  */
 class Correcao
 {
-    public const SUPERVISAO = ['admin_rede', 'dir_escolar', 'coordenador'];
-
     public static function fechada(Prova $prova): bool
     {
         return $prova->correcao_fechada_em !== null;
@@ -24,7 +22,8 @@ class Correcao
     /** null = pode alterar; senão, a mensagem explicando o bloqueio. */
     public static function bloqueio(Usuario $u, Prova $prova): ?string
     {
-        if (!self::fechada($prova) || in_array($u->perfil, self::SUPERVISAO, true)) {
+        // Quem pode reabrir (padrão: coordenador, diretor escolar, admin; ou extra) continua alterando
+        if (!self::fechada($prova) || Permissao::pode($u, 'correcao.reabrir')) {
             return null;
         }
 

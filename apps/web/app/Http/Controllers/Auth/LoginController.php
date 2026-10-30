@@ -47,6 +47,7 @@ class LoginController extends Controller
             'auth_nome'    => $data['nome'],
             'auth_email'   => $data['email'],
             'auth_titular' => $data['eh_titular'] ?? false,
+            'auth_permissoes' => $data['permissoes'] ?? null,
         ]);
 
         return redirect()->route('painel');

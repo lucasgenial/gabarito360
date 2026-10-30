@@ -53,114 +53,117 @@ Route::prefix('v1')->group(function () {
 
         // Provas
         Route::prefix('provas')->group(function () {
-            Route::get('/',             [ProvaController::class, 'index']);
-            Route::post('/',            [ProvaController::class, 'store'])->middleware('perfil:admin_rede,coordenador,professor'); // doc 03: diretor não cria prova
-            Route::get('{id}',          [ProvaController::class, 'show']);
-            Route::put('{id}',          [ProvaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::post('{id}/publicar',[ProvaController::class, 'publicar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::delete('{id}',       [ProvaController::class, 'destroy'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::get('/',             [ProvaController::class, 'index'])->middleware('permissao:prova.ver');
+            Route::post('/',            [ProvaController::class, 'store'])->middleware('permissao:prova.criar'); // doc 03: diretor não cria prova
+            Route::get('{id}',          [ProvaController::class, 'show'])->middleware('permissao:prova.ver');
+            Route::put('{id}',          [ProvaController::class, 'update'])->middleware('permissao:prova.editar');
+            Route::post('{id}/publicar',[ProvaController::class, 'publicar'])->middleware('permissao:prova.editar');
+            Route::delete('{id}',       [ProvaController::class, 'destroy'])->middleware('permissao:prova.editar');
             // Gabarito (MP-020)
-            Route::get('{id}/gabarito',          [GabaritoController::class, 'show']);
-            Route::post('{id}/gabarito',         [GabaritoController::class, 'salvar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::post('{id}/gabarito/publicar',[GabaritoController::class, 'publicar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::get('{id}/gabarito',          [GabaritoController::class, 'show'])->middleware('permissao:gabarito.ver');
+            Route::post('{id}/gabarito',         [GabaritoController::class, 'salvar'])->middleware('permissao:gabarito.editar');
+            Route::post('{id}/gabarito/publicar',[GabaritoController::class, 'publicar'])->middleware('permissao:gabarito.editar');
             // Cartões / OMR (MP-021)
-            Route::get('{id}/cartoes',        [CartaoController::class, 'index']);
-            Route::get('{id}/cartoes/status', [CartaoController::class, 'status']);
-            Route::get('{id}/cartoes/pdf',    [CartaoController::class, 'pdf']);
-            Route::post('{id}/correcao/fechar',  [CartaoController::class, 'fecharCorrecao'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::post('{id}/correcao/reabrir', [CartaoController::class, 'reabrirCorrecao'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
-            Route::post('{id}/cartoes',       [CartaoController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor,aplicador');
+            Route::get('{id}/cartoes',        [CartaoController::class, 'index'])->middleware('permissao:correcao.acompanhar,cartao.enviar');
+            Route::get('{id}/cartoes/status', [CartaoController::class, 'status'])->middleware('permissao:correcao.acompanhar,cartao.enviar');
+            Route::get('{id}/cartoes/pdf',    [CartaoController::class, 'pdf'])->middleware('permissao:cartao.imprimir');
+            Route::post('{id}/correcao/fechar',  [CartaoController::class, 'fecharCorrecao'])->middleware('permissao:correcao.fechar');
+            Route::post('{id}/correcao/reabrir', [CartaoController::class, 'reabrirCorrecao'])->middleware('permissao:correcao.reabrir');
+            Route::post('{id}/cartoes',       [CartaoController::class, 'store'])->middleware('permissao:cartao.enviar');
         });
 
         // Cartões / OMR (MP-021)
         Route::prefix('cartoes')->group(function () {
-            Route::get('{id}',                       [CartaoController::class, 'show']);
-            Route::get('{id}/imagem',                [CartaoController::class, 'imagem']);
-            Route::delete('{id}',                    [CartaoController::class, 'destroy'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::put('{id}/vincular-aluno',         [CartaoController::class, 'vincularAluno'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::post('{id}/resolver-ambiguidade',  [CartaoController::class, 'resolverAmbiguidade'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::post('{id}/revisar',               [CartaoController::class, 'revisar'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+            Route::get('{id}',                       [CartaoController::class, 'show'])->middleware('permissao:correcao.acompanhar');
+            Route::get('{id}/imagem',                [CartaoController::class, 'imagem'])->middleware('permissao:correcao.acompanhar');
+            Route::delete('{id}',                    [CartaoController::class, 'destroy'])->middleware('permissao:correcao.alterar');
+            Route::put('{id}/vincular-aluno',         [CartaoController::class, 'vincularAluno'])->middleware('permissao:correcao.alterar');
+            Route::post('{id}/resolver-ambiguidade',  [CartaoController::class, 'resolverAmbiguidade'])->middleware('permissao:correcao.alterar');
+            Route::post('{id}/revisar',               [CartaoController::class, 'revisar'])->middleware('permissao:correcao.alterar');
         });
 
         // Alunos
         Route::prefix('alunos')->group(function () {
-            Route::get('/',            [AlunoController::class, 'index']);
-            Route::post('/',           [AlunoController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::get('{id}',         [AlunoController::class, 'show']);
-            Route::put('{id}',         [AlunoController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
-            Route::post('{id}/toggle', [AlunoController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
+            Route::get('/',            [AlunoController::class, 'index'])->middleware('permissao:aluno.ver');
+            Route::post('/',           [AlunoController::class, 'store'])->middleware('permissao:aluno.gerir');
+            Route::get('{id}',         [AlunoController::class, 'show'])->middleware('permissao:aluno.ver');
+            Route::put('{id}',         [AlunoController::class, 'update'])->middleware('permissao:aluno.gerir');
+            Route::post('{id}/toggle', [AlunoController::class, 'toggle'])->middleware('permissao:aluno.desativar');
             // Resultado individual (MP-022)
-            Route::get('{id}/resultados/{provaId}', [ResultadoController::class, 'show']);
-            Route::get('{id}/resultados/{provaId}/pdf', [ResultadoController::class, 'pdf']);
+            Route::get('{id}/resultados/{provaId}', [ResultadoController::class, 'show'])->middleware('permissao:resultado.ver');
+            Route::get('{id}/resultados/{provaId}/pdf', [ResultadoController::class, 'pdf'])->middleware('permissao:resultado.compartilhar');
         });
 
         // Relatórios (MP-022)
         Route::prefix('relatorios')->group(function () {
-            Route::get('prova/{id}',                       [RelatorioController::class, 'prova']);
-            Route::get('turma/{turmaId}/prova/{provaId}',   [RelatorioController::class, 'turmaProva']);
-            Route::get('turma/{turmaId}',                   [RelatorioController::class, 'turma']);
-            Route::get('aluno/{alunoId}',                   [RelatorioController::class, 'aluno']);
-            Route::get('escola/{id?}',                      [RelatorioConsolidadoController::class, 'escola']);
-            Route::get('nucleo/{id?}',                      [RelatorioConsolidadoController::class, 'nucleo']);
-            Route::get('rede/{id?}',                        [RelatorioConsolidadoController::class, 'rede']);
+            Route::get('prova/{id}',                       [RelatorioController::class, 'prova'])->middleware('permissao:relatorio.prova');
+            Route::get('turma/{turmaId}/prova/{provaId}',   [RelatorioController::class, 'turmaProva'])->middleware('permissao:relatorio.prova');
+            Route::get('turma/{turmaId}',                   [RelatorioController::class, 'turma'])->middleware('permissao:relatorio.turma');
+            Route::get('aluno/{alunoId}',                   [RelatorioController::class, 'aluno'])->middleware('permissao:relatorio.turma');
+            Route::get('escola/{id?}',                      [RelatorioConsolidadoController::class, 'escola'])->middleware('permissao:relatorio.escola');
+            Route::get('nucleo/{id?}',                      [RelatorioConsolidadoController::class, 'nucleo'])->middleware('permissao:relatorio.nucleo');
+            Route::get('rede/{id?}',                        [RelatorioConsolidadoController::class, 'rede'])->middleware('permissao:relatorio.rede');
         });
 
         // Turmas
         Route::prefix('turmas')->group(function () {
-            Route::get('/',            [TurmaController::class, 'index']);
-            Route::post('/',           [TurmaController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
-            Route::get('{id}',         [TurmaController::class, 'show']);
-            Route::put('{id}',         [TurmaController::class, 'update'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
-            Route::post('{id}/toggle', [TurmaController::class, 'toggle'])->middleware('perfil:admin_rede,dir_escolar');
+            Route::get('/',            [TurmaController::class, 'index'])->middleware('permissao:turma.ver');
+            Route::post('/',           [TurmaController::class, 'store'])->middleware('permissao:turma.gerir');
+            Route::get('{id}',         [TurmaController::class, 'show'])->middleware('permissao:turma.ver');
+            Route::put('{id}',         [TurmaController::class, 'update'])->middleware('permissao:turma.gerir');
+            Route::post('{id}/toggle', [TurmaController::class, 'toggle'])->middleware('permissao:turma.desativar');
             // Vínculos professor ↔ turma (MP-018)
-            Route::get('{id}/correcao',                   [AcompanhamentoTurmaController::class, 'show']);
-            Route::get('{id}/professores',                [VinculoProfessorController::class, 'index']);
-            Route::post('{id}/professores',               [VinculoProfessorController::class, 'store'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
-            Route::delete('{id}/professores/{usuarioId}', [VinculoProfessorController::class, 'destroy'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
+            Route::get('{id}/correcao',                   [AcompanhamentoTurmaController::class, 'show'])->middleware('permissao:correcao.acompanhar');
+            Route::get('{id}/professores',                [VinculoProfessorController::class, 'index'])->middleware('permissao:turma.ver');
+            Route::post('{id}/professores',               [VinculoProfessorController::class, 'store'])->middleware('permissao:turma.vincular_professor');
+            Route::delete('{id}/professores/{usuarioId}', [VinculoProfessorController::class, 'destroy'])->middleware('permissao:turma.vincular_professor');
         });
 
         // Turmas do professor
-        Route::get('usuarios/{id}/turmas', [VinculoProfessorController::class, 'turmasDoProfessor'])
-            ->middleware('perfil:admin_rede,dir_escolar,coordenador,professor');
+        Route::get('usuarios/{id}/turmas', [VinculoProfessorController::class, 'turmasDoProfessor'])->middleware('permissao:turma.ver')
+            ;
 
         // Escolas
         Route::get('redes/{id}/logo',  [EscolaController::class, 'logoRede']);
-        Route::post('redes/{id}/logo', [EscolaController::class, 'enviarLogoRede'])->middleware('perfil:admin_rede,dir_nucleo');
+        Route::post('redes/{id}/logo', [EscolaController::class, 'enviarLogoRede'])->middleware('permissao:rede.logo');
 
         Route::prefix('escolas')->group(function () {
             Route::get('{id}/logo',   [EscolaController::class, 'logo']);
-            Route::post('{id}/logo',  [EscolaController::class, 'enviarLogo'])->middleware('perfil:admin_rede,dir_escolar,coordenador');
-            Route::get('/',           [EscolaController::class, 'index']);
+            Route::post('{id}/logo',  [EscolaController::class, 'enviarLogo'])->middleware('permissao:escola.logo');
+            Route::get('/',           [EscolaController::class, 'index'])->middleware('permissao:escola.ver');
             // Cadastro de escola: admin da rede e diretor de núcleo (no próprio núcleo)
-            Route::post('/',          [EscolaController::class, 'store'])->middleware('perfil:admin_rede,dir_nucleo');
-            Route::get('{id}',        [EscolaController::class, 'show']);
-            Route::put('{id}',        [EscolaController::class, 'update'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar');
-            Route::post('{id}/toggle',[EscolaController::class, 'toggle'])->middleware('perfil:admin_rede,dir_nucleo');
+            Route::post('/',          [EscolaController::class, 'store'])->middleware('permissao:escola.criar');
+            Route::get('{id}',        [EscolaController::class, 'show'])->middleware('permissao:escola.ver');
+            Route::put('{id}',        [EscolaController::class, 'update'])->middleware('permissao:escola.editar');
+            Route::post('{id}/toggle',[EscolaController::class, 'toggle'])->middleware('permissao:escola.desativar');
         });
 
         // Núcleos
         Route::prefix('nucleos')->group(function () {
-            Route::get('/',     [NucleoController::class, 'index'])->middleware('perfil:admin_rede,dir_nucleo');
-            Route::post('/',    [NucleoController::class, 'store'])->middleware('perfil:admin_rede');
-            Route::get('{id}',  [NucleoController::class, 'show'])->middleware('perfil:admin_rede,dir_nucleo');
-            Route::put('{id}',  [NucleoController::class, 'update'])->middleware('perfil:admin_rede,dir_nucleo');
-            Route::delete('{id}',[NucleoController::class, 'destroy'])->middleware('perfil:admin_rede');
+            Route::get('/',     [NucleoController::class, 'index'])->middleware('permissao:nucleo.ver');
+            Route::post('/',    [NucleoController::class, 'store'])->middleware('permissao:nucleo.gerir');
+            Route::get('{id}',  [NucleoController::class, 'show'])->middleware('permissao:nucleo.ver');
+            Route::put('{id}',  [NucleoController::class, 'update'])->middleware('permissao:nucleo.gerir');
+            Route::delete('{id}',[NucleoController::class, 'destroy'])->middleware('permissao:nucleo.gerir');
         });
 
         // Usuários / equipe
         Route::prefix('usuarios')->group(function () {
-            Route::get('/',          [UsuarioController::class, 'index'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
+            Route::get('/',          [UsuarioController::class, 'index'])->middleware('permissao:usuario.ver');
             // Quem cadastra quem e em qual escopo: App\Support\Cadastro (docs/21, etapa 0)
-            Route::post('/',         [UsuarioController::class, 'store'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
-            Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
-            Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
-            Route::post('{id}/toggle',[UsuarioController::class, 'toggle'])->middleware('perfil:admin_rede,dir_nucleo,dir_escolar,coordenador');
+            Route::post('/',         [UsuarioController::class, 'store'])->middleware('permissao:usuario.gerir');
+            Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('permissao:usuario.ver');
+            Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('permissao:usuario.gerir');
+            Route::post('{id}/toggle',[UsuarioController::class, 'toggle'])->middleware('permissao:usuario.gerir');
+            // Permissões do usuário: padrão do perfil, extras e retiradas (docs/03 §1)
+            Route::get('{id}/permissoes', [UsuarioController::class, 'permissoes'])->middleware('permissao:usuario.ver');
+            Route::put('{id}/permissoes', [UsuarioController::class, 'definirPermissoes'])->middleware('permissao:usuario.permissoes');
         });
 
         // Configurações da rede (MP-024)
         Route::prefix('configuracoes')->group(function () {
-            Route::get('/', [ConfiguracaoController::class, 'show'])->middleware('perfil:admin_rede');
-            Route::put('/', [ConfiguracaoController::class, 'update'])->middleware('perfil:admin_rede');
+            Route::get('/', [ConfiguracaoController::class, 'show'])->middleware('permissao:rede.configurar');
+            Route::put('/', [ConfiguracaoController::class, 'update'])->middleware('permissao:rede.configurar');
         });
 
         // Assinaturas (MP-027)

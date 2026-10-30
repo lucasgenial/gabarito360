@@ -39,6 +39,7 @@ class AuthController extends Controller
         return ApiResponse::success([
             'token'      => $token,
             'perfil'     => $usuario->perfil,
+            'permissoes' => \App\Support\Permissao::efetivas($usuario),
             'nome'       => $usuario->nome,
             'email'      => $usuario->email,
             'eh_titular' => $ehTitular,
@@ -54,7 +55,9 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return ApiResponse::success($request->user());
+        return ApiResponse::success(array_merge($request->user()->toArray(), [
+            'permissoes' => \App\Support\Permissao::efetivas($request->user()),
+        ]));
     }
 
     public function update(Request $request): JsonResponse
