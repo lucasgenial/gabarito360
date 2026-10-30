@@ -32,7 +32,7 @@
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ $turma['nome'] }}{{ $prova['data_aplicacao'] ? ' · aplicada em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }} · {{ $kpis['cartoes_total'] > 0 ? round($kpis['cartoes_lidos'] / $kpis['cartoes_total'] * 100) : 0 }}% corrigido</p>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
-    <button class="btn btn-secondary" onclick="window.print()">Exportar PDF</button>
+    <button class="btn btn-secondary no-print" onclick="window.print()">🖨 Imprimir / PDF</button>
     <span class="badge {{ $prova['status'] === 'corrigida' ? 'badge-success' : 'badge-info' }} badge-dot">
       {{ ['rascunho'=>'Rascunho','publicada'=>'Publicada','em_correcao'=>'Em correção','corrigida'=>'Corrigida'][$prova['status']] ?? $prova['status'] }}
     </span>
@@ -66,8 +66,7 @@
 
 <div class="result-head">
   <div class="card card-pad">
-    <h3 style="font-size:16px;margin-bottom:6px;">Desempenho por tema (Turma)</h3>
-    <p class="field-help">A análise de acertos por tema/assunto será disponibilizada em uma versão futura, quando as questões puderem ser classificadas por tema no cadastro da prova.</p>
+    @include('relatorios._distribuicao-notas', ['alunos' => $alunos, 'notaMaxima' => $prova['nota_maxima']])
   </div>
   <div class="card card-pad">
     <h3 style="font-size:16px;margin-bottom:6px;text-align:center;">Aproveitamento da turma</h3>
@@ -77,6 +76,8 @@
     <p style="text-align:center;color:var(--muted);font-size:14px;margin-top:8px;">Nota média {{ number_format($kpis['media'], 1, ',', '.') }} de {{ number_format($prova['nota_maxima'], 1, ',', '.') }}</p>
   </div>
 </div>
+
+@include('relatorios._analise-questoes', ['questoes' => $questoes ?? []])
 
 <div class="card" style="margin-top:20px;overflow:hidden;">
   <div class="card-pad" style="padding-bottom:0;">
