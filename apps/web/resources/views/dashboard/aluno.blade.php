@@ -274,7 +274,7 @@
     <div class="motivation-card">
       <div class="eyebrow" style="color:var(--accent-dark);margin-bottom:8px;">Mensagem de incentivo</div>
       <strong>Mantenha sua rotina de estudos.</strong>
-      <p style="margin-top:8px;">Cada prova é uma oportunidade de aprender mais. O Ministério da Educação incentiva você a seguir com foco, organização e confiança no seu desenvolvimento.</p>
+      <p style="margin-top:8px;">Cada prova é uma oportunidade de aprender mais. Foco e organização ajudam muito no seu desenvolvimento.</p>
     </div>
 
   </div>
