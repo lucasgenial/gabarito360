@@ -11,6 +11,7 @@ return new class extends Migration
         // Convite usa o mesmo token da recuperação, com validade própria
         Schema::table('password_reset_tokens', function (Blueprint $table) {
             $table->timestamp('expira_em')->nullable();
+            $table->foreignId('convidado_por')->nullable()->constrained('usuarios')->nullOnDelete();
         });
 
         Schema::create('trocas_email', function (Blueprint $table) {
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('trocas_email');
         Schema::table('password_reset_tokens', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('convidado_por');
             $table->dropColumn('expira_em');
         });
     }

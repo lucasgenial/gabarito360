@@ -66,6 +66,31 @@ class LoginController extends Controller
             ->with('sucesso', 'Se o e-mail estiver cadastrado, um link de recuperação foi enviado.');
     }
 
+    public function showConvite(Request $request)
+    {
+        $token = (string) $request->query('token', '');
+        $email = (string) $request->query('email', '');
+        $resp  = $this->api->post('/v1/auth/convite', ['token' => $token, 'email' => $email]);
+
+        return view('auth.convite', [
+            'token'   => $token,
+            'email'   => $email,
+            'convite' => $resp->successful() ? $resp->json('data') : null,
+        ]);
+    }
+
+    public function recusarConvite(Request $request)
+    {
+        $dados = $request->validate(['email' => 'required|email', 'token' => 'required|string']);
+        $resp  = $this->api->post('/v1/auth/convite/recusar', $dados);
+
+        if ($resp->failed()) {
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível recusar o convite.');
+        }
+
+        return redirect()->route('login')->with('sucesso', 'Convite recusado. Avisamos quem enviou.');
+    }
+
     public function showRedefinirSenha(Request $request)
     {
         return view('auth.redefinir-senha', [

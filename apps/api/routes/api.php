@@ -48,6 +48,8 @@ Route::prefix('v1')->group(function () {
         Route::post('esqueci-senha',   [AuthController::class, 'esqueceuSenha'])->middleware('throttle:5,1');
         Route::post('redefinir-senha', [AuthController::class, 'redefinirSenha'])->middleware('throttle:10,1');
         Route::post('confirmar-email', [AuthController::class, 'confirmarEmail'])->middleware('throttle:10,1');
+        Route::post('convite',         [AuthController::class, 'consultarConvite'])->middleware('throttle:20,1');
+        Route::post('convite/recusar', [AuthController::class, 'recusarConvite'])->middleware('throttle:10,1');
     });
 
     // Rotas protegidas

@@ -116,6 +116,35 @@ class AuthController extends Controller
         return ApiResponse::success(['mensagem' => 'E-mail confirmado.']);
     }
 
+    /** Mostra ao convidado a função e o vínculo antes de aceitar. */
+    public function consultarConvite(Request $request, ContaUsuario $conta): JsonResponse
+    {
+        $data = $request->validate(['email' => 'required|email', 'token' => 'required|string']);
+
+        $usuario = Usuario::where('email', $data['email'])->first();
+        $convite = $conta->convitePendente($data['email'], $data['token']);
+        if (!$usuario || !$convite) {
+            return ApiResponse::error('Convite inválido ou vencido.', [], 422);
+        }
+
+        return ApiResponse::success($conta->dadosDoConvite($usuario, Usuario::find($convite->convidado_por)));
+    }
+
+    public function recusarConvite(Request $request, ContaUsuario $conta): JsonResponse
+    {
+        $data = $request->validate(['email' => 'required|email', 'token' => 'required|string']);
+
+        $usuario = Usuario::where('email', $data['email'])->first();
+        $convite = $conta->convitePendente($data['email'], $data['token']);
+        if (!$usuario || !$convite) {
+            return ApiResponse::error('Convite inválido ou vencido.', [], 422);
+        }
+
+        $conta->recusarConvite($usuario, $convite);
+
+        return ApiResponse::success(['mensagem' => 'Convite recusado.']);
+    }
+
     public function esqueceuSenha(Request $request): JsonResponse
     {
         $request->validate(['email' => 'required|email']);

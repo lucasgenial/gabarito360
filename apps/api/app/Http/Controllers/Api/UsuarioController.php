@@ -152,7 +152,7 @@ class UsuarioController extends Controller
         }
 
         if ($usuario->ativo) {
-            app(ContaUsuario::class)->convidar($usuario);
+            app(ContaUsuario::class)->convidar($usuario, $gestor);
         }
 
         return ApiResponse::success($usuario, null, 201);
@@ -193,7 +193,7 @@ class UsuarioController extends Controller
             return ApiResponse::error('Ative o usuário antes de enviar o convite.', [], 422);
         }
 
-        $conta->convidar($usuario);
+        $conta->convidar($usuario, $request->user());
 
         return ApiResponse::success(['mensagem' => 'Convite enviado.']);
     }

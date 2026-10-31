@@ -45,6 +45,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/login',           [LoginController::class, 'store'])->name('login.store');
     Route::get('/esqueci-senha',    [LoginController::class, 'showEsqueciSenha'])->name('esqueci-senha');
     Route::post('/esqueci-senha',   [LoginController::class, 'postEsqueciSenha'])->name('esqueci-senha.store');
+    Route::get('/convite',          [LoginController::class, 'showConvite'])->name('convite');
+    Route::post('/convite/recusar', [LoginController::class, 'recusarConvite'])->name('convite.recusar');
     Route::get('/redefinir-senha',  [LoginController::class, 'showRedefinirSenha'])->name('redefinir-senha');
     Route::post('/redefinir-senha', [LoginController::class, 'postRedefinirSenha'])->name('redefinir-senha.store');
 });

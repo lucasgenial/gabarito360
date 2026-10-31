@@ -19,23 +19,81 @@ class ContaUsuario
 
     private const VALIDADE_TROCA_HORAS = 24;
 
-    public function convidar(Usuario $usuario): void
+    private const PERFIS = [
+        'secretario_educacao' => 'Secretário de Educação',
+        'admin_rede'          => 'Administrador da Rede',
+        'dir_nucleo'          => 'Diretor de Núcleo',
+        'dir_escolar'         => 'Diretor Escolar',
+        'coordenador'         => 'Coordenador Pedagógico',
+        'professor'           => 'Professor',
+        'aplicador'           => 'Aplicador de Prova',
+        'aluno'               => 'Aluno',
+    ];
+
+    public function convidar(Usuario $usuario, Usuario $convidadoPor): void
     {
         $token = Str::random(64);
 
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => $usuario->email],
-            ['token' => Hash::make($token), 'created_at' => now(), 'expira_em' => now()->addDays(self::VALIDADE_CONVITE_DIAS)]
+            ['token' => Hash::make($token), 'created_at' => now(), 'expira_em' => now()->addDays(self::VALIDADE_CONVITE_DIAS), 'convidado_por' => $convidadoPor->id]
         );
 
-        $link = config('emails.url_web') . '/redefinir-senha?' . http_build_query([
-            'token' => $token, 'email' => $usuario->email, 'convite' => 1,
-        ]);
+        $link = config('emails.url_web') . '/convite?' . http_build_query(['token' => $token, 'email' => $usuario->email]);
 
-        Mail::to($usuario->email)->queue(new EmailModelo('convite-usuario', 'Seu acesso ao Gabarito360', [
-            'nome' => $usuario->nome,
-            'link' => $link,
-        ]));
+        Mail::to($usuario->email)->queue(new EmailModelo('convite-usuario', 'Convite para o Gabarito360', $this->dadosDoConvite($usuario, $convidadoPor) + ['link' => $link]));
+    }
+
+    /** O que o convidado precisa saber para decidir. @return array<string, string> */
+    public function dadosDoConvite(Usuario $usuario, ?Usuario $convidadoPor): array
+    {
+        $escopos = DB::table('usuario_escopos')->where('usuario_id', $usuario->id)->get()->groupBy('escopo_tipo');
+        $ids = fn (string $tipo) => collect($escopos->get($tipo, []))->pluck('escopo_id');
+
+        [$tipo, $vinculo] = match (true) {
+            $ids('escola')->isNotEmpty() => ['Escola', DB::table('escolas')->whereIn('id', $ids('escola'))->pluck('nome')->implode(', ')],
+            $ids('nucleo')->isNotEmpty() => ['Núcleo', DB::table('nucleos')->whereIn('id', $ids('nucleo'))->pluck('nome')->implode(', ')],
+            $ids('rede')->isNotEmpty()   => ['Rede', DB::table('redes')->whereIn('id', $ids('rede'))->pluck('nome')->implode(', ')],
+            default                      => ['Vínculo', 'Gabarito360'],
+        };
+
+        return [
+            'nome'          => $usuario->nome,
+            'funcao'        => self::PERFIS[$usuario->perfil] ?? $usuario->perfil,
+            'tipo_vinculo'  => $tipo,
+            'vinculo'       => $vinculo,
+            'turmas'        => DB::table('turmas')->whereIn('id', $ids('turma'))->orderBy('nome')->pluck('nome')->implode(', ') ?: 'Não se aplica',
+            'convidado_por' => $convidadoPor?->nome ?? 'Equipe Gabarito360',
+        ];
+    }
+
+    /** Convite válido e ainda não usado, ou null. */
+    public function convitePendente(string $email, string $token): ?object
+    {
+        $registro = DB::table('password_reset_tokens')->where('email', $email)->first();
+
+        return $registro
+            && $registro->expira_em
+            && now()->lessThan($registro->expira_em)
+            && Hash::check($token, $registro->token) ? $registro : null;
+    }
+
+    public function recusarConvite(Usuario $usuario, object $convite): void
+    {
+        DB::table('password_reset_tokens')->where('email', $usuario->email)->delete();
+
+        $gestor = Usuario::find($convite->convidado_por);
+        $dados = $this->dadosDoConvite($usuario, $gestor);
+        $usuario->update(['ativo' => false]);
+
+        if ($gestor) {
+            Mail::to($gestor->email)->queue(new EmailModelo('convite-recusado', 'Convite recusado', [
+                'nome'      => $gestor->nome,
+                'convidado' => $usuario->nome,
+                'funcao'    => $dados['funcao'],
+                'vinculo'   => $dados['vinculo'],
+            ]));
+        }
     }
 
     public function pedirTrocaDeEmail(Usuario $usuario, string $novoEmail): void
