@@ -1,5 +1,5 @@
 @extends('layouts.public')
-@section('title', 'Planos e Preços — Gabarito360')
+@section('title', 'Planos e preços — Gabarito360')
 
 @push('styles')
 <style>
@@ -166,7 +166,7 @@
 
 @section('content')
 <div class="planos-hero">
-  <h1>Planos e Preços</h1>
+  <h1>Planos e preços</h1>
   <p>Escolha o plano ideal para o seu contexto — professor individual ou instituição de ensino.</p>
 </div>
 
@@ -192,7 +192,7 @@
       <li>1 escola</li>
       <li>Até 20 turmas</li>
       <li>Até 50 provas por mês</li>
-      <li>OMR (leitura de cartões)</li>
+      <li>Leitura de cartões</li>
       <li>Relatórios completos</li>
     </ul>
 
@@ -216,7 +216,7 @@
       <li>Até 5 escolas</li>
       <li>Até 100 turmas</li>
       <li>Até 200 provas por mês</li>
-      <li>OMR (leitura de cartões)</li>
+      <li>Leitura de cartões</li>
       <li>Relatórios consolidados</li>
       <li>Gestão de equipe</li>
     </ul>
@@ -235,7 +235,7 @@
     <p>Para redes maiores e secretarias de educação, trabalhamos com proposta personalizada. Sem preço de tabela — nosso time entra em contato para entender sua demanda.</p>
   </div>
   <div style="flex-shrink:0">
-    <a href="{{ route('leads.index') }}" class="btn btn-outline" style="white-space:nowrap">Fale Conosco</a>
+    <a href="{{ route('leads.index') }}" class="btn btn-outline" style="white-space:nowrap">Fale conosco</a>
   </div>
 </div>
 

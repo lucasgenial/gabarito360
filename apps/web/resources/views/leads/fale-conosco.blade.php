@@ -1,5 +1,5 @@
 @extends('layouts.public')
-@section('title', 'Fale Conosco — Gabarito360')
+@section('title', 'Fale conosco — Gabarito360')
 
 @push('styles')
 <style>
@@ -33,12 +33,12 @@
 
 @section('content')
 <div class="fale-wrap">
-  <h1>Fale Conosco</h1>
+  <h1>Fale conosco</h1>
   <p class="subtitulo">Preencha o formulário e nossa equipe comercial entrará em contato para montar a proposta ideal para a sua rede.</p>
 
   @if($plano)
   <div class="plano-contexto">
-    📋 Você está interessado no plano <strong>{{ $plano['nome'] }}</strong>.
+    Você está interessado no plano <strong>{{ $plano['nome'] }}</strong>.
     Deixe suas informações abaixo.
   </div>
   @endif

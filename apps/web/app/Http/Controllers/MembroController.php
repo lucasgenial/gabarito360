@@ -90,7 +90,7 @@ class MembroController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao cadastrar membro.');
+                ->with('erro', $resp->json('message') ?? 'Não foi possível cadastrar o membro.');
         }
 
         // Passo 4: permissões do novo membro (padrão do perfil + extras)
@@ -148,11 +148,11 @@ class MembroController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao atualizar membro.');
+                ->with('erro', $resp->json('message') ?? 'Não foi possível atualizar o membro.');
         }
 
         return redirect()->route('membros.index')
-            ->with('sucesso', 'Membro atualizado com sucesso.');
+            ->with('sucesso', 'Membro atualizado.');
     }
 
     public function toggle(int $id)
@@ -165,7 +165,7 @@ class MembroController extends Controller
 
         $status = $resp->json('data.ativo') ? 'ativado' : 'desativado';
 
-        return back()->with('sucesso', "Membro {$status} com sucesso.");
+        return back()->with('sucesso', "Membro {$status}.");
     }
 
     /** Permissões do membro: padrão do perfil (com retirada), extras e histórico. */

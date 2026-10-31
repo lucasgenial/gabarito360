@@ -3,7 +3,6 @@
 
 @section('content')
 <div style="max-width:520px;margin:4rem auto;text-align:center;padding:2rem">
-  <div style="font-size:3rem;margin-bottom:1rem">✅</div>
   <h1 style="font-size:1.75rem;font-weight:800;color:var(--color-success-03);margin-bottom:.75rem">Pagamento confirmado!</h1>
   <p style="color:var(--color-secondary-07);margin-bottom:2rem">
     Sua assinatura foi ativada. Você já pode usar todas as funcionalidades do plano.

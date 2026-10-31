@@ -66,12 +66,12 @@ class AlunoController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao cadastrar aluno.');
+                ->with('erro', $resp->json('message') ?? 'Não foi possível cadastrar o aluno.');
         }
 
         $turmaId = $request->input('turma_id');
         return redirect()->route('turmas.show', $turmaId)
-            ->with('sucesso', 'Aluno cadastrado com sucesso.');
+            ->with('sucesso', 'Aluno cadastrado.');
     }
 
     public function show(int $id): View
@@ -111,7 +111,7 @@ class AlunoController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao atualizar aluno.');
+                ->with('erro', $resp->json('message') ?? 'Não foi possível atualizar o aluno.');
         }
 
         return redirect()->route('alunos.show', $id)->with('sucesso', 'Aluno atualizado.');
@@ -126,6 +126,6 @@ class AlunoController extends Controller
         }
 
         $status = $resp->json('data.ativo') ? 'ativado' : 'desativado';
-        return back()->with('sucesso', "Aluno {$status} com sucesso.");
+        return back()->with('sucesso', "Aluno {$status}.");
     }
 }

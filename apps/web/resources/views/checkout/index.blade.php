@@ -107,7 +107,7 @@
   <h1>Assinar um plano</h1>
 
   <div class="trial-notice">
-    ✅ Você tem <strong>14 dias gratuitos</strong> antes de qualquer cobrança. Cancele a qualquer momento.
+    Confira o plano antes de confirmar.
   </div>
 
   @if($errors->any())
@@ -181,7 +181,7 @@
     </button>
 
     <div class="mp-badge">
-      🔒 Pagamento processado com segurança pelo <strong>Mercado Pago</strong>
+      Pagamento processado com segurança pelo <strong>Mercado Pago</strong>
     </div>
   </form>
 </div>

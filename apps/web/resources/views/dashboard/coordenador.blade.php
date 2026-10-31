@@ -184,7 +184,7 @@
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM16 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.5 19a4.5 4.5 0 0 1 9 0M13 19a3.5 3.5 0 0 1 7 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <b>Ver Turmas</b>
+    <b>Turmas</b>
     <span>Acesse desempenho, matrículas e alunos em atenção.</span>
   </a>
 </div>

@@ -93,12 +93,12 @@
 @endpush
 
 @section('breadcrumb')
-<a href="{{ route('painel') }}">Início</a> › Assinatura e Cobrança
+<a href="{{ route('painel') }}">Início</a> › Assinatura e cobrança
 @endsection
 
 @section('content')
 <div class="assinatura-wrap">
-  <h1>Assinatura e Cobrança</h1>
+  <h1>Assinatura e cobrança</h1>
 
   @if(session('sucesso'))
     <div class="alert alert-success" style="margin-bottom:1rem">{{ session('sucesso') }}</div>
@@ -113,7 +113,7 @@
 
     @if($assinatura['status'] === 'atrasada')
     <div class="alerta-atrasada">
-      <p>⚠️ Sua assinatura está <strong>atrasada</strong>. Regularize o pagamento para restaurar o acesso completo.
+      <p>Sua assinatura está <strong>atrasada</strong>. Regularize o pagamento para restaurar o acesso completo.
       <a href="{{ route('checkout.index') }}">Renovar agora →</a></p>
     </div>
     @endif
@@ -124,9 +124,9 @@
         @php
           $statusLabels = [
             'trial'     => '⏱ Trial',
-            'ativa'     => '✅ Ativa',
-            'atrasada'  => '⚠️ Atrasada',
-            'cancelada' => '✗ Cancelada',
+            'ativa'     => 'Ativa',
+            'atrasada'  => 'Atrasada',
+            'cancelada' => 'Cancelada',
           ];
         @endphp
         <span class="status-badge status-{{ $assinatura['status'] }}">

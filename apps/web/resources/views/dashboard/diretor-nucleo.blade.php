@@ -189,14 +189,14 @@
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 9h8M8 13h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <b>Ver todas as Escolas</b>
+    <b>Escolas</b>
     <span>Acessar dados detalhados das unidades sob supervisão.</span>
   </a>
   <a class="qa" href="{{ route('relatorios.nucleo') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18V8m6 10V5m6 13v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 21h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <b>Relatório Comparativo</b>
+    <b>Comparar escolas</b>
     <span>Gerar quadro entre escolas, séries e desempenho por prova.</span>
   </a>
 </div>
