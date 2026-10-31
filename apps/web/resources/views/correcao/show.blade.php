@@ -69,7 +69,7 @@
 <div class="progress-head">
   <div class="card card-pad">
     <div class="stat-row">
-      <div id="donut"></div>
+      <div class="correcao-pct"><b id="v-pct">0%</b><span>concluído</span></div>
       <div class="stat-grid">
         <div><div class="v" id="v-lidos" style="color:var(--accent);">{{ $status['lidos'] }}</div><div class="l">Cartões lidos</div></div>
         <div><div class="v" id="v-pendentes" style="color:var(--muted)">{{ $status['pendentes'] }}</div><div class="l">Pendentes</div></div>
@@ -254,10 +254,7 @@ function tempoRelativo(iso) {
 
 function renderEstado(data) {
   var pct = data.total > 0 ? Math.round(data.lidos / data.total * 100) : 0;
-  var donutEl = document.getElementById('donut');
-  donutEl.dataset.donut = pct;
-  donutEl.dataset.color = pct >= 100 ? '#168821' : '#1d4f9e';
-  if (typeof drawDonut === 'function') drawDonut(donutEl);
+  document.getElementById('v-pct').textContent = pct + '%';
 
   document.getElementById('v-lidos').textContent = data.lidos;
   document.getElementById('v-pendentes').textContent = data.pendentes;

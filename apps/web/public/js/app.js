@@ -125,45 +125,6 @@ function initTurmaFilter() {
   apply();
 }
 
-/* ---------- Gráfico de barras (SVG, sem dependências) ---------- */
-function drawBarChart(el) {
-  var data = JSON.parse(el.dataset.bars);
-  var max = Math.max.apply(null, data.map(function (d) { return d.v; }));
-  var w = el.clientWidth || 600, h = 220, pad = 30, n = data.length;
-  var bw = (w - pad * 2) / n * 0.62;
-  var gap = (w - pad * 2) / n;
-  var svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" height="' + h + '">';
-  [0, 0.5, 1].forEach(function (g) {
-    var y = pad + (h - pad * 2) * (1 - g);
-    svg += '<line x1="' + pad + '" y1="' + y + '" x2="' + (w - pad) + '" y2="' + y + '" stroke="#e6e9ed"/>';
-  });
-  data.forEach(function (d, i) {
-    var bh = (h - pad * 2) * (d.v / max);
-    var x = pad + gap * i + (gap - bw) / 2;
-    var y = h - pad - bh;
-    var color = d.c || '#1d4f9e';
-    svg += '<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + bh + '" rx="4" fill="' + color + '"/>';
-    svg += '<text x="' + (x + bw / 2) + '" y="' + (h - pad + 16) + '" text-anchor="middle" font-size="12" fill="#555" font-family="sans-serif">' + d.l + '</text>';
-    svg += '<text x="' + (x + bw / 2) + '" y="' + (y - 6) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#1c2733" font-family="monospace">' + d.v + '</text>';
-  });
-  svg += '</svg>';
-  el.innerHTML = svg;
-}
-
-/* ---------- Donut de desempenho (SVG) ---------- */
-function drawDonut(el) {
-  var pct = parseFloat(el.dataset.donut);
-  var color = el.dataset.color || '#168821';
-  var r = 52, c = 2 * Math.PI * r, off = c * (1 - pct / 100);
-  el.innerHTML =
-    '<svg viewBox="0 0 140 140" width="140" height="140">' +
-    '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="#e6e9ed" stroke-width="14"/>' +
-    '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="14" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + off + '" transform="rotate(-90 70 70)"/>' +
-    '<text x="70" y="68" text-anchor="middle" font-size="26" font-weight="700" fill="#1c2733" font-family="monospace">' + pct + '%</text>' +
-    '<text x="70" y="88" text-anchor="middle" font-size="11" fill="#555" font-family="sans-serif">acerto</text>' +
-    '</svg>';
-}
-
 /* ---------- Menu de Usuário ---------- */
 function initUserMenu() {
   var trigger = document.getElementById('user-menu-trigger');
@@ -212,11 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
   initUserMenu();
   initGabaritoEditor();
   initStudentFilter();
-  document.querySelectorAll('[data-bars]').forEach(drawBarChart);
-  document.querySelectorAll('[data-donut]').forEach(drawDonut);
-  window.addEventListener('resize', function () {
-    document.querySelectorAll('[data-bars]').forEach(drawBarChart);
-  });
 });
 
 /* ---------- Tabelas e filtros no celular (docs/21, etapa 5) ---------- */
