@@ -18,6 +18,7 @@
   --faixa: #153b78;           /* faixas com texto branco, igual nos dois temas */
   --atencao: #0b7f75;         /* verde-água: o que pede atenção */
   --atencao-light: #dcf3f0;
+  --serie-1: #1d4f9e; --serie-2: #008a7c; --serie-3: #b7791f; --serie-4: #7b3fa0; --serie-5: #c2410c;
 
   --purple-light: #efe7ff; --purple-fg: #6d28d9;
   --success: #168821;         /* verde */
@@ -954,6 +955,7 @@ html[data-theme="dark"] {
   --accent-on: #0d1a2e;
   --atencao: #4cc7b9;
   --atencao-light: #12332f;
+  --serie-1: #5f8fe8; --serie-2: #14a88f; --serie-3: #b98527; --serie-4: #a278d4; --serie-5: #d9713c;
   --accent-dark: #a9c8f7;
   --accent-light: #22344f;
   --success-light: #0a2a10;
@@ -982,6 +984,13 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kpi-grid > .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
+
+/* ---------- Gráficos (docs/27) ---------- */
+.grafico { width: 100%; }
+.grafico-dados { margin-top: 8px; font-size: 13px; }
+.grafico-dados summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.grafico-dados .table-wrap { margin-top: 8px; }
+@media print { .grafico-dados { display: none; } .grafico { break-inside: avoid; } }
 
 /* ---------- Página inicial (docs/26, V2) ---------- */
 .tela-inicio { background: var(--surface); }
