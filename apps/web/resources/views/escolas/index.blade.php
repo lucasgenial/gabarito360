@@ -29,7 +29,6 @@
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
-{{-- KPIs --}}
 {{-- Grid de escolas --}}
 <div class="escola-grid" id="escola-grid">
   @forelse($escolas as $e)

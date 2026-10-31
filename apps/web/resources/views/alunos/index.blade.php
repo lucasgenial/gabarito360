@@ -17,7 +17,6 @@
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 
-{{-- KPIs --}}
 {{-- Filtros --}}
 <form method="GET" class="filtros-cel" action="{{ route('alunos.index') }}" style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:flex-end;">
   <div style="position:relative;flex:1;min-width:200px;">

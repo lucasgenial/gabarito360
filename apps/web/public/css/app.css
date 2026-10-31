@@ -181,7 +181,7 @@ img { max-width: 100%; display: block; }
 
 /* ---------- Badges / pills ---------- */
 .badge {
-  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600;
   padding: 3px 8px; border-radius: var(--radius-sm); letter-spacing: 0.02em;
 }
 .badge-success { background: var(--success-light); color: var(--success); }
@@ -972,6 +972,7 @@ html[data-theme="dark"] .user-menu-links a { color: var(--fg-2); }
 html[data-theme="dark"] .user-menu-links a:hover { background: var(--surface-2); }
 html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 
+.table .badge { white-space: nowrap; }
 /* ---------- Números do painel: uma faixa só, em vez de um cartão para cada (docs/26, V3) ---------- */
 .kpi-grid { gap: 0; background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); overflow: hidden; }
 .kpi-grid > .card { border: 0; border-radius: 0; box-shadow: 1px 0 0 var(--border-soft), 0 1px 0 var(--border-soft); }

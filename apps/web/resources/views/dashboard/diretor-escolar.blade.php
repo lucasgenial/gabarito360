@@ -119,7 +119,6 @@
       <thead>
         <tr>
           <th>Turma</th>
-          <th>Professor(a)</th>
           <th>Alunos</th>
           <th>Última prova</th>
           <th>Média</th>
@@ -131,7 +130,6 @@
           @php $cfg = $statusConfig[$t['status']] ?? ['badge' => 'badge-muted', 'label' => 'N/D']; @endphp
           <tr>
             <td>{{ $t['nome'] }}</td>
-            <td>{{ $t['professor'] ?? '—' }}</td>
             <td class="num">{{ $t['total_alunos'] }}</td>
             <td>{{ $t['ultima_prova'] ?? '—' }}</td>
             <td class="num">{{ $t['media'] !== null ? number_format($t['media'], 1, ',', '') : '—' }}</td>
@@ -139,7 +137,7 @@
           </tr>
         @empty
           <tr>
-            <td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">
+            <td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">
               Nenhuma turma ativa nesta escola.
             </td>
           </tr>
