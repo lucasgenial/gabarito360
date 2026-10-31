@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Mail;
 
 class LeadController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, \App\Services\Turnstile $turnstile)
     {
         $validated = $request->validate([
             'plano_id'           => 'nullable|exists:planos,id',
@@ -24,7 +24,13 @@ class LeadController extends Controller
             'cargo'              => 'nullable|string|max:100',
             'licencas_estimadas' => 'nullable|integer|min:1',
             'mensagem'           => 'nullable|string|max:2000',
+            'cf-turnstile-response' => config('services.turnstile.enabled') ? 'required|string|max:2048' : 'nullable|string|max:2048',
         ]);
+
+        if (config('services.turnstile.enabled')) {
+            $turnstile->validar($validated['cf-turnstile-response']);
+        }
+        unset($validated['cf-turnstile-response']);
 
         if (!empty($validated['plano_id'])) {
             $plano = Plano::find($validated['plano_id']);

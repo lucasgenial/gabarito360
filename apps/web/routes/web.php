@@ -31,7 +31,7 @@ Route::get('/planos', [PlanoController::class, 'index'])->name('planos.index');
 
 // Fale Conosco (planos comerciais) — público
 Route::get('/fale-conosco',  [LeadController::class, 'index'])->name('leads.index');
-Route::post('/fale-conosco', [LeadController::class, 'store'])->name('leads.store');
+Route::post('/fale-conosco', [LeadController::class, 'store'])->middleware('throttle:5,1')->name('leads.store');
 Route::get('/fale-conosco/obrigado', [LeadController::class, 'sucesso'])->name('leads.sucesso');
 
 // Retorno de checkout do Mercado Pago (público, sem auth)

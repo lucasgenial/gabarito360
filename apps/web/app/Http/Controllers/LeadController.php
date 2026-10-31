@@ -41,13 +41,14 @@ class LeadController extends Controller
             'instituicao' => 'nullable|string|max:200',
             'cargo'       => 'nullable|string|max:100',
             'mensagem'    => 'required|string|max:2000',
+            'cf-turnstile-response' => config('services.turnstile.enabled') ? 'required|string|max:2048' : 'nullable|string|max:2048',
         ]);
 
         $resposta = $this->api->post('/v1/leads', $dados);
 
         // Sem isto a mensagem se perde em silêncio e a pessoa vê "enviado"
         if ($resposta->failed()) {
-            return back()->withInput()->withErrors(['lead' => $resposta->json('message') ?? 'Não foi possível enviar a mensagem. Tente de novo.']);
+            return back()->withInput($request->except('cf-turnstile-response'))->withErrors(['lead' => $resposta->json('message') ?? 'Não foi possível enviar a mensagem. Tente de novo.']);
         }
 
         return redirect()->route('leads.sucesso');

@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'turnstile' => [
+        'enabled' => env('TURNSTILE_ENABLED', false),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+        'hostnames' => array_values(array_filter(array_map('trim', explode(',', env('TURNSTILE_HOSTNAMES', 'gabarito360.com.br,www.gabarito360.com.br'))))),
+    ],
 
     /*
     |--------------------------------------------------------------------------
