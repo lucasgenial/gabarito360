@@ -47,6 +47,9 @@ Route::prefix('v1')->group(function () {
         Route::post('login',           [AuthController::class, 'login']);
         Route::post('esqueci-senha',   [AuthController::class, 'esqueceuSenha'])->middleware('throttle:5,1');
         Route::post('redefinir-senha', [AuthController::class, 'redefinirSenha'])->middleware('throttle:10,1');
+        Route::post('confirmar-email', [AuthController::class, 'confirmarEmail'])->middleware('throttle:10,1');
+        Route::post('convite',         [AuthController::class, 'consultarConvite'])->middleware('throttle:20,1');
+        Route::post('convite/recusar', [AuthController::class, 'recusarConvite'])->middleware('throttle:10,1');
     });
 
     // Rotas protegidas
@@ -54,6 +57,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('auth')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
+            Route::post('email', [AuthController::class, 'trocarEmail'])->middleware('throttle:5,1');
             Route::put('me',     [AuthController::class, 'update']);
         });
 
@@ -167,6 +171,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/',         [UsuarioController::class, 'store'])->middleware('permissao:usuario.gerir');
             Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('permissao:usuario.ver');
             Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('permissao:usuario.gerir');
+            Route::post('{id}/convite', [UsuarioController::class, 'reenviarConvite'])->middleware('permissao:usuario.gerir');
             Route::post('{id}/toggle',[UsuarioController::class, 'toggle'])->middleware('permissao:usuario.gerir');
             // Permissões do usuário: padrão do perfil, extras e retiradas (docs/03 §1)
             Route::get('{id}/permissoes', [UsuarioController::class, 'permissoes'])->middleware('permissao:usuario.ver');

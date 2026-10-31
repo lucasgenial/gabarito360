@@ -209,6 +209,11 @@
   </div>
 </form>
 
+<form method="POST" action="{{ route('membros.convite', $membro['id']) }}" style="margin-top:12px;">
+  @csrf
+  <button type="submit" class="btn btn-secondary">Reenviar convite por e-mail</button>
+</form>
+
 <form method="POST" action="{{ route('membros.toggle', $membro['id']) }}" style="margin-top:12px;">
   @csrf
   <button type="submit" class="btn btn-secondary">

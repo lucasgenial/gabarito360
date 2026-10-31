@@ -217,4 +217,15 @@ class MembroController extends Controller
 
         return view('membros.perfis', ['catalogo' => $resp->json('data') ?? [], 'perfis' => self::PERFIS]);
     }
+
+    public function convite(int $id)
+    {
+        $resp = $this->api->post("/v1/usuarios/{$id}/convite");
+
+        if ($resp->failed()) {
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível enviar o convite.');
+        }
+
+        return back()->with('sucesso', 'Convite enviado.');
+    }
 }
