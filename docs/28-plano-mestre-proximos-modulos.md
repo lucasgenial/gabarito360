@@ -960,7 +960,7 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | E7 Fale Conosco | Turnstile incorporado e publicado; ativação e envio real protegido a confirmar | Claude / Codex | #53, #58 |
 | E8 Páginas públicas | entrega visual publicada; termos e privacidade adiados pelo responsável | Codex | #59, #60 |
 | L1 Publicar termos | em andamento: prévias com campos a preencher autorizadas; publicação e aceite pendentes (docs/35) | Codex | #64 |
-| L2 Inventário | pendente | | |
+| L2 Inventário | em revisão: inventário técnico, retenção/terceiros e impacto preliminar em docs/34 e docs/38; validações e contratos pendentes | Codex | #68 |
 | L3 Proteção | pendente | | |
 | L4 Titulares | pendente | | |
 | L5 Incidentes | pendente | | |
