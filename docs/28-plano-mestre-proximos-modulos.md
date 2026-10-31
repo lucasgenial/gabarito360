@@ -943,7 +943,7 @@ Módulo de maior risco, com dados de menores. Disponível só para escolas e per
 
 Situação: `pendente`, `em andamento`, `em revisão`, `concluído` ou `cancelado`.
 
-Atualizado em 31/10/2026 com autorização do responsável para manter a completude registrada. Esta atualização preserva escopo, prioridades e critérios dos pacotes. PR incorporado não implica conclusão de critérios ainda pendentes. E7 inclui confirmação de uso real pelo responsável; L3 tem publicação e validação operacional registradas. L6 ainda não foi publicado.
+Atualizado em 31/10/2026 com autorização do responsável para manter a completude registrada. Esta atualização preserva escopo, prioridades e critérios dos pacotes. PR incorporado não implica conclusão de critérios ainda pendentes. E7 inclui confirmação de uso real pelo responsável; L3 tem publicação e validação operacional registradas. L6 publicado e verificado em 31/10/2026; remoção de fotos/coluna não autorizada.
 
 | Pacote | Situação | Responsável | PR |
 |---|---|---|---|
@@ -966,7 +966,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | L3 Proteção | concluído: chave dedicada, migração e logs protegidos publicados; verificações operacionais em 31/10/2026 (docs/operacao/protecao-dados.md) | Codex | #69 |
 | L4 Titulares | pendente: depende de T2 | | |
 | L5 Incidentes | pendente: depende de AU1 | | |
-| L6 Trocar foto por avatar | em revisão: iniciais e galeria aprovada de 36 avatares com seleção persistida; testes e prints em docs/operacao/avatares-alunos.md; merge/deploy e remoção de foto_path dependem de aprovação | Codex | #70 |
+| L6 Trocar foto por avatar | concluído funcionalmente: galeria de 36 avatares e iniciais publicadas e verificadas em produção (docs/operacao/avatares-alunos.md); foto_path e fotos preservados, remoção não autorizada | Codex | #70 |
 | T1 Modelo de dados | pendente | | |
 | T2 Clientes e espaços | pendente | | |
 | V1 Vínculos | pendente | | |
