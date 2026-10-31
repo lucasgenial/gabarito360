@@ -27,7 +27,7 @@ class VerificarInadimplenciaJob implements ShouldQueue
 
         foreach ($trialExpiradas as $assinatura) {
             $assinatura->update(['status' => 'atrasada']);
-            Log::info("Assinatura #{$assinatura->id} — trial expirado, acesso suspenso.");
+            Log::info('Assinatura: trial expirado, acesso suspenso.', ['assinatura_id' => $assinatura->id]);
         }
 
         // Ativa com próxima cobrança ultrapassada além do prazo de carência → atrasada
@@ -38,7 +38,7 @@ class VerificarInadimplenciaJob implements ShouldQueue
 
         foreach ($ativasAtrasadas as $assinatura) {
             $assinatura->update(['status' => 'atrasada']);
-            Log::info("Assinatura #{$assinatura->id} — inadimplente após carência, acesso suspenso.");
+            Log::info('Assinatura: inadimplente após carência, acesso suspenso.', ['assinatura_id' => $assinatura->id]);
         }
     }
 }

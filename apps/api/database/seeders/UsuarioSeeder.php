@@ -20,7 +20,7 @@ class UsuarioSeeder extends Seeder
         ];
 
         foreach ($usuarios as $usuario) {
-            DB::table('usuarios')->insert(array_merge($usuario, [
+            \App\Models\Usuario::create(array_merge($usuario, [
                 'password'   => Hash::make('password'),
                 'ativo'      => true,
                 'created_at' => now(),

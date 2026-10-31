@@ -26,7 +26,8 @@ class ContratacaoContatoTest extends TestCase
             'plano_id' => $plano->id, 'nome' => 'Pessoa Teste', 'email' => 'teste@example.test',
             'assunto' => 'Contratação', 'mensagem' => 'Quero conhecer este plano.',
         ])->assertCreated();
-        $this->assertDatabaseHas('leads', ['plano_id' => $plano->id, 'email' => 'teste@example.test']);
+        $this->assertSame('teste@example.test', \App\Models\Lead::where('plano_id', $plano->id)->sole()->email);
+        $this->assertDatabaseMissing('leads', ['email' => 'teste@example.test']);
         $this->assertDatabaseCount('assinaturas', 0);
     }
 

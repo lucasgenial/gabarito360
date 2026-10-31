@@ -14,7 +14,7 @@ use Symfony\Component\Mime\Email;
  * Função: Envia pela fila um modelo de resources/emails/modelos, dentro de base.html.
  *         O HTML fica sem Blade; os {{campos}} são preenchidos com valores escapados.
  */
-class EmailModelo extends Mailable implements ShouldQueue
+class EmailModelo extends Mailable implements ShouldQueue, \Illuminate\Contracts\Queue\ShouldBeEncrypted
 {
     use Queueable, SerializesModels;
 
