@@ -17,6 +17,9 @@ class Escola extends Model
     ];
 
     protected $casts = [
+        'email' => \App\Casts\DadoProtegido::class,
+        'telefone' => \App\Casts\DadoProtegido::class,
+
         'ativo' => 'boolean', 'edicao_manual' => 'boolean',
         'turnos' => 'array', 'etapas' => 'array', 'modalidades' => 'array',
     ];
