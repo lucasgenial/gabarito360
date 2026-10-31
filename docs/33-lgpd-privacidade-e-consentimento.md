@@ -71,6 +71,10 @@ O consentimento não é a única base possível para dados de crianças e adoles
 > **Seus direitos.** Você pode pedir confirmação do tratamento, acesso, correção, anonimização, bloqueio, eliminação, portabilidade, informação sobre compartilhamento e revisão de decisões automatizadas. Também pode revogar um consentimento dado. Pedidos sobre dados escolares devem ser feitos à instituição; podemos encaminhá-los pelo e-mail [privacidade@gabarito360.com.br]. Você também pode procurar a ANPD.
 >
 > **Cookies.** Usamos cookies necessários para login e segurança. Cookies opcionais só serão usados com sua escolha.
+>
+> **Medição de desempenho.** Usamos Cloudflare Web Analytics para medir visitas e desempenho das páginas. Esse recurso não usa cookies ou armazenamento local para coletar as métricas.
+>
+> **Fontes do site.** Utilizamos Google Fonts para carregar as fontes do site. Isso cria uma conexão do seu navegador com os servidores desse fornecedor.
 
 ## 4. Termo de ciência do responsável
 

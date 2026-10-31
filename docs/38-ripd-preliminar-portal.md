@@ -113,3 +113,5 @@ Não preencher a coluna residual apenas com a existência de uma tarefa planejad
 5. Reavaliar risco residual com evidências, validar pelo controlador e realizar piloto conforme P7.
 
 Este documento entrega a avaliação técnica inicial de RL13. O aceite institucional, a implementação dos controles e a autorização de entrada em operação permanecem pendentes.
+
+Validações posteriores com o responsável e conferências técnicas estão em [docs/39](39-validacoes-l2.md). Prazos foram aprovados para implementação futura e a localização/acessos próprios foram declarados. Nenhuma dessas decisões foi convertida em pontuação residual menor: contratos e vários controles continuam pendentes. A política de tokens da API foi mantida por decisão do responsável, sem adoção da proposta de oito horas.
