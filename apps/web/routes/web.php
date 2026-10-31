@@ -129,6 +129,7 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/provas/{id}/acompanhar',       [CorrecaoController::class, 'show'])->name('correcao.show');
     Route::get('/provas/{id}/acompanhar/status',[CorrecaoController::class, 'status'])->name('correcao.status');
     Route::get('/provas/{id}/acompanhar/cartoes',[CorrecaoController::class, 'cartoes'])->name('correcao.cartoes');
+    Route::get('/provas/{id}/revisao',          [CorrecaoController::class, 'revisao'])->name('correcao.revisao');
     Route::post('/provas/{id}/correcao/fechar', [CorrecaoController::class, 'fechar'])->name('correcao.fechar');
     Route::post('/provas/{id}/correcao/reabrir',[CorrecaoController::class, 'reabrir'])->name('correcao.reabrir');
     Route::get('/cartoes/{id}/imagem',          [CorrecaoController::class, 'imagem'])->name('cartoes.imagem');
