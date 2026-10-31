@@ -1,0 +1,9 @@
+[Unit]
+Description=Gabarito360: tarefas agendadas
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=/home/lucasdev/projetos/gabarito360/apps/api
+ExecStart=/usr/bin/php artisan schedule:run
