@@ -80,8 +80,15 @@
     };
   }
 
+  // viewBox: permite que o CSS de impressão escale o desenho inteiro para a folha
+  function ajustarEscala(g) {
+    var svg = g.el.querySelector('svg');
+    if (svg) svg.setAttribute('viewBox', '0 0 ' + g.instancia.getWidth() + ' ' + g.instancia.getHeight());
+  }
+
   function desenhar(g) {
     g.instancia.setOption(opcoes(g.dados), true);
+    ajustarEscala(g);
   }
 
   function iniciar() {
@@ -93,21 +100,15 @@
     if (!graficos.length) return;
 
     if (window.ResizeObserver) {
-      var aoRedimensionar = new ResizeObserver(function () { graficos.forEach(function (g) { g.instancia.resize(); }); });
+      var aoRedimensionar = new ResizeObserver(function () { graficos.forEach(function (g) { g.instancia.resize(); ajustarEscala(g); }); });
       graficos.forEach(function (g) { aoRedimensionar.observe(g.el); });
     }
     // Troca de tema: as cores vêm dos tokens do CSS
     new MutationObserver(function () { graficos.forEach(desenhar); })
       .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    // A4 sem animação e na largura da folha impressa
+    // O SVG escala para a folha pelo CSS: redesenhar aqui cortava o gráfico em A4
     window.addEventListener('beforeprint', function () {
-      graficos.forEach(function (g) {
-        g.instancia.setOption({ animation: false });
-        g.instancia.resize({ width: g.el.clientWidth < 680 ? g.el.clientWidth : 680, animation: { duration: 0 } });
-      });
-    });
-    window.addEventListener('afterprint', function () {
-      graficos.forEach(function (g) { g.instancia.resize({ width: 'auto' }); });
+      graficos.forEach(function (g) { g.instancia.setOption({ animation: false }); });
     });
   }
 

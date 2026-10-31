@@ -1005,7 +1005,8 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .media-meta-abaixo { color: var(--danger); }
 @media print {
   .grafico-dados { display: none; }
-  .grafico { break-inside: avoid; }
+  .grafico, .grafico > div { width: 100% !important; height: auto !important; break-inside: avoid; }
+  .grafico svg { display: block; position: static !important; width: 100% !important; height: auto !important; }
   .grafico-rolagem { overflow: visible; }
   .grafico-rolagem > .grafico-largo { min-width: 0 !important; }
   .media-meta-trilha, .media-meta-trilha i, .media-meta-trilha b { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
