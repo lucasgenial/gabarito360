@@ -49,6 +49,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/redefinir-senha', [LoginController::class, 'postRedefinirSenha'])->name('redefinir-senha.store');
 });
 
+Route::get('/confirmar-email', [PerfilController::class, 'confirmarEmail'])->name('email.confirmar');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
 // Rotas autenticadas
@@ -60,6 +61,7 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/perfil',        [PerfilController::class, 'show'])->name('perfil');
     Route::put('/perfil',        [PerfilController::class, 'update'])->name('perfil.update');
     Route::put('/perfil/senha',  [PerfilController::class, 'senha'])->name('perfil.senha');
+    Route::post('/perfil/email', [PerfilController::class, 'email'])->name('perfil.email');
 
     // Configurações da rede (MP-024)
     Route::get('/configuracoes', [ConfiguracaoController::class, 'index'])->name('configuracoes.index');
@@ -75,6 +77,7 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/membros/{id}/editar', [MembroController::class, 'edit'])->name('membros.edit');
     Route::put('/membros/{id}',        [MembroController::class, 'update'])->name('membros.update');
     Route::post('/membros/{id}/toggle',[MembroController::class, 'toggle'])->name('membros.toggle');
+    Route::post('/membros/{id}/convite',[MembroController::class, 'convite'])->name('membros.convite');
 
     // Escolas (MP-015)
     Route::get('/escolas',             [EscolaController::class, 'index'])->name('escolas.index');

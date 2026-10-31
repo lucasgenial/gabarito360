@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
+use App\Services\ContaUsuario;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -150,6 +151,10 @@ class UsuarioController extends Controller
             ]);
         }
 
+        if ($usuario->ativo) {
+            app(ContaUsuario::class)->convidar($usuario);
+        }
+
         return ApiResponse::success($usuario, null, 201);
     }
 
@@ -175,6 +180,22 @@ class UsuarioController extends Controller
             'escola_id'     => $escolaId,
             'secretaria_id' => $secretariaId,
         ]));
+    }
+
+    /** Novo convite para quem ainda não criou a senha ou perdeu o link. */
+    public function reenviarConvite(Request $request, int $id, ContaUsuario $conta): JsonResponse
+    {
+        $usuario = $this->escopoQuery($request)->where('id', $id)->first();
+        if (!$usuario) {
+            return ApiResponse::notFound('Usuário não encontrado.');
+        }
+        if (!$usuario->ativo) {
+            return ApiResponse::error('Ative o usuário antes de enviar o convite.', [], 422);
+        }
+
+        $conta->convidar($usuario);
+
+        return ApiResponse::success(['mensagem' => 'Convite enviado.']);
     }
 
     public function update(Request $request, int $id): JsonResponse

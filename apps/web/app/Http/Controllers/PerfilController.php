@@ -55,4 +55,33 @@ class PerfilController extends Controller
 
         return back()->with('sucesso', 'Senha alterada.');
     }
+
+    public function email(Request $request)
+    {
+        $dados = $request->validate([
+            'novo_email'  => 'required|email|max:190',
+            'senha_atual' => 'required|string',
+        ]);
+
+        $resp = $this->api->post('/v1/auth/email', $dados);
+
+        if ($resp->failed()) {
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível pedir a troca de e-mail.');
+        }
+
+        return back()->with('sucesso', 'Enviamos um link de confirmação para o novo e-mail. O atual segue valendo até lá.');
+    }
+
+    /** Link do e-mail: funciona com ou sem sessão aberta. */
+    public function confirmarEmail(Request $request)
+    {
+        $resp = $this->api->post('/v1/auth/confirmar-email', ['token' => (string) $request->query('token')]);
+        $destino = session('auth_token') ? 'perfil' : 'login';
+
+        if ($resp->failed()) {
+            return redirect()->route($destino)->with('erro', $resp->json('message') ?? 'Link inválido ou expirado.');
+        }
+
+        return redirect()->route($destino)->with('sucesso', 'E-mail confirmado.');
+    }
 }

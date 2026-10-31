@@ -952,12 +952,12 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | B5 Deploy | pendente | | |
 | B6 Cartão pela fila | pendente | | |
 | E1 Domínio | concluído | Claude | |
-| E2 Motor de e-mail | pendente | | |
-| E3 Recuperar senha | pendente | | |
-| E4 Modelos | pendente | | |
-| E5 Convite | pendente | | |
-| E6 Trocar e-mail | pendente | | |
-| E7 Fale Conosco | pendente | | |
+| E2 Motor de e-mail | concluído | Claude | |
+| E3 Recuperar senha | concluído | Claude | |
+| E4 Modelos | fase 1 em andamento | Claude | |
+| E5 Convite | em andamento | Claude | |
+| E6 Trocar e-mail | em andamento | Claude | |
+| E7 Fale Conosco | concluído, falta Turnstile | Claude | |
 | E8 Páginas públicas | pendente | | |
 | L1 Publicar termos | pendente | | |
 | L2 Inventário | pendente | | |

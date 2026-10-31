@@ -98,7 +98,7 @@ class LoginController extends Controller
         }
 
         return redirect()->route('login')
-            ->with('sucesso', 'Senha redefinida. Entre com a nova senha.');
+            ->with('sucesso', 'Senha salva. Entre com a nova senha.');
     }
 
     public function destroy(Request $request)
