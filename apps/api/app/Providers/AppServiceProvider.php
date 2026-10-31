@@ -17,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->extend('log', fn ($original, $app) => new \App\Logging\GerenciadorProtegido($app));
         // OMR_DRIVER=nativo (padrão) usa visão computacional real; simulado é só para dev/testes.
         $this->app->bind(OmrDriverInterface::class, fn () => config('omr.driver') === 'simulado'
             ? new SimuladoOmrDriver()
@@ -28,6 +29,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->app->extend('queue.failer', function ($original, $app) {
+            $config = $app['config']['queue.failed'];
+            return $config['driver'] === 'database-uuids'
+                ? new \App\Support\FalhasProtegidas($app['db'], $config['database'], $config['table'])
+                : $original;
+        });
         Event::listen(MessageSent::class, function (MessageSent $evento) {
             $modelo = $evento->message->getHeaders()->getHeaderBody('X-G360-Modelo');
             if (!$modelo) {

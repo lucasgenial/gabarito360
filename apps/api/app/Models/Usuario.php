@@ -33,10 +33,14 @@ class Usuario extends Authenticatable
 
     protected $hidden = [
         'password',
-        'remember_token',
+        'remember_token', 'email_hash', 'cpf_hash',
     ];
 
     protected $casts = [
+        'email' => \App\Casts\DadoProtegido::class . ':1',
+        'cpf' => \App\Casts\DadoProtegido::class . ':1',
+        'telefone' => \App\Casts\DadoProtegido::class,
+
         'ativo'               => 'boolean',
         'password'            => 'hashed',
         'ultimo_acesso'       => 'datetime',
@@ -44,6 +48,11 @@ class Usuario extends Authenticatable
         'data_ingresso'       => 'date',
         'forcar_troca_senha'  => 'boolean',
     ];
+
+    public function scopePorEmail($query, string $email)
+    {
+        return $query->where('email_hash', \App\Support\DadoProtegido::hash($email, 'email'));
+    }
 
     public function escopos()
     {

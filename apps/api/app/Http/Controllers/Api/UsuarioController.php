@@ -45,18 +45,17 @@ class UsuarioController extends Controller
             $query->where('perfil', $perfil);
         }
 
-        if ($busca = $request->query('busca')) {
-            $query->where(function ($q) use ($busca) {
-                $q->where('nome', 'like', "%{$busca}%")
-                  ->orWhere('email', 'like', "%{$busca}%");
-            });
-        }
-
         $usuarios = $query
             ->select('id', 'nome', 'email', 'cpf', 'perfil', 'ativo', 'ultimo_acesso', 'created_at')
             ->orderBy('perfil')
             ->orderBy('nome')
             ->get();
+
+        if ($busca = $request->query('busca')) {
+            $busca = mb_strtolower($busca);
+            $usuarios = $usuarios->filter(fn ($u) => str_contains(mb_strtolower($u->nome), $busca)
+                || str_contains(mb_strtolower($u->email), $busca))->values();
+        }
 
         $totais = DB::table('usuarios')
             ->select('perfil', DB::raw('count(*) as total'))
@@ -75,8 +74,8 @@ class UsuarioController extends Controller
 
         $data = $request->validate([
             'nome'                   => 'required|string|max:200',
-            'email'                  => 'required|email|unique:usuarios,email',
-            'cpf'                    => 'required|string|regex:/^\d{11}$/|unique:usuarios,cpf',
+            'email'                  => ['required', 'email', new \App\Rules\UnicoProtegido('usuarios', 'email')],
+            'cpf'                    => ['required', 'string', 'regex:/^\d{11}$/', new \App\Rules\UnicoProtegido('usuarios', 'cpf')],
             'perfil'                 => ['required', Rule::in(['secretario_educacao','admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aplicador','aluno'])],
             'ativo'                  => 'sometimes|boolean',
             'data_nascimento'        => 'sometimes|date|nullable',
@@ -231,7 +230,7 @@ class UsuarioController extends Controller
 
         $data = $request->validate([
             'nome'                   => 'sometimes|string|max:200',
-            'email'                  => ['sometimes', 'email', Rule::unique('usuarios', 'email')->ignore($id)],
+            'email'                  => ['sometimes', 'email', new \App\Rules\UnicoProtegido('usuarios', 'email', $id)],
             'perfil'                 => ['sometimes', Rule::in(['secretario_educacao','admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aplicador','aluno'])],
             'ativo'                  => 'sometimes|boolean',
             'data_nascimento'        => 'sometimes|date|nullable',

@@ -77,7 +77,9 @@ class ImportarCenso extends Command
                 ->get(['escolas.id', 'censo_escolas.*']);
             foreach ($escolas as $e) {
                 $dados = collect(Censo::paraEscola($e))->except('inep', 'nome')->all();
-                $atualizadas += DB::table('escolas')->where('id', $e->id)->update($dados + ['updated_at' => $agora]);
+                $escola = \App\Models\Escola::findOrFail($e->id);
+                $escola->fill($dados)->save();
+                $atualizadas++;
             }
         }
 

@@ -245,7 +245,7 @@ class EscolaController extends Controller
                 ];
             });
 
-        $equipe = DB::table('usuarios')
+        $equipe = \App\Models\Usuario::query()
             ->join('usuario_escopos', function ($j) use ($id) {
                 $j->on('usuarios.id', '=', 'usuario_escopos.usuario_id')
                   ->where('usuario_escopos.escopo_tipo', 'escola')

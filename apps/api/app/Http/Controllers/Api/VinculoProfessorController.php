@@ -20,7 +20,7 @@ class VinculoProfessorController extends Controller
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        $professores = DB::table('usuarios')
+        $professores = \App\Models\Usuario::query()
             ->join('usuario_escopos', function ($j) use ($turmaId) {
                 $j->on('usuarios.id', '=', 'usuario_escopos.usuario_id')
                   ->where('usuario_escopos.escopo_tipo', 'turma')
@@ -46,7 +46,7 @@ class VinculoProfessorController extends Controller
             'usuario_id' => 'required|integer|exists:usuarios,id',
         ]);
 
-        $professor = DB::table('usuarios')
+        $professor = \App\Models\Usuario::query()
             ->where('id', $data['usuario_id'])
             ->where('perfil', 'professor')
             ->first();
@@ -97,7 +97,7 @@ class VinculoProfessorController extends Controller
 
     public function turmasDoProfessor(int $usuarioId): JsonResponse
     {
-        $professor = DB::table('usuarios')
+        $professor = \App\Models\Usuario::query()
             ->where('id', $usuarioId)
             ->where('perfil', 'professor')
             ->first();

@@ -33,7 +33,7 @@ class WebhookController extends Controller
         $data = $request->json()->all();
         $tipo = $data['type'] ?? $data['action'] ?? null;
 
-        Log::info('MP Webhook recebido', ['type' => $tipo, 'data' => $data]);
+        Log::info('MP Webhook recebido');
 
         match ($tipo) {
             'payment'             => $this->processarPagamento($data),

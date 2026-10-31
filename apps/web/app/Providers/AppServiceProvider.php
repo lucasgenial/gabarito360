@@ -13,6 +13,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->extend('log', fn ($original, $app) => new \App\Logging\GerenciadorProtegido($app));
         //
     }
 

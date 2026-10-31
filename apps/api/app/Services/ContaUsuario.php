@@ -35,11 +35,11 @@ class ContaUsuario
         $token = Str::random(64);
 
         DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $usuario->email],
+            ['email' => \App\Support\DadoProtegido::hash($usuario->email, 'email')],
             ['token' => Hash::make($token), 'created_at' => now(), 'expira_em' => now()->addDays(self::VALIDADE_CONVITE_DIAS), 'convidado_por' => $convidadoPor->id]
         );
 
-        $link = config('emails.url_web') . '/convite?' . http_build_query(['token' => $token, 'email' => $usuario->email]);
+        $link = config('emails.url_web') . '/convite?' . http_build_query(['token' => $token, 'conta' => \App\Support\DadoProtegido::hash($usuario->email, 'email')]);
 
         Mail::to($usuario->email)->queue(new EmailModelo('convite-usuario', 'Convite para o Gabarito360', $this->dadosDoConvite($usuario, $convidadoPor) + ['link' => $link]));
     }
@@ -70,7 +70,7 @@ class ContaUsuario
     /** Convite válido e ainda não usado, ou null. */
     public function convitePendente(string $email, string $token): ?object
     {
-        $registro = DB::table('password_reset_tokens')->where('email', $email)->first();
+        $registro = DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::conta($email))->first();
 
         return $registro
             && $registro->expira_em
@@ -80,7 +80,7 @@ class ContaUsuario
 
     public function recusarConvite(Usuario $usuario, object $convite): void
     {
-        DB::table('password_reset_tokens')->where('email', $usuario->email)->delete();
+        DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::hash($usuario->email, 'email'))->delete();
 
         $gestor = Usuario::find($convite->convidado_por);
         $dados = $this->dadosDoConvite($usuario, $gestor);
@@ -102,7 +102,7 @@ class ContaUsuario
 
         DB::table('trocas_email')->updateOrInsert(
             ['usuario_id' => $usuario->id],
-            ['novo_email' => $novoEmail, 'token_hash' => hash('sha256', $token), 'expira_em' => now()->addHours(self::VALIDADE_TROCA_HORAS), 'created_at' => now()]
+            ['novo_email' => 'g360:v1:'.\Illuminate\Support\Facades\Crypt::encryptString($novoEmail), 'token_hash' => hash('sha256', $token), 'expira_em' => now()->addHours(self::VALIDADE_TROCA_HORAS), 'created_at' => now()]
         );
 
         Mail::to($novoEmail)->queue(new EmailModelo('confirmar-email', 'Confirme seu novo e-mail', [
@@ -121,13 +121,14 @@ class ContaUsuario
 
         DB::table('trocas_email')->where('id', $troca->id)->delete();
 
+        $troca->novo_email = \Illuminate\Support\Facades\Crypt::decryptString(substr($troca->novo_email, 8));
         $usuario = Usuario::find($troca->usuario_id);
-        if (!$usuario || now()->greaterThan($troca->expira_em) || Usuario::where('email', $troca->novo_email)->exists()) {
+        if (!$usuario || now()->greaterThan($troca->expira_em) || Usuario::porEmail($troca->novo_email)->exists()) {
             return false;
         }
 
         $anterior = $usuario->email;
-        DB::table('password_reset_tokens')->where('email', $anterior)->delete();
+        DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::hash($anterior, 'email'))->delete();
         $usuario->update(['email' => $troca->novo_email]);
 
         Mail::to($anterior)->queue(new EmailModelo('email-alterado-aviso', 'O e-mail da sua conta foi alterado', [
@@ -144,12 +145,12 @@ class ContaUsuario
         $token = Str::random(64);
 
         DB::table('password_reset_tokens')->upsert(
-            ['email' => $usuario->email, 'token' => Hash::make($token), 'created_at' => now(), 'expira_em' => null],
+            ['email' => \App\Support\DadoProtegido::hash($usuario->email, 'email'), 'token' => Hash::make($token), 'created_at' => now(), 'expira_em' => null],
             ['email'],
             ['token', 'created_at', 'expira_em']
         );
 
-        $link = config('emails.url_web') . '/redefinir-senha?' . http_build_query(['token' => $token, 'email' => $usuario->email]);
+        $link = config('emails.url_web') . '/redefinir-senha?' . http_build_query(['token' => $token, 'conta' => \App\Support\DadoProtegido::hash($usuario->email, 'email')]);
 
         Mail::to($usuario->email)->queue(new EmailModelo('recuperar-senha', 'Redefina sua senha do Gabarito360', [
             'nome' => $usuario->nome,
