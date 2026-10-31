@@ -140,7 +140,7 @@
 
     {{-- Próximas etapas --}}
     @if(in_array($prova['status'], ['rascunho', 'publicada']))
-    <div class="card card-pad" style="background:var(--accent-light);border-color:rgba(19,81,180,.2);">
+    <div class="card card-pad" style="background:var(--accent-light);border-color:rgba(29,79,158,.2);">
       <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--accent);">Próximas etapas</h3>
       <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--fg-2);">
         @if($prova['status'] === 'rascunho')

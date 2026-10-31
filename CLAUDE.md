@@ -78,12 +78,13 @@ Em conflito: Mockup > Style System > Docs > Legado
 
 ## Design System
 
-- **Framework:** gov.br Design System (Padrão Digital de Governo)
-- **Fonte principal:** Rawline / Raleway (fallback)
-- **Fonte mono:** Roboto Mono
-- **Cor accent:** `#1351b4` (Blue Warm Vivid 50)
-- **Cor success:** `#168821` (Green Cool Vivid 50)
-- **Arquivo tokens:** `style-system/css/gov.css`
+- **Identidade:** própria, direção "Atual refinada" (`docs/26-plano-identidade-visual.md`)
+- **Fonte principal:** Figtree
+- **Fonte de código:** Roboto Mono
+- **Cor accent:** `#1d4f9e`
+- **Cor de atenção:** `#0b7f75`
+- **Cor success:** `#168821`
+- **Arquivo tokens:** `apps/web/public/css/app.css`
 
 ---
 
@@ -99,7 +100,7 @@ Em conflito: Mockup > Style System > Docs > Legado
 ### O Que Sempre Fazer
 - Consultar `docs/01-inventario-dos-mockups.md` antes de implementar qualquer tela
 - Verificar `docs/03-perfis-e-permissoes.md` antes de criar endpoints
-- Seguir o Design System gov.br em todos os componentes visuais
+- Seguir a identidade própria e os tokens de `apps/web/public/css/app.css` em todos os componentes visuais
 - Documentar decisões de arquitetura em `docs/12-arquitetura.md`
 
 ---

@@ -51,7 +51,7 @@
 <div class="card card-pad" style="margin-top:16px;">
   <div class="row-between" style="flex-wrap:wrap;">
     <h3 style="font-size:17px;">Aluno × turma</h3>
-    <span style="font-size:12px;color:var(--muted);"><span style="color:#1351b4;">■</span> aluno · <span style="color:#a7b6cc;">■</span> média da turma</span>
+    <span style="font-size:12px;color:var(--muted);"><span style="color:#1d4f9e;">■</span> aluno · <span style="color:#a7b6cc;">■</span> média da turma</span>
   </div>
   <div style="overflow-x:auto;margin-top:8px;">
     <svg viewBox="0 0 {{ $larg }} 190" width="100%" style="min-width:{{ min($larg, 560) }}px;" role="img" aria-label="Nota do aluno e média da turma por prova">
@@ -65,7 +65,7 @@
           $ha = ($p['nota'] ?? 0) * $esc * 12; $ht = ($p['media_turma'] ?? 0) * $esc * 12;
         @endphp
         @if($p['nota'] !== null)
-          <rect x="{{ $x }}" y="{{ 150 - $ha }}" width="30" height="{{ max($ha, 1) }}" rx="2" fill="#1351b4"></rect>
+          <rect x="{{ $x }}" y="{{ 150 - $ha }}" width="30" height="{{ max($ha, 1) }}" rx="2" fill="#1d4f9e"></rect>
           <text x="{{ $x + 15 }}" y="{{ 146 - $ha }}" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor">{{ $fmt($p['nota']) }}</text>
         @else
           <text x="{{ $x + 15 }}" y="146" text-anchor="middle" font-size="9" fill="#999">—</text>

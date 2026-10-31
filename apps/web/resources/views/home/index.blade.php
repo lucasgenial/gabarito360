@@ -6,14 +6,14 @@
 <meta name="description" content="Gabarito360 lê cartões-resposta pela câmera do celular, calcula as notas e entrega relatórios por aluno, turma e escola.">
 <title>Gabarito360 — Corrija provas em minutos, não em dias</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}"/>
 <style>
 /* ─── Reset / base ─────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 :root {
-  --blue:  #1351b4;
-  --blue2: #0c326f;
+  --blue:  #1d4f9e;
+  --blue2: #153b78;
   --teal:  #2670e8;
   --green: #168821;
   --gray1: #f8f8f8;
@@ -24,7 +24,7 @@
   --radius: 10px;
   --shadow: 0 2px 16px rgba(0,0,0,.08);
 }
-body { margin:0; font-family:'Raleway',sans-serif; color:var(--gray4); background:var(--white); }
+body { margin:0; font-family:'Figtree',sans-serif; color:var(--gray4); background:var(--white); }
 a { color:inherit; text-decoration:none; }
 img { display:block; max-width:100%; }
 
@@ -69,7 +69,7 @@ img { display:block; max-width:100%; }
 .hero {
   min-height:calc(100vh / var(--escala) - 60px);
   display:flex; align-items:center;
-  background:linear-gradient(135deg, #0c326f 0%, #1351b4 60%, #2670e8 100%);
+  background:linear-gradient(135deg, #153b78 0%, #1d4f9e 60%, #2670e8 100%);
   color:#fff; padding:4rem 1.5rem;
 }
 .hero-inner {
@@ -194,7 +194,7 @@ img { display:block; max-width:100%; }
 .plan-card:hover { box-shadow:var(--shadow); }
 .plan-card.popular {
   border-color:var(--blue); position:relative;
-  box-shadow:0 0 0 3px rgba(19,81,180,.15);
+  box-shadow:0 0 0 3px rgba(29,79,158,.15);
 }
 .popular-badge {
   position:absolute; top:-1px; left:50%; transform:translateX(-50%);
@@ -220,7 +220,7 @@ img { display:block; max-width:100%; }
 
 /* ─── CTA final ─────────────────────────────────────── */
 .final-cta {
-  background:linear-gradient(135deg, #0c326f, #1351b4);
+  background:linear-gradient(135deg, #153b78, #1d4f9e);
   color:#fff; text-align:center; padding:5rem 1.5rem;
 }
 .final-cta h2 { font-size:clamp(1.6rem,3vw,2.4rem); font-weight:900; margin:0 0 1rem; }
@@ -246,7 +246,7 @@ img { display:block; max-width:100%; }
 /* ─── Section titles ─────────────────────────────────── */
 .section-tag {
   display:inline-block; font-size:.75rem; font-weight:800; text-transform:uppercase;
-  letter-spacing:.08em; color:var(--blue); background:rgba(19,81,180,.08);
+  letter-spacing:.08em; color:var(--blue); background:rgba(29,79,158,.08);
   padding:.25rem .75rem; border-radius:99px; margin-bottom:.75rem;
 }
 .section-tag.light { color:rgba(255,255,255,.8); background:rgba(255,255,255,.12); }
