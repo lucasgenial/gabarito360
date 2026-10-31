@@ -17,6 +17,8 @@
 <section><h2>Retenção</h2><p>Mantemos os dados pelo tempo necessário às finalidades, ao contrato e às obrigações legais. A tabela de prazos está em <span class="campo-pendente">[LINK DA TABELA DE RETENÇÃO]</span>. Ao final, os dados são eliminados ou anonimizados.</p></section>
 <section><h2>Segurança</h2><p>Usamos criptografia, controle de acesso, registro de operações, cópias de segurança e monitoramento. Nenhum sistema é totalmente imune a incidentes. Se um incidente puder causar risco ou dano relevante, comunicaremos a ANPD e os titulares conforme a norma aplicável.</p></section>
 <section><h2>Seus direitos</h2><p>Você pode pedir confirmação do tratamento, acesso, correção, anonimização, bloqueio, eliminação, portabilidade, informação sobre compartilhamento e revisão de decisões automatizadas. Também pode revogar um consentimento dado. Pedidos sobre dados escolares devem ser feitos à instituição; podemos encaminhá-los pelo e-mail <span class="campo-pendente">[E-MAIL DO ENCARREGADO]</span>. Você também pode procurar a ANPD.</p></section>
+<section><h2>Medição de desempenho</h2><p>Usamos Cloudflare Web Analytics para medir visitas e desempenho das páginas. Esse recurso não usa cookies ou armazenamento local para coletar as métricas.</p></section>
+<section><h2>Fontes do site</h2><p>Utilizamos Google Fonts para carregar as fontes do site. Isso cria uma conexão do seu navegador com os servidores desse fornecedor.</p></section>
 <section><h2>Cookies</h2><p>Usamos cookies necessários para login e segurança. Cookies opcionais só serão usados com sua escolha.</p></section>
 </article>
 @endsection
