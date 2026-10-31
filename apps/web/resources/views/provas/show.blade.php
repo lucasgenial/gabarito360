@@ -152,7 +152,7 @@
         @else
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">1</span> Prova publicada</div>
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">2</span> Aplique nas turmas em {{ $prova['data_aplicacao'] ? \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : 'data a definir' }}</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">3</span> <a href="{{ route('correcao.show', $prova['id']) }}" style="color:var(--accent);">Envie os cartões-resposta para leitura OMR</a></div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">3</span> <a href="{{ route('correcao.show', $prova['id']) }}" style="color:var(--accent);">Envie os cartões-resposta para leitura</a></div>
         @endif
       </div>
     </div>
