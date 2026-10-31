@@ -87,9 +87,9 @@ Todos passam do mínimo de 4,5:1 para texto normal. A etapa V1 ainda precisa con
 
 ### V5. Gráficos modernos
 
-Pedido do usuário em 30/10/2026, citando Recharts. Biblioteca a confirmar: o ECOAR usa ECharts, que não exige React. Recharts exige React, e a web usa Blade com JavaScript simples.
+Pedido do usuário em 30/10/2026. Biblioteca escolhida: ECharts, a mesma usada no ECOAR. Ela funciona nas telas Blade, sem React.
 
-- Carregar a biblioteca escolhida só nas telas com gráficos.
+- Carregar o ECharts só nas telas com gráficos.
 - Criar um componente único, com as cores e a fonte da identidade e suporte aos modos claro e escuro.
 - Trocar os gráficos desenhados à mão por esse componente, mantendo a impressão em A4.
 - Plano detalhado e aprovação antes de começar.
