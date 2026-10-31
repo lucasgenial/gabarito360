@@ -267,4 +267,20 @@ class PerfisTest extends TestCase
         $this->assertContains('cartao.enviar', $perms);
         $this->assertNotContains('escola.criar', $perms);
     }
+
+    public function test_gestor_envia_link_de_senha_e_nao_define_a_senha(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        $alvo = $this->u['professor'];
+        $hash = $alvo->password;
+
+        $this->como('admin_rede')->postJson("/api/v1/usuarios/{$alvo->id}/link-senha")->assertOk();
+        \Illuminate\Support\Facades\Mail::assertQueued(\App\Mail\EmailModelo::class, 1);
+
+        $this->putJson("/api/v1/usuarios/{$alvo->id}", ['nova_senha' => 'senha-do-gestor'])->assertOk();
+        $this->assertSame($hash, $alvo->fresh()->password);
+
+        $this->como('coordenador')->postJson("/api/v1/usuarios/{$this->u['admin_rede']->id}/link-senha")
+            ->assertStatus(404);
+    }
 }

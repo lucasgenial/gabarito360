@@ -53,7 +53,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Rotas protegidas
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'senha_trocada'])->group(function () {
         Route::prefix('auth')->group(function () {
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
@@ -172,6 +172,7 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}',       [UsuarioController::class, 'show'])->middleware('permissao:usuario.ver');
             Route::put('{id}',       [UsuarioController::class, 'update'])->middleware('permissao:usuario.gerir');
             Route::post('{id}/convite', [UsuarioController::class, 'reenviarConvite'])->middleware('permissao:usuario.gerir');
+            Route::post('{id}/link-senha', [UsuarioController::class, 'enviarLinkSenha'])->middleware(['permissao:usuario.gerir', 'throttle:5,1']);
             Route::post('{id}/toggle',[UsuarioController::class, 'toggle'])->middleware('permissao:usuario.gerir');
             // Permissões do usuário: padrão do perfil, extras e retiradas (docs/03 §1)
             Route::get('{id}/permissoes', [UsuarioController::class, 'permissoes'])->middleware('permissao:usuario.ver');

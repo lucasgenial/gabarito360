@@ -198,6 +198,25 @@ class UsuarioController extends Controller
         return ApiResponse::success(['mensagem' => 'Convite enviado.']);
     }
 
+    /** O gestor não define senha: a pessoa recebe o link e cria a própria. */
+    public function enviarLinkSenha(Request $request, int $id, ContaUsuario $conta): JsonResponse
+    {
+        $usuario = $this->escopoQuery($request)->where('id', $id)->first();
+        if (!$usuario) {
+            return ApiResponse::notFound('Usuário não encontrado.');
+        }
+        if (!Cadastro::podeGerirPerfil($request->user(), $usuario->perfil)) {
+            return ApiResponse::error('Você não pode alterar um usuário deste perfil.', [], 403);
+        }
+        if (!$usuario->ativo) {
+            return ApiResponse::error('Ative o usuário antes de enviar o link.', [], 422);
+        }
+
+        $conta->enviarLinkDeSenha($usuario);
+
+        return ApiResponse::success(['mensagem' => 'Link enviado.']);
+    }
+
     public function update(Request $request, int $id): JsonResponse
     {
         $gestor  = $request->user();
@@ -223,7 +242,6 @@ class UsuarioController extends Controller
             'registro_profissional'  => 'sometimes|string|max:50|nullable',
             'observacoes'            => 'sometimes|string|nullable',
             'escola_id'              => 'sometimes|integer|exists:escolas,id|nullable',
-            'nova_senha'             => 'sometimes|string|min:8|nullable',
             'forcar_troca_senha'     => 'sometimes|boolean',
         ]);
 
@@ -237,11 +255,6 @@ class UsuarioController extends Controller
             && ($erro = $this->validarPerfilEEscopo($gestor, $perfilFinal, $escolaFinal ? (int) $escolaFinal : null, null, $usuario->perfil === 'dir_nucleo'))) {
             return $erro;
         }
-
-        if (!empty($data['nova_senha'])) {
-            $data['password'] = Hash::make($data['nova_senha']);
-        }
-        unset($data['nova_senha']);
 
         $usuario->update($data);
 

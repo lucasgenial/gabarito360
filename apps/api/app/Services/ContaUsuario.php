@@ -137,4 +137,23 @@ class ContaUsuario
 
         return true;
     }
+
+    /** Link de nova senha, vale 60 minutos. Usado por "esqueci a senha" e pelo gestor. */
+    public function enviarLinkDeSenha(Usuario $usuario): void
+    {
+        $token = Str::random(64);
+
+        DB::table('password_reset_tokens')->upsert(
+            ['email' => $usuario->email, 'token' => Hash::make($token), 'created_at' => now(), 'expira_em' => null],
+            ['email'],
+            ['token', 'created_at', 'expira_em']
+        );
+
+        $link = config('emails.url_web') . '/redefinir-senha?' . http_build_query(['token' => $token, 'email' => $usuario->email]);
+
+        Mail::to($usuario->email)->queue(new EmailModelo('recuperar-senha', 'Redefina sua senha do Gabarito360', [
+            'nome' => $usuario->nome,
+            'link' => $link,
+        ]));
+    }
 }

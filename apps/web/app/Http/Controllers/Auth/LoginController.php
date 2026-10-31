@@ -46,6 +46,7 @@ class LoginController extends Controller
             'auth_email'   => $data['email'],
             'auth_titular' => $data['eh_titular'] ?? false,
             'auth_permissoes' => $data['permissoes'] ?? null,
+            'auth_trocar_senha' => $data['trocar_senha'] ?? false,
         ]);
 
         return redirect()->route('painel');

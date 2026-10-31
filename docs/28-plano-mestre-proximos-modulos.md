@@ -954,9 +954,9 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | E1 Domínio | concluído | Claude | |
 | E2 Motor de e-mail | concluído | Claude | |
 | E3 Recuperar senha | concluído | Claude | |
-| E4 Modelos | fase 1 em andamento | Claude | |
-| E5 Convite | em andamento | Claude | |
-| E6 Trocar e-mail | em andamento | Claude | |
+| E4 Modelos | fase 1 concluída; fase 2 pendente | Claude | |
+| E5 Convite | concluído no código; falta teste real | Claude | |
+| E6 Trocar e-mail | concluído no código; falta teste real | Claude | |
 | E7 Fale Conosco | concluído, falta Turnstile | Claude | |
 | E8 Páginas públicas | pendente | | |
 | L1 Publicar termos | pendente | | |
