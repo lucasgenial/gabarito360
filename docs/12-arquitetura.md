@@ -328,6 +328,10 @@ O WEB implementa o Padrão Digital de Governo (gov.br Design System).
 | Fase 8 | Suporte offline no Mobile                           | Sync API        |
 
 
+### T1 — Clientes, espaços e vínculos (proposta, 31/10/2026)
+
+O [documento T1](40-clientes-espacos-e-vinculos.md) propõe propriedade dos dados por espaço, vínculos e permissões contextuais, cópias independentes e migração gradual no MariaDB compartilhado. O [mapa de consultas](41-t1-mapa-de-consultas.md) registra os consumidores a adaptar. A proposta aguarda aprovação; não descreve isolamento já implementado nem autoriza T2 ou deploy.
+
 ### L6 — Galeria de avatares (31/10/2026, aprovação do responsável)
 
 A API persiste somente `alunos.avatar_id`, inteiro de 1 a 36 ou nulo para iniciais. Não aceita URLs nem upload de imagens de alunos. A web usa o catálogo estático versionado `images/avatares/estudantes-v1.png`, com mapeamento estável por linha/coluna, e componentes Blade compartilhados para exibição e seleção. O catálogo aprovado não deve ser reordenado: novos personagens devem preservar os IDs existentes. A migração é aditiva e não remove `foto_path` nem arquivos. Telas de turma e painéis recebem o mesmo identificador.
