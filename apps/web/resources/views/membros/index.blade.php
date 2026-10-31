@@ -2,10 +2,10 @@
 
 @section('tela', 'tela-equipe')
 
-@section('title', 'Membros da Equipe')
+@section('title', 'Equipe')
 
 @section('breadcrumb')
-<span>Início</span><span class="sep">/</span><span>Membros da Equipe</span>
+<span>Início</span><span class="sep">/</span><span>Equipe</span>
 @endsection
 
 @section('content')
@@ -29,7 +29,7 @@
   ];
 @endphp
 
-<x-pagina titulo="Membros da Equipe">
+<x-pagina titulo="Equipe">
   <x-slot:sub>Gerencie os usuários e perfis de acesso do sistema.</x-slot:sub>
     <a href="{{ route('membros.perfis') }}" class="btn btn-ghost">O que cada perfil pode</a>
     @pode('usuario.gerir')<a href="{{ route('membros.create') }}" class="btn btn-primary">+ Novo Membro</a>@endpode

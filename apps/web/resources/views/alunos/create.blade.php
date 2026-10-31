@@ -15,7 +15,7 @@
 
 @section('content')
 
-<x-pagina titulo="Cadastrar Novo Aluno">
+<x-pagina titulo="Cadastrar aluno">
   <x-slot:sub>Preencha os dados básicos para matricular o aluno no sistema.</x-slot:sub>
 </x-pagina>
 

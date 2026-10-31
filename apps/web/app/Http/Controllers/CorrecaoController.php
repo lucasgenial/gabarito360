@@ -101,13 +101,13 @@ class CorrecaoController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json(
-                $resp->failed() ? ['erro' => $resp->json('message') ?? 'Erro ao enviar cartão.'] : $resp->json('data'),
+                $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível enviar o cartão.'] : $resp->json('data'),
                 $resp->failed() ? 422 : 200
             );
         }
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Erro ao enviar cartão.');
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível enviar o cartão.');
         }
 
         return back()->with('sucesso', 'Cartão enviado para processamento.');
@@ -170,7 +170,7 @@ class CorrecaoController extends Controller
         $resp = $this->api->put("/v1/cartoes/{$cartaoId}/vincular-aluno", $request->only('aluno_id'));
 
         return response()->json(
-            $resp->failed() ? ['erro' => $resp->json('message') ?? 'Erro ao vincular aluno.'] : $resp->json('data'),
+            $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível vincular o aluno.'] : $resp->json('data'),
             $resp->failed() ? 422 : 200
         );
     }
@@ -218,7 +218,7 @@ class CorrecaoController extends Controller
         $resp = $this->api->post("/v1/cartoes/{$cartaoId}/resolver-ambiguidade", $request->only('numero_questao', 'alternativa'));
 
         if ($resp->failed()) {
-            return response()->json(['erro' => $resp->json('message') ?? 'Erro ao resolver ambiguidade.'], 422);
+            return response()->json(['erro' => $resp->json('message') ?? 'Não foi possível salvar a resposta.'], 422);
         }
 
         return response()->json($resp->json('data'));
@@ -235,14 +235,14 @@ class CorrecaoController extends Controller
 
         if ($request->expectsJson()) {
             return $resp->failed()
-                ? response()->json(['erro' => $resp->json('message') ?? 'Erro ao revisar leitura.'], 422)
+                ? response()->json(['erro' => $resp->json('message') ?? 'Não foi possível revisar a leitura.'], 422)
                 : response()->json($resp->json('data'));
         }
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Erro ao revisar leitura.');
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível revisar a leitura.');
         }
 
-        return back()->with('sucesso', 'Leitura revisada com sucesso.');
+        return back()->with('sucesso', 'Leitura revisada.');
     }
 }

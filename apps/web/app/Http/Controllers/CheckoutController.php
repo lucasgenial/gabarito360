@@ -38,7 +38,7 @@ class CheckoutController extends Controller
             return redirect()->away($resposta['data']['init_point']);
         }
 
-        return back()->withErrors(['checkout' => $resposta['message'] ?? 'Erro ao iniciar checkout.']);
+        return back()->withErrors(['checkout' => $resposta['message'] ?? 'Não foi possível iniciar o pagamento.']);
     }
 
     public function sucesso(Request $request): View

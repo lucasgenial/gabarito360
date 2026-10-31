@@ -59,12 +59,12 @@
             <div class="user-role">{{ \App\Support\Acesso::rotulo() }} · {{ session('auth_email') }}</div>
           </div>
           <div class="user-menu-links">
-            <a href="{{ route('perfil') }}">Meu Perfil</a>
+            <a href="{{ route('perfil') }}">Meu perfil</a>
             @pode('rede.configurar')
               <a href="{{ route('configuracoes.index') }}">Configurações</a>
             @endpode
             @if(session('auth_titular'))
-              <a href="{{ route('assinatura.index') }}">Assinatura e Cobrança</a>
+              <a href="{{ route('assinatura.index') }}">Assinatura e cobrança</a>
             @endif
             <hr>
             <form method="POST" action="{{ route('logout') }}">

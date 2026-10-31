@@ -2,7 +2,7 @@
 
 @section('tela', 'tela-provas')
 
-@section('title', 'Provas e Gabaritos')
+@section('title', 'Provas e gabaritos')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span><span>Provas</span>

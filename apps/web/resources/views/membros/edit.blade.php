@@ -2,12 +2,12 @@
 
 @section('tela', 'tela-membro')
 
-@section('title', 'Editar Membro')
+@section('title', 'Editar membro')
 
 @section('breadcrumb')
 <span>Início</span><span class="sep">/</span>
 <a href="{{ route('membros.index') }}">Equipe</a><span class="sep">/</span>
-<span>Editar Membro</span>
+<span>Editar membro</span>
 @endsection
 
 @section('content')
@@ -25,7 +25,7 @@
 @endphp
 
 <div style="margin-top:12px;">
-  <h1 class="page-title">Editar Membro</h1>
+  <h1 class="page-title">Editar membro</h1>
   <p class="page-sub">Atualize as informações do membro da equipe.</p>
   <a href="{{ route('membros.permissoes', $membro['id']) }}" class="btn btn-secondary btn-sm" style="margin-top:8px;">Permissões deste membro</a>
 </div>
@@ -67,10 +67,10 @@
   </aside>
 
   <div class="form-main">
-    {{-- Perfil e Acesso --}}
+    {{-- Perfil e acesso --}}
     <section class="section-card">
       <div class="section-head">
-        <h2>Perfil e Acesso</h2>
+        <h2>Perfil e acesso</h2>
         <p>Altere o perfil ou o status de acesso do membro.</p>
       </div>
       <div class="section-body">
@@ -101,10 +101,10 @@
       </div>
     </section>
 
-    {{-- Dados Pessoais --}}
+    {{-- Dados pessoais --}}
     <section class="section-card">
       <div class="section-head">
-        <h2>Dados Pessoais</h2>
+        <h2>Dados pessoais</h2>
         <p>Atualize nome, e-mail e dados cadastrais do membro.</p>
       </div>
       <div class="section-body">
@@ -138,10 +138,10 @@
       </div>
     </section>
 
-    {{-- Dados Profissionais --}}
+    {{-- Dados profissionais --}}
     <section class="section-card">
       <div class="section-head">
-        <h2>Dados Profissionais</h2>
+        <h2>Dados profissionais</h2>
         <p>Formação, vínculo institucional e datas relevantes.</p>
       </div>
       <div class="section-body">

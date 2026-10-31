@@ -46,7 +46,7 @@
         </div>
         <span style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
           <span class="badge {{ $badge }}">{{ $rotulo }}</span>
-          @if(!empty($p['correcao_fechada_em']))<span class="badge badge-warn" title="Correção fechada">🔒 fechada</span>@endif
+          @if(!empty($p['correcao_fechada_em']))<span class="badge badge-warn" title="Correção fechada">Fechada</span>@endif
         </span>
       </div>
 

@@ -95,7 +95,7 @@
 <div class="modal-backdrop" id="modal-editar" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-head">
-      <h2>Editar Aluno</h2>
+      <h2>Editar aluno</h2>
       <button type="button" class="modal-close" onclick="fecharModal()">&times;</button>
     </div>
     <form method="POST" action="{{ route('alunos.update', $aluno['id']) }}">

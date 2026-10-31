@@ -45,10 +45,10 @@ class GabaritoController extends Controller
         $resp = $this->api->post("/v1/provas/{$provaId}/gabarito", ['questoes' => $questoes]);
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Erro ao salvar gabarito.');
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível salvar o gabarito.');
         }
 
-        return back()->with('sucesso', 'Gabarito salvo com sucesso.');
+        return back()->with('sucesso', 'Gabarito salvo.');
     }
 
     public function publicar(int $provaId)
@@ -60,7 +60,7 @@ class GabaritoController extends Controller
         }
 
         return redirect()->route('provas.gabarito.show', $provaId)
-            ->with('sucesso', 'Gabarito publicado com sucesso.');
+            ->with('sucesso', 'Gabarito publicado.');
     }
 
     public function show(int $provaId): View

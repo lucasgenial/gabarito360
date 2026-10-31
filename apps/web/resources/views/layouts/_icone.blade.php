@@ -3,6 +3,7 @@
 @switch($nome)
   @case('casa')<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>@break
   @case('prova')<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>@break
+  @case('lanterna')<path d="M8 3h8l-1 5H9z"/><path d="M9 8l1 13h4l1-13"/><path d="M12 12v3"/>@break
   @case('camera')<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>@break
   @case('turma')<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.9.4 5 2.8 5 5.8"/>@break
   @case('aluno')<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>@break

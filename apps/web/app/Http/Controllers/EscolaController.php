@@ -106,7 +106,7 @@ class EscolaController extends Controller
 
         $resp = $this->api->post('/v1/escolas', $this->dados($request));
         if ($resp->failed()) {
-            return $this->voltarComErro($resp, 'Erro ao cadastrar a escola.');
+            return $this->voltarComErro($resp, 'Não foi possível cadastrar a escola.');
         }
 
         return redirect()->route('escolas.show', $resp->json('data.id'))->with('sucesso', 'Escola cadastrada.');
@@ -129,7 +129,7 @@ class EscolaController extends Controller
 
         $resp = $this->api->put("/v1/escolas/{$id}", $this->dados($request));
         if ($resp->failed()) {
-            return $this->voltarComErro($resp, 'Erro ao atualizar a escola.');
+            return $this->voltarComErro($resp, 'Não foi possível atualizar a escola.');
         }
 
         return redirect()->route('escolas.show', $id)->with('sucesso', 'Dados da escola atualizados.');
@@ -161,7 +161,7 @@ class EscolaController extends Controller
         }
 
         $status = $resp->json('data.ativo') ? 'ativada' : 'desativada';
-        return back()->with('sucesso', "Escola {$status} com sucesso.");
+        return back()->with('sucesso', "Escola {$status}.");
     }
 
     /** Logo da escola (para o cabeçalho dos relatórios impressos). */

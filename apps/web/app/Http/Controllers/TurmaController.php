@@ -45,10 +45,10 @@ class TurmaController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao criar turma.');
+                ->with('erro', $resp->json('message') ?? 'Não foi possível criar a turma.');
         }
 
-        return redirect()->route('turmas.index')->with('sucesso', 'Turma criada com sucesso.');
+        return redirect()->route('turmas.index')->with('sucesso', 'Turma criada.');
     }
 
     public function show(int $id): View
@@ -76,7 +76,7 @@ class TurmaController extends Controller
         $resp = $this->api->post("/v1/turmas/{$id}/professores", $request->only('usuario_id'));
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Erro ao vincular professor.');
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível vincular o professor.');
         }
 
         return back()->with('sucesso', 'Professor vinculado à turma.');
@@ -87,7 +87,7 @@ class TurmaController extends Controller
         $resp = $this->api->delete("/v1/turmas/{$id}/professores/{$usuarioId}");
 
         if ($resp->failed()) {
-            return back()->with('erro', 'Erro ao desvincular professor.');
+            return back()->with('erro', 'Não foi possível desvincular o professor.');
         }
 
         return back()->with('sucesso', 'Professor desvinculado da turma.');
@@ -107,7 +107,7 @@ class TurmaController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao atualizar turma.');
+                ->with('erro', $resp->json('message') ?? 'Não foi possível atualizar a turma.');
         }
 
         return redirect()->route('turmas.show', $id)->with('sucesso', 'Turma atualizada.');
@@ -122,6 +122,6 @@ class TurmaController extends Controller
         }
 
         $status = $resp->json('data.ativo') ? 'ativada' : 'desativada';
-        return back()->with('sucesso', "Turma {$status} com sucesso.");
+        return back()->with('sucesso', "Turma {$status}.");
     }
 }

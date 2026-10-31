@@ -202,21 +202,21 @@
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/><path d="M3.5 19c1.8-3 7.2-3 9 0M13.5 18.5c.9-1.8 3.7-2.6 5.8-1.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <b>Gerenciar Equipe</b>
+    <b>Equipe</b>
     <span>Atualizar funções, perfis e acessos dos profissionais.</span>
   </a>
   <a class="qa" href="{{ route('turmas.index') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 9h8M8 13h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <b>Ver Turmas</b>
+    <b>Turmas</b>
     <span>Acompanhar matrículas, provas e pendências por sala.</span>
   </a>
   <a class="qa" href="{{ route('relatorios.escola') }}">
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3v18M12 8v13M17 12v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <b>Relatório da Escola</b>
+    <b>Relatório da escola</b>
     <span>Emitir consolidado da unidade para conselho e supervisão.</span>
   </a>
 </div>

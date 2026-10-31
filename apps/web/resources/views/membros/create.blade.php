@@ -2,7 +2,7 @@
 
 @section('tela', 'tela-membro')
 
-@section('title', 'Cadastrar Novo Membro')
+@section('title', 'Cadastrar membro')
 
 @section('breadcrumb')
 <span>Início</span><span class="sep">/</span>
@@ -13,7 +13,7 @@
 @section('content')
 
 <div style="margin-top:12px;">
-  <h1 class="page-title">Cadastrar Novo Membro</h1>
+  <h1 class="page-title">Cadastrar membro</h1>
   <p class="page-sub">Preencha os dados para adicionar um novo integrante à equipe.</p>
   {{-- Passos do cadastro (o 4º abre depois de salvar) --}}
   <ol style="display:flex;gap:6px 14px;flex-wrap:wrap;list-style:none;padding:0;margin:12px 0 0;font-size:13px;">
@@ -51,10 +51,10 @@
   </aside>
 
   <div class="form-main">
-    {{-- Perfil e Acesso --}}
+    {{-- Perfil e acesso --}}
     <section class="section-card">
       <div class="section-head">
-        <h2>Perfil e Acesso</h2>
+        <h2>Perfil e acesso</h2>
         <p>Defina o tipo de usuário e situação inicial.</p>
       </div>
       <div class="section-body">
@@ -86,10 +86,10 @@
       </div>
     </section>
 
-    {{-- Dados Pessoais --}}
+    {{-- Dados pessoais --}}
     <section class="section-card">
       <div class="section-head">
-        <h2>Dados Pessoais</h2>
+        <h2>Dados pessoais</h2>
         <p>Informações básicas de identificação e contato.</p>
       </div>
       <div class="section-body">
@@ -116,10 +116,10 @@
       </div>
     </section>
 
-    {{-- Dados Profissionais --}}
+    {{-- Dados profissionais --}}
     <section class="section-card">
       <div class="section-head">
-        <h2>Dados Profissionais</h2>
+        <h2>Dados profissionais</h2>
         <p>Formação, vínculo institucional e datas relevantes.</p>
       </div>
       <div class="section-body">

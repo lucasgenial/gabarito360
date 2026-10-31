@@ -23,6 +23,6 @@ class AssinaturaController extends Controller
         $this->api->post('/v1/assinaturas/cancelar', []);
 
         return redirect()->route('assinatura.index')
-            ->with('sucesso', 'Assinatura cancelada com sucesso.');
+            ->with('sucesso', 'Assinatura cancelada.');
     }
 }

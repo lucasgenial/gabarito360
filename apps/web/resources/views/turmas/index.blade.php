@@ -113,7 +113,7 @@
 <div class="modal-backdrop" id="modal-criar" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-head">
-      <h2>Nova Turma</h2>
+      <h2>Nova turma</h2>
       <button type="button" class="modal-close" onclick="fecharModal('modal-criar')">&times;</button>
     </div>
     <form method="POST" action="{{ route('turmas.store') }}">
@@ -166,7 +166,7 @@
 <div class="modal-backdrop" id="modal-importar" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-head">
-      <h2>Importar Planilha</h2>
+      <h2>Importar planilha</h2>
       <button type="button" class="modal-close" onclick="fecharModal('modal-importar')">&times;</button>
     </div>
     <div class="modal-body" style="text-align:center;padding:40px 24px;">
