@@ -1,11 +1,11 @@
-// Mede as telas geradas por rodar.sh em 6 larguras: rolagem lateral, erro de JavaScript e excesso de imagens.
+// Mede de celular pequeno a 4K: largura útil, rolagem lateral, JavaScript e imagens.
 // Uso: node medir.mjs <pasta com os .html> <raiz do repositório>
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
 
 const [pasta, raiz] = process.argv.slice(2);
-const LARGURAS = [375, 768, 1024, 1440, 1920, 3840];
+const LARGURAS = [320, 360, 375, 414, 768, 1024, 1440, 1920, 2560, 3840];
 const LIMITE_IMAGENS = 12; // pedidos de foto ao abrir a tela; cada um ocupa dois processos PHP
 const BASE = 'http://auditoria.local';
 
@@ -46,6 +46,22 @@ for (const largura of LARGURAS) {
     await pagina.waitForTimeout(150);
     const sobra = await pagina.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     if (sobra > 1) falhas.push(`${arquivo} @${largura}: rolagem lateral de ${sobra}px`);
+    // Detecta formulários internos presos a uma coluna estreita em monitores grandes.
+    if (largura >= 1440) {
+      const estreitos = await pagina.evaluate(() => {
+        const seletores = ['.member-layout', '.tela-perfil .profile-layout', '.tela-config .section-card',
+          '.tela-prova-nova .editor-grid', '.tela-escola-form .esc-form', '.tela-permissoes form',
+          '.tela-aluno-novo .form-container', '.assinatura-wrap', '.checkout-wrap'];
+        return [...document.querySelectorAll(seletores.join(','))].filter(el => {
+          if (!el.getClientRects().length) return false;
+          const pai = el.parentElement;
+          const estilo = getComputedStyle(pai);
+          const util = pai.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight);
+          return util > 0 && el.offsetWidth < util * 0.98;
+        }).map(el => el.className || el.tagName);
+      });
+      estreitos.forEach(el => falhas.push(`${arquivo} @${largura}: ${el} não ocupa a largura útil`));
+    }
     if (imagens > LIMITE_IMAGENS) falhas.push(`${arquivo} @${largura}: ${imagens} fotos pedidas ao abrir`);
     erros.forEach((e) => falhas.push(`${arquivo} @${largura}: erro de JavaScript: ${e}`));
     await pagina.close();

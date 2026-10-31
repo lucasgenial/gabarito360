@@ -525,7 +525,7 @@ img { max-width: 100%; display: block; }
 .tela-perfis .perfil-bloco.ativo { display:block; }
 .tela-perfis .lista-perm li { padding:6px 0; border-bottom:1px solid var(--border-soft); font-size:14px; display:flex; justify-content:space-between; gap:8px; }
 .tela-perfis .duas-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.tela-escola-form .esc-form { display:flex; flex-direction:column; gap:16px; margin-top:16px; max-width:900px; }
+.tela-escola-form .esc-form { display:flex; flex-direction:column; gap:16px; margin-top:16px; }
 .tela-escola-form .sec { background:var(--surface); border:1px solid var(--border-soft); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); }
 .tela-escola-form .sec-head { padding:16px 20px 12px; border-bottom:1px solid var(--border-soft); }
 .tela-escola-form .sec-head h2 { font-size:16px; font-weight:700; }
@@ -595,13 +595,14 @@ img { max-width: 100%; display: block; }
 .tela-config .section-body { padding:24px; }
 .form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 18px; }
 .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 20px; }
-.member-layout, .tela-perfil .profile-layout, .tela-config .section-card, .tela-prova-nova .editor-grid { max-width: 1240px; }
-.tela-escola-form .esc-form, .tela-permissoes form { max-width: 960px; }
+/* Os painéis e formulários internos acompanham a largura útil da página. */
+.member-layout, .tela-perfil .profile-layout, .tela-config .section-card,
+.tela-prova-nova .editor-grid, .tela-escola-form .esc-form,
+.tela-permissoes form, .tela-aluno-novo .form-container { width: 100%; min-width: 0; }
 .tela-gabarito .q-grid, .tela-gabarito-editar .q-grid { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
 @media (max-width: 1023px) { .member-layout, .editor-grid, .tela-gabarito-editar .editor-grid, .tela-perfil .profile-layout { grid-template-columns: 1fr; } .identity-card, .sticky { position: static; } }
 @media (max-width: 767px) { .form-grid-2, .form-row, .tela-aluno-novo .form-grid { grid-template-columns: 1fr; } .action-bar { flex-direction: column; align-items: stretch; } .action-bar .btn { width: 100%; } }
 .stepper { flex-wrap: wrap; gap: 10px 18px; }
-.tela-aluno-novo .form-container { max-width: 1240px; }
 @media (max-width: 767px) {
   .tela-perfis .duas-col, .tela-escola-form .g2, .tela-escola-form .g3 { grid-template-columns: 1fr; }
   .tela-escola-form .censo-busca { flex-direction: column; }
