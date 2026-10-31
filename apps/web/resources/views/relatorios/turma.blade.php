@@ -10,7 +10,7 @@
 
 @php
   $fmt  = fn ($n) => $n === null ? '—' : number_format((float) $n, 1, ',', '.');
-  $cores = ['#1351b4', '#c27c0e', '#168821', '#7b3fa0', '#0e7c86', '#b7410e'];
+  $cores = ['#1d4f9e', '#c27c0e', '#168821', '#7b3fa0', '#0e7c86', '#b7410e'];
   // Turmas que aparecem no comparativo (esta primeiro)
   $turmasComp = collect($provas)->flatMap(fn ($p) => $p['por_turma'])->pluck('turma', 'turma_id')->sortKeys();
   $turmasComp = collect([$turma['id'] => $turma['nome']])->union($turmasComp);

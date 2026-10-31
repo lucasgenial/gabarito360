@@ -73,7 +73,7 @@
       <div class="stat-grid">
         <div><div class="v" id="v-lidos" style="color:var(--accent);">{{ $status['lidos'] }}</div><div class="l">Cartões lidos</div></div>
         <div><div class="v" id="v-pendentes" style="color:var(--muted)">{{ $status['pendentes'] }}</div><div class="l">Pendentes</div></div>
-        <div><div class="v" id="v-ambiguos" style="color:var(--warn-fg)">{{ $status['ambiguos'] }}</div><div class="l">Ambíguos</div></div>
+        <div><div class="v" id="v-ambiguos" style="color:var(--atencao)">{{ $status['ambiguos'] }}</div><div class="l">Ambíguos</div></div>
         <div><div class="v" id="v-total" style="color:var(--muted)">{{ $status['total'] }}</div><div class="l">Total de cartões</div></div>
       </div>
     </div>
@@ -256,7 +256,7 @@ function renderEstado(data) {
   var pct = data.total > 0 ? Math.round(data.lidos / data.total * 100) : 0;
   var donutEl = document.getElementById('donut');
   donutEl.dataset.donut = pct;
-  donutEl.dataset.color = pct >= 100 ? '#168821' : '#1351b4';
+  donutEl.dataset.color = pct >= 100 ? '#168821' : '#1d4f9e';
   if (typeof drawDonut === 'function') drawDonut(donutEl);
 
   document.getElementById('v-lidos').textContent = data.lidos;
