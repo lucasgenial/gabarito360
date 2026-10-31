@@ -14,6 +14,10 @@ class Autenticado
             return redirect()->route('login')->with('erro', 'Faça login para continuar.');
         }
 
+        if (session('auth_trocar_senha') && !$request->routeIs('trocar-senha', 'trocar-senha.store')) {
+            return redirect()->route('trocar-senha');
+        }
+
         return $next($request);
     }
 }

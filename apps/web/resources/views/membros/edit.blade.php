@@ -183,22 +183,15 @@
     <section class="section-card">
       <div class="section-head">
         <h2>Acesso ao Sistema</h2>
-        <p>Redefina a senha ou exija troca no próximo login.</p>
+        <p>A senha é sempre criada pela própria pessoa. Use os botões abaixo do formulário para enviar um link.</p>
       </div>
       <div class="section-body">
-        <div class="form-grid-2">
-          <div class="field">
-            <label for="nova_senha">Nova senha</label>
-            <input class="input" type="password" id="nova_senha" name="nova_senha" minlength="8" placeholder="Deixe em branco para manter a atual" />
-            @error('nova_senha')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
-          </div>
-          <div class="field">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:30px;">
+        <div class="field">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
               <input type="checkbox" name="forcar_troca_senha" value="1" {{ old('forcar_troca_senha', $membro['forcar_troca_senha'] ?? false) ? 'checked' : '' }} style="accent-color:var(--accent);" />
               Forçar troca de senha no próximo login
             </label>
           </div>
-        </div>
       </div>
     </section>
 
@@ -212,6 +205,11 @@
 <form method="POST" action="{{ route('membros.convite', $membro['id']) }}" style="margin-top:12px;">
   @csrf
   <button type="submit" class="btn btn-secondary">Reenviar convite por e-mail</button>
+</form>
+
+<form method="POST" action="{{ route('membros.link-senha', $membro['id']) }}" style="margin-top:12px;">
+  @csrf
+  <button type="submit" class="btn btn-secondary">Enviar link para criar nova senha</button>
 </form>
 
 <form method="POST" action="{{ route('membros.toggle', $membro['id']) }}" style="margin-top:12px;">

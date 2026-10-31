@@ -60,6 +60,8 @@ Route::middleware('autenticado')->group(function () {
 
     // Meu perfil (MP-024)
     Route::view('/referencia-visual', 'referencia.index')->name('referencia');
+    Route::get('/trocar-senha',  [PerfilController::class, 'formTrocarSenha'])->name('trocar-senha');
+    Route::put('/trocar-senha',  [PerfilController::class, 'trocarSenha'])->name('trocar-senha.store');
     Route::get('/perfil',        [PerfilController::class, 'show'])->name('perfil');
     Route::put('/perfil',        [PerfilController::class, 'update'])->name('perfil.update');
     Route::put('/perfil/senha',  [PerfilController::class, 'senha'])->name('perfil.senha');
@@ -80,6 +82,7 @@ Route::middleware('autenticado')->group(function () {
     Route::put('/membros/{id}',        [MembroController::class, 'update'])->name('membros.update');
     Route::post('/membros/{id}/toggle',[MembroController::class, 'toggle'])->name('membros.toggle');
     Route::post('/membros/{id}/convite',[MembroController::class, 'convite'])->name('membros.convite');
+    Route::post('/membros/{id}/link-senha',[MembroController::class, 'linkSenha'])->name('membros.link-senha');
 
     // Escolas (MP-015)
     Route::get('/escolas',             [EscolaController::class, 'index'])->name('escolas.index');
