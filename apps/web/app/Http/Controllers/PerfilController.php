@@ -50,7 +50,7 @@ class PerfilController extends Controller
         ]);
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Não foi possível alterar senha.');
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível alterar a senha.');
         }
 
         return back()->with('sucesso', 'Senha alterada.');

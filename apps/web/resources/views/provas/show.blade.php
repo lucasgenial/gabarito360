@@ -148,7 +148,7 @@
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">2</span> <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" style="color:var(--accent);">Configure o gabarito</a></div>
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">3</span> Publique o gabarito</div>
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">4</span> Aplique a prova nas turmas</div>
-          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">5</span> Lance os cartões-resposta (OMR)</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">5</span> Lance os cartões-resposta</div>
         @else
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">1</span> Prova publicada</div>
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">2</span> Aplique nas turmas em {{ $prova['data_aplicacao'] ? \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : 'data a definir' }}</div>
