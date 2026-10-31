@@ -9,6 +9,8 @@ use Throwable;
 /** Lista positiva: SQL, corpos HTTP/SMTP, objetos e argumentos nunca chegam ao arquivo. */
 final class ProtegerDados
 {
+    private static ?\WeakMap $handlers = null;
+
     private const MENSAGENS = [
         'MP Webhook: assinatura inválida', 'MP Webhook recebido',
         'OMR nativo: leitura falhou', 'Imagens do cartão não geradas',
@@ -18,8 +20,10 @@ final class ProtegerDados
     public function __invoke(Logger $logger): void
     {
         // No handler: roda depois da interpolação dos placeholders e do contexto global.
+        self::$handlers ??= new \WeakMap;
         foreach ($logger->getLogger()->getHandlers() as $handler) {
-            if (method_exists($handler, 'pushProcessor')) {
+            if (method_exists($handler, 'pushProcessor') && !isset(self::$handlers[$handler])) {
+                self::$handlers[$handler] = true;
                 $handler->pushProcessor(fn (LogRecord $record) => self::registro($record));
             }
         }
