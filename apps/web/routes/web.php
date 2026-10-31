@@ -34,6 +34,10 @@ Route::get('/fale-conosco',  [LeadController::class, 'index'])->name('leads.inde
 Route::post('/fale-conosco', [LeadController::class, 'store'])->middleware('throttle:5,1')->name('leads.store');
 Route::get('/fale-conosco/obrigado', [LeadController::class, 'sucesso'])->name('leads.sucesso');
 
+// Contratação assistida: URLs antigas do checkout levam ao Fale Conosco.
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
 // Retorno de checkout do Mercado Pago (público, sem auth)
 Route::get('/checkout/sucesso',  [CheckoutController::class, 'sucesso'])->name('checkout.sucesso');
 Route::get('/checkout/falha',    [CheckoutController::class, 'falha'])->name('checkout.falha');
@@ -163,8 +167,5 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/assinatura',           [AssinaturaController::class, 'index'])->name('assinatura.index');
     Route::post('/assinatura/cancelar', [AssinaturaController::class, 'cancelar'])->name('assinatura.cancelar');
 
-    // Checkout (MP-027) — requer auth para identificar o titular
-    Route::get('/checkout',  [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 });
 

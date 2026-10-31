@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Mail\EmailModelo;
 use App\Models\Lead;
-use App\Models\Plano;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -31,17 +30,6 @@ class LeadController extends Controller
             $turnstile->validar($validated['cf-turnstile-response']);
         }
         unset($validated['cf-turnstile-response']);
-
-        if (!empty($validated['plano_id'])) {
-            $plano = Plano::find($validated['plano_id']);
-            if ($plano && $plano->isAutoatendimento()) {
-                return ApiResponse::error(
-                    'Este plano possui checkout automático. Use o fluxo de assinatura diretamente.',
-                    [],
-                    422
-                );
-            }
-        }
 
         $lead = Lead::create($validated);
 

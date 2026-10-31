@@ -5,85 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Assinatura;
-use App\Models\Plano;
 use App\Services\MercadoPagoService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class AssinaturaController extends Controller
 {
-    public function __construct(private MercadoPagoService $mp) {}
-
-    /**
-     * Inicia o checkout de uma assinatura (apenas planos autoatendimento).
-     * Retorna a URL de pagamento do Mercado Pago.
-     */
+    /** Contratação assistida: não cria assinatura nem chama o gateway. */
     public function checkout(Request $request)
     {
-        $validated = $request->validate([
-            'plano_id'  => 'required|exists:planos,id',
-            'licencas'  => 'integer|min:1|max:10',
-        ]);
-
-        $plano   = Plano::findOrFail($validated['plano_id']);
-        $usuario = $request->user();
-        $licencas = $validated['licencas'] ?? 1;
-
-        if (!$plano->isAutoatendimento()) {
-            return ApiResponse::error('Este plano requer contato comercial. Use o formulário Fale Conosco.', [], 422);
-        }
-
-        if ($plano->publico === 'individual' && $licencas > 1) {
-            return ApiResponse::error('Planos individuais suportam apenas 1 licença.', [], 422);
-        }
-
-        if ($plano->licencas_max && $licencas > $plano->licencas_max) {
-            return ApiResponse::error(
-                "Este plano suporta no máximo {$plano->licencas_max} licenças. Para mais licenças, use o formulário Fale Conosco.",
-                [],
-                422
-            );
-        }
-
-        $assinaturaExistente = Assinatura::where('titular_id', $usuario->id)
-            ->whereIn('status', ['trial', 'ativa'])
-            ->first();
-
-        if ($assinaturaExistente) {
-            return ApiResponse::error('Você já possui uma assinatura ativa.', [], 422);
-        }
-
-        $trialDays = config('mercadopago.trial_days', 14);
-        $trialTerminaEm = Carbon::now()->addDays($trialDays);
-
-        $assinatura = Assinatura::create([
-            'plano_id'            => $plano->id,
-            'titular_id'          => $usuario->id,
-            'licencas_contratadas' => $licencas,
-            'status'              => 'trial',
-            'trial_termina_em'    => $trialTerminaEm,
-        ]);
-
-        try {
-            if ($plano->periodicidade === 'mensal') {
-                $dados = $this->mp->criarAssinaturaRecorrente($plano, $usuario, $licencas);
-                $assinatura->update(['gateway_subscription_id' => $dados['subscription_id']]);
-            } else {
-                $dados = $this->mp->criarPreferenciaCheckout($plano, $usuario, $licencas);
-                $assinatura->update(['gateway_subscription_id' => $dados['preference_id']]);
-            }
-
-            return ApiResponse::success([
-                'assinatura_id' => $assinatura->id,
-                'init_point'    => config('mercadopago.sandbox')
-                    ? ($dados['sandbox_init_point'] ?? $dados['init_point'])
-                    : $dados['init_point'],
-                'trial_termina_em' => $trialTerminaEm->toIso8601String(),
-            ], null, 201);
-        } catch (\Throwable $e) {
-            $assinatura->delete();
-            return ApiResponse::error('Erro ao criar checkout no Mercado Pago. Tente novamente.', [], 502);
-        }
+        return ApiResponse::error('Para contratar, fale com nossa equipe pelo Fale Conosco.', [
+            'contato_url' => rtrim(config('emails.url_web'), '/') . '/fale-conosco',
+        ], 409);
     }
 
     /**
@@ -106,14 +38,14 @@ class AssinaturaController extends Controller
     /**
      * Cancela a assinatura do titular logado.
      */
-    public function cancelar(Request $request)
+    public function cancelar(Request $request, MercadoPagoService $mp)
     {
         $assinatura = Assinatura::where('titular_id', $request->user()->id)
             ->whereIn('status', ['trial', 'ativa'])
             ->firstOrFail();
 
         if ($assinatura->gateway_subscription_id && $assinatura->plano->periodicidade === 'mensal') {
-            $this->mp->cancelarAssinatura($assinatura->gateway_subscription_id);
+            $mp->cancelarAssinatura($assinatura->gateway_subscription_id);
         }
 
         $assinatura->update(['status' => 'cancelada']);

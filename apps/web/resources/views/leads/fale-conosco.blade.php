@@ -1,5 +1,6 @@
 @extends('layouts.public')
 @section('title', 'Fale conosco — Gabarito360')
+@section('description', 'Fale com a equipe do Gabarito360 para conhecer o sistema, conversar sobre contratação ou pedir suporte.')
 
 @section('content')
 <div class="fale-conosco">
@@ -63,15 +64,16 @@
 
     <p class="fale-aviso">Usamos seus dados só para responder a este contato. Não escreva dados de alunos nesta mensagem.</p>
     @if(config('services.turnstile.enabled'))
-      <div class="field">
+      <section class="seguranca-contato" aria-labelledby="seguranca-titulo">
+        <h2 id="seguranca-titulo">Verificação de segurança</h2>
         @if(config('services.turnstile.site_key'))
-          <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-action="fale-conosco" data-language="pt-br" data-size="compact"></div>
+          <div class="cf-turnstile seguranca-widget" data-sitekey="{{ config('services.turnstile.site_key') }}" data-action="fale-conosco"></div>
           <noscript><p class="field-error">Ative o JavaScript para confirmar a verificação de segurança.</p></noscript>
         @else
           <p class="field-error">Verificação de segurança indisponível. Tente novamente mais tarde.</p>
         @endif
         @error('cf-turnstile-response')<span class="field-error">Confirme a verificação de segurança e tente novamente.</span>@enderror
-      </div>
+      </section>
     @endif
     <button type="submit" class="btn btn-primary">Enviar mensagem</button>
   </form>
@@ -80,6 +82,7 @@
 
 @if(config('services.turnstile.enabled') && config('services.turnstile.site_key'))
   @push('scripts')
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="{{ asset('js/turnstile.js') }}?v={{ @filemtime(public_path('js/turnstile.js')) }}"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=g360Turnstile" async defer></script>
   @endpush
 @endif
