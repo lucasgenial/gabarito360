@@ -59,11 +59,7 @@
     @include('relatorios._distribuicao-notas', ['alunos' => $alunos, 'notaMaxima' => $prova['nota_maxima']])
   </div>
   <div class="card card-pad">
-    <h3 style="font-size:16px;margin-bottom:6px;text-align:center;">Aproveitamento médio</h3>
-    <div style="display:flex;justify-content:center;margin-top:8px;">
-      <div id="donut-media"></div>
-    </div>
-    <p style="text-align:center;color:var(--muted);font-size:14px;margin-top:8px;">Nota média {{ number_format($kpis['media'], 1, ',', '.') }} de {{ number_format($prova['nota_maxima'], 1, ',', '.') }} · meta da rede {{ number_format($kpis['meta_rede'], 1, ',', '.') }}</p>
+    @include('relatorios._media-meta', ['titulo' => 'Média comparada à meta', 'media' => $kpis['media'], 'notaMaxima' => $prova['nota_maxima'], 'meta' => $kpis['meta_rede']])
   </div>
 </div>
 
@@ -105,11 +101,3 @@
 <div style="height:48px"></div>
 @endsection
 
-@push('scripts')
-<script>
-var donut = document.getElementById('donut-media');
-donut.dataset.donut = {{ (int) round($kpis['media'] / max($prova['nota_maxima'], 0.1) * 100) }};
-donut.dataset.color = '{{ $kpis['media'] >= $kpis['meta_rede'] ? '#168821' : '#1d4f9e' }}';
-if (typeof drawDonut === 'function') drawDonut(donut);
-</script>
-@endpush

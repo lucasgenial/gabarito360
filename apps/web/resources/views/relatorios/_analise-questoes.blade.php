@@ -9,34 +9,28 @@
   $comDados = collect($questoes)->filter(fn ($q) => $q['pct'] !== null && !$q['anulada']);
   $dificeis = $comDados->sortBy('pct')->take(5)->values();
   $faceis   = $comDados->sortByDesc('pct')->take(5)->values();
-  $nivel    = fn ($p) => $p === null ? ['#bbb', '—'] : ($p >= 70 ? ['#168821', 'fácil'] : ($p >= 40 ? ['#c27c0e', 'média'] : ['#e52207', 'difícil']));
+  $nivel    = fn ($p) => $p === null ? ['--muted', '—'] : ($p >= 70 ? ['--success', 'fácil'] : ($p >= 40 ? ['--serie-3', 'média'] : ['--danger', 'difícil']));
   $n        = count($questoes);
   $larg     = max(560, $n * 16 + 40);
+  $listaQ   = collect($questoes);
 @endphp
 
 <div class="card card-pad" style="margin-top:20px;">
   <div class="row-between" style="flex-wrap:wrap;">
     <h3 style="font-size:17px;">Análise por questão</h3>
-    <span style="font-size:12px;color:var(--muted);">% de alunos que acertaram · <span style="color:var(--success);">■</span> fácil (≥70%) <span style="color:#c27c0e;">■</span> média <span style="color:var(--danger);">■</span> difícil (&lt;40%)</span>
+    <span style="font-size:12px;color:var(--muted);">% de alunos que acertaram · <span style="color:var(--success);">■</span> fácil (≥70%) <span style="color:var(--serie-3);">■</span> média <span style="color:var(--danger);">■</span> difícil (&lt;40%)</span>
   </div>
 
   @if($comDados->isEmpty())
     <p class="field-help" style="margin-top:8px;">A análise aparece quando houver cartões lidos.</p>
   @else
-    <div style="overflow-x:auto;margin-top:10px;">
-      <svg viewBox="0 0 {{ $larg }} 170" width="100%" style="min-width:{{ min($larg, 720) }}px;" role="img" aria-label="Percentual de acerto por questão">
-        @foreach([0, 50, 100] as $g)
-          <line x1="28" x2="{{ $larg - 6 }}" y1="{{ 130 - $g * 1.1 }}" y2="{{ 130 - $g * 1.1 }}" stroke="#ddd" stroke-dasharray="{{ $g ? '3 3' : '' }}"></line>
-          <text x="24" y="{{ 133 - $g * 1.1 }}" text-anchor="end" font-size="9" fill="#888">{{ $g }}%</text>
-        @endforeach
-        @foreach($questoes as $i => $q)
-          @php [$cor] = $nivel($q['anulada'] ? null : $q['pct']); $h = ($q['pct'] ?? 0) * 1.1; $x = 32 + $i * (($larg - 40) / max($n, 1)); $w = max(6, ($larg - 40) / max($n, 1) - 4); @endphp
-          <rect x="{{ round($x, 1) }}" y="{{ 130 - $h }}" width="{{ round($w, 1) }}" height="{{ max($h, 1) }}" rx="2" fill="{{ $cor }}">
-            <title>Questão {{ $q['numero'] }}: {{ $q['anulada'] ? 'anulada' : ($q['pct'] ?? 0) . '% de acerto (' . $q['acertos'] . '/' . $q['total'] . ')' }}</title>
-          </rect>
-          <text x="{{ round($x + $w / 2, 1) }}" y="145" text-anchor="middle" font-size="8" fill="#666">{{ $q['numero'] }}</text>
-        @endforeach
-      </svg>
+    <div class="grafico-rolagem">
+      <div class="grafico-largo" style="min-width:{{ min($larg, 720) }}px;">
+        <x-grafico descricao="Percentual de alunos que acertaram cada questão" :altura="200"
+          :dados="['categorias' => $listaQ->pluck('numero'), 'formato' => 'pct', 'maximo' => 100, 'intervalo' => 0, 'prefixo' => 'Questão ',
+                   'series' => [['nome' => 'Acerto', 'valores' => $listaQ->map(fn ($q) => $q['anulada'] ? null : $q['pct'])->values(),
+                                 'cores' => $listaQ->map(fn ($q) => $nivel($q['anulada'] ? null : $q['pct'])[0])->values()]]]" />
+      </div>
     </div>
 
     <div class="aq-listas">
