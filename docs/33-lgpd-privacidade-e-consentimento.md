@@ -134,7 +134,7 @@ Requisitos obrigatórios do sistema, cobrados pelos pacotes da fase L do plano m
 | RL15 | Canal do encarregado publicado no site |
 | RL16 | Cookies necessários por padrão e escolha para os opcionais |
 | RL18 | Professor autônomo só registra dados mínimos de alunos; portal dos pais só para escolas e perfis superiores |
-| RL19 | Sem foto ou vídeo de aluno |
+| RL19 | Sem foto ou vídeo de aluno. O aluno é representado por avatar, sem imagem enviada |
 | RL17 | Revisão humana de leituras automáticas, já atendida pela tela de revisão |
 
 ## 7. ECA Digital

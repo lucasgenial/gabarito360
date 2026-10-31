@@ -155,7 +155,7 @@ Partes da escala que outros módulos exigem já entram na fase 0.
 - Dados de alunos só seguem com o professor se o contrato da escola permitir. Sem a cláusula, ele leva provas, materiais e notas anonimizadas.
 - Professor autônomo tem cadastro mínimo de alunos: nome, turma e identificação simples, sem CPF, nascimento ou responsável. Ele não tem portal dos pais.
 - Cadastro completo e portal dos pais são exclusivos de escolas e perfis superiores.
-- O sistema é pedagógico: provas, gabaritos e respostas. Não guarda foto de aluno nem vídeo. A foto do cartão-resposta é mantida porque é o documento da correção.
+- O sistema é pedagógico: provas, gabaritos e respostas. Não guarda foto de aluno nem vídeo; o aluno é representado por avatar. A foto do cartão-resposta é mantida porque é o documento da correção.
 - Professor autônomo é um perfil próprio. Perfis de escola e de núcleo também são distintos.
 - Cliente pode ser professor, escola, núcleo, rede, secretaria ou governo.
 - Cliente presenteado exibe a divulgação do Gabarito360 em impressões e PDFs. Cliente pagante exibe apenas "Feito no gabarito360.com.br".
@@ -396,16 +396,19 @@ Texto-base: `docs/33-lgpd-privacidade-e-consentimento.md`.
   4. Fazer teste de restauração com chaves.
 - **Pronto quando:** RL8 e RL9 foram atendidos.
 
-#### L6. Retirar foto de aluno
+#### L6. Trocar foto de aluno por avatar
 
 - **Objetivo:** cumprir a minimização de dados. O sistema não precisa de foto de aluno.
 - **Dependências:** B1.
-- **Arquivos:** `AlunoController`, telas de aluno, migração de `alunos.foto_path`.
+- **Arquivos:** `AlunoController`, `Aluno`, telas de aluno, novo `components/avatar.blade.php`, migração de `alunos.foto_path`.
 - **Passos:**
-  1. Retirar o campo das telas e da API.
-  2. Verificar se existe arquivo em `storage/app/public/alunos`.
-  3. Com aprovação, apagar os arquivos e remover a coluna.
-- **Pronto quando:** nenhuma tela ou API aceita foto de aluno.
+  1. Retirar o envio de foto das telas e da API.
+  2. Criar avatar com as iniciais do nome, com cor definida pelo id do aluno.
+  3. Usar o avatar em todas as telas que mostram aluno.
+  4. Oferecer, se desejado, um conjunto fixo de ícones. Nunca aceitar imagem enviada.
+  5. Levantar as fotos existentes no banco e no armazenamento.
+  6. Com aprovação do responsável, depois do backup, apagar os arquivos e remover a coluna.
+- **Pronto quando:** nenhuma tela ou API aceita foto de aluno, e todas mostram o avatar.
 
 #### L4. Pedidos dos titulares
 
@@ -972,7 +975,7 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | L3 Proteção | pendente | | |
 | L4 Titulares | pendente | | |
 | L5 Incidentes | pendente | | |
-| L6 Retirar foto de aluno | pendente | | |
+| L6 Trocar foto por avatar | pendente | | |
 | T1 Modelo de dados | pendente | | |
 | T2 Clientes e espaços | pendente | | |
 | V1 Vínculos | pendente | | |
