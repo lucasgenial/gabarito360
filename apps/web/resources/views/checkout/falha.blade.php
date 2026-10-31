@@ -3,7 +3,6 @@
 
 @section('content')
 <div style="max-width:520px;margin:4rem auto;text-align:center;padding:2rem">
-  <div style="font-size:3rem;margin-bottom:1rem">❌</div>
   <h1 style="font-size:1.75rem;font-weight:800;color:var(--color-danger-03);margin-bottom:.75rem">Pagamento não concluído</h1>
   <p style="color:var(--color-secondary-07);margin-bottom:2rem">
     Houve um problema ao processar seu pagamento. Nenhum valor foi cobrado.

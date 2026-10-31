@@ -62,7 +62,7 @@ class ProvaController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao criar prova.');
+                ->with('erro', $resp->json('message') ?? 'Não foi possível criar a prova.');
         }
 
         $id = $resp->json('data.id');
@@ -101,7 +101,7 @@ class ProvaController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
-                ->with('erro', $resp->json('message') ?? 'Erro ao atualizar prova.');
+                ->with('erro', $resp->json('message') ?? 'Não foi possível atualizar a prova.');
         }
 
         return redirect()->route('provas.show', $id)->with('sucesso', 'Prova atualizada.');
@@ -115,7 +115,7 @@ class ProvaController extends Controller
             return back()->with('erro', $resp->json('message') ?? 'Não foi possível publicar a prova.');
         }
 
-        return back()->with('sucesso', 'Prova publicada com sucesso.');
+        return back()->with('sucesso', 'Prova publicada.');
     }
 
     public function destroy(int $id)

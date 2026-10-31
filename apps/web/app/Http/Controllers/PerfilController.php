@@ -28,12 +28,12 @@ class PerfilController extends Controller
         $resp = $this->api->put('/v1/auth/me', ['nome' => $request->input('nome')]);
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Erro ao atualizar dados.');
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível atualizar os dados.');
         }
 
         session(['auth_nome' => $request->input('nome')]);
 
-        return back()->with('sucesso', 'Dados atualizados com sucesso.');
+        return back()->with('sucesso', 'Dados atualizados.');
     }
 
     public function senha(Request $request)
@@ -50,9 +50,9 @@ class PerfilController extends Controller
         ]);
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Erro ao alterar senha.');
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível alterar senha.');
         }
 
-        return back()->with('sucesso', 'Senha alterada com sucesso.');
+        return back()->with('sucesso', 'Senha alterada.');
     }
 }

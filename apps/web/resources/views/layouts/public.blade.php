@@ -19,7 +19,7 @@
     </a>
     <nav class="app-nav">
       <a href="{{ route('planos.index') }}" @if(request()->routeIs('planos.index')) class="active" @endif>Planos</a>
-      <a href="{{ route('leads.index') }}" @if(request()->routeIs('leads.*')) class="active" @endif>Fale Conosco</a>
+      <a href="{{ route('leads.index') }}" @if(request()->routeIs('leads.*')) class="active" @endif>Fale conosco</a>
     </nav>
     <div class="header-right">
       <a href="{{ route('login') }}" class="btn btn-outline" style="margin-right:.5rem">Entrar</a>
@@ -42,7 +42,7 @@
 </div>
 
 <footer style="text-align:center;padding:2rem;color:var(--color-secondary-06);font-size:.875rem;margin-top:3rem;border-top:1px solid var(--color-secondary-03)">
-  © {{ date('Y') }} Gabarito360 · <a href="{{ route('leads.index') }}">Fale Conosco</a>
+  © {{ date('Y') }} Gabarito360 · <a href="{{ route('leads.index') }}">Fale conosco</a>
 </footer>
 
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>

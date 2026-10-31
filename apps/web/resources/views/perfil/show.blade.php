@@ -2,11 +2,11 @@
 
 @section('tela', 'tela-perfil')
 
-@section('title', 'Meu Perfil')
+@section('title', 'Meu perfil')
 
 @section('breadcrumb')
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
-<span>Meu Perfil</span>
+<span>Meu perfil</span>
 @endsection
 
 @section('content')
@@ -23,7 +23,7 @@
   $iniciais = strtoupper(implode('', array_map(fn($p) => $p[0], array_slice(explode(' ', $usuario['nome']), 0, 2))));
 @endphp
 
-<x-pagina titulo="Meu Perfil">
+<x-pagina titulo="Meu perfil">
   <x-slot:sub>Gerencie seus dados pessoais e sua senha de acesso</x-slot:sub>
 </x-pagina>
 
@@ -48,7 +48,7 @@
     <div class="section-card">
       <div class="section-head">
         <div>
-          <h2>Dados Pessoais</h2>
+          <h2>Dados pessoais</h2>
           <p>Informações exibidas em provas, relatórios e no cabeçalho do sistema</p>
         </div>
       </div>
@@ -84,7 +84,7 @@
     <div class="section-card">
       <div class="section-head">
         <div>
-          <h2>Alterar Senha</h2>
+          <h2>Alterar senha</h2>
           <p>Use uma senha forte com letras, números e símbolos</p>
         </div>
       </div>

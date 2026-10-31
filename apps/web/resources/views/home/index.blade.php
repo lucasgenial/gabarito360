@@ -135,12 +135,12 @@
           <ul class="plan-features">
             @if($plano['publico'] === 'individual')
               <li>1 escola · até 20 turmas</li>
-              <li>OMR por câmera</li>
+              <li>Leitura pela câmera</li>
               <li>Relatórios completos</li>
               <li>Suporte por e-mail</li>
             @else
               <li>Até 5 escolas · 100 turmas</li>
-              <li>OMR por câmera</li>
+              <li>Leitura pela câmera</li>
               <li>Relatórios e dashboards</li>
               <li>Gestão de equipe</li>
             @endif
@@ -157,7 +157,7 @@
         <div class="plan-desc">Para redes acima de 10 licenças e secretarias de educação</div>
         <ul class="plan-features">
           <li>Várias escolas e núcleos</li>
-          <li>OMR por câmera</li>
+          <li>Leitura pela câmera</li>
           <li>Relatórios consolidados</li>
         </ul>
         <div class="plan-cta"><a href="{{ route('leads.index') }}">Falar com a gente</a></div>
@@ -171,7 +171,7 @@
     <strong>Gabarito360</strong>
     <div class="lp-links">
       <a href="{{ route('planos.index') }}">Planos</a>
-      <a href="{{ route('leads.index') }}">Fale Conosco</a>
+      <a href="{{ route('leads.index') }}">Fale conosco</a>
       <a href="{{ route('login') }}">Entrar</a>
     </div>
     <span>© {{ date('Y') }} Gabarito360</span>

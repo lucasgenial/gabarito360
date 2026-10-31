@@ -262,7 +262,7 @@
     <div class="qa-ico">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="10" r="2" stroke="currentColor" stroke-width="2"/><path d="M4 18c1.6-2.6 7.4-2.6 9 0M14 18c.8-1.5 3.2-2.1 5-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
-    <b>Gerenciar Usuários</b>
+    <b>Usuários</b>
     <span>Revisar permissões, perfis institucionais e acessos.</span>
   </a>
   <a class="qa" href="{{ route('relatorios.rede') }}">

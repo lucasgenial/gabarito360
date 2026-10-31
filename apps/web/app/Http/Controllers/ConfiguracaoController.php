@@ -15,7 +15,7 @@ class ConfiguracaoController extends Controller
         $resp = $this->api->get('/v1/configuracoes');
 
         if ($resp->failed()) {
-            abort($resp->status() === 403 ? 403 : 422, $resp->json('message') ?? 'Erro ao carregar configurações.');
+            abort($resp->status() === 403 ? 403 : 422, $resp->json('message') ?? 'Não foi possível carregar as configurações.');
         }
 
         return view('configuracoes.index', ['config' => $resp->json('data')]);
@@ -32,9 +32,9 @@ class ConfiguracaoController extends Controller
         $resp = $this->api->put('/v1/configuracoes', $request->only('meta_media', 'meta_minima', 'limiar_seges_min'));
 
         if ($resp->failed()) {
-            return back()->withInput()->with('erro', $resp->json('message') ?? 'Erro ao salvar configurações.');
+            return back()->withInput()->with('erro', $resp->json('message') ?? 'Não foi possível salvar as configurações.');
         }
 
-        return back()->with('sucesso', 'Configurações atualizadas com sucesso.');
+        return back()->with('sucesso', 'Configurações atualizadas.');
     }
 }

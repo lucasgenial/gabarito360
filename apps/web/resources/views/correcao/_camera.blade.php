@@ -10,7 +10,7 @@
 
 <div class="card card-pad" id="camera" style="margin-top:16px;scroll-margin-top:90px;">
   <div style="display:flex;flex-wrap:wrap;gap:10px;">
-    <button type="button" id="cam-abrir" class="btn btn-primary" style="flex:1 1 220px;justify-content:center;padding:16px;font-size:16px;">📷 Fotografar cartões</button>
+    <button type="button" id="cam-abrir" class="btn btn-primary" style="flex:1 1 220px;justify-content:center;padding:16px;font-size:16px;"><x-icone nome="camera" /> Fotografar cartões</button>
     <input id="cam-input" type="file" accept="image/*" capture="environment" style="display:none;">
     <label for="lote-input" class="btn btn-secondary" style="flex:1 1 220px;justify-content:center;padding:16px;cursor:pointer;">Enviar fotos da galeria</label>
     <input id="lote-input" type="file" accept="image/*" multiple style="display:none;">
@@ -29,7 +29,7 @@
   </div>
   <div id="cam-ultimo" class="cam-ultimo"></div>
   <div class="cam-base">
-    <button type="button" class="cam-btn-redondo" id="cam-luz" aria-label="Lanterna" style="visibility:hidden;">🔦</button>
+    <button type="button" class="cam-btn-redondo" id="cam-luz" aria-label="Lanterna" style="visibility:hidden;"><x-icone nome="lanterna" /></button>
     <button type="button" class="cam-disparo" id="cam-disparo" aria-label="Tirar foto"></button>
     <label class="cam-auto"><input type="checkbox" id="cam-auto-chk" checked style="width:20px;height:20px;"> Auto</label>
   </div>
@@ -104,20 +104,20 @@ function enviarCartao(file) {
     return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: false, j: { erro: erroHttp(r.status) } }; });
   }).then(function (res) {
       var d = res.j;
-      if (!res.ok) { li.innerHTML = '⛔ <b>Não corrigido.</b> ' + esc(d.erro || 'falha no envio'); return li.innerHTML; }
+      if (!res.ok) { li.innerHTML = '<b>Não corrigido.</b> ' + esc(d.erro || 'falha no envio'); return li.innerHTML; }
       var quem = d.aluno_nome ? '<b>' + esc(d.aluno_nome) + '</b>' : '<b style="color:var(--danger)">Aluno não identificado</b>';
       var nota = d.acertos !== null && d.acertos !== undefined ? ' — <b>' + d.acertos + '/' + d.total + '</b> acertos · nota ' + Number(d.nota_final).toFixed(1).replace('.', ',') : '';
       var amb = d.ambiguas ? ' · <span style="color:var(--warning)">' + d.ambiguas + ' questão(ões) para revisar</span>' : '';
       var lg = d.lingua ? ' · ' + (d.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : '';
       var mov = d.prova_corrigida
         ? '<div style="font-size:13px;margin-top:4px;padding:6px 8px;border-radius:6px;background:var(--warn-light);color:var(--warn-fg);">'
-          + '⚠ Este cartão <b>não é de ' + esc(CAM_DISCIPLINA) + '</b>: é de <b>' + esc(d.prova_corrigida) + '</b>. Ele foi corrigido em ' + esc(d.prova_corrigida) + ', com o gabarito certo.</div>'
+          + 'Este cartão <b>não é de ' + esc(CAM_DISCIPLINA) + '</b>: é de <b>' + esc(d.prova_corrigida) + '</b>. Ele foi corrigido em ' + esc(d.prova_corrigida) + ', com o gabarito certo.</div>'
         : '';
-      var resumo = (d.aluno_nome && !d.ambiguas ? '✅ ' : '📝 ') + quem + nota + lg + amb + mov;
+      var resumo = quem + nota + lg + amb + mov;
       li.innerHTML = resumo + (d.aluno_nome ? '' : (ALUNOS.length ? seletorAluno(d.id) : '<div style="font-size:13px;color:var(--muted);margin-top:4px;">QR ilegível ou cartão em branco: o professor vincula o aluno depois.</div>'));
       if (typeof atualizar === 'function') atualizar();
       return resumo;
-    }).catch(function (e) { li.innerHTML = '⚠ <b>Sem conexão:</b> ' + esc(e.message) + '. Verifique a internet e tente de novo.'; return li.innerHTML; });
+    }).catch(function (e) { li.innerHTML = '<b>Sem conexão:</b> ' + esc(e.message) + '. Verifique a internet e tente de novo.'; return li.innerHTML; });
 }
 document.getElementById('cam-input').addEventListener('change', function (e) {
   Array.prototype.forEach.call(e.target.files, enviarCartao); e.target.value = '';
