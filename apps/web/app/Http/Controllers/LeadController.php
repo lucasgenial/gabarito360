@@ -27,25 +27,27 @@ class LeadController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'plano_id'           => 'nullable|integer',
-            'nome'               => 'required|string|max:200',
-            'email'              => 'required|email|max:150',
-            'telefone'           => 'nullable|string|max:20',
-            'instituicao'        => 'nullable|string|max:200',
-            'cargo'              => 'nullable|string|max:100',
-            'licencas_estimadas' => 'nullable|integer|min:1',
-            'mensagem'           => 'nullable|string|max:2000',
+        // Campo invisível: pessoas não preenchem, robôs sim
+        if ($request->filled('site')) {
+            return redirect()->route('leads.sucesso');
+        }
+
+        $dados = $request->validate([
+            'plano_id'    => 'nullable|integer',
+            'nome'        => 'required|string|max:200',
+            'email'       => 'required|email|max:150',
+            'assunto'     => 'required|string|max:120',
+            'telefone'    => 'nullable|string|max:20',
+            'instituicao' => 'nullable|string|max:200',
+            'cargo'       => 'nullable|string|max:100',
+            'mensagem'    => 'required|string|max:2000',
         ]);
 
-        $resposta = $this->api->post('/v1/leads', $request->only([
-            'plano_id', 'nome', 'email', 'telefone',
-            'instituicao', 'cargo', 'licencas_estimadas', 'mensagem',
-        ]));
+        $resposta = $this->api->post('/v1/leads', $dados);
 
         // Sem isto a mensagem se perde em silêncio e a pessoa vê "enviado"
         if ($resposta->failed()) {
-            return back()->withInput()->withErrors(['lead' => $resposta->json('message') ?? 'Não foi possível enviar agora. Tente de novo.']);
+            return back()->withInput()->withErrors(['lead' => $resposta->json('message') ?? 'Não foi possível enviar a mensagem. Tente de novo.']);
         }
 
         return redirect()->route('leads.sucesso');

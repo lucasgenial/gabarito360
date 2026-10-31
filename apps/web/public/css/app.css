@@ -978,6 +978,16 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
   .kpi-grid > .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 
+/* ---------- Fale conosco ---------- */
+.fale-conosco { max-width: 720px; margin: 32px auto; }
+.fale-conosco h1 { font-size: 28px; font-weight: 800; }
+.fale-sub { margin: 8px 0 24px; color: var(--fg-2); }
+.fale-plano { margin-bottom: 16px; color: var(--fg-2); }
+.fale-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.fale-aviso { margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+.fale-armadilha { position: absolute; left: -9999px; }
+@media (max-width: 767px) { .fale-grade { grid-template-columns: minmax(0, 1fr); } }
+
 /* ---------- Gráficos (docs/27) ---------- */
 .grafico { width: 100%; }
 .grafico-dados { margin-top: 8px; font-size: 13px; }

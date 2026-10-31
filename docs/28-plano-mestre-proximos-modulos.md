@@ -947,8 +947,8 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 |---|---|---|---|
 | B1 Backup | em andamento: falta teste de restauração | Claude | |
 | B2 Senha do banco | cancelado | | |
-| B3 Redis | em andamento | Claude | |
-| B4 Workers | em andamento | Claude | |
+| B3 Redis | concluído | Claude | |
+| B4 Workers | concluído | Claude | |
 | B5 Deploy | pendente | | |
 | B6 Cartão pela fila | pendente | | |
 | E1 Domínio | concluído | Claude | |
