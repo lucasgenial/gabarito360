@@ -29,26 +29,6 @@
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
-{{-- KPIs --}}
-<div class="kpi-strip">
-  <div class="card card-pad" style="padding:16px 20px;">
-    <div class="kpi-v" style="color:var(--accent);">{{ $kpis['total_escolas'] ?? 0 }}</div>
-    <div class="kpi-l">Escolas cadastradas</div>
-  </div>
-  <div class="card card-pad" style="padding:16px 20px;">
-    <div class="kpi-v" style="color:var(--success);">{{ $kpis['total_ativas'] ?? 0 }}</div>
-    <div class="kpi-l">Escolas ativas</div>
-  </div>
-  <div class="card card-pad" style="padding:16px 20px;">
-    <div class="kpi-v">{{ $kpis['total_alunos'] ?? 0 }}</div>
-    <div class="kpi-l">Alunos totais</div>
-  </div>
-  <div class="card card-pad" style="padding:16px 20px;">
-    <div class="kpi-v">{{ $kpis['total_turmas'] ?? 0 }}</div>
-    <div class="kpi-l">Turmas ativas</div>
-  </div>
-</div>
-
 {{-- Grid de escolas --}}
 <div class="escola-grid" id="escola-grid">
   @forelse($escolas as $e)

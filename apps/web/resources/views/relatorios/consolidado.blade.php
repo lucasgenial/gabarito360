@@ -35,7 +35,6 @@
 
 <div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
   <div>
-    <div class="eyebrow">{{ $rotNivel }}</div>
     <h1 class="page-title">{{ $unidade['nome'] }}</h1>
     <p class="page-sub">{{ collect([$unidade['detalhe'] ?? null, $nivel !== 'escola' ? $kpis['escolas'] . ' escolas' : null, $kpis['alunos'] . ' alunos', $kpis['provas'] . ' provas'])->filter()->implode(' · ') }}</p>
   </div>
@@ -132,7 +131,7 @@
       <h3 style="font-size:16px;color:#e52207;">Precisam de atenção (média abaixo de 6,0)</h3>
       <ul style="list-style:none;padding:0;margin:6px 0 0;">
         @forelse($atencao as $a)
-          <li><span><a href="{{ route('relatorios.aluno', $a['id']) }}" style="color:inherit;">{{ $a['nome'] }}</a> <span style="color:var(--muted);font-size:12px;">· {{ $a['turma'] }}</span></span><b style="color:#e52207;">{{ $fmt($a['media']) }}</b></li>
+          <li><span><a href="{{ route('relatorios.aluno', $a['id']) }}" style="color:inherit;">{{ $a['nome'] }}</a> <span style="color:var(--muted);font-size:12px;">· {{ $a['turma'] }}</span></span><b style="color:var(--danger);">{{ $fmt($a['media']) }}</b></li>
         @empty
           <li style="color:var(--muted);">Nenhum aluno abaixo de 6,0.</li>
         @endforelse

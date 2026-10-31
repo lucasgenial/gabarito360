@@ -31,7 +31,6 @@
 @section('content')
 <div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
   <div>
-    <div class="eyebrow">Acompanhar correção da turma</div>
     <h1 class="page-title">{{ $turma['nome'] }}</h1>
     <p class="page-sub">{{ collect([$turma['escola_nome'], $turma['serie'], $resumo['alunos'] . ' alunos ativos'])->filter()->implode(' · ') }}</p>
   </div>
