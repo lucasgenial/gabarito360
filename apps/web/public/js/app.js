@@ -235,3 +235,24 @@ document.addEventListener('DOMContentLoaded', function () {
   // Quadros dentro de <details> só têm largura quando abertos
   document.querySelectorAll('details').forEach(function (d) { d.addEventListener('toggle', marcarQuadros); });
 });
+
+
+// A seleção só persiste quando o formulário do aluno é salvo.
+document.querySelectorAll('[data-seletor-avatar]').forEach(function (seletor) {
+  var preview = seletor.querySelector('[data-avatar-preview]');
+  var nome = document.getElementById(seletor.dataset.campoNome);
+  function atualizarAvatar() {
+    var selecionado = seletor.querySelector('input[name="avatar_id"]:checked');
+    var id = Number(selecionado ? selecionado.value : 0);
+    var imagem = Number.isInteger(id) && id >= 1 && id <= 36;
+    preview.classList.toggle('avatar-aluno--imagem', imagem);
+    preview.style.setProperty('--avatar-x', ((id - 1) % 6) * 20 + '%');
+    preview.style.setProperty('--avatar-y', Math.floor((id - 1) / 6) * 20 + '%');
+    var partes = (nome ? nome.value : '').trim().split(/\s+/u).filter(Boolean);
+    preview.querySelector('.avatar-iniciais').textContent = partes.slice(0, 2).map(function (p) { return Array.from(p)[0].toLocaleUpperCase('pt-BR'); }).join('') || '?';
+    seletor.querySelector('[data-avatar-status]').textContent = imagem ? 'Avatar ' + id + ' selecionado' : 'Iniciais do nome';
+  }
+  seletor.addEventListener('change', atualizarAvatar);
+  if (nome) nome.addEventListener('input', atualizarAvatar);
+  atualizarAvatar();
+});

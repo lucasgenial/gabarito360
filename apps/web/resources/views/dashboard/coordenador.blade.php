@@ -111,12 +111,12 @@
       <ul class="attention-list">
         @forelse($alunos as $a)
           @php
-            $ini = implode('', array_map(fn($p) => strtoupper($p[0]), array_slice(explode(' ', $a['nome']), 0, 2)));
+
             $cls = $a['media'] < 5 ? 'danger' : 'warn';
             $badgeCls = $a['media'] < 5 ? 'badge-danger' : 'badge-warn';
           @endphp
           <li>
-            <div class="student-mark {{ $cls }}">{{ $ini }}</div>
+            <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id'] ?? $a['aluno_id'] ?? null" />
             <div class="student-meta">
               <b>{{ $a['nome'] }} · {{ $a['turma'] }}</b>
               <span>{{ $a['disciplina'] }} · média atual</span>

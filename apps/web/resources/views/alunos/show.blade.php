@@ -20,10 +20,7 @@
 
 {{-- Header do perfil --}}
 <div class="profile-header">
-  @php
-    $ini = collect(explode(' ', $aluno['nome']))->filter()->map(fn($p) => mb_strtoupper(mb_substr($p,0,1)))->take(2)->implode('');
-  @endphp
-  <div class="profile-avatar">{{ $ini }}</div>
+  <x-avatar :avatar-id="$aluno['avatar_id'] ?? null" :nome="$aluno['nome']" :aluno-id="$aluno['id']" tamanho="lg" />
   <div style="flex:1;">
     <h1 class="page-title" style="margin:0;">{{ $aluno['nome'] }}</h1>
     <p class="page-sub">
@@ -102,10 +99,11 @@
       @csrf
       @method('PUT')
       <div class="modal-body">
+        <x-seletor-avatar :nome="old('nome', $aluno['nome'])" :aluno-id="$aluno['id']" :avatar-id="$aluno['avatar_id'] ?? null" campo-nome="ed-nome" preview-id="editar-avatar-preview" />
         <div class="form-row-2">
           <div class="field" style="grid-column:1/-1">
             <label for="ed-nome">Nome completo *</label>
-            <input class="input" type="text" id="ed-nome" name="nome" required value="{{ $aluno['nome'] }}" />
+            <input class="input" type="text" id="ed-nome" name="nome" required value="{{ old('nome', $aluno['nome']) }}" />
           </div>
           <div class="field">
             <label for="ed-matricula">Matrícula *</label>
@@ -160,6 +158,7 @@
 var modal = document.getElementById('modal-editar');
 function abrirModal() { modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
 function fecharModal() { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+@if($errors->any() || session('erro')) abrirModal(); @endif
 modal.addEventListener('click', function(e){ if(e.target===modal) fecharModal(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') fecharModal(); });
 </script>

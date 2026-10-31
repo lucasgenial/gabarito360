@@ -5,7 +5,7 @@
 @push('styles')
 <style>
   .welcome-card {
-    display:grid; grid-template-columns:64px 1fr; gap:18px; align-items:center;
+    display:grid; grid-template-columns:72px 1fr; gap:18px; align-items:center;
     margin-top:18px; padding:22px 24px;
     background:var(--accent-light);
     border:1px solid var(--accent); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);
@@ -68,7 +68,7 @@
   $primeiroNome = explode(' ', $nomeAluno)[0];
 
   $iniciais = implode('', array_map(
-    fn($p) => strtoupper($p[0]),
+    fn($p) => mb_strtoupper(mb_substr($p, 0, 1)),
     array_slice(array_filter(explode(' ', $nomeAluno)), 0, 2)
   ));
 
@@ -97,7 +97,7 @@
 
 {{-- Card de boas-vindas --}}
 <div class="welcome-card">
-  <div class="welcome-avatar" aria-hidden="true">{{ $iniciais }}</div>
+  <x-avatar :avatar-id="$aluno['avatar_id'] ?? null" :nome="$nomeAluno" :aluno-id="$aluno['id'] ?? null" tamanho="lg" />
   <div>
     <h1 class="page-title" style="margin-bottom:0;">Olá, {{ $primeiroNome }}!</h1>
     <p>{{ $nomeAluno }} ({{ $iniciais }}) · Aluno · {{ $turma }}{{ $escola ? ' · '.$escola : '' }}</p>

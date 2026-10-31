@@ -132,7 +132,8 @@ são campos independentes — uma rede individual de um professor autônomo tem
 | cpf              | char(11)     | Opcional. Apenas dígitos               |
 | data_nascimento  | date         |                                       |
 | genero           | enum         | M, F, O (opcional)                    |
-| foto_path        | varchar(255) | Caminho do arquivo no disco `public` (opcional) |
+| foto_path        | varchar(255) | Legado preservado; L6 proíbe novos envios e omite nas respostas |
+| avatar_id        | tinyint unsigned nullable | L6: catálogo fixo 1–36; nulo usa iniciais |
 | nome_responsavel | varchar(200) |                                       |
 | ativo            | boolean      |                                       |
 | created_at       | timestamp    |                                       |
