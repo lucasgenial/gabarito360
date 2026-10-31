@@ -97,7 +97,7 @@ class TrocaDeSenhaTest extends TestCase
     public function test_gestor_envia_link_e_nao_define_senha(): void
     {
         Mail::fake();
-        $gestor = $this->usuario('admin', 'gestor@gabarito360.dev');
+        $gestor = $this->usuario('admin_rede', 'gestor@gabarito360.dev');
         $alvo = $this->usuario('professor', 'e@gabarito360.dev');
         Sanctum::actingAs($gestor);
 
