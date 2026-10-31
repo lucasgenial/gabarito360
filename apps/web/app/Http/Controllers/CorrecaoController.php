@@ -195,6 +195,19 @@ class CorrecaoController extends Controller
         ]);
     }
 
+    /** Tela de revisão: uma questão por vez, da fila da prova ou de um cartão (?cartao=). */
+    public function revisao(Request $request, int $provaId): View
+    {
+        $prova = $this->api->get("/v1/provas/{$provaId}");
+        if ($prova->failed()) {
+            abort(404, 'Prova não encontrada.');
+        }
+
+        $fila = $this->api->get("/v1/provas/{$provaId}/revisao", array_filter(['cartao' => $request->integer('cartao')]));
+
+        return view('correcao.revisao', ['prova' => $prova->json('data'), 'itens' => $fila->json('data.itens') ?? []]);
+    }
+
     public function resolverAmbiguidade(Request $request, int $cartaoId)
     {
         $request->validate([
@@ -219,6 +232,12 @@ class CorrecaoController extends Controller
         ]);
 
         $resp = $this->api->post("/v1/cartoes/{$cartaoId}/revisar", $request->only('numero_questao', 'alternativa'));
+
+        if ($request->expectsJson()) {
+            return $resp->failed()
+                ? response()->json(['erro' => $resp->json('message') ?? 'Erro ao revisar leitura.'], 422)
+                : response()->json($resp->json('data'));
+        }
 
         if ($resp->failed()) {
             return back()->with('erro', $resp->json('message') ?? 'Erro ao revisar leitura.');

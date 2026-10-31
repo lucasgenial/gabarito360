@@ -7,7 +7,7 @@
     ["turmas.index", []], ["turmas.show", [14]], ["alunos.index", []], ["alunos.show", [410]], ["alunos.create", []],
     ["escolas.show", [8]], ["escolas.edit", [8]], ["membros.index", []], ["membros.create", []], ["membros.edit", [5]], ["membros.permissoes", [5]],
     ["relatorios.escola", [8]], ["relatorios.turma", [14]], ["relatorios.prova", [4]], ["relatorios.turmaProva", [14, 4]],
-    ["relatorios.aluno", [410]], ["resultados.show", [410, 4]], ["correcao.index", []], ["correcao.show", [4]], ["correcao.turma", [14]]]},
+    ["relatorios.aluno", [410]], ["resultados.show", [410, 4]], ["correcao.index", []], ["correcao.show", [4]], ["correcao.revisao", [4]], ["correcao.turma", [14]]]},
   "coordenador": {"uid": 4, "perfil": "coordenador", "nome": "Renata Nogueira", "paginas": [["painel", []], ["correcao.show", [4]], ["resultados.show", [410, 4]]]},
   "professor": {"uid": 5, "perfil": "professor", "nome": "Paulo Mendes", "paginas": [["painel", []], ["correcao.index", []], ["correcao.show", [4]], ["resultados.show", [410, 4]]]},
   "aluno": {"uid": 6, "perfil": "aluno", "nome": "Lucas Teixeira", "paginas": [["painel", []]]},

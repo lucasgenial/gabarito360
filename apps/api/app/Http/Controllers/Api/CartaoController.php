@@ -24,6 +24,9 @@ class CartaoController extends Controller
      * Prova dentro do escopo do usuário. O aplicador só pode ENVIAR cartões
      * (doc 03, †APLIC): nas demais ações a prova não é encontrada para ele.
      */
+    /** Decisões da revisão além das letras, com o código gravado em ambiguidade_logs. */
+    private const DECISOES = ['BRANCO' => '-', 'ANULADA' => 'N'];
+
     private function encontrarProva(Request $request, int $provaId, bool $envio = false): ?Prova
     {
         if ($request->user()->perfil === 'aplicador' && !$envio) {
@@ -329,7 +332,7 @@ class CartaoController extends Controller
 
         $data = $request->validate([
             'numero_questao' => 'required|integer|min:1',
-            'alternativa'    => 'required|string|in:A,B,C,D,E',
+            'alternativa'    => 'required|string|in:A,B,C,D,E,' . implode(',', array_keys(self::DECISOES)),
         ]);
 
         $resposta = DB::table('cartao_respostas')
@@ -341,18 +344,7 @@ class CartaoController extends Controller
             return ApiResponse::notFound('Questão não encontrada no cartão.');
         }
 
-        DB::table('cartao_respostas')->where('id', $resposta->id)->update([
-            'alternativa' => $data['alternativa'],
-            'ambigua'     => false,
-        ]);
-
-        DB::table('ambiguidade_logs')->insert([
-            'cartao_id'          => $cartao->id,
-            'cartao_resposta_id' => $resposta->id,
-            'usuario_id'         => $usuario->id,
-            'alternativa_escolhida' => $data['alternativa'],
-            'created_at'         => now(),
-        ]);
+        $this->registrarDecisao($cartao, $resposta, $usuario->id, $data['alternativa']);
 
         $restamAmbiguas = DB::table('cartao_respostas')
             ->where('cartao_id', $cartao->id)
@@ -394,7 +386,7 @@ class CartaoController extends Controller
 
         $data = $request->validate([
             'numero_questao' => 'required|integer|min:1',
-            'alternativa'    => 'required|string|in:A,B,C,D,E',
+            'alternativa'    => 'required|string|in:A,B,C,D,E,' . implode(',', array_keys(self::DECISOES)),
         ]);
 
         $resposta = DB::table('cartao_respostas')
@@ -406,9 +398,7 @@ class CartaoController extends Controller
             return ApiResponse::notFound('Questão não encontrada no cartão.');
         }
 
-        DB::table('cartao_respostas')->where('id', $resposta->id)->update([
-            'alternativa' => $data['alternativa'],
-        ]);
+        $this->registrarDecisao($cartao, $resposta, $usuario->id, $data['alternativa']);
 
         $cartao->update([
             'revisado_por' => $usuario->id,
@@ -417,7 +407,71 @@ class CartaoController extends Controller
 
         CalculadoraNota::calcular($cartao->fresh());
 
-        return ApiResponse::success(['revisado' => true]);
+        return ApiResponse::success(['revisado' => true, 'cartao_status' => 'lido']);
+    }
+
+    /** Em branco e anulada ficam sem alternativa (não pontuam); o log guarda quem decidiu o quê e quando. */
+    private function registrarDecisao(Cartao $cartao, object $resposta, int $usuarioId, string $alternativa): void
+    {
+        $codigo = self::DECISOES[$alternativa] ?? null;
+
+        DB::table('cartao_respostas')->where('id', $resposta->id)->update([
+            'alternativa' => $codigo ? null : $alternativa,
+            'ambigua'     => false,
+        ]);
+
+        DB::table('ambiguidade_logs')->insert([
+            'cartao_id'             => $cartao->id,
+            'cartao_resposta_id'    => $resposta->id,
+            'usuario_id'            => $usuarioId,
+            'alternativa_escolhida' => $codigo ?? $alternativa,
+            'created_at'            => now(),
+        ]);
+    }
+
+    /** Fila da tela de revisão: as questões pendentes da prova ou todas as de um cartão (?cartao=). */
+    public function revisao(Request $request, int $provaId, ImagensCartao $imagens): JsonResponse
+    {
+        $prova = $this->encontrarProva($request, $provaId);
+        if (!$prova) {
+            return ApiResponse::notFound('Prova não encontrada.');
+        }
+
+        $cartaoId = $request->integer('cartao');
+        $disco    = Storage::disk('public');
+
+        $itens = DB::table('cartao_respostas as r')
+            ->join('cartoes as c', 'c.id', '=', 'r.cartao_id')
+            ->leftJoin('alunos as a', 'a.id', '=', 'c.aluno_id')
+            ->leftJoin('turmas as t', 't.id', '=', 'a.turma_id')
+            ->where('c.prova_id', $provaId)
+            ->when(
+                $cartaoId,
+                fn ($q) => $q->where('c.id', $cartaoId),
+                fn ($q) => $q->where('c.status', 'ambiguo')->where('r.ambigua', true)
+            )
+            ->orderBy('a.nome')->orderBy('c.id')->orderBy('r.numero_questao')
+            ->get(['c.id as cartao_id', 'c.status', 'c.imagem_url', 'a.nome as aluno_nome', 't.nome as turma',
+                   'r.numero_questao', 'r.alternativa', 'r.ambigua', 'r.alternativas_detectadas'])
+            ->map(function ($r) use ($prova, $imagens, $disco) {
+                $temEndireitada = $disco->exists(ImagensCartao::caminho($r->cartao_id, 'endireitada'));
+                return [
+                    'cartao_id'       => $r->cartao_id,
+                    'status'          => $r->status,
+                    'aluno_nome'      => $r->aluno_nome,
+                    'turma'           => $r->turma,
+                    'numero_questao'  => $r->numero_questao,
+                    'alternativa'     => $r->alternativa,
+                    'ambigua'         => (bool) $r->ambigua,
+                    'detectadas'      => array_column(json_decode($r->alternativas_detectadas ?? '[]', true) ?? [], 'alternativa'),
+                    'foto_url'        => $r->imagem_url ? $imagens->url($r->cartao_id, 'original') : null,
+                    'endireitada_url' => $temEndireitada ? $imagens->url($r->cartao_id, 'endireitada') : null,
+                    'recorte'         => ImagensCartao::recorte($r->numero_questao, $prova->num_questoes, $prova->num_alternativas),
+                ];
+            })
+            ->values();
+
+        return ApiResponse::success(['itens' => $itens]);
     }
 
     /** Fecha a correção: a partir daqui só a supervisão altera, exclui ou inclui cartões. */

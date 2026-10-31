@@ -1,6 +1,6 @@
 # Plano: fotos e nova revisão das leituras
 
-Situação em 30/10/2026: aprovado. R1 em andamento. Os processos da web e da API já foram separados no servidor.
+Situação em 30/10/2026: aprovado. R1 concluída e R2 em andamento. Os processos da web e da API já foram separados no servidor.
 
 ## Problemas
 
@@ -64,7 +64,7 @@ Ver cartão inteiro · Voltar · Pular
 
 ## Decisões a confirmar
 
-1. "Anulada" conta como erro, sem pontos para o aluno, e não muda o gabarito da prova.
+1. "Anulada" conta como erro, sem pontos para o aluno, e não muda o gabarito da prova. Nos relatórios, ela aparece como questão em branco. A decisão fica em `ambiguidade_logs`.
 2. O PR #37 entra primeiro, para o site parar de travar. As miniaturas voltam na R1.
 
 ## Testes

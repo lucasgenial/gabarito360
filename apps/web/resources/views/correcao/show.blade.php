@@ -80,8 +80,9 @@
     <div class="progress-track"><div id="bar"></div></div>
   </div>
   <div class="card card-pad">
-    <h3 style="font-size:16px;margin-bottom:8px;">Cartões com marcação ambígua</h3>
-    <ul class="ambig-list" id="ambig-list"></ul>
+    <h3 style="font-size:16px;margin-bottom:8px;">Leituras para revisar</h3>
+    <p id="ambig-resumo" style="margin-bottom:12px;"></p>
+    @if($podeMexer)<a class="btn btn-primary" id="btn-revisar" href="{{ route('correcao.revisao', $prova['id']) }}" style="display:none;">Revisar leituras</a>@endif
   </div>
 </div>
 
@@ -151,8 +152,6 @@ var LISTA_URL = '{{ route('correcao.cartoes', $prova['id'], false) }}';
 var PROVA_ID = {{ (int) $prova['id'] }};
 var PODE_EXCLUIR = {{ $podeMexer ? 'true' : 'false' }};
 var NOTA_MAX = {{ (float) ($prova['nota_maxima'] ?? 10) }};
-var ALTERNATIVAS = 'ABCDE'.slice(0, {{ (int) ($prova['num_alternativas'] ?? 5) }}).split('');
-var ultimasAmbiguidades = [];
 
 // ---------- Alunos corrigidos ----------
 var corrDados = [], corrAssinatura = '';
@@ -165,7 +164,6 @@ function carregarCorrigidos() {
       var lista = d.cartoes || [], assin = JSON.stringify(lista);
       if (assin === corrAssinatura) return; // nada mudou: não redesenha (evita piscar as fotos)
       corrAssinatura = assin; corrDados = lista; desenharCorrigidos();
-      if (ultimasAmbiguidades.length) renderAmbiguidades(ultimasAmbiguidades); // nomes chegam depois do status
     }).catch(function () {});
 }
 function desenharCorrigidos() {
@@ -197,6 +195,7 @@ function desenharCorrigidos() {
       acoes += '<a class="btn btn-sm btn-secondary" href="/resultados/' + c.aluno_id + '/' + PROVA_ID + '?from=correcao">Acertos e erros</a>';
     }
     if (!c.aluno_id && typeof seletorAluno === 'function' && typeof ALUNOS !== 'undefined' && ALUNOS.length) acoes += seletorAluno(c.id);
+    if (PODE_EXCLUIR && c.status === 'lido') acoes += '<a class="btn btn-sm btn-ghost" href="/provas/' + PROVA_ID + '/revisao?cartao=' + c.id + '">Revisar leitura</a>';
     if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">Excluir</button>';
     return '<li class="corr-item">' + foto + '<div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
       + '<div style="margin-top:4px;">' + st + '</div><div class="corr-acoes">' + acoes + '</div></div><div>' + nota + '</div></li>';
@@ -281,34 +280,16 @@ function renderEstado(data) {
 }
 
 function renderAmbiguidades(lista) {
-  ultimasAmbiguidades = lista;
-  var ul = document.getElementById('ambig-list');
-  ul.innerHTML = '';
-  if (!lista.length) {
-    ul.innerHTML = '<li style="border:0;color:var(--muted);">Nenhuma pendência de revisão.</li>';
-    return;
+  var alunos = {};
+  lista.forEach(function (a) { alunos[a.cartao_id] = true; });
+  var botao = document.getElementById('btn-revisar');
+  document.getElementById('ambig-resumo').textContent = lista.length
+    ? lista.length + ' questões de ' + Object.keys(alunos).length + ' cartão(ões) aguardam sua decisão.'
+    : 'Nenhuma pendência de revisão.';
+  if (botao) {
+    botao.textContent = 'Revisar leituras (' + lista.length + ')';
+    botao.style.display = lista.length ? '' : 'none';
   }
-  lista.forEach(function (a) {
-    var li = document.createElement('li');
-    var detectadas = a.alternativas_detectadas.map(function (d) { return d.alternativa; });
-    // Todas as alternativas: a leitura pode ter falhado e a certa não estar entre as detectadas
-    var btns = ALTERNATIVAS.map(function (letra) {
-      var classe = detectadas.indexOf(letra) >= 0 ? 'btn-secondary' : 'btn-ghost';
-      return '<button class="btn ' + classe + ' btn-sm" data-cartao="' + a.cartao_id + '" data-questao="' + a.numero_questao + '" data-alt="' + letra + '">' + letra + '</button>';
-    }).join('');
-    var c = corrDados.filter(function (x) { return x.id === a.cartao_id; })[0] || {};
-    var nome = c.aluno_nome ? escH(c.aluno_nome) : 'Cartão #' + a.cartao_id;
-    var foto = c.tem_imagem ? ' <button type="button" class="btn btn-ghost btn-sm" onclick="verFoto(' + a.cartao_id + ')">Ver foto</button>' : '';
-    li.innerHTML = '<div><b>' + nome + '</b>' + foto + '<div class="exam-meta">Questão ' + a.numero_questao + ' — '
-      + (detectadas.length ? 'leitura: ' + detectadas.join(' e ') : 'sem leitura') + '. Escolha a resposta do aluno.</div></div><div class="resolve-actions">' + btns + '</div>';
-    ul.appendChild(li);
-  });
-
-  ul.querySelectorAll('[data-cartao]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      resolverAmbiguidade(btn.dataset.cartao, btn.dataset.questao, btn.dataset.alt);
-    });
-  });
 }
 
 function renderAtividade(recentes) {
@@ -324,19 +305,6 @@ function renderAtividade(recentes) {
     var nota = r.nota_final !== null ? parseFloat(r.nota_final).toFixed(1).replace('.', ',') : '—';
     li.innerHTML = '<div class="act-ico" style="background:var(--success-light);color:var(--success);">✓</div><div><b>' + nome + '</b> — nota ' + nota + '<div class="act-time">' + tempoRelativo(r.updated_at) + '</div></div>';
     ul.appendChild(li);
-  });
-}
-
-function resolverAmbiguidade(cartaoId, numeroQuestao, alternativa) {
-  fetch(CARTOES_URL + '/' + cartaoId + '/resolver-ambiguidade', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-    body: JSON.stringify({ numero_questao: parseInt(numeroQuestao), alternativa: alternativa })
-  }).then(function (r) {
-    if (!r.ok) {
-      return r.json().catch(function () { return {}; }).then(function (d) { alert(d.message || d.erro || 'Não foi possível salvar a resposta.'); });
-    }
-    corrAssinatura = ''; carregarCorrigidos(); atualizar();
   });
 }
 
