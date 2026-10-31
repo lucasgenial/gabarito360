@@ -205,7 +205,8 @@ class CartaoController extends Controller
             'status'     => 'pendente',
         ]);
 
-        ProcessarCartaoJob::dispatch($cartao->id);
+        // Leitura imediata: a câmera mostra a nota na resposta. Passa para a fila no pacote B6.
+        ProcessarCartaoJob::dispatchSync($cartao->id);
 
         // Recusado pelo QR (cartão de outra prova que não pode recebê-lo): explica o motivo.
         if (!Cartao::whereKey($cartao->id)->exists()) {
@@ -214,7 +215,7 @@ class CartaoController extends Controller
             return ApiResponse::error($motivo, ['motivo' => 'outra_prova'], 422);
         }
 
-        // Com fila síncrona o cartão já foi lido: devolve o resultado para o celular.
+        // O cartão já foi lido: devolve o resultado para o celular.
         $cartao->refresh()->load('aluno:id,nome');
 
         // Aplicador não vê notas (doc 03): só a confirmação de leitura e o aluno.
