@@ -88,21 +88,23 @@ class CorrecaoController extends Controller
     public function upload(Request $request, int $provaId)
     {
         $request->validate([
-            'imagem'   => 'required|image|max:10240',
+            'imagem' => 'required|image|max:10240',
             'aluno_id' => 'sometimes|integer|nullable',
+            'envio_id' => 'sometimes|uuid',
         ]);
 
         $resp = $this->api->postFile(
             "/v1/provas/{$provaId}/cartoes",
             'imagem',
             $request->file('imagem'),
-            $request->filled('aluno_id') ? ['aluno_id' => $request->input('aluno_id')] : []
+            $request->only('aluno_id', 'envio_id'),
+            timeout: 15
         );
 
         if ($request->expectsJson()) {
             return response()->json(
                 $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível enviar o cartão.'] : $resp->json('data'),
-                $resp->failed() ? 422 : 200
+                $resp->status()
             );
         }
 
@@ -110,7 +112,22 @@ class CorrecaoController extends Controller
             return back()->with('erro', $resp->json('message') ?? 'Não foi possível enviar o cartão.');
         }
 
-        return back()->with('sucesso', 'Cartão enviado para processamento.');
+        return back()->with('cartao_envio', $resp->json('data.envio_id'))
+            ->with('sucesso', 'Foto salva. Acompanhe o resultado na lista de envios.');
+    }
+
+    public function envio(int $provaId, string $chave)
+    {
+        $resp = $this->api->get("/v1/provas/{$provaId}/cartoes/envios/{$chave}");
+
+        return response()->json($resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível acompanhar o envio.'] : $resp->json('data'), $resp->status());
+    }
+
+    public function repetirEnvio(int $provaId, string $chave)
+    {
+        $resp = $this->api->post("/v1/provas/{$provaId}/cartoes/envios/{$chave}/repetir");
+
+        return response()->json($resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível repetir a leitura.'] : $resp->json('data'), $resp->status());
     }
 
     public function fechar(int $provaId)

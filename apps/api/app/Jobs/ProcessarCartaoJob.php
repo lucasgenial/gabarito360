@@ -3,203 +3,251 @@
 namespace App\Jobs;
 
 use App\Models\Cartao;
+use App\Models\CartaoEnvio;
 use App\Models\Prova;
+use App\Models\Usuario;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
 use App\Services\Omr\ImagensCartao;
 use App\Services\Omr\OmrDriverInterface;
 use App\Services\Omr\OmrIdentificacaoInterface;
+use App\Services\Omr\ResultadoEnvio;
+use App\Support\Correcao;
+use App\Support\Escopo;
+use App\Support\Permissao;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ProcessarCartaoJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private const LIMIAR_CONFIANCA = 0.90;
+    public int $tries = 3;
 
-    public function __construct(public int $cartaoId) {}
+    public int $timeout;
+
+    public bool $failOnTimeout = true;
+
+    public function __construct(public int $cartaoId, public int $envioId, public int $tentativa = 1)
+    {
+        // Duas leituras (redirecionamento pelo QR) e geração das versões leves.
+        $this->timeout = 3 * max(1, (int) config('omr.timeout', 60)) + 30;
+        $this->onQueue('alta');
+    }
+
+    public function backoff(): array
+    {
+        return [5, 20];
+    }
+
+    public function middleware(): array
+    {
+        return [(new WithoutOverlapping("cartao:{$this->cartaoId}"))->dontRelease()->expireAfter($this->timeout + 15)];
+    }
+
+    private function envioAtivo(): ?CartaoEnvio
+    {
+        return CartaoEnvio::whereKey($this->envioId)->where('tentativa', $this->tentativa)
+            ->whereIn('status', ['na_fila', 'processando'])->lockForUpdate()->first();
+    }
 
     public function handle(OmrDriverInterface $driver, ImagensCartao $imagens): void
     {
+        $envio = $this->envioAtivo();
+        if (! $envio) {
+            return;
+        } // Entrega repetida ou tentativa antiga não repete efeitos.
         $cartao = Cartao::find($this->cartaoId);
-        if (!$cartao) {
+        if (! $cartao) {
+            $envio->update(['status' => 'recusado', 'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
+
             return;
         }
+        try {
+            $usuario = Usuario::find($envio->usuario_id);
+            Permissao::limparCache();
+            $prova = Prova::find($envio->prova_id);
+            if (! $this->podeLer($usuario, $prova)) {
+                $this->recusar($envio, $cartao, 'A prova não está mais disponível para este envio.');
 
-        $prova = $cartao->prova;
-
-        $caminho = Storage::disk('public')->path($cartao->imagem_url);
-        $leituras = $driver->processar($caminho, $prova->num_questoes, $prova->num_alternativas);
-
-        if ($driver instanceof OmrIdentificacaoInterface) {
-            // Cartão de outra prova (ex.: fotografou o de Linguagens na tela de Ciências Humanas):
-            // vai para a prova do QR, se for da mesma escola, e é relido com o gabarito dela.
-            $provaQr = (int) ($driver->identificacao()['prova_id'] ?? 0);
-            $outra   = $this->provaDoQr($cartao, $driver->identificacao());
-            if ($provaQr && $provaQr !== (int) $prova->id && !$outra) {
-                $this->recusar($cartao, $prova, $provaQr);
                 return;
             }
-            if ($outra) {
-                $anterior = $prova;
-                $cartao->update(['prova_id' => $outra->id]);
-                $cartao->refresh();
-                $prova    = $outra;
+            $envio->update(['status' => 'processando', 'mensagem' => null]);
+            $caminho = Storage::disk('public')->path($cartao->imagem_url);
+            $leituras = $driver->processar($caminho, $prova->num_questoes, $prova->num_alternativas);
+            $id = $driver instanceof OmrIdentificacaoInterface ? $driver->identificacao() : [];
+            $provaQr = (int) ($id['prova_id'] ?? 0);
+            if ($provaQr && $provaQr !== (int) $prova->id) {
+                $destino = Prova::find($provaQr);
+                if (! $this->podeLer($usuario, $destino) || (int) $destino->escola_id !== (int) $prova->escola_id) {
+                    $this->recusar($envio, $cartao, 'O QR indica outra prova que não está disponível para correção neste acesso. Confira o cartão e a prova.');
+
+                    return;
+                }
+                $prova = $destino;
                 $leituras = $driver->processar($caminho, $prova->num_questoes, $prova->num_alternativas);
-                AtualizadorStatusProva::atualizar($anterior);
+                $id = $driver->identificacao();
             }
+            // Trabalho caro fora da transação: não bloqueia os novos uploads na prova.
+            $cartao->prova_id = $prova->id;
+            $cartao->setRelation('prova', $prova);
+            $imagens->gerar($cartao);
+            DB::transaction(function () use ($envio, $cartao, $prova, $usuario, $leituras, $id) {
+                // Ordem fixa evita deadlock em redirecionamentos cruzados.
+                $provas = Prova::whereIn('id', [$envio->prova_id, $prova->id])->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+                $atual = Cartao::whereKey($cartao->id)->lockForUpdate()->first();
+                $recibo = $this->envioAtivo();
+                if (! $recibo) {
+                    return;
+                }
+                if (! $atual) {
+                    $recibo->update(['status' => 'recusado', 'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
+                    DB::afterCommit(fn () => app(ImagensCartao::class)->apagar($cartao->id));
 
-            // Identificação pelo QR do cartão nativo (aluno e língua estrangeira)
-            $this->aplicarIdentificacao($cartao, $driver->identificacao());
-            $this->substituirLeiturasAnteriores($cartao);
+                    return;
+                }
+                Permissao::limparCache();
+                $usuario = $usuario->fresh();
+                if (! $this->podeLer($usuario, $provas->get($envio->prova_id)) || ! $this->podeLer($usuario, $provas->get($prova->id))) {
+                    $this->recusar($recibo, $atual, 'A prova foi fechada ou o acesso mudou durante a leitura.');
+
+                    return;
+                }
+                if ((int) $atual->prova_id !== (int) $prova->id) {
+                    $atual->aluno_id = null;
+                }
+                $atual->prova_id = $prova->id;
+                $atual->setRelation('prova', $provas->get($prova->id));
+                $this->identificar($atual, $id);
+                if ($atual->aluno_id) {
+                    $anteriores = Cartao::where('prova_id', $prova->id)->where('aluno_id', $atual->aluno_id)
+                        ->where('id', '!=', $atual->id)->where(function ($q) use ($atual) {
+                            $q->whereIn('status', ['lido', 'ambiguo'])
+                                ->orWhere(function ($falhou) use ($atual) {
+                                    $falhou->where('status', 'pendente')->where('id', '<', $atual->id)
+                                        ->whereIn('id', CartaoEnvio::where('status', 'erro')->select('cartao_id'));
+                                });
+                        })->get();
+                    if ($anteriores->contains(fn ($c) => $c->id > $atual->id)) {
+                        $this->substituido($recibo, $atual);
+                        foreach ($provas as $p) {
+                            AtualizadorStatusProva::atualizar($p);
+                        }
+
+                        return;
+                    }
+                    foreach ($anteriores as $antigo) {
+                        CartaoEnvio::where('cartao_id', $antigo->id)->update(['status' => 'substituido', 'resultado' => null,
+                            'mensagem' => 'Uma foto mais recente deste aluno substituiu esta leitura.']);
+                        $this->apagar($antigo);
+                    }
+                }
+                $this->gravarLeituras($atual, $leituras);
+                foreach ($provas as $p) {
+                    AtualizadorStatusProva::atualizar($p);
+                }
+                ResultadoEnvio::concluir($recibo, $atual);
+            }, 3);
+        } catch (Throwable $e) {
+            CartaoEnvio::whereKey($this->envioId)->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
+                ->update(['status' => 'na_fila', 'mensagem' => 'A leitura será tentada novamente.']);
+            throw $e;
         }
+    }
 
+    public function failed(?Throwable $e): void
+    {
+        CartaoEnvio::whereKey($this->envioId)->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
+            ->update(['status' => 'erro', 'mensagem' => 'Não foi possível ler esta foto. Tente novamente ou fotografe outro cartão.']);
+    }
+
+    private function podeLer(?Usuario $u, ?Prova $p): bool
+    {
+        return $u && $u->ativo && $p && in_array($p->status, ['publicada', 'em_correcao', 'corrigida'], true)
+            && Permissao::pode($u, 'cartao.enviar') && Escopo::prova($u, $p->id) && ! Correcao::bloqueio($u, $p);
+    }
+
+    private function recusar(CartaoEnvio $envio, Cartao $cartao, string $mensagem): void
+    {
+        DB::transaction(function () use ($envio, $cartao, $mensagem) {
+            $prova = Prova::whereKey($envio->prova_id)->lockForUpdate()->first();
+            $envio = $this->envioAtivo();
+            if (! $envio) {
+                return;
+            }
+            $envio->update(['status' => 'recusado', 'mensagem' => $mensagem, 'resultado' => null]);
+            $this->apagar($cartao);
+            if ($prova) {
+                AtualizadorStatusProva::atualizar($prova);
+            }
+        });
+    }
+
+    private function substituido(CartaoEnvio $envio, Cartao $cartao): void
+    {
+        $envio->update(['status' => 'substituido', 'resultado' => null,
+            'mensagem' => 'Uma foto mais recente deste aluno substituiu esta leitura.']);
+        $this->apagar($cartao);
+    }
+
+    private function apagar(Cartao $cartao): void
+    {
+        // Rollback preserva as fotos da leitura anterior.
+        DB::table('cartoes')->where('id', $cartao->id)->delete();
+        DB::afterCommit(function () use ($cartao) {
+            if ($cartao->imagem_url) {
+                Storage::disk('public')->delete($cartao->imagem_url);
+            }
+            app(ImagensCartao::class)->apagar($cartao->id);
+        });
+    }
+
+    private function identificar(Cartao $cartao, array $id): void
+    {
+        if (in_array($id['lingua'] ?? null, ['ING', 'ESP'], true) && $cartao->prova->opcao_lingua) {
+            $cartao->lingua = $id['lingua'];
+        }
+        $alunoQr = (int) ($id['aluno_id'] ?? 0);
+        if (! $cartao->aluno_id && $alunoQr && (int) ($id['prova_id'] ?? 0) === (int) $cartao->prova_id
+            && DB::table('alunos')->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
+                ->where('prova_turmas.prova_id', $cartao->prova_id)->where('alunos.id', $alunoQr)->exists()) {
+            $cartao->aluno_id = $alunoQr;
+        }
+    }
+
+    private function gravarLeituras(Cartao $cartao, array $leituras): void
+    {
         DB::table('cartao_respostas')->where('cartao_id', $cartao->id)->delete();
-
-        $rows               = [];
-        $somaConfianca      = 0.0;
-        $temAmbiguaPendente = false;
-
+        $rows = [];
+        $soma = 0;
+        $pendente = false;
         foreach ($leituras as $l) {
-            $ambigua = $l['ambigua'] || $l['confianca'] < self::LIMIAR_CONFIANCA;
-
-            // Quando a prova está configurada para anular questões com marcação dupla,
-            // a divergência é resolvida automaticamente como questão em branco, sem
-            // exigir intervenção manual do professor/coordenador.
-            if ($ambigua && $l['multiplas_marcacoes'] && $prova->anular_se_todas) {
+            $ambigua = $l['ambigua'] || $l['confianca'] < 0.90;
+            if ($ambigua && $l['multiplas_marcacoes'] && $cartao->prova->anular_se_todas) {
                 $ambigua = false;
                 $l['alternativa'] = null;
             }
-
-            if ($ambigua) {
-                $temAmbiguaPendente = true;
-            }
-
-            $somaConfianca += $l['confianca'];
-
-            $rows[] = [
-                'cartao_id'               => $cartao->id,
-                'numero_questao'          => $l['numero_questao'],
-                'alternativa'             => $ambigua ? null : $l['alternativa'],
-                'confianca'               => $l['confianca'],
-                'ambigua'                 => $ambigua,
-                'alternativas_detectadas' => json_encode($l['alternativas_detectadas']),
-            ];
+            $pendente = $pendente || $ambigua;
+            $soma += $l['confianca'];
+            $rows[] = ['cartao_id' => $cartao->id, 'numero_questao' => $l['numero_questao'],
+                'alternativa' => $ambigua ? null : $l['alternativa'], 'confianca' => $l['confianca'],
+                'ambigua' => $ambigua, 'alternativas_detectadas' => json_encode($l['alternativas_detectadas'])];
         }
-
         if ($rows) {
             DB::table('cartao_respostas')->insert($rows);
         }
-
-        $confiancaGeral = count($leituras) ? $somaConfianca / count($leituras) : 0;
-        $status         = $temAmbiguaPendente ? 'ambiguo' : 'lido';
-
-        $cartao->update([
-            'status'          => $status,
-            'confianca_geral' => $confiancaGeral,
-        ]);
-
-        if ($status === 'lido') {
+        $cartao->status = $pendente ? 'ambiguo' : 'lido';
+        $cartao->confianca_geral = count($leituras) ? $soma / count($leituras) : 0;
+        $cartao->save();
+        if (! $pendente) {
             CalculadoraNota::calcular($cartao);
-        }
-
-        $imagens->gerar($cartao);
-
-        AtualizadorStatusProva::atualizar($prova);
-    }
-
-    /** Prova indicada pelo QR quando difere da prova do envio e pode receber o cartão. */
-    private function provaDoQr(Cartao $cartao, array $id): ?Prova
-    {
-        $provaQr = (int) ($id['prova_id'] ?? 0);
-        if (!$provaQr || $provaQr === (int) $cartao->prova_id) {
-            return null;
-        }
-
-        $outra = Prova::find($provaQr);
-
-        return ($outra
-            && (int) $outra->escola_id === (int) $cartao->prova->escola_id
-            && in_array($outra->status, ['publicada', 'em_correcao', 'corrigida'], true))
-            ? $outra : null;
-    }
-
-    /**
-     * QR de outra prova que não pode receber este cartão (outra escola ou prova não publicada):
-     * não corrige com o gabarito errado — apaga o envio e deixa o motivo para a resposta do upload.
-     */
-    private function recusar(Cartao $cartao, Prova $prova, int $provaQr): void
-    {
-        $outra = Prova::find($provaQr);
-        $motivo = ($outra && (int) $outra->escola_id === (int) $prova->escola_id)
-            ? "Este cartão não é de {$prova->disciplina}: é da prova \"{$outra->disciplina}\" ({$outra->titulo}), "
-              . 'que ainda não está publicada para correção. Publique o gabarito dela e fotografe de novo.'
-            : "Este cartão não é de {$prova->disciplina}: o QR é de uma prova de outra escola ou que você não acessa. "
-              . 'Confira se imprimiu o cartão na prova certa.';
-
-        Cache::put(self::chaveRecusa($cartao->id), $motivo, now()->addMinutes(10));
-        if ($cartao->imagem_url) {
-            Storage::disk('public')->delete($cartao->imagem_url);
-        }
-        $cartao->delete();
-        AtualizadorStatusProva::atualizar($prova);
-    }
-
-    public static function chaveRecusa(int $cartaoId): string
-    {
-        return "g360:cartao-recusado:{$cartaoId}";
-    }
-
-    /** Nova foto do mesmo aluno na mesma prova substitui a anterior (sem cartão duplicado). */
-    private function substituirLeiturasAnteriores(Cartao $cartao): void
-    {
-        if (!$cartao->aluno_id) {
-            return;
-        }
-
-        Cartao::where('prova_id', $cartao->prova_id)
-            ->where('aluno_id', $cartao->aluno_id)
-            ->where('id', '!=', $cartao->id)
-            ->get()
-            ->each(function (Cartao $antigo) {
-                if ($antigo->imagem_url) {
-                    Storage::disk('public')->delete($antigo->imagem_url);
-                }
-                $antigo->delete(); // respostas, nota e logs saem em cascata
-            });
-    }
-
-    private function aplicarIdentificacao(Cartao $cartao, array $id): void
-    {
-        $dados = [];
-
-        if (!empty($id['lingua']) && $cartao->prova->opcao_lingua) {
-            $dados['lingua'] = $id['lingua'];
-        }
-
-        // Só vincula o aluno do QR se o cartão é desta prova e o aluno está numa turma dela.
-        $alunoQr = (int) ($id['aluno_id'] ?? 0);
-        if (!$cartao->aluno_id && $alunoQr && (int) ($id['prova_id'] ?? 0) === (int) $cartao->prova_id) {
-            $pertence = DB::table('alunos')
-                ->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
-                ->where('prova_turmas.prova_id', $cartao->prova_id)
-                ->where('alunos.id', $alunoQr)
-                ->exists();
-            if ($pertence) {
-                $dados['aluno_id'] = $alunoQr;
-            }
-        }
-
-        if ($dados) {
-            $cartao->update($dados);
-            $cartao->refresh();
         }
     }
 }

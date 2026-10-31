@@ -118,6 +118,7 @@
     </div>
     <form method="POST" action="{{ route('correcao.upload', $prova['id']) }}" enctype="multipart/form-data">
       @csrf
+      <input type="hidden" name="envio_id" value="{{ \Illuminate\Support\Str::uuid() }}">
       <div style="padding:22px;display:flex;flex-direction:column;gap:14px;">
         <div class="field">
           <label>Imagem do cartão *</label>

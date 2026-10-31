@@ -16,7 +16,8 @@
     <input id="lote-input" type="file" accept="image/*" multiple style="display:none;">
   </div>
   <p style="font-size:12px;color:var(--muted);margin-top:10px;">Folha sobre a mesa e com boa luz. Encaixe os <b>4 quadrados pretos</b> nas guias da tela: quando os 4 ficarem verdes, a foto é tirada sozinha. O aluno é identificado pelo QR do cartão.</p>
-  <ul id="envios" style="list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;"></ul>
+  <p style="font-size:13px;color:var(--muted);margin-top:10px;">Depois do envio, você pode fotografar o próximo cartão. Acompanhe cada leitura na lista abaixo.</p>
+  <ul id="envios" aria-label="Envios de cartões" aria-live="polite" style="list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;"></ul>
 </div>
 
 {{-- Visor ao vivo com as guias dos cantos --}}
@@ -36,6 +37,7 @@
 </div>
 
 @push('scripts')
+<script src="{{ asset('js/cartoes-fila.js') }}?v={{ @filemtime(public_path('js/cartoes-fila.js')) }}"></script>
 <script>
 // ---------- Correção pela câmera ----------
 // URLs relativas: o site roda atrás de proxy https (Cloudflare); URL absoluta http seria bloqueada.
@@ -94,31 +96,28 @@ function erroHttp(status) {
   if (status >= 500) return 'o servidor não conseguiu ler o cartão agora. Tente de novo.';
   return 'falha no envio (HTTP ' + status + ').';
 }
-/** Envia a foto e devolve uma promessa com o HTML do resultado (também listado em #envios). */
-function enviarCartao(file) {
-  var li = linhaEnvio('⏳ Lendo cartão…');
-  return reduzirFoto(file).then(function (f) {
-    var fd = new FormData(); fd.append('imagem', f); fd.append('_token', CAM_CSRF);
-    return fetch(UPLOAD_URL, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
-  }).then(function (r) {
-    return r.json().then(function (j) { return { ok: r.ok, j: j }; }, function () { return { ok: false, j: { erro: erroHttp(r.status) } }; });
-  }).then(function (res) {
-      var d = res.j;
-      if (!res.ok) { li.innerHTML = '<b>Não corrigido.</b> ' + esc(d.erro || 'falha no envio'); return li.innerHTML; }
+function resultadoCartao(d) {
       var quem = d.aluno_nome ? '<b>' + esc(d.aluno_nome) + '</b>' : '<b style="color:var(--danger)">Aluno não identificado</b>';
       var nota = d.acertos !== null && d.acertos !== undefined ? ' — <b>' + d.acertos + '/' + d.total + '</b> acertos · nota ' + Number(d.nota_final).toFixed(1).replace('.', ',') : '';
-      var amb = d.ambiguas ? ' · <span style="color:var(--warning)">' + d.ambiguas + ' questão(ões) para revisar</span>' : '';
+      var amb = d.ambiguas ? ' · <span style="color:var(--warn-fg)">' + d.ambiguas + ' questão(ões) para revisar</span>' : '';
       var lg = d.lingua ? ' · ' + (d.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : '';
       var mov = d.prova_corrigida
         ? '<div style="font-size:13px;margin-top:4px;padding:6px 8px;border-radius:6px;background:var(--warn-light);color:var(--warn-fg);">'
           + 'Este cartão <b>não é de ' + esc(CAM_DISCIPLINA) + '</b>: é de <b>' + esc(d.prova_corrigida) + '</b>. Ele foi corrigido em ' + esc(d.prova_corrigida) + ', com o gabarito certo.</div>'
         : '';
       var resumo = quem + nota + lg + amb + mov;
-      li.innerHTML = resumo + (d.aluno_nome ? '' : (ALUNOS.length ? seletorAluno(d.id) : '<div style="font-size:13px;color:var(--muted);margin-top:4px;">QR ilegível ou cartão em branco: o professor vincula o aluno depois.</div>'));
-      if (typeof atualizar === 'function') atualizar();
-      return resumo;
-    }).catch(function (e) { li.innerHTML = '<b>Sem conexão:</b> ' + esc(e.message) + '. Verifique a internet e tente de novo.'; return li.innerHTML; });
+      return resumo + (d.aluno_nome ? '' : (ALUNOS.length ? seletorAluno(d.id) : '<div style="font-size:13px;color:var(--muted);margin-top:4px;">QR ilegível ou cartão em branco: o professor vincula o aluno depois.</div>'));
 }
+var filaCartoes = criarFilaCartoes({
+  uploadUrl: UPLOAD_URL,
+  envioUrl: '{{ route('correcao.envio', ['id' => $prova['id'], 'chave' => '__ENVIO__'], false) }}',
+  csrf: CAM_CSRF,
+  chaveSessao: @json('g360:envios:' . hash('sha256', session()->getId()) . ':' . $prova['id']),
+  envioInicial: @json(session('cartao_envio')),
+  linha: linhaEnvio, reduzir: reduzirFoto, erroHttp: erroHttp, resultado: resultadoCartao,
+  atualizar: function () { if (typeof atualizar === 'function') atualizar(); }
+});
+function enviarCartao(file) { return filaCartoes.enviar(file); }
 document.getElementById('cam-input').addEventListener('change', function (e) {
   Array.prototype.forEach.call(e.target.files, enviarCartao); e.target.value = '';
 });
@@ -236,7 +235,7 @@ document.getElementById('lote-input').addEventListener('change', function (e) {
     var n = cantosOk.filter(Boolean).length;
     if (esperaTrocar) {
       if (n <= 1) { esperaTrocar = false; } // cartão retirado: libera o próximo
-      else { estaveis = 0; dica.textContent = 'Cartão lido. Coloque o próximo.'; return; }
+      else { estaveis = 0; dica.textContent = 'Foto capturada. Coloque o próximo cartão.'; return; }
     }
     if (n === 4) {
       estaveis++;
@@ -259,13 +258,13 @@ document.getElementById('lote-input').addEventListener('change', function (e) {
     var esc2 = Math.min(1, 2400 / Math.max(sw, sh)), c = document.createElement('canvas');
     c.width = Math.round(sw * esc2); c.height = Math.round(sh * esc2);
     c.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
-    dica.textContent = 'Lendo cartão…';
-    ultimo.innerHTML = '⏳ Lendo cartão…';
+    dica.textContent = 'Enviando foto…';
+    ultimo.textContent = 'Enviando foto…';
     paraJpeg(c).then(enviarCartao).then(function (html) {
       ultimo.innerHTML = html + '<div style="font-size:12px;color:#555;margin-top:4px;">Coloque o próximo cartão.</div>';
       ocupado = false; esperaTrocar = true; pausaAte = performance.now() + 800;
       cantosOk = [false, false, false, false];
-      dica.textContent = 'Cartão lido. Coloque o próximo.';
+      dica.textContent = 'Foto capturada. Coloque o próximo cartão.';
     });
   }
 
