@@ -962,7 +962,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | E7 Fale Conosco | concluído: chaves reais configuradas, publicado e envio confirmado pelo responsável | Claude / Codex | #53, #58 |
 | E8 Páginas públicas | entrega visual publicada; termos e privacidade adiados pelo responsável | Codex | #59, #60 |
 | L1 Publicar termos | em andamento: prévias com campos a preencher autorizadas; publicação e aceite pendentes (docs/35) | Codex | #64 |
-| L2 Inventário | em revisão: inventário técnico, retenção/terceiros e impacto preliminar em docs/34 e docs/38; validações e contratos pendentes | Codex | #68 |
+| L2 Inventário | parcial: inventário incorporado; políticas e conferências em docs/39; contratos, prazos por instituição e validação residual pendentes | Codex | #68, #71 |
 | L3 Proteção | concluído: chave dedicada, migração e logs protegidos publicados; verificações operacionais em 31/10/2026 (docs/operacao/protecao-dados.md) | Codex | #69 |
 | L4 Titulares | pendente: depende de T2 | | |
 | L5 Incidentes | pendente: depende de AU1 | | |
