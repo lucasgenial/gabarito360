@@ -1102,6 +1102,40 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
   .lp-passos, .lp-recursos { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* ---------- Páginas públicas: mesma identidade da página inicial ---------- */
+.pagina-publica { min-height: 100vh; display: flex; flex-direction: column; }
+.pagina-publica .lp-nav-inner { max-width: none; padding-inline: var(--margem); }
+.pagina-publica .lp-links a[aria-current="page"] { color: var(--accent); font-weight: 700; }
+.publico-conteudo { flex: 1; padding: 32px var(--margem) 48px; min-width: 0; }
+.publico-rodape { padding-inline: var(--margem); background: var(--surface); }
+.publico-abertura { padding-block: 16px 8px; }
+.publico-abertura h1 { font-size: 32px; line-height: 1.2; text-wrap: balance; }
+.publico-abertura p { margin-top: 12px; color: var(--fg-2); max-width: 65ch; }
+.publico-planos { grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
+.publico-planos .plan-name { font-size: 18px; }
+.publico-planos .btn { white-space: normal; margin-top: 8px; }
+.publico-contato { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; margin-top: 32px; }
+.publico-contato h2, .publico-faq h2 { font-size: 22px; }
+.publico-contato p { color: var(--fg-2); margin-top: 8px; }
+.publico-faq { margin-top: 40px; }
+.publico-faq details { border-bottom: 1px solid var(--border-soft); padding-block: 16px; }
+.publico-faq summary { cursor: pointer; font-weight: 600; }
+.publico-faq details p { color: var(--fg-2); margin-top: 12px; max-width: 75ch; }
+.publico-status { padding-block: 40px; display: grid; gap: 20px; justify-items: start; }
+.publico-status h1 { font-size: 32px; line-height: 1.2; }
+.publico-status p { max-width: 65ch; color: var(--fg-2); }
+.publico-status .lp-acoes { margin-top: 8px; }
+.seguranca-contato { padding: 16px; border: 1px solid var(--border-soft); border-radius: var(--radius-lg); background: var(--surface); margin-block: 16px 24px; display: grid; gap: 12px; }
+.seguranca-contato h2 { font-size: 14px; font-weight: 600; }
+.seguranca-widget { width: 100%; min-width: 0; }
+.pular-conteudo { position: absolute; left: 16px; top: -100px; z-index: 100; background: var(--surface); padding: 12px; border: 1px solid var(--accent); }
+.pular-conteudo:focus { top: 8px; }
+@media (max-width: 767px) {
+  .pagina-publica .lp-nav .lp-links { display: flex; order: 3; width: 100%; }
+  .publico-abertura h1, .publico-status h1 { font-size: 28px; }
+  .seguranca-contato { padding: 12px; }
+}
+
 /* ---------- Impressão A4 (relatórios, boletim e resultados) ---------- */
 .impressao-cab { display: none; }
 @media print {
