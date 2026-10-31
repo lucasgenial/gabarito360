@@ -1,6 +1,6 @@
 # Plano: identidade própria e visual menos genérico
 
-Situação em 30/10/2026: aprovado. V1 a V3 concluídas, V4 em andamento.
+Situação em 30/10/2026: aprovado. V1 a V4 concluídas, V5 em andamento.
 
 **Decisão já tomada:** direção "Atual refinada": azul próprio, verde-água para o que pede atenção e fonte Figtree. Login aprovado: mantém a composição e recebe só as novas cores e a nova fonte.
 

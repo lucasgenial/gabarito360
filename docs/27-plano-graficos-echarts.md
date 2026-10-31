@@ -1,6 +1,6 @@
 # Plano: gráficos com ECharts (V5)
 
-Situação em 30/10/2026: aprovado, com a troca das roscas. G1 em andamento.
+Situação em 30/10/2026: aprovado, com a troca das roscas. G1 e G2 concluídas, G3 em andamento.
 
 ## Decisão já tomada
 
