@@ -27,7 +27,13 @@
       @endif
       <ul class="plan-features">
         @if($p['licencas_min'] && $p['licencas_max'])
-          <li>@if($p['licencas_min'] == $p['licencas_max']){{ $p['licencas_max'] }} {{ $p['licencas_max'] == 1 ? 'licença' : 'licenças' }}@else{{ $p['licencas_min'] }} a {{ $p['licencas_max'] }} licenças@endif</li>
+          <li>
+            @if($p['licencas_min'] == $p['licencas_max'])
+              {{ $p['licencas_max'] }} {{ $p['licencas_max'] == 1 ? 'licença' : 'licenças' }}
+            @else
+              {{ $p['licencas_min'] }} a {{ $p['licencas_max'] }} licenças
+            @endif
+          </li>
         @endif
         @foreach(['escolas' => 'escola(s)', 'turmas' => 'turma(s)', 'provas_mes' => 'prova(s) por mês'] as $chave => $rotulo)
           @if(isset($p['limites'][$chave]))<li>Até {{ $p['limites'][$chave] }} {{ $rotulo }}</li>@endif
