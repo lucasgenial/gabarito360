@@ -34,7 +34,7 @@
         data: d.categorias,
         axisTick: { show: false },
         axisLine: { lineStyle: { color: token('--border') } },
-        axisLabel: { color: apagado, fontSize: 12, interval: d.intervalo === undefined ? 'auto' : d.intervalo, hideOverlap: true }
+        axisLabel: { color: apagado, fontSize: d.intervalo === 0 ? 11 : 12, interval: d.intervalo === undefined ? 'auto' : d.intervalo, hideOverlap: d.intervalo !== 0 }
       },
       yAxis: {
         type: 'value',
