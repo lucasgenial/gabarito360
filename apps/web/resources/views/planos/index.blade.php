@@ -41,7 +41,7 @@
         <li>Leitura de cartões-resposta pelo celular</li>
         <li>Relatórios de avaliações</li>
       </ul>
-      <a class="btn btn-primary" href="{{ route('leads.index', ['plano_id' => $p['modo'] === 'comercial' ? $p['id'] : null]) }}">Falar sobre este plano</a>
+      <a class="btn btn-primary" href="{{ route('leads.index', ['plano_id' => $p['id']]) }}">Falar sobre este plano</a>
     </article>
   @endforeach
 </div>

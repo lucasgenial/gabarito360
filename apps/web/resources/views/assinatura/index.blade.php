@@ -114,7 +114,7 @@
     @if($assinatura['status'] === 'atrasada')
     <div class="alerta-atrasada">
       <p>Sua assinatura está <strong>atrasada</strong>. Regularize o pagamento para restaurar o acesso completo.
-      <a href="{{ route('checkout.index') }}">Renovar agora →</a></p>
+      <a href="{{ route('leads.index') }}">Conversar sobre renovação</a></p>
     </div>
     @endif
 
@@ -205,7 +205,7 @@
     <div class="assinatura-card">
       <h2>Ações</h2>
       <div style="display:flex;gap:1rem;flex-wrap:wrap">
-        <a href="{{ route('checkout.index') }}" class="btn btn-outline">Trocar plano</a>
+        <a href="{{ route('leads.index') }}" class="btn btn-outline">Conversar sobre troca de plano</a>
         <form method="POST" action="{{ route('assinatura.cancelar') }}"
           onsubmit="return confirm('Tem certeza que deseja cancelar a assinatura? O acesso será suspenso imediatamente.')">
           @csrf
@@ -215,7 +215,7 @@
         </form>
       </div>
       <p style="font-size:.8rem;color:var(--color-secondary-06);margin-top:.75rem">
-        Ao cancelar, seus dados são preservados por 90 dias. O acesso é suspenso imediatamente.
+        Para esclarecer as condições de cancelamento, fale com nossa equipe.
       </p>
     </div>
     @endif

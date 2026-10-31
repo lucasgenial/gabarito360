@@ -17,7 +17,7 @@ class LeadController extends Controller
 
         $resposta = $this->api->get('/v1/planos');
         $planos   = collect($resposta['data'] ?? [])
-            ->filter(fn ($p) => $p['modo'] === 'comercial')
+            ->filter(fn ($p) => $p['ativo'] ?? true)
             ->values();
 
         $plano = $planoId ? $planos->firstWhere('id', (int) $planoId) : null;

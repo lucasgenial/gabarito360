@@ -50,4 +50,23 @@ class PaginasPublicasTest extends TestCase
         $this->get('/termos')->assertNotFound();
         $this->get('/privacidade')->assertNotFound();
     }
+
+    public function test_checkout_redireciona_ao_contato_sem_chamar_pagamentos(): void
+    {
+        $this->get('/checkout')->assertRedirect(route('leads.index'));
+        $this->withSession(['auth_token' => 'ficticio'])->get('/checkout?plano_id=15')
+            ->assertRedirect(route('leads.index', ['plano_id' => 15]));
+        $this->post('/checkout', ['plano_id' => 15, 'licencas' => 2])
+            ->assertRedirect(route('leads.index', ['plano_id' => 15]));
+        Http::assertNothingSent();
+    }
+
+    public function test_contato_preserva_interesse_em_plano_individual(): void
+    {
+        Http::fake(['api.test/api/v1/planos' => Http::response(['data' => [[
+            'id' => 15, 'nome' => 'Individual de teste', 'modo' => 'autoatendimento',
+        ]]])]);
+        $this->get('/fale-conosco?plano_id=15')->assertOk()->assertSee('Individual de teste')
+            ->assertSee('name="plano_id" value="15"', false);
+    }
 }
