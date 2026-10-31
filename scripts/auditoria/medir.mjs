@@ -31,6 +31,7 @@ for (const largura of LARGURAS) {
     }
     if (url.pathname.endsWith('/css/app.css')) return rota.fulfill({ path: join(raiz, 'apps/web/public/css/app.css') });
     if (url.pathname.endsWith('/js/app.js')) return rota.fulfill({ path: join(raiz, 'apps/web/public/js/app.js') });
+    if (url.pathname.includes('/js/libs/') || url.pathname.endsWith('/js/graficos.js')) return rota.fulfill({ path: join(raiz, 'apps/web/public', url.pathname.slice(url.pathname.indexOf('/js/'))) });
     if (url.pathname.endsWith('/acompanhar/cartoes')) return rota.fulfill({ json: { cartoes: CARTOES } });
     if (url.pathname.endsWith('/acompanhar/status')) return rota.fulfill({ json: STATUS });
     return rota.abort();
