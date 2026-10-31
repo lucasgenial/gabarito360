@@ -17,18 +17,6 @@
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 
-{{-- KPIs --}}
-<div class="kpi-strip">
-  <div class="card card-pad" style="padding:16px 20px;">
-    <div class="kv" style="color:var(--accent);">{{ $kpis['total_alunos'] ?? 0 }}</div>
-    <div class="kl">Total de alunos</div>
-  </div>
-  <div class="card card-pad" style="padding:16px 20px;">
-    <div class="kv" style="color:var(--success);">{{ $kpis['total_ativos'] ?? 0 }}</div>
-    <div class="kl">Alunos ativos</div>
-  </div>
-</div>
-
 {{-- Filtros --}}
 <form method="GET" class="filtros-cel" action="{{ route('alunos.index') }}" style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:flex-end;">
   <div style="position:relative;flex:1;min-width:200px;">

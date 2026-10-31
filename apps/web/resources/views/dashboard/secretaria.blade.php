@@ -29,24 +29,21 @@
   ];
 @endphp
 
-<x-pagina chamada="Acompanhamento da secretaria" titulo="Painel {{ $nomeSecret }}" subtitulo="{{ $nome }} · supervisão de {{ $kpis['total_redes'] ?? '—' }} redes · consolidação {{ now()->year }}" />
+<x-pagina titulo="Painel {{ $nomeSecret }}" subtitulo="{{ $nome }} · supervisão de {{ $kpis['total_redes'] ?? '—' }} redes · consolidação {{ now()->year }}" />
 
 {{-- KPIs --}}
 <div class="kpi-grid">
   <div class="card kpi">
     <div class="kpi-label">Redes Vinculadas</div>
     <div class="kpi-value">{{ $kpis['total_redes'] ?? '—' }}</div>
-    <div class="kpi-trend">● sob esta secretaria</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Alunos</div>
     <div class="kpi-value">{{ $kpis ? number_format($kpis['total_alunos'], 0, ',', '.') : '—' }}</div>
-    <div class="kpi-trend up">▲ matrículas ativas</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Provas Realizadas</div>
     <div class="kpi-value">{{ $kpis['provas_realizadas'] ?? '—' }}</div>
-    <div class="kpi-trend up">▲ no período letivo</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Média Consolidada</div>
@@ -57,15 +54,13 @@
         —
       @endif
     </div>
-    <div class="kpi-trend">● todas as redes</div>
   </div>
 </div>
 
 {{-- Comparativo de redes --}}
 <div class="card table-wrap">
   <div class="card-pad" style="padding-bottom:0;">
-    <div class="eyebrow">Mapa de desempenho</div>
-    <h3 style="font-size:18px;">Comparativo das redes</h3>
+    <h3 style="font-size:18px;">Redes</h3>
   </div>
   <table class="table lista-cel">
     <thead>

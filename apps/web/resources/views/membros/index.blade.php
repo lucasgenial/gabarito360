@@ -29,7 +29,7 @@
   ];
 @endphp
 
-<x-pagina chamada="Administração" titulo="Membros da Equipe">
+<x-pagina titulo="Membros da Equipe">
   <x-slot:sub>Gerencie os usuários e perfis de acesso do sistema.</x-slot:sub>
     <a href="{{ route('membros.perfis') }}" class="btn btn-ghost">O que cada perfil pode</a>
     @pode('usuario.gerir')<a href="{{ route('membros.create') }}" class="btn btn-primary">+ Novo Membro</a>@endpode

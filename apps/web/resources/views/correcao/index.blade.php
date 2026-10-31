@@ -14,7 +14,6 @@
 
 @section('content')
 <div style="margin-top:12px;">
-  <div class="eyebrow">Correção pelo celular</div>
   <h1 class="page-title">Qual prova você vai corrigir?</h1>
   <p class="page-sub">Toque em <b><x-icone nome="camera" /> Corrigir</b> e fotografe os cartões. O aluno é identificado pelo QR impresso.</p>
 </div>

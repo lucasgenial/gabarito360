@@ -28,7 +28,7 @@
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
-<x-pagina chamada="Aplicação de provas" titulo="{{ \App\Support\Acesso::saudacao() }}, {{ $primeiroNome }}" subtitulo="Provas agendadas para hoje em {{ $dashboard['escola']['nome'] ?? 'sua escola' }}." />
+<x-pagina titulo="{{ \App\Support\Acesso::saudacao() }}, {{ $primeiroNome }}" subtitulo="Provas agendadas para hoje em {{ $dashboard['escola']['nome'] ?? 'sua escola' }}." />
 
 <div class="kpi-grid">
   <div class="card kpi">
@@ -43,7 +43,6 @@
 
 <div class="card table-wrap">
   <div class="card-pad" style="padding-bottom:0;">
-    <div class="eyebrow">Aplicação do dia</div>
     <h3 style="font-size:18px;">Provas para enviar cartões</h3>
   </div>
   <table class="table lista-cel">

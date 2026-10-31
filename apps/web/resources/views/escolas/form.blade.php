@@ -30,7 +30,6 @@
 
 @section('content')
 <div style="margin-top:12px;">
-  <div class="eyebrow">Escolas</div>
   <h1 class="page-title">{{ $novo ? ($tipoAtual === 'anexo' ? 'Cadastrar anexo' : 'Cadastrar escola') : 'Editar escola' }}</h1>
   <p class="page-sub">Mesmos dados do Censo Escolar (INEP) usados no ECOAR. {{ $novo ? 'Digite o código INEP: os dados são preenchidos e você só confere.' : '' }}</p>
 </div>

@@ -54,7 +54,7 @@
   $maxMedia = $top5 ? collect($top5)->max('media') : 10;
 @endphp
 
-<x-pagina chamada="Visão da rede" titulo="Painel administrativo" subtitulo="{{ $nome }} · Administrador · {{ $nomeRede }} · período letivo {{ now()->year }}">
+<x-pagina titulo="Painel administrativo" subtitulo="{{ $nome }} · Administrador · {{ $nomeRede }} · período letivo {{ now()->year }}">
   <a href="{{ route('relatorios.rede') }}" class="btn btn-primary"><x-icone nome="grafico" /> Relatório da rede</a>
 </x-pagina>
 
@@ -70,10 +70,9 @@
     @endif
   </div>
   <div class="card kpi">
-    <div class="kpi-label">Total de Alunos</div>
+    <div class="kpi-label">Alunos</div>
     <div class="kpi-value">{{ $kpis ? number_format($kpis['total_alunos'], 0, ',', '.') : '—' }}</div>
     @if($kpis)
-    <div class="kpi-trend up">▲ matrículas ativas</div>
     @endif
   </div>
   <div class="card kpi">
@@ -103,7 +102,6 @@
   <div class="card card-pad">
     <div class="chart-head">
       <div>
-        <div class="eyebrow">Status da rede</div>
         <h3 style="font-size:18px;">Desempenho médio por escola</h3>
       </div>
       <span class="badge badge-info">5 melhores da última consolidação</span>
@@ -138,7 +136,6 @@
   <div class="card card-pad">
     <div class="section-head">
       <div>
-        <div class="eyebrow">Alertas críticos</div>
         <h3 style="font-size:18px;">Pontos de atenção</h3>
       </div>
       @php $totalAlertas = $alertas ? ($alertas['cartoes_ambiguos'] > 0 ? 1 : 0) + ($alertas['escolas_abaixo_meta'] > 0 ? 1 : 0) + ($alertas['seges_atraso_min'] !== null ? 1 : 0) : 0; @endphp
@@ -206,8 +203,7 @@
   <div class="card-pad" style="padding-bottom:0;">
     <div class="section-head">
       <div>
-        <div class="eyebrow">Usuários e acessos</div>
-        <h3 style="font-size:18px;">Últimos acessos registrados</h3>
+        <h3 style="font-size:18px;">Últimos acessos</h3>
       </div>
       <a href="{{ route('membros.index') }}" class="btn btn-secondary btn-sm">Gerenciar usuários</a>
     </div>

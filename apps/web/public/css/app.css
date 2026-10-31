@@ -208,7 +208,7 @@ img { max-width: 100%; display: block; }
 .kpi .kpi-trend { font-size: 13px; margin-top: 8px; font-weight: 600; }
 .up { color: var(--success); } .down { color: var(--danger); }
 
-.eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.eyebrow { font-size: 13px; font-weight: 600; color: var(--muted); }
 .page-title { font-size: 28px; margin: 6px 0 4px; }
 .page-sub { color: var(--muted); font-size: 14px; }
 
@@ -407,7 +407,7 @@ img { max-width: 100%; display: block; }
 .tela-escola .tab-panel { display:none; }
 .tela-escola .tab-panel.active { display:block; }
 .tela-escola .kpi-card { background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow-sm); }
-.tela-escola .kpi-label { font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em; }
+.tela-escola .kpi-label { font-size:12px;color:var(--muted);font-weight:500; }
 .tela-escola .kpi-value { font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--accent);margin:4px 0 2px; }
 .tela-escola .kpi-delta { font-size:12px; }
 .tela-escola .kpi-delta.up { color:var(--success); }
@@ -971,6 +971,17 @@ html[data-theme="dark"] .user-menu-header { background: var(--surface-2); border
 html[data-theme="dark"] .user-menu-links a { color: var(--fg-2); }
 html[data-theme="dark"] .user-menu-links a:hover { background: var(--surface-2); }
 html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
+
+.table .badge { white-space: nowrap; }
+/* ---------- Números do painel: uma faixa só, em vez de um cartão para cada (docs/26, V3) ---------- */
+.kpi-grid { gap: 0; background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); overflow: hidden; }
+.kpi-grid > .card { border: 0; border-radius: 0; box-shadow: 1px 0 0 var(--border-soft), 0 1px 0 var(--border-soft); }
+.kpi-grid .kpi { padding: 14px 18px; }
+.kpi-grid .kpi-value { font-size: 28px; }
+@media (max-width: 767px) {
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi-grid > .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
 
 /* ---------- Página inicial (docs/26, V2) ---------- */
 .tela-inicio { background: var(--surface); }

@@ -65,7 +65,7 @@
   $subProf = collect(['Suas turmas', $prof['disciplina'] ?? null,
     !empty($prof['total_turmas']) ? $prof['total_turmas'] . ($prof['total_turmas'] == 1 ? ' turma ativa' : ' turmas ativas') : null])->filter()->implode(' · ');
 @endphp
-<x-pagina chamada="Docência" titulo="{{ \App\Support\Acesso::saudacao() }}, {{ $primeiroNome }}" subtitulo="{{ $subProf }}">
+<x-pagina titulo="{{ \App\Support\Acesso::saudacao() }}, {{ $primeiroNome }}" subtitulo="{{ $subProf }}">
   <a href="{{ route('correcao.index') }}" class="btn btn-primary"><x-icone nome="camera" /> Corrigir cartões</a>
   @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-secondary">+ Nova prova</a>@endpode
 </x-pagina>
@@ -75,7 +75,6 @@
   <div class="card kpi">
     <div class="kpi-label">Minhas provas</div>
     <div class="kpi-value">{{ $kpis['minhas_provas'] ?? '—' }}</div>
-    <div class="kpi-trend up">▲ no período letivo</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Cartões p/ corrigir</div>
@@ -89,7 +88,6 @@
   <div class="card kpi">
     <div class="kpi-label">Minhas turmas</div>
     <div class="kpi-value">{{ $kpis['minhas_turmas'] ?? '—' }}</div>
-    <div class="kpi-trend">● turmas ativas</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Média das turmas</div>

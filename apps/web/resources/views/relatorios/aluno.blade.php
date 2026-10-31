@@ -26,7 +26,6 @@
 @include('relatorios._cabecalho', ['cabecalho' => $cabecalho ?? [], 'titulo' => 'Boletim de avaliações', 'subtitulo' => 'Turma ' . $turma['nome']])
 <div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
   <div>
-    <div class="eyebrow no-print">Boletim do aluno</div>
     <h1 class="page-title" style="margin:4px 0 2px;">{{ $aluno['nome'] }}</h1>
     <p class="page-sub">{{ collect(['Turma ' . $turma['nome'], $aluno['matricula'] ? 'Matrícula ' . $aluno['matricula'] : null, $aluno['nome_responsavel'] ? 'Responsável: ' . $aluno['nome_responsavel'] : null])->filter()->implode(' · ') }}</p>
   </div>

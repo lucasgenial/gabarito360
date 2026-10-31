@@ -54,24 +54,21 @@
   ];
 @endphp
 
-<x-pagina chamada="Acompanhamento regional" titulo="Painel {{ $nomeNucleo }}" subtitulo="{{ $nome }} · {{ ($kpis['total_escolas'] ?? 0) == 1 ? '1 escola' : ($kpis['total_escolas'] ?? '—') . ' escolas' }} na regional · consolidação {{ now()->year }}" />
+<x-pagina titulo="Painel {{ $nomeNucleo }}" subtitulo="{{ $nome }} · {{ ($kpis['total_escolas'] ?? 0) == 1 ? '1 escola' : ($kpis['total_escolas'] ?? '—') . ' escolas' }} na regional · consolidação {{ now()->year }}" />
 
 {{-- KPIs --}}
 <div class="kpi-grid">
   <div class="card kpi">
     <div class="kpi-label">Escolas no Núcleo</div>
     <div class="kpi-value">{{ $kpis['total_escolas'] ?? '—' }}</div>
-    <div class="kpi-trend">● calendário da regional</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Alunos</div>
     <div class="kpi-value">{{ $kpis ? number_format($kpis['total_alunos'], 0, ',', '.') : '—' }}</div>
-    <div class="kpi-trend up">▲ matrículas ativas</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Provas Realizadas</div>
     <div class="kpi-value">{{ $kpis['provas_realizadas'] ?? '—' }}</div>
-    <div class="kpi-trend up">▲ no período letivo</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Média do Núcleo</div>
@@ -100,8 +97,7 @@
   {{-- Tabela comparativa de escolas --}}
   <div class="card table-wrap">
     <div class="card-pad" style="padding-bottom:0;">
-      <div class="eyebrow">Mapa de desempenho escolar</div>
-      <h3 style="font-size:18px;">Comparativo das escolas do núcleo</h3>
+      <h3 style="font-size:18px;">Escolas do núcleo</h3>
     </div>
     <table class="table lista-cel">
       <thead>
@@ -141,8 +137,7 @@
   <div class="stack-grid">
     {{-- Gráfico bimestral --}}
     <div class="card card-pad">
-      <div class="eyebrow">Evolução bimestral</div>
-      <h3 style="font-size:18px;">Média consolidada do núcleo</h3>
+      <h3 style="font-size:18px;">Média do núcleo por bimestre</h3>
       <div class="bim-grid">
         @foreach($bimestres as $bim)
           @php
@@ -164,8 +159,7 @@
 
     {{-- Visitas programadas --}}
     <div class="card card-pad">
-      <div class="eyebrow">Visitas programadas</div>
-      <h3 style="font-size:18px;">Próximas agendas em campo</h3>
+      <h3 style="font-size:18px;">Próximas visitas</h3>
       <div class="visit-list">
         @forelse($visitas as $v)
           @php

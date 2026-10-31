@@ -13,7 +13,6 @@
 @section('content')
 
 <div style="margin-top:12px;">
-  <div class="eyebrow">Administração</div>
   <h1 class="page-title">Cadastrar Novo Membro</h1>
   <p class="page-sub">Preencha os dados para adicionar um novo integrante à equipe.</p>
   {{-- Passos do cadastro (o 4º abre depois de salvar) --}}

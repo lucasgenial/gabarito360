@@ -57,7 +57,7 @@
   ];
 @endphp
 
-<x-pagina chamada="Coordenação pedagógica" titulo="Painel da escola" subtitulo="{{ $nome }} · Coordenador(a) · {{ $escola['nome'] ?? '' }}">
+<x-pagina titulo="Painel da escola" subtitulo="{{ $nome }} · Coordenador(a) · {{ $escola['nome'] ?? '' }}">
   <a href="{{ route('correcao.index') }}" class="btn btn-primary"><x-icone nome="camera" /> Corrigir cartões</a>
   @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-secondary">+ Criar prova</a>@endpode
 </x-pagina>
@@ -67,7 +67,6 @@
   <div class="card kpi">
     <div class="kpi-label">Provas em andamento</div>
     <div class="kpi-value">{{ $kpis['provas_andamento'] ?? '—' }}</div>
-    <div class="kpi-trend up">▲ no período letivo</div>
   </div>
   <div class="card kpi">
     <div class="kpi-label">Cartões pendentes de leitura</div>
@@ -90,7 +89,6 @@
   <div class="card kpi">
     <div class="kpi-label">Próximas provas</div>
     <div class="kpi-value">{{ $kpis['proximas_provas'] ?? '—' }}</div>
-    <div class="kpi-trend">● até os próximos 7 dias</div>
   </div>
 </div>
 

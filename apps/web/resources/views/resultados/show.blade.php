@@ -50,7 +50,6 @@
 
 <div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
   <div>
-    <div class="eyebrow no-print">{{ $prova['disciplina'] }} · {{ $prova['titulo'] }}</div>
     <h1 class="page-title" style="margin:4px 0 2px;">{{ $aluno['nome'] }}</h1>
     <p class="page-sub">
       {{ collect([$aluno['turma_nome'] ? 'Turma ' . $aluno['turma_nome'] : null, $aluno['matricula'] ? 'Matrícula ' . $aluno['matricula'] : null, $lingua])->filter()->implode(' · ') }}

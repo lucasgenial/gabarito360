@@ -105,7 +105,6 @@
 <div class="welcome-card">
   <div class="welcome-avatar" aria-hidden="true">{{ $iniciais }}</div>
   <div>
-    <div class="eyebrow">Seu acompanhamento</div>
     <h1 class="page-title" style="margin-bottom:0;">Olá, {{ $primeiroNome }}!</h1>
     <p>{{ $nomeAluno }} ({{ $iniciais }}) · Aluno · {{ $turma }}{{ $escola ? ' · '.$escola : '' }}</p>
   </div>
@@ -116,7 +115,6 @@
   <div class="card kpi">
     <div class="kpi-label">Provas realizadas</div>
     <div class="kpi-value">{{ $kpis['provas_realizadas'] ?? '—' }}</div>
-    <div class="kpi-trend up">▲ no período letivo</div>
   </div>
 
   <div class="card kpi">
