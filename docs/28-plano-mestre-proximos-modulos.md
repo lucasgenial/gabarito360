@@ -950,7 +950,7 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | B3 Redis | concluído | Claude | |
 | B4 Workers | concluído | Claude | |
 | B5 Deploy | pendente | | |
-| B6 Cartão pela fila | em revisão: CI aprovado; sem merge, migração ou deploy | Codex | #61 |
+| B6 Cartão pela fila | em revisão: recuperação de erros e exclusão corrigidas (docs/36); sem merge, migração ou deploy | Codex | #61 |
 | E1 Domínio | concluído | Claude | |
 | E2 Motor de e-mail | concluído | Claude | |
 | E3 Recuperar senha | concluído | Claude | |

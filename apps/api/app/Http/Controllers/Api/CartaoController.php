@@ -4,19 +4,22 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
-use App\Jobs\ProcessarCartaoJob;
 use App\Models\Cartao;
+use App\Models\CartaoEnvio;
 use App\Models\Prova;
 use App\Services\Omr\AtualizadorStatusProva;
 use App\Services\Omr\CalculadoraNota;
 use App\Services\Omr\ImagensCartao;
 use App\Services\Omr\GeradorCartoes;
+use App\Services\Omr\FilaCartoes;
+use App\Services\Omr\ResultadoEnvio;
 use App\Support\Correcao;
 use App\Support\Escopo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CartaoController extends Controller
 {
@@ -111,12 +114,25 @@ class CartaoController extends Controller
             return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
-        if ($cartao->imagem_url) {
-            Storage::disk('public')->delete($cartao->imagem_url);
-        }
-        $cartao->delete(); // respostas, nota e logs de ambiguidade saem em cascata
-
-        AtualizadorStatusProva::atualizar($prova->fresh());
+        DB::transaction(function () use ($cartao, $prova) {
+            $provaAtual = Prova::whereKey($prova->id)->lockForUpdate()->firstOrFail();
+            $atual = Cartao::whereKey($cartao->id)->lockForUpdate()->first();
+            if (! $atual) {
+                return;
+            }
+            abort_if((int) $atual->prova_id !== (int) $provaAtual->id, 409,
+                'O cartão mudou de prova durante a leitura. Atualize a página antes de excluir.');
+            CartaoEnvio::where('cartao_id', $atual->id)->update(['status' => 'recusado', 'resultado' => null,
+                'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
+            $atual->delete(); // respostas, nota e logs de ambiguidade saem em cascata
+            AtualizadorStatusProva::atualizar($provaAtual);
+            DB::afterCommit(function () use ($atual) {
+                if ($atual->imagem_url) {
+                    Storage::disk('public')->delete($atual->imagem_url);
+                }
+                app(ImagensCartao::class)->apagar($atual->id);
+            });
+        });
 
         return ApiResponse::success(['excluido' => true]);
     }
@@ -166,7 +182,7 @@ class CartaoController extends Controller
             'lidos'        => $lidos,
             'pendentes'    => $pendentes,
             'ambiguos'     => $ambiguos,
-            'concluida'    => $prova->fresh()->status === 'corrigida',
+            'concluida'    => $pendentes === 0 && $prova->fresh()->status === 'corrigida',
             'esperados'    => DB::table('alunos')
                 ->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
                 ->where('prova_turmas.prova_id', $provaId)->where('alunos.ativo', true)->count(),
@@ -177,73 +193,72 @@ class CartaoController extends Controller
         ]);
     }
 
-    public function store(Request $request, int $provaId): JsonResponse
+    public function store(Request $request, int $provaId, FilaCartoes $fila): JsonResponse
     {
         $prova = $this->encontrarProva($request, $provaId, envio: true);
-        if (!$prova) {
+        if (! $prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
         if ($bloqueio = Correcao::bloqueio($request->user(), $prova)) {
             return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
-        if (!in_array($prova->status, ['publicada', 'em_correcao', 'corrigida'], true)) {
+        if (! in_array($prova->status, ['publicada', 'em_correcao', 'corrigida'], true)) {
             return ApiResponse::error('A prova precisa estar publicada para receber cartões.', [], 422);
         }
 
         $data = $request->validate([
-            'imagem'   => 'required|image|max:10240',
+            'imagem' => 'required|image|max:10240',
             'aluno_id' => 'sometimes|integer|exists:alunos,id|nullable',
+            'envio_id' => 'sometimes|uuid',
         ]);
 
-        $caminho = $request->file('imagem')->store('cartoes/' . $provaId, 'public');
+        if (! empty($data['aluno_id']) && ! DB::table('alunos')
+            ->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
+            ->where('prova_turmas.prova_id', $provaId)->where('alunos.id', $data['aluno_id'])->exists()) {
+            return ApiResponse::error('O aluno não pertence às turmas desta prova.');
+        }
+        $envio = $fila->receber($request->user(), $provaId, $data['envio_id'] ?? (string) Str::uuid(),
+            $request->file('imagem'), $data['aluno_id'] ?? null);
 
-        $cartao = Cartao::create([
-            'prova_id'   => $provaId,
-            'aluno_id'   => $data['aluno_id'] ?? null,
-            'imagem_url' => $caminho,
-            'status'     => 'pendente',
-        ]);
+        return ApiResponse::success(ResultadoEnvio::resposta($envio, $request->user()), null, 202);
+    }
 
-        // Leitura imediata: a câmera mostra a nota na resposta. Passa para a fila no pacote B6.
-        ProcessarCartaoJob::dispatchSync($cartao->id);
-
-        // Recusado pelo QR (cartão de outra prova que não pode recebê-lo): explica o motivo.
-        if (!Cartao::whereKey($cartao->id)->exists()) {
-            $motivo = \Illuminate\Support\Facades\Cache::pull(ProcessarCartaoJob::chaveRecusa($cartao->id))
-                ?? 'Este cartão não pôde ser corrigido nesta prova.';
-            return ApiResponse::error($motivo, ['motivo' => 'outra_prova'], 422);
+    /** Só o autor acompanha o envio, sempre dentro do escopo original da prova. */
+    public function envio(Request $request, int $provaId, string $chave): JsonResponse
+    {
+        if (! $this->encontrarProva($request, $provaId, envio: true)) {
+            return ApiResponse::notFound('Envio não encontrado.');
+        }
+        $envio = CartaoEnvio::where('usuario_id', $request->user()->id)
+            ->where('prova_id', $provaId)->where('chave', $chave)->first();
+        if (! $envio) {
+            return ApiResponse::notFound('Envio não encontrado.');
+        }
+        $destino = $envio->resultado['prova_id'] ?? $provaId;
+        if (! Escopo::prova($request->user(), $destino)) {
+            return ApiResponse::notFound('Envio não encontrado.');
         }
 
-        // O cartão já foi lido: devolve o resultado para o celular.
-        $cartao->refresh()->load('aluno:id,nome');
+        return ApiResponse::success(ResultadoEnvio::resposta($envio, $request->user()));
+    }
 
-        // Aplicador não vê notas (doc 03): só a confirmação de leitura e o aluno.
-        if ($request->user()->perfil === 'aplicador') {
-            return ApiResponse::success([
-                'id'         => $cartao->id,
-                'status'     => $cartao->status === 'pendente' ? 'processando' : $cartao->status,
-                'aluno_id'   => $cartao->aluno_id,
-                'aluno_nome' => $cartao->aluno?->nome,
-            ], null, 202);
+    public function repetirEnvio(Request $request, int $provaId, string $chave, FilaCartoes $fila): JsonResponse
+    {
+        $prova = $this->encontrarProva($request, $provaId, envio: true);
+        $envio = CartaoEnvio::where('usuario_id', $request->user()->id)
+            ->where('prova_id', $provaId)->where('chave', $chave)->first();
+        if (! $prova || ! $envio) {
+            return ApiResponse::notFound('Envio não encontrado.');
+        }
+        if ($bloqueio = Correcao::bloqueio($request->user(), $prova)) {
+            return ApiResponse::forbidden($bloqueio);
+        }
+        if (! in_array($prova->status, ['publicada', 'em_correcao', 'corrigida'], true)) {
+            return ApiResponse::error('A prova precisa estar publicada para receber cartões.');
         }
 
-        $nota = DB::table('notas')->where('cartao_id', $cartao->id)->first();
-
-        return ApiResponse::success([
-            'id'         => $cartao->id,
-            // Preenchido quando o QR indicou outra prova e o cartão foi corrigido nela
-            'prova_corrigida' => (int) $cartao->prova_id !== $provaId
-                ? DB::table('provas')->where('id', $cartao->prova_id)->value('disciplina') : null,
-            'status'     => $cartao->status === 'pendente' ? 'processando' : $cartao->status,
-            'aluno_id'   => $cartao->aluno_id,
-            'aluno_nome' => $cartao->aluno?->nome,
-            'lingua'     => $cartao->lingua,
-            'acertos'    => $nota->acertos ?? null,
-            'total'      => $nota->total_questoes ?? null,
-            'nota_final' => $nota->nota_final ?? null,
-            'ambiguas'   => DB::table('cartao_respostas')->where('cartao_id', $cartao->id)->where('ambigua', true)->count(),
-        ], null, 202);
+        return ApiResponse::success(ResultadoEnvio::resposta($fila->repetir($envio), $request->user()), null, 202);
     }
 
     /**
