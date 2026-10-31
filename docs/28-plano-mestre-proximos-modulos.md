@@ -949,7 +949,7 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | B2 Senha do banco | cancelado | | |
 | B3 Redis | concluído | Claude | |
 | B4 Workers | concluído | Claude | |
-| B5 Deploy | pendente | | |
+| B5 Deploy | em andamento: roteiro e regressões em preparação (docs/37); dois deploys de aceite ainda pendentes | Codex | |
 | B6 Cartão pela fila | concluído: PR #61 incorporado, migração e deploy verificados; validação com cartão real em produção ainda não executada | Codex | #61 |
 | E1 Domínio | concluído | Claude | |
 | E2 Motor de e-mail | concluído | Claude | |
