@@ -1,0 +1,9 @@
+[Unit]
+Description=Gabarito360: agendador a cada minuto
+
+[Timer]
+OnCalendar=minutely
+Persistent=false
+
+[Install]
+WantedBy=timers.target

@@ -181,16 +181,9 @@ Partes da escala que outros módulos exigem já entram na fase 0.
   4. Documentar a restauração.
 - **Pronto quando:** uma restauração real foi feita e registrada.
 
-#### B2. Senha do banco e arquivos sensíveis
+#### B2. Senha do banco
 
-- **Objetivo:** concluir a troca pendente da senha do banco.
-- **Dependências:** B1.
-- **Passos:**
-  1. O responsável apaga `apps/api/.env.bak-20261029`.
-  2. O responsável troca a senha do banco e atualiza os dois `.env`.
-  3. Reconstruir o cache de configuração e recarregar o PHP-FPM.
-  4. Avaliar `~/projetos/gabarito360-old`.
-- **Pronto quando:** a senha antiga é recusada e o site responde.
+Cancelado em 31/10/2026 por decisão do responsável. A senha do banco não será trocada.
 
 #### B3. Redis para cache, sessão e fila
 
@@ -953,9 +946,9 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | Pacote | Situação | Responsável | PR |
 |---|---|---|---|
 | B1 Backup | em andamento: falta teste de restauração | Claude | |
-| B2 Senha do banco | pendente | | |
-| B3 Redis | pendente | | |
-| B4 Workers | pendente | | |
+| B2 Senha do banco | cancelado | | |
+| B3 Redis | em andamento | Claude | |
+| B4 Workers | em andamento | Claude | |
 | B5 Deploy | pendente | | |
 | B6 Cartão pela fila | pendente | | |
 | E1 Domínio | concluído | Claude | |

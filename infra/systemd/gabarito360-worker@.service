@@ -1,0 +1,15 @@
+[Unit]
+Description=Gabarito360: worker da fila %i
+After=network-online.target redis-server.service
+Wants=network-online.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/home/lucasdev/projetos/gabarito360/apps/api
+ExecStart=/usr/bin/php artisan queue:work redis --queue=alta,padrao,baixa --sleep=3 --tries=3 --timeout=120 --max-time=3600 --memory=256
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
