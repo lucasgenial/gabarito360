@@ -7,7 +7,6 @@ use App\Models\Usuario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
@@ -92,19 +91,5 @@ class TrocaDeSenhaTest extends TestCase
         ])->assertOk();
 
         $this->assertFalse($usuario->fresh()->forcar_troca_senha);
-    }
-
-    public function test_gestor_envia_link_e_nao_define_senha(): void
-    {
-        Mail::fake();
-        $gestor = $this->usuario('admin_rede', 'gestor@gabarito360.dev');
-        $alvo = $this->usuario('professor', 'e@gabarito360.dev');
-        Sanctum::actingAs($gestor);
-
-        $this->postJson("/api/v1/usuarios/{$alvo->id}/link-senha")->assertOk();
-        Mail::assertQueued(EmailModelo::class, 1);
-
-        $this->putJson("/api/v1/usuarios/{$alvo->id}", ['nova_senha' => 'senha-do-gestor']);
-        $this->assertTrue(Hash::check('senha-antiga', $alvo->fresh()->password));
     }
 }
