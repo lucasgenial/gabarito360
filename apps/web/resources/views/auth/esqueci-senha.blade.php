@@ -25,7 +25,7 @@
 @section('content')
 <div class="auth-wrap">
   <aside class="auth-aside">
-    <a class="brand"><span class="logo">G360</span> Gabarito360</a>
+    <a class="brand" href="{{ route('home') }}"><span class="logo">G360</span> Gabarito360</a>
     <div class="aside-body">
       <h1>Recupere o acesso à sua conta.</h1>
       <p>Informe seu e-mail institucional e enviaremos um link para redefinir sua senha.</p>

@@ -11,8 +11,10 @@
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" />
 @stack('styles')
 </head>
-<body class="area-publica">
-@yield('content')
+<body class="area-publica pagina-acesso">
+@unless(request()->routeIs('login'))<x-menu-publico />@endunless
+<div class="acesso-conteudo">@yield('content')</div>
+@unless(request()->routeIs('login'))<x-rodape-publico />@endunless
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
 @stack('scripts')
 </body>
