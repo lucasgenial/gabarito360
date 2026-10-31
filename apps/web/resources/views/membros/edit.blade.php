@@ -183,7 +183,7 @@
     <section class="section-card">
       <div class="section-head">
         <h2>Acesso ao Sistema</h2>
-        <p>A senha é sempre criada pela própria pessoa. Use os botões abaixo do formulário para enviar um link.</p>
+        <p>A senha é sempre criada pela própria pessoa. Envie um link para que ela defina uma nova senha.</p>
       </div>
       <div class="section-body">
         <div class="field">
@@ -192,6 +192,13 @@
               Forçar troca de senha no próximo login
             </label>
           </div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:18px;">
+          <button type="submit" form="reenviar-convite" class="btn btn-secondary">Reenviar convite por e-mail</button>
+          <button type="submit" form="enviar-link-senha" class="btn btn-secondary">Enviar link para criar nova senha</button>
+          <button type="submit" form="alternar-acesso" class="btn btn-secondary">
+            {{ ($membro['ativo'] ?? true) ? 'Desativar membro' : 'Ativar membro' }}
+          </button>
+        </div>
       </div>
     </section>
 
@@ -202,21 +209,16 @@
   </div>
 </form>
 
-<form method="POST" action="{{ route('membros.convite', $membro['id']) }}" style="margin-top:12px;">
+<form id="reenviar-convite" method="POST" action="{{ route('membros.convite', $membro['id']) }}">
   @csrf
-  <button type="submit" class="btn btn-secondary">Reenviar convite por e-mail</button>
 </form>
 
-<form method="POST" action="{{ route('membros.link-senha', $membro['id']) }}" style="margin-top:12px;">
+<form id="enviar-link-senha" method="POST" action="{{ route('membros.link-senha', $membro['id']) }}">
   @csrf
-  <button type="submit" class="btn btn-secondary">Enviar link para criar nova senha</button>
 </form>
 
-<form method="POST" action="{{ route('membros.toggle', $membro['id']) }}" style="margin-top:12px;">
+<form id="alternar-acesso" method="POST" action="{{ route('membros.toggle', $membro['id']) }}">
   @csrf
-  <button type="submit" class="btn btn-secondary">
-    {{ ($membro['ativo'] ?? true) ? 'Desativar membro' : 'Ativar membro' }}
-  </button>
 </form>
 
 <div style="height:48px"></div>
