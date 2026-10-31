@@ -83,7 +83,6 @@ Cada pacote traz: objetivo, dependências, arquivos, passos e critério de pront
 | `QUEUE_CONNECTION=sync` e nenhum worker | Tudo roda dentro da requisição, inclusive a leitura de cartão |
 | Cache e sessão em arquivo ou banco, com Redis instalado e sem uso | Gargalo sob carga |
 | Nenhuma notificação | Módulo inexistente |
-| Nenhum backup encontrado no CT 111 | Não confirmado. `mysqldump` não está instalado no contêiner, e o servidor de banco 10.0.0.6 não foi verificado |
 | `alunos.cpf` vazio nos 414 alunos e `data_nascimento` em 360 | CPF não serve para validar o portal agora; 54 alunos ficariam sem acesso |
 | Só existe `nome_responsavel` | Não há contato para confirmar o responsável |
 | `nucleos` só tem nome e órgão regional | Faltam dados para a edição |
@@ -172,17 +171,14 @@ Partes da escala que outros módulos exigem já entram na fase 0.
 
 #### B1. Backup verificado
 
-- **Objetivo:** confirmar ou criar backup diário do banco `gabarito-360` e das fotos, com restauração testada.
+- **Objetivo:** copiar para o computador o backup diário do Proxmox e testar a restauração. Detalhes em `docs/operacao/backup.md`.
 - **Dependências:** nenhuma.
 - **Arquivos:** novo `docs/operacao/backup.md`; scripts em `scripts/operacao/`.
 - **Passos:**
-  1. Verificar se 10.0.0.6 já tem rotina de backup.
-  2. Instalar o cliente MariaDB no CT 111, se faltar.
-  3. Criar `scripts/operacao/backup.sh` para banco e `storage/app/public`.
-  4. Manter 7 cópias diárias e 4 semanais, fora do contêiner.
-  5. Agendar por cron.
-  6. Restaurar em banco temporário e comparar contagens.
-  7. Documentar a restauração.
+  1. Copiar os backups para o D:, com checksum. Feito.
+  2. Restaurar CT 106 e CT 111 em ambiente isolado.
+  3. Comparar contagens de registros.
+  4. Documentar a restauração.
 - **Pronto quando:** uma restauração real foi feita e registrada.
 
 #### B2. Senha do banco e arquivos sensíveis
@@ -956,13 +952,13 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 
 | Pacote | Situação | Responsável | PR |
 |---|---|---|---|
-| B1 Backup | pendente | | |
+| B1 Backup | em andamento: falta teste de restauração | Claude | |
 | B2 Senha do banco | pendente | | |
 | B3 Redis | pendente | | |
 | B4 Workers | pendente | | |
 | B5 Deploy | pendente | | |
 | B6 Cartão pela fila | pendente | | |
-| E1 Domínio | pendente | | |
+| E1 Domínio | concluído | Claude | |
 | E2 Motor de e-mail | pendente | | |
 | E3 Recuperar senha | pendente | | |
 | E4 Modelos | pendente | | |

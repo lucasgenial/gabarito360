@@ -1,0 +1,47 @@
+#!/bin/bash
+# Entrega os backups do SSD SATA ao computador de cópia, só para leitura.
+# Comandos: preparar | listar | ler <arquivo> | encerrar
+set -euo pipefail
+
+MOUNT=/mnt/pve/backup-sata
+DEVICE=/dev/disk/by-label/PVE_BACKUP_SATA
+LOCK=/run/lock/proxmox-backup-sata.lock
+
+die() { echo "ERRO: $*" >&2; exit 1; }
+
+args=("$@")
+
+case "${args[0]:-}" in
+  preparar)
+    hora=$((10#$(date +%H)))
+    (( hora < 2 || hora >= 5 )) || { echo "ERRO: janela do backup diario" >&2; exit 75; }
+    exec 9>"$LOCK"
+    flock -n 9 || { echo "ERRO: backup em andamento" >&2; exit 75; }
+    [[ -e "$DEVICE" ]] || die "disco PVE_BACKUP_SATA nao encontrado"
+    mountpoint -q "$MOUNT" || mount -o ro "$MOUNT"
+    echo pronto
+    ;;
+  listar)
+    mountpoint -q "$MOUNT" || die "SSD nao preparado"
+    find "$MOUNT/dump" -maxdepth 1 -type f -name 'vzdump-*.tar.zst' -printf '%f\n' | sort | while read -r nome; do
+      arquivo="$MOUNT/dump/$nome"
+      [[ -f "$arquivo.sha256" ]] || continue
+      printf '%s\t%s\t%s\n' "$nome" "$(stat -c %s "$arquivo")" "$(cut -d' ' -f1 "$arquivo.sha256")"
+    done
+    ;;
+  ler)
+    nome="${args[1]:-}"
+    [[ "$nome" =~ ^vzdump-(lxc|qemu)-[0-9]+-[0-9_]+-[0-9_]+\.tar\.zst$ ]] || die "nome de arquivo recusado"
+    mountpoint -q "$MOUNT" || die "SSD nao preparado"
+    exec cat -- "$MOUNT/dump/$nome"
+    ;;
+  encerrar)
+    exec 9>"$LOCK"
+    flock -n 9 || { echo "backup em andamento; SSD mantido"; exit 0; }
+    mountpoint -q "$MOUNT" && umount "$MOUNT" || true
+    echo encerrado
+    ;;
+  *)
+    die "comando recusado"
+    ;;
+esac
