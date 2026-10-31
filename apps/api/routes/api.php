@@ -35,7 +35,7 @@ Route::prefix('v1')->group(function () {
     Route::get('planos', [PlanoController::class, 'index']);
 
     // Fale Conosco (público)
-    Route::post('leads', [LeadController::class, 'store']);
+    Route::post('leads', [LeadController::class, 'store'])->middleware('throttle:5,1');
 
     // Foto do cartão por link temporário assinado: o navegador busca direto, sem passar pela web
     Route::get('cartoes/{id}/arquivo/{tipo}', [CartaoController::class, 'arquivo'])
@@ -45,8 +45,8 @@ Route::prefix('v1')->group(function () {
     // Rotas públicas de autenticação
     Route::prefix('auth')->group(function () {
         Route::post('login',           [AuthController::class, 'login']);
-        Route::post('esqueci-senha',   [AuthController::class, 'esqueceuSenha']);
-        Route::post('redefinir-senha', [AuthController::class, 'redefinirSenha']);
+        Route::post('esqueci-senha',   [AuthController::class, 'esqueceuSenha'])->middleware('throttle:5,1');
+        Route::post('redefinir-senha', [AuthController::class, 'redefinirSenha'])->middleware('throttle:10,1');
     });
 
     // Rotas protegidas
