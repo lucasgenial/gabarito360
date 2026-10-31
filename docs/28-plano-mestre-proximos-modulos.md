@@ -1,6 +1,6 @@
 # 28 — Plano mestre dos próximos módulos
 
-Situação em 31/10/2026: segunda revisão, com clientes, espaços, financeiro e LGPD. Aguarda aprovação. Nada deste plano foi aplicado.
+Situação em 31/10/2026: execução iniciada, com conciliação do quadro por Codex após consulta ao GitHub e ao commit publicado. Os diagnósticos da seção 2 são históricos; consultar a seção 6 para o andamento atual.
 
 Este documento é a fonte de verdade para pessoas e agentes de IA. Quem for executar um pacote lê a seção 1, as decisões da seção 4, o próprio pacote e `docs/33-lgpd-privacidade-e-consentimento.md`.
 
@@ -945,21 +945,21 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 
 | Pacote | Situação | Responsável | PR |
 |---|---|---|---|
-| B1 Backup | em andamento: falta teste de restauração | Claude | |
+| B1 Backup | em revisão: restauração registrada no PR #62; CI aprovado, aguarda merge | Claude / Codex | #51, #62 |
 | B2 Senha do banco | cancelado | | |
 | B3 Redis | concluído | Claude | |
 | B4 Workers | concluído | Claude | |
 | B5 Deploy | pendente | | |
-| B6 Cartão pela fila | pendente | | |
+| B6 Cartão pela fila | em revisão: CI aprovado; sem merge, migração ou deploy | Codex | #61 |
 | E1 Domínio | concluído | Claude | |
 | E2 Motor de e-mail | concluído | Claude | |
 | E3 Recuperar senha | concluído | Claude | |
 | E4 Modelos | fase 1 concluída; fase 2 pendente | Claude | |
-| E5 Convite | concluído no código; falta teste real | Claude | |
+| E5 Convite | código incorporado e publicado; falta teste real de convite | Claude / Codex | #54, #55 |
 | E6 Trocar e-mail | concluído no código; falta teste real | Claude | |
-| E7 Fale Conosco | concluído, falta Turnstile | Claude | |
-| E8 Páginas públicas | pendente | | |
-| L1 Publicar termos | em andamento: prévias com campos a preencher autorizadas; publicação e aceite pendentes (docs/35) | Codex | |
+| E7 Fale Conosco | Turnstile incorporado e publicado; ativação e envio real protegido a confirmar | Claude / Codex | #53, #58 |
+| E8 Páginas públicas | entrega visual publicada; termos e privacidade adiados pelo responsável | Codex | #59, #60 |
+| L1 Publicar termos | em andamento: prévias com campos a preencher autorizadas; publicação e aceite pendentes (docs/35) | Codex | #64 |
 | L2 Inventário | pendente | | |
 | L3 Proteção | pendente | | |
 | L4 Titulares | pendente | | |
