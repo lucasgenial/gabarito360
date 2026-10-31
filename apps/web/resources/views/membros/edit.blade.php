@@ -27,7 +27,6 @@
 <div style="margin-top:12px;">
   <h1 class="page-title">Editar membro</h1>
   <p class="page-sub">Atualize as informações do membro da equipe.</p>
-  <a href="{{ route('membros.permissoes', $membro['id']) }}" class="btn btn-secondary btn-sm" style="margin-top:8px;">Permissões deste membro</a>
 </div>
 
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
@@ -69,9 +68,12 @@
   <div class="form-main">
     {{-- Perfil e acesso --}}
     <section class="section-card">
-      <div class="section-head">
-        <h2>Perfil e acesso</h2>
-        <p>Altere o perfil ou o status de acesso do membro.</p>
+      <div class="section-head" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2>Perfil e acesso</h2>
+          <p>Altere o perfil ou o status de acesso do membro.</p>
+        </div>
+        <a href="{{ route('membros.permissoes', $membro['id']) }}" class="btn btn-secondary btn-sm">Permissões deste membro</a>
       </div>
       <div class="section-body">
         <div class="form-grid-2">
