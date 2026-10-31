@@ -15,6 +15,7 @@ As decisões de retenção abaixo são políticas aprovadas para implementação
 | Correio da equipe | Gmail pessoal | Não presumir Google Workspace ou um DPA corporativo; modalidade/adequação contratual permanece em revisão |
 | Mercado Pago | Sem assinatura ou pagamento real ativo | Declaração; não foi consultada a conta nem o banco. Código e tabelas continuam existentes, para avaliar antes de ativar |
 | API | Destinada exclusivamente a esta aplicação; manter política atual, sem introduzir limite fixo de oito horas | Decisão recebida após apresentar a proposta. Não equivale a confirmar isolamento de rede ou expiração automática dos tokens |
+| Sessão web | Confirmados 120 minutos de inatividade do usuário no aplicativo | Esclarecimento posterior do responsável: a objeção anterior tratava do prazo proposto para tokens API, não dos 120 minutos da sessão web. Não é limite total de permanência no aplicativo; atividade que renova a sessão reinicia a contagem |
 | Cloudflare Web Analytics | Manter e documentar | Decisão do responsável; sem alteração no painel. Atualização do aviso fica apenas na view de prévia, sem rota pública |
 
 Razão social, CNPJ, endereço, identificação do encarregado e responsável de cada instituição continuam como campos a preencher, conforme orientação anterior. A identificação por função neste registro não substitui esses dados.
