@@ -1,6 +1,6 @@
 # 40 — T1: clientes, espaços e vínculos
 
-Status: **proposta para aprovação**, 31/10/2026. Base: main `54bf83454a8ad1b3a17cd4050be18ddee46a3597`, após L6 e seu registro de publicação. Decisor: responsável pelo produto. Este documento não cria tabelas, não executa migrações e não autoriza publicação.
+Status: **aprovado pelo responsável em 31/10/2026**, PR #73 incorporado em `294f7078f4c5bb089d82165f9d03aa9dcc42cfe9`. Base da análise: main `54bf83454a8ad1b3a17cd4050be18ddee46a3597`, após L6 e seu registro de publicação. O responsável autorizou iniciar T2. Este documento não cria tabelas, não executa migrações e não autoriza publicação.
 
 Referências: [plano mestre](28-plano-mestre-proximos-modulos.md), [perfis](03-perfis-e-permissoes.md), [privacidade](33-lgpd-privacidade-e-consentimento.md), [decisões de retenção](39-validacoes-l2.md), [inventário de pontos de consulta](41-t1-mapa-de-consultas.md). A numeração 40 substitui o nome previsto em T1, pois 35 já identifica as prévias jurídicas.
 
@@ -169,4 +169,4 @@ Aprovar T1 significa aceitar: propriedade por espaço, hierarquia institucional 
 
 Permanecem: identificação contratual dos clientes reais no manifesto T2, prazos por instituição, contratos dos terceiros e decisões L2, campos da empresa em L1. Não há exclusão de fotos/coluna legada, alteração de TTL de API, publicação jurídica ou ativação financeira nesta proposta. L3/L6 publicados e decisões anteriores continuam válidos.
 
-Critério de pronto de T1: documento e mapa revisados, seis casos cobertos, CI do PR aprovado e aprovação explícita do responsável. Até lá, quadro **em revisão**; T2 não iniciado.
+Critério de pronto de T1 atendido: documento e mapa revisados, seis casos cobertos, CI do PR aprovado e aprovação explícita do responsável. T2 iniciado pelo diagnóstico e conciliação T2-A; os gates de implantação e aprovação do manifesto continuam aplicáveis.
