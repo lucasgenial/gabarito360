@@ -1,27 +1,55 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
 <title>{{titulo}}</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+  table { border-collapse: collapse; }
+  a { color: #1d4f9e; }
+  @media (max-width: 620px) {
+    .moldura { padding: 0 !important; }
+    .cartao { border-radius: 0 !important; }
+    .miolo { padding: 28px 22px !important; }
+    .topo { padding: 22px !important; border-radius: 0 !important; }
+    .rodape { padding: 22px !important; border-radius: 0 !important; }
+    .titulo { font-size: 24px !important; }
+    .botao, .botao a { width: 100% !important; box-sizing: border-box; text-align: center !important; }
+    .rotulo { display: block !important; width: auto !important; padding-bottom: 0 !important; }
+    .valor { display: block !important; padding-top: 2px !important; }
+  }
+</style>
 </head>
-<body style="margin:0;padding:0;background:#f4f6fa;font-family:Figtree,'Segoe UI',Arial,sans-serif;color:#16233a;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fa;">
+<body style="margin:0;padding:0;background-color:#e9eef6;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#e9eef6" style="background-color:#e9eef6;">
   <tr>
-    <td align="center" style="padding:24px 12px;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+    <td class="moldura" align="center" style="padding:32px 16px;">
+      <table role="presentation" class="cartao" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;">
         <tr>
-          <td style="padding:0 4px 16px;font-size:18px;font-weight:700;color:#1d4f9e;">Gabarito360</td>
+          <td class="topo" bgcolor="#1d4f9e" style="background-color:#1d4f9e;border-radius:12px 12px 0 0;padding:24px 32px;">
+            <table role="presentation" cellpadding="0" cellspacing="0">
+              <tr>
+                <td width="44" height="44" align="center" valign="middle" bgcolor="#ffffff" style="width:44px;height:44px;background-color:#ffffff;border-radius:8px;font-family:Consolas,'Courier New',monospace;font-size:14px;font-weight:700;color:#1d4f9e;">G360</td>
+                <td style="padding-left:12px;font-family:Figtree,'Segoe UI',Arial,sans-serif;font-size:22px;font-weight:800;color:#ffffff;">Gabarito360</td>
+              </tr>
+            </table>
+          </td>
         </tr>
         <tr>
-          <td style="background:#ffffff;border:1px solid #dbe2ed;border-radius:8px;padding:28px 24px;font-size:16px;line-height:1.55;">
+          <td class="miolo" bgcolor="#ffffff" style="background-color:#ffffff;padding:36px 32px 32px;font-family:Figtree,'Segoe UI',Arial,sans-serif;font-size:16px;line-height:1.6;color:#16233a;">
             {{conteudo}}
           </td>
         </tr>
         <tr>
-          <td style="padding:16px 4px;font-size:13px;line-height:1.5;color:#56637a;">
-            Esta mensagem foi enviada pelo Gabarito360. Em caso de dúvida, escreva para contatos@gabarito360.com.br.<br>
-            © {{ano}} Gabarito360
+          <td class="rodape" bgcolor="#f4f6fa" style="background-color:#f4f6fa;border-top:1px solid #dbe2ed;border-radius:0 0 12px 12px;padding:22px 32px;font-family:Figtree,'Segoe UI',Arial,sans-serif;font-size:13px;line-height:1.55;color:#56637a;">
+            <strong style="color:#1d4f9e;">Gabarito360</strong> · Correção de provas pelo celular<br>
+            Dúvidas? Escreva para <a href="mailto:contatos@gabarito360.com.br" style="color:#1d4f9e;">contatos@gabarito360.com.br</a><br>
+            <a href="https://gabarito360.com.br" style="color:#56637a;">gabarito360.com.br</a> · © {{ano}}
           </td>
         </tr>
       </table>
