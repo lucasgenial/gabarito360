@@ -88,4 +88,9 @@ class AuthTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_sem_login_responde_401_mesmo_sem_pedir_json(): void
+    {
+        $this->get('/api/v1/provas')->assertUnauthorized();
+    }
 }
