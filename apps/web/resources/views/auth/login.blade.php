@@ -25,7 +25,7 @@
 @section('content')
 <div class="auth-wrap">
   <aside class="auth-aside">
-    <a class="brand"><span class="logo">G360</span> Gabarito360</a>
+    <a class="brand" href="{{ route('home') }}"><span class="logo">G360</span> Gabarito360</a>
     <div class="aside-body">
       <h1>Da prova impressa à nota da turma, pelo celular.</h1>
       <p>Crie provas, capture cartões-resposta pelo celular e acompanhe o desempenho das turmas.</p>
@@ -73,6 +73,7 @@
         </div>
         <button type="submit" class="btn btn-primary btn-block">Entrar no painel</button>
       </form>
+      <a href="{{ route('home') }}" class="btn btn-ghost btn-block login-voltar">Voltar ao início</a>
     </div>
   </main>
 </div>

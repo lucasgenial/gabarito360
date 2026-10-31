@@ -5,7 +5,7 @@
 @section('content')
 <main class="convite">
   <div class="convite-cartao">
-    <a class="brand convite-marca"><span class="logo">G360</span> Gabarito360</a>
+    <a class="brand convite-marca" href="{{ route('home') }}"><span class="logo">G360</span> Gabarito360</a>
     <h1>Troque sua senha</h1>
 
     @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
