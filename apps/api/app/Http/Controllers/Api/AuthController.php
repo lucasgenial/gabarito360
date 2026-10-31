@@ -4,17 +4,22 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
+use App\Mail\EmailModelo;
 use App\Models\Assinatura;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    private const VALIDADE_LINK_MINUTOS = 60;
+
     public function login(Request $request): JsonResponse
     {
         $request->validate([
@@ -86,16 +91,23 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $usuario = Usuario::where('email', $request->email)->first();
+        $usuario = Usuario::where('email', $request->email)->where('ativo', true)->first();
 
         if ($usuario) {
             $token = Str::random(64);
 
             DB::table('password_reset_tokens')->upsert(
-                ['email' => $request->email, 'token' => Hash::make($token), 'created_at' => now()],
+                ['email' => $usuario->email, 'token' => Hash::make($token), 'created_at' => now()],
                 ['email'],
                 ['token', 'created_at']
             );
+
+            $link = config('emails.url_web') . '/redefinir-senha?' . http_build_query(['token' => $token, 'email' => $usuario->email]);
+
+            Mail::to($usuario->email)->queue(new EmailModelo('recuperar-senha', 'Redefina sua senha do Gabarito360', [
+                'nome' => $usuario->nome,
+                'link' => $link,
+            ]));
         }
 
         // Sempre retorna sucesso por segurança (evita enumeração de e-mails)
@@ -120,16 +132,25 @@ class AuthController extends Controller
             return ApiResponse::error('Token inválido ou expirado.', [], 422);
         }
 
-        if (now()->diffInHours($record->created_at) >= 24) {
-            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        if (Carbon::parse($record->created_at)->addMinutes(self::VALIDADE_LINK_MINUTOS)->isPast()) {
             return ApiResponse::error('Link expirado. Solicite um novo link de recuperação.', [], 422);
         }
 
-        Usuario::where('email', $request->email)
-            ->update(['password' => Hash::make($request->password)]);
+        $usuario = Usuario::where('email', $request->email)->first();
+        if (!$usuario) {
+            return ApiResponse::error('Token inválido ou expirado.', [], 422);
+        }
 
-        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        $usuario->update(['password' => Hash::make($request->password)]);
+        $usuario->tokens()->delete(); // encerra as sessões abertas com a senha antiga
 
-        return ApiResponse::success(['mensagem' => 'Senha redefinida com sucesso.']);
+        Mail::to($usuario->email)->queue(new EmailModelo('senha-alterada', 'Sua senha do Gabarito360 foi alterada', [
+            'nome'   => $usuario->nome,
+            'quando' => now()->timezone('America/Bahia')->format('d/m/Y \à\s H:i'),
+        ]));
+
+        return ApiResponse::success(['mensagem' => 'Senha redefinida.']);
     }
 }
