@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Mail\EmailModelo;
+use App\Services\ContaUsuario;
 use App\Models\Assinatura;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
@@ -87,6 +88,63 @@ class AuthController extends Controller
         return ApiResponse::success($request->user()->fresh());
     }
 
+    /** Pede a troca de e-mail: o endereço atual segue valendo até a confirmação. */
+    public function trocarEmail(Request $request, ContaUsuario $conta): JsonResponse
+    {
+        $data = $request->validate([
+            'novo_email'  => 'required|email|max:190|unique:usuarios,email',
+            'senha_atual' => 'required|string',
+        ], ['novo_email.unique' => 'Este e-mail já está em uso.']);
+
+        if (!Hash::check($data['senha_atual'], $request->user()->password)) {
+            return ApiResponse::error('Senha atual incorreta.', [], 422);
+        }
+
+        $conta->pedirTrocaDeEmail($request->user(), $data['novo_email']);
+
+        return ApiResponse::success(['mensagem' => 'Enviamos um link de confirmação para o novo e-mail.']);
+    }
+
+    public function confirmarEmail(Request $request, ContaUsuario $conta): JsonResponse
+    {
+        $data = $request->validate(['token' => 'required|string']);
+
+        if (!$conta->confirmarTrocaDeEmail($data['token'])) {
+            return ApiResponse::error('Link inválido ou expirado. Peça a troca de e-mail novamente.', [], 422);
+        }
+
+        return ApiResponse::success(['mensagem' => 'E-mail confirmado.']);
+    }
+
+    /** Mostra ao convidado a função e o vínculo antes de aceitar. */
+    public function consultarConvite(Request $request, ContaUsuario $conta): JsonResponse
+    {
+        $data = $request->validate(['email' => 'required|email', 'token' => 'required|string']);
+
+        $usuario = Usuario::where('email', $data['email'])->first();
+        $convite = $conta->convitePendente($data['email'], $data['token']);
+        if (!$usuario || !$convite) {
+            return ApiResponse::error('Convite inválido ou vencido.', [], 422);
+        }
+
+        return ApiResponse::success($conta->dadosDoConvite($usuario, Usuario::find($convite->convidado_por)));
+    }
+
+    public function recusarConvite(Request $request, ContaUsuario $conta): JsonResponse
+    {
+        $data = $request->validate(['email' => 'required|email', 'token' => 'required|string']);
+
+        $usuario = Usuario::where('email', $data['email'])->first();
+        $convite = $conta->convitePendente($data['email'], $data['token']);
+        if (!$usuario || !$convite) {
+            return ApiResponse::error('Convite inválido ou vencido.', [], 422);
+        }
+
+        $conta->recusarConvite($usuario, $convite);
+
+        return ApiResponse::success(['mensagem' => 'Convite recusado.']);
+    }
+
     public function esqueceuSenha(Request $request): JsonResponse
     {
         $request->validate(['email' => 'required|email']);
@@ -97,9 +155,9 @@ class AuthController extends Controller
             $token = Str::random(64);
 
             DB::table('password_reset_tokens')->upsert(
-                ['email' => $usuario->email, 'token' => Hash::make($token), 'created_at' => now()],
+                ['email' => $usuario->email, 'token' => Hash::make($token), 'created_at' => now(), 'expira_em' => null],
                 ['email'],
-                ['token', 'created_at']
+                ['token', 'created_at', 'expira_em']
             );
 
             $link = config('emails.url_web') . '/redefinir-senha?' . http_build_query(['token' => $token, 'email' => $usuario->email]);
@@ -134,7 +192,8 @@ class AuthController extends Controller
 
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        if (Carbon::parse($record->created_at)->addMinutes(self::VALIDADE_LINK_MINUTOS)->isPast()) {
+        $expira = $record->expira_em ? Carbon::parse($record->expira_em) : Carbon::parse($record->created_at)->addMinutes(self::VALIDADE_LINK_MINUTOS);
+        if ($expira->isPast()) {
             return ApiResponse::error('Link expirado. Solicite um novo link de recuperação.', [], 422);
         }
 
@@ -145,6 +204,10 @@ class AuthController extends Controller
 
         $usuario->update(['password' => Hash::make($request->password)]);
         $usuario->tokens()->delete(); // encerra as sessões abertas com a senha antiga
+
+        if ($record->expira_em) { // convite: é a primeira senha, não uma troca
+            return ApiResponse::success(['mensagem' => 'Senha criada.']);
+        }
 
         Mail::to($usuario->email)->queue(new EmailModelo('senha-alterada', 'Sua senha do Gabarito360 foi alterada', [
             'nome'   => $usuario->nome,

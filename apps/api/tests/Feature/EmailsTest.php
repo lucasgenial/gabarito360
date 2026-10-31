@@ -105,4 +105,118 @@ class EmailsTest extends TestCase
             && $m->hasTo('contatos@gabarito360.dev') && $m->responderPara === 'ana@escola.dev');
         Mail::assertQueued(EmailModelo::class, fn ($m) => $m->modelo === 'fale-conosco-confirmacao' && $m->hasTo('ana@escola.dev'));
     }
+
+    private function convidar(Usuario $usuario): string
+    {
+        $gestor = Usuario::create([
+            'perfil' => 'dir_escolar', 'nome' => 'Dir. Ana', 'email' => 'dir@gabarito360.dev',
+            'cpf' => '00000000088', 'password' => Hash::make('x'), 'ativo' => true,
+        ]);
+        app(\App\Services\ContaUsuario::class)->convidar($usuario, $gestor);
+
+        $token = null;
+        Mail::assertQueued(EmailModelo::class, function ($m) use (&$token) {
+            if ($m->modelo === 'convite-usuario') {
+                parse_str((string) parse_url((string) $m->dados['link'], PHP_URL_QUERY), $q);
+                $token = $q['token'];
+            }
+            return true;
+        });
+
+        return $token;
+    }
+
+    public function test_convite_informa_funcao_e_quem_convidou_e_cria_a_senha(): void
+    {
+        Mail::fake();
+        $usuario = $this->usuario();
+        $token = $this->convidar($usuario);
+
+        Mail::assertQueued(EmailModelo::class, fn ($m) => $m->modelo === 'convite-usuario'
+            && $m->dados['funcao'] === 'Professor' && $m->dados['convidado_por'] === 'Dir. Ana');
+
+        $this->postJson('/api/v1/auth/convite', ['email' => $usuario->email, 'token' => $token])
+            ->assertOk()->assertJsonPath('data.funcao', 'Professor');
+
+        $this->travel(6)->days();
+        $this->redefinir($token)->assertOk();
+        Mail::assertNotQueued(EmailModelo::class, fn ($m) => $m->modelo === 'senha-alterada');
+    }
+
+    public function test_recusar_desativa_a_conta_e_avisa_quem_convidou(): void
+    {
+        Mail::fake();
+        $usuario = $this->usuario();
+        $token = $this->convidar($usuario);
+
+        $this->postJson('/api/v1/auth/convite/recusar', ['email' => $usuario->email, 'token' => $token])->assertOk();
+
+        $this->assertFalse((bool) $usuario->fresh()->ativo);
+        Mail::assertQueued(EmailModelo::class, fn ($m) => $m->modelo === 'convite-recusado' && $m->hasTo('dir@gabarito360.dev'));
+        $this->postJson('/api/v1/auth/convite/recusar', ['email' => $usuario->email, 'token' => $token])->assertStatus(422);
+    }
+
+    public function test_convite_vencido_e_recusado(): void
+    {
+        Mail::fake();
+        $usuario = $this->usuario();
+        DB::table('password_reset_tokens')->insert([
+            'email' => $usuario->email, 'token' => Hash::make('abc'), 'created_at' => now()->subDays(8), 'expira_em' => now()->subDay(),
+        ]);
+
+        $this->redefinir('abc')->assertStatus(422);
+    }
+
+    private function pedirTroca(Usuario $usuario): string
+    {
+        \Laravel\Sanctum\Sanctum::actingAs($usuario);
+        $this->postJson('/api/v1/auth/email', ['novo_email' => 'novo@gabarito360.dev', 'senha_atual' => 'senha-antiga'])->assertOk();
+
+        $token = null;
+        Mail::assertQueued(EmailModelo::class, function ($m) use (&$token) {
+            if ($m->modelo === 'confirmar-email') {
+                parse_str((string) parse_url((string) $m->dados['link'], PHP_URL_QUERY), $q);
+                $token = $q['token'];
+            }
+            return true;
+        });
+
+        return $token;
+    }
+
+    public function test_email_so_muda_depois_de_confirmar_e_avisa_o_anterior(): void
+    {
+        Mail::fake();
+        $usuario = $this->usuario();
+        $token = $this->pedirTroca($usuario);
+
+        $this->assertSame('prof@gabarito360.dev', $usuario->fresh()->email);
+
+        $this->postJson('/api/v1/auth/confirmar-email', ['token' => $token])->assertOk();
+        $this->assertSame('novo@gabarito360.dev', $usuario->fresh()->email);
+        Mail::assertQueued(EmailModelo::class, fn ($m) => $m->modelo === 'email-alterado-aviso' && $m->hasTo('prof@gabarito360.dev'));
+
+        $this->postJson('/api/v1/auth/confirmar-email', ['token' => $token])->assertStatus(422);
+    }
+
+    public function test_troca_exige_a_senha_atual(): void
+    {
+        Mail::fake();
+        \Laravel\Sanctum\Sanctum::actingAs($this->usuario());
+
+        $this->postJson('/api/v1/auth/email', ['novo_email' => 'novo@gabarito360.dev', 'senha_atual' => 'errada'])->assertStatus(422);
+        Mail::assertNothingQueued();
+    }
+
+    public function test_link_de_troca_vencido_e_recusado(): void
+    {
+        Mail::fake();
+        $usuario = $this->usuario();
+        $token = $this->pedirTroca($usuario);
+
+        $this->travel(25)->hours();
+
+        $this->postJson('/api/v1/auth/confirmar-email', ['token' => $token])->assertStatus(422);
+        $this->assertSame('prof@gabarito360.dev', $usuario->fresh()->email);
+    }
 }

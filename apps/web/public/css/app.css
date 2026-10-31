@@ -978,6 +978,21 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
   .kpi-grid > .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 
+/* ---------- Aceite de convite ---------- */
+.convite { min-height: 100vh; display: grid; place-items: center; padding: 32px 16px; background: var(--bg); }
+.convite-cartao { width: 100%; max-width: 520px; background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); padding: 32px; }
+.convite-marca { margin-bottom: 24px; }
+.convite-cartao h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+.convite-texto { color: var(--fg-2); margin-bottom: 16px; }
+.convite-dados { margin: 0 0 24px; }
+.convite-dados > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+.convite-dados dt { color: var(--muted); }
+.convite-dados dd { margin: 0; font-weight: 600; }
+.convite-aceite { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 16px; font-size: 14px; }
+.convite-aceite input { margin-top: 3px; }
+.convite-recusar { margin-top: 8px; }
+.convite-recusar .btn { color: var(--danger); }
+
 /* ---------- Fale conosco ---------- */
 .fale-conosco { max-width: 720px; margin: 32px auto; }
 .fale-conosco h1 { font-size: 28px; font-weight: 800; }

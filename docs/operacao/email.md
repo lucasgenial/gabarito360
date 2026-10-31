@@ -39,7 +39,9 @@ APP_URL_WEB=https://gabarito360.com.br
 
 Ficam em `apps/api/resources/emails/modelos`, dentro de `base.html`. Campos usam `{{nome}}`, e os valores são escapados por `App\Mail\EmailModelo`. Os envios vão pela fila `padrao`, com 3 tentativas.
 
-Modelos disponíveis: `recuperar-senha`, `senha-alterada`, `fale-conosco-equipe` e `fale-conosco-confirmacao`.
+Modelos disponíveis: `recuperar-senha`, `senha-alterada`, `convite-usuario`, `convite-recusado`, `confirmar-email`, `email-alterado-aviso`, `boas-vindas-cadastro`, `fale-conosco-equipe` e `fale-conosco-confirmacao`.
+
+`convite-usuario` é para quem foi cadastrado por um gestor e informa função e vínculo. `boas-vindas-cadastro` é para quem criou a própria conta ou comprou o sistema; entra em uso quando esse fluxo voltar.
 
 ## Testar
 

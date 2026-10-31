@@ -106,6 +106,21 @@
           </div>
           <button type="submit" class="btn btn-primary">Atualizar senha</button>
         </form>
+
+        <form method="POST" action="{{ route('perfil.email') }}" style="margin-top:28px;">
+          @csrf
+          <h2 style="font-size:18px;margin-bottom:4px;">Trocar e-mail</h2>
+          <p style="margin-bottom:14px;color:var(--muted);font-size:14px;">O e-mail atual segue valendo até você confirmar o novo pelo link enviado.</p>
+          <div class="field">
+            <label for="novo-email">Novo e-mail</label>
+            <input id="novo-email" name="novo_email" type="email" class="input" required autocomplete="email" />
+          </div>
+          <div class="field">
+            <label for="senha-email">Senha atual</label>
+            <input id="senha-email" name="senha_atual" type="password" class="input" required autocomplete="current-password" />
+          </div>
+          <button type="submit" class="btn btn-secondary">Enviar confirmação</button>
+        </form>
       </div>
     </div>
   </div>
