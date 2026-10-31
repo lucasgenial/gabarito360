@@ -10,7 +10,7 @@
 @endif
 @once
   @push('scripts')
-    <script src="{{ asset('js/vendor/echarts-6.1.0.common.min.js') }}"></script>
+    <script src="{{ asset('js/libs/echarts-6.1.0.common.min.js') }}"></script>
     <script src="{{ asset('js/graficos.js') }}?v={{ @filemtime(public_path('js/graficos.js')) }}"></script>
   @endpush
 @endonce
