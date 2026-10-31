@@ -328,9 +328,9 @@ O WEB implementa o Padrão Digital de Governo (gov.br Design System).
 | Fase 8 | Suporte offline no Mobile                           | Sync API        |
 
 
-### T1 — Clientes, espaços e vínculos (proposta, 31/10/2026)
+### T1 — Clientes, espaços e vínculos (aprovado, 31/10/2026)
 
-O [documento T1](40-clientes-espacos-e-vinculos.md) propõe propriedade dos dados por espaço, vínculos e permissões contextuais, cópias independentes e migração gradual no MariaDB compartilhado. O [mapa de consultas](41-t1-mapa-de-consultas.md) registra os consumidores a adaptar. A proposta aguarda aprovação; não descreve isolamento já implementado nem autoriza T2 ou deploy.
+O [documento T1](40-clientes-espacos-e-vinculos.md), aprovado pelo responsável e incorporado no PR #73, define propriedade dos dados por espaço, vínculos e permissões contextuais, cópias independentes e migração gradual no MariaDB compartilhado. O [mapa de consultas](41-t1-mapa-de-consultas.md) registra os consumidores a adaptar. T2 foi autorizado e começa pelo inventário; a aprovação do modelo não representa isolamento já implementado nem autoriza deploy.
 
 ### L6 — Galeria de avatares (31/10/2026, aprovação do responsável)
 
