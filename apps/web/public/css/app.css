@@ -1124,6 +1124,16 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .publico-status h1 { font-size: 32px; line-height: 1.2; }
 .publico-status p { max-width: 65ch; color: var(--fg-2); }
 .publico-status .lp-acoes { margin-top: 8px; }
+.documento-legal { max-width: 78ch; margin-inline: auto; padding-block: var(--space-6); overflow-wrap: anywhere; }
+.documento-legal header { margin-bottom: var(--space-6); }
+.documento-legal h1 { font-size: clamp(28px, 4vw, 40px); margin-bottom: var(--space-4); }
+.documento-legal h2 { font-size: 22px; margin-bottom: var(--space-3); }
+.documento-legal section { margin-top: var(--space-8); }
+.documento-legal p, .documento-legal li { line-height: 1.75; }
+.documento-legal section p + p { margin-top: var(--space-3); }
+.documento-legal ul { padding-left: var(--space-6); }
+.documento-legal li + li { margin-top: var(--space-2); }
+.campo-pendente { background: var(--atencao-light); color: var(--fg); border-bottom: 1px dashed var(--atencao); padding-inline: var(--space-1); }
 .seguranca-contato { padding: 16px; border: 1px solid var(--border-soft); border-radius: var(--radius-lg); background: var(--surface); margin-block: 16px 24px; display: grid; gap: 12px; }
 .seguranca-contato h2 { font-size: 14px; font-weight: 600; }
 .seguranca-widget { width: 100%; min-width: 0; }

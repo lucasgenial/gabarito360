@@ -959,7 +959,7 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | E6 Trocar e-mail | concluído no código; falta teste real | Claude | |
 | E7 Fale Conosco | Turnstile incorporado e publicado; ativação e envio real protegido a confirmar | Claude / Codex | #53, #58 |
 | E8 Páginas públicas | entrega visual publicada; termos e privacidade adiados pelo responsável | Codex | #59, #60 |
-| L1 Publicar termos | pendente | | |
+| L1 Publicar termos | em andamento: prévias com campos a preencher autorizadas; publicação e aceite pendentes (docs/35) | Codex | #64 |
 | L2 Inventário | pendente | | |
 | L3 Proteção | pendente | | |
 | L4 Titulares | pendente | | |
