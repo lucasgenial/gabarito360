@@ -39,8 +39,24 @@ Para copiar só alguns arquivos, sem limpeza por retenção:
 powershell -ExecutionPolicy Bypass -File D:\Backups-Proxmox\copiar-backups.ps1 -Filtro "lxc-305-2026_10_30"
 ```
 
+## Teste de restauração
+
+Feito em 31/10/2026, no WSL do computador do responsável, a partir da cópia em `D:\Backups-Proxmox\dump`. Nenhum contêiner de produção foi usado.
+
+Antes do teste, a cópia completa terminou às 08:50 com 8 datas, 15 arquivos por data e 293 GB, sem erro no registro e sem arquivo parcial. O SSD foi desmontado.
+
+| Item | Backup | Resultado |
+|---|---|---|
+| CT 106 | 31/10, 02:36 | Extraído sem erro. MariaDB 10.11.14 iniciou sem erro no registro. `mariadb-check` aprovou as 39 tabelas de `gabarito-360` |
+| CT 106 | 30/10, 02:41 | Extraído sem erro. `mariadb-check` aprovou as 32 tabelas |
+| CT 111 | 31/10, 03:00 | Extraído sem erro. Commit `57f77f3`, `.env` da API e da web, `vendor`, OMR, arquivos enviados, nginx, Redis, PHP-FPM e serviços presentes. PHP 8.3.6 e Laravel 13.15.0 executaram |
+
+Entre as duas datas, as contagens subiram e 7 tabelas surgiram. Isso é esperado: pelas datas dos arquivos, as tabelas novas foram criadas depois do backup de 30/10, e ele tem menos dados que o de 31/10. Nenhuma contagem caiu.
+
+O teste provou que os arquivos podem ser recuperados e que o banco abre. Não houve restauração com `pct restore`, nem subida do site completo. A pasta de teste foi apagada ao final.
+
 ## Pendências
 
-- Teste real de restauração do CT 106 e do CT 111.
+- Comparar as contagens do backup com o banco de produção, após aprovação.
 - Confirmar BitLocker no disco D:. Os arquivos não são criptografados e contêm dados de alunos e segredos dos sistemas.
 - Avaliar uma terceira cópia fora do local. As duas camadas ficam no mesmo endereço.
