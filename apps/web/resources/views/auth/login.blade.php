@@ -27,7 +27,7 @@
   <aside class="auth-aside">
     <a class="brand"><span class="logo">G360</span> Gabarito360</a>
     <div class="aside-body">
-      <h1>Correção de provas em segundos, não em fins de semana.</h1>
+      <h1>Da prova impressa à nota da turma, pelo celular.</h1>
       <p>Crie provas, capture cartões-resposta pelo celular e acompanhe o desempenho das turmas.</p>
     </div>
   </aside>

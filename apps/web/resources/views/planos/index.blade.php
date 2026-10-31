@@ -197,11 +197,7 @@
     </ul>
 
     <div class="plano-cta">
-      @auth
-        <a href="{{ route('checkout.index', ['plano_id' => $p['id']]) }}" class="btn btn-primary">Assinar agora</a>
-      @else
-        <a href="{{ route('login') }}?next={{ urlencode(route('checkout.index', ['plano_id' => $p['id']])) }}" class="btn btn-primary">Assinar agora</a>
-      @endauth
+      <a href="{{ route('leads.index') }}" class="btn btn-primary">Falar com a gente</a>
     </div>
   </div>
   @endforeach
@@ -226,11 +222,7 @@
     </ul>
 
     <div class="plano-cta">
-      @auth
-        <a href="{{ route('checkout.index', ['plano_id' => $p['id']]) }}" class="btn btn-primary">Assinar agora</a>
-      @else
-        <a href="{{ route('login') }}?next={{ urlencode(route('checkout.index', ['plano_id' => $p['id']])) }}" class="btn btn-primary">Assinar agora</a>
-      @endauth
+      <a href="{{ route('leads.index') }}" class="btn btn-primary">Falar com a gente</a>
     </div>
   </div>
   @endforeach
@@ -254,8 +246,6 @@
   @php
   $faqs = [
     ['O que é uma licença?', 'Uma licença corresponde a 1 professor ou usuário ativo dentro da sua rede institucional. Alunos e aplicadores não contam como licença.'],
-    ['Posso testar antes de pagar?', 'Sim. Todo cadastro novo inicia com 14 dias de trial gratuito. Você só é cobrado após o período de teste.'],
-    ['Quais formas de pagamento são aceitas?', 'PIX, boleto bancário e cartão de crédito, processados pelo Mercado Pago.'],
     ['Meus dados ficam seguros se eu cancelar?', 'Sim. O cancelamento suspende o acesso, mas seus dados são preservados por 90 dias antes de qualquer exclusão.'],
     ['Posso migrar do plano individual para o institucional?', 'Sim. Se sua escola ou rede decidir usar o plano institucional, transferimos todo o histórico de provas e alunos sem perda de dados.'],
   ];
