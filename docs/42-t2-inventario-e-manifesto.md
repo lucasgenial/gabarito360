@@ -32,16 +32,16 @@ Execução somente de leitura no banco de produção, código publicado `dc9949e
 
 Não foram listados usuários ou alunos. A conta de aluno sem escopo não será vinculada por adivinhação nem desativada por este inventário. A identificação autorizada da pessoa e do aluno correspondente pertence à conciliação V1, antes de conceder acesso. O administrador atual exige decisão explícita sobre redes administradas, sem perpetuar acesso global implícito.
 
-## Manifesto proposto para decisão
+## Manifesto aprovado em 31/10/2026
 
-| Chave de planejamento | Cliente proposto | Espaços e origem | Situação |
+| Chave de planejamento | Cliente aprovado | Espaços e origem | Situação |
 |---|---|---|---|
-| LEGADO-REDE-1 | Cliente provisório interno para a rede 1 | Rede 1; núcleos 1/2/3; escolas 1/2/3/4/5/6 | Aguardando aprovação do responsável |
-| LEGADO-REDE-2 | Cliente provisório interno para a rede 2 | Rede 2; núcleo 4; escola 8 | Aguardando aprovação do responsável |
+| LEGADO-REDE-1 | Cliente provisório interno para a rede 1 | Rede 1; núcleos 1/2/3; escolas 1/2/3/4/5/6 | Aprovado pelo responsável |
+| LEGADO-REDE-2 | Cliente provisório interno para a rede 2 | Rede 2; núcleo 4; escola 8 | Aprovado pelo responsável |
 
-Essas chaves não são IDs futuros do banco. A proposta cria 2 clientes e 13 espaços institucionais. Não cria espaços pessoais, não presume contrato jurídico ou modalidade pagante, não ativa cobrança. Cada dado escolar fica no espaço da escola hoje identificada pelas relações. A aprovação deve ser registrada antes de fixar esse backfill.
+Essas chaves não são IDs futuros do banco. A proposta cria 2 clientes e 13 espaços institucionais. Não cria espaços pessoais, não presume contrato jurídico ou modalidade pagante, não ativa cobrança. Cada dado escolar fica no espaço da escola hoje identificada pelas relações. O responsável aprovou esse mapeamento antes da implementação do preenchimento.
 
-Perguntas apresentadas ao responsável separadamente: aprovação dos dois clientes provisórios internos; redes que o administrador atual deve gerir na futura conversão de vínculos. Ausência de resposta não autoriza o mapeamento. Mudanças de contrato, proprietário ou acesso exigem atualização do manifesto.
+Decisões expressas: dois clientes internos provisórios, um por rede; o administrador atual gerirá as duas redes com vínculos separados em V1. Isso não cria vínculo global e não autoriza atribuir a conta de aluno sem escopo a um aluno por suposição. Mudanças de contrato, proprietário ou acesso exigem atualização do manifesto.
 
 ## Limites e próximos passos
 
