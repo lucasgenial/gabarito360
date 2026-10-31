@@ -45,8 +45,7 @@
 
 {{-- Médias por área: esta turma × outras turmas da escola --}}
 <div class="card card-pad" style="margin-top:16px;">
-  <div class="row-between" style="flex-wrap:wrap;">
-    <h3 style="font-size:17px;">Média por área</h3>
+  <h3 style="font-size:17px;">Média por área</h3>
   @php
     $grupos = count($provas);
     $listaP = collect($provas);
