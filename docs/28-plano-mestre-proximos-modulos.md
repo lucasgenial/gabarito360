@@ -941,7 +941,9 @@ Módulo de maior risco, com dados de menores. Disponível só para escolas e per
 
 ## 6. Quadro de andamento
 
-Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
+Situação: `pendente`, `em andamento`, `em revisão`, `concluído` ou `cancelado`.
+
+Atualizado em 31/10/2026 com autorização do responsável para manter a completude registrada. Esta atualização preserva escopo, prioridades e critérios dos pacotes. PR incorporado não implica conclusão de critérios ainda pendentes. E7 inclui confirmação de uso real pelo responsável; L3 tem publicação e validação operacional registradas. L6 ainda não foi publicado.
 
 | Pacote | Situação | Responsável | PR |
 |---|---|---|---|
@@ -949,22 +951,22 @@ Situação: `pendente`, `em andamento`, `em revisão` ou `concluído`.
 | B2 Senha do banco | cancelado | | |
 | B3 Redis | concluído | Claude | |
 | B4 Workers | concluído | Claude | |
-| B5 Deploy | concluído: roteiro aprovado e dois deploys consecutivos verificados em 31/10/2026 (docs/37) | Codex | #66 |
-| B6 Cartão pela fila | concluído: PR #61 incorporado, migração e deploy verificados; validação com cartão real em produção ainda não executada | Codex | #61 |
+| B5 Deploy | concluído: roteiro aprovado e dois deploys consecutivos verificados em 31/10/2026 (docs/37) | Codex | #66, #67 |
+| B6 Cartão pela fila | concluído: PR #61 incorporado, migração e deploy verificados; validação com cartão real em produção ainda não executada | Codex | #61, #65 |
 | E1 Domínio | concluído | Claude | |
 | E2 Motor de e-mail | concluído | Claude | |
 | E3 Recuperar senha | concluído | Claude | |
 | E4 Modelos | fase 1 concluída; fase 2 pendente | Claude | |
 | E5 Convite | código incorporado e publicado; falta teste real de convite | Claude / Codex | #54, #55 |
 | E6 Trocar e-mail | concluído no código; falta teste real | Claude | |
-| E7 Fale Conosco | Turnstile incorporado e publicado; ativação e envio real protegido a confirmar | Claude / Codex | #53, #58 |
+| E7 Fale Conosco | concluído: chaves reais configuradas, publicado e envio confirmado pelo responsável | Claude / Codex | #53, #58 |
 | E8 Páginas públicas | entrega visual publicada; termos e privacidade adiados pelo responsável | Codex | #59, #60 |
 | L1 Publicar termos | em andamento: prévias com campos a preencher autorizadas; publicação e aceite pendentes (docs/35) | Codex | #64 |
 | L2 Inventário | em revisão: inventário técnico, retenção/terceiros e impacto preliminar em docs/34 e docs/38; validações e contratos pendentes | Codex | #68 |
-| L3 Proteção | pendente | | |
-| L4 Titulares | pendente | | |
-| L5 Incidentes | pendente | | |
-| L6 Trocar foto por avatar | pendente | | |
+| L3 Proteção | concluído: chave dedicada, migração e logs protegidos publicados; verificações operacionais em 31/10/2026 (docs/operacao/protecao-dados.md) | Codex | #69 |
+| L4 Titulares | pendente: depende de T2 | | |
+| L5 Incidentes | pendente: depende de AU1 | | |
+| L6 Trocar foto por avatar | em andamento: implementação local; testes, revisão e publicação pendentes; exclusão de arquivos e coluna exige aprovação específica | Codex | |
 | T1 Modelo de dados | pendente | | |
 | T2 Clientes e espaços | pendente | | |
 | V1 Vínculos | pendente | | |
