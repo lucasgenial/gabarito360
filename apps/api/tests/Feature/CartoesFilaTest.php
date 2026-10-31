@@ -281,6 +281,70 @@ class CartoesFilaTest extends TestCase
         $this->assertDatabaseCount('cartoes', 1);
     }
 
+    public function test_foto_nova_substitui_falha_definitiva_sem_deixar_pendencia(): void
+    {
+        $antigo = $this->enviar(aluno: $this->aluno);
+        $jobAntigo = $this->job($antigo);
+        $jobAntigo->failed(new \RuntimeException('Falha fictícia'));
+        $novo = $this->enviar(aluno: $this->aluno);
+        $this->job($novo)->handle($this->driver(), app(ImagensCartao::class));
+
+        $this->getJson($this->uri($antigo))->assertOk()
+            ->assertJsonPath('data.processamento', 'substituido')->assertJsonPath('data.pode_repetir', false);
+        $this->getJson('/api/v1/provas/'.$this->prova->id.'/cartoes/status')->assertOk()
+            ->assertJsonPath('data.pendentes', 0)->assertJsonPath('data.concluida', true);
+        $jobAntigo->handle($this->driver(), app(ImagensCartao::class));
+        $jobAntigo->failed(new \RuntimeException('Falha atrasada'));
+        $this->assertDatabaseCount('cartoes', 1);
+        $this->assertDatabaseCount('notas', 1);
+        $this->assertDatabaseHas('notas', ['cartao_id' => $novo->cartao_id]);
+        $this->assertEquals('substituido', $antigo->fresh()->status);
+    }
+
+    public function test_leitura_antiga_nao_descarta_foto_mais_nova_com_erro(): void
+    {
+        $antigo = $this->enviar(aluno: $this->aluno);
+        $novo = $this->enviar(aluno: $this->aluno);
+        $this->job($novo)->failed(new \RuntimeException('Falha fictícia'));
+        $this->job($antigo)->handle($this->driver(), app(ImagensCartao::class));
+        $this->assertDatabaseCount('cartoes', 2);
+        $this->getJson($this->uri($novo))->assertOk()
+            ->assertJsonPath('data.processamento', 'erro')->assertJsonPath('data.pode_repetir', true);
+        $this->postJson($this->uri($novo).'/repetir')->assertStatus(202);
+        $this->job($novo->fresh())->handle($this->driver(), app(ImagensCartao::class));
+        $this->assertDatabaseCount('cartoes', 1);
+        $this->assertDatabaseHas('notas', ['cartao_id' => $novo->cartao_id]);
+    }
+
+    public function test_excluir_cartao_limpa_recibo_e_uuid_nao_ressuscita_resultado(): void
+    {
+        $e = $this->enviar(aluno: $this->aluno);
+        $this->job($e)->handle($this->driver(), app(ImagensCartao::class));
+        $this->deleteJson('/api/v1/cartoes/'.$e->cartao_id)->assertOk();
+        $this->assertDatabaseCount('cartoes', 0);
+        $this->assertDatabaseCount('notas', 0);
+        $this->assertNull($e->fresh()->resultado);
+        $this->getJson($this->uri($e))->assertOk()->assertJsonPath('data.processamento', 'recusado')
+            ->assertJsonPath('data.resultado', [])->assertJsonPath('data.pode_repetir', false);
+        $this->postJson($this->uri($e).'/repetir')->assertStatus(202)->assertJsonPath('data.resultado', []);
+        $this->postJson('/api/v1/provas/'.$this->prova->id.'/cartoes', ['envio_id' => $e->chave,
+            'imagem' => UploadedFile::fake()->image('cartao.jpg')])->assertStatus(202)
+            ->assertJsonPath('data.processamento', 'recusado')->assertJsonPath('data.resultado', []);
+        $this->assertDatabaseCount('cartoes', 0);
+        Queue::assertPushed(ProcessarCartaoJob::class, 1);
+    }
+
+    public function test_recibo_antigo_com_cartao_excluido_nao_devolve_resultado(): void
+    {
+        $e = $this->enviar(aluno: $this->aluno);
+        $this->job($e)->handle($this->driver(), app(ImagensCartao::class));
+        // Simula exclusão anterior à correção: a FK é anulada, mas o JSON antigo fica.
+        Cartao::findOrFail($e->cartao_id)->delete();
+        $this->getJson($this->uri($e))->assertOk()->assertJsonPath('data.processamento', 'recusado')
+            ->assertJsonPath('data.resultado', [])->assertJsonPath('data.pode_repetir', false);
+        $this->assertNull($e->fresh()->resultado);
+    }
+
     public function test_fila_indisponivel_preserva_foto_e_permite_repetir(): void
     {
         Bus::shouldReceive('dispatch')->once()->andThrow(new \RuntimeException('Fila indisponível simulada'));

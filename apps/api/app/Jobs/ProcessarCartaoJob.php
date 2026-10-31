@@ -128,7 +128,13 @@ class ProcessarCartaoJob implements ShouldQueue
                 $this->identificar($atual, $id);
                 if ($atual->aluno_id) {
                     $anteriores = Cartao::where('prova_id', $prova->id)->where('aluno_id', $atual->aluno_id)
-                        ->where('id', '!=', $atual->id)->whereIn('status', ['lido', 'ambiguo'])->get();
+                        ->where('id', '!=', $atual->id)->where(function ($q) use ($atual) {
+                            $q->whereIn('status', ['lido', 'ambiguo'])
+                                ->orWhere(function ($falhou) use ($atual) {
+                                    $falhou->where('status', 'pendente')->where('id', '<', $atual->id)
+                                        ->whereIn('id', CartaoEnvio::where('status', 'erro')->select('cartao_id'));
+                                });
+                        })->get();
                     if ($anteriores->contains(fn ($c) => $c->id > $atual->id)) {
                         $this->substituido($recibo, $atual);
                         foreach ($provas as $p) {

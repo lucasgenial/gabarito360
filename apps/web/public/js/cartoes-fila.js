@@ -38,7 +38,9 @@ window.criarFilaCartoes = function (opcoes) {
       texto(li, d.processamento === 'na_fila' ? 'Na fila de leitura. Você já pode fotografar o próximo cartão.' : 'Lendo cartão…');
       acompanhar(chave, li);
     } else {
-      ativos.delete(chave); guardar();
+      // Erro recuperável também precisa sobreviver à recarga, sem reenviar a foto.
+      if (d.processamento === 'erro' && d.pode_repetir) acompanhar(chave, li);
+      else { ativos.delete(chave); guardar(); }
       texto(li, d.mensagem || 'Não foi possível concluir esta leitura. Fotografe novamente.');
     }
     if (d.pode_repetir) botao(li, 'Tentar leitura novamente', async function () {

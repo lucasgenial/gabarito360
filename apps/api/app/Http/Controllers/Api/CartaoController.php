@@ -114,12 +114,25 @@ class CartaoController extends Controller
             return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
-        if ($cartao->imagem_url) {
-            Storage::disk('public')->delete($cartao->imagem_url);
-        }
-        $cartao->delete(); // respostas, nota e logs de ambiguidade saem em cascata
-
-        AtualizadorStatusProva::atualizar($prova->fresh());
+        DB::transaction(function () use ($cartao, $prova) {
+            $provaAtual = Prova::whereKey($prova->id)->lockForUpdate()->firstOrFail();
+            $atual = Cartao::whereKey($cartao->id)->lockForUpdate()->first();
+            if (! $atual) {
+                return;
+            }
+            abort_if((int) $atual->prova_id !== (int) $provaAtual->id, 409,
+                'O cartão mudou de prova durante a leitura. Atualize a página antes de excluir.');
+            CartaoEnvio::where('cartao_id', $atual->id)->update(['status' => 'recusado', 'resultado' => null,
+                'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
+            $atual->delete(); // respostas, nota e logs de ambiguidade saem em cascata
+            AtualizadorStatusProva::atualizar($provaAtual);
+            DB::afterCommit(function () use ($atual) {
+                if ($atual->imagem_url) {
+                    Storage::disk('public')->delete($atual->imagem_url);
+                }
+                app(ImagensCartao::class)->apagar($atual->id);
+            });
+        });
 
         return ApiResponse::success(['excluido' => true]);
     }

@@ -26,6 +26,12 @@ class ResultadoEnvio
 
     public static function resposta(CartaoEnvio $envio, Usuario $usuario): array
     {
+        // Inclui recibos antigos cuja FK foi anulada por uma exclusão em cascata.
+        if ($envio->status !== 'substituido' &&
+            (! $envio->cartao_id || ! Cartao::whereKey($envio->cartao_id)->exists())) {
+            $envio->update(['status' => 'recusado', 'resultado' => null,
+                'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
+        }
         $resultado = $envio->resultado ?? [];
         // Vale também para a resposta de um upload repetido e de uma retentativa.
         if (isset($resultado['prova_id']) && !Escopo::prova($usuario, $resultado['prova_id'])) {
