@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->dontFlash(['senha_atual']);
+        $exceptions->dontFlash(['senha_atual', 'cf-turnstile-response']);
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
