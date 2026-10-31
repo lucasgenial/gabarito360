@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // A API não tem tela de login: sem autenticação responde 401, nunca redireciona
+        $middleware->redirectGuestsTo(fn () => null);
+
         $middleware->alias([
             'perfil'             => \App\Http\Middleware\CheckPerfil::class,
             'permissao'          => \App\Http\Middleware\CheckPermissao::class,
