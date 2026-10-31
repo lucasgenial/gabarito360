@@ -40,7 +40,7 @@ Prazos de contas sem vínculo, auditoria, documentos fiscais, arquivos de import
 
 ## 3. Configuração técnica conferida
 
-Leitura pontual em produção no CT 111, com saída restrita a flags e parâmetros técnicos. Não foram impressos valores de cookies, tokens, chaves, senhas, destinatários ou conteúdos pessoais.
+Leitura pontual em produção no CT 111, na versão `07340a8`, com saída restrita a flags e parâmetros técnicos. Não foram impressos valores de cookies, tokens, chaves, senhas, destinatários ou conteúdos pessoais. É um retrato dessa versão: alterações posteriores de L3 devem ser avaliadas pelo respectivo PR e registro de implantação, sem considerar esta leitura como validação delas.
 
 | Item | API | Web | Interpretação |
 |---|---|---|---|
