@@ -10,11 +10,9 @@
 
 @php
   $fmt  = fn ($n) => $n === null ? '—' : number_format((float) $n, 1, ',', '.');
-  $cores = ['#1d4f9e', '#c27c0e', '#168821', '#7b3fa0', '#0e7c86', '#b7410e'];
   // Turmas que aparecem no comparativo (esta primeiro)
   $turmasComp = collect($provas)->flatMap(fn ($p) => $p['por_turma'])->pluck('turma', 'turma_id')->sortKeys();
   $turmasComp = collect([$turma['id'] => $turma['nome']])->union($turmasComp);
-  $corTurma = $turmasComp->keys()->values()->flip()->map(fn ($i) => $cores[$i % count($cores)]);
 @endphp
 
 @section('title', 'Relatório da turma ' . $turma['nome'])
@@ -49,35 +47,26 @@
 <div class="card card-pad" style="margin-top:16px;">
   <div class="row-between" style="flex-wrap:wrap;">
     <h3 style="font-size:17px;">Média por área</h3>
-    <div class="legenda">@foreach($turmasComp as $id => $nome)<span><i style="background:{{ $corTurma[$id] }}"></i>{{ $nome }}{{ $id == $turma['id'] ? ' (esta)' : '' }}</span>@endforeach</div>
-  </div>
   @php
-    $grupos = count($provas); $nT = max(1, $turmasComp->count());
-    $larg = max(520, $grupos * ($nT * 26 + 40) + 40);
+    $grupos = count($provas);
+    $listaP = collect($provas);
+    $seriesT = $turmasComp->map(fn ($tnome, $tid) => [
+        'nome'    => $tnome . ($tid == $turma['id'] ? ' (esta)' : ''),
+        'valores' => $listaP->map(function ($p) use ($tid) {
+            $m = collect($p['por_turma'])->firstWhere('turma_id', $tid)['media'] ?? null;
+            return $m === null ? null : round($m * 10 / max($p['nota_maxima'], 0.1), 1);
+        })->values(),
+    ])->values();
   @endphp
   @if($grupos)
-    <div style="overflow-x:auto;margin-top:10px;">
-      <svg viewBox="0 0 {{ $larg }} 200" width="100%" style="min-width:{{ min($larg, 640) }}px;" role="img" aria-label="Média por área e turma">
-        @foreach([0, 5, 10] as $g)
-          <line x1="30" x2="{{ $larg - 6 }}" y1="{{ 160 - $g * 14 }}" y2="{{ 160 - $g * 14 }}" stroke="#ddd" stroke-dasharray="{{ $g ? '3 3' : '' }}"></line>
-          <text x="26" y="{{ 163 - $g * 14 }}" text-anchor="end" font-size="9" fill="#888">{{ $g }}</text>
-        @endforeach
-        @foreach($provas as $gi => $p)
-          @php
-            $x0 = 40 + $gi * (($larg - 50) / $grupos);
-            $medias = collect($p['por_turma'])->keyBy('turma_id');
-          @endphp
-          @foreach($turmasComp as $tid => $tnome)
-            @php $m = $medias[$tid]['media'] ?? null; $esc = 10 / max($p['nota_maxima'], 0.1); $h = $m !== null ? $m * $esc * 14 : 0; $x = $x0 + $loop->index * 26; @endphp
-            @if($m !== null)
-              <rect x="{{ $x }}" y="{{ 160 - $h }}" width="22" height="{{ max($h, 1) }}" rx="2" fill="{{ $corTurma[$tid] }}"><title>{{ $tnome }} — {{ $p['disciplina'] }}: {{ $fmt($m) }}</title></rect>
-              <text x="{{ $x + 11 }}" y="{{ 156 - $h }}" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor">{{ $fmt($m) }}</text>
-            @endif
-          @endforeach
-          <text x="{{ $x0 + ($nT * 26) / 2 - 2 }}" y="178" text-anchor="middle" font-size="10" fill="#555">{{ \Illuminate\Support\Str::limit($p['disciplina'], 22) }}</text>
-        @endforeach
-      </svg>
+    <div class="grafico-rolagem">
+      <div class="grafico-largo" style="min-width:{{ min(max(520, $grupos * ($turmasComp->count() * 26 + 40) + 40), 640) }}px;">
+        <x-grafico descricao="Média por área e turma" :altura="280"
+          :dados="['categorias' => $listaP->map(fn ($p) => \Illuminate\Support\Str::limit($p['disciplina'], 22))->values(), 'formato' => 'nota', 'maximo' => 10,
+                   'rotulos' => $turmasComp->count() <= 3 && $grupos <= 5, 'series' => $seriesT]" />
+      </div>
     </div>
+    <p class="field-help">Notas na escala de 0 a 10.</p>
   @else
     <p class="field-help">Nenhuma prova publicada para a turma.</p>
   @endif

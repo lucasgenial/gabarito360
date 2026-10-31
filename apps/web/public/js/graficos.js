@@ -10,6 +10,22 @@
     return getComputedStyle(document.body).fontFamily;
   }
 
+  // Números no formato brasileiro: 3,2 e 45%
+  function texto(d, v) {
+    if (v === null || v === undefined || v === '-') return '—';
+    if (d.formato === 'nota') return Number(v).toFixed(1).replace('.', ',');
+    if (d.formato === 'pct') return v + '%';
+    return String(v);
+  }
+
+  function dica(d, itens) {
+    var titulo = (d.prefixo || '') + itens[0].axisValue;
+    return itens.reduce(function (html, i) {
+      var v = i.value && typeof i.value === 'object' ? i.value.value : i.value;
+      return html + '<br>' + i.marker + (d.series.length > 1 ? i.seriesName + ': ' : '') + '<b>' + texto(d, v) + '</b>';
+    }, '<b>' + titulo + '</b>');
+  }
+
   function opcoes(d) {
     var tinta = token('--fg-2'), apagado = token('--muted'), linha = token('--border-soft');
     var paleta = [1, 2, 3, 4, 5].map(function (n) { return token('--serie-' + n); });
@@ -27,7 +43,8 @@
         backgroundColor: token('--surface'),
         borderColor: token('--border'),
         textStyle: { color: token('--fg'), fontFamily: fonte() },
-        confine: true
+        confine: true,
+        formatter: function (itens) { return dica(d, itens); }
       },
       xAxis: {
         type: 'category',
@@ -40,7 +57,7 @@
         type: 'value',
         max: d.maximo === undefined ? null : d.maximo,
         minInterval: d.inteiros ? 1 : 0,
-        axisLabel: { color: apagado, fontSize: 12 },
+        axisLabel: { color: apagado, fontSize: 12, formatter: d.formato === 'pct' ? '{value}%' : '{value}' },
         splitLine: { lineStyle: { color: linha } }
       },
       series: d.series.map(function (s) {
@@ -50,7 +67,10 @@
           barMaxWidth: 40,
           barGap: '10%',
           itemStyle: { borderRadius: [4, 4, 0, 0] },
-          label: { show: !!d.rotulos, position: 'top', color: tinta, fontSize: 12, fontWeight: 600 },
+          label: {
+            show: !!d.rotulos, position: 'top', color: tinta, fontSize: 12, fontWeight: 600,
+            formatter: function (p) { return texto(d, p.value); }
+          },
           data: s.valores.map(function (v, i) {
             var cor = s.cores && s.cores[i];
             return cor ? { value: v, itemStyle: { color: token(cor) } } : v;

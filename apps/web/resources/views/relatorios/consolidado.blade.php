@@ -57,20 +57,21 @@
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;">Média por área</h3>
   @if(count($areas))
-    @php $na = count($areas); $larg = max(420, $na * 110 + 40); @endphp
-    <svg viewBox="0 0 {{ $larg }} 190" width="100%" role="img" aria-label="Média por área" style="margin-top:8px;">
-      @foreach([0, 5, 10] as $g)
-        <line x1="28" x2="{{ $larg - 6 }}" y1="{{ 150 - $g * 12 }}" y2="{{ 150 - $g * 12 }}" stroke="#ddd" stroke-dasharray="{{ $g ? '3 3' : '' }}"></line>
-        <text x="24" y="{{ 153 - $g * 12 }}" text-anchor="end" font-size="9" fill="#888">{{ $g }}</text>
-      @endforeach
-      @foreach($areas as $i => $a)
-        @php $x = 40 + $i * (($larg - 50) / $na); $h = $a['media'] * 12; @endphp
-        <rect x="{{ $x + 10 }}" y="{{ 150 - $h }}" width="44" height="{{ max($h, 1) }}" rx="3" fill="{{ $a['media'] >= 6 ? '#168821' : '#e52207' }}" opacity=".85"></rect>
-        <text x="{{ $x + 32 }}" y="{{ 145 - $h }}" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor">{{ $fmt($a['media']) }}</text>
-        <text x="{{ $x + 32 }}" y="166" text-anchor="middle" font-size="10" fill="#555">{{ \Illuminate\Support\Str::limit($a['disciplina'], 18) }}</text>
-        <text x="{{ $x + 32 }}" y="179" text-anchor="middle" font-size="8.5" fill="#888">{{ $a['aprovacao_pct'] }}% aprov. · {{ $a['notas'] }} notas</text>
-      @endforeach
-    </svg>
+    @php $listaA = collect($areas); @endphp
+    <x-grafico descricao="Média por área" :altura="260"
+      :dados="['categorias' => $listaA->map(fn ($a) => \Illuminate\Support\Str::limit($a['disciplina'], 18))->values(), 'formato' => 'nota', 'maximo' => 10, 'rotulos' => true,
+               'series' => [['nome' => 'Média', 'valores' => $listaA->pluck('media'),
+                             'cores' => $listaA->map(fn ($a) => $a['media'] >= 6 ? '--serie-1' : '--danger')->values()]]]">
+      <table class="table">
+        <thead><tr><th>Área</th><th>Média</th><th>Aprovação</th><th>Notas</th></tr></thead>
+        <tbody>
+          @foreach($areas as $a)
+            <tr><td>{{ $a['disciplina'] }}</td><td class="num">{{ $fmt($a['media']) }}</td><td class="num">{{ $a['aprovacao_pct'] }}%</td><td class="num">{{ $a['notas'] }}</td></tr>
+          @endforeach
+        </tbody>
+      </table>
+    </x-grafico>
+    <p class="field-help">Em vermelho, média abaixo de 6.</p>
   @else
     <p class="field-help" style="margin-top:6px;">Sem notas lançadas ainda.</p>
   @endif

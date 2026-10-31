@@ -990,7 +990,26 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .grafico-dados { margin-top: 8px; font-size: 13px; }
 .grafico-dados summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 .grafico-dados .table-wrap { margin-top: 8px; }
-@media print { .grafico-dados { display: none; } .grafico { break-inside: avoid; } }
+.grafico-rolagem { overflow-x: auto; margin-top: 8px; }
+.media-meta { display: grid; gap: 8px; margin-top: 12px; }
+.media-meta-valor { font-size: 40px; line-height: 1; font-weight: 800; color: var(--fg); }
+.media-meta-valor small { font-size: 16px; font-weight: 500; color: var(--muted); }
+.media-meta-trilha { position: relative; height: 12px; margin-top: 8px; background: var(--surface-2); border-radius: var(--radius-sm); }
+.media-meta-trilha i { display: block; height: 100%; border-radius: var(--radius-sm); }
+.media-meta-trilha i.ok { background: var(--success); }
+.media-meta-trilha i.abaixo { background: var(--danger); }
+.media-meta-trilha b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--fg); }
+.media-meta-legenda { font-size: 13px; color: var(--muted); }
+.media-meta p { font-size: 14px; font-weight: 600; }
+.media-meta-ok { color: var(--success); }
+.media-meta-abaixo { color: var(--danger); }
+@media print {
+  .grafico-dados { display: none; }
+  .grafico { break-inside: avoid; }
+  .grafico-rolagem { overflow: visible; }
+  .grafico-rolagem > .grafico-largo { min-width: 0 !important; }
+  .media-meta-trilha, .media-meta-trilha i, .media-meta-trilha b { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
 
 /* ---------- Página inicial (docs/26, V2) ---------- */
 .tela-inicio { background: var(--surface); }
