@@ -28,7 +28,7 @@
 @endsection
 
 @section('content')
-<x-pagina chamada="Passo 4 · Permissões" titulo="{{ $u['nome'] }}">
+<x-pagina titulo="{{ $u['nome'] }}">
   <x-slot:sub>{{ $perfis[$u['perfil']]['label'] ?? $u['perfil'] }} · {{ count($dados['efetivas']) }} permissões efetivas</x-slot:sub>
     <a class="btn btn-ghost" href="{{ route('membros.perfis') }}">O que cada perfil pode</a>
     <a class="btn btn-secondary" href="{{ route('membros.edit', $u['id']) }}">Dados do membro</a>

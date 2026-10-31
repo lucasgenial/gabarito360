@@ -4,8 +4,6 @@
 
 @push('styles')
 <style>
-  .school-banner { margin-top:20px; padding:20px 24px; border:1px solid var(--accent); background:var(--accent-light); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; }
-  .school-meta { color:var(--accent-dark); font-weight:700; margin-top:4px; font-size:14px; }
   .team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr)); gap:12px; margin-top:14px; }
   .person-card { display:flex; align-items:center; gap:12px; padding:14px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface-2); }
   .person-card .avatar-mini { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:14px; background:var(--accent-light); color:var(--accent-dark); flex-shrink:0; }
@@ -64,63 +62,48 @@
   ];
 @endphp
 
-<x-pagina chamada="Gestão escolar" titulo="Painel {{ $nomeEscola }}" subtitulo="{{ $nome }} · acompanhamento pedagógico da unidade · período letivo {{ now()->year }}">
-  <a href="{{ route('turmas.index') }}" class="btn btn-primary">Ver turmas ativas</a>
-</x-pagina>
+@php
+  $meta = [];
+  if ($escola) {
+        $rotEtapas = ['infantil' => 'Educação Infantil', 'fundamental_iniciais' => 'Fundamental (anos iniciais)', 'fundamental_finais' => 'Fundamental (anos finais)',
+                      'medio' => 'Ensino Médio', 'eja' => 'EJA', 'profissional' => 'Educação Profissional'];
+        $rotTurnos = ['manha' => 'manhã', 'tarde' => 'tarde', 'noite' => 'noite', 'integral' => 'integral'];
+        $meta = array_filter([
+          'INEP ' . $escola['inep'],
+          !empty($escola['cidade']) ? $escola['cidade'] . (!empty($escola['uf']) ? '/' . $escola['uf'] : '') : null,
+          collect($escola['etapas'] ?? [])->map(fn ($k) => $rotEtapas[$k] ?? $k)->implode(', ') ?: null,
+          !empty($escola['turnos']) ? 'Turnos: ' . collect($escola['turnos'])->map(fn ($k) => $rotTurnos[$k] ?? $k)->implode(', ') : null,
+        ]);
+  }
+@endphp
 
-{{-- Banner da escola --}}
-@if($escola)
-<div class="school-banner">
-  <div>
-    <div class="eyebrow" style="color:var(--accent-dark);">Unidade escolar</div>
-    <h3 style="font-size:24px;color:var(--accent-dark);margin-top:4px;">{{ $escola['nome'] }}</h3>
-    @php
-      $rotEtapas = ['infantil' => 'Educação Infantil', 'fundamental_iniciais' => 'Fundamental (anos iniciais)', 'fundamental_finais' => 'Fundamental (anos finais)',
-                    'medio' => 'Ensino Médio', 'eja' => 'EJA', 'profissional' => 'Educação Profissional'];
-      $rotTurnos = ['manha' => 'manhã', 'tarde' => 'tarde', 'noite' => 'noite', 'integral' => 'integral'];
-      $meta = array_filter([
-        'INEP ' . $escola['inep'],
-        !empty($escola['cidade']) ? $escola['cidade'] . (!empty($escola['uf']) ? '/' . $escola['uf'] : '') : null,
-        collect($escola['etapas'] ?? [])->map(fn ($k) => $rotEtapas[$k] ?? $k)->implode(', ') ?: null,
-        !empty($escola['turnos']) ? 'Turnos: ' . collect($escola['turnos'])->map(fn ($k) => $rotTurnos[$k] ?? $k)->implode(', ') : null,
-      ]);
-    @endphp
-    <div class="school-meta">{{ implode(' · ', $meta) }}</div>
-  </div>
-  <span class="badge {{ $escola['ativo'] ? 'badge-info' : 'badge-muted' }}" style="font-size:13px;">
-    {{ $escola['ativo'] ? 'Escola Ativa' : 'Escola Inativa' }}
-  </span>
-</div>
-@endif
+<x-pagina titulo="{{ $nomeEscola }}" subtitulo="{{ implode(' · ', $meta) }}">
+  <a href="{{ route('turmas.index') }}" class="btn btn-primary">Ver turmas</a>
+  @if($escola && !$escola['ativo'])<span class="badge badge-muted">Escola inativa</span>@endif
+</x-pagina>
 
 {{-- KPIs --}}
 <div class="kpi-grid">
   <div class="card kpi">
-    <div class="kpi-label">Turmas Ativas</div>
+    <div class="kpi-label">Turmas ativas</div>
     <div class="kpi-value">{{ $kpis['turmas_ativas'] ?? '—' }}</div>
-    <div class="kpi-trend">● turmas em operação</div>
   </div>
   <div class="card kpi">
-    <div class="kpi-label">Total de Alunos</div>
+    <div class="kpi-label">Alunos</div>
     <div class="kpi-value">{{ $kpis ? number_format($kpis['total_alunos'], 0, ',', '.') : '—' }}</div>
-    <div class="kpi-trend up">▲ matrículas ativas</div>
   </div>
   <div class="card kpi">
-    <div class="kpi-label">Provas Aplicadas</div>
+    <div class="kpi-label">Provas aplicadas</div>
     <div class="kpi-value">{{ $kpis['provas_aplicadas'] ?? '—' }}</div>
-    <div class="kpi-trend up">▲ no período letivo</div>
   </div>
   <div class="card kpi">
-    <div class="kpi-label">Média da Escola</div>
+    <div class="kpi-label">Média da escola</div>
     <div class="kpi-value">
       @if($kpis && $kpis['media_escola'] !== null)
         {{ number_format($kpis['media_escola'], 1, ',', '') }}
       @else
         —
       @endif
-    </div>
-    <div class="kpi-trend {{ ($kpis['media_escola'] ?? 0) >= 7 ? 'up' : '' }}">
-      {{ ($kpis['media_escola'] ?? 0) >= 7 ? '▲ acima da meta da rede' : '● acompanhar meta da rede' }}
     </div>
   </div>
 </div>
@@ -130,8 +113,7 @@
   {{-- Tabela por turma --}}
   <div class="card table-wrap">
     <div class="card-pad" style="padding-bottom:0;">
-      <div class="eyebrow">Desempenho por turma</div>
-      <h3 style="font-size:18px;">Consolidação das últimas provas</h3>
+      <h3 style="font-size:18px;">Últimas provas por turma</h3>
     </div>
     <table class="table lista-cel">
       <thead>
@@ -139,7 +121,7 @@
           <th>Turma</th>
           <th>Professor(a)</th>
           <th>Alunos</th>
-          <th>Última Prova</th>
+          <th>Última prova</th>
           <th>Média</th>
           <th>Status</th>
         </tr>
@@ -170,8 +152,7 @@
   <div class="side-stack">
     {{-- Equipe da escola --}}
     <div class="card card-pad">
-      <div class="eyebrow">Equipe da escola</div>
-      <h3 style="font-size:18px;">Gestão e docentes de referência</h3>
+      <h3 style="font-size:18px;">Equipe da escola</h3>
       <div class="team-grid">
         @forelse($equipe as $membro)
           @php
@@ -195,8 +176,7 @@
 
     {{-- Calendário de provas --}}
     <div class="card card-pad">
-      <div class="eyebrow">Calendário de provas próximas</div>
-      <h3 style="font-size:18px;">Aplicações agendadas</h3>
+      <h3 style="font-size:18px;">Próximas provas</h3>
       <div class="list-stack">
         @forelse($provas as $p)
           @php $pcfg = $provaStatusConfig[$p['status']] ?? ['badge' => 'badge-muted', 'label' => ucfirst($p['status'])]; @endphp

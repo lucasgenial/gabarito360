@@ -17,7 +17,7 @@
 <div class="card card-pad" style="margin-top:20px;">
   <div class="row-between" style="flex-wrap:wrap;">
     <h3 style="font-size:17px;">Análise por questão</h3>
-    <span style="font-size:12px;color:var(--muted);">% de alunos que acertaram · <span style="color:#168821;">■</span> fácil (≥70%) <span style="color:#c27c0e;">■</span> média <span style="color:#e52207;">■</span> difícil (&lt;40%)</span>
+    <span style="font-size:12px;color:var(--muted);">% de alunos que acertaram · <span style="color:var(--success);">■</span> fácil (≥70%) <span style="color:#c27c0e;">■</span> média <span style="color:var(--danger);">■</span> difícil (&lt;40%)</span>
   </div>
 
   @if($comDados->isEmpty())
@@ -41,18 +41,18 @@
 
     <div class="aq-listas">
       <div>
-        <div class="eyebrow" style="color:#e52207;">Mais difíceis — revisar em aula</div>
+        <div class="eyebrow" style="color:var(--danger);">Mais difíceis — revisar em aula</div>
         <ul style="list-style:none;padding:0;margin:6px 0 0;">
           @foreach($dificeis as $q)
-            <li><span><b>Questão {{ str_pad($q['numero'], 2, '0', STR_PAD_LEFT) }}</b> · certa {{ $q['gabarito'] }}@if($q['distrator']) · mais marcada errada: <b>{{ $q['distrator'] }}</b>@endif</span><b style="color:#e52207;">{{ $q['pct'] }}%</b></li>
+            <li><span><b>Questão {{ str_pad($q['numero'], 2, '0', STR_PAD_LEFT) }}</b> · certa {{ $q['gabarito'] }}@if($q['distrator']) · mais marcada errada: <b>{{ $q['distrator'] }}</b>@endif</span><b style="color:var(--danger);">{{ $q['pct'] }}%</b></li>
           @endforeach
         </ul>
       </div>
       <div>
-        <div class="eyebrow" style="color:#168821;">Mais acertadas</div>
+        <div class="eyebrow" style="color:var(--success);">Mais acertadas</div>
         <ul style="list-style:none;padding:0;margin:6px 0 0;">
           @foreach($faceis as $q)
-            <li><span><b>Questão {{ str_pad($q['numero'], 2, '0', STR_PAD_LEFT) }}</b> · certa {{ $q['gabarito'] }}</span><b style="color:#168821;">{{ $q['pct'] }}%</b></li>
+            <li><span><b>Questão {{ str_pad($q['numero'], 2, '0', STR_PAD_LEFT) }}</b> · certa {{ $q['gabarito'] }}</span><b style="color:var(--success);">{{ $q['pct'] }}%</b></li>
           @endforeach
         </ul>
       </div>
