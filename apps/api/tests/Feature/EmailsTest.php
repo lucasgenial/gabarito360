@@ -86,7 +86,7 @@ class EmailsTest extends TestCase
     {
         $this->usuario();
         DB::table('password_reset_tokens')->insert([
-            'email' => 'prof@gabarito360.dev', 'token' => Hash::make('abc'), 'created_at' => now()->subMinutes(61),
+            'email' => \App\Support\DadoProtegido::hash('prof@gabarito360.dev', 'email'), 'token' => Hash::make('abc'), 'created_at' => now()->subMinutes(61),
         ]);
 
         $this->redefinir('abc')->assertStatus(422);
@@ -161,7 +161,7 @@ class EmailsTest extends TestCase
         Mail::fake();
         $usuario = $this->usuario();
         DB::table('password_reset_tokens')->insert([
-            'email' => $usuario->email, 'token' => Hash::make('abc'), 'created_at' => now()->subDays(8), 'expira_em' => now()->subDay(),
+            'email' => \App\Support\DadoProtegido::hash($usuario->email, 'email'), 'token' => Hash::make('abc'), 'created_at' => now()->subDays(8), 'expira_em' => now()->subDay(),
         ]);
 
         $this->redefinir('abc')->assertStatus(422);

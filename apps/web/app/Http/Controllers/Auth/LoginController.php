@@ -70,7 +70,7 @@ class LoginController extends Controller
     public function showConvite(Request $request)
     {
         $token = (string) $request->query('token', '');
-        $email = (string) $request->query('email', '');
+        $email = (string) $request->query('conta', $request->query('email', ''));
         $resp  = $this->api->post('/v1/auth/convite', ['token' => $token, 'email' => $email]);
 
         return view('auth.convite', [
@@ -82,7 +82,7 @@ class LoginController extends Controller
 
     public function recusarConvite(Request $request)
     {
-        $dados = $request->validate(['email' => 'required|email', 'token' => 'required|string']);
+        $dados = $request->validate(['email' => 'required|string|max:255', 'token' => 'required|string']);
         $resp  = $this->api->post('/v1/auth/convite/recusar', $dados);
 
         if ($resp->failed()) {
@@ -96,14 +96,14 @@ class LoginController extends Controller
     {
         return view('auth.redefinir-senha', [
             'token' => $request->query('token', ''),
-            'email' => $request->query('email', ''),
+            'email' => $request->query('conta', $request->query('email', '')),
         ]);
     }
 
     public function postRedefinirSenha(Request $request)
     {
         $request->validate([
-            'email'                 => 'required|email',
+            'email'                 => 'required|string|max:255',
             'token'                 => 'required|string',
             'password'              => 'required|string|min:8|confirmed',
         ], [

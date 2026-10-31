@@ -21,7 +21,7 @@ class EscolaSeeder extends Seeder
         ];
 
         foreach ($escolas as $escola) {
-            DB::table('escolas')->insert(array_merge($escola, [
+            \App\Models\Escola::create(array_merge($escola, [
                 'tipo_rede'  => 'municipal',
                 'cidade'     => 'Cidade Exemplo',
                 'uf'         => 'PE',

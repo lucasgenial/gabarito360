@@ -28,7 +28,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $usuario = Usuario::where('email', $request->email)
+        $usuario = Usuario::porEmail($request->email)
             ->where('ativo', true)
             ->first();
 
@@ -99,7 +99,7 @@ class AuthController extends Controller
     public function trocarEmail(Request $request, ContaUsuario $conta): JsonResponse
     {
         $data = $request->validate([
-            'novo_email'  => 'required|email|max:190|unique:usuarios,email',
+            'novo_email'  => ['required', 'email', 'max:190', new \App\Rules\UnicoProtegido('usuarios', 'email')],
             'senha_atual' => 'required|string',
         ], ['novo_email.unique' => 'Este e-mail já está em uso.']);
 
@@ -126,9 +126,9 @@ class AuthController extends Controller
     /** Mostra ao convidado a função e o vínculo antes de aceitar. */
     public function consultarConvite(Request $request, ContaUsuario $conta): JsonResponse
     {
-        $data = $request->validate(['email' => 'required|email', 'token' => 'required|string']);
+        $data = $request->validate(['email' => 'required|string|max:255', 'token' => 'required|string']);
 
-        $usuario = Usuario::where('email', $data['email'])->first();
+        $usuario = Usuario::where('email_hash', \App\Support\DadoProtegido::conta($data['email']))->first();
         $convite = $conta->convitePendente($data['email'], $data['token']);
         if (!$usuario || !$convite) {
             return ApiResponse::error('Convite inválido ou vencido.', [], 422);
@@ -139,9 +139,9 @@ class AuthController extends Controller
 
     public function recusarConvite(Request $request, ContaUsuario $conta): JsonResponse
     {
-        $data = $request->validate(['email' => 'required|email', 'token' => 'required|string']);
+        $data = $request->validate(['email' => 'required|string|max:255', 'token' => 'required|string']);
 
-        $usuario = Usuario::where('email', $data['email'])->first();
+        $usuario = Usuario::where('email_hash', \App\Support\DadoProtegido::conta($data['email']))->first();
         $convite = $conta->convitePendente($data['email'], $data['token']);
         if (!$usuario || !$convite) {
             return ApiResponse::error('Convite inválido ou vencido.', [], 422);
@@ -156,7 +156,7 @@ class AuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $usuario = Usuario::where('email', $request->email)->where('ativo', true)->first();
+        $usuario = Usuario::porEmail($request->email)->where('ativo', true)->first();
 
         if ($usuario) {
             $conta->enviarLinkDeSenha($usuario);
@@ -171,27 +171,27 @@ class AuthController extends Controller
     public function redefinirSenha(Request $request): JsonResponse
     {
         $request->validate([
-            'email'                 => 'required|email',
+            'email'                 => 'required|string|max:255',
             'token'                 => 'required|string',
             'password'              => 'required|string|min:8|confirmed',
         ]);
 
         $record = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
+            ->where('email', \App\Support\DadoProtegido::conta($request->email))
             ->first();
 
         if (!$record || !Hash::check($request->token, $record->token)) {
             return ApiResponse::error('Token inválido ou expirado.', [], 422);
         }
 
-        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::conta($request->email))->delete();
 
         $expira = $record->expira_em ? Carbon::parse($record->expira_em) : Carbon::parse($record->created_at)->addMinutes(self::VALIDADE_LINK_MINUTOS);
         if ($expira->isPast()) {
             return ApiResponse::error('Link expirado. Solicite um novo link de recuperação.', [], 422);
         }
 
-        $usuario = Usuario::where('email', $request->email)->first();
+        $usuario = Usuario::where('email_hash', \App\Support\DadoProtegido::conta($request->email))->first();
         if (!$usuario) {
             return ApiResponse::error('Token inválido ou expirado.', [], 422);
         }
