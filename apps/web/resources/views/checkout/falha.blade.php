@@ -1,4 +1,5 @@
-@extends('layouts.app')
+@extends('layouts.public')
+@section('robots', 'noindex, nofollow')
 @section('title', 'Pagamento não concluído')
 
 @section('content')

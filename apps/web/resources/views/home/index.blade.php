@@ -11,20 +11,7 @@
 </head>
 <body class="area-publica tela-inicio">
 
-<nav class="lp-nav" aria-label="Navegação principal">
-  <div class="lp-nav-inner">
-    <a href="{{ route('home') }}" class="brand"><span class="logo">G360</span> Gabarito360</a>
-    <div class="lp-links">
-      <a href="#como-funciona">Como funciona</a>
-      <a href="#recursos">Recursos</a>
-      <a href="#planos">Planos</a>
-    </div>
-    <div class="lp-acoes">
-      <a href="{{ route('login') }}" class="btn btn-ghost">Entrar</a>
-      <a href="{{ route('leads.index') }}" class="btn btn-primary">Falar com a gente</a>
-    </div>
-  </div>
-</nav>
+<x-menu-publico />
 
 <section class="lp-abertura" aria-labelledby="titulo">
   <div class="lp-inner lp-abertura-grade">
@@ -166,17 +153,7 @@
   </div>
 </section>
 
-<footer class="lp-rodape">
-  <div class="lp-inner lp-rodape-grade">
-    <strong>Gabarito360</strong>
-    <div class="lp-links">
-      <a href="{{ route('planos.index') }}">Planos</a>
-      <a href="{{ route('leads.index') }}">Fale conosco</a>
-      <a href="{{ route('login') }}">Entrar</a>
-    </div>
-    <span>© {{ date('Y') }} Gabarito360</span>
-  </div>
-</footer>
+<x-rodape-publico />
 
 </body>
 </html>

@@ -14,17 +14,7 @@
 </head>
 <body class="area-publica pagina-publica">
 <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
-<header class="lp-nav">
-  <nav class="lp-nav-inner" aria-label="Navegação principal">
-    <a class="brand" href="{{ route('home') }}"><span class="logo">G360</span> Gabarito360</a>
-    <div class="lp-links">
-      <a href="{{ route('home') }}#como-funciona">Como funciona</a>
-      <a href="{{ route('planos.index') }}" @if(request()->routeIs('planos.index')) aria-current="page" @endif>Planos</a>
-      <a href="{{ route('leads.index') }}" @if(request()->routeIs('leads.*')) aria-current="page" @endif>Fale conosco</a>
-    </div>
-    <div class="lp-acoes"><a href="{{ route('login') }}" class="btn btn-secondary">Entrar</a></div>
-  </nav>
-</header>
+<x-menu-publico />
 <main id="conteudo" class="publico-conteudo" tabindex="-1">
   @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
   @if($errors->any())
@@ -32,17 +22,7 @@
   @endif
   @yield('content')
 </main>
-<footer class="lp-rodape publico-rodape">
-  <div class="lp-rodape-grade">
-    <a class="brand" href="{{ route('home') }}">Gabarito360</a>
-    <nav class="lp-links" aria-label="Links do rodapé">
-      <a href="{{ route('planos.index') }}">Planos</a>
-      <a href="{{ route('leads.index') }}">Fale conosco</a>
-      <a href="{{ route('login') }}">Entrar</a>
-    </nav>
-    <span>© {{ date('Y') }} Gabarito360</span>
-  </div>
-</footer>
+<x-rodape-publico />
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
 @stack('scripts')
 </body>

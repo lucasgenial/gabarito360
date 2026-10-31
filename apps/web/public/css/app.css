@@ -1104,7 +1104,6 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 
 /* ---------- Páginas públicas: mesma identidade da página inicial ---------- */
 .pagina-publica { min-height: 100vh; display: flex; flex-direction: column; }
-.pagina-publica .lp-nav-inner { max-width: none; padding-inline: var(--margem); }
 .pagina-publica .lp-links a[aria-current="page"] { color: var(--accent); font-weight: 700; }
 .publico-conteudo { flex: 1; padding: 32px var(--margem) 48px; min-width: 0; }
 .publico-rodape { padding-inline: var(--margem); background: var(--surface); }
@@ -1128,10 +1127,30 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .seguranca-contato { padding: 16px; border: 1px solid var(--border-soft); border-radius: var(--radius-lg); background: var(--surface); margin-block: 16px 24px; display: grid; gap: 12px; }
 .seguranca-contato h2 { font-size: 14px; font-weight: 600; }
 .seguranca-widget { width: 100%; min-width: 0; }
+.pagina-acesso { min-height: calc(100dvh / var(--escala)); display: flex; flex-direction: column; }
+.acesso-conteudo { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.pagina-acesso .auth-wrap, .pagina-acesso .convite { flex: 1; min-height: 0; }
+.rodape-publico { background: var(--surface); padding: 32px 20px; }
+.rodape-publico-grade { max-width: 1160px; margin-inline: auto; display: grid; grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr)); gap: 32px; }
+.rodape-publico h2 { font-size: 14px; font-weight: 700; color: var(--fg); margin-bottom: 12px; }
+.rodape-publico nav { display: flex; flex-direction: column; gap: 8px; }
+.rodape-publico nav h2 { margin-bottom: 4px; }
+.rodape-publico a { color: var(--fg-2); }
+.rodape-publico .brand { color: var(--accent); margin-bottom: 12px; }
+.rodape-publico p { font-size: 14px; color: var(--muted); }
+.rodape-publico-marca p + p { margin-top: 12px; }
+.rodape-redes { list-style: none; display: grid; gap: 8px; }
+.rodape-redes li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.rodape-em-breve { font-size: 12px; color: var(--muted); }
+.login-voltar { margin-top: 16px; }
+@media (max-width: 767px) {
+  .rodape-publico-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 20px; }
+  .rodape-publico-marca { grid-column: 1 / -1; }
+}
+@media (max-width: 359px) { .rodape-publico-grade { grid-template-columns: minmax(0, 1fr); } }
 .pular-conteudo { position: absolute; left: 16px; top: -100px; z-index: 100; background: var(--surface); padding: 12px; border: 1px solid var(--accent); }
 .pular-conteudo:focus { top: 8px; }
 @media (max-width: 767px) {
-  .pagina-publica .lp-nav .lp-links { display: flex; order: 3; width: 100%; }
   .publico-abertura h1, .publico-status h1 { font-size: 28px; }
   .seguranca-contato { padding: 12px; }
 }

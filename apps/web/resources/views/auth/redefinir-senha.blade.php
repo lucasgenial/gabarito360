@@ -24,7 +24,7 @@
 @section('content')
 <div class="auth-wrap">
   <aside class="auth-aside">
-    <a class="brand"><span class="logo">G360</span> Gabarito360</a>
+    <a class="brand" href="{{ route('home') }}"><span class="logo">G360</span> Gabarito360</a>
     <div class="aside-body">
       <h1>Crie uma nova senha segura.</h1>
       <p>Use pelo menos 8 caracteres. Combine letras, números e símbolos para maior segurança.</p>
