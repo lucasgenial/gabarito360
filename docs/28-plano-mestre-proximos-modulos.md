@@ -966,7 +966,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | L3 Proteção | concluído: chave dedicada, migração e logs protegidos publicados; verificações operacionais em 31/10/2026 (docs/operacao/protecao-dados.md) | Codex | #69 |
 | L4 Titulares | pendente: depende de T2 | | |
 | L5 Incidentes | pendente: depende de AU1 | | |
-| L6 Trocar foto por avatar | em revisão: implementação e testes locais/MariaDB aprovados, prints fictícios em docs/operacao/avatares-alunos.md; publicação e eventual remoção da coluna dependem de aprovação | Codex | |
+| L6 Trocar foto por avatar | em revisão: implementação e testes locais/MariaDB aprovados, prints fictícios em docs/operacao/avatares-alunos.md; publicação e eventual remoção da coluna dependem de aprovação | Codex |#70 |
 | T1 Modelo de dados | pendente | | |
 | T2 Clientes e espaços | pendente | | |
 | V1 Vínculos | pendente | | |
