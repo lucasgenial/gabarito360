@@ -11,7 +11,7 @@
   .bim-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(110px,100%),1fr)); gap:12px; margin-top:16px; align-items:end; }
   .bim-item { text-align:center; }
   .bim-bar { height:140px; background:var(--surface-2); border-radius:var(--radius-md); display:flex; align-items:flex-end; padding:6px; }
-  .bim-bar span { width:100%; border-radius:8px; background:linear-gradient(180deg, var(--accent), var(--accent-dark)); }
+  .bim-bar span { width:100%; border-radius:8px; background:var(--accent); }
   .bim-item strong { display:block; margin-top:8px; font-size:13px; }
   .bim-item small { color:var(--muted); font-family:var(--font-mono); }
   .visit-list { display:grid; gap:12px; margin-top:8px; }

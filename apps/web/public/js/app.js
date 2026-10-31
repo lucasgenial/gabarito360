@@ -141,7 +141,7 @@ function drawBarChart(el) {
     var bh = (h - pad * 2) * (d.v / max);
     var x = pad + gap * i + (gap - bw) / 2;
     var y = h - pad - bh;
-    var color = d.c || '#1351b4';
+    var color = d.c || '#1d4f9e';
     svg += '<rect x="' + x + '" y="' + y + '" width="' + bw + '" height="' + bh + '" rx="4" fill="' + color + '"/>';
     svg += '<text x="' + (x + bw / 2) + '" y="' + (h - pad + 16) + '" text-anchor="middle" font-size="12" fill="#555" font-family="sans-serif">' + d.l + '</text>';
     svg += '<text x="' + (x + bw / 2) + '" y="' + (y - 6) + '" text-anchor="middle" font-size="12" font-weight="700" fill="#1c2733" font-family="monospace">' + d.v + '</text>';
