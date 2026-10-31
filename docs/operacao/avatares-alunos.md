@@ -1,6 +1,6 @@
 # L6 — Avatares de alunos
 
-Implementação em revisão em 31/10/2026; sem merge, deploy ou exclusão de fotos.
+Publicado em 31/10/2026 com aprovação do responsável, pelo PR #70. Não houve exclusão de fotos.
 
 ## Comportamento
 
@@ -35,3 +35,14 @@ O levantamento se limita à coluna e ao diretório utilizados pela aplicação; 
 ![Lista no celular](../evidencias/l6-2026-10-31/index-375.png)
 ![Detalhe no tema escuro](../evidencias/l6-2026-10-31/show-dark.png)
 ![Lista em 4K](../evidencias/l6-2026-10-31/index-3840.png)
+
+
+## Publicação e verificação — 31/10/2026
+
+- PR #70 incorporado no commit `dc9949e3690744b72c5071d919955c09ad2be9b8`. CI do código aprovado após conciliar o quadro com as validações L2 já incorporadas pelo PR #71.
+- Backup anterior ao deploy preservado com acesso restrito no CT106 em `/root/gabarito360-recovery/l6-20261031/producao-antes.sql`; restauração isolada conferiu as 40 tabelas. Nenhum arquivo de foto foi apagado.
+- Roteiro B5 concluído às 18:11:55 (America/Sao_Paulo). Migração aditiva de `avatar_id` concluída em 26,88 ms; início, login e health responderam HTTP 200 local e público.
+- Kernel HTTP da API de produção: cadastro com avatar 36, troca entre 1/9/36, retorno a iniciais, leitura persistida via GET, avatar na turma, rejeição de ID 37 e de foto_path. Conta e registros fictícios em transação revertida; nenhum aluno real alterado.
+- Interface: HTML renderizado pelo código publicado no servidor com dados fictícios; CSS, JS e galeria carregados do domínio público com HTTP 200. Seleção 1/9/36 e retorno às iniciais aprovados em Chrome, desktop/celular, sem erro JS ou rolagem lateral. Não foi usado cadastro real nem simulado um envio de formulário autenticado pelo navegador; a persistência foi validada separadamente no kernel da API de produção.
+- Nginx, PHP-FPM, Redis, dois workers, timer e sanitizador ativos; nenhum job falho.
+- `foto_path` permanece no banco. Exclusão de arquivos ou da coluna continua dependendo de aprovação específica; essa etapa não foi executada.
