@@ -147,6 +147,8 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/cartoes/{id}/imagem',          [CorrecaoController::class, 'imagem'])->name('cartoes.imagem');
     Route::delete('/cartoes/{id}',              [CorrecaoController::class, 'excluir'])->name('cartoes.excluir');
     Route::post('/provas/{id}/cartoes',         [CorrecaoController::class, 'upload'])->name('correcao.upload');
+    Route::get('/provas/{id}/cartoes/envios/{chave}', [CorrecaoController::class, 'envio'])->whereUuid('chave')->name('correcao.envio');
+    Route::post('/provas/{id}/cartoes/envios/{chave}/repetir', [CorrecaoController::class, 'repetirEnvio'])->whereUuid('chave')->name('correcao.envio.repetir');
     Route::get('/provas/{id}/cartoes/pdf',      [CorrecaoController::class, 'pdf'])->name('correcao.pdf');
     Route::post('/cartoes/{id}/resolver-ambiguidade', [CorrecaoController::class, 'resolverAmbiguidade'])->name('cartoes.resolver-ambiguidade');
     Route::post('/cartoes/{id}/vincular-aluno',       [CorrecaoController::class, 'vincularAluno'])->name('cartoes.vincular-aluno');

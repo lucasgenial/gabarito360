@@ -81,6 +81,8 @@ Route::prefix('v1')->group(function () {
             Route::post('{id}/correcao/fechar',  [CartaoController::class, 'fecharCorrecao'])->middleware('permissao:correcao.fechar');
             Route::post('{id}/correcao/reabrir', [CartaoController::class, 'reabrirCorrecao'])->middleware('permissao:correcao.reabrir');
             Route::post('{id}/cartoes',       [CartaoController::class, 'store'])->middleware('permissao:cartao.enviar');
+            Route::get('{id}/cartoes/envios/{chave}', [CartaoController::class, 'envio'])->whereUuid('chave')->middleware('permissao:cartao.enviar');
+            Route::post('{id}/cartoes/envios/{chave}/repetir', [CartaoController::class, 'repetirEnvio'])->whereUuid('chave')->middleware('permissao:cartao.enviar');
         });
 
         // Cartões / OMR (MP-021)
