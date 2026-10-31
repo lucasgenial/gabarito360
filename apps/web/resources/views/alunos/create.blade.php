@@ -30,20 +30,17 @@
   </div>
 @endif
 
-<form method="POST" action="{{ route('alunos.store') }}" class="form-container" enctype="multipart/form-data">
+<form method="POST" action="{{ route('alunos.store') }}" class="form-container">
   @csrf
 
   {{-- Card lateral de preview --}}
   <aside class="identity-card">
-    <img id="preview-foto" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto 20px;display:none;" />
-    <div class="photo-preview" id="preview-avatar">?</div>
+    <x-avatar :nome="old('nome', '')" tamanho="xl" id="preview-avatar" />
     <div style="margin-bottom:20px;">
       <h3 id="preview-nome" style="font-size:16px;font-weight:700;color:var(--fg);margin-bottom:4px;">Novo Aluno</h3>
       <p id="preview-turma" style="font-size:13px;color:var(--muted);">Série / Turma</p>
     </div>
-    <label for="foto" class="btn btn-secondary btn-sm" style="cursor:pointer;">Selecionar Foto</label>
-    <input type="file" id="foto" name="foto" accept="image/*" style="display:none;" onchange="previewFoto(this)" />
-    <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px;">Opcional. Imagem até 4MB.</p>
+    <p style="font-size:12px;color:var(--muted);line-height:1.5;">O aluno será representado pelas iniciais do nome.</p>
   </aside>
 
   {{-- Formulário principal --}}
@@ -120,25 +117,13 @@
 
 @push('scripts')
 <script>
-function previewFoto(input) {
-  if (!input.files || !input.files[0]) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var img = document.getElementById('preview-foto');
-    img.src = e.target.result;
-    img.style.display = 'block';
-    document.getElementById('preview-avatar').style.display = 'none';
-  };
-  reader.readAsDataURL(input.files[0]);
-}
-
 function atualizarPreview() {
   var nome  = document.getElementById('nome').value;
   var sel   = document.getElementById('turma_id');
   var opt   = sel.options[sel.selectedIndex];
 
   var ini = nome.trim()
-    ? nome.trim().split(' ').filter(Boolean).map(function(p){ return p[0].toUpperCase(); }).slice(0,2).join('')
+    ? nome.trim().split(/\s+/u).filter(Boolean).map(function(p){ return Array.from(p)[0].toLocaleUpperCase('pt-BR'); }).slice(0,2).join('')
     : '?';
 
   document.getElementById('preview-avatar').textContent = ini;

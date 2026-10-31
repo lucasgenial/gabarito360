@@ -170,13 +170,13 @@
         <div class="attention-grid">
           @foreach($atencao as $a)
             @php
-              $ini = implode('', array_map(fn($p) => strtoupper($p[0]), array_slice(explode(' ', $a['nome']), 0, 2)));
+
               $badgeCls = $a['media'] < 5 ? 'badge-danger' : 'badge-warn';
               $badgeLabel = $a['media'] < 5 ? 'abaixo da média' : 'precisa reforço';
             @endphp
             <article>
               <div class="student-card-top">
-                <div class="student-avatar">{{ $ini }}</div>
+                <x-avatar :nome="$a['nome']" :aluno-id="$a['id'] ?? $a['aluno_id'] ?? null" />
                 <span class="trend down">↓ {{ number_format($a['media'], 1, ',', '') }}</span>
               </div>
               <div style="margin-top:12px;">

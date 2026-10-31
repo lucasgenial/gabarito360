@@ -1217,3 +1217,13 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
   a { color: inherit !important; text-decoration: none !important; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* L6: representação do aluno sem imagem enviada; cor estável pelo ID. */
+.avatar-aluno { display:inline-grid;place-items:center;flex-shrink:0;border-radius:50%;width:42px;height:42px;font-size:14px;font-weight:700;line-height:1; }
+.avatar-aluno--sm { width:36px;height:36px;font-size:13px; }
+.avatar-aluno--lg { width:72px;height:72px;font-size:24px; }
+.avatar-aluno--xl { width:120px;height:120px;font-size:36px;margin:0 auto 20px; }
+.avatar-aluno--azul { background:var(--accent-light);color:var(--accent-dark); }
+.avatar-aluno--verde { background:var(--atencao-light);color:var(--atencao); }
+.avatar-aluno--roxo { background:var(--purple-light);color:var(--purple-fg); }
+.avatar-aluno--neutro { background:var(--surface-2);color:var(--fg-2); }

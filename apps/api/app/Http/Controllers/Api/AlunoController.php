@@ -96,13 +96,9 @@ class AlunoController extends Controller
             'genero'          => 'sometimes|in:M,F,O|nullable',
             'nome_responsavel'=> 'sometimes|string|max:200|nullable',
             'ativo'           => 'sometimes|boolean',
-            'foto'            => 'sometimes|image|max:4096|nullable',
+            'foto'            => 'prohibited',
+            'foto_path'       => 'prohibited',
         ]);
-
-        if ($request->hasFile('foto')) {
-            $data['foto_path'] = $request->file('foto')->store('alunos', 'public');
-        }
-        unset($data['foto']);
 
         $aluno = Aluno::create($data);
 
@@ -147,13 +143,9 @@ class AlunoController extends Controller
             'genero'          => 'sometimes|in:M,F,O|nullable',
             'nome_responsavel'=> 'sometimes|string|max:200|nullable',
             'ativo'           => 'sometimes|boolean',
-            'foto'            => 'sometimes|image|max:4096|nullable',
+            'foto'            => 'prohibited',
+            'foto_path'       => 'prohibited',
         ]);
-
-        if ($request->hasFile('foto')) {
-            $data['foto_path'] = $request->file('foto')->store('alunos', 'public');
-        }
-        unset($data['foto']);
 
         $aluno->update($data);
 

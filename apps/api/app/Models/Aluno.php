@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Aluno extends Model
 {
-    protected $hidden = ['cpf_hash'];
+    protected $hidden = ['cpf_hash', 'foto_path'];
 
     protected $table = 'alunos';
 
     protected $fillable = [
-        'turma_id', 'nome', 'matricula', 'cpf', 'data_nascimento', 'genero', 'foto_path', 'nome_responsavel', 'ativo',
+        'turma_id', 'nome', 'matricula', 'cpf', 'data_nascimento', 'genero', 'nome_responsavel', 'ativo',
     ];
 
     protected $casts = [

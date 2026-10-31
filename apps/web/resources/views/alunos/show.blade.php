@@ -20,10 +20,7 @@
 
 {{-- Header do perfil --}}
 <div class="profile-header">
-  @php
-    $ini = collect(explode(' ', $aluno['nome']))->filter()->map(fn($p) => mb_strtoupper(mb_substr($p,0,1)))->take(2)->implode('');
-  @endphp
-  <div class="profile-avatar">{{ $ini }}</div>
+  <x-avatar :nome="$aluno['nome']" :aluno-id="$aluno['id']" tamanho="lg" />
   <div style="flex:1;">
     <h1 class="page-title" style="margin:0;">{{ $aluno['nome'] }}</h1>
     <p class="page-sub">
