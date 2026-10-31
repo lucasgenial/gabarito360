@@ -1,6 +1,6 @@
 # L3 — Proteção de CPF, contatos, fila e logs
 
-Implementação para revisão em 31/10/2026. Não altera o plano mestre nem autoriza merge, migração, configuração ou deploy em produção.
+Publicado com aprovação do responsável em 31/10/2026 pelo PR #69, commit `90b7d3e310519a20f9121d55629d3c457e869297`. O registro abaixo distingue o ensaio anterior da verificação em produção. Novas alterações operacionais continuam exigindo aprovação.
 
 ## O que muda
 
@@ -15,7 +15,7 @@ Implementação para revisão em 31/10/2026. Não altera o plano mestre nem auto
 
 A base pública de referência do Censo mantém o telefone institucional publicado pelo INEP. O contato do cadastro editável da escola é cifrado. Nomes, matrículas, notas, datas de nascimento, mensagens livres e fotos não são abrangidos pela criptografia de campos deste pacote; continuam sujeitos a escopo, minimização e aos pacotes específicos. A futura informação de contato dos responsáveis e o código do portal devem usar proteção própria quando esses modelos existirem.
 
-## Chaves e publicação futura
+## Procedimento de chaves e publicação
 
 1. Exigir aprovação de merge/deploy e da configuração da chave dedicada `DADOS_HASH_KEY` na API. Gerar ao menos 32 bytes aleatórios, guardar em cofre e gravar pelo procedimento de segredos sem imprimir o valor. Fora do ambiente `testing`, a ausência da chave bloqueia a migração e a busca; não há fallback silencioso para `APP_KEY`.
 2. Guardar separadamente a chave de busca, a `APP_KEY` da API e quaisquer `APP_PREVIOUS_KEYS` necessárias. Banco e chaves são necessários para recuperar os dados. Não registrar chaves em relatório, comando compartilhado, Git ou conversa.
@@ -29,9 +29,9 @@ A base pública de referência do Censo mantém o telefone institucional publica
 ## Limites operacionais que ainda exigem aprovação
 
 - A política da aplicação não modifica nem elimina logs históricos, caixas de e-mail, payloads de falhas anteriores ou backups em texto simples. Retenção e descarte permanecem no fluxo aprovado do projeto.
-- O nginx atual usa o log de acesso padrão, que pode conter query strings dos links. A revisão deve trocar seu formato por um que omita query string, cabeçalhos, IP e corpo; avaliar também logs de erro e Cloudflare. Isso não é aplicado pelo PR nem pelo roteiro B5 automaticamente. Não declarar que todos os logs da infraestrutura estão saneados.
+- O nginx passou a usar logs de acesso e erro protegidos na publicação autorizada, conforme registro abaixo. Essa configuração é operacional, não aplicada automaticamente pelo PR ou pelo roteiro B5. Logs históricos e Cloudflare não foram alterados; não declarar que todos os logs da infraestrutura estão saneados.
 - O virtual host consultado encaminha `/api/v1/` ao PHP da API e usa o `public` da web como raiz. Não foi demonstrada exposição de arquivos reais e nenhum arquivo pessoal foi baixado. Preservar o acesso autenticado/assinado às imagens e bloquear publicação direta dos diretórios de fotos antes de criar qualquer link público de storage. L6 permanece responsável por retirar fotos de alunos.
-- Sem alteração de retenção, autorização de dados, termos públicos, infraestrutura ou planejamento nesta entrega. L3 fica sujeito à revisão e à validação operacional posterior; não declarar conformidade jurídica integral.
+- Retenção, autorização de dados e termos públicos não foram alterados. A validação operacional de L3 foi concluída; isso não representa conformidade jurídica integral.
 
 ## Validação
 
@@ -39,5 +39,15 @@ A base pública de referência do Censo mantém o telefone institucional publica
 - Recuperação nova sem e-mail na URL, compatibilidade dos links antigos, payload de e-mail cifrado e restaurável, e rejeição de chave incorreta.
 - Logs finais de API/web testados com nomes, CPF, e-mail, senha, SQL, exceção e texto SMTP fictícios. Teste do registro de falha da fila sem mensagem sensível.
 - MariaDB no banco padrão `gabarito360_teste`, usando a cópia existente do esquema e dados fictícios: migração, leitura e índices, repetição sem recifrar, dump cifrado, restauração do dump e recuperação do job com a chave correta; chave diferente recusada.
-- Depois do ensaio, a cópia de teste foi restaurada ao estado anterior (dois usuários e sem a migração L3), a credencial temporária foi revogada e os dumps temporários removidos. Nenhum dado de produção foi convertido ou publicado.
+- Depois do ensaio, a cópia de teste foi restaurada ao estado anterior (dois usuários e sem a migração L3), a credencial temporária foi revogada e os dumps temporários removidos. Nesse ensaio anterior ao deploy, nenhum dado de produção foi convertido ou publicado.
 - Testes completos de API/web, verificação estática de telas e CI registrados no PR. Não houve alteração visual que exigisse novo aceite de layout.
+
+## Publicação e verificação em produção — 31/10/2026
+
+- [PR #69](https://github.com/lucasgenial/gabarito360/pull/69) incorporado e publicado às 17:08:56 UTC pelo roteiro B5; [CI da main aprovado](https://github.com/lucasgenial/gabarito360/actions/runs/41223050192).
+- Chave dedicada configurada sem exposição de valores. Backup recente e cópias restritas das chaves preservados; restauração isolada conferiu contagens de 40 tabelas. Verificação agregada antes/depois confirmou preservação dos campos convertidos.
+- Nginx com classificação fixa de rotas e logs sem URI livre, query string, IP, cabeçalhos ou corpo. Serviço `g360-nginx-log-protegido` sanitiza erros via socket Unix. Logs novos em `gabarito360.access.protegido.log` e `gabarito360.error.protegido.log`; histórico preservado. Configuração validada com `nginx -t` e marcadores fictícios ausentes dos logs finais.
+- Início, login, Fale Conosco e health responderam HTTP 200 com os cabeçalhos de privacidade; login inválido retornou 401.
+- Login, leitura de conta, recuperação e confirmação de troca de e-mail verificados no kernel da API com conta fictícia em transação revertida e transporte de e-mail em memória, sem envio externo.
+- Job técnico consumido pela fila; filas vazias e nenhum job falho ao final. Nginx, PHP-FPM, Redis, dois workers, agendador e sanitizador ativos.
+- Limites: não houve envio real de e-mail nem leitura OMR de cartão real nesta publicação. O teste técnico não encerra as pendências de uso real de E5/E6 ou B6.

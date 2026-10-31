@@ -51,13 +51,10 @@
     </thead>
     <tbody>
       @forelse($alunos as $a)
-        @php
-          $ini = collect(explode(' ', $a['nome']))->filter()->map(fn($p) => mb_strtoupper(mb_substr($p,0,1)))->take(2)->implode('');
-        @endphp
         <tr>
           <td>
             <div class="student-name">
-              <div class="student-av">{{ $ini }}</div>
+              <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id']" tamanho="sm" />
               <strong>{{ $a['nome'] }}</strong>
             </div>
           </td>

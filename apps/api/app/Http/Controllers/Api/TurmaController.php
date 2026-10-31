@@ -138,7 +138,7 @@ class TurmaController extends Controller
         $alunos = DB::table('alunos')
             ->where('turma_id', $id)
             ->orderBy('nome')
-            ->select('id', 'nome', 'matricula', 'data_nascimento', 'ativo')
+            ->select('id', 'nome', 'avatar_id', 'matricula', 'data_nascimento', 'ativo')
             ->get()
             ->map(function ($a) {
                 $a->media_geral = DB::table('notas')->where('aluno_id', $a->id)->avg('nota_final');

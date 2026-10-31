@@ -41,28 +41,26 @@ class AlunoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'required|integer',
             'nome'            => 'required|string|max:200',
             'matricula'       => 'required|string|max:20',
             'data_nascimento' => 'required|date',
             'cpf'             => 'sometimes|string|nullable',
             'genero'          => 'sometimes|in:M,F,O|nullable',
-            'foto'            => 'sometimes|image|max:4096|nullable',
+            'foto'            => 'prohibited',
+            'foto_path'       => 'prohibited',
         ]);
 
         $dados = $request->only(
-            'turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
+            'avatar_id','turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
         );
 
         if ($cpf = $request->input('cpf')) {
             $dados['cpf'] = preg_replace('/\D/', '', $cpf);
         }
 
-        if ($request->hasFile('foto')) {
-            $resp = $this->api->postFile('/v1/alunos', 'foto', $request->file('foto'), $dados);
-        } else {
-            $resp = $this->api->post('/v1/alunos', $dados);
-        }
+        $resp = $this->api->post('/v1/alunos', $dados);
 
         if ($resp->failed()) {
             return back()->withInput()
@@ -93,6 +91,9 @@ class AlunoController extends Controller
     public function update(Request $request, int $id)
     {
         $request->validate([
+            'avatar_id' => 'sometimes|nullable|integer|between:1,36',
+            'foto' => 'prohibited',
+            'foto_path' => 'prohibited',
             'nome'      => 'required|string|max:200',
             'matricula' => 'required|string|max:20',
             'cpf'       => 'sometimes|string|nullable',
@@ -100,7 +101,7 @@ class AlunoController extends Controller
         ]);
 
         $dados = $request->only(
-            'turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
+            'avatar_id','turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
         );
 
         if ($cpf = $request->input('cpf')) {
