@@ -88,6 +88,7 @@ class AlunoController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
+            'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'required|integer|exists:turmas,id',
             'nome'            => 'required|string|max:200',
             'matricula'       => 'required|string|max:20|unique:alunos,matricula',
@@ -135,6 +136,7 @@ class AlunoController extends Controller
         }
 
         $data = $request->validate([
+            'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'sometimes|integer|exists:turmas,id',
             'nome'            => 'sometimes|string|max:200',
             'matricula'       => "sometimes|string|max:20|unique:alunos,matricula,{$id}",

@@ -394,7 +394,7 @@ Texto-base: `docs/33-lgpd-privacidade-e-consentimento.md`.
   1. Retirar o envio de foto das telas e da API.
   2. Criar avatar com as iniciais do nome, com cor definida pelo id do aluno.
   3. Usar o avatar em todas as telas que mostram aluno.
-  4. Oferecer, se desejado, um conjunto fixo de ícones. Nunca aceitar imagem enviada.
+  4. Oferecer as iniciais como padrão e uma galeria de 36 personagens em pixel art, aprovada pelo responsável em 31/10/2026. Permitir escolher no cadastro/edição, salvar a escolha e voltar às iniciais. Nunca aceitar imagem enviada.
   5. Levantar as fotos existentes no banco e no armazenamento.
   6. Com aprovação do responsável, depois do backup, apagar os arquivos e remover a coluna.
 - **Pronto quando:** nenhuma tela ou API aceita foto de aluno, e todas mostram o avatar.
@@ -966,7 +966,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | L3 Proteção | concluído: chave dedicada, migração e logs protegidos publicados; verificações operacionais em 31/10/2026 (docs/operacao/protecao-dados.md) | Codex | #69 |
 | L4 Titulares | pendente: depende de T2 | | |
 | L5 Incidentes | pendente: depende de AU1 | | |
-| L6 Trocar foto por avatar | em revisão: implementação e testes locais/MariaDB aprovados, prints fictícios em docs/operacao/avatares-alunos.md; publicação e eventual remoção da coluna dependem de aprovação | Codex |#70 |
+| L6 Trocar foto por avatar | em revisão: iniciais e galeria aprovada de 36 avatares com seleção persistida; testes e prints em docs/operacao/avatares-alunos.md; merge/deploy e remoção de foto_path dependem de aprovação | Codex | #70 |
 | T1 Modelo de dados | pendente | | |
 | T2 Clientes e espaços | pendente | | |
 | V1 Vínculos | pendente | | |

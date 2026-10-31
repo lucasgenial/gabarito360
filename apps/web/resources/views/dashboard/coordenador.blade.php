@@ -116,7 +116,7 @@
             $badgeCls = $a['media'] < 5 ? 'badge-danger' : 'badge-warn';
           @endphp
           <li>
-            <x-avatar :nome="$a['nome']" :aluno-id="$a['id'] ?? $a['aluno_id'] ?? null" />
+            <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id'] ?? $a['aluno_id'] ?? null" />
             <div class="student-meta">
               <b>{{ $a['nome'] }} · {{ $a['turma'] }}</b>
               <span>{{ $a['disciplina'] }} · média atual</span>

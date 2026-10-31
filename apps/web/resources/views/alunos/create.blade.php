@@ -35,12 +35,12 @@
 
   {{-- Card lateral de preview --}}
   <aside class="identity-card">
-    <x-avatar :nome="old('nome', '')" tamanho="xl" id="preview-avatar" />
+    <x-seletor-avatar :nome="old('nome', '')" />
     <div style="margin-bottom:20px;">
       <h3 id="preview-nome" style="font-size:16px;font-weight:700;color:var(--fg);margin-bottom:4px;">Novo Aluno</h3>
       <p id="preview-turma" style="font-size:13px;color:var(--muted);">Série / Turma</p>
     </div>
-    <p style="font-size:12px;color:var(--muted);line-height:1.5;">O aluno será representado pelas iniciais do nome.</p>
+    <p style="font-size:12px;color:var(--muted);line-height:1.5;">Escolha uma imagem da galeria ou mantenha as iniciais.</p>
   </aside>
 
   {{-- Formulário principal --}}
@@ -126,7 +126,7 @@ function atualizarPreview() {
     ? nome.trim().split(/\s+/u).filter(Boolean).map(function(p){ return Array.from(p)[0].toLocaleUpperCase('pt-BR'); }).slice(0,2).join('')
     : '?';
 
-  document.getElementById('preview-avatar').textContent = ini;
+  document.querySelector('#preview-avatar .avatar-iniciais').textContent = ini;
   document.getElementById('preview-nome').textContent   = nome || 'Novo Aluno';
   document.getElementById('preview-turma').textContent  = (opt && opt.value) ? opt.dataset.label : 'Série / Turma';
 }

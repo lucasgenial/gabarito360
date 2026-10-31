@@ -97,7 +97,7 @@
         <tr data-nome="{{ strtolower($a['nome']) }}">
           <td>
             <div class="student-name">
-              <x-avatar :nome="$a['nome']" :aluno-id="$a['id']" tamanho="sm" />
+              <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id']" tamanho="sm" />
               <strong>{{ $a['nome'] }}</strong>
             </div>
           </td>

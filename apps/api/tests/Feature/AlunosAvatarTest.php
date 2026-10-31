@@ -63,4 +63,28 @@ class AlunosAvatarTest extends TestCase
         $this->assertDatabaseCount('alunos',1);
         $this->assertNull(Aluno::sole()->foto_path);
     }
+
+    public function test_selecao_persiste_nas_listas_e_permite_voltar_as_iniciais(): void
+    {
+        $res=$this->postJson('/api/v1/alunos',$this->dados+['avatar_id'=>36])->assertCreated()->assertJsonPath('data.avatar_id',36);
+        $id=$res->json('data.id');
+        $this->getJson('/api/v1/alunos/'.$id)->assertOk()->assertJsonPath('data.avatar_id',36);
+        $this->getJson('/api/v1/alunos')->assertOk()->assertJsonPath('data.alunos.0.avatar_id',36);
+        $this->getJson('/api/v1/turmas/'.$this->dados['turma_id'])->assertOk()->assertJsonPath('data.alunos.0.avatar_id',36);
+        $this->putJson('/api/v1/alunos/'.$id,['nome'=>'Novo nome fictício'])->assertOk()->assertJsonPath('data.avatar_id',36);
+        $this->putJson('/api/v1/alunos/'.$id,['avatar_id'=>1])->assertOk()->assertJsonPath('data.avatar_id',1);
+        $this->putJson('/api/v1/alunos/'.$id,['avatar_id'=>null])->assertOk()->assertJsonPath('data.avatar_id',null);
+        $this->assertNull(Aluno::find($id)->avatar_id);
+    }
+
+    public function test_apenas_identificadores_do_catalogo_sao_aceitos(): void
+    {
+        $aluno=Aluno::create($this->dados+['avatar_id'=>7]);
+        foreach([0,37,-1,1.5,'https://example.test/foto.png','../foto', ['id'=>1]] as $valor) {
+            $this->putJson('/api/v1/alunos/'.$aluno->id,['avatar_id'=>$valor])->assertUnprocessable()->assertJsonValidationErrors('avatar_id');
+            $this->postJson('/api/v1/alunos',array_merge($this->dados,['matricula'=>'OUTRA','avatar_id'=>$valor]))->assertUnprocessable()->assertJsonValidationErrors('avatar_id');
+        }
+        $this->assertSame(7,$aluno->fresh()->avatar_id);
+        $this->assertDatabaseCount('alunos',1);
+    }
 }

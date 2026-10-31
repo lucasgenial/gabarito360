@@ -1227,3 +1227,19 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .avatar-aluno--verde { background:var(--atencao-light);color:var(--atencao); }
 .avatar-aluno--roxo { background:var(--purple-light);color:var(--purple-fg); }
 .avatar-aluno--neutro { background:var(--surface-2);color:var(--fg-2); }
+
+/* Galeria de personagens aprovada: catálogo fixo, sem upload. */
+.avatar-aluno--imagem { background-image:url('../images/avatares/estudantes-v1.png'); background-size:650% 650%; background-position:calc(0.76% + var(--avatar-x) * 0.9848) calc(0.76% + var(--avatar-y) * 0.9848); image-rendering:pixelated; overflow:hidden; }
+.avatar-aluno--imagem .avatar-iniciais { visibility:hidden; }
+.seletor-avatar { border:0; padding:0; margin:0 0 20px; min-width:0; }
+.seletor-avatar legend { font-weight:700; margin-bottom:12px; }
+.seletor-avatar-atual { display:flex; align-items:center; gap:16px; margin-bottom:14px; text-align:left; }
+.seletor-avatar-atual [data-avatar-status] { font-size:13px; color:var(--fg-2); }
+.seletor-avatar summary { cursor:pointer; color:var(--accent-dark); font-weight:600; padding:10px 0; }
+.avatar-opcoes { display:grid; grid-template-columns:repeat(auto-fit,minmax(60px,1fr)); gap:8px; max-height:320px; overflow-y:auto; padding:5px; }
+.avatar-opcao { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:64px; border:2px solid var(--border); border-radius:var(--radius-md); padding:6px; cursor:pointer; background:var(--surface); color:var(--fg); }
+.avatar-opcao input { position:absolute; width:1px; height:1px; opacity:0; }
+.avatar-opcao:has(input:checked) { border-color:var(--accent); background:var(--accent-light); }
+.avatar-opcao:has(input:focus-visible) { outline:3px solid var(--accent); outline-offset:2px; }
+.avatar-opcao-iniciais { grid-column:1/-1; min-height:44px; font-size:13px; }
+.avatar-numero { font-size:11px; color:var(--fg-2); }

@@ -11,10 +11,11 @@ class Aluno extends Model
     protected $table = 'alunos';
 
     protected $fillable = [
-        'turma_id', 'nome', 'matricula', 'cpf', 'data_nascimento', 'genero', 'nome_responsavel', 'ativo',
+        'avatar_id', 'turma_id', 'nome', 'matricula', 'cpf', 'data_nascimento', 'genero', 'nome_responsavel', 'ativo',
     ];
 
     protected $casts = [
+        'avatar_id' => 'integer',
         'cpf' => \App\Casts\DadoProtegido::class . ':1',
         'ativo' => 'boolean',
     ];

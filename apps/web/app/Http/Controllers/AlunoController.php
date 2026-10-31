@@ -41,6 +41,7 @@ class AlunoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'required|integer',
             'nome'            => 'required|string|max:200',
             'matricula'       => 'required|string|max:20',
@@ -52,7 +53,7 @@ class AlunoController extends Controller
         ]);
 
         $dados = $request->only(
-            'turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
+            'avatar_id','turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
         );
 
         if ($cpf = $request->input('cpf')) {
@@ -90,6 +91,7 @@ class AlunoController extends Controller
     public function update(Request $request, int $id)
     {
         $request->validate([
+            'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'foto' => 'prohibited',
             'foto_path' => 'prohibited',
             'nome'      => 'required|string|max:200',
@@ -99,7 +101,7 @@ class AlunoController extends Controller
         ]);
 
         $dados = $request->only(
-            'turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
+            'avatar_id','turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
         );
 
         if ($cpf = $request->input('cpf')) {

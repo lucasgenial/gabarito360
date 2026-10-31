@@ -97,7 +97,7 @@
 
 {{-- Card de boas-vindas --}}
 <div class="welcome-card">
-  <x-avatar :nome="$nomeAluno" :aluno-id="$aluno['id'] ?? null" tamanho="lg" />
+  <x-avatar :avatar-id="$aluno['avatar_id'] ?? null" :nome="$nomeAluno" :aluno-id="$aluno['id'] ?? null" tamanho="lg" />
   <div>
     <h1 class="page-title" style="margin-bottom:0;">Olá, {{ $primeiroNome }}!</h1>
     <p>{{ $nomeAluno }} ({{ $iniciais }}) · Aluno · {{ $turma }}{{ $escola ? ' · '.$escola : '' }}</p>

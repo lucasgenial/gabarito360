@@ -39,7 +39,7 @@ class DashboardController extends Controller
             ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
             ->join('escolas', 'turmas.escola_id', '=', 'escolas.id')
             ->where('alunos.id', $alunoId)
-            ->select('alunos.id', 'alunos.nome', 'turmas.nome as turma', 'turmas.id as turma_id', 'escolas.nome as escola')
+            ->select('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome as turma', 'turmas.id as turma_id', 'escolas.nome as escola')
             ->first();
 
         if (!$aluno) {
@@ -212,8 +212,8 @@ class DashboardController extends Controller
             ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
             ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
             ->whereIn('notas.turma_id', $turmaIds)
-            ->select('alunos.id', 'alunos.nome', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
-            ->groupBy('alunos.id', 'alunos.nome', 'turmas.nome')
+            ->select('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
+            ->groupBy('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome')
             ->orderByDesc('media')
             ->limit(5)
             ->get();
@@ -222,8 +222,8 @@ class DashboardController extends Controller
             ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
             ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
             ->whereIn('notas.turma_id', $turmaIds)
-            ->select('alunos.id', 'alunos.nome', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
-            ->groupBy('alunos.id', 'alunos.nome', 'turmas.nome')
+            ->select('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
+            ->groupBy('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome')
             ->orderBy('media')
             ->limit(3)
             ->get();
@@ -233,8 +233,8 @@ class DashboardController extends Controller
             ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
             ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
             ->whereIn('notas.turma_id', $turmaIds)
-            ->select('alunos.id', 'alunos.nome', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
-            ->groupBy('alunos.id', 'alunos.nome', 'turmas.nome')
+            ->select('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
+            ->groupBy('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome')
             ->havingRaw('AVG(notas.nota_final) < 6')
             ->orderBy('media')
             ->limit(3)
@@ -378,11 +378,12 @@ class DashboardController extends Controller
             ->select(
                 'alunos.id',
                 'alunos.nome',
+                'alunos.avatar_id',
                 'turmas.nome as turma',
                 'provas.disciplina',
                 DB::raw('ROUND(AVG(notas.nota_final), 1) as media')
             )
-            ->groupBy('alunos.id', 'alunos.nome', 'turmas.nome', 'provas.disciplina')
+            ->groupBy('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome', 'provas.disciplina')
             ->havingRaw('AVG(notas.nota_final) < 6')
             ->orderBy('media')
             ->limit(5)

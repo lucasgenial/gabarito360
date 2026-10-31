@@ -176,7 +176,7 @@
             @endphp
             <article>
               <div class="student-card-top">
-                <x-avatar :nome="$a['nome']" :aluno-id="$a['id'] ?? $a['aluno_id'] ?? null" />
+                <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id'] ?? $a['aluno_id'] ?? null" />
                 <span class="trend down">↓ {{ number_format($a['media'], 1, ',', '') }}</span>
               </div>
               <div style="margin-top:12px;">
