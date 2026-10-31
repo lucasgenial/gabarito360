@@ -20,12 +20,6 @@
   .trend-up { color:var(--success); }
   .trend-down { color:var(--danger); }
   .trend-flat { color:var(--warn-fg); }
-  .bar-chart { display:flex; align-items:flex-end; gap:10px; height:80px; margin-bottom:6px; }
-  .bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
-  .bar { width:100%; border-radius:6px 6px 0 0; background:var(--surface-2); transition:height .3s; }
-  .bar.active { background:var(--accent); }
-  .bar-label { font-size:11px; color:var(--muted); text-align:center; }
-  .bar-val { font-size:12px; font-weight:700; color:var(--accent-dark); }
   .waiting-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr)); gap:12px; margin-top:16px; }
   .waiting-card {
     padding:14px; border:1px dashed var(--border); border-radius:var(--radius-md);
@@ -224,22 +218,10 @@
       @endphp
 
       @if($bimComDados->count())
-        <div class="bar-chart" role="img" aria-label="Gráfico de evolução bimestral">
-          @foreach($bimComDados as $b)
-            @php
-              $pct = $maxMedia > 0 ? round(($b['media'] / $maxMedia) * 100) : 0;
-              $isCurrent = $b['bimestre'] == $bimAtual;
-            @endphp
-            <div class="bar-wrap">
-              <span class="bar-val">{{ number_format($b['media'], 1, ',', '') }}</span>
-              <div class="bar {{ $isCurrent ? 'active' : '' }}"
-                   style="height:{{ max(8, $pct) }}%;"
-                   title="{{ $b['label'] }}: {{ number_format($b['media'], 1, ',', '') }}">
-              </div>
-              <span class="bar-label">{{ $b['label'] }}</span>
-            </div>
-          @endforeach
-        </div>
+        <x-grafico descricao="Sua média por bimestre" :altura="180"
+          :dados="['categorias' => $bimComDados->pluck('label')->values(), 'formato' => 'nota', 'maximo' => 10, 'rotulos' => true,
+                   'series' => [['nome' => 'Média', 'valores' => $bimComDados->pluck('media')->values(),
+                                 'cores' => $bimComDados->map(fn ($b) => $b['bimestre'] == $bimAtual ? '--serie-1' : '--border')->values()]]]" />
       @else
         <p style="color:var(--muted);font-size:13px;text-align:center;padding:12px 0;">
           Sem médias bimestrais ainda.
@@ -292,7 +274,7 @@
     <div class="motivation-card">
       <div class="eyebrow" style="color:var(--accent-dark);margin-bottom:8px;">Mensagem de incentivo</div>
       <strong>Mantenha sua rotina de estudos.</strong>
-      <p style="margin-top:8px;">Cada prova é uma oportunidade de aprender mais. O Ministério da Educação incentiva você a seguir com foco, organização e confiança no seu desenvolvimento.</p>
+      <p style="margin-top:8px;">Cada prova é uma oportunidade de aprender mais. Foco e organização ajudam muito no seu desenvolvimento.</p>
     </div>
 
   </div>

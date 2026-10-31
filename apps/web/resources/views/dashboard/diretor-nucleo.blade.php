@@ -8,12 +8,6 @@
   .trend.up { color:var(--success); }
   .trend.down { color:var(--danger); }
   .trend.flat { color:var(--muted); }
-  .bim-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(110px,100%),1fr)); gap:12px; margin-top:16px; align-items:end; }
-  .bim-item { text-align:center; }
-  .bim-bar { height:140px; background:var(--surface-2); border-radius:var(--radius-md); display:flex; align-items:flex-end; padding:6px; }
-  .bim-bar span { width:100%; border-radius:8px; background:var(--accent); }
-  .bim-item strong { display:block; margin-top:8px; font-size:13px; }
-  .bim-item small { color:var(--muted); font-family:var(--font-mono); }
   .visit-list { display:grid; gap:12px; margin-top:8px; }
   .visit-item { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; padding:14px; border:1px solid var(--border-soft); border-radius:var(--radius-md); background:var(--surface-2); }
   .visit-item strong { display:block; font-size:14px; }
@@ -138,22 +132,12 @@
     {{-- Gráfico bimestral --}}
     <div class="card card-pad">
       <h3 style="font-size:18px;">Média do núcleo por bimestre</h3>
-      <div class="bim-grid">
-        @foreach($bimestres as $bim)
-          @php
-            $pct = $bim['media'] !== null ? min(100, ($bim['media'] / 10) * 100) : 0;
-          @endphp
-          <div class="bim-item">
-            <div class="bim-bar">
-              <span style="height:{{ $pct }}%;"></span>
-            </div>
-            <strong>{{ $bim['label'] }}</strong>
-            <small>{{ $bim['media'] !== null ? number_format($bim['media'], 1, ',', '') : '—' }}</small>
-          </div>
-        @endforeach
-      </div>
+      @php $listaB = collect($bimestres); @endphp
+      <x-grafico descricao="Média do núcleo por bimestre" :altura="220"
+        :dados="['categorias' => $listaB->pluck('label'), 'formato' => 'nota', 'maximo' => 10, 'rotulos' => true,
+                 'series' => [['nome' => 'Média', 'valores' => $listaB->pluck('media')]]]" />
       <p class="field-help" style="margin-top:14px;">
-        Evolução da média consolidada das escolas por bimestre no período letivo {{ now()->year }}.
+        Média das escolas por bimestre em {{ now()->year }}.
       </p>
     </div>
 
