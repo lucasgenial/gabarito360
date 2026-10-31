@@ -4,7 +4,7 @@
 @push('styles')
 <style>
 .checkout-wrap {
-  max-width: 560px;
+  width: 100%;
   margin: 2rem auto;
 }
 .checkout-wrap h1 {

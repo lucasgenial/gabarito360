@@ -89,7 +89,7 @@
         </div>
       </div>
       <div class="section-body">
-        <form method="POST" action="{{ route('perfil.senha') }}" style="max-width:440px;">
+        <form method="POST" action="{{ route('perfil.senha') }}">
           @csrf
           @method('PUT')
           <div class="field">
