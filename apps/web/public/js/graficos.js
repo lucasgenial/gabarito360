@@ -10,6 +10,22 @@
     return getComputedStyle(document.body).fontFamily;
   }
 
+  // Números no formato brasileiro: 3,2 e 45%
+  function texto(d, v) {
+    if (v === null || v === undefined || v === '-') return '—';
+    if (d.formato === 'nota') return Number(v).toFixed(1).replace('.', ',');
+    if (d.formato === 'pct') return v + '%';
+    return String(v);
+  }
+
+  function dica(d, itens) {
+    var titulo = (d.prefixo || '') + itens[0].axisValue;
+    return itens.reduce(function (html, i) {
+      var v = i.value && typeof i.value === 'object' ? i.value.value : i.value;
+      return html + '<br>' + i.marker + (d.series.length > 1 ? i.seriesName + ': ' : '') + '<b>' + texto(d, v) + '</b>';
+    }, '<b>' + titulo + '</b>');
+  }
+
   function opcoes(d) {
     var tinta = token('--fg-2'), apagado = token('--muted'), linha = token('--border-soft');
     var paleta = [1, 2, 3, 4, 5].map(function (n) { return token('--serie-' + n); });
@@ -27,7 +43,8 @@
         backgroundColor: token('--surface'),
         borderColor: token('--border'),
         textStyle: { color: token('--fg'), fontFamily: fonte() },
-        confine: true
+        confine: true,
+        formatter: function (itens) { return dica(d, itens); }
       },
       xAxis: {
         type: 'category',
@@ -40,7 +57,7 @@
         type: 'value',
         max: d.maximo === undefined ? null : d.maximo,
         minInterval: d.inteiros ? 1 : 0,
-        axisLabel: { color: apagado, fontSize: 12 },
+        axisLabel: { color: apagado, fontSize: 12, formatter: d.formato === 'pct' ? '{value}%' : '{value}' },
         splitLine: { lineStyle: { color: linha } }
       },
       series: d.series.map(function (s) {
@@ -50,7 +67,10 @@
           barMaxWidth: 40,
           barGap: '10%',
           itemStyle: { borderRadius: [4, 4, 0, 0] },
-          label: { show: !!d.rotulos, position: 'top', color: tinta, fontSize: 12, fontWeight: 600 },
+          label: {
+            show: !!d.rotulos, position: 'top', color: tinta, fontSize: 12, fontWeight: 600,
+            formatter: function (p) { return texto(d, p.value); }
+          },
           data: s.valores.map(function (v, i) {
             var cor = s.cores && s.cores[i];
             return cor ? { value: v, itemStyle: { color: token(cor) } } : v;
@@ -60,8 +80,15 @@
     };
   }
 
+  // viewBox: permite que o CSS de impressão escale o desenho inteiro para a folha
+  function ajustarEscala(g) {
+    var svg = g.el.querySelector('svg');
+    if (svg) svg.setAttribute('viewBox', '0 0 ' + g.instancia.getWidth() + ' ' + g.instancia.getHeight());
+  }
+
   function desenhar(g) {
     g.instancia.setOption(opcoes(g.dados), true);
+    ajustarEscala(g);
   }
 
   function iniciar() {
@@ -73,21 +100,15 @@
     if (!graficos.length) return;
 
     if (window.ResizeObserver) {
-      var aoRedimensionar = new ResizeObserver(function () { graficos.forEach(function (g) { g.instancia.resize(); }); });
+      var aoRedimensionar = new ResizeObserver(function () { graficos.forEach(function (g) { g.instancia.resize(); ajustarEscala(g); }); });
       graficos.forEach(function (g) { aoRedimensionar.observe(g.el); });
     }
     // Troca de tema: as cores vêm dos tokens do CSS
     new MutationObserver(function () { graficos.forEach(desenhar); })
       .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    // A4 sem animação e na largura da folha impressa
+    // O SVG escala para a folha pelo CSS: redesenhar aqui cortava o gráfico em A4
     window.addEventListener('beforeprint', function () {
-      graficos.forEach(function (g) {
-        g.instancia.setOption({ animation: false });
-        g.instancia.resize({ width: g.el.clientWidth < 680 ? g.el.clientWidth : 680, animation: { duration: 0 } });
-      });
-    });
-    window.addEventListener('afterprint', function () {
-      graficos.forEach(function (g) { g.instancia.resize({ width: 'auto' }); });
+      graficos.forEach(function (g) { g.instancia.setOption({ animation: false }); });
     });
   }
 

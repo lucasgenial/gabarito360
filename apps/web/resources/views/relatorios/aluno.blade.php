@@ -45,38 +45,21 @@
 </div>
 
 {{-- Aluno × média da turma por prova --}}
-@php $n = count($provas); $larg = max(420, $n * 110 + 40); @endphp
+@php
+  $n = count($provas);
+  $em10 = fn ($v, $p) => $v === null ? null : round($v * 10 / max($p['nota_maxima'], 0.1), 1);
+  $listaP = collect($provas);
+@endphp
 @if($n)
 <div class="card card-pad" style="margin-top:16px;">
   <div class="row-between" style="flex-wrap:wrap;">
     <h3 style="font-size:17px;">Aluno × turma</h3>
-    <span style="font-size:12px;color:var(--muted);"><span style="color:#1d4f9e;">■</span> aluno · <span style="color:#a7b6cc;">■</span> média da turma</span>
+    <span style="font-size:12px;color:var(--muted);">Notas na escala de 0 a 10</span>
   </div>
-  <div style="overflow-x:auto;margin-top:8px;">
-    <svg viewBox="0 0 {{ $larg }} 190" width="100%" style="min-width:{{ min($larg, 560) }}px;" role="img" aria-label="Nota do aluno e média da turma por prova">
-      @foreach([0, 5, 10] as $g)
-        <line x1="28" x2="{{ $larg - 6 }}" y1="{{ 150 - $g * 12 }}" y2="{{ 150 - $g * 12 }}" stroke="#ddd" stroke-dasharray="{{ $g ? '3 3' : '' }}"></line>
-        <text x="24" y="{{ 153 - $g * 12 }}" text-anchor="end" font-size="9" fill="#888">{{ $g }}</text>
-      @endforeach
-      @foreach($provas as $i => $p)
-        @php
-          $esc = 10 / max($p['nota_maxima'], 0.1); $x = 40 + $i * (($larg - 50) / $n);
-          $ha = ($p['nota'] ?? 0) * $esc * 12; $ht = ($p['media_turma'] ?? 0) * $esc * 12;
-        @endphp
-        @if($p['nota'] !== null)
-          <rect x="{{ $x }}" y="{{ 150 - $ha }}" width="30" height="{{ max($ha, 1) }}" rx="2" fill="#1d4f9e"></rect>
-          <text x="{{ $x + 15 }}" y="{{ 146 - $ha }}" text-anchor="middle" font-size="10" font-weight="700" fill="currentColor">{{ $fmt($p['nota']) }}</text>
-        @else
-          <text x="{{ $x + 15 }}" y="146" text-anchor="middle" font-size="9" fill="#999">—</text>
-        @endif
-        @if($p['media_turma'] !== null)
-          <rect x="{{ $x + 34 }}" y="{{ 150 - $ht }}" width="30" height="{{ max($ht, 1) }}" rx="2" fill="#a7b6cc"></rect>
-          <text x="{{ $x + 49 }}" y="{{ 146 - $ht }}" text-anchor="middle" font-size="9" fill="#555">{{ $fmt($p['media_turma']) }}</text>
-        @endif
-        <text x="{{ $x + 32 }}" y="168" text-anchor="middle" font-size="10" fill="#555">{{ \Illuminate\Support\Str::limit($p['disciplina'], 18) }}</text>
-      @endforeach
-    </svg>
-  </div>
+  <x-grafico descricao="Nota do aluno e média da turma por prova" :altura="260"
+    :dados="['categorias' => $listaP->map(fn ($p) => \Illuminate\Support\Str::limit($p['disciplina'], 18))->values(), 'formato' => 'nota', 'maximo' => 10, 'rotulos' => $n <= 6,
+             'series' => [['nome' => 'Aluno', 'valores' => $listaP->map(fn ($p) => $em10($p['nota'], $p))->values()],
+                          ['nome' => 'Média da turma', 'valores' => $listaP->map(fn ($p) => $em10($p['media_turma'], $p))->values()]]]" />
 </div>
 @endif
 
