@@ -18,6 +18,8 @@ O tratamento educacional atual serve a cadastro, provas, correção, revisão e 
 
 Os papéis e hipóteses de base por finalidade permanecem sujeitos à documentação de cada controlador, conforme docs/33 e docs/34. Aceite de ciência e eventual autorização de comunicação promocional são registros distintos; não usar um deles para presumir base de todo o tratamento educacional.
 
+Antes do piloto, conciliar também os registros de D10/D14 no quadro do plano com as validações e decisões já recebidas. Esta entrega não altera o desenho nem substitui o registro dessas decisões.
+
 ## 2. Orientação usada
 
 A [ANPD](https://www.gov.br/anpd/pt-br/canais_atendimento/agente-de-tratamento/relatorio-de-impacto-a-protecao-de-dados-pessoais-ripd), em orientação consultada em 31/10/2026, atribui ao controlador a elaboração do RIPD e recomenda avaliar previamente tratamentos que possam gerar alto risco. Este material fornece insumos técnicos para essa avaliação, com processos, riscos e medidas; a validação e as decisões institucionais ainda não estão preenchidas.
