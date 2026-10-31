@@ -121,7 +121,6 @@ class MembroController extends Controller
             'nome'       => 'required|string|max:200',
             'email'      => 'required|email',
             'perfil'     => 'required|string',
-            'nova_senha' => 'sometimes|string|min:8|nullable',
         ]);
 
         $dados = [
@@ -139,10 +138,6 @@ class MembroController extends Controller
             'escola_id'              => $request->input('escola_id'),
             'forcar_troca_senha'     => $request->boolean('forcar_troca_senha'),
         ];
-
-        if ($request->filled('nova_senha')) {
-            $dados['nova_senha'] = $request->input('nova_senha');
-        }
 
         $resp = $this->api->put("/v1/usuarios/{$id}", $dados);
 
@@ -227,5 +222,16 @@ class MembroController extends Controller
         }
 
         return back()->with('sucesso', 'Convite enviado.');
+    }
+
+    public function linkSenha(int $id)
+    {
+        $resp = $this->api->post("/v1/usuarios/{$id}/link-senha");
+
+        if ($resp->failed()) {
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível enviar o link.');
+        }
+
+        return back()->with('sucesso', 'Link para criar nova senha enviado por e-mail.');
     }
 }

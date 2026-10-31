@@ -36,6 +36,30 @@ class PerfilController extends Controller
         return back()->with('sucesso', 'Dados atualizados.');
     }
 
+    public function formTrocarSenha()
+    {
+        return view('auth.trocar-senha');
+    }
+
+    /** Troca obrigatória: exigida pelo gestor, antes de liberar o sistema. */
+    public function trocarSenha(Request $request)
+    {
+        $request->validate([
+            'senha_atual' => 'required|string',
+            'password'    => 'required|string|min:8|confirmed',
+        ]);
+
+        $resp = $this->api->put('/v1/auth/me', $request->only('senha_atual', 'password', 'password_confirmation'));
+
+        if ($resp->failed()) {
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível alterar a senha.');
+        }
+
+        session()->forget('auth_trocar_senha');
+
+        return redirect()->route('painel')->with('sucesso', 'Senha alterada.');
+    }
+
     public function senha(Request $request)
     {
         $request->validate([
