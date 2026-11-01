@@ -2,9 +2,9 @@
 
 O responsável aprovou o merge do PR #81 e autorizou validar ambiente equivalente, backup/restauração e release de ativação, sem deploy. PR #81 incorporado em `1d42000e3b145bf756ef5f000583a9adb623eda2`. O responsável reforçou que deve ser avisado quando houver versão estável; publicação depende de nova autorização.
 
-## Entrega em revisão — PR #82
+## Entrega incorporada — PR #82
 
-[PR #82](https://github.com/lucasgenial/gabarito360/pull/82), aguardando aprovação de merge. Não autoriza deploy.
+[PR #82](https://github.com/lucasgenial/gabarito360/pull/82) incorporado com autorização em `b2fa772f3e46a5eb02e76336fc094bc42a1a607b`. CI aprovado; não autoriza deploy. Confirmação posterior de backups e serviços em [docs/51](51-t2-backup-e-servicos.md).
 
 ## Trabalho autorizado
 
@@ -44,7 +44,7 @@ Na cópia atual, o relatório autorizado passou a 259 ms. O ensaio usa limite de
 
 ## Condições ainda pendentes para avisar que o deploy pode ser marcado
 
-1. Revisar e aprovar o merge deste candidato, com CI final verde; definir SHA incorporado como alvo.
+1. Concluído: PR #82 aprovado e incorporado, CI verde, alvo candidato `b2fa772f3e46a5eb02e76336fc094bc42a1a607b`. Acompanhamento operacional no doc. 51.
 2. Confirmar backup automático posterior a L3, incluindo APP_KEY e DADOS_HASH_KEY, nas duas camadas. A cópia online validada não é prova de um ponto coerente entre banco e arquivos durante escritas concorrentes.
 3. Completar o ensaio operacional da restauração de serviços/contêineres e medir RTO/RPO antes de assumir que a reserva de 45 minutos cobre recuperação. O ensaio presente comprova arquivo, banco e kernel da aplicação com versões equivalentes; não é restauração completa de nginx/FPM/Redis/systemd no Proxmox.
 4. Confirmar janela, operador e ausência de escritores externos. Na janela autorizada, capturar ponto final coerente com escritores parados, rever inventário/manifesto e executar o roteiro passo a passo.
