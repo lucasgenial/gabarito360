@@ -49,7 +49,7 @@
   @endif
 </div>
 
-@if($podeMexer || session('auth_perfil') === 'aplicador')
+@if($podeMexer || \App\Support\Acesso::perfil() === 'aplicador')
   @pode('cartao.enviar')
     @include('correcao._camera')
   @endpode

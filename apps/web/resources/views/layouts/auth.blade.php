@@ -12,9 +12,9 @@
 @stack('styles')
 </head>
 <body class="area-publica pagina-acesso">
-@unless(request()->routeIs('login'))<x-menu-publico />@endunless
+@unless(request()->routeIs('login') || ($semMenuPublico ?? false))<x-menu-publico />@endunless
 <div class="acesso-conteudo">@yield('content')</div>
-@unless(request()->routeIs('login'))<x-rodape-publico />@endunless
+@unless(request()->routeIs('login') || ($semMenuPublico ?? false))<x-rodape-publico />@endunless
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
 @stack('scripts')
 </body>
