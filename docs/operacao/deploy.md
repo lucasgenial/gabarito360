@@ -79,6 +79,12 @@ O roteiro:
 
 Todos os serviços são conferidos individualmente. O roteiro não altera `.env`, DNS, nginx, PHP-FPM ou unidades systemd. Ele requer Redis como fila e manutenção Laravel por arquivo; outra configuração interrompe a conferência antes de publicar.
 
+### Preparar uma janela sem reabrir automaticamente
+
+`--manter-manutencao` mantém API/web fechadas e workers/timer/serviço do agendador parados ao terminar. A parada é conferida antes de trocar código e após recriar caches. O resultado é `PREPARADO EM MANUTENÇÃO`; não há teste HTTP nem retomada automática. A opção combina com `--check` sem executar essas mudanças. O deploy normal permanece como descrito acima.
+
+Para T2, seguir [o roteiro do corte](../49-t2-preparacao-operacional.md), com aprovação própria de release, migração e abertura. A opção não ativa o adaptador nem chama comandos T2. Não usar o modo normal de B5 para instalar um release de ativação que ainda precise de backfill/constraints.
+
 ### Se falhar
 
 - Antes de mudar o código: tenta retirar somente a manutenção iniciada por ele e restaurar os serviços que parou. Confira o resultado da recuperação e o SHA real antes de tentar novamente.
