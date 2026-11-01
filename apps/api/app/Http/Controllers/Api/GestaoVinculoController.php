@@ -41,7 +41,7 @@ class GestaoVinculoController extends Controller
     public function update(Request $r, int $id)
     {
         GestaoVinculos::impedirIdentidade($r);
-        $data = $r->validate(['ativo' => 'sometimes|boolean', 'perfil' => ['sometimes', Rule::in(['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'])],
+        $data = $r->validate(['ativo' => 'sometimes|boolean', 'perfil' => ['sometimes', Rule::in(['secretario_escolar', 'admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'])],
             'escola_id' => 'sometimes|integer|min:1']);
         // Perfil é validado pelo catálogo completo abaixo, sem aceitar mudanças de espaço.
         return DB::transaction(function () use ($r, $id, $data) {

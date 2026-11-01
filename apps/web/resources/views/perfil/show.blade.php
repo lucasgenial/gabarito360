@@ -13,6 +13,7 @@
 
 @php
   $perfilLabels = [
+        'secretario_escolar' => 'Secretário Escolar',
     'desenvolvedor' => 'Desenvolvedor',
     'suporte' => 'Suporte',
     'financeiro' => 'Financeiro',

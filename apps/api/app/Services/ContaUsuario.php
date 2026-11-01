@@ -20,6 +20,7 @@ class ContaUsuario
     private const VALIDADE_TROCA_HORAS = 24;
 
     private const PERFIS = [
+        'secretario_escolar' => 'Secretário Escolar',
         'secretario_educacao' => 'Secretário de Educação',
         'admin_rede'          => 'Administrador da Rede',
         'dir_nucleo'          => 'Diretor de Núcleo',

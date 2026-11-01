@@ -7,7 +7,7 @@ final class PerfisEspaco
 {
     public const POR_TIPO = [
         'pessoal' => ['professor_autonomo'],
-        'escola' => ['dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'escola' => ['dir_escolar', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
         'nucleo' => ['dir_nucleo'],
         'rede' => ['admin_rede'],
     ];

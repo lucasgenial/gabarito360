@@ -30,6 +30,19 @@ class ContextoPorAba
         $dados['permissoes'] = $me['permissoes'];
         $request->attributes->set('vinculo_contexto', $dados);
         ContextoWeb::renovar($id, $dados);
+        if ($dados['perfil'] === 'secretario_escolar') {
+            $permissao = match ($request->route()->getName()) {
+                'painel', 'perfil', 'perfil.update', 'perfil.senha', 'perfil.email' => null,
+                'turmas.index', 'turmas.show' => 'turma.ver',
+                'turmas.store', 'turmas.update' => 'turma.gerir',
+                'turmas.toggle' => 'turma.desativar',
+                'alunos.index', 'alunos.show' => 'aluno.ver',
+                'alunos.create', 'alunos.store', 'alunos.update' => 'aluno.gerir',
+                'alunos.toggle' => 'aluno.desativar',
+                default => false,
+            };
+            abort_unless($permissao === null || ($permissao !== false && in_array($permissao, $dados['permissoes'], true)), 403);
+        }
         if (($dados['tipo_contexto'] ?? null) === 'interno') {
             abort_unless($request->routeIs('painel', 'perfil', 'perfil.*', 'internos.*'), 403, 'Escolha um vínculo para abrir esta área.');
         }
