@@ -2,6 +2,8 @@
 
 01/11/2026. PR #101 incorporado com aprovação em `ee96bad`.
 
+Atualização: B1 incorporado no PR #102 (`29222ad`); B2 em revisão conforme [docs/69](69-a1-b2-gestao-interna.md).
+
 ## Revisão antes da fase
 
 A1-B atravessa autenticação e concessão de privilégios. Dividir em duas entregas para validar o isolamento antes de expor gestão:

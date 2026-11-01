@@ -14,6 +14,10 @@ class ExigirContextoVinculo
         if (!$request->is('api/v1/auth/logout')) {
             $usuario = \App\Support\TokenInterno::resolver(\App\Support\TokenVinculo::resolver($request->user()));
             $request->setUserResolver(fn () => $usuario);
+            if ($request->is('api/v1/acessos-internos', 'api/v1/acessos-internos/*')) {
+                app(\App\Services\GestaoAcessosInternos::class)->autorizar($usuario);
+                return $next($request);
+            }
             // A área interna não pode alcançar rotas escolares nem responder convites.
             if (\App\Support\ContextoInterno::presente($usuario)) {
                 abort_unless($request->is('api/v1/auth/me', 'api/v1/auth/email'), 403);

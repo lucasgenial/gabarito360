@@ -547,7 +547,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### A1. Perfis Desenvolvedor, Suporte, Financeiro e Secretário Escolar
 
-- **Replanejado em 01/11/2026:** antecipado como dependência de T4. A1-A prepara contexto interno e política comercial; A1-B cobre seleção/transporte e gestão; A1-C cobre Secretário Escolar e hierarquia institucional. [Plano e limites](67-a1-planejamento-e-acessos-internos.md). A1-A incorporado no PR #101 (`ee96bad`). A1-B revisto em [docs/68](68-a1-b-contextos-internos.md): B1 seleção/transporte em revisão; B2 gestão/bootstrap posterior. Habilitação desligada; sem deploy.
+- **Replanejado em 01/11/2026:** antecipado como dependência de T4. A1-A prepara contexto interno e política comercial; A1-B cobre seleção/transporte e gestão; A1-C cobre Secretário Escolar e hierarquia institucional. [Plano e limites](67-a1-planejamento-e-acessos-internos.md). A1-A incorporado no PR #101 (`ee96bad`). A1-B revisto em [docs/68](68-a1-b-contextos-internos.md): B1 seleção/transporte incorporado no PR #102 (`29222ad`); B2 gestão/bootstrap em revisão conforme [docs/69](69-a1-b2-gestao-interna.md). Habilitação desligada; sem deploy.
 - **Dependências:** V1.
 - **Arquivos disputados:** `CatalogoPermissoes.php`, `docs/03-perfis-e-permissoes.md`, `PerfisTest.php`.
 - **Passos:**
@@ -981,7 +981,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | T4 Cadastro de clientes | T4-A #100 incorporado; A1 necessário antes das telas T4-B; sem deploy | Codex | docs/66–67 |
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
-| A1 Novos perfis | A1-A #101 incorporado; A1-B1 seleção em revisão; B2/C pendentes; sem deploy | Codex | docs/67–68 |
+| A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 gestão em revisão; C pendente; sem deploy | Codex | docs/67–69 |
 | AU1 Registro de auditoria | pendente | | |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |
