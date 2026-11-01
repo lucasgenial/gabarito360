@@ -10,6 +10,9 @@ namespace App\Support;
 class Acesso
 {
     public const ROTULOS = [
+        'desenvolvedor' => 'Desenvolvedor',
+        'suporte' => 'Suporte',
+        'financeiro' => 'Financeiro',
         'secretario_educacao' => 'Secretário de Educação',
         'admin_rede'          => 'Administrador da Rede',
         'dir_nucleo'          => 'Diretor de Núcleo',
@@ -90,6 +93,11 @@ class Acesso
     {
         return session('auth_vinculos') && self::perfil() === 'professor_autonomo'
             && (ContextoWeb::atual()['espaco']['tipo'] ?? null) === 'pessoal';
+    }
+
+    public static function interno(): bool
+    {
+        return session('auth_vinculos') && (ContextoWeb::atual()['tipo_contexto'] ?? null) === 'interno';
     }
 
     public static function rotulo(?string $perfil = null): string

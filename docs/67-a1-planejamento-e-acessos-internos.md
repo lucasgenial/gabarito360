@@ -2,6 +2,8 @@
 
 01/11/2026. T4-A/PR #100 aprovado e incorporado. Continuidade autorizada, sem deploy.
 
+Atualização: A1-A incorporado no PR #101 (`ee96bad`). A1-B dividido antes da execução em seleção/transporte (B1) e gestão/bootstrap (B2), conforme [docs/68](68-a1-b-contextos-internos.md).
+
 ## Revisão antes da fase
 
 T4 depende de A1: os perfis atuais são institucionais/pessoais, enquanto os operadores internos precisam atuar sobre clientes da plataforma. Um vínculo de rede não pode virar acesso comercial global. A1 será antecipado como dependência, sem declarar concluída a Fase 3.

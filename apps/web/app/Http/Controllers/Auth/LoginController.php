@@ -43,6 +43,7 @@ class LoginController extends Controller
         session([
             'auth_token'   => $data['token'],
             'auth_vinculos' => $data['selecionar_vinculo'] ?? false,
+            'auth_internos' => $data['selecionar_acesso_interno'] ?? false,
             'auth_perfil'  => $data['perfil'],
             'auth_nome'    => $data['nome'],
             'auth_email'   => $data['email'],

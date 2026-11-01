@@ -65,6 +65,7 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/vinculos/convite/consultar', [\App\Http\Controllers\ConviteVinculoController::class, 'consultar'])->middleware('throttle:20,1')->name('vinculos.convite.consultar');
     Route::post('/vinculos/convite/responder', [\App\Http\Controllers\ConviteVinculoController::class, 'responder'])->middleware('throttle:10,1')->name('vinculos.convite.responder');
     Route::get('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'index'])->name('vinculos.index');
+    Route::post('/vinculos/interno', [\App\Http\Controllers\Auth\VinculoController::class, 'interno'])->middleware('throttle:20,1')->name('vinculos.interno');
     Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
 

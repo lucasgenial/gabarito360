@@ -48,6 +48,7 @@ class AuthController extends Controller
             'token'      => $token,
             'perfil'     => \App\Support\RegimeVinculos::obrigatorio() ? null : $usuario->perfil,
             'selecionar_vinculo' => \App\Support\RegimeVinculos::obrigatorio(),
+            'selecionar_acesso_interno' => \App\Support\TokenInterno::habilitado(),
             'permissoes' => \App\Support\RegimeVinculos::obrigatorio() ? [] : \App\Support\Permissao::efetivas($usuario),
             'nome'       => $usuario->nome,
             'email'      => $usuario->email,
@@ -65,6 +66,13 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
+        if (\App\Support\ContextoInterno::presente($request->user())) {
+            return ApiResponse::success(['id' => $request->user()->id, 'nome' => $request->user()->nome,
+                'email' => $request->user()->email, 'cpf' => $request->user()->cpf,
+                'created_at' => $request->user()->created_at, 'escola_nome' => null,
+                'tipo_contexto' => 'interno', 'perfil' => $request->user()->perfil,
+                'permissoes' => \App\Support\ContextoInterno::permissoes($request->user())]);
+        }
         if (\App\Support\RegimeVinculos::obrigatorio() && !\App\Support\ContextoVinculo::presente($request->user())) {
             return ApiResponse::success(['id' => $request->user()->id, 'nome' => $request->user()->nome, 'email' => $request->user()->email,
                 'perfil' => null, 'permissoes' => [], 'selecionar_vinculo' => true]);

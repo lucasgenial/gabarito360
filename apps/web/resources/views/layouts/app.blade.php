@@ -49,7 +49,7 @@
     <div class="header-right">
       @if($vinculoAtual = \App\Support\ContextoWeb::atual())
       <a class="vinculo-topo" href="{{ route('vinculos.index', ['trocar' => 1]) }}" data-sem-contexto>
-        <strong>{{ $vinculoAtual['espaco']['nome'] }}</strong><span>{{ \App\Support\Acesso::rotulo() }} · Trocar vínculo</span>
+        <strong>{{ \App\Support\Acesso::interno() ? 'Equipe interna · Gabarito360' : $vinculoAtual['espaco']['nome'] }}</strong><span>{{ \App\Support\Acesso::rotulo() }} · {{ \App\Support\Acesso::interno() ? 'Trocar acesso' : 'Trocar vínculo' }}</span>
       </a>
       @endif
       @hasSection('context-badge')
@@ -72,7 +72,7 @@
             @pode('rede.configurar')
               <a href="{{ route('configuracoes.index') }}">Configurações</a>
             @endpode
-            @if(session('auth_titular'))
+            @if(session('auth_titular') && !\App\Support\Acesso::interno())
               <a href="{{ route('assinatura.index') }}">Assinatura e cobrança</a>
             @endif
             <hr>
