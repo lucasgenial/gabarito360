@@ -21,4 +21,14 @@ Uma publicação futura exige o ensaio da release, migrações T3-B, conciliaç�
 - `IntegracaoPessoalWebTest` e `DadosPessoaisWebTest`: seleção, painel, menu, ausência de controles e consultas institucionais e preservação da identidade.
 - Ensaio local com conta fictícia, SQLite descartável e API/web reais: login, seleção pessoal/escolar, turma e aluno mínimo. Evidências complementares e resultado final do CI registrados no PR.
 
+### Fechamento do ensaio (01/11/2026)
+
+- CI do commit `e82412f`: API, web, telas e integridade MariaDB aprovados ([execução 41349419315](https://github.com/lucasgenial/gabarito360/actions/runs/41349419315)).
+- Chrome: login fictício, seleção do espaço pessoal, painel e gravação do gabarito confirmados. O Computer Use travou ao aceitar o diálogo JavaScript de publicação; a publicação foi concluída pela API local. A confirmação visual desse diálogo permanece uma limitação da automação, não uma validação concluída.
+- Cartão-resposta e resultado individual gerados pelos processos Python reais e inspecionados visualmente: cabeçalho pessoal, aluno/turma fictícios, QR no cartão e resultado legível.
+- Upload HTTP, repetição do envio e worker `queue:work database --queue=alta --once`: recibo concluído, cartão lido, uma resposta e nota persistida. Leitura OMR simulada; nenhuma fotografia real foi certificada.
+- O SQLite descartável não tinha a tabela operacional `jobs` (o ambiente publicado usa sua infraestrutura de fila). A primeira tentativa foi preservada com erro recuperável; após preparar somente essa tabela local, a repetição entrou na fila e concluiu. Nenhuma migration ou configuração do servidor foi executada.
+
+PR #99 pronto para revisão do código, com a limitação de automação acima registrada. Merge depende de autorização; a próxima etapa planejada é T4 (cadastro de clientes). Isso não libera publicação das fases acumuladas.
+
 Os testes automatizados de fila usam OMR controlado para verificar autorização e persistência; isso não representa nova certificação da leitura óptica de fotografias. O ensaio local não substitui restauração e corte no ambiente equivalente antes da publicação. T3-C permanece em revisão até aprovação do PR.
