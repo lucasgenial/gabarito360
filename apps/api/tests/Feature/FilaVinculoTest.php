@@ -184,4 +184,16 @@ class FilaVinculoTest extends TestCase
         $job->handle($this->driver(), app(ImagensCartao::class));
         $this->assertSame('concluido', $e->fresh()->status);
     }
+
+    public function test_contexto_sem_t2_recusa_sem_excluir_cartao(): void
+    {
+        $e = $this->enviar();
+        config(['espacos.ativo' => false]);
+        $d = Mockery::mock(OmrDriverInterface::class);
+        $d->shouldNotReceive('processar');
+        $this->job($e)->handle($d, app(ImagensCartao::class));
+        $this->assertSame('recusado', $e->fresh()->status);
+        $this->assertDatabaseHas('cartoes', ['id' => $e->cartao_id]);
+        $this->assertDatabaseCount('notas', 0);
+    }
 }

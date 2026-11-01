@@ -206,7 +206,7 @@ class ProcessarCartaoJob implements ShouldQueue
                 return;
             }
             $envio->update(['status' => 'recusado', 'mensagem' => $mensagem, 'resultado' => null]);
-            if (Espacos::ativo()) return; // Recusa preserva cartão/foto para conciliação; não transfere nem apaga dados.
+            if (Espacos::ativo() || $this->vinculoId !== null) return; // Recusa contextual nunca usa a exclusão do fluxo legado.
             $this->apagar($cartao);
             if ($prova) {
                 AtualizadorStatusProva::atualizar($prova);
