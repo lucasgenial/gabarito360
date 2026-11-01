@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\Validator;
 class ImportarAlunos extends Command
 {
     protected $signature = 'g360:importar-alunos {escola_id} {arquivo}
-        {--serie=} {--turno=manha} {--ano=} {--usuario=} {--espaco=} {--aplicar}';
+        {--serie=} {--turno=manha} {--ano=} {--usuario=} {--vinculo=} {--espaco=} {--aplicar}';
     protected $description = 'Importa alunos e turmas de CSV CLASS;NAME;MATRICULA no destino autorizado';
 
     public function handle(): int
     {
         try {
             $escola = (int) $this->argument('escola_id');
-            $contexto = fn () => ContextoImportacao::resolver($escola, (int) $this->option('usuario'), (int) $this->option('espaco'), ['aluno.importar', 'aluno.gerir', 'turma.gerir']);
+            $contexto = fn () => ContextoImportacao::resolver($escola, (int) $this->option('usuario'), (int) $this->option('espaco'), ['aluno.importar', 'aluno.gerir', 'turma.gerir'], $this->option('vinculo') !== null ? (int) $this->option('vinculo') : null);
             $meta = $contexto();
             abort_unless(DB::table('escolas')->where('id', $escola)->exists(), 422);
             $linhas = @file($this->argument('arquivo'), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

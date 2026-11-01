@@ -16,17 +16,21 @@ use Illuminate\Support\Facades\DB;
 class ImportarCenso extends Command
 {
     protected $signature = 'g360:censo-importar {arquivo : Tabela_Escola_AAAA.csv do Censo Escolar}
-        {--uf=BA : UFs a importar, separadas por vírgula} {--dry-run : Só conta, não grava} {--atualizar-escolas} {--usuario=} {--espaco=}';
+        {--uf=BA : UFs a importar, separadas por vírgula} {--dry-run : Só conta, não grava} {--atualizar-escolas} {--usuario=} {--vinculo=} {--espaco=}';
 
     protected $description = 'Importa a base de escolas do Censo Escolar (INEP) para consulta pelo código INEP';
 
     public function handle(): int
     {
+        if ((\App\Support\RegimeVinculos::obrigatorio() || $this->option('vinculo') !== null) && !\App\Support\Espacos::ativo()) {
+            $this->error('Espaços indisponíveis; atualização legada recusada.');
+            return self::FAILURE;
+        }
         $escolaAlvo = null;
         if (\App\Support\Espacos::ativo() && $this->option('atualizar-escolas')) {
             try {
                 $escolaAlvo = (int) \App\Support\Espacos::escolas()->where('ee.id', (int) $this->option('espaco'))->value('e.id');
-                \App\Support\ContextoImportacao::resolver($escolaAlvo, (int) $this->option('usuario'), (int) $this->option('espaco'), ['escola.editar']);
+                \App\Support\ContextoImportacao::resolver($escolaAlvo, (int) $this->option('usuario'), (int) $this->option('espaco'), ['escola.editar'], $this->option('vinculo') !== null ? (int) $this->option('vinculo') : null);
             } catch (\Throwable $e) { $this->error('Destino institucional não autorizado.'); return self::FAILURE; }
         }
         $arquivo = $this->argument('arquivo');
@@ -89,7 +93,7 @@ class ImportarCenso extends Command
                     try {
                         DB::transaction(function () use ($escolaAlvo, $dados) {
                             $escola = \App\Models\Escola::whereKey($escolaAlvo)->lockForUpdate()->firstOrFail();
-                            \App\Support\ContextoImportacao::resolver($escolaAlvo, (int) $this->option('usuario'), (int) $this->option('espaco'), ['escola.editar']);
+                            \App\Support\ContextoImportacao::resolver($escolaAlvo, (int) $this->option('usuario'), (int) $this->option('espaco'), ['escola.editar'], $this->option('vinculo') !== null ? (int) $this->option('vinculo') : null);
                             abort_unless($escola->origem === 'censo' && !$escola->edicao_manual, 409);
                             $escola->fill($dados)->save();
                         });

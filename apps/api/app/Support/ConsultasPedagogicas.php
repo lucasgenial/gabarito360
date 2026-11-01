@@ -12,6 +12,7 @@ class ConsultasPedagogicas
 
     public function escolasIds(): ?array
     {
+        RegimeVinculos::exigir($this->ator);
         if ($this->ator->perfil === 'aluno') return Instituicoes::escolasLogoIds($this->ator);
         if ($this->ator->perfil === 'secretario_educacao' && Espacos::ativo()) {
             // Secretaria não é cliente pagador nem concessão implícita a todas as redes.
@@ -24,6 +25,7 @@ class ConsultasPedagogicas
 
     public function tabela(string $tabela)
     {
+        RegimeVinculos::exigir($this->ator);
         $q = DB::table($tabela);
         if (!Espacos::ativo()) return $q;
         if (!$this->ator->ativo) return $q->whereRaw('1 = 0');
@@ -96,11 +98,12 @@ class ConsultasPedagogicas
 
     private function alunosProprios()
     {
-        return Espacos::agregadoEscolar(DB::table('alunos'), 'alunos')->whereIn('alunos.id', Instituicoes::referencias($this->ator, 'aluno'));
+        return Espacos::agregadoEscolar(DB::table('alunos'), 'alunos', $this->ator)->whereIn('alunos.id', Instituicoes::referencias($this->ator, 'aluno'));
     }
 
     public function modelo(string $classe)
     {
+        RegimeVinculos::exigir($this->ator);
         $modelo = new $classe();
         $q = $modelo->newQuery();
         return Espacos::ativo() ? $q->whereIn($modelo->getTable().'.id', $this->tabela($modelo->getTable())->select($modelo->getTable().'.id')) : $q;

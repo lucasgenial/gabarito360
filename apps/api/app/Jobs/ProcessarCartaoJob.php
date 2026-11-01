@@ -172,7 +172,7 @@ class ProcessarCartaoJob implements ShouldQueue
                 ResultadoEnvio::concluir($recibo, $atual);
             }, 3);
         } catch (Throwable $e) {
-            if ($this->vinculoId !== null && $e instanceof \Symfony\Component\HttpKernel\Exception\HttpException
+            if (($this->vinculoId !== null || \App\Support\RegimeVinculos::obrigatorio()) && $e instanceof \Symfony\Component\HttpKernel\Exception\HttpException
                 && in_array($e->getStatusCode(), [403, 404], true)) {
                 $this->recusar($envio, $cartao, 'O vínculo não está mais disponível para este envio.');
                 return;
@@ -206,7 +206,7 @@ class ProcessarCartaoJob implements ShouldQueue
                 return;
             }
             $envio->update(['status' => 'recusado', 'mensagem' => $mensagem, 'resultado' => null]);
-            if (Espacos::ativo() || $this->vinculoId !== null) return; // Recusa contextual nunca usa a exclusão do fluxo legado.
+            if (Espacos::ativo() || $this->vinculoId !== null || \App\Support\RegimeVinculos::obrigatorio()) return; // Recusa contextual nunca usa a exclusão do fluxo legado.
             $this->apagar($cartao);
             if ($prova) {
                 AtualizadorStatusProva::atualizar($prova);

@@ -351,3 +351,8 @@ FKs compostas garantem o mesmo espaço entre pais e filhos; serviços continuam 
 ### Gestão contextual V1-C2b (01/11/2026)
 
 A gestão distingue identidade global de vínculo alvo, conforme T1: suspensão, concessões e turmas alteram apenas o vínculo validado, com evento e versão. Projeções usam perfil local, e resultados individuais não liberam o conteúdo geral da turma. O convite de primeira senha ganha referência nullable ao vínculo para impedir desativação global; não substitui o futuro convite de conta existente em `vinculo_convites`. Contratos, validação e limites em [59-v1-gestao-e-resultados-contextuais.md](59-v1-gestao-e-resultados-contextuais.md). Sem ativação, deploy ou migration no servidor.
+
+
+### V1-C3 — Conferência e corte sem fallback
+
+A conferência operacional é somente leitura, com hashes separados de origem/destino e decisão de todas as contas; nunca reativa um vínculo por sincronização legada. `vinculo_convites` implementa o convite de novo papel sem redefinir identidade, com emissor contextual e aceite pelo titular. `vinculos.obrigatorio`, desligado por padrão, prepara o bloqueio do legado no núcleo/HTTP/CLI/arquivos/filas; V2 ainda deve fornecer contexto confiável e telas. Contratos, testes e limites em [60-v1-conciliacao-e-preparo-do-corte.md](60-v1-conciliacao-e-preparo-do-corte.md). Sem deploy ou migration no servidor.

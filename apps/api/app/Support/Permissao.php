@@ -18,6 +18,7 @@ class Permissao
 
     public static function efetivas(Usuario $u): array
     {
+        RegimeVinculos::exigir($u);
         // Contextos explícitos são revalidados; não reutilizam o cache global legado por pessoa.
         if (ContextoVinculo::presente($u)) return ContextoVinculo::permissoes($u);
         if (isset(self::$cache[$u->id])) {

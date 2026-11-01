@@ -9,6 +9,7 @@ class GestaoLegada
 {
     public static function usuarios(Usuario $gestor)
     {
+        RegimeVinculos::exigir($gestor);
         if (ContextoVinculo::presente($gestor)) return Usuario::query()->whereIn('usuarios.id', GestaoVinculos::consulta($gestor)->select('v.usuario_id'));
         $escolas = Escopo::escolaIds($gestor) ?? [];
         $turmas = Escopo::turmaIds($gestor) ?? [];
