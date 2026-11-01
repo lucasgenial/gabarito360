@@ -2,6 +2,10 @@
 
 O responsável aprovou o merge do PR #81 e autorizou validar ambiente equivalente, backup/restauração e release de ativação, sem deploy. PR #81 incorporado em `1d42000e3b145bf756ef5f000583a9adb623eda2`. O responsável reforçou que deve ser avisado quando houver versão estável; publicação depende de nova autorização.
 
+## Entrega em revisão — PR #82
+
+[PR #82](https://github.com/lucasgenial/gabarito360/pull/82), aguardando aprovação de merge. Não autoriza deploy.
+
 ## Trabalho autorizado
 
 Validar backups locais e uma cópia atual de leitura, em WSL isolado, sem restaurar contêineres no Proxmox e sem interromper produção. Configurações/chaves e dados ficam em diretório restrito, fora do Git. Confrontar versões, contagens, integridade, leitura de campos protegidos e relações escolares antes/depois do corte na cópia. Nenhum dado real é usado nos testes comuns ou enviado por e-mail/gateway.
@@ -51,3 +55,5 @@ O ciclo OMR/fila é coberto com dependências simuladas na suíte MariaDB. Leitu
 ## Verificações da entrega
 
 Sete testes MariaDB passaram (89 assertions somadas nas execuções local anterior e da nova regressão), incluindo DDL real, integridade, retomada, unicidade, OMR simulado e acesso ao relatório. Quinze testes do B5 passaram. Sintaxe PHP/Bash aprovada. Regressão completa e CI final serão vinculados no PR.
+
+Ao encerrar o ensaio, os dois processos MariaDB isolados foram parados, o banco temporário de dados reais foi removido e o diretório restrito de extrações/configurações foi eliminado. Arquivos originais de backup preservados; somente evidência sanitizada ficou versionada.
