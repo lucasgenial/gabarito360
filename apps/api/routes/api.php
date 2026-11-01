@@ -58,6 +58,8 @@ Route::prefix('v1')->group(function () {
         Route::prefix('auth')->group(function () {
             Route::post('convites-vinculo/{id}/consultar', [ConviteVinculoController::class, 'consultar'])->whereNumber('id')->middleware('throttle:20,1');
             Route::post('convites-vinculo/{id}/responder', [ConviteVinculoController::class, 'responder'])->whereNumber('id')->middleware('throttle:10,1');
+            Route::get('vinculos', [\App\Http\Controllers\Api\SelecaoVinculoController::class, 'index'])->middleware('throttle:30,1');
+            Route::post('vinculos/selecionar', [\App\Http\Controllers\Api\SelecaoVinculoController::class, 'selecionar'])->middleware('throttle:20,1');
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::post('email', [AuthController::class, 'trocarEmail'])->middleware('throttle:5,1');
