@@ -88,7 +88,7 @@ bash /tmp/g360-deploy.sh --commit "$ALVO" --from "$ATUAL" --wait 300 --manter-ma
 
 Esperado: `PREPARADO EM MANUTENÇÃO`, não `DEPLOY CONCLUÍDO`. B5 fecha web, para timer e serviço de agendamento, drena com API ainda aberta, fecha API, reconfere fila e para workers. Confere todos parados **antes** do código/DDL. Instala dependências, executa migrações aditivas só da API, recria caches e termina sem abrir HTTP nem iniciar workers/timer. Não executa backfill, conciliação ou restrições e não modifica `.env`/flag. O release de ativação ainda precisa ser preparado/aprovado separadamente; não editar `config/espacos.php` à mão no servidor.
 
-Falha antes de mudar código: B5 tenta restaurar o funcionamento anterior. Após mudar código: mantém manutenção; não rerodar cegamente B5, pois seu preflight recusa manutenção preexistente. Investigar passo e usar plano de recuperação aprovado.
+Sem checkpoint de backup, falha antes de mudar código tenta restaurar o funcionamento anterior. Com `--backup-final`, falha após iniciar o checkpoint preserva manutenção e escritores parados, mesmo antes de mudar código (doc. 53). Após mudar código também mantém manutenção; não rerodar cegamente B5, pois seu preflight recusa manutenção preexistente. Investigar passo e usar plano de recuperação aprovado.
 
 ### 3. Preenchimento e conferência
 

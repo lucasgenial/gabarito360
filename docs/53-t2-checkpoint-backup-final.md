@@ -74,3 +74,7 @@ O procedimento está validado para solicitar a publicação/migração T2 na hom
 ## Encerramento
 
 Os clones 9106/9111, seus volumes, os backups descartáveis do ensaio e a área temporária foram removidos após as conferências. Os backups de referência do doc. 52 permanecem preservados. No servidor atual, o SHA continua `dc9949e3690744b72c5071d919955c09ad2be9b8`, não existem tabelas clientes/espacos, health responde 200 e os serviços foram conferidos individualmente ativos. **Sem deploy ou migração no servidor atual.**
+
+## Publicação posterior autorizada
+
+O PR #85 foi incorporado em `af4c6d1e9e1d324ebd10e404af149b78a28270a4`. Após nova autorização do responsável, o T2 foi aplicado e validado no servidor atual em 01/11/2026; execução, backups finais e ajustes operacionais em [doc. 54](54-t2-publicacao-homologacao.md).
