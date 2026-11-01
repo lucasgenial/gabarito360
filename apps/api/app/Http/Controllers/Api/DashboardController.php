@@ -151,10 +151,7 @@ class DashboardController extends Controller
         $usuario = $request->user();
 
         // Turmas do professor via escopos
-        $turmaIds = DB::table('usuario_escopos')
-            ->where('usuario_id', $usuario->id)
-            ->where('escopo_tipo', 'turma')
-            ->pluck('escopo_id');
+        $turmaIds = collect(Instituicoes::referencias($usuario, 'turma'));
 
         if (Espacos::ativo()) $turmaIds = collect(Escopo::turmaIds($usuario) ?? []);
 
@@ -703,7 +700,7 @@ class DashboardController extends Controller
             ->get(['id', 'nome', 'perfil', 'escola_nome', 'ultimo_acesso']);
 
         // Rede(s) do admin: a do escopo dele ou, sem escopo, todas
-        $redeIds = DB::table('usuario_escopos')->where('usuario_id', $request->user()->id)->where('escopo_tipo', 'rede')->pluck('escopo_id');
+        $redeIds = collect(Instituicoes::referencias($request->user(), 'rede'));
         $redes   = $consulta->tabela('redes')->when($redeIds->isNotEmpty(), fn ($q) => $q->whereIn('id', $redeIds))->orderBy('nome')->get(['id', 'nome', 'tipo']);
 
         return ApiResponse::success([

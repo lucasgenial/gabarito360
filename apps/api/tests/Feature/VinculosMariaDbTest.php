@@ -85,6 +85,25 @@ class VinculosMariaDbTest extends TestCase
         $this->assertDatabaseCount('vinculo_eventos', 1);
     }
 
+    public function test_recibo_so_aceita_vinculo_da_pessoa_e_migration_retoma(): void
+    {
+        DB::table('usuarios')->insert(['id' => 2, 'perfil' => 'admin_rede', 'nome' => 'Fictício', 'email' => 'outro@example.test', 'cpf' => '00000000002', 'password' => 'ficticio']);
+        DB::table('nucleos')->insert(['id' => 1, 'rede_id' => 1, 'nome' => 'Núcleo']);
+        DB::table('escolas')->insert(['id' => 1, 'nucleo_id' => 1, 'nome' => 'Escola', 'inep' => '00000001', 'tipo_rede' => 'estadual']);
+        DB::table('provas')->insert(['id' => 1, 'escola_id' => 1, 'criado_por' => 1, 'titulo' => 'Prova', 'disciplina' => 'Teste', 'serie' => '3', 'num_questoes' => 1, 'num_alternativas' => 4]);
+        foreach ([1, 2] as $id) DB::table('usuario_vinculos')->insert(['id' => $id, 'usuario_id' => $id, 'espaco_id' => 1, 'perfil' => 'admin_rede', 'situacao' => 'ativo', 'inicio_em' => now()]);
+        $r = ['usuario_id' => 1, 'prova_id' => 1, 'vinculo_id' => 2, 'chave' => (string) \Illuminate\Support\Str::uuid()];
+        $this->recusa(fn () => DB::table('cartao_envios')->insert($r));
+        DB::table('cartao_envios')->insert(array_replace($r, ['vinculo_id' => 1]));
+        $this->recusa(fn () => DB::table('usuario_vinculos')->where('id', 1)->delete());
+        $migration = require database_path('migrations/2026_11_01_000003_contextualizar_envios_cartao.php');
+        $migration->up();
+        $this->assertDatabaseCount('cartao_envios', 1);
+        $this->assertDatabaseHas('cartao_envios', ['usuario_id' => 1, 'vinculo_id' => 1]);
+        DB::table('cartao_envios')->insert(array_replace($r, ['vinculo_id' => null, 'chave' => (string) \Illuminate\Support\Str::uuid()]));
+        $this->assertDatabaseCount('cartao_envios', 2);
+    }
+
     public function test_falha_tardia_desfaz_lote_no_mariadb(): void
     {
         DB::table('usuario_escopos')->insert(['usuario_id' => 1, 'escopo_tipo' => 'rede', 'escopo_id' => 1]);

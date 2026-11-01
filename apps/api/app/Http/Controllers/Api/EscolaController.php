@@ -451,10 +451,8 @@ class EscolaController extends Controller
         $redes = Instituicoes::redesIds($usuario);
         abort_unless($redes === null || in_array($redeId, $redes, true), 404);
         $rede    = DB::table('redes')->where('id', $redeId)->first(['id', 'logo_path']);
-        $permite = $usuario->perfil === 'admin_rede' || ($usuario->perfil === 'dir_nucleo' && DB::table('usuario_escopos')
-            ->join('nucleos', 'nucleos.id', '=', 'usuario_escopos.escopo_id')
-            ->where('usuario_escopos.usuario_id', $usuario->id)->where('usuario_escopos.escopo_tipo', 'nucleo')
-            ->where('nucleos.rede_id', $redeId)->exists());
+        $permite = $usuario->perfil === 'admin_rede' || ($usuario->perfil === 'dir_nucleo' && DB::table('nucleos')
+            ->whereIn('id', Instituicoes::referencias($usuario, 'nucleo'))->where('rede_id', $redeId)->exists());
         if (!$rede || !$permite) {
             return ApiResponse::notFound('Rede não encontrada.');
         }
