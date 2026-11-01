@@ -13,12 +13,31 @@ class Usuario extends Authenticatable
     protected $table = 'usuarios';
 
     private ?int $vinculoContexto = null;
+    private ?int $acessoInternoContexto = null;
+    private ?int $acessoInternoVersao = null;
+
+    /** Contexto explícito; a versão será transportada no token na próxima parte de A1. */
+    public function noAcessoInterno(int $id, int $versao): static
+    {
+        $contexto = clone $this;
+        $contexto->unsetRelations();
+        $contexto->vinculoContexto = null;
+        $contexto->acessoInternoContexto = $id;
+        $contexto->acessoInternoVersao = $versao;
+        \App\Support\ContextoInterno::resolver($contexto);
+        return $contexto;
+    }
+
+    public function acessoInternoContextoId(): ?int { return $this->acessoInternoContexto; }
+    public function acessoInternoContextoVersao(): ?int { return $this->acessoInternoVersao; }
 
     /** Cópia de leitura para um vínculo validado; não muda a conta nem outros contextos. */
     public function noVinculo(int $id): static
     {
         $contexto = clone $this;
         $contexto->unsetRelations();
+        $contexto->acessoInternoContexto = null;
+        $contexto->acessoInternoVersao = null;
         $contexto->vinculoContexto = $id;
         \App\Support\ContextoVinculo::resolver($contexto);
         return $contexto;
@@ -32,20 +51,22 @@ class Usuario extends Authenticatable
     public function fresh($with = [])
     {
         $atual = parent::fresh($with);
+        if ($atual && $this->acessoInternoContexto !== null) return $atual->noAcessoInterno($this->acessoInternoContexto, $this->acessoInternoVersao);
         return $atual && $this->vinculoContexto !== null ? $atual->noVinculo($this->vinculoContexto) : $atual;
     }
 
     /** SerializesModels só guarda o ID da conta e perderia o vínculo. */
     public function getQueueableId()
     {
-        if ($this->vinculoContexto !== null) {
-            throw new \LogicException('Transporte usuario_id e vinculo_id explicitamente e revalide no consumidor.');
+        if ($this->vinculoContexto !== null || $this->acessoInternoContexto !== null) {
+            throw new \LogicException('Transporte a identidade e o contexto explicitamente e revalide no consumidor.');
         }
         return parent::getQueueableId();
     }
 
     public function getPerfilAttribute($perfil): ?string
     {
+        if ($this->acessoInternoContexto !== null) return \App\Support\ContextoInterno::resolver($this)->perfil;
         return $this->vinculoContexto === null ? $perfil : \App\Support\ContextoVinculo::resolver($this)->perfil;
     }
 

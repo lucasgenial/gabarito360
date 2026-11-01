@@ -18,6 +18,9 @@ class Permissao
 
     public static function efetivas(Usuario $u): array
     {
+        if (ContextoInterno::presente($u)) return ContextoInterno::permissoes($u);
+        // Gravar um perfil interno no campo legado não concede acesso comercial ou pedagógico.
+        if (in_array($u->getRawOriginal('perfil'), ContextoInterno::PERFIS, true) && !ContextoVinculo::presente($u)) return [];
         RegimeVinculos::exigir($u);
         // Contextos explícitos são revalidados; não reutilizam o cache global legado por pessoa.
         if (ContextoVinculo::presente($u)) return ContextoVinculo::permissoes($u);
