@@ -35,15 +35,17 @@ class ImportarAlunos extends Command
                 $valores = str_getcsv($linha, $sep);
                 abort_unless(count($valores) === count($cab), 422);
                 $r = array_combine($cab, array_map('trim', $valores));
-                Validator::make($r, ['CLASS' => 'required|string|max:50', 'NAME' => 'required|string|max:200', 'MATRICULA' => 'required|string|max:50'])->validate();
+                Validator::make($r, ['CLASS' => 'required|string|max:50', 'NAME' => 'required|string|max:200', 'MATRICULA' => 'required|string|max:20'])->validate();
                 abort_if(isset($matriculas[$r['MATRICULA']]), 422);
                 $matriculas[$r['MATRICULA']] = true;
                 $dados[] = $r;
             }
             $validar = function () use ($dados, $escola, $meta, $ano) {
                 foreach ($dados as $r) {
-                    // A unicidade global permanece até E. Colisão externa é recusa, nunca atualização.
-                    foreach (DB::table('alunos')->where('matricula', $r['MATRICULA'])->get() as $aluno) {
+                    // No corte, coincidência em outro espaço não identifica nem transfere a pessoa.
+                    $existentes = DB::table('alunos')->where('matricula', $r['MATRICULA']);
+                    if (Espacos::ativo()) $existentes->where('espaco_id', $meta['espaco_id']);
+                    foreach ($existentes->get() as $aluno) {
                         $turma = DB::table('turmas')->where('id', $aluno->turma_id)->first();
                         abort_unless($turma && (int) $turma->escola_id === $escola, 409);
                         if (Espacos::ativo()) abort_unless((int) $aluno->espaco_id === $meta['espaco_id'] && (int) $turma->espaco_id === $meta['espaco_id'], 409);

@@ -135,7 +135,7 @@ class CartaoController extends Controller
             abort_if((int) $atual->prova_id !== (int) $provaAtual->id, 409,
                 'O cartão mudou de prova durante a leitura. Atualize a página antes de excluir.');
             abort_unless(ContextoCorrecao::cartaoValido($atual, $provaAtual), 409);
-            ContextoCorrecao::filtrar(CartaoEnvio::query(), $atual->espaco_id)->where('cartao_id', $atual->id)->update(['status' => 'recusado', 'resultado' => null,
+            ContextoCorrecao::filtrar(CartaoEnvio::query(), $atual->espaco_id)->where('cartao_id', $atual->id)->update(['status' => 'recusado', 'resultado' => null, 'cartao_id' => null,
                 'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
             $atual->delete(); // respostas, nota e logs de ambiguidade saem em cascata
             AtualizadorStatusProva::atualizar($provaAtual);

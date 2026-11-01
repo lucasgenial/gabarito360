@@ -212,6 +212,7 @@ class ProcessarCartaoJob implements ShouldQueue
     private function apagar(Cartao $cartao): void
     {
         // Rollback preserva as fotos da leitura anterior.
+        ContextoCorrecao::filtrar(CartaoEnvio::query(), $cartao->espaco_id)->where('cartao_id', $cartao->id)->update(['cartao_id' => null]);
         DB::table('cartoes')->where('id', $cartao->id)->delete();
         DB::afterCommit(function () use ($cartao) {
             if ($cartao->imagem_url) {
