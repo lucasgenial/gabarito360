@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\AcompanhamentoTurmaController;
 use App\Http\Controllers\Api\RelatorioConsolidadoController;
 use App\Http\Controllers\Api\VinculoProfessorController;
 use App\Http\Controllers\Api\WebhookController;
+use App\Http\Controllers\Api\ConviteVinculoController;
 use App\Services\Omr\ImagensCartao;
 use Illuminate\Support\Facades\Route;
 
@@ -53,8 +54,10 @@ Route::prefix('v1')->group(function () {
     });
 
     // Rotas protegidas
-    Route::middleware(['auth:sanctum', 'senha_trocada'])->group(function () {
+    Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
         Route::prefix('auth')->group(function () {
+            Route::post('convites-vinculo/{id}/consultar', [ConviteVinculoController::class, 'consultar'])->whereNumber('id')->middleware('throttle:20,1');
+            Route::post('convites-vinculo/{id}/responder', [ConviteVinculoController::class, 'responder'])->whereNumber('id')->middleware('throttle:10,1');
             Route::post('logout', [AuthController::class, 'logout']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::post('email', [AuthController::class, 'trocarEmail'])->middleware('throttle:5,1');
@@ -167,6 +170,7 @@ Route::prefix('v1')->group(function () {
         // Usuários / equipe
         Route::get('permissoes/perfis', [UsuarioController::class, 'catalogoPerfis'])->middleware('permissao:usuario.ver');
 
+        Route::post('usuarios/convites-vinculo', [ConviteVinculoController::class, 'store'])->middleware(['permissao:usuario.gerir', 'throttle:10,1']);
         Route::prefix('usuarios')->group(function () {
             Route::get('/',          [UsuarioController::class, 'index'])->middleware('permissao:usuario.ver');
             // Quem cadastra quem e em qual escopo: App\Support\Cadastro (docs/21, etapa 0)

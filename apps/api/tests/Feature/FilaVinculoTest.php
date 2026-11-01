@@ -196,4 +196,17 @@ class FilaVinculoTest extends TestCase
         $this->assertDatabaseHas('cartoes', ['id' => $e->cartao_id]);
         $this->assertDatabaseCount('notas', 0);
     }
+    public function test_corte_recusa_job_sem_contexto_sem_acionar_omr(): void
+    {
+        $e = $this->enviar();
+        $e->update(['vinculo_id' => null, 'chave_cliente' => null]);
+        config(['vinculos.obrigatorio' => true]);
+        $driver = Mockery::mock(OmrDriverInterface::class);
+        $driver->shouldNotReceive('processar');
+        $this->job($e)->handle($driver, app(ImagensCartao::class));
+        $this->assertSame('recusado', $e->fresh()->status);
+        $this->assertDatabaseCount('notas', 0);
+        $this->assertDatabaseHas('cartoes', ['id' => $e->cartao_id]);
+    }
+
 }

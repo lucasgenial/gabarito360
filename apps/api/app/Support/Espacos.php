@@ -31,12 +31,14 @@ class Espacos
 
     public static function escolasPermitidas(Usuario $u, array $candidatas): array
     {
+        RegimeVinculos::exigir($u);
         if (!$u->ativo) return [];
         return self::escolas()->whereIn('e.id', $candidatas)->pluck('e.id')->map(fn ($id) => (int) $id)->all();
     }
 
     public static function ids(Usuario $u): array
     {
+        RegimeVinculos::exigir($u);
         return self::escolas()->whereIn('e.id', Escopo::escolaIds($u) ?? [])
             ->pluck('ee.id')->map(fn ($id) => (int) $id)->all();
     }
@@ -44,6 +46,7 @@ class Espacos
     /** Nunca aceita espaco_id vindo do cliente; deriva da escola já autorizada. */
     public static function daEscola(Usuario $u, int $escola): int
     {
+        RegimeVinculos::exigir($u);
         abort_unless(in_array($escola, Escopo::escolaIds($u) ?? [], true), 404);
         $id = self::escolas()->where('e.id', $escola)->value('ee.id');
         abort_unless($id, 404);
@@ -52,11 +55,13 @@ class Espacos
 
     public static function autoria(int $espaco, Usuario $u): array
     {
+        RegimeVinculos::exigir($u);
         return ['espaco_id' => $espaco, 'criado_por' => $u->id, 'origem_autoria' => 'registrada'];
     }
 
     public static function filtrar($query, Usuario $u, string $coluna)
     {
+        RegimeVinculos::exigir($u);
         if (self::ativo()) $query->whereIn($coluna, self::ids($u));
         return $query;
     }
@@ -73,6 +78,7 @@ class Espacos
     /** Integridade dos agregados institucionais; o chamador ainda deve autorizar a escola. */
     public static function agregadoEscolar($query, string $tabela, ?Usuario $ator = null)
     {
+        if ($ator) RegimeVinculos::exigir($ator);
         if (!self::ativo()) return $query;
         if ($ator) {
             if ($tabela === 'turmas') $query->whereIn('turmas.id', Escopo::turmas($ator)->select('turmas.id'));
