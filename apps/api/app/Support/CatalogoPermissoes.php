@@ -23,6 +23,12 @@ class CatalogoPermissoes
         'relatorio.prova', 'relatorio.turma',
     ];
 
+    /** A1-C: administração escolar sem poderes pedagógicos ou extras. */
+    public const SECRETARIO_ESCOLAR = [
+        'escola.ver', 'turma.ver', 'turma.gerir', 'turma.desativar',
+        'aluno.ver', 'aluno.gerir', 'aluno.importar', 'aluno.desativar',
+    ];
+
     public const LISTA = [
         // 4.1 Rede, núcleos e escolas
         ['rede.configurar',          'escolas',   'Parâmetros da rede (metas etc.)',                        '-v------'],
@@ -87,6 +93,7 @@ class CatalogoPermissoes
         }
 
         $out['professor_autonomo'] = ['padrao' => self::AUTONOMO, 'extra' => []];
+        $out['secretario_escolar'] = ['padrao' => self::SECRETARIO_ESCOLAR, 'extra' => []];
         return $out;
     }
 }

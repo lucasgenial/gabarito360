@@ -44,11 +44,15 @@ class TurmaController extends Controller
         $turmas = $query->with('escola:id,nome,nucleo_id')
             ->orderBy('nome')
             ->get()
-            ->map(function (Turma $t) use ($consulta) {
+            ->map(function (Turma $t) use ($consulta, $request) {
                 $totalAlunos = $consulta->tabela('alunos')
                     ->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))
                     ->where('ativo', true)
                     ->count();
+
+                if ($request->user()->perfil === 'secretario_escolar') return array_merge($t->toArray(), [
+                    'total_alunos' => $totalAlunos, 'escola_nome' => $t->escola?->nome,
+                ]);
 
                 $media = $consulta->tabela('notas')->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))->avg('nota_final');
 
@@ -108,6 +112,14 @@ class TurmaController extends Controller
 
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');
+        }
+
+        if ($request->user()->perfil === 'secretario_escolar') {
+            $alunos = $consulta->tabela('alunos')->where('turma_id', $id)->where('espaco_id', $turma->espaco_id)
+                ->orderBy('nome')->get(['id', 'nome', 'matricula', 'ativo']);
+            return ApiResponse::success(array_merge($turma->toArray(), [
+                'escola_nome' => $turma->escola?->nome, 'total_alunos' => $alunos->where('ativo', true)->count(), 'alunos' => $alunos,
+            ]));
         }
 
         $alunos = $consulta->tabela('alunos')

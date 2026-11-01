@@ -24,6 +24,7 @@ class DashboardController extends Controller
 
     public function index(Request $request): View
     {
+        if (\App\Support\Acesso::perfil() === 'secretario_escolar') return view('dashboard.secretario-escolar');
         if (\App\Support\Acesso::interno()) return view('dashboard.interno');
         $contexto = $request->validate(['escola_id' => 'sometimes|integer|min:1', 'nucleo_id' => 'sometimes|integer|min:1', 'aluno_id' => 'sometimes|integer|min:1', 'secretaria_id' => 'sometimes|integer|min:1']);
         $perfil = \App\Support\Acesso::perfil();

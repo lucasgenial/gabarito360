@@ -15,9 +15,9 @@ class Cadastro
 {
     /** Perfis que cada gestor pode cadastrar/gerir. */
     public const PODE_GERIR = [
-        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
-        'dir_nucleo'  => ['dir_escolar', 'coordenador'],
-        'dir_escolar' => ['coordenador', 'professor', 'aplicador', 'aluno'],
+        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'dir_nucleo'  => ['dir_escolar', 'secretario_escolar', 'coordenador'],
+        'dir_escolar' => ['secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
         'coordenador' => ['professor', 'aplicador', 'aluno'],
     ];
 
