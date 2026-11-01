@@ -15,6 +15,7 @@ class DashboardController extends Controller
         'dir_escolar' => 'dashboard.diretor-escolar',
         'coordenador' => 'dashboard.coordenador',
         'professor'   => 'dashboard.professor',
+        'professor_autonomo' => 'dashboard.professor',
         'aplicador'   => 'dashboard.aplicador',
         'aluno'       => 'dashboard.aluno',
     ];
@@ -33,7 +34,7 @@ class DashboardController extends Controller
             'dir_nucleo'  => $this->dadosDirNucleo($contexto),
             'dir_escolar' => $this->dadosDirEscolar($contexto),
             'coordenador' => $this->dadosCoordenador($contexto),
-            'professor'   => $this->dadosProfessor($contexto),
+            'professor', 'professor_autonomo' => $this->dadosProfessor($contexto),
             'aplicador'   => $this->dadosAplicador($contexto),
             'aluno'       => $this->dadosAluno($contexto),
             default       => [],

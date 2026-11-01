@@ -37,7 +37,7 @@ class ResultadoController extends Controller
         }
 
         $prova  = Prova::find($provaId);
-        $escola = DB::table('escolas')->where('id', $prova->escola_id)->first();
+        $escola = $prova->escola_id ? DB::table('escolas')->where('id', $prova->escola_id)->first() : null;
         $saida  = tempnam(sys_get_temp_dir(), 'g360_e'.($prova->espaco_id ?? 0).'_res_');
         @unlink($saida);
         $saida .= '.pdf';
@@ -48,7 +48,7 @@ class ResultadoController extends Controller
                 'saida'       => $saida,
                 'rede'        => $escola ? DB::table('nucleos')->join('redes', 'nucleos.rede_id', '=', 'redes.id')
                     ->where('nucleos.id', $escola->nucleo_id)->value('redes.nome') : null,
-                'escola'      => $escola->nome ?? '',
+                'escola'      => $dados['cabecalho']['nome'] ?? '',
                 'titulo'      => $dados['prova']['titulo'],
                 'disciplina'  => $dados['prova']['disciplina'],
                 'data'        => $prova->data_aplicacao?->format('d/m/Y'),
@@ -59,8 +59,8 @@ class ResultadoController extends Controller
                 'media_turma' => $dados['media_turma'],
                 'folha'       => $dados['folha'],
                 'logo'        => Cabecalho::logoPath($escola->logo_path ?? null),
-                'logo_ente'   => Cabecalho::logoPath(DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
-                    ->where('nucleos.id', $escola->nucleo_id ?? 0)->value('redes.logo_path')),
+                'logo_ente'   => $escola ? Cabecalho::logoPath(DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
+                    ->where('nucleos.id', $escola->nucleo_id)->value('redes.logo_path')) : null,
                 'detalhe'     => $dados['cabecalho']['detalhe'] ?? null,
             ], JSON_UNESCAPED_UNICODE))
             ->run([config('omr.python'), 'gerar_resultado.py']);
@@ -102,8 +102,11 @@ class ResultadoController extends Controller
             return ApiResponse::notFound('Aluno não encontrado.');
         }
 
-        if (Espacos::ativo() && !ContextoCorrecao::alunos($prova, $individual ? null : $request->user())->where('alunos.id', $alunoId)->exists()) return ApiResponse::notFound('Resultado não encontrado.');
-        $nota = ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id)->where('aluno_id', $alunoId)->where('prova_id', $provaId)->first();
+        $pessoal = \App\Support\EspacoPessoal::doAtor($request->user());
+        if (Espacos::ativo() && !$pessoal && !ContextoCorrecao::alunos($prova, $individual ? null : $request->user())->where('alunos.id', $alunoId)->exists()) return ApiResponse::notFound('Resultado não encontrado.');
+        $notas = $pessoal ? (new \App\Support\ConsultasPedagogicas($request->user()))->tabela('notas')
+            : ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id);
+        $nota = $notas->where('aluno_id', $alunoId)->where('prova_id', $provaId)->first();
         if (!$nota) {
             return ApiResponse::error('Resultado ainda não disponível para este aluno nesta prova.', [], 404);
         }
@@ -154,13 +157,15 @@ class ResultadoController extends Controller
             ->where('turma_id', $nota->turma_id)
             ->avg('nota_final');
 
+        $turmaResultado = $pessoal ? Escopo::turmas($request->user())->find($nota->turma_id) : $aluno->turma;
+        $cabecalho = Cabecalho::contexto($request->user(), $prova->escola_id);
         return [
             'aluno' => [
                 'id'         => $aluno->id,
                 'nome'       => $aluno->nome,
                 'matricula'  => $aluno->matricula,
-                'turma_id'   => $aluno->turma?->id,
-                'turma_nome' => $aluno->turma?->nome,
+                'turma_id'   => $turmaResultado?->id,
+                'turma_nome' => $turmaResultado?->nome,
             ],
             'prova' => [
                 'id'               => $prova->id,
@@ -170,7 +175,7 @@ class ResultadoController extends Controller
                 'num_questoes'     => $prova->num_questoes,
                 'num_alternativas' => $prova->num_alternativas,
                 'nota_maxima'      => $prova->nota_maxima,
-                'escola_nome'      => DB::table('escolas')->where('id', $prova->escola_id)->value('nome'),
+                'escola_nome'      => $cabecalho['nome'],
             ],
             'nota' => [
                 'acertos'          => $nota->acertos,
@@ -178,7 +183,7 @@ class ResultadoController extends Controller
                 'nota_final'       => (float) $nota->nota_final,
                 'status_aprovacao' => $nota->status_aprovacao,
             ],
-            'cabecalho'       => Cabecalho::escola((int) $prova->escola_id),
+            'cabecalho'       => $cabecalho,
             'correcao'        => Correcao::situacao($prova),
             'cartao_id'       => $nota->cartao_id,
             'lingua'          => $cartao?->lingua,
