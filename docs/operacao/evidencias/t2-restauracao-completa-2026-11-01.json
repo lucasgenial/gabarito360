@@ -1,0 +1,134 @@
+{
+  "ambiente_atual": "homologacao representativa de producao, em desenvolvimento/testes, conforme responsavel",
+  "alvo_validado": "3af6c19de426ef0ea89bbbeab66e7e167c3970c2",
+  "sem_deploy_ou_migracao_no_servidor_atual": true,
+  "backup": {
+    "copiado_em_utc": "2026-11-01T03:36:35.999639+00:00",
+    "copia_pontual_t2": true,
+    "arquivos": [
+      {
+        "arquivo": "vzdump-lxc-106-2026_11_01-00_22_15.tar.zst",
+        "bytes": 2208133923,
+        "sha256": "8517348bf92b0183880da1a42f264f30cdcac12c7f0125141e2b96ac53992178",
+        "confirmado": true
+      },
+      {
+        "arquivo": "vzdump-lxc-111-2026_11_01-00_24_28.tar.zst",
+        "bytes": 8749437681,
+        "sha256": "1f2f912f00ff3247cfc8927cd559b38c1a83939763738576affb5810cf93736c",
+        "confirmado": true
+      }
+    ]
+  },
+  "inventario": {
+    "chaves_recuperadas": true,
+    "cifras": 20,
+    "arquivos": 47,
+    "contagens": {
+      "turmas": 14,
+      "alunos": 414,
+      "provas": 4,
+      "prova_turmas": 8,
+      "gabaritos": 4,
+      "gabarito_questoes": 180,
+      "cartoes": 47,
+      "cartao_respostas": 2115,
+      "notas": 47,
+      "ambiguidade_logs": 28,
+      "cartao_envios": 0,
+      "visitas": 0,
+      "sincronizacoes_seges": 0
+    }
+  },
+  "restauracao": {
+    "temporarios": {
+      "9106": "g360-t2-db-20261101",
+      "9111": "g360-t2-app-20261101"
+    },
+    "sem_rede_externa": true,
+    "tempos_s": {
+      "restaurar_9106": 30.31,
+      "restaurar_9111": 157.86,
+      "restauracao_ate_health_inclui_ajuste_rede": 412.05
+    },
+    "inicio_utc": "2026-11-01T03:36:48.156080+00:00",
+    "mariadb_check": true,
+    "servicos_ativos": true,
+    "health": 200,
+    "rede_par_veth_sem_host": true,
+    "ajuste_rede_restaurada": true
+  },
+  "corte": {
+    "somente_clone": true,
+    "alvo": "3af6c19de426ef0ea89bbbeab66e7e167c3970c2",
+    "b5_manteve_manutencao": true,
+    "b5_s": 21.79,
+    "corte_s": 26.35,
+    "conteudo_preservado": true,
+    "ocorrencias": 0,
+    "esquema_completo": true,
+    "http": {
+      "ct_isolado": true,
+      "fase": "primeiro",
+      "login_api": 200,
+      "rede_1": 200,
+      "rede_2_sem_vinculo": 404,
+      "rede_2_com_vinculo": 200,
+      "login_web_sessao_redis": true
+    }
+  },
+  "retomada": {
+    "somente_clones": true,
+    "fila_antes": {
+      "falhos": 0,
+      "pendentes": 0
+    },
+    "job_antes": true,
+    "worker_restart_automatico": true,
+    "timer_disparou": true,
+    "reboot_e_rede_s": 44.93,
+    "http_pos_reboot": {
+      "ct_isolado": true,
+      "fase": "apos-reboot",
+      "sessao_preservada_no_reboot": true,
+      "login_api": 200,
+      "rede_1": 200,
+      "rede_2_com_vinculo": 200
+    },
+    "job_pos_reboot": true,
+    "fila_depois": {
+      "falhos": 0,
+      "pendentes": 0
+    },
+    "integridade": {
+      "conteudo_preservado": true,
+      "ocorrencias": 0,
+      "esquema_completo": true
+    },
+    "mariadb_check_pos_reboot": true
+  },
+  "fontes_sha256_lf": {
+    "scripts/ensaios/t2-copiar-backups.py": "c7560bfb8929893ac12edf97d4795e34c40a364d6b09beb317e0da5650efa1b0",
+    "scripts/ensaios/t2-corte-no-clone.py": "4ff092c1ff28d7ee5af6dcd7650d94e7bb7b5f9ccf85b2820a17e2c6bf4d6f89",
+    "scripts/ensaios/t2-http-restauracao.py": "6a14e0881c3e5e28defdb514d5e4710f1c349518ef2fb5b439d0e329277d5e86",
+    "scripts/ensaios/t2-restaurar-cts.py": "6cf7a88c3e2b218f64f432d3be4d6f923b3f43f5d462283ff7049410cace6aa5",
+    "scripts/ensaios/t2-retomada-clones.py": "3994e483eb60e10cef85b1133f69be424a0c8e74925cdef45b6fa4381c69e8c4",
+    "scripts/ensaios/t2-restauracao-completa.php": "f0bf00fdc66a73221e009b8e804f751de1394279a05fcc0ffa73f1fcf6bc9949"
+  },
+  "limpeza": {
+    "temporarios_removidos": [
+      9111,
+      9106
+    ],
+    "originais_preservados": [
+      111,
+      106
+    ]
+  },
+  "servidor_atual_apos_ensaio": {
+    "sha": "dc9949e3690744b72c5071d919955c09ad2be9b8",
+    "tabelas_clientes_espacos": 0,
+    "health": 200,
+    "servicos_ativos": true
+  }
+}

@@ -60,3 +60,7 @@ O teste provou que os arquivos podem ser recuperados e que o banco abre. Não ho
 - Comparar as contagens do backup com o banco de produção, após aprovação.
 - Confirmar BitLocker no disco D:. Os arquivos não são criptografados e contêm dados de alunos e segredos dos sistemas.
 - Avaliar uma terceira cópia fora do local. As duas camadas ficam no mesmo endereço.
+
+## Antecipação e ensaio T2 — 01/11/2026
+
+Com autorização do responsável, os backups dos CTs 106/111 foram antecipados e copiados com SHA-256 às 00h36 BRT, sem esperar 06h e sem aplicar retenção. Registro pontual: `D:\Backups-Proxmox\T2-COPIA-OK-2026-11-01.json`; o marcador da rotina completa não foi substituído. Restauração completa pelo Proxmox nos CTs temporários 9106/9111, recuperação das chaves pós-L3 e reinício supervisionado validados. Os temporários foram removidos; os originais e backups foram preservados. Veja [docs/52](../52-t2-ensaio-completo-e-prontidao.md) para arquivos, hashes, tempos e limites.
