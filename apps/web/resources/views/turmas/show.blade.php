@@ -206,15 +206,16 @@
   <form method="POST" action="{{ route('turmas.professores.store', $turma['id']) }}"
         style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
     @csrf
-    <select class="select" name="usuario_id" required style="flex:1;min-width:200px;">
+    <select class="select" name="usuario_id" id="professor-selecionado" required style="flex:1;min-width:200px;">
       <option value="">— Selecione um professor —</option>
       @foreach($todosProfessores as $p)
-        @php $jaVinculado = collect($professores)->contains('id', $p['id']); @endphp
-        @if(!$jaVinculado)
-          <option value="{{ $p['id'] }}">{{ $p['nome'] }} ({{ $p['email'] }})</option>
+        @php $jaVinculado = isset($p['vinculo_id']) ? collect($professores)->contains('vinculo_id', $p['vinculo_id']) : collect($professores)->contains('id', $p['id']); @endphp
+        @if(!$jaVinculado && (!isset($p['vinculo_id']) || ($p['ativo'] && (int) $p['escola_id'] === (int) $turma['escola_id'])))
+          <option value="{{ $p['id'] }}" data-vinculo="{{ $p['vinculo_id'] ?? '' }}">{{ $p['nome'] }} ({{ $p['email'] }})</option>
         @endif
       @endforeach
     </select>
+    @if(session('auth_vinculos'))<input type="hidden" name="vinculo_id" id="professor-vinculo">@endif
     <button type="submit" class="btn btn-primary btn-sm">Vincular professor</button>
   </form>
 
@@ -248,7 +249,7 @@
             </td>
             <td style="text-align:right;">
               <form method="POST"
-                    action="{{ route('turmas.professores.destroy', [$turma['id'], $p['id']]) }}"
+                    action="{{ route('turmas.professores.destroy', array_filter(['id' => $turma['id'], 'uid' => $p['id'], 'vinculo_id' => $p['vinculo_id'] ?? null])) }}"
                     onsubmit="return confirm('Desvincular {{ $p['nome'] }} desta turma?')">
                 @csrf
                 @method('DELETE')
@@ -349,6 +350,16 @@ function filtrarAlunos(q) {
     if(show) visiveis++;
   });
   document.getElementById('no-results').style.display = (visiveis === 0 && termo) ? 'block' : 'none';
+}
+</script>
+@endpush
+
+@push('scripts')
+<script>
+const professorEscolhido = document.getElementById('professor-selecionado'), professorVinculo = document.getElementById('professor-vinculo');
+if (professorEscolhido && professorVinculo) {
+ const atualizarVinculo = () => professorVinculo.value = professorEscolhido.selectedOptions[0]?.dataset.vinculo || '';
+ professorEscolhido.addEventListener('change', atualizarVinculo); atualizarVinculo();
 }
 </script>
 @endpush

@@ -190,3 +190,7 @@ ALUNO        → /painel → dashboard-aluno
 ### V2-B — escolha do vínculo
 
 `GET /vinculos` mostra os vínculos autorizados; `POST /vinculos` seleciona um vínculo via API, cria handle vinculado à sessão e redireciona ao painel. Proteção CSRF, autenticação e troca de senha obrigatória preservadas. Contexto da aba acompanha rotas operacionais, formulários, AJAX e downloads. Contrato: [docs/61](61-v2-contexto-autenticado.md).
+
+### V2-C — convites e gestão
+
+`GET/POST /membros/convidar-vinculo`: opções autorizadas e convite de conta existente. `GET /vinculos/convite`: página pública sem dados; `POST /vinculos/convite/consultar` e `/responder`: identidade autenticada, CSRF, limite de requisições e referência de confirmação vinculada à sessão. Gestão de membros/permissões e professores por turma transporta `vinculo_id` explícito. [Contrato](62-v2-gestao-e-aceite-de-convites.md).

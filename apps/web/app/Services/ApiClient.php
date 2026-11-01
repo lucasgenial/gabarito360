@@ -52,9 +52,9 @@ class ApiClient
         return $this->http()->put($path, $data);
     }
 
-    public function delete(string $path): Response
+    public function delete(string $path, array $data = []): Response
     {
-        return $this->http()->delete($path);
+        return $this->http()->delete($path, $data);
     }
 
     public function postFile(string $path, string $fileField, \Illuminate\Http\UploadedFile $file, array $data = [], int $timeout = 90): Response

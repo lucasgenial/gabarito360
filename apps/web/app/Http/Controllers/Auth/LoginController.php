@@ -13,7 +13,7 @@ class LoginController extends Controller
     public function index(Request $request)
     {
         if (session('auth_token')) {
-            return redirect()->route('painel');
+            return redirect()->route($request->boolean('retorno_convite') ? 'vinculos.convite' : 'painel');
         }
 
         return view('auth.login');
@@ -51,6 +51,7 @@ class LoginController extends Controller
             'auth_trocar_senha' => $data['trocar_senha'] ?? false,
         ]);
 
+        if ($request->boolean('retorno_convite')) return redirect()->route(($data['trocar_senha'] ?? false) ? 'trocar-senha' : 'vinculos.convite', ['retorno_convite' => 1]);
         return redirect()->route('painel');
     }
 

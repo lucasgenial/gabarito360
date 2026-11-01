@@ -57,7 +57,7 @@ class PerfilController extends Controller
 
         session()->forget('auth_trocar_senha');
 
-        return redirect()->route('painel')->with('sucesso', 'Senha alterada.');
+        return redirect()->route($request->boolean('retorno_convite') ? 'vinculos.convite' : 'painel')->with('sucesso', 'Senha alterada.');
     }
 
     public function senha(Request $request)
