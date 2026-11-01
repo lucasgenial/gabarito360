@@ -78,4 +78,4 @@ jobs:
       - run: mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
       - run: composer install --no-interaction --no-progress
       - run: cp .env.example .env && php artisan key:generate
-      - run: php artisan test --filter='IntegridadeEspacosMariaDbTest|VinculosMariaDbTest|SelecaoVinculoTest|ConviteInterfaceTest|PerfisEspacoTest'
+      - run: php artisan test --filter='IntegridadeEspacosMariaDbTest|VinculosMariaDbTest|SelecaoVinculoTest|ConviteInterfaceTest|PerfisEspacoTest|PlanejamentoConsultasMariaDbTest'
