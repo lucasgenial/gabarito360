@@ -212,7 +212,7 @@ Route::prefix('v1')->group(function () {
             Route::get('coordenador',  [DashboardController::class, 'coordenador'])
                 ->middleware('perfil:coordenador');
             Route::get('professor',    [DashboardController::class, 'professor'])
-                ->middleware('perfil:professor');
+                ->middleware('perfil:professor,professor_autonomo');
             Route::get('aluno',        [DashboardController::class, 'aluno'])
                 ->middleware('perfil:aluno');
             Route::get('secretaria',  [DashboardController::class, 'secretaria'])

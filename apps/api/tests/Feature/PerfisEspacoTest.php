@@ -87,8 +87,9 @@ class PerfisEspacoTest extends TestCase
         $this->negado(fn()=>Usuario::find(1)->noVinculo(5));
     }
 
-    public function test_catalogo_pessoal_nao_libera_contexto_nem_perfil_global_antes_da_integracao(): void
+    public function test_gate_desabilitado_bloqueia_pessoal_e_catalogo_nao_libera_perfil_global(): void
     {
+        config(['espacos.pessoal'=>false]);
         $politica = CatalogoPermissoes::porPerfil()['professor_autonomo'];
         foreach (['turma.gerir', 'aluno.gerir', 'aluno.desativar', 'prova.criar', 'relatorio.turma'] as $p) {
             $this->assertContains($p, $politica['padrao']);

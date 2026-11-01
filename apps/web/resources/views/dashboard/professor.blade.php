@@ -62,7 +62,7 @@
 @endphp
 
 @php
-  $subProf = collect(['Suas turmas', $prof['disciplina'] ?? null,
+  $subProf = collect([$prof['espaco_nome'] ?? 'Suas turmas', $prof['disciplina'] ?? null,
     !empty($prof['total_turmas']) ? $prof['total_turmas'] . ($prof['total_turmas'] == 1 ? ' turma ativa' : ' turmas ativas') : null])->filter()->implode(' · ');
 @endphp
 <x-pagina titulo="{{ \App\Support\Acesso::saudacao() }}, {{ $primeiroNome }}" subtitulo="{{ $subProf }}">

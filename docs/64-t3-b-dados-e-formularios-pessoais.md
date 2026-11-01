@@ -27,3 +27,5 @@ Migration `2026_11_01_000006_preparar_dados_pessoais`: prepara esquema e catálo
 Testes de API: cadastro mínimo, payload excessivo, tentativa entre dois espaços pessoais, propriedade derivada, turmas/provas sem escola, agregados, restrições diretas no banco, mudança de turma e retorno, recálculo e boletim histórico. Testes web: campos mínimos, ausência de consultas institucionais, payload e rejeição antes de envio. Nova suíte participa também do CI MariaDB. Regressões institucionais permanecem exigidas.
 
 T3-B em revisão. T3-C ainda deve validar seleção/menu/dashboard, percurso completo em navegador, PDFs, filas e habilitação; ensaio da release em ambiente equivalente continua necessário antes de publicar. Nenhum deploy, migração ou sincronização foi executado no servidor.
+
+Atualização T3-C: T3-B incorporado no PR #97. Integração e habilitação preparadas no código em docs/65, ainda em revisão e sem publicação no servidor; o estado desligado acima descreve a entrega T3-B original.

@@ -249,7 +249,9 @@ class DashboardController extends Controller
                 'nome'               => $usuario->nome,
                 'disciplina'         => $disciplinaPrincipal,
                 'total_turmas'       => $minhasTurmas,
-                'escola_nome'        => $usuario->escola_nome,
+                'escola_nome'        => \App\Support\EspacoPessoal::doAtor($usuario) ? null : $usuario->escola_nome,
+                'espaco_nome'        => \App\Support\EspacoPessoal::doAtor($usuario)
+                    ? \App\Support\ContextoVinculo::resolver($usuario)->espaco->nome : null,
             ],
             'kpis' => [
                 'minhas_provas'     => $minhasProvas,

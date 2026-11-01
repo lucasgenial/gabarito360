@@ -47,6 +47,7 @@ class DadosPessoaisWebTest extends TestCase
         }
         foreach (['/turmas','/turmas/1','/provas/nova'] as $path) {
             $r=$this->get($path.'?_ctx='.$this->ctx)->assertOk()->assertDontSee('name="escola_id"',false);
+            if ($path==='/turmas/1') $r->assertDontSee('Vincular professor')->assertDontSee('id="professor-selecionado"',false);
             if ($dir=getenv('T3B_PREVIEW_DIR')) file_put_contents($dir.'/'.str_replace('/','-',trim($path,'/')).'.html',$r->getContent());
         }
     }

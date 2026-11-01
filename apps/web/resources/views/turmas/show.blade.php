@@ -15,8 +15,8 @@
 <x-pagina titulo="{{ $turma['nome'] }}">
   <x-slot:sub>{{ $turma['serie'] }} ·
       {{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$turma['turno']] ?? $turma['turno'] }} ·
-      <b>{{ $turma['total_alunos'] ?? 0 }}</b> aluno(s) ·
-      {{ $turma['escola_nome'] ?? '' }}</x-slot:sub>
+      <b>{{ $turma['total_alunos'] ?? 0 }}</b> aluno(s)
+      @if(!empty($turma['escola_nome'])) · {{ $turma['escola_nome'] }}@endif</x-slot:sub>
     @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}"><x-icone nome="grafico" /> Acompanhar correção</a>@endpode
     @pode('resultado.ver')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}"><x-icone nome="grafico" /> Relatório da turma</a>@endpode
     @pode('turma.gerir')
@@ -192,6 +192,7 @@
 </div>
 
 {{-- Seção: Professores vinculados --}}
+@unless(\App\Support\Acesso::pessoal())
 <h2 class="section-title secao-topo">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -268,6 +269,8 @@
     </div>
   @endif
 </div>
+
+@endunless
 
 {{-- Modal de edição --}}
 <div class="modal-backdrop" id="modal-editar" aria-hidden="true">
