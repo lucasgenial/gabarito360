@@ -473,7 +473,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### V1. Vínculos por pessoa
 
-- **Andamento em 01/11/2026:** V1-A/B/C1/C2a/C2b incorporados nos PRs #87–#91. V1-C3 implementado para revisão: [conciliação e preparo do corte](60-v1-conciliacao-e-preparo-do-corte.md). Backend com regime obrigatório ainda desligado; V2 deve concluir seleção por aba, interface de gestão e página de convite antes da ativação. Conciliação real e ensaio operacional permanecem pendentes. Sem deploy destas fases.
+- **Andamento em 01/11/2026:** V1-A/B/C1/C2a/C2b/C3 incorporados nos PRs #87–#92. V1-C3 documentado em: [conciliação e preparo do corte](60-v1-conciliacao-e-preparo-do-corte.md). Backend com regime obrigatório ainda desligado; V2 deve concluir seleção por aba, interface de gestão e página de convite antes da ativação. Conciliação real e ensaio operacional permanecem pendentes. Sem deploy destas fases.
 
 - **Objetivo:** permitir vários papéis para a mesma pessoa.
 - **Dependências:** T2.
@@ -971,8 +971,8 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | L6 Trocar foto por avatar | concluído funcionalmente: galeria de 36 avatares e iniciais publicadas e verificadas em produção (docs/operacao/avatares-alunos.md); foto_path e fotos preservados, remoção não autorizada | Codex | #70 |
 | T1 Modelo de dados | concluído: modelo aprovado pelo responsável; PR #73 incorporado; docs/40 e docs/41 | Codex | #73 |
 | T2 Clientes e espaços | concluído e publicado na homologação representativa em 01/11/2026: release af4c6d1 (PR #85); backup final em duas camadas, preenchimento e restrições aplicados; 2 clientes internos/13 espaços, administrador com dois vínculos separados; auditoria, dados e validação funcional aprovados (docs/54). V1/V2 permanecem próximos pacotes distintos | Codex | #74, #75, #76, #77, #78, #79, #80, #81, #82, #83, #84, #85 |
-| V1 Vínculos | em andamento; A/B/C1/C2a/C2b incorporados, C3 em revisão; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#91; docs/60 |
-| V2 Escolha do vínculo | pendente | | |
+| V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
+| V2 Escolha do vínculo | V2-A em revisão: API de seleção e tokens independentes; V2-B web por aba e V2-C gestão/convites pendentes; sem deploy | Codex | docs/61 |
 | T3 Perfis por espaço | pendente | | |
 | T4 Cadastro de clientes | pendente | | |
 | T5 Cópia de dados | pendente | | |
