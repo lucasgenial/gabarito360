@@ -851,3 +851,7 @@ dashboard-admin.html → escolas.html → relatorio-prova.html
 | Modal         | Dialog centralizado para formulários e confirmações        |
 | Donut chart   | Gráfico circular com percentual para notas e progresso     |
 | Bar chart     | Gráfico de barras horizontal para rankings e comparativos  |
+
+## Extensão aprovada — V2-B (01/11/2026)
+
+Autorização explícita para V2-B após PR #93, com origem no T1 e V2 do plano mestre: `auth/vinculo.blade.php` (escolha única/múltipla e estado sem vínculo), `auth/contexto.blade.php` (retomada da aba sem dados operacionais) e indicação/troca do vínculo no topo existente. Identidade visual própria e tokens atuais. Contrato e validações: [docs/61](61-v2-contexto-autenticado.md).

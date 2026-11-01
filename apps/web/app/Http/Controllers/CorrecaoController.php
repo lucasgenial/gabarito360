@@ -46,7 +46,7 @@ class CorrecaoController extends Controller
         }
 
         // Aplicador só envia cartões (doc 03): tela só com a câmera, sem notas nem ambíguos.
-        if (session('auth_perfil') === 'aplicador') {
+        if (\App\Support\Acesso::perfil() === 'aplicador') {
             return view('correcao.camera', ['prova' => $resp->json('data'), 'alunos' => []]);
         }
 

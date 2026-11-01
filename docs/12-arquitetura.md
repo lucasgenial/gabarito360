@@ -360,3 +360,7 @@ A conferência operacional é somente leitura, com hashes separados de origem/de
 ### V2-A — tokens contextuais independentes
 
 Contexto autenticado é reconstruído a partir de metadados internos do token Sanctum persistido, com vínculo e token de identidade de origem. Não se altera o token de outras abas. Token contextual não emite outro contexto. Origem encerrada/expirada e vínculo inválido bloqueiam uso. Permissões permanecem dinâmicas; abilities não concedem poderes do catálogo. Sem migration nem ativação nesta entrega. Integração web por aba permanece V2-B: [contrato](61-v2-contexto-autenticado.md).
+
+### V2-B — contexto web por requisição
+
+A identidade continua na sessão compartilhada; perfil/permissões e token contextual são resolvidos por handle imutável por aba. Cache cifrado vincula o handle à sessão e identidade. Não se altera `auth_token`/`auth_perfil` global ao trocar. Cada requisição revalida a API, inclusive downloads e gravações; falhas não repetem POSTs. Contexto é transportado explicitamente em links/forms/headers. Detalhes, prazo deslizante e limites do ensaio em [docs/61](61-v2-contexto-autenticado.md).

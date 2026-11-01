@@ -15,6 +15,10 @@ jobs:
           node-version: 22
       - run: python3 scripts/verificar_telas.py
       - run: node --test scripts/tests/cartoes-fila.test.mjs
+      - run: npm install --prefix scripts/auditoria --ignore-scripts --no-package-lock --no-audit --no-fund
+      - run: node scripts/auditoria/contexto-abas.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
       - run: |
           bash -n scripts/operacao/deploy.sh
           bash -n infra/deploy.sh

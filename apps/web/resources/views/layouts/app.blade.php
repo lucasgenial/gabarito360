@@ -8,6 +8,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" />
+@if(\App\Support\ContextoWeb::id())
+<meta name="g360-contexto" content="{{ \App\Support\ContextoWeb::id() }}">
+<script src="{{ asset('js/contexto-aba.js') }}?v={{ @filemtime(public_path('js/contexto-aba.js')) }}"></script>
+@endif
 @stack('styles')
 {{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
 <script>try { if (localStorage.getItem('g360-menu') === 'recolhido') document.documentElement.classList.add('menu-recolhido'); } catch (e) {}</script>
@@ -36,13 +40,18 @@
 
 <div class="app-corpo">
 {{-- Topo: logo só no celular/tablet (no computador ele fica no menu lateral) --}}
-<header class="app-header">
+<header class="app-header {{ \App\Support\ContextoWeb::id() ? 'com-vinculo' : '' }}">
   <div class="container">
     <a class="brand topo-marca" href="{{ route('painel') }}">
       <span class="logo">G360</span> Gabarito360
     </a>
 
     <div class="header-right">
+      @if($vinculoAtual = \App\Support\ContextoWeb::atual())
+      <a class="vinculo-topo" href="{{ route('vinculos.index', ['trocar' => 1]) }}" data-sem-contexto>
+        <strong>{{ $vinculoAtual['espaco']['nome'] }}</strong><span>{{ \App\Support\Acesso::rotulo() }} · Trocar vínculo</span>
+      </a>
+      @endif
       @hasSection('context-badge')
         @yield('context-badge')
       @else

@@ -11,6 +11,7 @@ class Autenticado
     public function handle(Request $request, Closure $next): Response
     {
         if (!session('auth_token')) {
+            if ($request->expectsJson()) return response()->json(['message' => 'Entre novamente para continuar.', 'login_necessario' => true], 401);
             return redirect()->route('login')->with('erro', 'Faça login para continuar.');
         }
 
@@ -18,6 +19,6 @@ class Autenticado
             return redirect()->route('trocar-senha');
         }
 
-        return $next($request);
+        return app(ContextoPorAba::class)->handle($request, $next);
     }
 }
