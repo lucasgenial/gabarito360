@@ -37,8 +37,11 @@ class ProcessarCartaoJob implements ShouldQueue
 
     public bool $failOnTimeout = true;
 
-    public function __construct(public int $cartaoId, public int $envioId, public int $tentativa = 1, public ?int $espacoId = null, public ?int $atorId = null)
+    public ?int $vinculoId = null;
+
+    public function __construct(public int $cartaoId, public int $envioId, public int $tentativa = 1, public ?int $espacoId = null, public ?int $atorId = null, ?int $vinculoId = null)
     {
+        $this->vinculoId = $vinculoId;
         // Duas leituras (redirecionamento pelo QR) e geração das versões leves.
         $this->timeout = 3 * max(1, (int) config('omr.timeout', 60)) + 30;
         $this->onQueue('alta');
@@ -57,6 +60,7 @@ class ProcessarCartaoJob implements ShouldQueue
     private function envioAtivo(): ?CartaoEnvio
     {
         return CartaoEnvio::whereKey($this->envioId)->where('tentativa', $this->tentativa)
+            ->where('vinculo_id', $this->vinculoId)
             ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $this->espacoId ?: 0)->where('usuario_id', $this->atorId ?: 0)->where('cartao_id', $this->cartaoId))
             ->whereIn('status', ['na_fila', 'processando'])->lockForUpdate()->first();
     }
@@ -79,6 +83,7 @@ class ProcessarCartaoJob implements ShouldQueue
         }
         try {
             $usuario = Usuario::find($envio->usuario_id);
+            if ($usuario && $this->vinculoId !== null) $usuario = $usuario->noVinculo($this->vinculoId);
             Permissao::limparCache();
             $prova = Prova::find($envio->prova_id);
             if (! $this->podeLer($usuario, $prova) || (Espacos::ativo() && $cartao->aluno_id && !ContextoCorrecao::alunos($prova, $usuario)->where('alunos.id', $cartao->aluno_id)->exists())) {
@@ -167,7 +172,13 @@ class ProcessarCartaoJob implements ShouldQueue
                 ResultadoEnvio::concluir($recibo, $atual);
             }, 3);
         } catch (Throwable $e) {
+            if ($this->vinculoId !== null && $e instanceof \Symfony\Component\HttpKernel\Exception\HttpException
+                && in_array($e->getStatusCode(), [403, 404], true)) {
+                $this->recusar($envio, $cartao, 'O vínculo não está mais disponível para este envio.');
+                return;
+            }
             CartaoEnvio::whereKey($this->envioId)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $this->espacoId ?: 0)->where('usuario_id', $this->atorId ?: 0)->where('cartao_id', $this->cartaoId))->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
+                ->where('vinculo_id', $this->vinculoId)
                 ->update(['status' => 'na_fila', 'mensagem' => 'A leitura será tentada novamente.']);
             throw $e;
         }
@@ -176,6 +187,7 @@ class ProcessarCartaoJob implements ShouldQueue
     public function failed(?Throwable $e): void
     {
         CartaoEnvio::whereKey($this->envioId)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $this->espacoId ?: 0)->where('usuario_id', $this->atorId ?: 0)->where('cartao_id', $this->cartaoId))->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
+            ->where('vinculo_id', $this->vinculoId)
             ->update(['status' => 'erro', 'mensagem' => 'Não foi possível ler esta foto. Tente novamente ou fotografe outro cartão.']);
     }
 

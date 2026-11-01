@@ -1,6 +1,7 @@
 # 57 — V1-C1: núcleo de autorização por vínculo
 
 Data: 01/11/2026. Base: `7a13ffe`, merge autorizado do PR #88. Continuação de [V1-B](56-v1-conversao-conciliada.md).
+Atualização: V1-C1 incorporado no PR #89 em `298c60f`. A primeira integração de consumidores está em [V1-C2a](58-v1-fila-e-consultas-contextuais.md), ainda sem ativação.
 
 ## Entrega
 

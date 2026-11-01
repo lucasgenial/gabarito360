@@ -10,7 +10,22 @@ class CartaoEnvio extends Model
 
     protected $guarded = ['id'];
 
-    protected $casts = ['resultado' => 'array'];
+    protected $casts = ['resultado' => 'array', 'vinculo_id' => 'integer'];
+
+    /** Preserva os índices T2 e a chave pública, separando a chave interna por contexto. */
+    public static function chaveContextual(Usuario $usuario, string $chave, ?int $espaco): string
+    {
+        if ($usuario->vinculoContextoId() === null) return $chave;
+        $v = \App\Support\ContextoVinculo::resolver($usuario);
+        return \Ramsey\Uuid\Uuid::uuid5(\Ramsey\Uuid\Uuid::NAMESPACE_URL,
+            'g360:envio:'.$usuario->id.':'.$v->id.':'.$espaco.':'.strtolower($chave))->toString();
+    }
+
+    public function exigirContexto(Usuario $usuario): void
+    {
+        abort_unless((int) $this->usuario_id === (int) $usuario->id && $this->vinculo_id === $usuario->vinculoContextoId(), 404);
+        if ($this->vinculo_id !== null) \App\Support\ContextoVinculo::resolver($usuario);
+    }
 
     public function podeRepetir(): bool
     {
