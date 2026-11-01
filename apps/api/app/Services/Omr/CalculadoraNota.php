@@ -3,6 +3,8 @@
 namespace App\Services\Omr;
 
 use App\Models\Cartao;
+use App\Support\ContextoCorrecao;
+use App\Support\Espacos;
 use Illuminate\Support\Facades\DB;
 
 class CalculadoraNota
@@ -29,25 +31,33 @@ class CalculadoraNota
      *
      * Questões anuladas no gabarito não entram no total considerado.
      */
-    public static function calcular(Cartao $cartao): void
+    public static function calcular(Cartao $cartao, ?int $atorId = null): void
     {
+        if (Espacos::ativo()) abort_unless(ContextoCorrecao::cartaoValido($cartao), 409, 'Relações do cartão divergentes.');
         if (!$cartao->aluno_id) {
             return;
         }
 
         $prova = $cartao->prova;
 
-        $gabarito = DB::table('gabaritos')->where('prova_id', $prova->id)->first();
+        ContextoCorrecao::exigirFilhos('gabaritos', 'prova_id', $prova->id, $cartao->espaco_id);
+        $gabarito = ContextoCorrecao::filtrar(DB::table('gabaritos'), $cartao->espaco_id)->where('prova_id', $prova->id)->first();
         if (!$gabarito) {
             return;
         }
 
-        $questoesGabarito = DB::table('gabarito_questoes')
+        if (Espacos::ativo()) {
+            foreach (['gabarito_questoes' => ['gabarito_id', $gabarito->id], 'cartao_respostas' => ['cartao_id', $cartao->id], 'notas' => ['cartao_id', $cartao->id]] as $tabela => [$coluna, $id]) {
+                ContextoCorrecao::exigirFilhos($tabela, $coluna, $id, $cartao->espaco_id);
+            }
+        }
+
+        $questoesGabarito = ContextoCorrecao::filtrar(DB::table('gabarito_questoes'), $cartao->espaco_id)
             ->where('gabarito_id', $gabarito->id)
             ->get()
             ->keyBy('numero_questao');
 
-        $respostas = DB::table('cartao_respostas')
+        $respostas = ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)
             ->where('cartao_id', $cartao->id)
             ->get()
             ->keyBy('numero_questao');
@@ -90,15 +100,15 @@ class CalculadoraNota
             'updated_at'       => now(),
         ];
 
-        $existente = DB::table('notas')->where('cartao_id', $cartao->id)->first();
+        $existente = ContextoCorrecao::filtrar(DB::table('notas'), $cartao->espaco_id)->where('cartao_id', $cartao->id)->first();
 
         if ($existente) {
-            DB::table('notas')->where('cartao_id', $cartao->id)->update($dados);
+            ContextoCorrecao::filtrar(DB::table('notas'), $cartao->espaco_id)->where('cartao_id', $cartao->id)->update($dados);
         } else {
-            DB::table('notas')->insert(array_merge($dados, [
+            ContextoCorrecao::filtrar(DB::table('notas'), $cartao->espaco_id)->insert(array_merge($dados, [
                 'cartao_id'  => $cartao->id,
                 'created_at' => now(),
-            ]));
+            ], ContextoCorrecao::autoria($cartao->espaco_id, $atorId)));
         }
     }
 }

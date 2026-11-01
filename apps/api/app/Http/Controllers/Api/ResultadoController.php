@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
-use App\Models\Aluno;
 use App\Models\Prova;
 use App\Support\Cabecalho;
 use App\Support\Correcao;
 use App\Support\Escopo;
+use App\Support\Espacos;
+use App\Support\ContextoCorrecao;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +37,7 @@ class ResultadoController extends Controller
 
         $prova  = Prova::find($provaId);
         $escola = DB::table('escolas')->where('id', $prova->escola_id)->first();
-        $saida  = tempnam(sys_get_temp_dir(), 'g360_res_');
+        $saida  = tempnam(sys_get_temp_dir(), 'g360_e'.($prova->espaco_id ?? 0).'_res_');
         @unlink($saida);
         $saida .= '.pdf';
 
@@ -82,24 +83,26 @@ class ResultadoController extends Controller
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        $aluno = Aluno::with('turma:id,nome,serie')->find($alunoId);
+        $aluno = Escopo::alunos($request->user())->with('turma:id,nome,serie')->find($alunoId);
         if (!$aluno) {
             return ApiResponse::notFound('Aluno não encontrado.');
         }
 
-        $nota = DB::table('notas')->where('aluno_id', $alunoId)->where('prova_id', $provaId)->first();
+        if (Espacos::ativo() && !ContextoCorrecao::alunos($prova, $request->user())->where('alunos.id', $alunoId)->exists()) return ApiResponse::notFound('Resultado não encontrado.');
+        $nota = ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id)->where('aluno_id', $alunoId)->where('prova_id', $provaId)->first();
         if (!$nota) {
             return ApiResponse::error('Resultado ainda não disponível para este aluno nesta prova.', [], 404);
         }
 
-        $cartao = DB::table('cartoes')->where('id', $nota->cartao_id)->first();
+        $cartao = ContextoCorrecao::filtrar(DB::table('cartoes'), $prova->espaco_id)->where('id', $nota->cartao_id)->first();
 
-        $gabarito = DB::table('gabaritos')->where('prova_id', $provaId)->first();
+        if (Espacos::ativo() && (!$cartao || (int) $cartao->aluno_id !== $alunoId || (int) $cartao->prova_id !== $provaId)) return ApiResponse::notFound('Resultado não encontrado.');
+        $gabarito = ContextoCorrecao::filtrar(DB::table('gabaritos'), $prova->espaco_id)->where('prova_id', $provaId)->first();
         $questoesGabarito = $gabarito
-            ? DB::table('gabarito_questoes')->where('gabarito_id', $gabarito->id)->orderBy('numero_questao')->get()->keyBy('numero_questao')
+            ? ContextoCorrecao::filtrar(DB::table('gabarito_questoes'), $prova->espaco_id)->where('gabarito_id', $gabarito->id)->orderBy('numero_questao')->get()->keyBy('numero_questao')
             : collect();
 
-        $respostas = DB::table('cartao_respostas')
+        $respostas = ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $prova->espaco_id)
             ->where('cartao_id', $nota->cartao_id)
             ->get()
             ->keyBy('numero_questao');
@@ -132,7 +135,7 @@ class ResultadoController extends Controller
             ];
         }
 
-        $mediaTurma = DB::table('notas')
+        $mediaTurma = ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id)
             ->where('prova_id', $provaId)
             ->where('turma_id', $nota->turma_id)
             ->avg('nota_final');

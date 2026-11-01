@@ -15,6 +15,10 @@ use App\Services\Omr\FilaCartoes;
 use App\Services\Omr\ResultadoEnvio;
 use App\Support\Correcao;
 use App\Support\Escopo;
+use App\Support\Espacos;
+use App\Support\ContextoCorrecao;
+use App\Support\Permissao;
+use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,26 +51,29 @@ class CartaoController extends Controller
         }
 
         // Lista para a tela de correção: aluno, turma, nota e se há foto (a foto vem por /cartoes/{id}/imagem)
-        $cartoes = DB::table('cartoes')
+        $cartoes = DB::table('cartoes')->when(Espacos::ativo(), fn ($q) => $q->whereIn('cartoes.id', ContextoCorrecao::cartoes($request->user())->select('cartoes.id')))
             ->leftJoin('alunos', 'alunos.id', '=', 'cartoes.aluno_id')
             ->leftJoin('turmas', 'turmas.id', '=', 'alunos.turma_id')
-            ->leftJoin('notas', 'notas.cartao_id', '=', 'cartoes.id')
+            ->leftJoin('notas', function ($j) {
+                $j->on('notas.cartao_id', '=', 'cartoes.id');
+                if (Espacos::ativo()) $j->on('notas.espaco_id', '=', 'cartoes.espaco_id')->on('notas.aluno_id', '=', 'cartoes.aluno_id')->on('notas.prova_id', '=', 'cartoes.prova_id');
+            })
             ->where('cartoes.prova_id', $provaId)
             ->orderBy('alunos.nome')
             ->orderByDesc('cartoes.id')
             ->get([
-                'cartoes.id', 'cartoes.status', 'cartoes.aluno_id', 'cartoes.lingua', 'cartoes.created_at',
+                'cartoes.id', 'cartoes.espaco_id', 'cartoes.status', 'cartoes.aluno_id', 'cartoes.lingua', 'cartoes.created_at',
                 'cartoes.imagem_url', 'alunos.nome as aluno_nome', 'alunos.matricula', 'turmas.nome as turma',
                 'notas.acertos', 'notas.total_questoes', 'notas.nota_final',
             ])
-            ->map(function ($c) use ($imagens) {
+            ->map(function ($c) use ($imagens, $request) {
                 $c->tem_imagem = (bool) $c->imagem_url;
-                $c->foto_url = $c->imagem_url ? $imagens->url($c->id, 'original') : null;
-                $c->miniatura_url = Storage::disk('public')->exists(ImagensCartao::caminho($c->id, 'miniatura'))
-                    ? $imagens->url($c->id, 'miniatura')
+                $c->foto_url = $c->imagem_url ? $imagens->url($c->id, 'original', $request->user()) : null;
+                $c->miniatura_url = Storage::disk('public')->exists(ImagensCartao::disponivel($c->id, 'miniatura', $c->espaco_id))
+                    ? $imagens->url($c->id, 'miniatura', $request->user())
                     : null;
                 unset($c->imagem_url);
-                $c->ambiguas = DB::table('cartao_respostas')->where('cartao_id', $c->id)->where('ambigua', true)->count();
+                $c->ambiguas = ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $c->espaco_id)->where('cartao_id', $c->id)->where('ambigua', true)->count();
                 return $c;
             });
 
@@ -76,7 +83,7 @@ class CartaoController extends Controller
     /** Foto do cartão (dado de aluno: só para quem acessa a prova; nunca por URL pública). */
     public function imagem(Request $request, int $id)
     {
-        $cartao = Cartao::find($id);
+        $cartao = ContextoCorrecao::cartoes($request->user())->find($id);
         if (!$cartao || !$cartao->imagem_url || !$this->encontrarProva($request, $cartao->prova_id)) {
             return ApiResponse::notFound('Imagem não encontrada.');
         }
@@ -86,26 +93,31 @@ class CartaoController extends Controller
             return ApiResponse::notFound('Imagem não encontrada.');
         }
 
-        return response()->file($caminho, ['Cache-Control' => 'private, max-age=600']);
+        return response()->file($caminho, ['Cache-Control' => 'private, no-store']);
     }
 
-    /** Foto por link assinado: a assinatura já prova o acesso e a resposta não ocupa a web. */
-    public function arquivo(int $id, string $tipo)
+    /** Link assinado com versão do acesso; revalida ator e espaço a cada abertura. */
+    public function arquivo(Request $request, int $id, string $tipo)
     {
-        $cartao = Cartao::find($id);
-        $relativo = $tipo === 'original' ? $cartao?->imagem_url : ImagensCartao::caminho($id, $tipo);
-        $caminho = $cartao && $relativo ? Storage::disk('public')->path($relativo) : null;
-        if (!$caminho || !is_file($caminho)) {
-            return ApiResponse::notFound('Imagem não encontrada.');
+        if (Espacos::ativo()) {
+            $ator = Usuario::find($request->integer('ator'));
+            abort_unless($ator && $ator->ativo && $ator->perfil !== 'aplicador', 404);
+            abort_unless(hash_equals(ContextoCorrecao::versaoAcesso($ator), (string) $request->query('acesso', '')) && Permissao::pode($ator, 'correcao.acompanhar'), 404);
+            $cartao = ContextoCorrecao::cartoes($ator)->where('espaco_id', $request->integer('espaco'))->find($id);
+            abort_unless(ContextoCorrecao::cartaoValido($cartao), 404);
+        } else {
+            $cartao = Cartao::find($id);
         }
-
-        return response()->file($caminho, ['Cache-Control' => 'private, max-age=3600']);
+        $relativo = $tipo === 'original' ? $cartao?->imagem_url : ImagensCartao::disponivel($id, $tipo, $cartao?->espaco_id);
+        $caminho = $cartao && $relativo ? Storage::disk('public')->path($relativo) : null;
+        if (!$caminho || !is_file($caminho)) return ApiResponse::notFound('Imagem não encontrada.');
+        return response()->file($caminho, ['Cache-Control' => Espacos::ativo() ? 'private, no-store' : 'private, max-age=3600']);
     }
 
     /** Exclui a correção (cartão, respostas, nota e foto) para o aluno ser fotografado de novo. */
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $cartao = Cartao::find($id);
+        $cartao = ContextoCorrecao::cartoes($request->user())->find($id);
         $prova  = $cartao ? $this->encontrarProva($request, $cartao->prova_id) : null;
         if (!$cartao || !$prova) {
             return ApiResponse::notFound('Cartão não encontrado.');
@@ -114,15 +126,16 @@ class CartaoController extends Controller
             return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
-        DB::transaction(function () use ($cartao, $prova) {
+        DB::transaction(function () use ($cartao, $prova, $request) {
             $provaAtual = Prova::whereKey($prova->id)->lockForUpdate()->firstOrFail();
-            $atual = Cartao::whereKey($cartao->id)->lockForUpdate()->first();
+            $atual = ContextoCorrecao::cartoes($request->user())->whereKey($cartao->id)->lockForUpdate()->first();
             if (! $atual) {
                 return;
             }
             abort_if((int) $atual->prova_id !== (int) $provaAtual->id, 409,
                 'O cartão mudou de prova durante a leitura. Atualize a página antes de excluir.');
-            CartaoEnvio::where('cartao_id', $atual->id)->update(['status' => 'recusado', 'resultado' => null,
+            abort_unless(ContextoCorrecao::cartaoValido($atual, $provaAtual), 409);
+            ContextoCorrecao::filtrar(CartaoEnvio::query(), $atual->espaco_id)->where('cartao_id', $atual->id)->update(['status' => 'recusado', 'resultado' => null,
                 'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
             $atual->delete(); // respostas, nota e logs de ambiguidade saem em cascata
             AtualizadorStatusProva::atualizar($provaAtual);
@@ -130,7 +143,7 @@ class CartaoController extends Controller
                 if ($atual->imagem_url) {
                     Storage::disk('public')->delete($atual->imagem_url);
                 }
-                app(ImagensCartao::class)->apagar($atual->id);
+                app(ImagensCartao::class)->apagar($atual->id, $atual->espaco_id);
             });
         });
 
@@ -144,15 +157,16 @@ class CartaoController extends Controller
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        $base = DB::table('cartoes')->where('prova_id', $provaId);
+        $base = DB::table('cartoes')->when(Espacos::ativo(), fn ($q) => $q->whereIn('cartoes.id', ContextoCorrecao::cartoes($request->user())->select('cartoes.id')))->where('prova_id', $provaId);
 
         $total     = (clone $base)->count();
         $lidos     = (clone $base)->where('status', 'lido')->count();
         $ambiguos  = (clone $base)->where('status', 'ambiguo')->count();
         $pendentes = $total - $lidos - $ambiguos;
 
-        $ambiguosLista = DB::table('cartoes')
+        $ambiguosLista = DB::table('cartoes')->when(Espacos::ativo(), fn ($q) => $q->whereIn('cartoes.id', ContextoCorrecao::cartoes($request->user())->select('cartoes.id')))
             ->join('cartao_respostas', 'cartao_respostas.cartao_id', '=', 'cartoes.id')
+            ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('cartao_respostas.espaco_id', 'cartoes.espaco_id'))
             ->where('cartoes.prova_id', $provaId)
             ->where('cartoes.status', 'ambiguo')
             ->where('cartao_respostas.ambigua', true)
@@ -168,8 +182,11 @@ class CartaoController extends Controller
                 return $r;
             });
 
-        $recentes = DB::table('cartoes')
-            ->join('notas', 'notas.cartao_id', '=', 'cartoes.id')
+        $recentes = DB::table('cartoes')->when(Espacos::ativo(), fn ($q) => $q->whereIn('cartoes.id', ContextoCorrecao::cartoes($request->user())->select('cartoes.id')))
+            ->join('notas', function ($j) {
+                $j->on('notas.cartao_id', '=', 'cartoes.id');
+                if (Espacos::ativo()) $j->on('notas.espaco_id', '=', 'cartoes.espaco_id')->on('notas.aluno_id', '=', 'cartoes.aluno_id')->on('notas.prova_id', '=', 'cartoes.prova_id');
+            })
             ->leftJoin('alunos', 'alunos.id', '=', 'cartoes.aluno_id')
             ->where('cartoes.prova_id', $provaId)
             ->orderByDesc('notas.updated_at')
@@ -183,9 +200,7 @@ class CartaoController extends Controller
             'pendentes'    => $pendentes,
             'ambiguos'     => $ambiguos,
             'concluida'    => $pendentes === 0 && $prova->fresh()->status === 'corrigida',
-            'esperados'    => DB::table('alunos')
-                ->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
-                ->where('prova_turmas.prova_id', $provaId)->where('alunos.ativo', true)->count(),
+            'esperados'    => ContextoCorrecao::alunos($prova, $request->user())->where('alunos.ativo', true)->count(),
             'ambiguidades' => $ambiguosLista,
             'recentes'     => $recentes,
             'prova_status' => $prova->status,
@@ -213,9 +228,7 @@ class CartaoController extends Controller
             'envio_id' => 'sometimes|uuid',
         ]);
 
-        if (! empty($data['aluno_id']) && ! DB::table('alunos')
-            ->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
-            ->where('prova_turmas.prova_id', $provaId)->where('alunos.id', $data['aluno_id'])->exists()) {
+        if (! empty($data['aluno_id']) && ! ContextoCorrecao::alunos($prova, $request->user())->where('alunos.id', $data['aluno_id'])->exists()) {
             return ApiResponse::error('O aluno não pertence às turmas desta prova.');
         }
         $envio = $fila->receber($request->user(), $provaId, $data['envio_id'] ?? (string) Str::uuid(),
@@ -227,10 +240,10 @@ class CartaoController extends Controller
     /** Só o autor acompanha o envio, sempre dentro do escopo original da prova. */
     public function envio(Request $request, int $provaId, string $chave): JsonResponse
     {
-        if (! $this->encontrarProva($request, $provaId, envio: true)) {
+        if (! ($prova = $this->encontrarProva($request, $provaId, envio: true))) {
             return ApiResponse::notFound('Envio não encontrado.');
         }
-        $envio = CartaoEnvio::where('usuario_id', $request->user()->id)
+        $envio = ContextoCorrecao::filtrar(CartaoEnvio::query(), $prova?->espaco_id)->where('usuario_id', $request->user()->id)
             ->where('prova_id', $provaId)->where('chave', $chave)->first();
         if (! $envio) {
             return ApiResponse::notFound('Envio não encontrado.');
@@ -246,7 +259,7 @@ class CartaoController extends Controller
     public function repetirEnvio(Request $request, int $provaId, string $chave, FilaCartoes $fila): JsonResponse
     {
         $prova = $this->encontrarProva($request, $provaId, envio: true);
-        $envio = CartaoEnvio::where('usuario_id', $request->user()->id)
+        $envio = ContextoCorrecao::filtrar(CartaoEnvio::query(), $prova?->espaco_id)->where('usuario_id', $request->user()->id)
             ->where('prova_id', $provaId)->where('chave', $chave)->first();
         if (! $prova || ! $envio) {
             return ApiResponse::notFound('Envio não encontrado.');
@@ -258,7 +271,7 @@ class CartaoController extends Controller
             return ApiResponse::error('A prova precisa estar publicada para receber cartões.');
         }
 
-        return ApiResponse::success(ResultadoEnvio::resposta($fila->repetir($envio), $request->user()), null, 202);
+        return ApiResponse::success(ResultadoEnvio::resposta($fila->repetir($envio, $request->user()), $request->user()), null, 202);
     }
 
     /**
@@ -277,11 +290,15 @@ class CartaoController extends Controller
             'brancos'  => 'sometimes|integer|min:0|max:200',
         ]);
 
+        if (Espacos::ativo() && !empty($data['turma_id'])) {
+            abort_unless(in_array((int) $data['turma_id'], Escopo::turmaIds($request->user()) ?? [], true) && ContextoCorrecao::filtrar(DB::table('prova_turmas'), $prova->espaco_id)->where('prova_id', $prova->id)->where('turma_id', $data['turma_id'])->exists(), 404);
+        }
+
         try {
-            $arquivo = $gerador->gerar($prova, $data['turma_id'] ?? null, (int) ($data['brancos'] ?? 0));
+            $arquivo = $gerador->gerar($prova, $data['turma_id'] ?? null, (int) ($data['brancos'] ?? 0), $request->user());
         } catch (\Throwable $e) {
             report($e);
-            return ApiResponse::error('Não foi possível gerar os cartões: ' . $e->getMessage(), [], 500);
+            return ApiResponse::error('Não foi possível gerar os cartões.', [], 500);
         }
 
         $nome = 'cartoes-' . \Illuminate\Support\Str::slug($prova->titulo . ' ' . $prova->disciplina) . '.pdf';
@@ -291,12 +308,12 @@ class CartaoController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $cartao = Cartao::with('aluno:id,nome,matricula')->find($id);
+        $cartao = ContextoCorrecao::cartoes($request->user())->with('aluno:id,nome,matricula')->find($id);
         if (!$cartao || !$this->encontrarProva($request, $cartao->prova_id)) {
             return ApiResponse::notFound('Cartão não encontrado.');
         }
 
-        $respostas = DB::table('cartao_respostas')
+        $respostas = ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)
             ->where('cartao_id', $id)
             ->orderBy('numero_questao')
             ->get()
@@ -313,7 +330,7 @@ class CartaoController extends Controller
 
     public function vincularAluno(Request $request, int $id): JsonResponse
     {
-        $cartao = Cartao::find($id);
+        $cartao = ContextoCorrecao::cartoes($request->user())->find($id);
         if (!$cartao || !($prova = $this->encontrarProva($request, $cartao->prova_id))) {
             return ApiResponse::notFound('Cartão não encontrado.');
         }
@@ -325,20 +342,29 @@ class CartaoController extends Controller
             'aluno_id' => 'required|integer|exists:alunos,id',
         ]);
 
-        $cartao->update(['aluno_id' => $data['aluno_id']]);
+        return DB::transaction(function () use ($request, $id, $data, $prova) {
+            Prova::whereKey($prova->id)->lockForUpdate()->firstOrFail();
+            $usuario = $request->user()->fresh();
+            abort_unless($usuario && $usuario->ativo, 404);
+            $cartao = ContextoCorrecao::cartoes($usuario)->lockForUpdate()->findOrFail($id);
+            abort_unless((int) $cartao->prova_id === (int) $prova->id, 409);
+            abort_if(Correcao::bloqueio($usuario, $prova->fresh()), 403);
+            abort_unless(ContextoCorrecao::alunos($prova, $request->user())->where('alunos.id', $data['aluno_id'])->exists(), 404);
+            $cartao->update(['aluno_id' => $data['aluno_id']]);
 
-        if ($cartao->status === 'lido') {
-            CalculadoraNota::calcular($cartao->fresh());
-        }
+            if ($cartao->status === 'lido') {
+                CalculadoraNota::calcular($cartao->fresh(), $request->user()->id);
+            }
 
-        return ApiResponse::success(['vinculado' => true]);
+            return ApiResponse::success(['vinculado' => true]);
+        });
     }
 
     public function resolverAmbiguidade(Request $request, int $id): JsonResponse
     {
         $usuario = $request->user();
 
-        $cartao = Cartao::find($id);
+        $cartao = ContextoCorrecao::cartoes($request->user())->find($id);
         if (!$cartao || !($prova = $this->encontrarProva($request, $cartao->prova_id))) {
             return ApiResponse::notFound('Cartão não encontrado.');
         }
@@ -351,44 +377,52 @@ class CartaoController extends Controller
             'alternativa'    => 'required|string|in:A,B,C,D,E,' . implode(',', array_keys(self::DECISOES)),
         ]);
 
-        $resposta = DB::table('cartao_respostas')
-            ->where('cartao_id', $id)
-            ->where('numero_questao', $data['numero_questao'])
-            ->first();
+        return DB::transaction(function () use ($request, $id, $data, $prova) {
+            Prova::whereKey($prova->id)->lockForUpdate()->firstOrFail();
+            $usuario = $request->user()->fresh();
+            abort_unless($usuario && $usuario->ativo, 404);
+            $cartao = ContextoCorrecao::cartoes($usuario)->lockForUpdate()->findOrFail($id);
+            abort_unless((int) $cartao->prova_id === (int) $prova->id, 409);
+            abort_if(Correcao::bloqueio($usuario, $prova->fresh()), 403);
+            $resposta = ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)
+                ->where('cartao_id', $id)
+                ->where('numero_questao', $data['numero_questao'])
+                ->first();
 
-        if (!$resposta) {
-            return ApiResponse::notFound('Questão não encontrada no cartão.');
-        }
+            if (!$resposta) {
+                return ApiResponse::notFound('Questão não encontrada no cartão.');
+            }
 
-        $this->registrarDecisao($cartao, $resposta, $usuario->id, $data['alternativa']);
+            $this->registrarDecisao($cartao, $resposta, $usuario->id, $data['alternativa']);
 
-        $restamAmbiguas = DB::table('cartao_respostas')
-            ->where('cartao_id', $cartao->id)
-            ->where('ambigua', true)
-            ->exists();
+            $restamAmbiguas = ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)
+                ->where('cartao_id', $cartao->id)
+                ->where('ambigua', true)
+                ->exists();
 
-        if (!$restamAmbiguas) {
-            $cartao->update([
-                'status'        => 'lido',
-                'resolvido_por' => $usuario->id,
-                'resolvido_em'  => now(),
+            if (!$restamAmbiguas) {
+                $cartao->update([
+                    'status'        => 'lido',
+                    'resolvido_por' => $usuario->id,
+                    'resolvido_em'  => now(),
+                ]);
+
+                CalculadoraNota::calcular($cartao->fresh(), $request->user()->id);
+                AtualizadorStatusProva::atualizar($cartao->prova);
+            }
+
+            return ApiResponse::success([
+                'resolvido'      => true,
+                'cartao_status'  => $cartao->fresh()->status,
             ]);
-
-            CalculadoraNota::calcular($cartao->fresh());
-            AtualizadorStatusProva::atualizar($cartao->prova);
-        }
-
-        return ApiResponse::success([
-            'resolvido'      => true,
-            'cartao_status'  => $cartao->fresh()->status,
-        ]);
+        });
     }
 
     public function revisar(Request $request, int $id): JsonResponse
     {
         $usuario = $request->user();
 
-        $cartao = Cartao::find($id);
+        $cartao = ContextoCorrecao::cartoes($request->user())->find($id);
         if (!$cartao || !($prova = $this->encontrarProva($request, $cartao->prova_id))) {
             return ApiResponse::notFound('Cartão não encontrado.');
         }
@@ -405,25 +439,33 @@ class CartaoController extends Controller
             'alternativa'    => 'required|string|in:A,B,C,D,E,' . implode(',', array_keys(self::DECISOES)),
         ]);
 
-        $resposta = DB::table('cartao_respostas')
-            ->where('cartao_id', $id)
-            ->where('numero_questao', $data['numero_questao'])
-            ->first();
+        return DB::transaction(function () use ($request, $id, $data, $prova) {
+            Prova::whereKey($prova->id)->lockForUpdate()->firstOrFail();
+            $usuario = $request->user()->fresh();
+            abort_unless($usuario && $usuario->ativo, 404);
+            $cartao = ContextoCorrecao::cartoes($usuario)->lockForUpdate()->findOrFail($id);
+            abort_unless((int) $cartao->prova_id === (int) $prova->id, 409);
+            abort_if(Correcao::bloqueio($usuario, $prova->fresh()), 403);
+            $resposta = ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)
+                ->where('cartao_id', $id)
+                ->where('numero_questao', $data['numero_questao'])
+                ->first();
 
-        if (!$resposta) {
-            return ApiResponse::notFound('Questão não encontrada no cartão.');
-        }
+            if (!$resposta) {
+                return ApiResponse::notFound('Questão não encontrada no cartão.');
+            }
 
-        $this->registrarDecisao($cartao, $resposta, $usuario->id, $data['alternativa']);
+            $this->registrarDecisao($cartao, $resposta, $usuario->id, $data['alternativa']);
 
-        $cartao->update([
-            'revisado_por' => $usuario->id,
-            'revisado_em'  => now(),
-        ]);
+            $cartao->update([
+                'revisado_por' => $usuario->id,
+                'revisado_em'  => now(),
+            ]);
 
-        CalculadoraNota::calcular($cartao->fresh());
+            CalculadoraNota::calcular($cartao->fresh(), $request->user()->id);
 
-        return ApiResponse::success(['revisado' => true, 'cartao_status' => 'lido']);
+            return ApiResponse::success(['revisado' => true, 'cartao_status' => 'lido']);
+        });
     }
 
     /** Em branco e anulada ficam sem alternativa (não pontuam); o log guarda quem decidiu o quê e quando. */
@@ -431,7 +473,7 @@ class CartaoController extends Controller
     {
         $codigo = self::DECISOES[$alternativa] ?? null;
 
-        DB::table('cartao_respostas')->where('id', $resposta->id)->update([
+        ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)->where('id', $resposta->id)->update([
             'alternativa' => $codigo ? null : $alternativa,
             'ambigua'     => false,
         ]);
@@ -442,7 +484,7 @@ class CartaoController extends Controller
             'usuario_id'            => $usuarioId,
             'alternativa_escolhida' => $codigo ?? $alternativa,
             'created_at'            => now(),
-        ]);
+        ] + ContextoCorrecao::autoria($cartao->espaco_id, $usuarioId));
     }
 
     /** Fila da tela de revisão: as questões pendentes da prova ou todas as de um cartão (?cartao=). */
@@ -461,6 +503,7 @@ class CartaoController extends Controller
             ->leftJoin('alunos as a', 'a.id', '=', 'c.aluno_id')
             ->leftJoin('turmas as t', 't.id', '=', 'a.turma_id')
             ->where('c.prova_id', $provaId)
+            ->when(Espacos::ativo(), fn ($q) => $q->whereIn('c.id', ContextoCorrecao::cartoes($request->user())->select('cartoes.id'))->whereColumn('r.espaco_id', 'c.espaco_id'))
             ->when(
                 $cartaoId,
                 fn ($q) => $q->where('c.id', $cartaoId),
@@ -469,8 +512,8 @@ class CartaoController extends Controller
             ->orderBy('a.nome')->orderBy('c.id')->orderBy('r.numero_questao')
             ->get(['c.id as cartao_id', 'c.status', 'c.imagem_url', 'a.nome as aluno_nome', 't.nome as turma',
                    'r.numero_questao', 'r.alternativa', 'r.ambigua', 'r.alternativas_detectadas'])
-            ->map(function ($r) use ($prova, $imagens, $disco) {
-                $temEndireitada = $disco->exists(ImagensCartao::caminho($r->cartao_id, 'endireitada'));
+            ->map(function ($r) use ($prova, $imagens, $disco, $request) {
+                $temEndireitada = $disco->exists(ImagensCartao::disponivel($r->cartao_id, 'endireitada', $prova->espaco_id));
                 return [
                     'cartao_id'       => $r->cartao_id,
                     'status'          => $r->status,
@@ -480,8 +523,8 @@ class CartaoController extends Controller
                     'alternativa'     => $r->alternativa,
                     'ambigua'         => (bool) $r->ambigua,
                     'detectadas'      => array_column(json_decode($r->alternativas_detectadas ?? '[]', true) ?? [], 'alternativa'),
-                    'foto_url'        => $r->imagem_url ? $imagens->url($r->cartao_id, 'original') : null,
-                    'endireitada_url' => $temEndireitada ? $imagens->url($r->cartao_id, 'endireitada') : null,
+                    'foto_url'        => $r->imagem_url ? $imagens->url($r->cartao_id, 'original', $request->user()) : null,
+                    'endireitada_url' => $temEndireitada ? $imagens->url($r->cartao_id, 'endireitada', $request->user()) : null,
                     'recorte'         => ImagensCartao::recorte($r->numero_questao, $prova->num_questoes, $prova->num_alternativas),
                 ];
             })
