@@ -58,8 +58,12 @@ Route::middleware('guest')->group(function () {
 Route::get('/confirmar-email', [PerfilController::class, 'confirmarEmail'])->name('email.confirmar');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
+Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController::class, 'show'])->name('vinculos.convite');
+
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
+    Route::post('/vinculos/convite/consultar', [\App\Http\Controllers\ConviteVinculoController::class, 'consultar'])->middleware('throttle:20,1')->name('vinculos.convite.consultar');
+    Route::post('/vinculos/convite/responder', [\App\Http\Controllers\ConviteVinculoController::class, 'responder'])->middleware('throttle:10,1')->name('vinculos.convite.responder');
     Route::get('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'index'])->name('vinculos.index');
     Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
@@ -79,6 +83,8 @@ Route::middleware('autenticado')->group(function () {
 
     // Membros da equipe (MP-013)
     Route::get('/membros',             [MembroController::class, 'index'])->name('membros.index');
+    Route::get('/membros/convidar-vinculo', [\App\Http\Controllers\ConviteVinculoController::class, 'create'])->name('membros.convite-vinculo');
+    Route::post('/membros/convidar-vinculo', [\App\Http\Controllers\ConviteVinculoController::class, 'store'])->name('membros.convite-vinculo.store');
     Route::get('/membros/novo',        [MembroController::class, 'create'])->name('membros.create');
     Route::get('/membros/perfis',      [MembroController::class, 'perfis'])->name('membros.perfis');
     Route::get('/membros/{id}/permissoes', [MembroController::class, 'permissoes'])->name('membros.permissoes');

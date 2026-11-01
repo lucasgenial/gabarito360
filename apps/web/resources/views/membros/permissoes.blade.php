@@ -29,9 +29,9 @@
 
 @section('content')
 <x-pagina titulo="{{ $u['nome'] }}">
-  <x-slot:sub>{{ $perfis[$u['perfil']]['label'] ?? $u['perfil'] }} · {{ count($dados['efetivas']) }} permissões efetivas</x-slot:sub>
+  <x-slot:sub>@if(isset($u['vinculo_id']))Vínculo #{{ $u['vinculo_id'] }} · @endif{{ $perfis[$u['perfil']]['label'] ?? $u['perfil'] }} · {{ count($dados['efetivas']) }} permissões efetivas</x-slot:sub>
     <a class="btn btn-ghost" href="{{ route('membros.perfis') }}">O que cada perfil pode</a>
-    <a class="btn btn-secondary" href="{{ route('membros.edit', $u['id']) }}">Dados do membro</a>
+    <a class="btn btn-secondary" href="{{ route('membros.edit', array_filter(['id' => $u['id'], 'vinculo_id' => $u['vinculo_id'] ?? null])) }}">Dados do membro</a>
 </x-pagina>
 
 @if(session('sucesso'))<div class="card card-pad" style="margin-top:12px;border-color:var(--success);color:var(--success);font-weight:600;">{{ session('sucesso') }}</div>@endif
@@ -43,7 +43,7 @@
   @unless($editavel)<br><b>Você pode apenas ver as permissões deste membro.</b>@endunless
 </div>
 
-<form method="POST" action="{{ route('membros.permissoes.salvar', $u['id']) }}">
+<form method="POST" action="{{ route('membros.permissoes.salvar', array_filter(['id' => $u['id'], 'vinculo_id' => $u['vinculo_id'] ?? null])) }}">
   @csrf @method('PUT')
   @foreach($modulos as $mod => $rotulo)
     @php $doModulo = $itens->where('modulo', $mod); @endphp
@@ -92,7 +92,7 @@
   <h3 style="font-size:16px;">Histórico</h3>
   @forelse($dados['historico'] as $h)
     <div style="font-size:13px;padding:6px 0;border-bottom:1px solid var(--border-soft);">
-      {{ $data($h['created_at']) }} — <b>{{ $h['feita_por'] ?? 'sistema' }}</b> {{ $acoes[$h['acao']] ?? $h['acao'] }} <code>{{ $h['permissao'] }}</code>{{ $h['valida_ate'] ? ' (até ' . $data($h['valida_ate']) . ')' : '' }}
+      {{ $data($h['created_at']) }} — <b>{{ $h['feita_por'] ?? 'sistema' }}</b> {{ $acoes[$h['acao']] ?? $h['acao'] }} <code>{{ $h['permissao'] ?? $h['motivo_tecnico'] ?? '' }}</code>{{ $h['valida_ate'] ? ' (até ' . $data($h['valida_ate']) . ')' : '' }}
     </div>
   @empty
     <p class="field-help">Nenhuma alteração: este membro tem só as permissões padrão do perfil.</p>

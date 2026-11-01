@@ -855,3 +855,7 @@ dashboard-admin.html → escolas.html → relatorio-prova.html
 ## Extensão aprovada — V2-B (01/11/2026)
 
 Autorização explícita para V2-B após PR #93, com origem no T1 e V2 do plano mestre: `auth/vinculo.blade.php` (escolha única/múltipla e estado sem vínculo), `auth/contexto.blade.php` (retomada da aba sem dados operacionais) e indicação/troca do vínculo no topo existente. Identidade visual própria e tokens atuais. Contrato e validações: [docs/61](61-v2-contexto-autenticado.md).
+
+## Extensão aprovada — V2-C (01/11/2026)
+
+Autorização explícita após PR #94, T1/V2 e telas de equipe dos itens 26–28: `membros/vinculo`, `membros/convidar-vinculo` e `auth/convite-vinculo`; adaptação de equipe/permissões/turmas para alvo por vínculo. Detalhes em [docs/62](62-v2-gestao-e-aceite-de-convites.md). Mantém os tokens visuais e o catálogo aprovado.

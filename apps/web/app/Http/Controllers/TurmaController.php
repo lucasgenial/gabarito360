@@ -73,7 +73,8 @@ class TurmaController extends Controller
 
     public function vincularProfessor(Request $request, int $id)
     {
-        $resp = $this->api->post("/v1/turmas/{$id}/professores", $request->only('usuario_id'));
+        if (session('auth_vinculos')) $request->validate(['vinculo_id' => 'required|integer|min:1']);
+        $resp = $this->api->post("/v1/turmas/{$id}/professores", $request->only('usuario_id', 'vinculo_id'));
 
         if ($resp->failed()) {
             return back()->with('erro', $resp->json('message') ?? 'Não foi possível vincular o professor.');
@@ -84,7 +85,7 @@ class TurmaController extends Controller
 
     public function desvincularProfessor(int $id, int $usuarioId)
     {
-        $resp = $this->api->delete("/v1/turmas/{$id}/professores/{$usuarioId}");
+        $resp = $this->api->delete("/v1/turmas/{$id}/professores/{$usuarioId}", session('auth_vinculos') ? request()->validate(['vinculo_id' => 'required|integer|min:1']) : []);
 
         if ($resp->failed()) {
             return back()->with('erro', 'Não foi possível desvincular o professor.');

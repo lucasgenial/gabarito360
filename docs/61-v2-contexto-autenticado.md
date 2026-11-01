@@ -5,8 +5,8 @@ Origem: T1 (docs/40), V2 do plano mestre e autorização de 01/11/2026 após o P
 ## Sequência
 
 - V2-A: API lista vínculos válidos da própria identidade e emite token independente para um vínculo. Cada requisição reconstrói o contexto pelo token persistido, nunca pelo ID enviado em header/query. Incorporado no PR #93.
-- V2-B (em revisão): web associa identificador opaco por aba a token guardado no servidor; seleção automática se único vínculo, escolha se múltiplos, estado sem acesso e troca no topo. Cobrir navegação, forms, AJAX, downloads, expiração por inatividade e duas abas.
-- V2-C: interface de gestão e aceite dos convites; integração e ensaio completo antes do corte.
+- V2-B (incorporado no PR #94): web associa identificador opaco por aba a token guardado no servidor; seleção automática se único vínculo, escolha se múltiplos, estado sem acesso e troca no topo. Cobrir navegação, forms, AJAX, downloads, expiração por inatividade e duas abas.
+- V2-C: gestão e aceite implementados para revisão; contrato e validações em [docs/62](62-v2-gestao-e-aceite-de-convites.md). Ensaio da release em ambiente equivalente permanece necessário antes do corte.
 
 ## Contrato V2-A
 
@@ -32,4 +32,6 @@ Autorização em 01/11/2026: merge do PR #93 e seguir com V2-B, sem deploy. Base
 
 Validação: testes HTTP de duas abas/contextos, vínculo ausente/alheio/expirado, revogação sem reenvio, indisponibilidade, formulário, AJAX, download, menu, seleção única/múltipla/vazia e logout. Ensaio de transporte em Chromium com páginas fictícias e duas abas em `scripts/auditoria/contexto-abas.mjs`; executar com `CHROME_PATH` e dependências de `scripts/auditoria`. Não substitui o ensaio integrado com API e dados da futura release.
 
-V2-C (gestão/aceite dos convites e integração) e o ensaio operacional continuam pendentes. Sem deploy, migration ou configuração de ativação no servidor.
+V2-C (gestão/aceite dos convites e integração) está em revisão; o ensaio operacional permanece pendente. Sem deploy, migration ou configuração de ativação no servidor.
+
+V2-C implementado após o merge autorizado do PR #94: [gestão e aceite de convites](62-v2-gestao-e-aceite-de-convites.md). Sem publicação.

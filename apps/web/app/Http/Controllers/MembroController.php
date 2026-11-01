@@ -25,6 +25,12 @@ class MembroController extends Controller
         return array_intersect_key(self::PERFIS, array_flip(\App\Support\Acesso::perfisGeridos()));
     }
 
+    private function alvo(): array
+    {
+        if (!session('auth_vinculos')) return [];
+        return request()->validate(['vinculo_id' => 'required|integer|min:1']);
+    }
+
     public function __construct(private ApiClient $api) {}
 
     public function index(Request $request): View
@@ -94,18 +100,19 @@ class MembroController extends Controller
         }
 
         // Passo 4: permissões do novo membro (padrão do perfil + extras)
-        return redirect()->route('membros.permissoes', $resp->json('data.id'))
+        return redirect()->route('membros.permissoes', array_filter(['id' => $resp->json('data.id'), 'vinculo_id' => $resp->json('data.vinculo_id')]))
             ->with('sucesso', 'Membro cadastrado. Confira as permissões padrão do perfil e conceda extras, se precisar.');
     }
 
     public function edit(int $id): View
     {
-        $resp = $this->api->get("/v1/usuarios/{$id}");
+        $resp = $this->api->get("/v1/usuarios/{$id}", $this->alvo());
 
         if ($resp->failed()) {
             abort(404, 'Membro não encontrado.');
         }
 
+        if (session('auth_vinculos')) return view('membros.vinculo', ['membro' => $resp->json('data')]);
         $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
 
         return view('membros.edit', [
@@ -117,6 +124,11 @@ class MembroController extends Controller
 
     public function update(Request $request, int $id)
     {
+        if (session('auth_vinculos')) {
+            $dados = $this->alvo() + $request->validate(['ativo' => 'required|boolean']);
+            $resp = $this->api->put("/v1/usuarios/{$id}", $dados);
+            return back()->with($resp->successful() ? 'sucesso' : 'erro', $resp->successful() ? 'Acesso deste vínculo atualizado.' : ($resp->json('message') ?? 'Não foi possível atualizar o vínculo.'));
+        }
         $request->validate([
             'nome'       => 'required|string|max:200',
             'email'      => 'required|email',
@@ -152,7 +164,7 @@ class MembroController extends Controller
 
     public function toggle(int $id)
     {
-        $resp = $this->api->post("/v1/usuarios/{$id}/toggle");
+        $resp = $this->api->post("/v1/usuarios/{$id}/toggle", $this->alvo());
 
         if ($resp->failed()) {
             return back()->with('erro', 'Não foi possível alterar o status do membro.');
@@ -166,7 +178,7 @@ class MembroController extends Controller
     /** Permissões do membro: padrão do perfil (com retirada), extras e histórico. */
     public function permissoes(int $id): View
     {
-        $resp = $this->api->get("/v1/usuarios/{$id}/permissoes");
+        $resp = $this->api->get("/v1/usuarios/{$id}/permissoes", $this->alvo());
         if ($resp->failed()) {
             abort(404, 'Membro não encontrado.');
         }
@@ -176,7 +188,7 @@ class MembroController extends Controller
 
     public function salvarPermissoes(Request $request, int $id)
     {
-        $atual = $this->api->get("/v1/usuarios/{$id}/permissoes")->json('data.itens') ?? [];
+        $atual = $this->api->get("/v1/usuarios/{$id}/permissoes", $this->alvo())->json('data.itens') ?? [];
         $itens = [];
         foreach ($atual as $p) {
             if (empty($p['pode_alterar'])) {
@@ -184,18 +196,18 @@ class MembroController extends Controller
             }
             $chave = $p['chave'];
             if ($p['tipo'] === 'padrao') {
-                $itens[] = ['permissao' => $chave, 'estado' => $request->boolean("retirar.{$chave}") ? 'retirar' : 'padrao'];
+                $itens[] = ['permissao' => $chave, 'estado' => filter_var($request->input('retirar', [])[$chave] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'retirar' : 'padrao'];
             } else {
-                $conceder = $request->boolean("conceder.{$chave}");
+                $conceder = filter_var($request->input('conceder', [])[$chave] ?? false, FILTER_VALIDATE_BOOLEAN);
                 $itens[] = ['permissao' => $chave, 'estado' => $conceder ? 'conceder' : 'padrao',
-                            'valida_ate' => $conceder ? ($request->input("valida_ate.{$chave}") ?: null) : null];
+                            'valida_ate' => $conceder ? (($request->input('valida_ate', [])[$chave] ?? null) ?: null) : null];
             }
         }
         if (!$itens) {
             return back()->with('erro', 'Você não pode alterar as permissões deste membro.');
         }
 
-        $resp = $this->api->put("/v1/usuarios/{$id}/permissoes", ['itens' => $itens]);
+        $resp = $this->api->put("/v1/usuarios/{$id}/permissoes", $this->alvo() + ['itens' => $itens]);
         if ($resp->failed()) {
             $detalhes = collect($resp->json('errors') ?? [])->flatten()->implode(' ');
 
@@ -215,7 +227,7 @@ class MembroController extends Controller
 
     public function convite(int $id)
     {
-        $resp = $this->api->post("/v1/usuarios/{$id}/convite");
+        $resp = $this->api->post("/v1/usuarios/{$id}/convite", $this->alvo());
 
         if ($resp->failed()) {
             return back()->with('erro', $resp->json('message') ?? 'Não foi possível enviar o convite.');
@@ -226,6 +238,7 @@ class MembroController extends Controller
 
     public function linkSenha(int $id)
     {
+        abort_if(session('auth_vinculos'), 403);
         $resp = $this->api->post("/v1/usuarios/{$id}/link-senha");
 
         if ($resp->failed()) {

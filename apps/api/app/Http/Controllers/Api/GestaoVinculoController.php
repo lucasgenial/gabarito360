@@ -32,7 +32,10 @@ class GestaoVinculoController extends Controller
     public function show(Request $r, int $id)
     {
         $v = GestaoVinculos::alvo($r, $id, false);
-        return ApiResponse::success(GestaoVinculos::pessoas($r->user(), vigentes: false)->where('contextual.vinculo_id', $v->id)->firstOrFail());
+        $pessoa = GestaoVinculos::pessoas($r->user(), vigentes: false)->where('contextual.vinculo_id', $v->id)->firstOrFail();
+        $pessoa->setAttribute('convite_primeiro_acesso', $v->situacao === 'convidado' && !$pessoa->ultimo_acesso
+            && DB::table('usuario_vinculos')->where('usuario_id', $id)->count() === 1);
+        return ApiResponse::success($pessoa);
     }
 
     public function update(Request $r, int $id)
