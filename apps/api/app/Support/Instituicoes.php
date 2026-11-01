@@ -11,6 +11,7 @@ class Instituicoes
 {
     public static function referencias(Usuario $u, string $tipo): array
     {
+        if (ContextoVinculo::presente($u)) return ContextoVinculo::referencias($u, $tipo);
         return DB::table('usuario_escopos')->where('usuario_id', $u->id)->where('escopo_tipo', $tipo)
             ->pluck('escopo_id')->map(fn ($id) => (int) $id)->all();
     }

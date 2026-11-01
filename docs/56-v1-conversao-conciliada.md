@@ -1,6 +1,7 @@
 # 56 — V1-B: conversão conciliada dos vínculos
 
 Data: 01/11/2026. Base: `28b3fa7`, merge autorizado do PR #87. Continuação de [V1-A](55-v1-estrutura-e-inventario.md), conforme [T1](40-clientes-espacos-e-vinculos.md).
+Atualização: V1-B incorporado no PR #88 em `7a13ffe`. Continuidade em [V1-C1](57-v1-nucleo-de-autorizacao.md), sem ativação ou publicação.
 
 ## Entrega e limite de ativação
 

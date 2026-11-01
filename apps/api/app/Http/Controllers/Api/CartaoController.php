@@ -101,6 +101,10 @@ class CartaoController extends Controller
     {
         if (Espacos::ativo()) {
             $ator = Usuario::find($request->integer('ator'));
+            if ($ator && $request->has('vinculo')) {
+                try { $ator = $ator->noVinculo($request->integer('vinculo')); }
+                catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { abort(404); }
+            }
             abort_unless($ator && $ator->ativo && $ator->perfil !== 'aplicador', 404);
             abort_unless(hash_equals(ContextoCorrecao::versaoAcesso($ator), (string) $request->query('acesso', '')) && Permissao::pode($ator, 'correcao.acompanhar'), 404);
             $cartao = ContextoCorrecao::cartoes($ator)->where('espaco_id', $request->integer('espaco'))->find($id);
