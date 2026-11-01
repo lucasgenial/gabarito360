@@ -58,4 +58,9 @@ class Usuario extends Authenticatable
     {
         return $this->hasMany(UsuarioEscopo::class, 'usuario_id');
     }
+
+    public function vinculos()
+    {
+        return $this->hasMany(UsuarioVinculo::class, 'usuario_id');
+    }
 }
