@@ -356,3 +356,7 @@ A gestão distingue identidade global de vínculo alvo, conforme T1: suspensão,
 ### V1-C3 — Conferência e corte sem fallback
 
 A conferência operacional é somente leitura, com hashes separados de origem/destino e decisão de todas as contas; nunca reativa um vínculo por sincronização legada. `vinculo_convites` implementa o convite de novo papel sem redefinir identidade, com emissor contextual e aceite pelo titular. `vinculos.obrigatorio`, desligado por padrão, prepara o bloqueio do legado no núcleo/HTTP/CLI/arquivos/filas; V2 ainda deve fornecer contexto confiável e telas. Contratos, testes e limites em [60-v1-conciliacao-e-preparo-do-corte.md](60-v1-conciliacao-e-preparo-do-corte.md). Sem deploy ou migration no servidor.
+
+### V2-A — tokens contextuais independentes
+
+Contexto autenticado é reconstruído a partir de metadados internos do token Sanctum persistido, com vínculo e token de identidade de origem. Não se altera o token de outras abas. Token contextual não emite outro contexto. Origem encerrada/expirada e vínculo inválido bloqueiam uso. Permissões permanecem dinâmicas; abilities não concedem poderes do catálogo. Sem migration nem ativação nesta entrega. Integração web por aba permanece V2-B: [contrato](61-v2-contexto-autenticado.md).
