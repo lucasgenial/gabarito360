@@ -123,6 +123,12 @@ $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 if (config('app.maintenance.driver') !== 'file') {
     fwrite(STDERR,"Este roteiro requer manutenção por arquivo.\n"); exit(1);
 }
+if (($argv[2] ?? '') === '--validar-corte') {
+    if (config('espacos.ativo', false) && !app(App\Services\RestringirEspacos::class)->esquemaConcluido()) {
+        fwrite(STDERR,"T2 ativo com corte pendente. Manter manutenção; usar roteiro de corte aprovado.\n"); exit(1);
+    }
+    echo "0\n"; exit(0);
+}
 if (($argv[2] ?? '') === '--somente-manutencao') { echo "0\n"; exit(0); }
 if (config('queue.default') !== 'redis') { fwrite(STDERR,"Este roteiro requer fila Redis.\n"); exit(1); }
 $quantidade=0;
@@ -194,6 +200,9 @@ if (( MANTER_MANUTENCAO )); then
   log "PREPARADO EM MANUTENÇÃO: $ALVO. Sem abertura HTTP, workers ou agendador. Corte e retomada exigem roteiro autorizado."
   exit 0
 fi
+# A flag do release não autoriza abrir um banco que ainda esteja só expandido.
+etapa=verificacao-corte
+runuser -u www-data -- php "$helper" "$RAIZ/apps/api" --validar-corte >/dev/null
 etapa=servicos
 systemctl reload php8.3-fpm
 systemctl start gabarito360-worker@1 gabarito360-worker@2

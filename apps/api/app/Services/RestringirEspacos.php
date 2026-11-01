@@ -61,6 +61,16 @@ class RestringirEspacos
         }
     }
 
+    /** Gate de abertura/deploy posterior: somente esquema, sem exigir manifesto inicial novamente. */
+    public function esquemaConcluido(): bool
+    {
+        if (!in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)) return false;
+        $controles = DB::selectOne('SELECT @@foreign_key_checks as fks, @@check_constraint_checks as checks');
+        if (!(int) $controles->fks || !(int) $controles->checks) return false;
+        foreach ($this->passos() as $passo) if (!$passo['pronto']()) return false;
+        return true;
+    }
+
     private function conferirManifesto(): void
     {
         $controles = DB::selectOne('SELECT @@foreign_key_checks as fks, @@check_constraint_checks as checks');

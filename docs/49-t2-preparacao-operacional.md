@@ -2,9 +2,9 @@
 
 Autorização: após aprovar o merge do PR #80, o responsável autorizou preparar o ensaio e a janela, sem deploy. PR #80 incorporado em `1d7ed629f4a321788c9687c041a14f0ccd3cdd84`. Responsável operacional: administrador do ambiente; execução e decisão de abertura dependem de autorização específica.
 
-## Entrega em revisão — PR #81
+## Entrega incorporada — PR #81
 
-[PR #81](https://github.com/lucasgenial/gabarito360/pull/81), aguardando aprovação de merge.
+[PR #81](https://github.com/lucasgenial/gabarito360/pull/81) incorporado com autorização em `1d42000e3b145bf756ef5f000583a9adb623eda2`. A validação posterior e o candidato de ativação estão em [docs/50](50-t2-validacao-e-release.md); os registros abaixo descrevem o escopo desta preparação.
 
 ## Entrega autorizada
 
@@ -120,6 +120,8 @@ Esperado: primeira simulação íntegra; aplicação registra passos e contagens
 Falha de DDL: manter API/web em manutenção e todos os escritores parados. Registrar último passo sem SQL/bindings/dados pessoais, diagnosticar e repetir o mesmo plano após corrigir a causa. DDL confirmado não é desfeito por transação. Não usar rollback de migrações, desativar FKs ou restaurar apenas Git.
 
 ### 5. Validação e retomada controlada
+
+Com o candidato do doc. 50 instalado e o corte concluído, executar `runuser -u www-data -- php artisan g360:verificar-corte-espacos` dentro de `apps/api`. Exigir saída zero antes da retomada; não contornar a guarda. A leitura do esquema complementa a auditoria acima.
 
 Antes de abrir, validar os serviços/configuração, estado das filas (incluindo reservados/atrasados), jobs falhos sem payload e hashes/cobertura. Confirmar novo código e cache com adaptador ativo. Recarregar PHP-FPM antes de retirar manutenção. A revisão do release deve incluir teste autenticado dos dois contextos, recusas cruzadas e ciclo OMR; o ensaio local já cobre constraints/fluxos, mas não certifica acesso real.
 

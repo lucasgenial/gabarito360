@@ -79,12 +79,16 @@ class IntegridadeEspacosMariaDbTest extends TestCase
     public function test_corte_real_repete_e_rejeita_nulos_orfaos_cruzamentos_e_destinos_multiplos(): void
     {
         $s = app(RestringirEspacos::class);
+        $this->assertFalse($s->esquemaConcluido());
+        $this->artisan('g360:verificar-corte-espacos')->assertFailed();
         $sim = $s->executar();
         $this->assertFalse($sim['aplicado']);
         $this->assertNotEmpty($sim['passos_pendentes_antes']);
         $antes = DB::table('alunos')->get()->toJson();
         $r = $s->executar(true);
         $this->assertTrue($r['esquema_concluido']);
+        $this->assertTrue($s->esquemaConcluido());
+        $this->artisan('g360:verificar-corte-espacos')->assertSuccessful();
         $this->assertNotEmpty($r['tempos_ms']);
         $this->assertSame([], $s->executar(true)['passos_pendentes_antes']);
         $this->assertSame($antes, DB::table('alunos')->get()->toJson());
@@ -183,6 +187,33 @@ class IntegridadeEspacosMariaDbTest extends TestCase
         $this->assertNull($novo->fresh()->cartao_id);
         $this->assertSame('recusado', $novo->fresh()->status);
         $this->assertTrue(app(AuditarIntegridadeEspacos::class)->executar()['apto_dados']);
+    }
+
+    public function test_relatorio_consolidado_com_volume_e_duas_redes_preserva_escopo_sem_explosao_do_plano(): void
+    {
+        $meta = ['espaco_id' => $this->espaco(8), 'criado_por' => 1, 'origem_autoria' => 'registrada'];
+        DB::table('provas')->where('id', 1)->update(['status' => 'publicada']);
+        for ($i = 2; $i <= 414; $i++) DB::table('alunos')->insert(['id' => $i, 'turma_id' => 1,
+            'nome' => 'Aluno fictício '.$i, 'matricula' => 'T2-'.$i] + $meta);
+        for ($i = 2; $i <= 47; $i++) {
+            DB::table('cartoes')->insert(['id' => $i, 'prova_id' => 1, 'aluno_id' => $i] + $meta);
+            DB::table('notas')->insert(['cartao_id' => $i, 'prova_id' => 1, 'aluno_id' => $i, 'turma_id' => 1,
+                'acertos' => 1, 'total_questoes' => 1, 'nota_final' => 10, 'status_aprovacao' => 'aprovado'] + $meta);
+        }
+        app(RestringirEspacos::class)->executar(true);
+        Sanctum::actingAs(Usuario::findOrFail(1));
+        // Limite só nesta conexão de teste; produção mantém a configuração do servidor.
+        DB::statement('SET SESSION max_statement_time = 5');
+        try {
+            $this->getJson('/api/v1/relatorios/rede/2')->assertOk()
+                ->assertJsonPath('data.kpis.alunos', 414)
+                ->assertJsonPath('data.kpis.notas', 47);
+            $this->getJson('/api/v1/relatorios/rede/1')->assertOk()
+                ->assertJsonPath('data.kpis.notas', 0);
+            DB::table('usuario_escopos')->where('usuario_id', 1)->where('escopo_id', 2)->delete();
+            Permissao::limparCache();
+            $this->getJson('/api/v1/relatorios/rede/2')->assertNotFound();
+        } finally { DB::statement('SET SESSION max_statement_time = 0'); }
     }
 
     public function test_falha_entre_passos_retomavel_sem_rollback_de_ddl(): void
