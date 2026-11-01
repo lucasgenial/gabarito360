@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Support\Escopo;
+use App\Support\ConsultasPedagogicas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class AcompanhamentoTurmaController extends Controller
 {
     public function show(Request $request, int $turmaId): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
         $turmas  = Escopo::turmaIds($usuario);
         if (in_array($usuario->perfil, ['aplicador', 'aluno'], true)
@@ -26,15 +28,15 @@ class AcompanhamentoTurmaController extends Controller
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        $turma = DB::table('turmas')
-            ->leftJoin('escolas', 'escolas.id', '=', 'turmas.escola_id')
+        $turma = $consulta->tabela('turmas')
+            ->leftJoinSub($consulta->tabela('escolas'), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
             ->where('turmas.id', $turmaId)
             ->first(['turmas.id', 'turmas.nome', 'turmas.serie', 'turmas.turno', 'turmas.ano_letivo', 'escolas.nome as escola_nome']);
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        $alunos = DB::table('alunos')
+        $alunos = $consulta->tabela('alunos')
             ->where('turma_id', $turmaId)->where('ativo', true)
             ->orderBy('nome')
             ->get(['id', 'nome', 'matricula']);
@@ -42,7 +44,7 @@ class AcompanhamentoTurmaController extends Controller
 
         // Provas aplicáveis da turma (visíveis ao usuário: o professor vê as da turma dele)
         $provas = Escopo::provas($usuario)
-            ->join('prova_turmas', 'prova_turmas.prova_id', '=', 'provas.id')
+            ->joinSub($consulta->tabela('prova_turmas'), 'prova_turmas', 'prova_turmas.prova_id', '=', 'provas.id')
             ->where('prova_turmas.turma_id', $turmaId)
             ->whereIn('provas.status', ['publicada', 'em_correcao', 'corrigida'])
             ->orderBy('provas.disciplina')
@@ -50,8 +52,8 @@ class AcompanhamentoTurmaController extends Controller
         $provaIds = $provas->pluck('id');
 
         // Cartões dos alunos da turma nessas provas (mais recente por aluno/prova)
-        $cartoes = DB::table('cartoes')
-            ->leftJoin('notas', 'notas.cartao_id', '=', 'cartoes.id')
+        $cartoes = $consulta->tabela('cartoes')
+            ->leftJoinSub($consulta->tabela('notas'), 'notas', 'notas.cartao_id', '=', 'cartoes.id')
             ->whereIn('cartoes.prova_id', $provaIds)
             ->whereIn('cartoes.aluno_id', $alunoIds)
             ->orderBy('cartoes.id')
@@ -59,7 +61,7 @@ class AcompanhamentoTurmaController extends Controller
             ->keyBy(fn ($c) => $c->aluno_id . ':' . $c->prova_id);
 
         // Cartões sem aluno nas provas da turma (QR ilegível / cartão em branco): precisam de vínculo
-        $semAluno = DB::table('cartoes')->whereIn('prova_id', $provaIds)->whereNull('aluno_id')
+        $semAluno = $consulta->tabela('cartoes')->whereIn('prova_id', $provaIds)->whereNull('aluno_id')
             ->select('prova_id', DB::raw('COUNT(*) as total'))->groupBy('prova_id')->pluck('total', 'prova_id');
 
         $resumoProvas = $provas->map(function ($p) use ($alunos, $cartoes, $semAluno) {

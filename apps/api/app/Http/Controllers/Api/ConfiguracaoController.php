@@ -12,6 +12,10 @@ class ConfiguracaoController extends Controller
 {
     public function show(Request $request): JsonResponse
     {
+        if (\App\Support\Espacos::ativo() && $request->boolean('listar_redes')) {
+            $ids = \App\Support\Instituicoes::redesIds($request->user()) ?? [];
+            return ApiResponse::success(['redes' => DB::table('redes')->whereIn('id', $ids)->orderBy('nome')->get(['id', 'nome'])]);
+        }
         $rede = \App\Support\Instituicoes::redeSelecionada($request);
 
         if (!$rede) {
