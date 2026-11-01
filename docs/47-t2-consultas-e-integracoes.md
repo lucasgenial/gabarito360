@@ -2,7 +2,7 @@
 
 Base: PR #78 incorporado em `56457f8668a82d883e04dc29eb1a191166b453c6`. O responsável autorizou seguir T2-D4, **sem deploy**. Deriva do [T1 aprovado](40-clientes-espacos-e-vinculos.md), do [mapa de consumidores](41-t1-mapa-de-consultas.md) e do [roteiro D/E](44-t2-adaptacao-e-corte.md).
 
-## Entrega em revisão
+## Entrega em revisão — PR #79
 
 `ConsultasPedagogicas` recebe o ator explicitamente e limita as consultas antes de contagens, médias, rankings e projeções. Não usa usuário global, estado estático de contexto ou identidade do pagador. O adaptador continua desligado fora dos testes.
 
