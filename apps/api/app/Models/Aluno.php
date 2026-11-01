@@ -25,6 +25,12 @@ class Aluno extends Model
         return $this->belongsTo(Turma::class, 'turma_id');
     }
 
+    public function toArray(): array
+    {
+        $dados = parent::toArray();
+        return $this->espaco_tipo === 'pessoal' ? \App\Support\EspacoPessoal::dadosMinimos($dados) : $dados;
+    }
+
     public function notas()
     {
         return $this->hasMany(Nota::class, 'aluno_id');

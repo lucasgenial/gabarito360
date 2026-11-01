@@ -17,7 +17,7 @@ class TurmaController extends Controller
         $turmas  = $resp->successful() ? $resp->json('data.turmas') : [];
         $kpis    = $resp->successful() ? $resp->json('data.kpis')   : [];
 
-        $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
+        $escolas = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
 
         return view('turmas.index', [
             'turmas'     => $turmas,
@@ -32,7 +32,7 @@ class TurmaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'escola_id'  => 'required|integer',
+            'escola_id'  => \App\Support\Acesso::pessoal() ? 'prohibited' : 'required|integer',
             'nome'       => 'required|string|max:50',
             'serie'      => 'required|string|max:50',
             'turno'      => 'required|string',
@@ -59,9 +59,9 @@ class TurmaController extends Controller
             abort(404, 'Turma não encontrada.');
         }
 
-        $escolas     = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
-        $professores = $this->api->get("/v1/turmas/{$id}/professores")->json('data.professores') ?? [];
-        $todosProfessores = $this->api->get('/v1/usuarios', ['perfil' => 'professor'])->json('data.usuarios') ?? [];
+        $escolas     = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
+        $professores = \App\Support\Acesso::pessoal() ? [] : ($this->api->get("/v1/turmas/{$id}/professores")->json('data.professores') ?? []);
+        $todosProfessores = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/usuarios', ['perfil' => 'professor'])->json('data.usuarios') ?? []);
 
         return view('turmas.show', [
             'turma'            => $resp->json('data'),
@@ -96,6 +96,7 @@ class TurmaController extends Controller
 
     public function update(Request $request, int $id)
     {
+        if (\App\Support\Acesso::pessoal()) $request->validate(['escola_id'=>'prohibited']);
         $request->validate([
             'nome'  => 'required|string|max:50',
             'serie' => 'required|string|max:50',

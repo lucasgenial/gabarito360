@@ -13,7 +13,7 @@
 <x-pagina titulo="Turmas">
   <x-slot:sub><b>{{ count($turmas) }}</b> turma(s) ·
       <b>{{ $kpis['total_alunos'] ?? 0 }}</b> alunos no total</x-slot:sub>
-    <button class="btn btn-secondary" onclick="abrirModal('modal-importar')">Importar planilha</button>
+    @unless(\App\Support\Acesso::pessoal())<button class="btn btn-secondary" onclick="abrirModal('modal-importar')">Importar planilha</button>@endunless
     <button class="btn btn-primary" onclick="abrirModal('modal-criar')">+ Nova turma</button>
 </x-pagina>
 
@@ -27,12 +27,14 @@
     <input class="input" type="search" name="busca" placeholder="Buscar turma por nome…"
            value="{{ $busca }}" style="padding-left:36px;" />
   </div>
+@unless(\App\Support\Acesso::pessoal())
   <select class="select" name="escola_id" style="min-width:180px;">
     <option value="">Todas as escolas</option>
     @foreach($escolas as $e)
       <option value="{{ $e['id'] }}" {{ $escola_id == $e['id'] ? 'selected' : '' }}>{{ $e['nome'] }}</option>
     @endforeach
   </select>
+@endunless
   <input class="input" type="number" name="ano_letivo" placeholder="Ano letivo"
          value="{{ $ano_letivo }}" style="width:130px;" min="2020" max="2099" />
   <button type="submit" class="btn btn-secondary">Filtrar</button>
@@ -138,7 +140,8 @@
               <option value="integral">Integral</option>
             </select>
           </div>
-          <div class="field">
+          @unless(\App\Support\Acesso::pessoal())
+<div class="field">
             <label for="cr-escola">Escola *</label>
             <select class="select" id="cr-escola" name="escola_id" required>
               <option value="">— Selecione —</option>
@@ -147,6 +150,7 @@
               @endforeach
             </select>
           </div>
+@endunless
           <div class="field">
             <label for="cr-ano">Ano letivo *</label>
             <input class="input num" type="number" id="cr-ano" name="ano_letivo"

@@ -32,6 +32,10 @@ class ContextoCorrecao
     public static function provaValida(?Prova $prova): bool
     {
         if (!$prova) return false;
+        if (Espacos::ativo() && $prova->escola_id === null) {
+            $e = DB::table('espacos')->where('id', $prova->espaco_id)->where('tipo', 'pessoal')->first();
+            return config('espacos.pessoal', false) && $e && ContextoVinculo::espacoValido($e);
+        }
         return !Espacos::ativo() || Espacos::escolas()->where('ee.id', $prova->espaco_id ?: 0)->where('e.id', $prova->escola_id)->exists();
     }
 
@@ -55,7 +59,9 @@ class ContextoCorrecao
         $prova ??= Prova::find($cartao->prova_id);
         return self::provaValida($prova) && (int) $cartao->prova_id === (int) $prova->id
             && (int) $cartao->espaco_id === (int) $prova->espaco_id
-            && (!$cartao->aluno_id || self::alunos($prova)->where('alunos.id', $cartao->aluno_id)->exists());
+            && (!$cartao->aluno_id || DB::table('alunos')->where('id', $cartao->aluno_id)->where('espaco_id', $cartao->espaco_id)
+                ->whereExists(fn ($q) => $q->selectRaw('1')->from('prova_turmas')->where('prova_id', $prova->id)->where('espaco_id', $cartao->espaco_id)
+                    ->whereRaw('prova_turmas.turma_id = COALESCE(?, alunos.turma_id)', [$cartao->turma_aplicacao_id]))->exists());
     }
 
     public static function cartoes(Usuario $ator)
@@ -67,7 +73,7 @@ class ContextoCorrecao
                     ->whereColumn('dona.id', 'cartoes.prova_id')->whereColumn('dona.espaco_id', 'cartoes.espaco_id'))
                 ->where(fn ($a) => $a->whereNull('cartoes.aluno_id')->orWhereIn('cartoes.aluno_id', Escopo::alunos($ator)->select('alunos.id')));
             $q->where(fn ($a) => $a->whereNull('cartoes.aluno_id')->orWhereExists(fn ($s) => $s->selectRaw('1')->from('alunos as vinculado')
-                ->join('prova_turmas as pt', 'pt.turma_id', '=', 'vinculado.turma_id')
+                ->join('prova_turmas as pt', fn ($j) => $j->whereRaw('pt.turma_id = COALESCE(cartoes.turma_aplicacao_id, vinculado.turma_id)'))
                 ->whereColumn('vinculado.id', 'cartoes.aluno_id')->whereColumn('vinculado.espaco_id', 'cartoes.espaco_id')
                 ->whereColumn('pt.espaco_id', 'cartoes.espaco_id')->whereColumn('pt.prova_id', 'cartoes.prova_id')));
         }
