@@ -13,6 +13,16 @@ class CatalogoPermissoes
 {
     public const PERFIS = ['secretario_educacao', 'admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'];
 
+    /** T3: política pessoal independente, sem herdar poderes institucionais do professor. */
+    public const AUTONOMO = [
+        'turma.ver', 'turma.gerir', 'turma.desativar',
+        'aluno.ver', 'aluno.gerir', 'aluno.desativar',
+        'prova.ver', 'prova.criar', 'prova.editar', 'gabarito.ver', 'gabarito.editar',
+        'cartao.imprimir', 'cartao.enviar', 'correcao.acompanhar', 'correcao.alterar',
+        'correcao.fechar', 'resultado.ver', 'resultado.compartilhar',
+        'relatorio.prova', 'relatorio.turma',
+    ];
+
     public const LISTA = [
         // 4.1 Rede, núcleos e escolas
         ['rede.configurar',          'escolas',   'Parâmetros da rede (metas etc.)',                        '-v------'],
@@ -76,6 +86,7 @@ class CatalogoPermissoes
             }
         }
 
+        $out['professor_autonomo'] = ['padrao' => self::AUTONOMO, 'extra' => []];
         return $out;
     }
 }

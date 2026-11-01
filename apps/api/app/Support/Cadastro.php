@@ -22,7 +22,7 @@ class Cadastro
     ];
 
     /** Perfis ligados a uma escola (exigem escola no cadastro). */
-    public const DE_ESCOLA = ['dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'];
+    public const DE_ESCOLA = PerfisEspaco::POR_TIPO['escola'];
 
     public static function perfisGeridos(Usuario $gestor): array
     {
