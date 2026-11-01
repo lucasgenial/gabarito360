@@ -25,7 +25,8 @@ class FilaCartoes
         $espaco = $prova->espaco_id;
         if (Espacos::ativo() && $alunoId) abort_unless(ContextoCorrecao::alunos($prova, $usuario)->where('alunos.id', $alunoId)->exists(), 404);
         return Cache::lock("cartao-envio:{$espaco}:{$usuario->id}:{$chave}", 30)->block(3, function () use ($usuario, $provaId, $chave, $foto, $alunoId, $espaco) {
-            $existente = CartaoEnvio::where('usuario_id', $usuario->id)->where('chave', $chave)->first();
+            $existente = CartaoEnvio::where('usuario_id', $usuario->id)->where('chave', $chave)
+                ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $espaco))->first();
             if ($existente) {
                 if (Espacos::ativo()) abort_unless((int) $existente->espaco_id === (int) $espaco, 409, 'Identificador indisponível. Gere outro envio.');
                 abort_if((int) $existente->prova_id !== $provaId, 409, 'Este identificador já foi usado em outra prova.');
@@ -47,6 +48,7 @@ class FilaCartoes
                 });
             } catch (Throwable $e) {
                 Storage::disk('public')->delete($caminho);
+                abort_if($e instanceof \Illuminate\Database\UniqueConstraintViolationException, 409, 'Identificador indisponível. Gere outro envio.');
                 throw $e;
             }
 
