@@ -1,0 +1,403 @@
+{
+  "publicacao": {
+    "alvo": "af4c6d1e9e1d324ebd10e404af149b78a28270a4",
+    "anterior": "dc9949e3690744b72c5071d919955c09ad2be9b8",
+    "autorizacao": "Aplicar T2 na homologação, conforme solicitação de 01/11/2026",
+    "inicio_utc": "2026-11-01T11:20:33.639595+00:00",
+    "fase": "publicado_validado",
+    "atualizado_utc": "2026-11-01T11:40:25.185836+00:00",
+    "checkpoint": "/root/g360-backup-final-rqj0ra7m",
+    "checkpoint_id": "4f3150d5-a3e9-4473-8dff-b490a1a1b5eb",
+    "inventario_final": {
+      "chaves_recuperadas": true,
+      "cifras": 20,
+      "arquivos": 47,
+      "contagens": {
+        "turmas": 14,
+        "alunos": 414,
+        "provas": 4,
+        "prova_turmas": 8,
+        "gabaritos": 4,
+        "gabarito_questoes": 180,
+        "cartoes": 47,
+        "cartao_respostas": 2115,
+        "notas": 47,
+        "ambiguidade_logs": 28,
+        "cartao_envios": 0,
+        "visitas": 0,
+        "sincronizacoes_seges": 0
+      }
+    },
+    "filas_fechadas": {
+      "filas": {
+        "alta": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "padrao": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "baixa": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        }
+      },
+      "falhos": 0,
+      "adaptador_ativo": false,
+      "clientes": null,
+      "espacos": null
+    },
+    "arquivos": [
+      {
+        "papel": "banco",
+        "arquivo": "/mnt/pve/backup-sata/dump/vzdump-lxc-106-2026_11_01-08_20_46.tar.zst",
+        "bytes": 2245129524,
+        "sha256": "6ac8aaf1f1ad5193e9127d25e92f1b747c282fc230dee8be3f763c1632314901"
+      },
+      {
+        "papel": "aplicacao",
+        "arquivo": "/mnt/pve/backup-sata/dump/vzdump-lxc-111-2026_11_01-08_23_02.tar.zst",
+        "bytes": 8750470251,
+        "sha256": "3e51a7083b522e07af6cdc9f37c67e22057aa48b2b17f5b09787dbe67fc46dd4"
+      }
+    ],
+    "segunda_copia": {
+      "checkpoint_id": "4f3150d5-a3e9-4473-8dff-b490a1a1b5eb",
+      "arquivos": [
+        {
+          "papel": "banco",
+          "arquivo": "/mnt/pve/backup-sata/dump/vzdump-lxc-106-2026_11_01-08_20_46.tar.zst",
+          "bytes": 2245129524,
+          "sha256": "6ac8aaf1f1ad5193e9127d25e92f1b747c282fc230dee8be3f763c1632314901"
+        },
+        {
+          "papel": "aplicacao",
+          "arquivo": "/mnt/pve/backup-sata/dump/vzdump-lxc-111-2026_11_01-08_23_02.tar.zst",
+          "bytes": 8750470251,
+          "sha256": "3e51a7083b522e07af6cdc9f37c67e22057aa48b2b17f5b09787dbe67fc46dd4"
+        }
+      ],
+      "verificado": true,
+      "copiado_em_utc": "2026-11-01T11:33:02.901201+00:00",
+      "marcador_local": "D:\\Backups-Proxmox\\T2-CORTE-COPIA-OK-2026-11-01-4f3150d5.json"
+    },
+    "intercorrencia": {
+      "tipo": "AssertionError",
+      "etapa": "dependencias",
+      "causa": "umask 077 herdado pelo Git",
+      "corrigida": true,
+      "permissoes": {
+        "arquivos_versionados_corrigidos": 64,
+        "sem_alterar_conteudo": true
+      }
+    },
+    "estado_expandido": {
+      "filas": {
+        "alta": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "padrao": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "baixa": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        }
+      },
+      "falhos": 0,
+      "adaptador_ativo": true,
+      "clientes": 0,
+      "espacos": 0
+    },
+    "fase_pre_corte": "preparado_em_manutencao"
+  },
+  "corte": {
+    "inicio_utc": "2026-11-01T11:41:28.324896+00:00",
+    "alvo": "af4c6d1e9e1d324ebd10e404af149b78a28270a4",
+    "passos": [
+      {
+        "comando": "g360:inventariar-espacos",
+        "aplicacao": false,
+        "sucesso": true,
+        "segundos": 1.3
+      },
+      {
+        "comando": "g360:preencher-espacos",
+        "aplicacao": false,
+        "sucesso": true,
+        "segundos": 1.36
+      },
+      {
+        "comando": "g360:preencher-espacos",
+        "aplicacao": true,
+        "sucesso": true,
+        "segundos": 3.54
+      },
+      {
+        "comando": "g360:conciliar-admin-espacos",
+        "aplicacao": false,
+        "sucesso": true,
+        "segundos": 1.3
+      },
+      {
+        "comando": "g360:conciliar-admin-espacos",
+        "aplicacao": true,
+        "sucesso": true,
+        "segundos": 1.3
+      },
+      {
+        "comando": "g360:auditar-espacos",
+        "aplicacao": false,
+        "sucesso": true,
+        "segundos": 1.35
+      },
+      {
+        "comando": "g360:restringir-espacos",
+        "aplicacao": false,
+        "sucesso": true,
+        "segundos": 2.45
+      },
+      {
+        "comando": "g360:restringir-espacos",
+        "aplicacao": true,
+        "sucesso": true,
+        "segundos": 9.01
+      },
+      {
+        "comando": "g360:restringir-espacos",
+        "aplicacao": false,
+        "sucesso": true,
+        "segundos": 2.6
+      },
+      {
+        "comando": "g360:auditar-espacos",
+        "aplicacao": false,
+        "sucesso": true,
+        "segundos": 1.44
+      },
+      {
+        "comando": "g360:verificar-corte-espacos",
+        "aplicacao": false,
+        "sucesso": true,
+        "segundos": 2.31
+      }
+    ],
+    "integridade": {
+      "conteudo_preservado": true,
+      "ocorrencias": 0,
+      "esquema_completo": true
+    },
+    "estado": {
+      "filas": {
+        "alta": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "padrao": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "baixa": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        }
+      },
+      "falhos": 0,
+      "adaptador_ativo": true,
+      "clientes": 2,
+      "espacos": 13
+    },
+    "hierarquia": {
+      "clientes_internos": 2,
+      "espacos": 13,
+      "admin_vinculos_separados": 2,
+      "redes": [
+        1,
+        2
+      ]
+    },
+    "validado_antes_abertura_utc": "2026-11-01T11:42:15.281550+00:00",
+    "abertura_utc": "2026-11-01T11:50:03.871436+00:00",
+    "http": {
+      "http://127.0.0.1/": 200,
+      "http://127.0.0.1/login": 200,
+      "http://127.0.0.1/api/v1/health": 200,
+      "https://gabarito360.com.br/": 200,
+      "https://gabarito360.com.br/login": 200,
+      "https://gabarito360.com.br/api/v1/health": 200
+    },
+    "intercorrencia_validacao": {
+      "causa": "auxiliar http.py sombreou biblioteca padrão",
+      "corrigida": true
+    },
+    "primeira_abertura_utc": "2026-11-01T11:42:25.426018+00:00",
+    "aberturas_intermediarias": [
+      "2026-11-01T11:44:41.754988+00:00"
+    ],
+    "cloudflare_validacao": {
+      "erro_inicial": 1010,
+      "causa": "assinatura padrão do cliente Python recusada",
+      "ajuste": "User-Agent de navegador no cliente de verificação; nenhuma configuração do site alterada"
+    },
+    "funcional": {
+      "login_api": 200,
+      "rede_1": 200,
+      "recusas_cruzadas_sem_vinculo": 3,
+      "rede_2": 200,
+      "notas_rede_2": 47,
+      "cartao_respostas": 200,
+      "imagem_hash_preservado": true,
+      "login_web": 200,
+      "web_painel_e_duas_redes": true,
+      "logout_web_api": true
+    },
+    "hierarquia_apos_teste": {
+      "clientes_internos": 2,
+      "espacos": 13,
+      "admin_vinculos_separados": 2,
+      "redes": [
+        1,
+        2
+      ]
+    },
+    "integridade_apos_teste": {
+      "conteudo_preservado": true,
+      "ocorrencias": 0,
+      "esquema_completo": true
+    },
+    "job_consumido": true,
+    "agendador_nova_ocorrencia": true,
+    "estado_final": {
+      "filas": {
+        "alta": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "padrao": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "baixa": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        }
+      },
+      "falhos": 0,
+      "adaptador_ativo": true,
+      "clientes": 2,
+      "espacos": 13
+    },
+    "fim_utc": "2026-11-01T11:50:38.512105+00:00",
+    "sucesso": true
+  },
+  "recibo": {
+    "checkpoint": "4f3150d5-a3e9-4473-8dff-b490a1a1b5eb",
+    "anterior": "dc9949e3690744b72c5071d919955c09ad2be9b8",
+    "alvo": "af4c6d1e9e1d324ebd10e404af149b78a28270a4",
+    "verificado": true,
+    "arquivos": [
+      {
+        "papel": "banco",
+        "arquivo": "/mnt/pve/backup-sata/dump/vzdump-lxc-106-2026_11_01-08_20_46.tar.zst",
+        "bytes": 2245129524,
+        "sha256": "6ac8aaf1f1ad5193e9127d25e92f1b747c282fc230dee8be3f763c1632314901"
+      },
+      {
+        "papel": "aplicacao",
+        "arquivo": "/mnt/pve/backup-sata/dump/vzdump-lxc-111-2026_11_01-08_23_02.tar.zst",
+        "bytes": 8750470251,
+        "sha256": "3e51a7083b522e07af6cdc9f37c67e22057aa48b2b17f5b09787dbe67fc46dd4"
+      }
+    ]
+  },
+  "estabilidade": {
+    "conferido_utc": "2026-11-01T11:57:36.849532+00:00",
+    "sha": "af4c6d1e9e1d324ebd10e404af149b78a28270a4",
+    "arquivos_locais_preexistentes_preservados": true,
+    "sem_manutencao": true,
+    "credenciais_temporarias_removidas": true,
+    "servicos_ativos": true,
+    "filas": {
+      "filas": {
+        "alta": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "padrao": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        },
+        "baixa": {
+          "pendentes": 0,
+          "reservados": 0,
+          "atrasados": 0
+        }
+      },
+      "falhos": 0,
+      "adaptador_ativo": true,
+      "clientes": 2,
+      "espacos": 13
+    },
+    "integridade": {
+      "conteudo_preservado": true,
+      "ocorrencias": 0,
+      "esquema_completo": true
+    },
+    "hierarquia": {
+      "clientes_internos": 2,
+      "espacos": 13,
+      "admin_vinculos_separados": 2,
+      "redes": [
+        1,
+        2
+      ]
+    },
+    "sessao_web": {
+      "driver": "redis",
+      "lifetime": 120,
+      "secure": null
+    },
+    "logs": {
+      "/home/lucasdev/projetos/gabarito360/apps/api/storage/logs/laravel.log": {
+        "bytes_novos": 0,
+        "erros_novos": 0
+      },
+      "/home/lucasdev/projetos/gabarito360/apps/web/storage/logs/laravel.log": {
+        "bytes_novos": 0,
+        "erros_novos": 0
+      },
+      "/var/log/nginx/error.log": {
+        "bytes_novos": 0,
+        "erros_novos": 0
+      }
+    },
+    "health_publico": 200,
+    "ssd_desmontado": true,
+    "observacao_apos_reabertura_s": 476.379929
+  },
+  "resultado": "publicado_validado",
+  "autorizacao_temporaria_encerrada": true,
+  "regressao_umask": {
+    "falha_reproduzida_antes": true,
+    "testes_b5_apos_correcao": 20,
+    "aprovados": true,
+    "ajuste_ainda_nao_publicado": true
+  }
+}

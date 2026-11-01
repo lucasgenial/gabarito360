@@ -34,6 +34,12 @@ elif cmd=='git':
     elif a[:1]==['merge-base'] and a[-1]=='origin/main': code=int(s.get('outside_main',False))
     elif a[:1]==['merge']:
         s['head']=a[-1]
+        if s.get('write_tracked'):
+            f=Path(s['root'])/'apps/api/config/espacos.php'
+            f.parent.mkdir()
+            f.write_text('<?php return [];')
+            s['tracked_mode']=f.stat().st_mode & 0o777
+            s['tracked_dir_mode']=f.parent.stat().st_mode & 0o777
         # Simula a substituição do arquivo de origem durante o fast-forward.
         if s.get('replace_source'): Path(s['source']).write_text('exit 97\n')
 elif cmd=='php':
@@ -97,7 +103,7 @@ class DeployTest(unittest.TestCase):
         if self.hook_temp:
             self.hook_temp.cleanup()
 
-    def run_deploy(self, *, check=False, target=ALVO, legacy=False, hold=False, backup=False, **scenario):
+    def run_deploy(self, *, check=False, target=ALVO, legacy=False, hold=False, backup=False, mask=-1, **scenario):
         s = {'root': str(self.root), 'head': ANTES, 'events': [], 'source': str(self.source), **scenario}
         self.state.write_text(json.dumps(s))
         env = {**os.environ, 'PATH': str(self.bin) + os.pathsep + os.environ['PATH'],
@@ -111,7 +117,7 @@ class DeployTest(unittest.TestCase):
             args.append('--manter-manutencao')
         if check:
             args.append('--check')
-        self.result = subprocess.run(args, env=env, capture_output=True, text=True, timeout=20)
+        self.result = subprocess.run(args, env=env, capture_output=True, text=True, timeout=20, umask=mask)
         self.s = json.loads(self.state.read_text())
         return self.result.returncode
 
@@ -157,6 +163,11 @@ class DeployTest(unittest.TestCase):
         for app in ['api','web']:
             self.assertTrue((self.root / f'apps/{app}/storage/framework/down').exists())
         self.assertIn(['systemctl','stop','gabarito360-agendador.timer','gabarito360-agendador.service','gabarito360-worker@1','gabarito360-worker@2','php8.3-fpm'],self.s['events'])
+
+    def test_umask_restritivo_nao_torna_codigo_ilegivel_para_php(self):
+        self.assertEqual(self.run_deploy(mask=0o077, write_tracked=True, hold=True), 0, self.result.stderr)
+        self.assertEqual(self.s['tracked_mode'], 0o644)
+        self.assertEqual(self.s['tracked_dir_mode'], 0o755)
 
     def test_check_nao_publica_nem_interrompe_servicos(self):
         self.assertEqual(self.run_deploy(check=True, queue=[7]), 0, self.result.stderr)

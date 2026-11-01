@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Executar no CT 111, como root, somente para um commit revisado e autorizado.
 set -Eeuo pipefail
+# Git/Composer devem gerar código legível pelo PHP, mesmo com umask restritivo do chamador.
+# Temporários privados continuam protegidos por mktemp/chmod e pelo hook de backup.
+umask 022
 
 uso() {
   echo 'Uso: bash scripts/operacao/deploy.sh --commit SHA --from SHA [--check] [--manter-manutencao] [--backup-final SCRIPT] [--wait SEGUNDOS] [--root DIRETORIO]'
