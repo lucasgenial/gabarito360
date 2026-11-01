@@ -28,7 +28,7 @@ Compatibilidade testada também com payload serializado sem a nova propriedade `
 
 Referências do ator no painel de professor/admin, relatório de núcleo, resolução de núcleo do Censo e autorização de logo da rede passam por `Instituicoes`/`Escopo`. O Censo considera somente núcleos acessíveis no modo T2.
 
-**V1-C2 ainda não está concluído e a seleção de vínculo permanece não ativada.** Próxima entrega, V1-C2b:
+**Registro da entrega C2a:** as pendências abaixo foram tratadas na implementação do [V1-C2b](59-v1-gestao-e-resultados-contextuais.md), em revisão. A seleção de vínculo permanece não ativada. Escopo encaminhado ao C2b:
 
 - Gestão por vínculo em `UsuarioController`, `VinculoProfessorController`, `GestaoLegada` e `ContaUsuario`, evitando alteração global da identidade ou desativação de todos os vínculos ao operar sobre apenas um.
 - Projeções de terceiros que ainda consultam `usuario_escopos` em dashboards/escolas; listar os perfis do vínculo, sem usar o perfil global como autoridade.

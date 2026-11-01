@@ -346,3 +346,8 @@ Conforme T1 aprovado, os consumidores pedagógicos usam contexto explícito do a
 O [T2-E](48-t2-integridade-e-ensaio.md) mantém o DDL restritivo fora de `migrate`, pois o modo legado continua desligando o preenchimento de espaço nas escritas. `g360:auditar-espacos` é somente leitura; `g360:restringir-espacos` simula por padrão e aplica o plano fechado apenas na janela de corte. O comando não liga `espacos.ativo`. A futura ativação exige release aprovado com escritores antigos parados, preenchimento e conciliação concluídos, auditoria e ensaio de manutenção.
 
 FKs compostas garantem o mesmo espaço entre pais e filhos; serviços continuam validando relações funcionais e autorização. Recibo B6 conserva a prova de entrada quando o QR corrige a prova dentro do mesmo espaço. Exclusão/substituição de cartão desvincula explicitamente recibos na transação, sem anular seu espaço. Matrícula/CPF de aluno e idempotência B6 passam a índices por espaço durante o corte; identidade de usuários continua global.
+
+
+### Gestão contextual V1-C2b (01/11/2026)
+
+A gestão distingue identidade global de vínculo alvo, conforme T1: suspensão, concessões e turmas alteram apenas o vínculo validado, com evento e versão. Projeções usam perfil local, e resultados individuais não liberam o conteúdo geral da turma. O convite de primeira senha ganha referência nullable ao vínculo para impedir desativação global; não substitui o futuro convite de conta existente em `vinculo_convites`. Contratos, validação e limites em [59-v1-gestao-e-resultados-contextuais.md](59-v1-gestao-e-resultados-contextuais.md). Sem ativação, deploy ou migration no servidor.
