@@ -130,6 +130,7 @@ class ImagensCartao
             $cartao = ContextoCorrecao::cartoes($ator)->findOrFail($cartaoId);
             abort_unless(ContextoCorrecao::cartaoValido($cartao), 404);
             $parametros += ['espaco' => $cartao->espaco_id, 'ator' => $ator->id, 'acesso' => ContextoCorrecao::versaoAcesso($ator)];
+            if ($ator->vinculoContextoId() !== null) $parametros['vinculo'] = $ator->vinculoContextoId();
         }
         return URL::temporarySignedRoute(
             'cartoes.arquivo',

@@ -18,6 +18,8 @@ class Permissao
 
     public static function efetivas(Usuario $u): array
     {
+        // Contextos explícitos são revalidados; não reutilizam o cache global legado por pessoa.
+        if (ContextoVinculo::presente($u)) return ContextoVinculo::permissoes($u);
         if (isset(self::$cache[$u->id])) {
             return self::$cache[$u->id];
         }
