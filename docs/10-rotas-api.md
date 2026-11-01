@@ -242,3 +242,8 @@ Autenticação: Bearer Token (JWT) — exceto rotas públicas.
   "message": "Recurso não encontrado."
 }
 ```
+
+
+### V1-C3 — Convite de vínculo (backend preparado, sem ativação)
+
+O contrato de emissão, consulta e resposta dos convites de conta existente está em [docs/60](60-v1-conciliacao-e-preparo-do-corte.md). Emissão usa `usuario.gerir` e vínculo do gestor; consulta/resposta são POSTs autenticados pela identidade titular e token de uso único. Não há seleção de contexto por payload. A página web e a escolha por aba pertencem ao V2.

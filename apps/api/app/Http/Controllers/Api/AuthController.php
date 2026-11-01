@@ -46,8 +46,9 @@ class AuthController extends Controller
 
         return ApiResponse::success([
             'token'      => $token,
-            'perfil'     => $usuario->perfil,
-            'permissoes' => \App\Support\Permissao::efetivas($usuario),
+            'perfil'     => \App\Support\RegimeVinculos::obrigatorio() ? null : $usuario->perfil,
+            'selecionar_vinculo' => \App\Support\RegimeVinculos::obrigatorio(),
+            'permissoes' => \App\Support\RegimeVinculos::obrigatorio() ? [] : \App\Support\Permissao::efetivas($usuario),
             'nome'       => $usuario->nome,
             'email'      => $usuario->email,
             'eh_titular' => $ehTitular,
@@ -64,6 +65,10 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
+        if (\App\Support\RegimeVinculos::obrigatorio() && !\App\Support\ContextoVinculo::presente($request->user())) {
+            return ApiResponse::success(['id' => $request->user()->id, 'nome' => $request->user()->nome, 'email' => $request->user()->email,
+                'perfil' => null, 'permissoes' => [], 'selecionar_vinculo' => true]);
+        }
         return ApiResponse::success(array_merge($request->user()->toArray(), [
             'permissoes' => \App\Support\Permissao::efetivas($request->user()),
         ]));

@@ -18,6 +18,7 @@ class Escopo
     /** Escolas visíveis ao usuário. */
     public static function escolaIds(Usuario $u): ?array
     {
+        RegimeVinculos::exigir($u);
         if (ContextoVinculo::presente($u)) return ContextoVinculo::escolas($u);
         $ids = match ($u->perfil) {
             'admin_rede' => Espacos::ativo()
@@ -45,6 +46,7 @@ class Escopo
     /** Turmas visíveis: professor só as vinculadas; demais, as turmas das suas escolas. */
     public static function turmaIds(Usuario $u): ?array
     {
+        RegimeVinculos::exigir($u);
         // Aluno não recebe a turma inteira por ter vínculo individual.
         if (ContextoVinculo::presente($u) && $u->perfil === 'aluno') return [];
         if ($u->perfil === 'professor') {
@@ -70,6 +72,7 @@ class Escopo
      */
     public static function provas(Usuario $u): Builder
     {
+        RegimeVinculos::exigir($u);
         $q = Espacos::filtrar(Prova::query(), $u, 'provas.espaco_id');
         // O consumidor de resultado individual será integrado antes de liberar provas ao aluno.
         if (ContextoVinculo::presente($u) && $u->perfil === 'aluno') return $q->whereRaw('1 = 0');
@@ -102,17 +105,20 @@ class Escopo
 
     public static function prova(Usuario $u, int $id): ?Prova
     {
+        RegimeVinculos::exigir($u);
         return self::provas($u)->find($id);
     }
 
     /** Prova com acesso a conteúdo (gabarito, notas, relatórios): nunca para o aplicador. */
     public static function provaComConteudo(Usuario $u, int $id): ?Prova
     {
+        RegimeVinculos::exigir($u);
         return $u->perfil === 'aplicador' ? null : self::prova($u, $id);
     }
 
     public static function turmas(Usuario $u): Builder
     {
+        RegimeVinculos::exigir($u);
         $q = Espacos::filtrar(\App\Models\Turma::query(), $u, 'turmas.espaco_id');
         $ids = self::turmaIds($u);
         return $ids === null ? $q : $q->whereIn('turmas.id', $ids);
@@ -120,6 +126,7 @@ class Escopo
 
     public static function alunos(Usuario $u): Builder
     {
+        RegimeVinculos::exigir($u);
         $q = Espacos::filtrar(\App\Models\Aluno::query(), $u, 'alunos.espaco_id');
         if (Espacos::ativo()) {
             $q->whereExists(fn ($t) => $t->selectRaw('1')->from('turmas as turma_dona')

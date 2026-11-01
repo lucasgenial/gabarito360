@@ -11,6 +11,7 @@ class Instituicoes
 {
     public static function referencias(Usuario $u, string $tipo): array
     {
+        RegimeVinculos::exigir($u);
         if (ContextoVinculo::presente($u)) return ContextoVinculo::referencias($u, $tipo);
         return DB::table('usuario_escopos')->where('usuario_id', $u->id)->where('escopo_tipo', $tipo)
             ->pluck('escopo_id')->map(fn ($id) => (int) $id)->all();
@@ -33,6 +34,7 @@ class Instituicoes
 
     public static function redesIds(Usuario $u): ?array
     {
+        RegimeVinculos::exigir($u);
         if (!Espacos::ativo() && $u->perfil === 'admin_rede') return null;
         if (!$u->ativo) return [];
         if ($u->perfil === 'admin_rede') {
@@ -53,6 +55,7 @@ class Instituicoes
     /** O aluno vê somente o cabeçalho da própria escola, sem ampliar Escopo::turmaIds. */
     public static function escolasLogoIds(Usuario $u): ?array
     {
+        RegimeVinculos::exigir($u);
         if ($u->perfil !== 'aluno') return Escopo::escolaIds($u);
         if (!$u->ativo) return [];
         $q = Espacos::agregadoEscolar(DB::table('alunos'), 'alunos')->join('turmas', 'turmas.id', '=', 'alunos.turma_id')
@@ -63,6 +66,7 @@ class Instituicoes
 
     public static function nucleosIds(Usuario $u): ?array
     {
+        RegimeVinculos::exigir($u);
         if (!Espacos::ativo() && in_array($u->perfil, ['admin_rede', 'secretario_educacao'], true)) return null;
         if (!$u->ativo) return [];
         $q = DB::table('nucleos');
@@ -75,6 +79,7 @@ class Instituicoes
 
     public static function nucleos(Usuario $u)
     {
+        RegimeVinculos::exigir($u);
         $q = \App\Models\Nucleo::query();
         $ids = self::nucleosIds($u);
         return $ids === null ? $q : $q->whereIn('nucleos.id', $ids);
@@ -111,6 +116,7 @@ class Instituicoes
     /** Chamado na mesma transação da instituição; cliente herdado do pai validado. */
     public static function criarEspaco(string $tipo, int $id, string $nome, int $cliente, Usuario $ator): void
     {
+        RegimeVinculos::exigir($ator);
         abort_unless(in_array($tipo, ['nucleo', 'escola'], true), 422);
         DB::table('espacos')->insert(['cliente_id' => $cliente, 'tipo' => $tipo, 'nome' => $nome,
             $tipo.'_id' => $id, 'situacao' => 'ativo', 'criado_por' => $ator->id, 'created_at' => now(), 'updated_at' => now()]);

@@ -35,3 +35,6 @@ O aluno contextual consulta apenas o registro explicitamente atribuído em `vinc
 A revisão dos consumidores HTTP mantém `AuthController` como gestão da própria identidade; configuração institucional usa `Instituicoes`; assinaturas permanecem do titular e serão migradas em F1; links assinados e B6 já transportam vínculo em C1/C2a. Importadores CLI ainda recebem ator legado explícito e devem ser incluídos no corte sem fallback do C3 — não são endpoints autenticados por contexto.
 
 Próximo pacote: **V1-C3**, conciliação final, contas adiadas/alteradas, convite para conta existente e fechamento das condições de ativação. V2 ainda deve adaptar seleção por aba e interface de gestão aos IDs de vínculo. A entrega C2b não torna V1 pronto para publicação. Sem deploy, conversão ou migration no servidor; merge e publicação dependem de aprovação específica.
+
+
+Atualização: C2b incorporado no PR #91 (`276b2f1`). A preparação C3 e o convite para conta existente estão em [60-v1-conciliacao-e-preparo-do-corte.md](60-v1-conciliacao-e-preparo-do-corte.md), ainda em revisão e sem deploy.
