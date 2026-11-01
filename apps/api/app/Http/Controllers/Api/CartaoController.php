@@ -53,7 +53,7 @@ class CartaoController extends Controller
         // Lista para a tela de correção: aluno, turma, nota e se há foto (a foto vem por /cartoes/{id}/imagem)
         $cartoes = DB::table('cartoes')->when(Espacos::ativo(), fn ($q) => $q->whereIn('cartoes.id', ContextoCorrecao::cartoes($request->user())->select('cartoes.id')))
             ->leftJoin('alunos', 'alunos.id', '=', 'cartoes.aluno_id')
-            ->leftJoin('turmas', 'turmas.id', '=', 'alunos.turma_id')
+            ->leftJoin('turmas', fn ($j) => $j->whereRaw('turmas.id = COALESCE(cartoes.turma_aplicacao_id, alunos.turma_id)'))
             ->leftJoin('notas', function ($j) {
                 $j->on('notas.cartao_id', '=', 'cartoes.id');
                 if (Espacos::ativo()) $j->on('notas.espaco_id', '=', 'cartoes.espaco_id')->on('notas.aluno_id', '=', 'cartoes.aluno_id')->on('notas.prova_id', '=', 'cartoes.prova_id');
@@ -308,6 +308,12 @@ class CartaoController extends Controller
             return ApiResponse::error('Não foi possível gerar os cartões.', [], 500);
         }
 
+        // O vínculo pode ser revogado enquanto o processo gera o PDF.
+        if (\App\Support\ContextoVinculo::presente($request->user())) {
+            try {
+                abort_unless(Permissao::pode($request->user(), 'cartao.imprimir') && $this->encontrarProva($request, $provaId), 403);
+            } catch (\Throwable $e) { @unlink($arquivo); throw $e; }
+        }
         $nome = 'cartoes-' . \Illuminate\Support\Str::slug($prova->titulo . ' ' . $prova->disciplina) . '.pdf';
 
         return response()->download($arquivo, $nome, ['Content-Type' => 'application/pdf'])->deleteFileAfterSend();

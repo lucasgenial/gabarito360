@@ -87,6 +87,9 @@ class DadosPessoaisTest extends TestCase
         $consulta = new ConsultasPedagogicas(Usuario::find(1)->noVinculo(1));
         $this->assertSame(1,$consulta->tabela('notas')->count());
         $this->getJson("/api/v1/relatorios/aluno/$aluno")->assertOk()->assertJsonPath('data.kpis.feitas',1)->assertJsonPath('data.provas.0.nota',10)->assertJsonPath('data.cabecalho.nome','Pessoal 1');
+        $this->getJson("/api/v1/alunos/$aluno/resultados/$p")->assertOk()->assertJsonPath('data.aluno.turma_id',1)
+            ->assertJsonPath('data.cabecalho.nome','Pessoal 1')->assertJsonPath('data.nota.nota_final',10);
+        $this->getJson("/api/v1/provas/$p/cartoes")->assertOk()->assertJsonPath('data.cartoes.0.turma','Turma');
         $this->putJson("/api/v1/alunos/$aluno",['turma_id'=>1])->assertOk();
         $this->assertDatabaseHas('notas',['cartao_id'=>$c->id,'turma_id'=>1]);
     }
