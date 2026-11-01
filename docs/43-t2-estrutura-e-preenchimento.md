@@ -1,6 +1,6 @@
 # 43 — T2-B/C: expansão e preenchimento de espaços
 
-Implementação em revisão. Base: PR #74 incorporado em `79eb72f5f950b03185de4dfbe4f9584b36e45395`. O responsável aprovou dois clientes internos provisórios e a futura gestão das duas redes pelo administrador com vínculos separados. [Manifesto aprovado](42-t2-inventario-e-manifesto.md). Nenhuma migração ou escrita em produção foi realizada nesta entrega.
+Implementação incorporada pelo PR #75 em `7289fe1917bfceab7ab78c324e66c2b17602f8ea`, sem deploy. Continuidade: [T2-D/E](44-t2-adaptacao-e-corte.md). Base: PR #74 incorporado em `79eb72f5f950b03185de4dfbe4f9584b36e45395`. O responsável aprovou dois clientes internos provisórios e a futura gestão das duas redes pelo administrador com vínculos separados. [Manifesto aprovado](42-t2-inventario-e-manifesto.md). Nenhuma migração ou escrita em produção foi realizada nesta entrega.
 
 ## Escopo desta entrega
 
