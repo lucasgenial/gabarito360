@@ -76,6 +76,7 @@ class ContextoCorrecao
 
     public static function versaoAcesso(Usuario $ator): string
     {
+        if (ContextoVinculo::presente($ator)) return ContextoVinculo::versaoAcesso($ator);
         Permissao::limparCache();
         $escopos = DB::table('usuario_escopos')->where('usuario_id', $ator->id)->orderBy('id')->get()->toArray();
         $permissoes = Permissao::efetivas($ator); sort($permissoes);

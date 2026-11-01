@@ -12,6 +12,43 @@ class Usuario extends Authenticatable
 
     protected $table = 'usuarios';
 
+    private ?int $vinculoContexto = null;
+
+    /** Cópia de leitura para um vínculo validado; não muda a conta nem outros contextos. */
+    public function noVinculo(int $id): static
+    {
+        $contexto = clone $this;
+        $contexto->unsetRelations();
+        $contexto->vinculoContexto = $id;
+        \App\Support\ContextoVinculo::resolver($contexto);
+        return $contexto;
+    }
+
+    public function vinculoContextoId(): ?int
+    {
+        return $this->vinculoContexto;
+    }
+
+    public function fresh($with = [])
+    {
+        $atual = parent::fresh($with);
+        return $atual && $this->vinculoContexto !== null ? $atual->noVinculo($this->vinculoContexto) : $atual;
+    }
+
+    /** SerializesModels só guarda o ID da conta e perderia o vínculo. */
+    public function getQueueableId()
+    {
+        if ($this->vinculoContexto !== null) {
+            throw new \LogicException('Transporte usuario_id e vinculo_id explicitamente e revalide no consumidor.');
+        }
+        return parent::getQueueableId();
+    }
+
+    public function getPerfilAttribute($perfil): ?string
+    {
+        return $this->vinculoContexto === null ? $perfil : \App\Support\ContextoVinculo::resolver($this)->perfil;
+    }
+
     protected $fillable = [
         'perfil',
         'nome',

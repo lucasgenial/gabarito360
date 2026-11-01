@@ -18,6 +18,7 @@ class Escopo
     /** Escolas visíveis ao usuário. */
     public static function escolaIds(Usuario $u): ?array
     {
+        if (ContextoVinculo::presente($u)) return ContextoVinculo::escolas($u);
         $ids = match ($u->perfil) {
             'admin_rede' => Espacos::ativo()
                 ? DB::table('escolas')->join('nucleos', 'nucleos.id', '=', 'escolas.nucleo_id')
@@ -44,6 +45,8 @@ class Escopo
     /** Turmas visíveis: professor só as vinculadas; demais, as turmas das suas escolas. */
     public static function turmaIds(Usuario $u): ?array
     {
+        // Aluno não recebe a turma inteira por ter vínculo individual.
+        if (ContextoVinculo::presente($u) && $u->perfil === 'aluno') return [];
         if ($u->perfil === 'professor') {
             $q = DB::table('turmas')->whereIn('id', self::escopos($u, 'turma'));
             Espacos::conferirEscola($q, 'turmas');
@@ -68,6 +71,8 @@ class Escopo
     public static function provas(Usuario $u): Builder
     {
         $q = Espacos::filtrar(Prova::query(), $u, 'provas.espaco_id');
+        // O consumidor de resultado individual será integrado antes de liberar provas ao aluno.
+        if (ContextoVinculo::presente($u) && $u->perfil === 'aluno') return $q->whereRaw('1 = 0');
         Espacos::conferirEscola($q, 'provas');
 
         $escolas = self::escolaIds($u);
@@ -120,12 +125,16 @@ class Escopo
             $q->whereExists(fn ($t) => $t->selectRaw('1')->from('turmas as turma_dona')
                 ->whereColumn('turma_dona.id', 'alunos.turma_id')->whereColumn('turma_dona.espaco_id', 'alunos.espaco_id'));
         }
+        if (ContextoVinculo::presente($u) && $u->perfil === 'aluno') {
+            return $q->whereIn('alunos.id', ContextoVinculo::referencias($u, 'aluno'));
+        }
         $ids = self::turmaIds($u);
         return $ids === null ? $q : $q->whereIn('alunos.turma_id', $ids);
     }
 
     private static function escopos(Usuario $u, string $tipo): array
     {
+        if (ContextoVinculo::presente($u)) return ContextoVinculo::referencias($u, $tipo);
         return DB::table('usuario_escopos')
             ->where('usuario_id', $u->id)
             ->where('escopo_tipo', $tipo)
