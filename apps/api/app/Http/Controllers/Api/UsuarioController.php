@@ -9,6 +9,8 @@ use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Support\Cadastro;
+use App\Support\Espacos;
+use App\Support\GestaoLegada;
 use App\Support\Permissao;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -20,6 +22,7 @@ class UsuarioController extends Controller
     private function escopoQuery(Request $request)
     {
         $usuario = $request->user();
+        if (Espacos::ativo()) return GestaoLegada::usuarios($usuario);
 
         $query = Usuario::query()->where('id', '!=', $usuario->id);
 
@@ -57,7 +60,7 @@ class UsuarioController extends Controller
                 || str_contains(mb_strtolower($u->email), $busca))->values();
         }
 
-        $totais = DB::table('usuarios')
+        $totais = $this->escopoQuery($request)
             ->select('perfil', DB::raw('count(*) as total'))
             ->groupBy('perfil')
             ->pluck('total', 'perfil');
@@ -95,9 +98,12 @@ class UsuarioController extends Controller
             'cpf.unique'   => 'CPF já cadastrado.',
         ]);
 
+        if (Espacos::ativo() && $data['perfil'] === 'admin_rede') return ApiResponse::error('Novo administrador exige atribuição explícita por vínculo.', [], 422);
+
         if ($erro = $this->validarPerfilEEscopo($gestor, $data['perfil'], $data['escola_id'] ?? null, $data['nucleo_id'] ?? null)) {
             return $erro;
         }
+        if (!in_array($data['perfil'], Cadastro::DE_ESCOLA, true)) unset($data['escola_id']);
         // Turmas do professor: só da escola dele e só por quem vincula professor à turma
         $turmaIds = $data['perfil'] === 'professor' ? array_values(array_unique($data['turma_ids'] ?? [])) : [];
         if ($turmaIds) {
@@ -110,45 +116,52 @@ class UsuarioController extends Controller
             }
         }
 
-        $usuario = Usuario::create([
-            'nome'                  => $data['nome'],
-            'email'                 => $data['email'],
-            'cpf'                   => $data['cpf'],
-            'perfil'                => $data['perfil'],
-            'password'              => Hash::make(Str::random(32)),
-            'ativo'                 => $data['ativo'] ?? true,
-            'data_nascimento'       => $data['data_nascimento'] ?? null,
-            'telefone'              => $data['telefone'] ?? null,
-            'data_ingresso'         => $data['data_ingresso'] ?? null,
-            'formacao_academica'    => $data['formacao_academica'] ?? null,
-            'especializacao'        => $data['especializacao'] ?? null,
-            'registro_profissional' => $data['registro_profissional'] ?? null,
-            'observacoes'           => $data['observacoes'] ?? null,
-        ]);
-
-        if (!empty($data['escola_id'])) {
-            DB::table('usuario_escopos')->insert([
-                'usuario_id'  => $usuario->id,
-                'escopo_tipo' => 'escola',
-                'escopo_id'   => $data['escola_id'],
-                'created_at'  => now(),
-            ]);
+        if (Espacos::ativo() && $turmaIds && \App\Support\Escopo::turmas($gestor)->whereIn('turmas.id', $turmaIds)->count() !== count($turmaIds)) {
+            return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        foreach ($turmaIds as $turmaId) {
-            DB::table('usuario_escopos')->insert([
-                'usuario_id' => $usuario->id, 'escopo_tipo' => 'turma', 'escopo_id' => $turmaId, 'created_at' => now(),
+        $usuario = DB::transaction(function () use ($data, $turmaIds) {
+            $usuario = Usuario::create([
+                'nome'                  => $data['nome'],
+                'email'                 => $data['email'],
+                'cpf'                   => $data['cpf'],
+                'perfil'                => $data['perfil'],
+                'password'              => Hash::make(Str::random(32)),
+                'ativo'                 => $data['ativo'] ?? true,
+                'data_nascimento'       => $data['data_nascimento'] ?? null,
+                'telefone'              => $data['telefone'] ?? null,
+                'data_ingresso'         => $data['data_ingresso'] ?? null,
+                'formacao_academica'    => $data['formacao_academica'] ?? null,
+                'especializacao'        => $data['especializacao'] ?? null,
+                'registro_profissional' => $data['registro_profissional'] ?? null,
+                'observacoes'           => $data['observacoes'] ?? null,
             ]);
-        }
 
-        if ($data['perfil'] === 'dir_nucleo' && !empty($data['nucleo_id'])) {
-            DB::table('usuario_escopos')->insert([
-                'usuario_id'  => $usuario->id,
-                'escopo_tipo' => 'nucleo',
-                'escopo_id'   => $data['nucleo_id'],
-                'created_at'  => now(),
-            ]);
-        }
+            if (!empty($data['escola_id'])) {
+                DB::table('usuario_escopos')->insert([
+                    'usuario_id'  => $usuario->id,
+                    'escopo_tipo' => 'escola',
+                    'escopo_id'   => $data['escola_id'],
+                    'created_at'  => now(),
+                ]);
+            }
+
+            foreach ($turmaIds as $turmaId) {
+                DB::table('usuario_escopos')->insert([
+                    'usuario_id' => $usuario->id, 'escopo_tipo' => 'turma', 'escopo_id' => $turmaId, 'created_at' => now(),
+                ]);
+            }
+
+            if ($data['perfil'] === 'dir_nucleo' && !empty($data['nucleo_id'])) {
+                DB::table('usuario_escopos')->insert([
+                    'usuario_id'  => $usuario->id,
+                    'escopo_tipo' => 'nucleo',
+                    'escopo_id'   => $data['nucleo_id'],
+                    'created_at'  => now(),
+                ]);
+            }
+            return $usuario;
+        });
 
         if ($usuario->ativo) {
             app(ContaUsuario::class)->convidar($usuario, $gestor);
@@ -192,6 +205,7 @@ class UsuarioController extends Controller
             return ApiResponse::error('Ative o usuário antes de enviar o convite.', [], 422);
         }
 
+        if (!Cadastro::podeGerirPerfil($request->user(), $usuario->perfil)) return ApiResponse::error('Perfil fora da sua gestão.', [], 403);
         $conta->convidar($usuario, $request->user());
 
         return ApiResponse::success(['mensagem' => 'Convite enviado.']);
@@ -244,6 +258,13 @@ class UsuarioController extends Controller
             'forcar_troca_senha'     => 'sometimes|boolean',
         ]);
 
+        if (Espacos::ativo()) {
+            if (isset($data['perfil']) && $data['perfil'] !== $usuario->perfil) return ApiResponse::error('Mudança de perfil exige gestão por vínculo.', [], 422);
+            if ($request->has('escola_id')) {
+                $atuais = \App\Support\Instituicoes::referencias($usuario, 'escola');
+                if (count($atuais) !== 1 || (int) ($data['escola_id'] ?? 0) !== $atuais[0]) return ApiResponse::error('Mudança de escola exige gestão por vínculo.', [], 422);
+            }
+        }
         $escolaId = $data['escola_id'] ?? null;
         unset($data['escola_id']);
 
@@ -257,7 +278,7 @@ class UsuarioController extends Controller
 
         $usuario->update($data);
 
-        if ($request->has('escola_id')) {
+        if ($request->has('escola_id') && !Espacos::ativo()) {
             DB::table('usuario_escopos')
                 ->where('usuario_id', $id)
                 ->where('escopo_tipo', 'escola')

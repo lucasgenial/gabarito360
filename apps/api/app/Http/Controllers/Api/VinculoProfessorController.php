@@ -6,15 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Turma;
 use App\Support\Escopo;
+use App\Support\Espacos;
+use App\Support\GestaoLegada;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class VinculoProfessorController extends Controller
 {
-    public function index(int $turmaId): JsonResponse
+    public function index(Request $request, int $turmaId): JsonResponse
     {
-        $turma = Turma::find($turmaId);
+        $turma = $this->turmaNoEscopo($request, $turmaId);
 
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');
@@ -55,6 +57,10 @@ class VinculoProfessorController extends Controller
             return ApiResponse::error('Usuário não é professor.', [], 422);
         }
 
+        $daEscola = DB::table('usuario_escopos')->where('usuario_id', $professor->id)
+            ->where('escopo_tipo', 'escola')->where('escopo_id', $turma->escola_id)->exists();
+        if (!$daEscola) return ApiResponse::notFound('Professor não encontrado nesta escola.');
+
         $existe = DB::table('usuario_escopos')
             ->where('usuario_id', $data['usuario_id'])
             ->where('escopo_tipo', 'turma')
@@ -90,15 +96,13 @@ class VinculoProfessorController extends Controller
 
     private function turmaNoEscopo(Request $request, int $turmaId): ?Turma
     {
-        $ids = Escopo::turmaIds($request->user());
-
-        return ($ids === null || in_array($turmaId, $ids, true)) ? Turma::find($turmaId) : null;
+        return Escopo::turmas($request->user())->find($turmaId);
     }
 
-    public function turmasDoProfessor(int $usuarioId): JsonResponse
+    public function turmasDoProfessor(Request $request, int $usuarioId): JsonResponse
     {
-        $professor = \App\Models\Usuario::query()
-            ->where('id', $usuarioId)
+        $professor = (Espacos::ativo() && $usuarioId !== (int) $request->user()->id ? GestaoLegada::usuarios($request->user()) : \App\Models\Usuario::query())
+            ->where('usuarios.id', $usuarioId)
             ->where('perfil', 'professor')
             ->first();
 
@@ -106,7 +110,7 @@ class VinculoProfessorController extends Controller
             return ApiResponse::notFound('Professor não encontrado.');
         }
 
-        $turmas = DB::table('turmas')
+        $turmas = Escopo::turmas($request->user())
             ->join('usuario_escopos', function ($j) use ($usuarioId) {
                 $j->on('turmas.id', '=', 'usuario_escopos.escopo_id')
                   ->where('usuario_escopos.usuario_id', $usuarioId)

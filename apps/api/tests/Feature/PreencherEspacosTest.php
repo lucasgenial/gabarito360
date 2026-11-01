@@ -123,4 +123,30 @@ class PreencherEspacosTest extends TestCase
             $this->app['env'] = 'testing';
         }
     }
+
+    public function test_conciliacao_admin_simula_e_repete_duas_atribuicoes_sem_criar_vinculo_global(): void
+    {
+        app(PreencherEspacosLegados::class)->executar(true);
+        $opcoes = ['--usuario' => 1, '--manifesto' => EstruturaEspacos::VERSAO];
+        $this->artisan('g360:conciliar-admin-espacos', $opcoes)->assertSuccessful();
+        $this->assertDatabaseCount('usuario_escopos', 0);
+        $this->artisan('g360:conciliar-admin-espacos', $opcoes + ['--aplicar' => true])->assertSuccessful();
+        $this->artisan('g360:conciliar-admin-espacos', $opcoes + ['--aplicar' => true])->assertSuccessful();
+        $this->assertDatabaseCount('usuario_escopos', 2);
+        foreach ([1, 2] as $rede) $this->assertDatabaseHas('usuario_escopos', ['usuario_id' => 1, 'escopo_tipo' => 'rede', 'escopo_id' => $rede]);
+    }
+
+    public function test_conciliacao_admin_recusa_alvo_errado_ambiguidade_e_acessos_divergentes(): void
+    {
+        app(PreencherEspacosLegados::class)->executar(true);
+        $opcoes = ['--usuario' => 1, '--manifesto' => EstruturaEspacos::VERSAO, '--aplicar' => true];
+        $this->artisan('g360:conciliar-admin-espacos', array_replace($opcoes, ['--usuario' => 999]))->assertFailed();
+        DB::table('usuario_escopos')->insert(['usuario_id' => 1, 'escopo_tipo' => 'escola', 'escopo_id' => 1]);
+        $this->artisan('g360:conciliar-admin-espacos', $opcoes)->assertFailed();
+        $this->assertDatabaseCount('usuario_escopos', 1);
+        DB::table('usuario_escopos')->delete();
+        DB::table('usuarios')->insert(['nome' => 'Outro admin fictício', 'perfil' => 'admin_rede', 'email' => 'outro@example.test', 'cpf' => '00000000002', 'password' => 'teste']);
+        $this->artisan('g360:conciliar-admin-espacos', $opcoes)->assertFailed();
+        $this->assertDatabaseCount('usuario_escopos', 0);
+    }
 }
