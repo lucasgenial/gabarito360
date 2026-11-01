@@ -1,0 +1,80 @@
+{
+  "copia_isolada": true,
+  "mariadb": "10.11.14-MariaDB-0ubuntu0.24.04.1",
+  "adaptador_candidato_ativo": true,
+  "esquema_completo": true,
+  "contagens": {
+    "turmas": 14,
+    "alunos": 414,
+    "provas": 4,
+    "prova_turmas": 8,
+    "gabaritos": 4,
+    "gabarito_questoes": 180,
+    "cartoes": 47,
+    "cartao_respostas": 2115,
+    "notas": 47,
+    "ambiguidade_logs": 28,
+    "cartao_envios": 0,
+    "visitas": 0,
+    "sincronizacoes_seges": 0
+  },
+  "conteudo_anterior_preservado": true,
+  "cifras_validadas": 20,
+  "chave_errada_recusada": true,
+  "arquivos_cartoes_recuperados": 47,
+  "http_kernel": {
+    "login": 200,
+    "painel": 200,
+    "rede_alheia": 404,
+    "segunda_rede_autorizada": 200
+  },
+  "http_tempos_ms": {
+    "POST /api/v1/auth/login": 377.73,
+    "GET /api/v1/dashboard/admin": 210.11,
+    "GET /api/v1/relatorios/rede/2": 259.07
+  },
+  "tempos_ms": {
+    "expansao": 3180.06,
+    "preenchimento": 4320.53,
+    "conciliacao": 67.39,
+    "restricao": 18081.94,
+    "repeticao": 1019.25
+  },
+  "ocorrencias": 0,
+  "sem_escrita_producao": true,
+  "base_git": "1d42000e3b145bf756ef5f000583a9adb623eda2",
+  "producao_git_somente_leitura": "dc9949e3690744b72c5071d919955c09ad2be9b8",
+  "ambiente": "WSL isolado, PHP 8.3.6, MariaDB 10.11.14; kernel HTTP, sem nginx/FPM/Redis",
+  "fontes_sha256_lf": {
+    "scripts/ensaios/t2-validar-copia.php": "be88655340e14952e0f53e10cef2cd59cb3661dd5b1c06b9d795e76179e480c1",
+    "apps/api/config/espacos.php": "b6dcf1e9ed7c80f0d831d2edca530bddd43216bfca697efc7e4194ad0b1c9830",
+    "apps/api/app/Services/RestringirEspacos.php": "28ea8795d39023c391eb3a841b7af551cf59de2934ff0848bd2f14c7ec58367a",
+    "apps/api/app/Http/Controllers/Api/RelatorioConsolidadoController.php": "54689d0e1f24d8ea073166a53ccbc0c823957363963a5d571101affef296bc20"
+  },
+  "backup_automatico": {
+    "data": "2026-10-31",
+    "ct106_zstd_integro": true,
+    "ct111_zstd_integro": true,
+    "ct106_extraido_e_banco_iniciado_sem_rede": true,
+    "tabelas_banco_restaurado": 39,
+    "mariadb_check_ok": true,
+    "ct111_extraido": true,
+    "app_key_presente": true,
+    "dados_hash_key_presente": false,
+    "anterior_ao_L3": true
+  },
+  "copia_atual": {
+    "leitura_online": true,
+    "restauracao_sql_e_tar_ok": true,
+    "mariadb_check_ok": true,
+    "app_key_presente": true,
+    "dados_hash_key_presente": true,
+    "substitui_backup_final_com_escritores_parados": false
+  },
+  "limites": [
+    "Sem restauração LXC completa no Proxmox",
+    "Sem RTO/RPO operacional medido",
+    "Sem acesso externo ou envio de e-mail",
+    "OMR e fila com dependências simuladas na suíte MariaDB; não cartão real em produção"
+  ]
+}
