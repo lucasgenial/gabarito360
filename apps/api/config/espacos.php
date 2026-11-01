@@ -1,7 +1,7 @@
 <?php
 
 return [
-    // Preparação T2-D1. Sem chave .env enquanto consumidores e T2-E não estiverem completos.
-    // Testes exercitam o adaptador com config(['espacos.ativo' => true]).
-    'ativo' => false,
+    // Release de ativação T2: publicar somente com manutenção, preenchimento e corte aprovados.
+    // B5 impede reabertura automática se o esquema restritivo ainda não estiver completo.
+    'ativo' => true,
 ];

@@ -129,11 +129,13 @@ class RelatorioConsolidadoController extends Controller
             return collect();
         }
 
+        // DISTINCT preserva IDs únicos e impede a fusão das hierarquias no otimizador MariaDB.
+        // Projetar só as colunas usadas evita materializar dados protegidos desnecessários.
         return $consulta->tabela('notas')
-            ->joinSub($consulta->tabela('provas'), 'provas', 'provas.id', '=', 'notas.prova_id')
-            ->joinSub($consulta->tabela('turmas'), 'turmas', 'turmas.id', '=', 'notas.turma_id')
-            ->joinSub($consulta->tabela('escolas'), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
-            ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.id', '=', 'notas.aluno_id')
+            ->joinSub($consulta->tabela('provas')->select(['id', 'disciplina', 'status', 'nota_maxima'])->distinct(), 'provas', 'provas.id', '=', 'notas.prova_id')
+            ->joinSub($consulta->tabela('turmas')->select(['id', 'nome', 'escola_id'])->distinct(), 'turmas', 'turmas.id', '=', 'notas.turma_id')
+            ->joinSub($consulta->tabela('escolas')->select(['id', 'nome'])->distinct(), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
+            ->joinSub($consulta->tabela('alunos')->select(['id', 'nome'])->distinct(), 'alunos', 'alunos.id', '=', 'notas.aluno_id')
             ->whereIn('turmas.escola_id', $escolaIds)
             ->whereIn('provas.status', ['publicada', 'em_correcao', 'corrigida'])
             ->get([

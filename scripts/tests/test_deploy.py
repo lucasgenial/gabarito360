@@ -45,7 +45,9 @@ elif cmd=='php':
         if a[0]=='migrate' and s.get('migration_failure'): code=1
         s['events'][-1].append('app='+app)
     else:
-        if '--somente-manutencao' in args: print('0')
+        if '--validar-corte' in args:
+            code=int(s.get('cut_pending',False)); print('0')
+        elif '--somente-manutencao' in args: print('0')
         else:
             values=s.setdefault('queue',[0])
             q=values.pop(0) if len(values)>1 else values[0]
@@ -138,6 +140,19 @@ class DeployTest(unittest.TestCase):
         self.assertEqual(self.s['head'], ANTES)
         self.assertFalse(self.artisan('migrate'))
         self.assertNotIn('PREPARADO EM MANUTENÇÃO', self.result.stdout)
+
+    def test_corte_pendente_impede_abertura_automatica_e_preserva_manutencao(self):
+        self.assertNotEqual(self.run_deploy(cut_pending=True), 0)
+        self.assertEqual(self.s['head'], ALVO)
+        self.assertFalse(self.artisan('up'))
+        self.assertFalse([e for e in self.s['events'] if e[:2] == ['systemctl','start']])
+        for app in ['api','web']:
+            self.assertTrue((self.root / f'apps/{app}/storage/framework/down').exists())
+
+    def test_preparo_em_manutencao_permite_corte_ainda_pendente_sem_abrir(self):
+        self.assertEqual(self.run_deploy(hold=True,cut_pending=True),0,self.result.stderr)
+        self.assertFalse(self.artisan('up'))
+        self.assertFalse([e for e in self.s['events'] if '--validar-corte' in e])
 
     def test_sha_invalido_nao_chega_ao_git(self):
         self.assertEqual(self.run_deploy(target='invalido; comando'), 2)
