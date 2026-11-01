@@ -70,10 +70,12 @@ Backup novo e validação da restauração devem ser resolvidos **antes** de con
 
 ### 1. Conferência e drenagem
 
+Atualização do procedimento: preparar o hook e o confirmador conforme [doc. 53](53-t2-checkpoint-backup-final.md). O B5 aguarda o backup coerente antes do código/DDL; `--manter-manutencao` sozinho não oferece essa pausa.
+
 No CT 111, como root; usar o script revisado desta entrega (bootstrap em `/tmp` se a produção ainda tiver o B5 anterior). Conferir SHA-256 do arquivo com a versão aprovada antes de executar. Não fazer checkout antecipado. Definir `ALVO` e `ATUAL` pelos SHAs confirmados, não pelos exemplos históricos.
 
 ```bash
-bash /tmp/g360-deploy.sh --commit "$ALVO" --from "$ATUAL" --check --manter-manutencao
+bash /tmp/g360-deploy.sh --commit "$ALVO" --from "$ATUAL" --check --manter-manutencao --backup-final /root/pausa-backup-final.sh
 ```
 
 Esperado: preflight aprovado; nenhuma publicação/manutenção/migração. `--check` faz fetch e cria lock/temporários, portanto não é uma inspeção absolutamente sem escrita em disco. Resolver árvore suja, serviço inativo, mudança de SHA ou fila problemática antes da janela. Conferir externamente os importadores/escritores não administrados por B5.
@@ -81,7 +83,7 @@ Esperado: preflight aprovado; nenhuma publicação/manutenção/migração. `--c
 ### 2. Instalação mantendo a aplicação fechada
 
 ```bash
-bash /tmp/g360-deploy.sh --commit "$ALVO" --from "$ATUAL" --wait 300 --manter-manutencao
+bash /tmp/g360-deploy.sh --commit "$ALVO" --from "$ATUAL" --wait 300 --manter-manutencao --backup-final /root/pausa-backup-final.sh
 ```
 
 Esperado: `PREPARADO EM MANUTENÇÃO`, não `DEPLOY CONCLUÍDO`. B5 fecha web, para timer e serviço de agendamento, drena com API ainda aberta, fecha API, reconfere fila e para workers. Confere todos parados **antes** do código/DDL. Instala dependências, executa migrações aditivas só da API, recria caches e termina sem abrir HTTP nem iniciar workers/timer. Não executa backfill, conciliação ou restrições e não modifica `.env`/flag. O release de ativação ainda precisa ser preparado/aprovado separadamente; não editar `config/espacos.php` à mão no servidor.

@@ -18,7 +18,10 @@ jobs:
       - run: |
           bash -n scripts/operacao/deploy.sh
           bash -n infra/deploy.sh
-          python3 scripts/tests/test_deploy.py
+          bash -n scripts/operacao/pausa-backup-final.sh
+          sudo python3 scripts/tests/test_deploy.py
+          sudo python3 scripts/tests/test_pausa_backup.py
+          sudo python3 scripts/tests/test_confirmar_backup.py
 
   testes:
     runs-on: ubuntu-latest
