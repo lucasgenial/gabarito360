@@ -24,3 +24,5 @@ Recuperação do Desenvolvedor permanece operação administrativa fora da inter
 ## Resultados locais
 
 API: regressão inicial de gestão e seleção com 11 testes/125 verificações. Após ampliar casos de vínculo pedagógico e marcador de bootstrap, gestão passou com 5 testes/66 verificações. Web: 7 testes/82 verificações (gestão e contextos internos). Testes de gestão adicionados ao CI MariaDB. Revisão de código aplicada aos bloqueios transacionais, validação de alvo, revogação, auditoria e bootstrap. CI completo e ensaio visual devem ser conferidos antes de pedir merge.
+
+Ensaio visual via Chrome/Computer Use concluído em SQLite local com dados fictícios: seleção de Desenvolvedor, menu e formulário, concessão de Suporte e suspensão pela interface. Tela confirmou `Suspenso`; conferência local confirmou versão 2 e eventos `concessao`/`alteracao`. Nenhuma atribuição real foi criada. Ajustes finais de espaçamento e atalho do painel incluídos no PR; aprovação do CI final deve ser conferida no GitHub.
