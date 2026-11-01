@@ -473,7 +473,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### V1. Vínculos por pessoa
 
-- **Andamento em 01/11/2026:** V1-A/B/C1 incorporados nos PRs #87/#88/#89. V1-C2a implementado para revisão: [fila e referências contextuais](58-v1-fila-e-consultas-contextuais.md). Faltam V1-C2b (gestão/projeções/resultados) e V1-C3 (conciliação final e ativação); sem deploy destas fases.
+- **Andamento em 01/11/2026:** V1-A/B/C1/C2a incorporados nos PRs #87/#88/#89/#90. V1-C2b implementado para revisão: [gestão, projeções e resultados](59-v1-gestao-e-resultados-contextuais.md). Falta V1-C3 (conciliação final, contas adiadas, convite para conta existente e condições de ativação); V2 mantém seleção e interface por contexto. Sem deploy destas fases.
 
 - **Objetivo:** permitir vários papéis para a mesma pessoa.
 - **Dependências:** T2.
@@ -971,7 +971,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | L6 Trocar foto por avatar | concluído funcionalmente: galeria de 36 avatares e iniciais publicadas e verificadas em produção (docs/operacao/avatares-alunos.md); foto_path e fotos preservados, remoção não autorizada | Codex | #70 |
 | T1 Modelo de dados | concluído: modelo aprovado pelo responsável; PR #73 incorporado; docs/40 e docs/41 | Codex | #73 |
 | T2 Clientes e espaços | concluído e publicado na homologação representativa em 01/11/2026: release af4c6d1 (PR #85); backup final em duas camadas, preenchimento e restrições aplicados; 2 clientes internos/13 espaços, administrador com dois vínculos separados; auditoria, dados e validação funcional aprovados (docs/54). V1/V2 permanecem próximos pacotes distintos | Codex | #74, #75, #76, #77, #78, #79, #80, #81, #82, #83, #84, #85 |
-| V1 Vínculos | pendente | | |
+| V1 Vínculos | em andamento; A/B/C1/C2a incorporados, C2b em revisão e C3 pendente; sem deploy | Codex | #87–#90; docs/59 |
 | V2 Escolha do vínculo | pendente | | |
 | T3 Perfis por espaço | pendente | | |
 | T4 Cadastro de clientes | pendente | | |
