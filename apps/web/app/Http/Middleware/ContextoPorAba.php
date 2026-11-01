@@ -44,7 +44,7 @@ class ContextoPorAba
             abort_unless($permissao === null || ($permissao !== false && in_array($permissao, $dados['permissoes'], true)), 403);
         }
         if (($dados['tipo_contexto'] ?? null) === 'interno') {
-            abort_unless($request->routeIs('painel', 'perfil', 'perfil.*', 'internos.*'), 403, 'Escolha um vínculo para abrir esta área.');
+            abort_unless($request->routeIs('painel', 'perfil', 'perfil.*', 'internos.*', 'clientes.*'), 403, 'Escolha um vínculo para abrir esta área.');
         }
         $response = $next($request);
         // Redirecionamentos de formulários preservam o contexto da requisição.

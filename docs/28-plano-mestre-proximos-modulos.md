@@ -514,13 +514,13 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### T4. Cadastro de clientes
 
-- **Andamento em 01/11/2026:** T4-A incorporado no PR #100 (`a161e87`); nenhuma rota ou concessão de acesso. A1-A incorporado no PR #101 é a primeira parte do pré-requisito das telas T4-B. Sequência revista: [docs/67](67-a1-planejamento-e-acessos-internos.md). Sem deploy.
+- **Andamento em 01/11/2026:** T4-A incorporado no PR #100 (`a161e87`); A1 incorporado nos PRs #101–104. T4-B API e telas comerciais em revisão conforme [docs/71](71-t4-b-interface-clientes.md). Sem deploy.
 - **Dependências:** T2, A1.
 - **Arquivos:** novas telas `clientes/*`.
 - **Passos:**
   1. Criar telas para Desenvolvedor, Suporte e Financeiro.
   2. Cadastrar tipo, documento, contatos e modalidade.
-  3. Mostrar espaços, usuários e contrato.
+  3. Mostrar espaços e contagens de vínculos, sem identidade dos usuários; referência contratual opcional. Contrato completo é F1; atendimento com dados pedagógicos exige AU3 (revisão T4-B).
   4. Registrar mudança de modalidade na auditoria.
 - **Pronto quando:** cada tipo de cliente pode ser criado, editado e consultado.
 
@@ -978,10 +978,10 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
 | V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
 | T3 Perfis por espaço | T3-A #96, T3-B #97 e T3-C #99 incorporados; sem deploy | Codex | docs/63–65 |
-| T4 Cadastro de clientes | T4-A #100 incorporado; A1 necessário antes das telas T4-B; sem deploy | Codex | docs/66–67 |
+| T4 Cadastro de clientes | T4-A #100 e A1 #101–104 incorporados; T4-B interface comercial em revisão; sem deploy | Codex | docs/66–71 |
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
-| A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C Secretário Escolar em revisão; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
+| A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C #104 incorporado; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
 | AU1 Registro de auditoria | pendente | | |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |

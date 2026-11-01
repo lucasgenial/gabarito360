@@ -55,6 +55,11 @@ Route::prefix('v1')->group(function () {
 
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
+        Route::get('clientes', [\App\Http\Controllers\Api\ClienteController::class,'index']);
+        Route::post('clientes', [\App\Http\Controllers\Api\ClienteController::class,'store'])->middleware('throttle:20,1');
+        Route::get('clientes/{id}', [\App\Http\Controllers\Api\ClienteController::class,'show'])->whereNumber('id');
+        Route::put('clientes/{id}', [\App\Http\Controllers\Api\ClienteController::class,'update'])->whereNumber('id')->middleware('throttle:20,1');
+        Route::get('clientes/{id}/espacos', [\App\Http\Controllers\Api\ClienteController::class,'espacos'])->whereNumber('id');
         Route::get('acessos-internos', [\App\Http\Controllers\Api\GestaoAcessoInternoController::class,'index']);
         Route::post('acessos-internos', [\App\Http\Controllers\Api\GestaoAcessoInternoController::class,'store'])->middleware('throttle:10,1');
         Route::put('acessos-internos/{id}', [\App\Http\Controllers\Api\GestaoAcessoInternoController::class,'update'])->whereNumber('id')->middleware('throttle:20,1');

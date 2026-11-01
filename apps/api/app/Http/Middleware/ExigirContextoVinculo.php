@@ -18,6 +18,10 @@ class ExigirContextoVinculo
                 app(\App\Services\GestaoAcessosInternos::class)->autorizar($usuario);
                 return $next($request);
             }
+            if ($request->is('api/v1/clientes', 'api/v1/clientes/*')) {
+                \App\Http\Controllers\Api\ClienteController::autorizar($request);
+                return $next($request);
+            }
             // A área interna não pode alcançar rotas escolares nem responder convites.
             if (\App\Support\ContextoInterno::presente($usuario)) {
                 abort_unless($request->is('api/v1/auth/me', 'api/v1/auth/email'), 403);
