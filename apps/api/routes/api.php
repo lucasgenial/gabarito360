@@ -56,6 +56,8 @@ Route::prefix('v1')->group(function () {
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
         Route::prefix('auth')->group(function () {
+            Route::get('acessos-internos', [\App\Http\Controllers\Api\SelecaoInternaController::class, 'index'])->middleware('throttle:30,1');
+            Route::post('acessos-internos/selecionar', [\App\Http\Controllers\Api\SelecaoInternaController::class, 'selecionar'])->middleware('throttle:20,1');
             Route::post('convites-vinculo/{id}/consultar', [ConviteVinculoController::class, 'consultar'])->whereNumber('id')->middleware('throttle:20,1');
             Route::post('convites-vinculo/{id}/responder', [ConviteVinculoController::class, 'responder'])->whereNumber('id')->middleware('throttle:10,1');
             Route::get('vinculos', [\App\Http\Controllers\Api\SelecaoVinculoController::class, 'index'])->middleware('throttle:30,1');

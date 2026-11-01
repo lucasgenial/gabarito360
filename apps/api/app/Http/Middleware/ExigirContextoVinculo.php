@@ -12,11 +12,15 @@ class ExigirContextoVinculo
     {
         // O token persistido define o contexto; IDs em payload/header não o substituem.
         if (!$request->is('api/v1/auth/logout')) {
-            $usuario = \App\Support\TokenVinculo::resolver($request->user());
+            $usuario = \App\Support\TokenInterno::resolver(\App\Support\TokenVinculo::resolver($request->user()));
             $request->setUserResolver(fn () => $usuario);
+            // A área interna não pode alcançar rotas escolares nem responder convites.
+            if (\App\Support\ContextoInterno::presente($usuario)) {
+                abort_unless($request->is('api/v1/auth/me', 'api/v1/auth/email'), 403);
+            }
         }
         // Identidade e resposta ao próprio convite precisam funcionar antes da seleção V2.
-        if (!$request->is('api/v1/auth/vinculos', 'api/v1/auth/vinculos/selecionar', 'api/v1/auth/me', 'api/v1/auth/email', 'api/v1/auth/logout', 'api/v1/auth/convites-vinculo/*/consultar', 'api/v1/auth/convites-vinculo/*/responder')) RegimeVinculos::exigir($request->user());
+        if (!$request->is('api/v1/auth/acessos-internos', 'api/v1/auth/acessos-internos/selecionar', 'api/v1/auth/vinculos', 'api/v1/auth/vinculos/selecionar', 'api/v1/auth/me', 'api/v1/auth/email', 'api/v1/auth/logout', 'api/v1/auth/convites-vinculo/*/consultar', 'api/v1/auth/convites-vinculo/*/responder')) RegimeVinculos::exigir($request->user());
         return $next($request);
     }
 }
