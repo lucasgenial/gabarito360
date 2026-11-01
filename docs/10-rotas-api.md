@@ -247,3 +247,7 @@ Autenticação: Bearer Token (JWT) — exceto rotas públicas.
 ### V1-C3 — Convite de vínculo (backend preparado, sem ativação)
 
 O contrato de emissão, consulta e resposta dos convites de conta existente está em [docs/60](60-v1-conciliacao-e-preparo-do-corte.md). Emissão usa `usuario.gerir` e vínculo do gestor; consulta/resposta são POSTs autenticados pela identidade titular e token de uso único. Não há seleção de contexto por payload. A página web e a escolha por aba pertencem ao V2.
+
+### V2-A — seleção autenticada
+
+`GET /api/v1/auth/vinculos` lista os vínculos válidos da própria identidade. `POST /api/v1/auth/vinculos/selecionar` recebe `vinculo_id` e emite token contextual independente (201). Exigem token de identidade, troca de senha concluída e regime obrigatório ligado. Contrato e sequência em [docs/61](61-v2-contexto-autenticado.md).
