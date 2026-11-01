@@ -1,6 +1,7 @@
 # 55 — V1-A: estrutura e inventário de vínculos
 
 Data: 01/11/2026. Base: `b750b94`, após merge autorizado do PR #86.
+Atualização: V1-A incorporado pelo PR #87 em `28b3fa7`; continuidade implementada para revisão em [V1-B](56-v1-conversao-conciliada.md), ainda sem publicação.
 Escopo aprovado: iniciar V1 conforme [plano mestre](28-plano-mestre-proximos-modulos.md) e [T1](40-clientes-espacos-e-vinculos.md).
 
 ## Entrega
