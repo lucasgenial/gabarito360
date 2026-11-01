@@ -1,0 +1,93 @@
+{
+  "somente_clones": true,
+  "alvo": "6a9724c8107c1349eb2f1b592958d3e7e895aedb",
+  "check_sem_parada": true,
+  "timeout_sem_ddl_sem_reabertura": true,
+  "lock_durante_backup": true,
+  "inventario": {
+    "chaves_recuperadas": true,
+    "cifras": 20,
+    "arquivos": 47,
+    "contagens": {
+      "turmas": 14,
+      "alunos": 414,
+      "provas": 4,
+      "prova_turmas": 8,
+      "gabaritos": 4,
+      "gabarito_questoes": 180,
+      "cartoes": 47,
+      "cartao_respostas": 2115,
+      "notas": 47,
+      "ambiguidade_logs": 28,
+      "cartao_envios": 0,
+      "visitas": 0,
+      "sincronizacoes_seges": 0
+    }
+  },
+  "ajuste_ensaio": "tmpdir do vzdump fora da pasta privada; primeira tentativa não produziu backup e não liberou deploy",
+  "pausa_antes_codigo_ddl": true,
+  "backup_s": 877.07,
+  "backups": [
+    {
+      "papel": "banco",
+      "arquivo": "/root/g360-t2-20261101/checkpoint-arquivos/vzdump-lxc-9106-2026_11_01-06_43_27.tar.zst",
+      "bytes": 2206220087,
+      "sha256": "6b06159ed85723a911b8d496a72e6a130448c12bc9413ac4c8815664f2f16e7d"
+    },
+    {
+      "papel": "aplicacao",
+      "arquivo": "/root/g360-t2-20261101/checkpoint-arquivos/vzdump-lxc-9111-2026_11_01-06_47_16.tar.zst",
+      "bytes": 8757210619,
+      "sha256": "3d1de594103231057337f139e22f1516248dc1c9d068356cc3c7fcfd3d173371"
+    }
+  ],
+  "expansao_somente_apos_recibo": true,
+  "integridade": {
+    "conteudo_preservado": true,
+    "ocorrencias": 0,
+    "esquema_completo": true
+  },
+  "restauracao_checkpoint": {
+    "sha_anterior": true,
+    "sem_tabelas_t2": true,
+    "chaves_arquivos_contagens": true,
+    "health": 200
+  },
+  "fim_utc": "2026-11-01T10:05:06.317723+00:00",
+  "hashes_13_tabelas_restauradas": true,
+  "inicio_checkpoint_utc": "2026-11-01T09:41:32Z",
+  "confirmado_utc": "2026-11-01T09:57:53Z",
+  "pausa_total_s": 981.0,
+  "servidor_atual": {
+    "sha": "dc9949e3690744b72c5071d919955c09ad2be9b8",
+    "tabelas_t2": 0,
+    "health": 200,
+    "servicos_ativos": true,
+    "deploy_migracao_executados": false
+  },
+  "testes_automatizados": {
+    "total": 23,
+    "aprovados": true,
+    "deploy": 19,
+    "recibo": 2,
+    "confirmador_host": 2
+  },
+  "fontes_sha256_lf": {
+    "scripts/operacao/deploy.sh": "9261674901bbb1905a0cc47dd00475d482413f1e6ca586f6448cdcae3b4cdff0",
+    "scripts/operacao/pausa-backup-final.sh": "c76cb2c580f5cbe921a529b9a37c60a9de8ad2107e4b32c924eda662db9c3261",
+    "scripts/operacao/confirmar-backup-final.py": "f5207ad81b7b73d3217f1131e5b4a4af37677b9ac8196c8bc93b54ac98130556",
+    "scripts/ensaios/t2-checkpoint-backup.py": "63c38902212b1e65ff08bc1fccb94dba43f87c529c03a1678215c6c538f5e4f7"
+  },
+  "hook_ensaiado_commit": "6a9724c8107c1349eb2f1b592958d3e7e895aedb",
+  "hook_ajustes_posteriores_testados": "Python isolado (-I) e rejeição de recibo que chega após o prazo; cobertos pelos testes do recibo",
+  "limpeza": {
+    "cts_removidos": [
+      9106,
+      9111
+    ],
+    "volumes_removidos": true,
+    "backups_clones_descartados": true,
+    "backups_referencia_preservados": true,
+    "area_privada_removida": true
+  }
+}
