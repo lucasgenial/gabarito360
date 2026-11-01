@@ -972,7 +972,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | T1 Modelo de dados | concluído: modelo aprovado pelo responsável; PR #73 incorporado; docs/40 e docs/41 | Codex | #73 |
 | T2 Clientes e espaços | concluído e publicado na homologação representativa em 01/11/2026: release af4c6d1 (PR #85); backup final em duas camadas, preenchimento e restrições aplicados; 2 clientes internos/13 espaços, administrador com dois vínculos separados; auditoria, dados e validação funcional aprovados (docs/54). V1/V2 permanecem próximos pacotes distintos | Codex | #74, #75, #76, #77, #78, #79, #80, #81, #82, #83, #84, #85 |
 | V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
-| V2 Escolha do vínculo | V2-A em revisão: API de seleção e tokens independentes; V2-B web por aba e V2-C gestão/convites pendentes; sem deploy | Codex | docs/61 |
+| V2 Escolha do vínculo | V2-A incorporado no PR #93; V2-B web por aba em revisão; V2-C gestão/convites e ensaio integrado pendentes; sem deploy | Codex | docs/61 |
 | T3 Perfis por espaço | pendente | | |
 | T4 Cadastro de clientes | pendente | | |
 | T5 Cópia de dados | pendente | | |

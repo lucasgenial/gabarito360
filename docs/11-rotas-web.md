@@ -186,3 +186,7 @@ COORDENADOR  → /painel → dashboard-coordenador
 PROFESSOR    → /painel → dashboard-professor
 ALUNO        → /painel → dashboard-aluno
 ```
+
+### V2-B — escolha do vínculo
+
+`GET /vinculos` mostra os vínculos autorizados; `POST /vinculos` seleciona um vínculo via API, cria handle vinculado à sessão e redireciona ao painel. Proteção CSRF, autenticação e troca de senha obrigatória preservadas. Contexto da aba acompanha rotas operacionais, formulários, AJAX e downloads. Contrato: [docs/61](61-v2-contexto-autenticado.md).

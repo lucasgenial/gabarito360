@@ -1243,3 +1243,19 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .avatar-opcao:has(input:focus-visible) { outline:3px solid var(--accent); outline-offset:2px; }
 .avatar-opcao-iniciais { grid-column:1/-1; min-height:44px; font-size:13px; }
 .avatar-numero { font-size:11px; color:var(--fg-2); }
+
+/* V2-B: seleção e indicação do vínculo da aba. */
+.vinculo-pagina { max-width: 720px; margin: 48px auto; padding: 0 20px; }
+.vinculo-card { margin-top: 24px; padding: 28px; }
+.vinculo-card > p { margin: 12px 0 24px; color: var(--fg-2); }
+.vinculo-opcao { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.vinculo-opcao p { color: var(--fg-2); margin-top: 4px; }
+.vinculo-topo { display: flex; flex-direction: column; color: var(--fg); font-size: 13px; max-width: 260px; }
+.vinculo-topo span { color: var(--accent); font-size: 12px; }
+@media (max-width: 600px) { .vinculo-opcao { align-items: flex-start; flex-direction: column; } .vinculo-topo { max-width: 160px; } }
+
+@media (max-width: 1023px) {
+  .com-vinculo .container { height: auto; min-height: 56px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 8px; gap: 8px; }
+  .com-vinculo .header-right { width: 100%; margin-left: 0; }
+  .com-vinculo .vinculo-topo { max-width: none; flex: 1; min-width: 0; }
+}

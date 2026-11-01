@@ -38,9 +38,11 @@ class LoginController extends Controller
         }
 
         $data = $response->json('data');
+        $request->session()->regenerate();
 
         session([
             'auth_token'   => $data['token'],
+            'auth_vinculos' => $data['selecionar_vinculo'] ?? false,
             'auth_perfil'  => $data['perfil'],
             'auth_nome'    => $data['nome'],
             'auth_email'   => $data['email'],
@@ -129,9 +131,12 @@ class LoginController extends Controller
 
     public function destroy(Request $request)
     {
-        $this->api->post('/v1/auth/logout');
-
-        $request->session()->flush();
+        try { $this->api->identidade()->post('/v1/auth/logout'); }
+        catch (\Illuminate\Http\Client\ConnectionException) { /* A saída local independe da disponibilidade da API. */ }
+        finally {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return redirect()->route('login');
     }
