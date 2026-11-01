@@ -69,4 +69,31 @@ class Espacos
         }
         return $query;
     }
+
+    /** Integridade dos agregados institucionais; o chamador ainda deve autorizar a escola. */
+    public static function agregadoEscolar($query, string $tabela, ?Usuario $ator = null)
+    {
+        if (!self::ativo()) return $query;
+        if ($ator) {
+            if ($tabela === 'turmas') $query->whereIn('turmas.id', Escopo::turmas($ator)->select('turmas.id'));
+            elseif ($tabela === 'provas') $query->whereIn('provas.id', Escopo::provas($ator)->select('provas.id'));
+            else {
+                if (in_array($tabela, ['alunos', 'notas', 'prova_turmas'], true)) $query->whereIn($tabela.'.turma_id', Escopo::turmas($ator)->select('turmas.id'));
+                if (in_array($tabela, ['notas', 'prova_turmas'], true)) $query->whereIn($tabela.'.prova_id', Escopo::provas($ator)->select('provas.id'));
+            }
+        }
+        $query->whereIn($tabela.'.espaco_id', self::escolas()->select('ee.id'));
+        if (in_array($tabela, ['turmas', 'provas'], true)) return self::conferirEscola($query, $tabela);
+        $pais = match ($tabela) {
+            'alunos' => ['turma_id' => 'turmas'],
+            'prova_turmas' => ['turma_id' => 'turmas', 'prova_id' => 'provas'],
+            'notas' => ['aluno_id' => 'alunos', 'turma_id' => 'turmas', 'prova_id' => 'provas', 'cartao_id' => 'cartoes'],
+            default => throw new \InvalidArgumentException('Agregado não previsto.'),
+        };
+        foreach ($pais as $fk => $pai) {
+            $query->whereExists(fn ($q) => $q->selectRaw('1')->from($pai.' as pai_agregado')
+                ->whereColumn('pai_agregado.id', $tabela.'.'.$fk)->whereColumn('pai_agregado.espaco_id', $tabela.'.espaco_id'));
+        }
+        return $query;
+    }
 }
