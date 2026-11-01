@@ -2,6 +2,10 @@
 
 Base: PR #79 incorporado em `718472178aa6229689326dfeb2ca108480f5a785`. O responsável autorizou implementar T2-E, sem deploy. Esta implementação deriva do T1 aprovado (doc. 40, seções 4 e 9) e do roteiro D/E (doc. 44).
 
+## Entrega em revisão — PR #80
+
+[PR #80](https://github.com/lucasgenial/gabarito360/pull/80), aguardando aprovação de merge.
+
 ## Escopo autorizado
 
 Preparar auditoria somente de leitura, DDL retomável e ensaio fictício em MariaDB. A auditoria cobre as 13 tabelas pedagógicas, espaço/autoria, relações compostas, referências exclusivas e unicidades. A aplicação das restrições é uma operação explícita de corte, separada de `migrate`: exige manifesto exato, manutenção, confirmação de escritores parados e adaptador ativo. Esta entrega mantém `espacos.ativo=false`; não executa o corte real.
