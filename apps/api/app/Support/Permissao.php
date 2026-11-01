@@ -21,6 +21,8 @@ class Permissao
         RegimeVinculos::exigir($u);
         // Contextos explícitos são revalidados; não reutilizam o cache global legado por pessoa.
         if (ContextoVinculo::presente($u)) return ContextoVinculo::permissoes($u);
+        // O perfil pessoal nunca funciona como perfil global legado, nem por extras.
+        if ($u->perfil === 'professor_autonomo') return [];
         if (isset(self::$cache[$u->id])) {
             return self::$cache[$u->id];
         }

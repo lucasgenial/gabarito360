@@ -23,12 +23,9 @@ class ContextoVinculo
             ->where(fn ($q) => $q->whereNull('v.fim_em')->orWhere('v.fim_em', '>', now()))->select('v.*')->first();
         abort_unless($v, 403, 'Vínculo indisponível.');
         $e = DB::table('espacos')->find($v->espaco_id);
-        $tipo = match ($v->perfil) {
-            'admin_rede' => 'rede', 'dir_nucleo' => 'nucleo',
-            'dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno' => 'escola',
-            default => null,
-        };
-        abort_unless($e && $tipo && $e->tipo === $tipo && self::espacoValido($e), 403, 'Vínculo indisponível.');
+        abort_unless($e && PerfisEspaco::habilitado($v->perfil)
+            && PerfisEspaco::compativel($v->perfil, $e, (int) $u->id)
+            && self::espacoValido($e), 403, 'Vínculo indisponível.');
         $v->espaco = $e;
         return $v;
     }

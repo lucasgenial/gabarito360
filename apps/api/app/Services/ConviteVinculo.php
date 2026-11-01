@@ -7,6 +7,7 @@ use App\Support\Cadastro;
 use App\Support\ContextoVinculo;
 use App\Support\GestaoVinculos;
 use App\Support\Permissao;
+use App\Support\PerfisEspaco;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -83,7 +84,7 @@ class ConviteVinculo
         foreach ($espacos as $e) {
             if (!ContextoVinculo::espacoValido($e)) continue;
             $perfis = array_values(array_filter(Cadastro::perfisGeridos($gestor), fn ($p) =>
-                (match ($p) { 'admin_rede' => 'rede', 'dir_nucleo' => 'nucleo', default => 'escola' }) === $e->tipo));
+                PerfisEspaco::habilitado($p) && PerfisEspaco::tipo($p) === $e->tipo));
             if (!$perfis) continue;
             $turmas = $e->tipo === 'escola' && Permissao::pode($gestor, 'turma.vincular_professor')
                 ? \App\Support\Escopo::turmas($gestor)->where('turmas.espaco_id', $e->id)->where('turmas.ativo', true)->orderBy('turmas.nome')->get(['turmas.id', 'turmas.nome'])->toArray() : [];
@@ -97,8 +98,8 @@ class ConviteVinculo
         ContextoVinculo::resolver($gestor);
         abort_unless(Permissao::pode($gestor, 'usuario.gerir') && Cadastro::podeGerirPerfil($gestor, $perfil), 403);
         $e = DB::table('espacos')->find($espaco);
-        $tipo = match ($perfil) { 'admin_rede' => 'rede', 'dir_nucleo' => 'nucleo', default => 'escola' };
-        abort_unless($e && $e->tipo === $tipo && ContextoVinculo::espacoValido($e), 404);
+        $tipo = PerfisEspaco::tipo($perfil);
+        abort_unless($e && PerfisEspaco::habilitado($perfil) && $e->tipo === $tipo && ContextoVinculo::espacoValido($e), 404);
         $ids = match ($tipo) {
             'rede' => $gestor->perfil === 'admin_rede' ? \App\Support\Instituicoes::redesIds($gestor) : [],
             'nucleo' => $gestor->perfil === 'admin_rede' ? \App\Support\Instituicoes::nucleosIds($gestor) : [],
