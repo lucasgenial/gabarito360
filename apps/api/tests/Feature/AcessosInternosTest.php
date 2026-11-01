@@ -124,7 +124,9 @@ class AcessosInternosTest extends TestCase
     {
         config(['vinculos.obrigatorio'=>false]);
         foreach (ContextoInterno::PERFIS as $perfil) {
-            $this->u->forceFill(['perfil'=>$perfil])->save();
+            // Simula atributo adulterado em memória; o ENUM legado do MariaDB
+            // também impede persistir esses perfis na identidade global.
+            $this->u->forceFill(['perfil'=>$perfil]);
             $this->assertSame([], Permissao::efetivas($this->u));
             $this->assertFalse(Gate::forUser($this->u)->allows('gerir-clientes'));
         }
