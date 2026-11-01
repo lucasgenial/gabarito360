@@ -45,6 +45,6 @@ class Cadastro
     /** Núcleo que o gestor pode atribuir (só admin cria diretor de núcleo). */
     public static function nucleoNoEscopo(Usuario $gestor, int $nucleoId): bool
     {
-        return $gestor->perfil === 'admin_rede' && DB::table('nucleos')->where('id', $nucleoId)->exists();
+        return $gestor->perfil === 'admin_rede' && Instituicoes::nucleos($gestor)->where('id', $nucleoId)->exists();
     }
 }

@@ -2,7 +2,9 @@
 
 Base: PR #75 incorporado em `7289fe1917bfceab7ab78c324e66c2b17602f8ea`. O responsável autorizou seguir T2-D/E, **sem deploy**. Implementação derivada de [T1 aprovado](40-clientes-espacos-e-vinculos.md), do [mapa de consumidores](41-t1-mapa-de-consultas.md) e do [manifesto aprovado](42-t2-inventario-e-manifesto.md).
 
-## Entrega em revisão: T2-D1 — PR #76
+## Entrega incorporada: T2-D1 — PR #76
+
+PR #76 incorporado em `1fc27bfd046eb04c505c51c19c55943884e4d846`, sem deploy. Continuidade: [T2-D2](45-t2-instituicoes-e-gestao.md).
 
 Primeira parte de D: adaptador de escopo legado e consumidores de alunos, turmas e provas. Não representa conclusão de D ou E. Não executa migração, backfill, alteração de acesso em produção ou criação de vínculos.
 

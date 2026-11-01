@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use App\Support\Cabecalho;
 use App\Support\Censo;
 use App\Support\Escopo;
+use App\Support\Espacos;
+use App\Support\Instituicoes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -18,23 +20,7 @@ class EscolaController extends Controller
 {
     private function escopoIds(Request $request): ?array
     {
-        $usuario = $request->user();
-
-        return match ($usuario->perfil) {
-            'admin_rede' => null,
-            'dir_nucleo' => DB::table('escolas')
-                ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
-                ->join('usuario_escopos', 'nucleos.id', '=', 'usuario_escopos.escopo_id')
-                ->where('usuario_escopos.usuario_id', $usuario->id)
-                ->where('usuario_escopos.escopo_tipo', 'nucleo')
-                ->pluck('escolas.id')
-                ->all(),
-            default => DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'escola')
-                ->pluck('escopo_id')
-                ->all(),
-        };
+        return Escopo::escolaIds($request->user());
     }
 
     public function index(Request $request): JsonResponse
@@ -58,18 +44,18 @@ class EscolaController extends Controller
             $query->where('ativo', (bool) $request->query('ativo'));
         }
 
-        $escolas = $query->with('nucleo:id,nome', 'sede:id,nome')
+        $escolas = $query->with(['nucleo:id,nome', 'sede' => fn ($q) => $q->when($ids !== null, fn ($q) => $q->whereIn('id', $ids))->select('id', 'nome')])
             ->orderBy('nome')
             ->get()
-            ->map(function (Escola $e) {
-                $totalTurmas = DB::table('turmas')->where('escola_id', $e->id)->count();
+            ->map(function (Escola $e) use ($request) {
+                $totalTurmas = Espacos::agregadoEscolar(DB::table('turmas'), 'turmas', $request->user())->where('escola_id', $e->id)->count();
 
-                $totalAlunosEscola = DB::table('alunos')
+                $totalAlunosEscola = Espacos::agregadoEscolar(DB::table('alunos'), 'alunos', $request->user())
                     ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
                     ->where('turmas.escola_id', $e->id)
                     ->count();
 
-                $provas = DB::table('provas')->where('escola_id', $e->id)->count();
+                $provas = Espacos::agregadoEscolar(DB::table('provas'), 'provas', $request->user())->where('escola_id', $e->id)->count();
 
                 return array_merge($e->toArray(), [
                     'total_turmas' => $totalTurmas,
@@ -86,11 +72,11 @@ class EscolaController extends Controller
 
         $totalEscolas  = $baseQ->count();
         $totalAtivas   = (clone $baseQ)->where('ativo', true)->count();
-        $totalAlunos   = (int) DB::table('alunos')
+        $totalAlunos   = (int) Espacos::agregadoEscolar(DB::table('alunos'), 'alunos', $request->user())
             ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
             ->when($ids !== null, fn ($q) => $q->whereIn('turmas.escola_id', $ids))
             ->count();
-        $totalTurmas   = (int) DB::table('turmas')
+        $totalTurmas   = (int) Espacos::agregadoEscolar(DB::table('turmas'), 'turmas', $request->user())
             ->when($ids !== null, fn ($q) => $q->whereIn('escola_id', $ids))
             ->where('ativo', true)
             ->count();
@@ -160,7 +146,7 @@ class EscolaController extends Controller
         }
         $sedeId = $data['escola_sede_id'] ?? $atual?->escola_sede_id;
         $nucleo = (int) ($data['nucleo_id'] ?? $atual?->nucleo_id);
-        $sede   = $sedeId ? Escola::find($sedeId) : null;
+        $sede   = $sedeId ? $this->escolaNoEscopo($request, (int) $sedeId) : null;
         $ids    = Escopo::escolaIds($request->user());
         if (!$sede || $sede->tipo !== 'sede' || $sede->id === $atual?->id || ($ids !== null && !in_array($sede->id, $ids, true))) {
             return ApiResponse::error('Escolha a escola sede deste anexo.', ['escola_sede_id' => ['Escola sede inválida.']], 422);
@@ -190,7 +176,13 @@ class EscolaController extends Controller
         $data['ano_censo'] = $censo?->ano_censo;
         $data['orgao_regional'] ??= $censo?->orgao_regional;
 
-        $escola = Escola::create($data);
+        $escola = DB::transaction(function () use ($data, $request) {
+            $cliente = Espacos::ativo() ? Instituicoes::nucleosAtivos()->where('n.id', $data['nucleo_id'])->lockForUpdate()->value('en.cliente_id') : null;
+            if (Espacos::ativo()) abort_unless($cliente, 404);
+            $e = Escola::create($data);
+            if (Espacos::ativo()) Instituicoes::criarEspaco('escola', $e->id, $e->nome, $cliente, $request->user());
+            return $e;
+        });
         $this->aprenderOrgaoRegional($escola);
 
         return ApiResponse::success($escola, null, 201);
@@ -220,28 +212,28 @@ class EscolaController extends Controller
             return ApiResponse::notFound('Escola não encontrada.');
         }
 
-        $totalTurmas = DB::table('turmas')->where('escola_id', $id)->count();
+        $totalTurmas = Espacos::agregadoEscolar(DB::table('turmas'), 'turmas', $request->user())->where('escola_id', $id)->count();
 
-        $totalAlunosEscola = DB::table('alunos')
+        $totalAlunosEscola = Espacos::agregadoEscolar(DB::table('alunos'), 'alunos', $request->user())
             ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
             ->where('turmas.escola_id', $id)
             ->count();
 
-        $provas = DB::table('provas')->where('escola_id', $id)->count();
+        $provas = Espacos::agregadoEscolar(DB::table('provas'), 'provas', $request->user())->where('escola_id', $id)->count();
 
-        $turmas = DB::table('turmas')
+        $turmas = Espacos::agregadoEscolar(DB::table('turmas'), 'turmas', $request->user())
             ->where('escola_id', $id)
             ->orderBy('nome')
             ->select('id', 'nome', 'ano_letivo as ano', 'turno', 'ativo')
             ->get()
-            ->map(function ($t) {
+            ->map(function ($t) use ($request) {
                 return [
                     'id'           => $t->id,
                     'nome'         => $t->nome,
                     'ano'          => $t->ano,
                     'turno'        => $t->turno,
                     'ativo'        => (bool) $t->ativo,
-                    'total_alunos' => DB::table('alunos')->where('turma_id', $t->id)->where('ativo', true)->count(),
+                    'total_alunos' => Espacos::agregadoEscolar(DB::table('alunos'), 'alunos', $request->user())->where('turma_id', $t->id)->where('ativo', true)->count(),
                 ];
             });
 
@@ -255,25 +247,25 @@ class EscolaController extends Controller
             ->orderBy('usuarios.nome')
             ->get();
 
-        $provasLista = DB::table('provas')
+        $provasLista = Espacos::agregadoEscolar(DB::table('provas'), 'provas', $request->user())
             ->where('escola_id', $id)
             ->orderByDesc('data_aplicacao')
             ->select('id', 'titulo', 'disciplina', 'status', 'data_aplicacao')
             ->get()
-            ->map(function ($p) {
-                $turmasNomes = DB::table('prova_turmas')
+            ->map(function ($p) use ($request) {
+                $turmasNomes = Espacos::agregadoEscolar(DB::table('prova_turmas'), 'prova_turmas', $request->user())
                     ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
                     ->where('prova_turmas.prova_id', $p->id)
                     ->pluck('turmas.nome')
                     ->implode(', ');
 
-                $totalAlunos = DB::table('prova_turmas')
+                $totalAlunos = Espacos::agregadoEscolar(DB::table('prova_turmas'), 'prova_turmas', $request->user())
                     ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
                     ->where('prova_turmas.prova_id', $p->id)
                     ->where('alunos.ativo', true)
                     ->count();
 
-                $media = DB::table('notas')->where('prova_id', $p->id)->avg('nota_final');
+                $media = Espacos::agregadoEscolar(DB::table('notas'), 'notas', $request->user())->where('prova_id', $p->id)->avg('nota_final');
 
                 return [
                     'id'             => $p->id,
@@ -287,15 +279,15 @@ class EscolaController extends Controller
                 ];
             });
 
-        $alunosLista = DB::table('alunos')
+        $alunosLista = Espacos::agregadoEscolar(DB::table('alunos'), 'alunos', $request->user())
             ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
             ->where('turmas.escola_id', $id)
             ->select('alunos.id', 'alunos.nome', 'alunos.matricula', 'alunos.ativo', 'turmas.nome as turma')
             ->orderBy('alunos.nome')
             ->get()
-            ->map(function ($a) {
-                $media = DB::table('notas')->where('aluno_id', $a->id)->avg('nota_final');
-                $totalProvas = DB::table('notas')->where('aluno_id', $a->id)->count();
+            ->map(function ($a) use ($request) {
+                $media = Espacos::agregadoEscolar(DB::table('notas'), 'notas', $request->user())->where('aluno_id', $a->id)->avg('nota_final');
+                $totalProvas = Espacos::agregadoEscolar(DB::table('notas'), 'notas', $request->user())->where('aluno_id', $a->id)->count();
 
                 return [
                     'id'           => $a->id,
@@ -311,12 +303,12 @@ class EscolaController extends Controller
         $rede = DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
             ->where('nucleos.id', $escola->nucleo_id)->first(['redes.id', 'redes.nome']);
 
-        $anexos = Escola::where('escola_sede_id', $id)->orderBy('nome')
+        $anexos = Escola::where('escola_sede_id', $id)->when($ids !== null, fn ($q) => $q->whereIn('id', $ids))->orderBy('nome')
             ->get(['id', 'nome', 'inep', 'tipo', 'cidade', 'ativo'])
             ->filter(fn ($a) => $ids === null || in_array($a->id, $ids, true))->values();
 
         return ApiResponse::success(array_merge($escola->toArray(), [
-            'sede'      => $escola->escola_sede_id ? Escola::find($escola->escola_sede_id, ['id', 'nome', 'inep']) : null,
+            'sede'      => $escola->escola_sede_id ? $this->escolaNoEscopo($request, (int) $escola->escola_sede_id)?->only(['id', 'nome', 'inep']) : null,
             'anexos'    => $anexos,
             'rede_id'   => $rede?->id,
             'rede_nome' => $rede?->nome,
@@ -349,6 +341,7 @@ class EscolaController extends Controller
         if (isset($data['nucleo_id']) && ($erro = $this->nucleoForaDoEscopo($request, (int) $data['nucleo_id']))) {
             return $erro;
         }
+        if (Espacos::ativo() && isset($data['nucleo_id'])) abort_unless((int) $data['nucleo_id'] === (int) $escola->nucleo_id, 422, 'Mudança de núcleo exige procedimento próprio.');
         // Sede com anexos não pode virar anexo
         if (($data['tipo'] ?? 'sede') !== 'sede' && $escola->anexos()->exists()) {
             return ApiResponse::error('Esta escola tem anexos; ela precisa continuar como sede.', ['tipo' => ['Escola com anexos.']], 422);
@@ -400,25 +393,23 @@ class EscolaController extends Controller
 
     private function nucleoForaDoEscopo(Request $request, int $nucleoId): ?JsonResponse
     {
-        $u = $request->user();
-        if ($u->perfil !== 'dir_nucleo') {
-            return null;
-        }
-        $meu = DB::table('usuario_escopos')->where('usuario_id', $u->id)
-            ->where('escopo_tipo', 'nucleo')->where('escopo_id', $nucleoId)->exists();
-
-        return $meu ? null : ApiResponse::error('Você só pode cadastrar escolas no seu núcleo.', [], 403);
+        $ids = Instituicoes::nucleosIds($request->user());
+        return $ids === null || in_array($nucleoId, $ids, true) ? null
+            : (Espacos::ativo() ? ApiResponse::notFound('Núcleo não encontrado.') : ApiResponse::error('Você só pode cadastrar escolas no seu núcleo.', [], 403));
     }
 
-    /** Logo da escola (cabeçalho dos relatórios). Qualquer usuário autenticado pode ver. */
-    public function logo(int $id)
+    /** Logo da escola, após autorização institucional. */
+    public function logo(Request $request, int $id)
     {
-        $caminho = Cabecalho::logoPath(DB::table('escolas')->where('id', $id)->value('logo_path'));
+        $ids = Instituicoes::escolasLogoIds($request->user());
+        $escola = Escola::query()->when($ids !== null, fn ($q) => $q->whereIn('id', $ids))->find($id);
+        if (!$escola) return ApiResponse::notFound('Escola não encontrada.');
+        $caminho = Cabecalho::logoPath($escola->logo_path);
         if (!$caminho) {
             return ApiResponse::notFound('Escola sem logo.');
         }
 
-        return response()->file($caminho, ['Cache-Control' => 'private, max-age=3600']);
+        return response()->file($caminho, ['Cache-Control' => 'private, no-store']);
     }
 
     /** Envia/troca o logo da escola (PNG/JPG até 2 MB). */
@@ -431,7 +422,7 @@ class EscolaController extends Controller
         }
 
         $request->validate(['logo' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048']);
-        $novo = $request->file('logo')->store('escolas/logos', 'public');
+        $novo = $request->file('logo')->store('escolas/'.$id.'/logos', 'public');
         if ($escola->logo_path) {
             Storage::disk('public')->delete($escola->logo_path);
         }
@@ -441,20 +432,24 @@ class EscolaController extends Controller
     }
 
     /** Logo do ente da rede ou da mantenedora. */
-    public function logoRede(int $redeId)
+    public function logoRede(Request $request, int $redeId)
     {
+        $ids = Instituicoes::redesIds($request->user());
+        abort_unless($ids === null || in_array($redeId, $ids, true), 404);
         $caminho = Cabecalho::logoPath(DB::table('redes')->where('id', $redeId)->value('logo_path'));
         if (!$caminho) {
             return ApiResponse::notFound('Rede sem logo.');
         }
 
-        return response()->file($caminho, ['Cache-Control' => 'private, max-age=3600']);
+        return response()->file($caminho, ['Cache-Control' => 'private, no-store']);
     }
 
     /** Envia/troca o logo do ente: admin da rede ou diretor de núcleo de um núcleo da rede. */
     public function enviarLogoRede(Request $request, int $redeId): JsonResponse
     {
         $usuario = $request->user();
+        $redes = Instituicoes::redesIds($usuario);
+        abort_unless($redes === null || in_array($redeId, $redes, true), 404);
         $rede    = DB::table('redes')->where('id', $redeId)->first(['id', 'logo_path']);
         $permite = $usuario->perfil === 'admin_rede' || ($usuario->perfil === 'dir_nucleo' && DB::table('usuario_escopos')
             ->join('nucleos', 'nucleos.id', '=', 'usuario_escopos.escopo_id')
@@ -465,7 +460,7 @@ class EscolaController extends Controller
         }
 
         $request->validate(['logo' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048']);
-        $novo = $request->file('logo')->store('redes/logos', 'public');
+        $novo = $request->file('logo')->store('redes/'.$redeId.'/logos', 'public');
         if ($rede->logo_path) {
             Storage::disk('public')->delete($rede->logo_path);
         }

@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class ConfiguracaoController extends Controller
 {
-    public function show(): JsonResponse
+    public function show(Request $request): JsonResponse
     {
-        $rede = DB::table('redes')->first();
+        $rede = \App\Support\Instituicoes::redeSelecionada($request);
 
         if (!$rede) {
             return ApiResponse::notFound('Rede não configurada.');
@@ -29,7 +29,7 @@ class ConfiguracaoController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-        $rede = DB::table('redes')->first();
+        $rede = \App\Support\Instituicoes::redeSelecionada($request);
 
         if (!$rede) {
             return ApiResponse::notFound('Rede não configurada.');
