@@ -54,3 +54,7 @@ Nas duas execuções:
 - Conferência técnica após cada execução: Redis ativo na aplicação, filas alta/padrão/baixa vazias e zero jobs falhos; `retry_after=240`, OMR timeout de 60 segundos e tabela de envios de B6 presente.
 
 Não houve alteração de `.env`, DNS, nginx, PHP-FPM ou unidades systemd. Não foram criados dados escolares. O teste valida o procedimento e sua repetição no mesmo commit; não exercitou uma falha real em produção, uma nova alteração de esquema ou uma leitura autenticada de cartão.
+
+## Checkpoint de backup final
+
+A opção `--backup-final /root/pausa-backup-final.sh` introduz uma espera síncrona antes de código/DDL, com escritores/FPM parados e recibo verificado pelo host. Falhas após esse checkpoint preservam manutenção, sem reabertura automática. Procedimento e recuperação em [doc. 53](53-t2-checkpoint-backup-final.md). Sem a opção, permanece o comportamento anterior.

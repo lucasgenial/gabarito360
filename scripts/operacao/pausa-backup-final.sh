@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Hook síncrono do B5. Confirmação só após backup e verificação pelo operador no host.
 set -Eeuo pipefail
-exec python3 - "$@" <<'PY'
+exec python3 -I - "$@" <<'PY'
 import json, os, re, stat, sys, tempfile, time, uuid
 from pathlib import Path
 assert os.geteuid() == 0 and len(sys.argv) == 4
@@ -24,6 +24,7 @@ try:
         if time.monotonic() >= fim:
             raise TimeoutError("Backup não confirmado dentro do prazo")
         time.sleep(1)
+    assert time.monotonic() < fim, "Confirmação após o prazo"
     fd = os.open(recibo, os.O_RDONLY | os.O_NOFOLLOW)
     with os.fdopen(fd) as arquivo:
         st = os.fstat(arquivo.fileno())
