@@ -32,6 +32,20 @@ Regras de concessão (valem para extras e retiradas):
 
 ## 2. Perfis
 
+### Extensão A1-A — contexto interno (01/11/2026, em revisão)
+
+Os perfis internos usam atribuição própria, sem integrar a matriz institucional de oito colunas nem ampliar o escopo de um vínculo escolar. Habilitação desligada por padrão; seleção por token/aba e gestão são A1-B. Não há promoção automática de contas.
+
+| Contexto interno | Cadastro comercial | Gestão de acessos internos | Dados pedagógicos |
+|---|---|---|---|
+| Desenvolvedor | Consultar e gerir clientes | Política permite somente Suporte/Financeiro; consumidor ainda pendente | Negado neste contexto; atendimento auditado é AU3 |
+| Suporte | Consultar e gerir clientes | Negado | Negado neste contexto; atendimento auditado é AU3 |
+| Financeiro | Consultar e gerir clientes | Negado | Negado |
+
+Cada uso revalida titularidade, conta ativa, situação, vigência e versão da atribuição. Selecionar contexto interno remove o vínculo pedagógico do objeto e vice-versa; não há união de poderes. Primeiro Desenvolvedor e concessão de mesmo nível exigem procedimento próprio, ainda não implementado. Secretário Escolar permanece A1-C. Detalhes: [docs/67](67-a1-planejamento-e-acessos-internos.md).
+
+### Perfis institucionais
+
 | Perfil | Escopo | Faz (resumo) | Não faz | Restrições |
 |--------|--------|--------------|---------|------------|
 | **Secretário de Educação** (`secretario_educacao`) | redes da sua secretaria | relatórios consolidados das redes | operar escola, prova, correção, usuários | somente leitura |

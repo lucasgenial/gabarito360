@@ -2,6 +2,8 @@
 
 01/11/2026. PR #99 incorporado em `3b8aa5b`, com autorização para avançar ao T4 sem deploy.
 
+Atualização: PR #100 aprovado e incorporado em `a161e87`, com CI completo aprovado (41354532563). A1 iniciado conforme planejamento revisto em docs/67; os limites abaixo descrevem a entrega T4-A original. Sem deploy.
+
 ## Dependência encontrada
 
 T4 depende de A1, ainda pendente: os perfis Desenvolvedor, Suporte e Financeiro não existem no código atual. Perfis escolares não podem receber acesso global a contratantes. Por isso esta entrega prepara a persistência, sem rotas, telas ou concessões de acesso. T4 completo continua pendente.
