@@ -15,6 +15,9 @@ use App\Models\SincronizacaoSeges;
 use App\Models\Usuario;
 use App\Models\Visita;
 use App\Support\Escopo;
+use App\Support\Espacos;
+use App\Support\Instituicoes;
+use App\Support\ConsultasPedagogicas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,21 +26,20 @@ class DashboardController extends Controller
 {
     public function aluno(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
+        if ($escolha = $this->escolha($request, $consulta, 'aluno')) return $escolha;
 
         // Busca o registro de aluno vinculado ao usuário
-        $alunoId = DB::table('usuario_escopos')
-            ->where('usuario_id', $usuario->id)
-            ->where('escopo_tipo', 'aluno')
-            ->value('escopo_id');
+        $alunoId = Instituicoes::selecionarReferencia($request, 'aluno', $this->referencias($consulta, 'aluno')->pluck('id')->all());
 
         if (!$alunoId) {
-            return ApiResponse::forbidden('Usuário não vinculado a nenhum aluno.');
+            return Espacos::ativo() ? ApiResponse::notFound('Aluno não encontrado.') : ApiResponse::forbidden('Usuário não vinculado a nenhum aluno.');
         }
 
-        $aluno = DB::table('alunos')
-            ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
-            ->join('escolas', 'turmas.escola_id', '=', 'escolas.id')
+        $aluno = $consulta->tabela('alunos')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'alunos.turma_id', '=', 'turmas.id')
+            ->joinSub($consulta->tabela('escolas'), 'escolas', 'turmas.escola_id', '=', 'escolas.id')
             ->where('alunos.id', $alunoId)
             ->select('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome as turma', 'turmas.id as turma_id', 'escolas.nome as escola')
             ->first();
@@ -47,19 +49,19 @@ class DashboardController extends Controller
         }
 
         // KPIs
-        $provasRealizadas = Nota::where('aluno_id', $alunoId)->count();
-        $minhaMedia       = Nota::where('aluno_id', $alunoId)->avg('nota_final');
+        $provasRealizadas = $consulta->modelo(Nota::class)->where('aluno_id', $alunoId)->count();
+        $minhaMedia       = $consulta->modelo(Nota::class)->where('aluno_id', $alunoId)->avg('nota_final');
 
-        $melhorDisciplina = DB::table('notas')
-            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+        $melhorDisciplina = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
             ->where('notas.aluno_id', $alunoId)
             ->select('provas.disciplina', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
             ->groupBy('provas.disciplina')
             ->orderByDesc('media')
             ->first();
 
-        $proximaProva = DB::table('provas')
-            ->join('prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
+        $proximaProva = $consulta->tabela('provas')
+            ->joinSub($consulta->tabela('prova_turmas'), 'prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
             ->where('prova_turmas.turma_id', $aluno->turma_id)
             ->where('provas.data_aplicacao', '>=', now()->toDateString())
             ->whereIn('provas.status', ['publicada', 'rascunho'])
@@ -68,19 +70,21 @@ class DashboardController extends Controller
             ->first();
 
         // Tabela de notas por disciplina
-        $notas = DB::table('notas')
-            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+        $notas = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
             ->where('notas.aluno_id', $alunoId)
             ->select(
                 'provas.disciplina',
                 DB::raw('MAX(provas.data_aplicacao) as ultima_data'),
                 DB::raw('ROUND(AVG(notas.nota_final),1) as media_bimestral'),
-                DB::raw('(SELECT n2.nota_final FROM notas n2 JOIN provas p2 ON n2.prova_id = p2.id WHERE n2.aluno_id = notas.aluno_id AND p2.disciplina = provas.disciplina ORDER BY p2.data_aplicacao DESC LIMIT 1) as ultima_nota')
+                DB::raw('NULL as ultima_nota')
             )
             ->groupBy('provas.disciplina')
             ->orderBy('provas.disciplina')
             ->get()
-            ->map(function ($n) {
+            ->map(function ($n) use ($alunoId, $consulta) {
+                $n->ultima_nota = $consulta->tabela('notas')->joinSub($consulta->tabela('provas'), 'provas', 'provas.id', '=', 'notas.prova_id')
+                    ->where('notas.aluno_id', $alunoId)->where('provas.disciplina', $n->disciplina)->orderByDesc('provas.data_aplicacao')->value('notas.nota_final');
                 // Tendência simples: comparar última nota com média
                 $diff = $n->ultima_nota - $n->media_bimestral;
                 $n->tendencia = $diff > 0.3 ? 'up' : ($diff < -0.3 ? 'down' : 'flat');
@@ -93,8 +97,8 @@ class DashboardController extends Controller
         for ($bim = 1; $bim <= 4; $bim++) {
             $mesInicio = ($bim - 1) * 3 + 1;
             $mesFim    = $bim * 3;
-            $media = DB::table('notas')
-                ->join('provas', 'notas.prova_id', '=', 'provas.id')
+            $media = $consulta->tabela('notas')
+                ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
                 ->where('notas.aluno_id', $alunoId)
                 ->whereYear('provas.data_aplicacao', $ano)
                 ->whereMonth('provas.data_aplicacao', '>=', $mesInicio)
@@ -109,8 +113,8 @@ class DashboardController extends Controller
         }
 
         // Próximas provas da turma
-        $proximasProvas = DB::table('provas')
-            ->join('prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
+        $proximasProvas = $consulta->tabela('provas')
+            ->joinSub($consulta->tabela('prova_turmas'), 'prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
             ->leftJoin('usuarios', 'provas.criado_por', '=', 'usuarios.id')
             ->where('prova_turmas.turma_id', $aluno->turma_id)
             ->where('provas.data_aplicacao', '>=', now()->toDateString())
@@ -143,6 +147,7 @@ class DashboardController extends Controller
 
     public function professor(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
 
         // Turmas do professor via escopos
@@ -151,23 +156,25 @@ class DashboardController extends Controller
             ->where('escopo_tipo', 'turma')
             ->pluck('escopo_id');
 
+        if (Espacos::ativo()) $turmaIds = collect(Escopo::turmaIds($usuario) ?? []);
+
         // KPIs — provas visíveis: criadas por ele ou das turmas em que está vinculado
         $provaIds     = Escopo::provas($usuario)->pluck('provas.id');
         $minhasProvas = $provaIds->count();
 
-        $cartoesCorrigir = DB::table('cartoes')
+        $cartoesCorrigir = $consulta->tabela('cartoes')
             ->whereIn('prova_id', $provaIds)
             ->whereIn('status', ['pendente', 'ambiguo'])
             ->count();
 
         $minhasTurmas = $turmaIds->count();
 
-        $mediaTurmas = DB::table('notas')
+        $mediaTurmas = $consulta->tabela('notas')
             ->whereIn('notas.turma_id', $turmaIds)
             ->avg('notas.nota_final');
 
         // Disciplina principal (a mais usada nas provas do professor)
-        $disciplinaPrincipal = DB::table('provas')
+        $disciplinaPrincipal = $consulta->tabela('provas')
             ->whereIn('id', $provaIds)
             ->select('disciplina', DB::raw('COUNT(*) as total'))
             ->groupBy('disciplina')
@@ -180,15 +187,15 @@ class DashboardController extends Controller
             ->orderByDesc('data_aplicacao')
             ->limit(12)
             ->get(['id', 'titulo', 'disciplina', 'status', 'data_aplicacao'])
-            ->map(function ($p) use ($turmaIds) {
-                $turmas = DB::table('prova_turmas')
-                    ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+            ->map(function ($p) use ($turmaIds, $consulta) {
+                $turmas = $consulta->tabela('prova_turmas')
+                    ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
                     ->where('prova_turmas.prova_id', $p->id)
                     ->pluck('turmas.nome')
                     ->implode(', ');
 
-                $totalAlunos = DB::table('prova_turmas')
-                    ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                $totalAlunos = $consulta->tabela('prova_turmas')
+                    ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
                     ->where('prova_turmas.prova_id', $p->id)
                     ->where('alunos.ativo', true)
                     ->count();
@@ -199,18 +206,18 @@ class DashboardController extends Controller
                     'disciplina'     => $p->disciplina,
                     'turma'          => $turmas ?: '—',
                     // Cartões por turma: só as turmas do professor (todas, se ele criou a prova)
-                    'turmas_lista'   => $this->turmasDaProva($p->id, $turmaIds->all()),
+                    'turmas_lista'   => $this->turmasDaProva($consulta, $p->id, $turmaIds->all()),
                     'data_aplicacao' => $p->data_aplicacao,
                     'total_alunos'   => $totalAlunos,
-                    'cartoes_lidos'  => DB::table('cartoes')->where('prova_id', $p->id)->where('status', 'lido')->count(),
+                    'cartoes_lidos'  => $consulta->tabela('cartoes')->where('prova_id', $p->id)->where('status', 'lido')->count(),
                     'status'         => $p->status,
                 ];
             });
 
         // Ranking das turmas do professor
-        $top5 = DB::table('notas')
-            ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
-            ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
+        $top5 = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('alunos'), 'alunos', 'notas.aluno_id', '=', 'alunos.id')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'notas.turma_id', '=', 'turmas.id')
             ->whereIn('notas.turma_id', $turmaIds)
             ->select('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
             ->groupBy('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome')
@@ -218,9 +225,9 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        $bottom3 = DB::table('notas')
-            ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
-            ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
+        $bottom3 = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('alunos'), 'alunos', 'notas.aluno_id', '=', 'alunos.id')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'notas.turma_id', '=', 'turmas.id')
             ->whereIn('notas.turma_id', $turmaIds)
             ->select('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
             ->groupBy('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome')
@@ -229,9 +236,9 @@ class DashboardController extends Controller
             ->get();
 
         // Alunos que precisam de atenção (abaixo de 6, com menor média)
-        $alunosAtencao = DB::table('notas')
-            ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
-            ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
+        $alunosAtencao = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('alunos'), 'alunos', 'notas.aluno_id', '=', 'alunos.id')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'notas.turma_id', '=', 'turmas.id')
             ->whereIn('notas.turma_id', $turmaIds)
             ->select('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome as turma', DB::raw('ROUND(AVG(notas.nota_final),1) as media'))
             ->groupBy('alunos.id', 'alunos.nome', 'alunos.avatar_id', 'turmas.nome')
@@ -261,54 +268,53 @@ class DashboardController extends Controller
     }
 
     /** Turmas vinculadas à prova [{id, nome}], opcionalmente limitadas a $somente (vazio = todas). */
-    private function turmasDaProva(int $provaId, array $somente = []): array
+    private function turmasDaProva(ConsultasPedagogicas $consulta, int $provaId, array $somente = []): array
     {
-        $todas = DB::table('prova_turmas')
-            ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+        $todas = $consulta->tabela('prova_turmas')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
             ->where('prova_turmas.prova_id', $provaId)
             ->orderBy('turmas.nome')
             ->get(['turmas.id', 'turmas.nome']);
 
         $minhas = $todas->whereIn('id', $somente);
 
-        return ($minhas->isNotEmpty() ? $minhas : $todas)
+        return (Espacos::ativo() ? $todas : ($minhas->isNotEmpty() ? $minhas : $todas))
             ->map(fn ($t) => ['id' => (int) $t->id, 'nome' => $t->nome])->values()->all();
     }
 
     public function coordenador(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
+        if ($escolha = $this->escolha($request, $consulta, 'escola')) return $escolha;
 
-        $escolaId = DB::table('usuario_escopos')
-            ->where('usuario_id', $usuario->id)
-            ->where('escopo_tipo', 'escola')
-            ->value('escopo_id');
+        $escolaId = Instituicoes::selecionarReferencia($request, 'escola', $this->referencias($consulta, 'escola')->pluck('id')->all());
 
         if (!$escolaId) {
             return ApiResponse::forbidden('Usuário não vinculado a nenhuma escola.');
         }
 
-        $escola = Escola::findOrFail($escolaId);
+        $escola = $consulta->modelo(Escola::class)->findOrFail($escolaId);
 
         // KPIs
-        $provasAndamento = Prova::where('escola_id', $escolaId)
+        $provasAndamento = $consulta->modelo(Prova::class)->where('escola_id', $escolaId)
             ->whereIn('status', ['publicada', 'em_correcao'])
             ->count();
 
-        $cartoesAmbiguos = DB::table('cartoes')
-            ->join('provas', 'cartoes.prova_id', '=', 'provas.id')
+        $cartoesAmbiguos = $consulta->tabela('cartoes')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'cartoes.prova_id', '=', 'provas.id')
             ->where('provas.escola_id', $escolaId)
             ->where('cartoes.status', 'ambiguo')
             ->count();
 
-        $cartoesTotal = DB::table('cartoes')
-            ->join('provas', 'cartoes.prova_id', '=', 'provas.id')
+        $cartoesTotal = $consulta->tabela('cartoes')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'cartoes.prova_id', '=', 'provas.id')
             ->where('provas.escola_id', $escolaId)
             ->whereIn('cartoes.status', ['pendente', 'ambiguo'])
             ->count();
 
-        $alunosBaixaMedia = DB::table('notas')
-            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+        $alunosBaixaMedia = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
             ->where('provas.escola_id', $escolaId)
             ->select('notas.aluno_id')
             ->groupBy('notas.aluno_id')
@@ -316,13 +322,13 @@ class DashboardController extends Controller
             ->get()
             ->count();
 
-        $proximasProvas = Prova::where('escola_id', $escolaId)
+        $proximasProvas = $consulta->modelo(Prova::class)->where('escola_id', $escolaId)
             ->where('data_aplicacao', '>=', now()->toDateString())
             ->where('data_aplicacao', '<=', now()->addDays(7)->toDateString())
             ->count();
 
         // Tabela de provas em andamento
-        $provas = DB::table('provas')
+        $provas = $consulta->tabela('provas')
             ->where('provas.escola_id', $escolaId)
             ->whereIn('provas.status', ['publicada', 'em_correcao'])
             ->leftJoin('usuarios', 'provas.criado_por', '=', 'usuarios.id')
@@ -337,20 +343,20 @@ class DashboardController extends Controller
             ->orderByDesc('provas.updated_at')
             ->limit(8)
             ->get()
-            ->map(function ($p) {
-                $turmas = DB::table('prova_turmas')
-                    ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+            ->map(function ($p) use ($consulta) {
+                $turmas = $consulta->tabela('prova_turmas')
+                    ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
                     ->where('prova_turmas.prova_id', $p->id)
                     ->pluck('turmas.nome')
                     ->implode(', ');
 
-                $totalAlunos = DB::table('prova_turmas')
-                    ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                $totalAlunos = $consulta->tabela('prova_turmas')
+                    ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
                     ->where('prova_turmas.prova_id', $p->id)
                     ->where('alunos.ativo', true)
                     ->count();
 
-                $cartoesLidos = DB::table('cartoes')
+                $cartoesLidos = $consulta->tabela('cartoes')
                     ->where('prova_id', $p->id)
                     ->where('status', 'lido')
                     ->count();
@@ -361,7 +367,7 @@ class DashboardController extends Controller
                     'titulo'         => $p->titulo,
                     'professor'      => $p->professor_nome,
                     'turmas'         => $turmas ?: '—',
-                    'turmas_lista'   => $this->turmasDaProva($p->id),
+                    'turmas_lista'   => $this->turmasDaProva($consulta, $p->id),
                     'total_alunos'   => $totalAlunos,
                     'cartoes_lidos'  => $cartoesLidos,
                     'status'         => $p->status,
@@ -370,10 +376,10 @@ class DashboardController extends Controller
             });
 
         // Alunos em atenção (os 5 com menor média)
-        $alunosAtencao = DB::table('notas')
-            ->join('provas', 'notas.prova_id', '=', 'provas.id')
-            ->join('alunos', 'notas.aluno_id', '=', 'alunos.id')
-            ->join('turmas', 'notas.turma_id', '=', 'turmas.id')
+        $alunosAtencao = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
+            ->joinSub($consulta->tabela('alunos'), 'alunos', 'notas.aluno_id', '=', 'alunos.id')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'notas.turma_id', '=', 'turmas.id')
             ->where('provas.escola_id', $escolaId)
             ->select(
                 'alunos.id',
@@ -390,7 +396,7 @@ class DashboardController extends Controller
             ->get();
 
         // Agenda: próximas provas da semana
-        $agenda = Prova::where('escola_id', $escolaId)
+        $agenda = $consulta->modelo(Prova::class)->where('escola_id', $escolaId)
             ->where('data_aplicacao', '>=', now()->toDateString())
             ->where('data_aplicacao', '<=', now()->addDays(7)->toDateString())
             ->orderBy('data_aplicacao')
@@ -413,61 +419,60 @@ class DashboardController extends Controller
 
     public function dirEscolar(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
+        if ($escolha = $this->escolha($request, $consulta, 'escola')) return $escolha;
 
-        $escolaId = DB::table('usuario_escopos')
-            ->where('usuario_id', $usuario->id)
-            ->where('escopo_tipo', 'escola')
-            ->value('escopo_id');
+        $escolaId = Instituicoes::selecionarReferencia($request, 'escola', $this->referencias($consulta, 'escola')->pluck('id')->all());
 
         if (!$escolaId) {
             return ApiResponse::forbidden('Usuário não vinculado a nenhuma escola.');
         }
 
-        $escola = Escola::findOrFail($escolaId);
+        $escola = $consulta->modelo(Escola::class)->findOrFail($escolaId);
 
         // KPIs
-        $turmasAtivas = DB::table('turmas')
+        $turmasAtivas = $consulta->tabela('turmas')
             ->where('escola_id', $escolaId)
             ->where('ativo', true)
             ->count();
 
-        $totalAlunos = DB::table('alunos')
-            ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+        $totalAlunos = $consulta->tabela('alunos')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'alunos.turma_id', '=', 'turmas.id')
             ->where('turmas.escola_id', $escolaId)
             ->where('alunos.ativo', true)
             ->count();
 
-        $provasAplicadas = Prova::where('escola_id', $escolaId)
+        $provasAplicadas = $consulta->modelo(Prova::class)->where('escola_id', $escolaId)
             ->whereIn('status', ['corrigida', 'em_correcao', 'publicada'])
             ->count();
 
-        $mediaEscola = DB::table('notas')
-            ->join('provas', 'notas.prova_id', '=', 'provas.id')
+        $mediaEscola = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
             ->where('provas.escola_id', $escolaId)
             ->avg('notas.nota_final');
 
         // Tabela por turma
-        $turmas = DB::table('turmas')
+        $turmas = $consulta->tabela('turmas')
             ->where('turmas.escola_id', $escolaId)
             ->where('turmas.ativo', true)
             ->select('turmas.id', 'turmas.nome', 'turmas.serie')
             ->orderBy('turmas.serie')
             ->orderBy('turmas.nome')
             ->get()
-            ->map(function ($turma) {
-                $totalAlunos = DB::table('alunos')
+            ->map(function ($turma) use ($consulta) {
+                $totalAlunos = $consulta->tabela('alunos')
                     ->where('turma_id', $turma->id)
                     ->where('ativo', true)
                     ->count();
 
-                $mediaRaw = DB::table('notas')
+                $mediaRaw = $consulta->tabela('notas')
                     ->where('turma_id', $turma->id)
                     ->avg('nota_final');
                 $media = $mediaRaw ? round($mediaRaw, 1) : null;
 
-                $ultimaProva = DB::table('provas')
-                    ->join('prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
+                $ultimaProva = $consulta->tabela('provas')
+                    ->joinSub($consulta->tabela('prova_turmas'), 'prova_turmas', 'provas.id', '=', 'prova_turmas.prova_id')
                     ->where('prova_turmas.turma_id', $turma->id)
                     ->whereIn('provas.status', ['corrigida', 'em_correcao', 'publicada'])
                     ->orderByDesc('provas.data_aplicacao')
@@ -513,7 +518,7 @@ class DashboardController extends Controller
             ->get();
 
         // Próximas provas
-        $proximasProvas = Prova::where('escola_id', $escolaId)
+        $proximasProvas = $consulta->modelo(Prova::class)->where('escola_id', $escolaId)
             ->where('data_aplicacao', '>=', now()->toDateString())
             ->orderBy('data_aplicacao')
             ->limit(4)
@@ -544,46 +549,45 @@ class DashboardController extends Controller
 
     public function dirNucleo(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
+        if ($escolha = $this->escolha($request, $consulta, 'nucleo')) return $escolha;
 
         // Descobrir o núcleo do diretor via escopos
-        $nucleoId = DB::table('usuario_escopos')
-            ->where('usuario_id', $usuario->id)
-            ->where('escopo_tipo', 'nucleo')
-            ->value('escopo_id');
+        $nucleoId = Instituicoes::selecionarReferencia($request, 'nucleo', $this->referencias($consulta, 'nucleo')->pluck('id')->all());
 
         if (!$nucleoId) {
             return ApiResponse::forbidden('Usuário não vinculado a nenhum núcleo.');
         }
 
-        $nucleo = Nucleo::findOrFail($nucleoId);
+        $nucleo = $consulta->modelo(Nucleo::class)->findOrFail($nucleoId);
 
         // IDs das escolas do núcleo
-        $escolaIds = Escola::where('nucleo_id', $nucleoId)->pluck('id');
+        $escolaIds = $consulta->modelo(Escola::class)->where('nucleo_id', $nucleoId)->pluck('id');
 
         // KPIs
         $totalEscolas = $escolaIds->count();
-        $totalAlunos  = Aluno::whereHas('turma', fn ($q) => $q->whereIn('escola_id', $escolaIds))
+        $totalAlunos  = $consulta->modelo(Aluno::class)->whereHas('turma', fn ($q) => $q->whereIn('escola_id', $escolaIds))
             ->where('ativo', true)
             ->count();
 
-        $provasRealizadas = Prova::whereIn('escola_id', $escolaIds)
+        $provasRealizadas = $consulta->modelo(Prova::class)->whereIn('escola_id', $escolaIds)
             ->whereIn('status', ['corrigida', 'em_correcao', 'publicada'])
             ->count();
 
-        $mediaNucleo = Nota::whereHas('prova', fn ($q) => $q->whereIn('escola_id', $escolaIds))
+        $mediaNucleo = $consulta->modelo(Nota::class)->whereHas('prova', fn ($q) => $q->whereIn('escola_id', $escolaIds))
             ->avg('nota_final');
 
         // Comparativo de escolas
-        $escolas = DB::table('escolas')
-            ->leftJoin('turmas', function ($j) {
+        $escolas = $consulta->tabela('escolas')
+            ->leftJoinSub($consulta->tabela('turmas'), 'turmas', function ($j) {
                 $j->on('turmas.escola_id', '=', 'escolas.id')->where('turmas.ativo', true);
             })
-            ->leftJoin('alunos', function ($j) {
+            ->leftJoinSub($consulta->tabela('alunos'), 'alunos', function ($j) {
                 $j->on('alunos.turma_id', '=', 'turmas.id')->where('alunos.ativo', true);
             })
-            ->leftJoin('provas', 'provas.escola_id', '=', 'escolas.id')
-            ->leftJoin('notas', 'notas.prova_id', '=', 'provas.id')
+            ->leftJoinSub($consulta->tabela('provas'), 'provas', 'provas.escola_id', '=', 'escolas.id')
+            ->leftJoinSub($consulta->tabela('notas'), 'notas', 'notas.prova_id', '=', 'provas.id')
             ->whereIn('escolas.id', $escolaIds)
             ->select(
                 'escolas.id',
@@ -614,8 +618,8 @@ class DashboardController extends Controller
         for ($bim = 1; $bim <= 4; $bim++) {
             $mesInicio = ($bim - 1) * 3 + 1;
             $mesFim    = $bim * 3;
-            $media = DB::table('notas')
-                ->join('provas', 'notas.prova_id', '=', 'provas.id')
+            $media = $consulta->tabela('notas')
+                ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
                 ->whereIn('provas.escola_id', $escolaIds)
                 ->whereYear('provas.data_aplicacao', $ano)
                 ->whereMonth('provas.data_aplicacao', '>=', $mesInicio)
@@ -630,7 +634,7 @@ class DashboardController extends Controller
         }
 
         // Próximas visitas
-        $visitas = Visita::where('nucleo_id', $nucleoId)
+        $visitas = $consulta->modelo(Visita::class)->where('nucleo_id', $nucleoId)
             ->where('data_visita', '>=', now()->toDateString())
             ->orderBy('data_visita')
             ->limit(3)
@@ -654,19 +658,20 @@ class DashboardController extends Controller
 
     public function admin(Request $request): JsonResponse
     {
-        $totalEscolas   = Escola::count();
-        $totalAtivas    = Escola::where('ativo', true)->count();
-        $totalAlunos    = Aluno::where('ativo', true)->count();
+        $consulta = new ConsultasPedagogicas($request->user());
+        $totalEscolas   = $consulta->modelo(Escola::class)->count();
+        $totalAtivas    = $consulta->modelo(Escola::class)->where('ativo', true)->count();
+        $totalAlunos    = $consulta->modelo(Aluno::class)->where('ativo', true)->count();
 
-        $provasMes = Prova::whereMonth('data_aplicacao', now()->month)
+        $provasMes = $consulta->modelo(Prova::class)->whereMonth('data_aplicacao', now()->month)
             ->whereYear('data_aplicacao', now()->year)
             ->count();
 
-        $mediaRede = Nota::avg('nota_final');
+        $mediaRede = $consulta->modelo(Nota::class)->avg('nota_final');
 
-        $top5 = DB::table('notas')
-            ->join('provas', 'notas.prova_id', '=', 'provas.id')
-            ->join('escolas', 'provas.escola_id', '=', 'escolas.id')
+        $top5 = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
+            ->joinSub($consulta->tabela('escolas'), 'escolas', 'provas.escola_id', '=', 'escolas.id')
             ->select('escolas.id', 'escolas.nome', DB::raw('ROUND(AVG(notas.nota_final), 1) as media'))
             ->groupBy('escolas.id', 'escolas.nome')
             ->orderByDesc('media')
@@ -674,24 +679,24 @@ class DashboardController extends Controller
             ->get();
 
         $metaRede = 7.0;
-        $escolasAbaixo = DB::table('notas')
-            ->join('provas', 'notas.prova_id', '=', 'provas.id')
-            ->join('escolas', 'provas.escola_id', '=', 'escolas.id')
+        $escolasAbaixo = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'notas.prova_id', '=', 'provas.id')
+            ->joinSub($consulta->tabela('escolas'), 'escolas', 'provas.escola_id', '=', 'escolas.id')
             ->select('escolas.id')
             ->groupBy('escolas.id')
             ->havingRaw('AVG(notas.nota_final) < ?', [$metaRede])
             ->get()
             ->count();
 
-        $cartoesAmbiguos = Cartao::where('status', 'ambiguo')->count();
+        $cartoesAmbiguos = $consulta->modelo(Cartao::class)->where('status', 'ambiguo')->count();
 
-        $ultimaSync = SincronizacaoSeges::latest('iniciado_em')->first();
+        $ultimaSync = $consulta->modelo(SincronizacaoSeges::class)->latest('iniciado_em')->first(); // Sem destino válido, o registro não entra no modo novo.
         $segesAtraso = null;
         if ($ultimaSync && $ultimaSync->duracao_minutos !== null) {
             $segesAtraso = $ultimaSync->duracao_minutos;
         }
 
-        $ultimosAcessos = Usuario::whereNotNull('ultimo_acesso')
+        $ultimosAcessos = $consulta->modelo(Usuario::class)->whereNotNull('ultimo_acesso')
             ->where('ativo', true)
             ->orderByDesc('ultimo_acesso')
             ->limit(5)
@@ -699,7 +704,7 @@ class DashboardController extends Controller
 
         // Rede(s) do admin: a do escopo dele ou, sem escopo, todas
         $redeIds = DB::table('usuario_escopos')->where('usuario_id', $request->user()->id)->where('escopo_tipo', 'rede')->pluck('escopo_id');
-        $redes   = DB::table('redes')->when($redeIds->isNotEmpty(), fn ($q) => $q->whereIn('id', $redeIds))->orderBy('nome')->get(['id', 'nome', 'tipo']);
+        $redes   = $consulta->tabela('redes')->when($redeIds->isNotEmpty(), fn ($q) => $q->whereIn('id', $redeIds))->orderBy('nome')->get(['id', 'nome', 'tipo']);
 
         return ApiResponse::success([
             'redes' => $redes,
@@ -723,12 +728,11 @@ class DashboardController extends Controller
 
     public function secretaria(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
+        if ($escolha = $this->escolha($request, $consulta, 'secretaria')) return $escolha;
 
-        $secretariaId = DB::table('usuario_escopos')
-            ->where('usuario_id', $usuario->id)
-            ->where('escopo_tipo', 'secretaria')
-            ->value('escopo_id');
+        $secretariaId = Instituicoes::selecionarReferencia($request, 'secretaria', $this->referencias($consulta, 'secretaria')->pluck('id')->all());
 
         if (!$secretariaId) {
             return ApiResponse::forbidden('Usuário não vinculado a nenhuma secretaria.');
@@ -736,50 +740,39 @@ class DashboardController extends Controller
 
         $secretaria = Secretaria::findOrFail($secretariaId);
 
-        $redeIds = DB::table('redes')->where('secretaria_id', $secretariaId)->pluck('id');
+        $redeIds = $consulta->tabela('redes')->where('secretaria_id', $secretariaId)->pluck('id');
 
         $totalRedes = $redeIds->count();
 
-        $escolaIds = DB::table('escolas')
-            ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
+        $escolaIds = $consulta->tabela('escolas')
+            ->joinSub($consulta->tabela('nucleos'), 'nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
             ->whereIn('nucleos.rede_id', $redeIds)
             ->pluck('escolas.id');
 
-        $totalAlunos = Aluno::whereHas('turma', fn ($q) => $q->whereIn('escola_id', $escolaIds))
+        $totalAlunos = $consulta->modelo(Aluno::class)->whereHas('turma', fn ($q) => $q->whereIn('escola_id', $escolaIds))
             ->where('ativo', true)
             ->count();
 
-        $provasRealizadas = Prova::whereIn('escola_id', $escolaIds)
+        $provasRealizadas = $consulta->modelo(Prova::class)->whereIn('escola_id', $escolaIds)
             ->whereIn('status', ['corrigida', 'em_correcao', 'publicada'])
             ->count();
 
-        $mediaSecretaria = Nota::whereHas('prova', fn ($q) => $q->whereIn('escola_id', $escolaIds))
+        $mediaSecretaria = $consulta->modelo(Nota::class)->whereHas('prova', fn ($q) => $q->whereIn('escola_id', $escolaIds))
             ->avg('nota_final');
 
-        // Comparativo por rede
-        $redes = DB::table('redes')
-            ->leftJoin('nucleos', 'nucleos.rede_id', '=', 'redes.id')
-            ->leftJoin('escolas', 'escolas.nucleo_id', '=', 'nucleos.id')
-            ->leftJoin('turmas', function ($j) {
-                $j->on('turmas.escola_id', '=', 'escolas.id')->where('turmas.ativo', true);
-            })
-            ->leftJoin('alunos', function ($j) {
-                $j->on('alunos.turma_id', '=', 'turmas.id')->where('alunos.ativo', true);
-            })
-            ->leftJoin('provas', 'provas.escola_id', '=', 'escolas.id')
-            ->leftJoin('notas', 'notas.prova_id', '=', 'provas.id')
-            ->whereIn('redes.id', $redeIds)
-            ->select(
-                'redes.id',
-                'redes.nome',
-                'redes.modalidade',
-                DB::raw('COUNT(DISTINCT escolas.id) as total_escolas'),
-                DB::raw('COUNT(DISTINCT alunos.id) as total_alunos'),
-                DB::raw('ROUND(AVG(notas.nota_final), 1) as media')
-            )
-            ->groupBy('redes.id', 'redes.nome', 'redes.modalidade')
-            ->orderByDesc('media')
-            ->get();
+        // Agregações independentes evitam multiplicar notas pelo número de alunos das escolas.
+        $redes = $consulta->tabela('redes')->whereIn('redes.id', $redeIds)->get(['id', 'nome', 'modalidade'])
+            ->map(function ($rede) use ($consulta) {
+                $escolas = $consulta->tabela('escolas')->join('nucleos', 'nucleos.id', '=', 'escolas.nucleo_id')
+                    ->where('nucleos.rede_id', $rede->id)->pluck('escolas.id');
+                $rede->total_escolas = $escolas->count();
+                $rede->total_alunos = $consulta->tabela('alunos')->joinSub($consulta->tabela('turmas'), 'turmas', 'turmas.id', '=', 'alunos.turma_id')
+                    ->whereIn('turmas.escola_id', $escolas)->where('turmas.ativo', true)->where('alunos.ativo', true)->count();
+                $media = $consulta->tabela('notas')->joinSub($consulta->tabela('provas'), 'provas', 'provas.id', '=', 'notas.prova_id')
+                    ->whereIn('provas.escola_id', $escolas)->avg('notas.nota_final');
+                $rede->media = $media === null ? null : round((float) $media, 1);
+                return $rede;
+            })->sortByDesc('media')->values();
 
         return ApiResponse::success([
             'secretaria' => ['id' => $secretaria->id, 'nome' => $secretaria->nome],
@@ -795,38 +788,37 @@ class DashboardController extends Controller
 
     public function aplicador(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
+        if ($escolha = $this->escolha($request, $consulta, 'escola')) return $escolha;
 
-        $escolaId = DB::table('usuario_escopos')
-            ->where('usuario_id', $usuario->id)
-            ->where('escopo_tipo', 'escola')
-            ->value('escopo_id');
+        $escolaId = Instituicoes::selecionarReferencia($request, 'escola', $this->referencias($consulta, 'escola')->pluck('id')->all());
 
         if (!$escolaId) {
             return ApiResponse::forbidden('Usuário não vinculado a nenhuma escola.');
         }
 
-        $escola = Escola::findOrFail($escolaId);
+        $escola = $consulta->modelo(Escola::class)->findOrFail($escolaId);
 
         $hoje = now()->toDateString();
 
-        $provasHoje = Prova::where('escola_id', $escolaId)
+        $provasHoje = $consulta->modelo(Prova::class)->where('escola_id', $escolaId)
             ->where('data_aplicacao', $hoje)
             ->get(['id', 'titulo', 'disciplina', 'status'])
-            ->map(function ($p) {
-                $turmas = DB::table('prova_turmas')
-                    ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+            ->map(function ($p) use ($consulta) {
+                $turmas = $consulta->tabela('prova_turmas')
+                    ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
                     ->where('prova_turmas.prova_id', $p->id)
                     ->pluck('turmas.nome')
                     ->implode(', ');
 
-                $totalAlunos = DB::table('prova_turmas')
-                    ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                $totalAlunos = $consulta->tabela('prova_turmas')
+                    ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
                     ->where('prova_turmas.prova_id', $p->id)
                     ->where('alunos.ativo', true)
                     ->count();
 
-                $cartoesEnviados = DB::table('cartoes')
+                $cartoesEnviados = $consulta->tabela('cartoes')
                     ->where('prova_id', $p->id)
                     ->count();
 
@@ -848,5 +840,22 @@ class DashboardController extends Controller
             ],
             'provas_hoje' => $provasHoje,
         ]);
+    }
+
+    private function referencias(ConsultasPedagogicas $consulta, string $tipo)
+    {
+        $ids = Instituicoes::referencias($consulta->ator, $tipo);
+        $tabela = ['escola' => 'escolas', 'nucleo' => 'nucleos', 'aluno' => 'alunos', 'secretaria' => 'secretarias'][$tipo];
+        $q = $tipo === 'secretaria' ? DB::table($tabela) : $consulta->tabela($tabela);
+        return $q->whereIn('id', $ids)->orderBy('nome')->get(['id', 'nome']);
+    }
+
+    private function escolha(Request $request, ConsultasPedagogicas $consulta, string $tipo): ?JsonResponse
+    {
+        if (!Espacos::ativo() || $request->has($tipo.'_id')) return null;
+        $opcoes = $this->referencias($consulta, $tipo);
+        return $opcoes->count() > 1
+            ? ApiResponse::error('Selecione o contexto da consulta.', ['selecao' => ['campo' => $tipo.'_id', 'opcoes' => $opcoes]], 422)
+            : null;
     }
 }

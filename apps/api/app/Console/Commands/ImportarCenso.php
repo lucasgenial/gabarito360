@@ -16,12 +16,19 @@ use Illuminate\Support\Facades\DB;
 class ImportarCenso extends Command
 {
     protected $signature = 'g360:censo-importar {arquivo : Tabela_Escola_AAAA.csv do Censo Escolar}
-        {--uf=BA : UFs a importar, separadas por vírgula} {--dry-run : Só conta, não grava}';
+        {--uf=BA : UFs a importar, separadas por vírgula} {--dry-run : Só conta, não grava} {--atualizar-escolas} {--usuario=} {--espaco=}';
 
     protected $description = 'Importa a base de escolas do Censo Escolar (INEP) para consulta pelo código INEP';
 
     public function handle(): int
     {
+        $escolaAlvo = null;
+        if (\App\Support\Espacos::ativo() && $this->option('atualizar-escolas')) {
+            try {
+                $escolaAlvo = (int) \App\Support\Espacos::escolas()->where('ee.id', (int) $this->option('espaco'))->value('e.id');
+                \App\Support\ContextoImportacao::resolver($escolaAlvo, (int) $this->option('usuario'), (int) $this->option('espaco'), ['escola.editar']);
+            } catch (\Throwable $e) { $this->error('Destino institucional não autorizado.'); return self::FAILURE; }
+        }
         $arquivo = $this->argument('arquivo');
         $fh = @fopen($arquivo, 'r');
         if (!$fh) {
@@ -71,14 +78,29 @@ class ImportarCenso extends Command
 
         // Escolas vindas do Censo e não editadas à mão acompanham a base nova
         $atualizadas = 0;
-        if (!$this->option('dry-run')) {
+        if (!$this->option('dry-run') && (!\App\Support\Espacos::ativo() || $this->option('atualizar-escolas'))) {
             $escolas = DB::table('escolas')->join('censo_escolas', 'censo_escolas.codigo_inep', '=', 'escolas.inep')
+                ->when(\App\Support\Espacos::ativo(), fn ($q) => $q->where('escolas.id', $escolaAlvo))
                 ->where('escolas.origem', 'censo')->where('escolas.edicao_manual', false)
                 ->get(['escolas.id', 'censo_escolas.*']);
             foreach ($escolas as $e) {
                 $dados = collect(Censo::paraEscola($e))->except('inep', 'nome')->all();
-                $escola = \App\Models\Escola::findOrFail($e->id);
-                $escola->fill($dados)->save();
+                if (\App\Support\Espacos::ativo()) {
+                    try {
+                        DB::transaction(function () use ($escolaAlvo, $dados) {
+                            $escola = \App\Models\Escola::whereKey($escolaAlvo)->lockForUpdate()->firstOrFail();
+                            \App\Support\ContextoImportacao::resolver($escolaAlvo, (int) $this->option('usuario'), (int) $this->option('espaco'), ['escola.editar']);
+                            abort_unless($escola->origem === 'censo' && !$escola->edicao_manual, 409);
+                            $escola->fill($dados)->save();
+                        });
+                    } catch (\Throwable $e) {
+                        $this->error('Catálogo importado; atualização institucional recusada após revalidar o destino.');
+                        return self::FAILURE;
+                    }
+                } else {
+                    $escola = \App\Models\Escola::findOrFail($e->id);
+                    $escola->fill($dados)->save();
+                }
                 $atualizadas++;
             }
         }

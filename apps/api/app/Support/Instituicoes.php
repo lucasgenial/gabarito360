@@ -79,6 +79,19 @@ class Instituicoes
         return $ids === null ? $q : $q->whereIn('nucleos.id', $ids);
     }
 
+    public static function selecionarReferencia(Request $request, string $tipo, array $ids): ?int
+    {
+        $campo = $tipo.'_id';
+        $request->validate([$campo => 'sometimes|integer|min:1']);
+        $ids = array_values(array_unique(array_map('intval', $ids)));
+        if ($request->has($campo)) {
+            abort_unless(in_array($request->integer($campo), $ids, true), 404);
+            return $request->integer($campo);
+        }
+        abort_if(Espacos::ativo() && count($ids) > 1, 422, 'Selecione a instituição ou registro para esta consulta.');
+        return $ids[0] ?? null;
+    }
+
     /** Sem seleção e com duas redes, recusa ambiguidade em vez de escolher a primeira. */
     public static function redeSelecionada(Request $request): object
     {

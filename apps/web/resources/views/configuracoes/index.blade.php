@@ -18,6 +18,21 @@
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
+@if(count($redes ?? []) > 1)
+<form method="GET" action="{{ route('configuracoes.index') }}" class="section-card">
+  <div class="section-body field">
+    <label for="rede_id">Rede de ensino</label>
+    <select id="rede_id" name="rede_id" class="input" required>
+      <option value="">Selecione a rede</option>
+      @foreach($redes as $rede)
+      <option value="{{ $rede['id'] }}" @selected((int) request('rede_id') === (int) $rede['id'])>{{ $rede['nome'] }}</option>
+      @endforeach
+    </select>
+    <button type="submit" class="btn btn-primary">Abrir configurações</button>
+  </div>
+</form>
+@endif
+@if($config)
 <div class="section-card">
   <div class="section-head">
     <h2>Parâmetros da rede — {{ $config['nome'] }}</h2>
@@ -27,6 +42,7 @@
     <form method="POST" action="{{ route('configuracoes.update') }}">
       @csrf
       @method('PUT')
+      <input type="hidden" name="rede_id" value="{{ $config['rede_id'] }}" />
       <div class="form-row">
         <div class="field">
           <label for="meta_media">Meta de nota da rede *</label>
@@ -54,5 +70,6 @@
   </div>
 </div>
 
+@endif
 <div style="height:48px;"></div>
 @endsection
