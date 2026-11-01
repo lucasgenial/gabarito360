@@ -500,7 +500,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### T3. Perfis por tipo de espaço
 
-- **Andamento em 01/11/2026:** autorizado após PR #95, incorporado em `df1192c`. T3-A incorporado no PR #96; T3-B incorporado no PR #97 (docs/64); T3-C (integração/habilitação) em revisão (docs/65). Acesso pessoal preparado no código, sem publicação no servidor. Detalhes: [docs/63](63-t3-perfis-por-espaco.md). Sem deploy.
+- **Andamento em 01/11/2026:** T3-A incorporado no PR #96; T3-B no PR #97; T3-C no PR #99 (`3b8aa5b`, docs/65). Acesso pessoal preparado no código, sem publicação no servidor. Detalhes: [docs/63](63-t3-perfis-por-espaco.md). Sem deploy.
 
 - **Dependências:** V1.
 - **Arquivos disputados:** `CatalogoPermissoes.php`.
@@ -514,6 +514,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### T4. Cadastro de clientes
 
+- **Andamento em 01/11/2026:** T4-A (persistência cifrada e eventos comerciais) em revisão; nenhuma rota ou concessão de acesso. A1 ainda pendente é pré-requisito das telas T4-B. Detalhes e sequência: [docs/66](66-t4-a-base-cadastro-clientes.md). Sem deploy.
 - **Dependências:** T2, A1.
 - **Arquivos:** novas telas `clientes/*`.
 - **Passos:**
@@ -975,8 +976,8 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | T2 Clientes e espaços | concluído e publicado na homologação representativa em 01/11/2026: release af4c6d1 (PR #85); backup final em duas camadas, preenchimento e restrições aplicados; 2 clientes internos/13 espaços, administrador com dois vínculos separados; auditoria, dados e validação funcional aprovados (docs/54). V1/V2 permanecem próximos pacotes distintos | Codex | #74, #75, #76, #77, #78, #79, #80, #81, #82, #83, #84, #85 |
 | V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
 | V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
-| T3 Perfis por espaço | T3-A #96 e T3-B #97 incorporados; T3-C integração/habilitação em revisão; sem deploy | Codex | docs/63–65 |
-| T4 Cadastro de clientes | pendente | | |
+| T3 Perfis por espaço | T3-A #96, T3-B #97 e T3-C #99 incorporados; sem deploy | Codex | docs/63–65 |
+| T4 Cadastro de clientes | T4-A base em revisão; A1 necessário antes das telas T4-B; sem deploy | Codex | docs/66 |
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
 | A1 Novos perfis | pendente | | |
