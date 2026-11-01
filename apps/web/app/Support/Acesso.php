@@ -16,6 +16,7 @@ class Acesso
         'dir_escolar'         => 'Diretor Escolar',
         'coordenador'         => 'Coordenador',
         'professor'           => 'Professor',
+        'professor_autonomo'  => 'Professor autônomo',
         'aplicador'           => 'Aplicador',
         'aluno'               => 'Aluno',
     ];

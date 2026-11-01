@@ -500,6 +500,8 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### T3. Perfis por tipo de espaço
 
+- **Andamento em 01/11/2026:** autorizado após PR #95, incorporado em `df1192c`. T3-A (contrato de perfis e limites) em revisão; T3-B (dados/formulários) e T3-C (integração/habilitação) pendentes. Espaço pessoal ainda não liberado. Detalhes: [docs/63](63-t3-perfis-por-espaco.md). Sem deploy.
+
 - **Dependências:** V1.
 - **Arquivos disputados:** `CatalogoPermissoes.php`.
 - **Passos:**
@@ -972,8 +974,8 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | T1 Modelo de dados | concluído: modelo aprovado pelo responsável; PR #73 incorporado; docs/40 e docs/41 | Codex | #73 |
 | T2 Clientes e espaços | concluído e publicado na homologação representativa em 01/11/2026: release af4c6d1 (PR #85); backup final em duas camadas, preenchimento e restrições aplicados; 2 clientes internos/13 espaços, administrador com dois vínculos separados; auditoria, dados e validação funcional aprovados (docs/54). V1/V2 permanecem próximos pacotes distintos | Codex | #74, #75, #76, #77, #78, #79, #80, #81, #82, #83, #84, #85 |
 | V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
-| V2 Escolha do vínculo | V2-A/B incorporados nos PRs #93/#94; V2-C gestão/convites em revisão; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
-| T3 Perfis por espaço | pendente | | |
+| V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
+| T3 Perfis por espaço | T3-A contrato em revisão; T3-B/C pendentes; pessoal bloqueado; sem deploy | Codex | docs/63 |
 | T4 Cadastro de clientes | pendente | | |
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
