@@ -12,7 +12,7 @@
   $descr   = collect($catalogo['permissoes'] ?? [])->keyBy('chave');
   $porPerf = $catalogo['perfis'] ?? [];
   $cadastra = $catalogo['cadastra'] ?? [];
-  $ordem   = ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno', 'secretario_educacao'];
+  $ordem   = ['admin_rede', 'dir_nucleo', 'dir_escolar', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno', 'secretario_educacao'];
   $modulos = ['escolas' => 'Rede, núcleos e escolas', 'equipe' => 'Equipe e usuários', 'turmas' => 'Turmas e alunos',
               'provas' => 'Provas e gabaritos', 'correcao' => 'Cartões e correção', 'relatorios' => 'Resultados e relatórios'];
 @endphp

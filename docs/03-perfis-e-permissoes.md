@@ -34,7 +34,7 @@ Regras de concessão (valem para extras e retiradas):
 
 ### Extensão A1 — contexto interno (01/11/2026)
 
-Os perfis internos usam atribuição própria, sem integrar a matriz institucional de oito colunas nem ampliar o escopo de um vínculo escolar. Habilitação desligada por padrão; base A1-A e seleção por token/aba A1-B1 incorporadas nos PRs #101/#102. Gestão A1-B2 em revisão. Não há promoção automática de contas.
+Os perfis internos usam atribuição própria, sem integrar a matriz institucional de oito colunas nem ampliar o escopo de um vínculo escolar. Habilitação desligada por padrão; base A1-A e seleção por token/aba A1-B1 incorporadas nos PRs #101/#102. Gestão A1-B2 incorporada no PR #103 (`98b28e1`). Não há promoção automática de contas.
 
 | Contexto interno | Cadastro comercial | Gestão de acessos internos | Dados pedagógicos |
 |---|---|---|---|
@@ -42,7 +42,7 @@ Os perfis internos usam atribuição própria, sem integrar a matriz institucion
 | Suporte | Consultar e gerir clientes | Negado | Negado neste contexto; atendimento auditado é AU3 |
 | Financeiro | Consultar e gerir clientes | Negado | Negado |
 
-Cada uso revalida titularidade, conta ativa, situação, vigência e versão da atribuição. Selecionar contexto interno remove o vínculo pedagógico do objeto e vice-versa; não há união de poderes. A1-B2 prepara comando controlado para o primeiro Desenvolvedor e gestão auditada de Suporte/Financeiro de outras contas. Autogestão e gestão de pares são recusadas. Concessão de outros Desenvolvedores não é oferecida. Secretário Escolar permanece A1-C. Detalhes: [docs/69](69-a1-b2-gestao-interna.md).
+Cada uso revalida titularidade, conta ativa, situação, vigência e versão da atribuição. Selecionar contexto interno remove o vínculo pedagógico do objeto e vice-versa; não há união de poderes. A1-B2 prepara comando controlado para o primeiro Desenvolvedor e gestão auditada de Suporte/Financeiro de outras contas. Autogestão e gestão de pares são recusadas. Concessão de outros Desenvolvedores não é oferecida. Secretário Escolar implementado no A1-C, em revisão: vínculo exclusivo de escola, gestão de alunos/turmas sem dados de desempenho, sem extras e sem gestão de equipe. Administrador de rede, diretor de núcleo e diretor escolar podem gerir esse vínculo no próprio escopo; coordenador não. Detalhes: [docs/69](69-a1-b2-gestao-interna.md).
 
 ### Perfis institucionais
 
@@ -207,3 +207,7 @@ escolar · **COO** coordenador · **PRO** professor · **APL** aplicador · **AL
 - 30/10/2026 — Correção aberta/fechada; reabrir só pela supervisão.
 - 30/10/2026 — Logo da escola e do ente (público: governo/prefeitura; privado: mantenedora).
 - 30/10/2026 — Quem cadastra quem (seção 3) e permissões extras/retiradas com registro (doc 21).
+
+### A1-C — política administrativa
+
+O perfil `secretario_escolar` usa política independente da matriz legada: `escola.ver`, `turma.ver`, `turma.gerir`, `turma.desativar`, `aluno.ver`, `aluno.gerir`, `aluno.importar` e `aluno.desativar`. A permissão de importação fica preparada; o importador XLSX ainda não está implementado. O código do responsável depende de P3/P4. Sem vínculo válido, o perfil global não concede permissões. [Escopo e validação](70-a1-c-secretario-escolar.md).
