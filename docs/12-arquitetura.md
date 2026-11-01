@@ -335,3 +335,7 @@ O [documento T1](40-clientes-espacos-e-vinculos.md), aprovado pelo responsável 
 ### L6 — Galeria de avatares (31/10/2026, aprovação do responsável)
 
 A API persiste somente `alunos.avatar_id`, inteiro de 1 a 36 ou nulo para iniciais. Não aceita URLs nem upload de imagens de alunos. A web usa o catálogo estático versionado `images/avatares/estudantes-v1.png`, com mapeamento estável por linha/coluna, e componentes Blade compartilhados para exibição e seleção. O catálogo aprovado não deve ser reordenado: novos personagens devem preservar os IDs existentes. A migração é aditiva e não remove `foto_path` nem arquivos. Telas de turma e painéis recebem o mesmo identificador.
+
+### Adaptador transitório de consultas T2-D4
+
+Conforme T1 aprovado, os consumidores pedagógicos usam contexto explícito do ator e conferem a propriedade das relações antes de agregar resultados. `ConsultasPedagogicas` e `ContextoImportacao` não mantêm estado global de requisição; seleção institucional web segue URL/formulário. Detalhes e limites em [47-t2-consultas-e-integracoes.md](47-t2-consultas-e-integracoes.md). Adaptador desligado até E e aprovação operacional; V1/V2 permanecem responsáveis por vínculos/token contextual.

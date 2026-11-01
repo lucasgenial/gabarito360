@@ -2,7 +2,9 @@
 
 Base: PR #77 incorporado em `24e335ae3927fb6291f7346d18fc219c65d1654e`. Continuidade T2-D3 autorizada pelo responsável, **sem deploy**. Implementação derivada de [T1 aprovado](40-clientes-espacos-e-vinculos.md) e do [roteiro D/E](44-t2-adaptacao-e-corte.md).
 
-## Entrega em revisão — PR #78
+## Entrega incorporada — PR #78
+
+Merge em `56457f8668a82d883e04dc29eb1a191166b453c6`, sem deploy. Continuidade: [T2-D4](47-t2-consultas-e-integracoes.md).
 
 - Gabaritos, questões, cartões, recibos de envio, respostas, notas e decisões manuais recebem espaço e autoria do contexto autorizado no servidor. Payloads não escolhem proprietários. Leituras conferem os vínculos entre prova, escola, turma, aluno e cartão.
 - Fila transporta IDs de espaço e ator. Revalida conta ativa, permissão, prova, aluno e hierarquia antes da leitura e antes da gravação. QR só redireciona dentro da escola e espaço autorizados. Retentativas e callbacks de falha conferem recibo, cartão, tentativa, ator e espaço.

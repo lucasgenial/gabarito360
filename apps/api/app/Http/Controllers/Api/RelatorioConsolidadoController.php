@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Support\Cabecalho;
 use App\Support\Escopo;
+use App\Support\Espacos;
+use App\Support\Instituicoes;
+use App\Support\ConsultasPedagogicas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -23,20 +26,22 @@ class RelatorioConsolidadoController extends Controller
 {
     public function escola(Request $request, ?int $id = null): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
         $escolas = Escopo::escolaIds($usuario);
+        abort_if(Espacos::ativo() && !$id && count($escolas ?? []) > 1, 422, 'Selecione a escola.');
         $id ??= $escolas[0] ?? null;
         // A rota exige relatorio.escola (padrão ou extra); aqui só o escopo da pessoa conta
         if (!$id || ($escolas !== null && !in_array($id, $escolas, true))) {
             return ApiResponse::notFound('Escola não encontrada.');
         }
 
-        $escola = DB::table('escolas')->where('id', $id)->first(['id', 'nome', 'inep', 'nucleo_id']);
+        $escola = $consulta->tabela('escolas')->where('id', $id)->first(['id', 'nome', 'inep', 'nucleo_id']);
         if (!$escola) {
             return ApiResponse::notFound('Escola não encontrada.');
         }
 
-        $notas = $this->notas([$id]);
+        $notas = $this->notas($consulta, [$id]);
 
         return ApiResponse::success(array_merge([
             'nivel'    => 'escola',
@@ -44,31 +49,34 @@ class RelatorioConsolidadoController extends Controller
             'unidade'  => ['id' => $escola->id, 'nome' => $escola->nome, 'detalhe' => $escola->inep && $escola->inep !== 'PENDENTE' ? 'INEP ' . $escola->inep : null],
             'grupo'    => 'turma',
             'grupos'   => $this->comparativo($notas, 'turma_id', 'turma_nome',
-                DB::table('turmas')->where('escola_id', $id)->where('ativo', true)->orderBy('nome')->pluck('nome', 'id')),
+                $consulta->tabela('turmas')->where('escola_id', $id)->where('ativo', true)->orderBy('nome')->pluck('nome', 'id')),
             'destaques' => $this->alunos($notas, 'desc'),
             'atencao'   => $this->alunos($notas, 'asc', true),
-        ], $this->base($notas, [$id])));
+        ], $this->base($consulta, $notas, [$id])));
     }
 
     public function nucleo(Request $request, ?int $id = null): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
         // A rota exige relatorio.nucleo; o admin da rede vê todos, os demais só os núcleos do seu escopo
         $meus = $usuario->perfil === 'admin_rede' ? null
             : DB::table('usuario_escopos')->where('usuario_id', $usuario->id)->where('escopo_tipo', 'nucleo')->pluck('escopo_id')->map(fn ($v) => (int) $v)->all();
+        if (Espacos::ativo()) $meus = Instituicoes::nucleosIds($usuario) ?? [];
+        abort_if(Espacos::ativo() && !$id && count($meus ?? []) > 1, 422, 'Selecione o núcleo.');
         $id ??= $meus[0] ?? null;
         if (!$id || ($meus !== null && !in_array($id, $meus, true))) {
             return ApiResponse::notFound('Núcleo não encontrado.');
         }
 
-        $nucleo = DB::table('nucleos')->leftJoin('redes', 'redes.id', '=', 'nucleos.rede_id')
+        $nucleo = $consulta->tabela('nucleos')->leftJoinSub($consulta->tabela('redes'), 'redes', 'redes.id', '=', 'nucleos.rede_id')
             ->where('nucleos.id', $id)->first(['nucleos.id', 'nucleos.nome', 'redes.id as rede_id', 'redes.nome as rede']);
         if (!$nucleo) {
             return ApiResponse::notFound('Núcleo não encontrado.');
         }
 
-        $escolaIds = DB::table('escolas')->where('nucleo_id', $id)->pluck('id')->all();
-        $notas = $this->notas($escolaIds);
+        $escolaIds = $consulta->tabela('escolas')->where('nucleo_id', $id)->pluck('id')->all();
+        $notas = $this->notas($consulta, $escolaIds);
 
         return ApiResponse::success(array_merge([
             'nivel'   => 'nucleo',
@@ -76,17 +84,18 @@ class RelatorioConsolidadoController extends Controller
             'unidade' => ['id' => $nucleo->id, 'nome' => $nucleo->nome, 'detalhe' => $nucleo->rede],
             'grupo'   => 'escola',
             'grupos'  => $this->comparativo($notas, 'escola_id', 'escola_nome',
-                DB::table('escolas')->whereIn('id', $escolaIds)->orderBy('nome')->pluck('nome', 'id')),
-        ], $this->base($notas, $escolaIds)));
+                $consulta->tabela('escolas')->whereIn('id', $escolaIds)->orderBy('nome')->pluck('nome', 'id')),
+        ], $this->base($consulta, $notas, $escolaIds)));
     }
 
     public function rede(Request $request, ?int $id = null): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         if ($request->user()->perfil !== 'admin_rede') {
             return ApiResponse::notFound('Rede não encontrada.');
         }
 
-        $redes = DB::table('redes')->orderBy('nome')->get(['id', 'nome']);
+        $redes = $consulta->tabela('redes')->orderBy('nome')->get(['id', 'nome']);
         $id ??= $redes->count() === 1 ? $redes->first()->id : null;
         if (!$id) {
             // Mais de uma rede: devolve a lista para escolher
@@ -98,9 +107,9 @@ class RelatorioConsolidadoController extends Controller
             return ApiResponse::notFound('Rede não encontrada.');
         }
 
-        $escolaIds = DB::table('escolas')->join('nucleos', 'nucleos.id', '=', 'escolas.nucleo_id')
+        $escolaIds = $consulta->tabela('escolas')->joinSub($consulta->tabela('nucleos'), 'nucleos', 'nucleos.id', '=', 'escolas.nucleo_id')
             ->where('nucleos.rede_id', $id)->pluck('escolas.id')->all();
-        $notas = $this->notas($escolaIds);
+        $notas = $this->notas($consulta, $escolaIds);
 
         return ApiResponse::success(array_merge([
             'nivel'   => 'rede',
@@ -108,23 +117,23 @@ class RelatorioConsolidadoController extends Controller
             'unidade' => ['id' => $rede->id, 'nome' => $rede->nome, 'detalhe' => null],
             'grupo'   => 'escola',
             'grupos'  => $this->comparativo($notas, 'escola_id', 'escola_nome',
-                DB::table('escolas')->whereIn('id', $escolaIds)->orderBy('nome')->pluck('nome', 'id')),
+                $consulta->tabela('escolas')->whereIn('id', $escolaIds)->orderBy('nome')->pluck('nome', 'id')),
             'redes'   => $redes,
-        ], $this->base($notas, $escolaIds)));
+        ], $this->base($consulta, $notas, $escolaIds)));
     }
 
     /** Notas (escala 0–10) das provas aplicadas nas escolas, com turma/escola/disciplina. */
-    private function notas(array $escolaIds): Collection
+    private function notas(ConsultasPedagogicas $consulta, array $escolaIds): Collection
     {
         if (!$escolaIds) {
             return collect();
         }
 
-        return DB::table('notas')
-            ->join('provas', 'provas.id', '=', 'notas.prova_id')
-            ->join('turmas', 'turmas.id', '=', 'notas.turma_id')
-            ->join('escolas', 'escolas.id', '=', 'turmas.escola_id')
-            ->join('alunos', 'alunos.id', '=', 'notas.aluno_id')
+        return $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'provas.id', '=', 'notas.prova_id')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'turmas.id', '=', 'notas.turma_id')
+            ->joinSub($consulta->tabela('escolas'), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
+            ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.id', '=', 'notas.aluno_id')
             ->whereIn('turmas.escola_id', $escolaIds)
             ->whereIn('provas.status', ['publicada', 'em_correcao', 'corrigida'])
             ->get([
@@ -136,11 +145,11 @@ class RelatorioConsolidadoController extends Controller
     }
 
     /** Indicadores e média por área, comuns aos três níveis. */
-    private function base(Collection $notas, array $escolaIds): array
+    private function base(ConsultasPedagogicas $consulta, Collection $notas, array $escolaIds): array
     {
-        $alunos = $escolaIds ? DB::table('alunos')->join('turmas', 'turmas.id', '=', 'alunos.turma_id')
+        $alunos = $escolaIds ? $consulta->tabela('alunos')->joinSub($consulta->tabela('turmas'), 'turmas', 'turmas.id', '=', 'alunos.turma_id')
             ->whereIn('turmas.escola_id', $escolaIds)->where('alunos.ativo', true)->count() : 0;
-        $provas = $escolaIds ? DB::table('provas')->whereIn('escola_id', $escolaIds)
+        $provas = $escolaIds ? $consulta->tabela('provas')->whereIn('escola_id', $escolaIds)
             ->whereIn('status', ['publicada', 'em_correcao', 'corrigida'])->count() : 0;
 
         $areas = $notas->groupBy('disciplina')->map(fn ($g, $disc) => [

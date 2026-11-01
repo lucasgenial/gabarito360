@@ -7,6 +7,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Prova;
 use App\Support\Escopo;
 use App\Support\Espacos;
+use App\Support\ConsultasPedagogicas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,12 +41,12 @@ class ProvaController extends Controller
         return null;
     }
 
-    private function progresso(Prova $p): array
+    private function progresso(ConsultasPedagogicas $consulta, Prova $p): array
     {
         if ($p->status === 'corrigida') {
-            $totalCartoes = DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count();
-            $lidos        = DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->whereIn('status', ['lido', 'ambiguo'])->count();
-            $media        = DB::table('notas')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->avg('nota_final');
+            $totalCartoes = $consulta->tabela('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count();
+            $lidos        = $consulta->tabela('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->whereIn('status', ['lido', 'ambiguo'])->count();
+            $media        = $consulta->tabela('notas')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->avg('nota_final');
 
             return [
                 'tipo'          => 'media',
@@ -56,15 +57,15 @@ class ProvaController extends Controller
         }
 
         if ($p->status === 'em_correcao') {
-            $totalCartoes = DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count();
-            $lidos        = DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->whereIn('status', ['lido', 'ambiguo'])->count();
+            $totalCartoes = $consulta->tabela('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count();
+            $lidos        = $consulta->tabela('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->whereIn('status', ['lido', 'ambiguo'])->count();
 
             return ['tipo' => 'correcao', 'lidos' => $lidos, 'total' => $totalCartoes];
         }
 
         if ($p->status === 'rascunho') {
-            $gabarito    = DB::table('gabaritos')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->first();
-            $preenchidas = $gabarito ? DB::table('gabarito_questoes')->where('gabarito_id', $gabarito->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count() : 0;
+            $gabarito    = $consulta->tabela('gabaritos')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->first();
+            $preenchidas = $gabarito ? $consulta->tabela('gabarito_questoes')->where('gabarito_id', $gabarito->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count() : 0;
 
             return ['tipo' => 'gabarito', 'preenchidas' => $preenchidas, 'total' => $p->num_questoes];
         }
@@ -74,6 +75,7 @@ class ProvaController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $query = Escopo::provas($request->user());
 
         if ($busca = $request->query('busca')) {
@@ -94,9 +96,9 @@ class ProvaController extends Controller
         $provas = $query->with('escola:id,nome')
             ->orderByDesc('created_at')
             ->get()
-            ->map(function (Prova $p) {
-                $turmasLista = DB::table('prova_turmas')
-                    ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+            ->map(function (Prova $p) use ($consulta) {
+                $turmasLista = $consulta->tabela('prova_turmas')
+                    ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
                     ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('turmas.espaco_id', 'prova_turmas.espaco_id'))
                     ->where('prova_turmas.prova_id', $p->id)
                     ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $p->espaco_id))
@@ -107,13 +109,13 @@ class ProvaController extends Controller
                     'escola_nome'  => $p->escola?->nome,
                     'turmas'       => $turmasLista->pluck('nome')->all(),
                     'turmas_lista' => $turmasLista->map(fn ($t) => ['id' => (int) $t->id, 'nome' => $t->nome])->all(),
-                    'total_alunos' => DB::table('prova_turmas')
-                        ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+                    'total_alunos' => $consulta->tabela('prova_turmas')
+                        ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
                         ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('alunos.espaco_id', 'prova_turmas.espaco_id'))
                         ->where('prova_turmas.prova_id', $p->id)
                         ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $p->espaco_id))->where('alunos.ativo', true)->count(),
-                    'cartoes_lidos' => DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->where('status', 'lido')->count(),
-                    'progresso'   => $this->progresso($p),
+                    'cartoes_lidos' => $consulta->tabela('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->where('status', 'lido')->count(),
+                    'progresso'   => $this->progresso($consulta, $p),
                 ]);
             });
 
@@ -178,14 +180,15 @@ class ProvaController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $prova = Escopo::provas($request->user())->with('escola:id,nome')->find($id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        $turmas = DB::table('prova_turmas')
-            ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+        $turmas = $consulta->tabela('prova_turmas')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
             ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('turmas.espaco_id', 'prova_turmas.espaco_id'))
             ->where('prova_turmas.prova_id', $id)
             ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $prova->espaco_id))
