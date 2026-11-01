@@ -53,8 +53,10 @@ class InventarioEspacos
                     $q->whereColumn('n.prova_id', '<>', 'c.prova_id')->orWhereColumn('n.aluno_id', '<>', 'c.aluno_id')->orWhereNull('c.aluno_id');
                 })->count();
             $problemas['envios_com_cartao_inexistente'] = $this->orfaos('cartao_envios', 'cartao_id', 'cartoes', true);
-            $problemas['envios_com_cartao_de_outra_prova'] = DB::table('cartao_envios as e')
-                ->join('cartoes as c', 'c.id', '=', 'e.cartao_id')->whereColumn('e.prova_id', '<>', 'c.prova_id')->count();
+            // Recibo conserva a prova de entrada; QR pode corrigir a prova dentro da mesma escola.
+            $problemas['envios_com_cartao_de_outra_escola'] = DB::table('cartao_envios as e')
+                ->join('cartoes as c', 'c.id', '=', 'e.cartao_id')->join('provas as entrada', 'entrada.id', '=', 'e.prova_id')
+                ->join('provas as destino', 'destino.id', '=', 'c.prova_id')->whereColumn('entrada.escola_id', '<>', 'destino.escola_id')->count();
             $problemas['ambiguidade_com_resposta_inexistente'] = $this->orfaos('ambiguidade_logs', 'cartao_resposta_id', 'cartao_respostas');
             $problemas['ambiguidade_com_resposta_de_outro_cartao'] = DB::table('ambiguidade_logs as l')
                 ->join('cartao_respostas as r', 'r.id', '=', 'l.cartao_resposta_id')->whereColumn('l.cartao_id', '<>', 'r.cartao_id')->count();

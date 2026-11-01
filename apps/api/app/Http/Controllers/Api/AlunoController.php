@@ -9,6 +9,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Aluno;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AlunoController extends Controller
 {
@@ -54,12 +55,13 @@ class AlunoController extends Controller
     {
         $request->validate(['turma_id' => 'required|integer']);
         $turma = Escopo::turmas($request->user())->findOrFail((int) $request->input('turma_id'));
+        $espaco = Espacos::ativo() ? (int) $turma->espaco_id : null;
         $data = $request->validate([
             'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'required|integer|exists:turmas,id',
             'nome'            => 'required|string|max:200',
-            'matricula'       => 'required|string|max:20|unique:alunos,matricula',
-            'cpf'             => ['sometimes', 'string', 'size:11', 'nullable', new \App\Rules\UnicoProtegido('alunos', 'cpf')],
+            'matricula'       => ['required', 'string', 'max:20', Rule::unique('alunos', 'matricula')->when($espaco !== null, fn ($q) => $q->where('espaco_id', $espaco))],
+            'cpf'             => ['sometimes', 'string', 'size:11', 'nullable', new \App\Rules\UnicoProtegido('alunos', 'cpf', espaco: $espaco)],
             'data_nascimento' => 'required|date',
             'genero'          => 'sometimes|in:M,F,O|nullable',
             'nome_responsavel'=> 'sometimes|string|max:200|nullable',
@@ -103,8 +105,8 @@ class AlunoController extends Controller
             'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'sometimes|integer|exists:turmas,id',
             'nome'            => 'sometimes|string|max:200',
-            'matricula'       => "sometimes|string|max:20|unique:alunos,matricula,{$id}",
-            'cpf'             => ['sometimes', 'string', 'size:11', 'nullable', new \App\Rules\UnicoProtegido('alunos', 'cpf', $id)],
+            'matricula'       => ['sometimes', 'string', 'max:20', Rule::unique('alunos', 'matricula')->ignore($aluno->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $aluno->espaco_id))],
+            'cpf'             => ['sometimes', 'string', 'size:11', 'nullable', new \App\Rules\UnicoProtegido('alunos', 'cpf', $id, Espacos::ativo() ? (int) $aluno->espaco_id : null)],
             'data_nascimento' => 'sometimes|date|nullable',
             'genero'          => 'sometimes|in:M,F,O|nullable',
             'nome_responsavel'=> 'sometimes|string|max:200|nullable',
