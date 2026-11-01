@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Session;
 class ApiClient
 {
     private string $baseUrl;
+    private bool $usarIdentidade = false;
+
+    public function identidade(): self
+    {
+        $copia = clone $this;
+        $copia->usarIdentidade = true;
+        return $copia;
+    }
 
     public function __construct()
     {
@@ -22,7 +30,7 @@ class ApiClient
             ->acceptJson()
             ->timeout(15);
 
-        if ($token = Session::get('auth_token')) {
+        if ($token = (!$this->usarIdentidade ? (\App\Support\ContextoWeb::atual()['token'] ?? null) : null) ?? Session::get('auth_token')) {
             $request = $request->withToken($token);
         }
 

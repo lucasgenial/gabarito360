@@ -48,7 +48,7 @@ class MembroController extends Controller
     public function create(): View
     {
         $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
-        $nucleos = session('auth_perfil') === 'admin_rede' ? ($this->api->get('/v1/nucleos')->json('data.nucleos') ?? []) : [];
+        $nucleos = \App\Support\Acesso::perfil() === 'admin_rede' ? ($this->api->get('/v1/nucleos')->json('data.nucleos') ?? []) : [];
         $turmas  = \App\Support\Acesso::pode('turma.vincular_professor')
             ? collect($this->api->get('/v1/turmas')->json('data.turmas') ?? [])->where('ativo', true)
                 ->map(fn ($t) => ['id' => $t['id'], 'nome' => $t['nome'], 'escola_id' => $t['escola_id'] ?? null])->sortBy('nome')->values()->all()

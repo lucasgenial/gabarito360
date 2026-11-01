@@ -24,7 +24,7 @@ class DashboardController extends Controller
     public function index(Request $request): View
     {
         $contexto = $request->validate(['escola_id' => 'sometimes|integer|min:1', 'nucleo_id' => 'sometimes|integer|min:1', 'aluno_id' => 'sometimes|integer|min:1', 'secretaria_id' => 'sometimes|integer|min:1']);
-        $perfil = session('auth_perfil');
+        $perfil = \App\Support\Acesso::perfil();
         $view   = self::VIEWS[$perfil] ?? 'dashboard.admin';
 
         $dados = match ($perfil) {

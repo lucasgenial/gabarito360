@@ -60,6 +60,8 @@ Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
+    Route::get('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'index'])->name('vinculos.index');
+    Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
 
     // Meu perfil (MP-024)

@@ -81,7 +81,7 @@ class Acesso
 
     public static function perfil(): ?string
     {
-        return session('auth_perfil');
+        return session('auth_vinculos') ? (ContextoWeb::atual()['perfil'] ?? null) : session('auth_perfil');
     }
 
     public static function rotulo(?string $perfil = null): string
@@ -95,6 +95,7 @@ class Acesso
      */
     public static function permissoes(): array
     {
+        if (session('auth_vinculos')) return ContextoWeb::atual()['permissoes'] ?? [];
         $lista = session('auth_permissoes');
         if (!is_array($lista) && session('auth_token')) {
             $resp  = app(\App\Services\ApiClient::class)->get('/v1/auth/me');
