@@ -11,15 +11,18 @@ use Illuminate\Support\Facades\DB;
  * Arquivo: apps/api/app/Support/Escopo.php
  * Função: Escopo de dados por perfil (docs/03-perfis-e-permissoes.md, "Política de
  *         Isolamento"). Fonte única para escolas, turmas e provas visíveis a cada usuário.
- *         null = sem restrição (admin_rede); [] = nada visível.
+ *         null = compatibilidade anterior ao corte T2; [] = nada visível.
  */
 class Escopo
 {
     /** Escolas visíveis ao usuário. */
     public static function escolaIds(Usuario $u): ?array
     {
-        return match ($u->perfil) {
-            'admin_rede' => null,
+        $ids = match ($u->perfil) {
+            'admin_rede' => Espacos::ativo()
+                ? DB::table('escolas')->join('nucleos', 'nucleos.id', '=', 'escolas.nucleo_id')
+                    ->whereIn('nucleos.rede_id', self::escopos($u, 'rede'))->pluck('escolas.id')->all()
+                : null,
             'dir_nucleo' => DB::table('escolas')
                 ->join('usuario_escopos', function ($j) use ($u) {
                     $j->on('escolas.nucleo_id', '=', 'usuario_escopos.escopo_id')
@@ -35,20 +38,27 @@ class Escopo
             ))),
             default => [],
         };
+        return Espacos::ativo() ? Espacos::escolasPermitidas($u, $ids ?? []) : $ids;
     }
 
     /** Turmas visíveis: professor só as vinculadas; demais, as turmas das suas escolas. */
     public static function turmaIds(Usuario $u): ?array
     {
         if ($u->perfil === 'professor') {
-            return self::escopos($u, 'turma');
+            $q = DB::table('turmas')->whereIn('id', self::escopos($u, 'turma'));
+            Espacos::conferirEscola($q, 'turmas');
+            if (Espacos::ativo()) {
+                $q->whereIn('escola_id', self::escolaIds($u));
+                Espacos::filtrar($q, $u, 'espaco_id');
+            }
+            return $q->pluck('id')->map(fn ($id) => (int) $id)->all();
         }
 
         $escolas = self::escolaIds($u);
 
         return $escolas === null
             ? null
-            : DB::table('turmas')->whereIn('escola_id', $escolas)->pluck('id')->all();
+            : Espacos::filtrar(Espacos::conferirEscola(DB::table('turmas'), 'turmas')->whereIn('escola_id', $escolas), $u, 'espaco_id')->pluck('id')->map(fn ($id) => (int) $id)->all();
     }
 
     /**
@@ -57,7 +67,8 @@ class Escopo
      */
     public static function provas(Usuario $u): Builder
     {
-        $q = Prova::query();
+        $q = Espacos::filtrar(Prova::query(), $u, 'provas.espaco_id');
+        Espacos::conferirEscola($q, 'provas');
 
         $escolas = self::escolaIds($u);
         if ($escolas !== null) {
@@ -65,10 +76,14 @@ class Escopo
         }
 
         if ($u->perfil === 'professor') {
-            $turmas = self::escopos($u, 'turma');
+            $turmas = self::turmaIds($u);
             $q->where(function ($w) use ($u, $turmas) {
                 $w->where('provas.criado_por', $u->id)
-                  ->orWhereIn('provas.id', DB::table('prova_turmas')->whereIn('turma_id', $turmas ?: [0])->select('prova_id'));
+                  ->orWhereIn('provas.id', DB::table('prova_turmas')->whereIn('turma_id', $turmas ?: [0])
+                      ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('prova_turmas.espaco_id', 'provas.espaco_id')
+                          ->whereExists(fn ($t) => $t->selectRaw('1')->from('turmas as associada')
+                              ->whereColumn('associada.id', 'prova_turmas.turma_id')->whereColumn('associada.espaco_id', 'prova_turmas.espaco_id')))
+                      ->select('prova_id'));
             });
         }
 
@@ -89,6 +104,24 @@ class Escopo
     public static function provaComConteudo(Usuario $u, int $id): ?Prova
     {
         return $u->perfil === 'aplicador' ? null : self::prova($u, $id);
+    }
+
+    public static function turmas(Usuario $u): Builder
+    {
+        $q = Espacos::filtrar(\App\Models\Turma::query(), $u, 'turmas.espaco_id');
+        $ids = self::turmaIds($u);
+        return $ids === null ? $q : $q->whereIn('turmas.id', $ids);
+    }
+
+    public static function alunos(Usuario $u): Builder
+    {
+        $q = Espacos::filtrar(\App\Models\Aluno::query(), $u, 'alunos.espaco_id');
+        if (Espacos::ativo()) {
+            $q->whereExists(fn ($t) => $t->selectRaw('1')->from('turmas as turma_dona')
+                ->whereColumn('turma_dona.id', 'alunos.turma_id')->whereColumn('turma_dona.espaco_id', 'alunos.espaco_id'));
+        }
+        $ids = self::turmaIds($u);
+        return $ids === null ? $q : $q->whereIn('alunos.turma_id', $ids);
     }
 
     private static function escopos(Usuario $u, string $tipo): array

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Support\Escopo;
+use App\Support\Espacos;
 use App\Http\Responses\ApiResponse;
 use App\Models\Turma;
 use Illuminate\Http\JsonResponse;
@@ -12,44 +14,10 @@ use Illuminate\Validation\Rule;
 
 class TurmaController extends Controller
 {
-    private function escopoIds(Request $request): ?array
-    {
-        $usuario = $request->user();
-
-        return match ($usuario->perfil) {
-            'admin_rede' => null,
-            'dir_nucleo' => DB::table('turmas')
-                ->join('escolas', 'turmas.escola_id', '=', 'escolas.id')
-                ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
-                ->join('usuario_escopos', function ($j) use ($usuario) {
-                    $j->on('nucleos.id', '=', 'usuario_escopos.escopo_id')
-                      ->where('usuario_escopos.usuario_id', $usuario->id)
-                      ->where('usuario_escopos.escopo_tipo', 'nucleo');
-                })
-                ->pluck('turmas.id')->all(),
-            'dir_escolar', 'coordenador' => DB::table('turmas')
-                ->join('usuario_escopos', function ($j) use ($usuario) {
-                    $j->on('turmas.escola_id', '=', 'usuario_escopos.escopo_id')
-                      ->where('usuario_escopos.usuario_id', $usuario->id)
-                      ->where('usuario_escopos.escopo_tipo', 'escola');
-                })
-                ->pluck('turmas.id')->all(),
-            'professor' => DB::table('usuario_escopos')
-                ->where('usuario_id', $usuario->id)
-                ->where('escopo_tipo', 'turma')
-                ->pluck('escopo_id')->all(),
-            default => [],
-        };
-    }
-
     public function index(Request $request): JsonResponse
     {
-        $ids   = $this->escopoIds($request);
-        $query = Turma::query();
-
-        if ($ids !== null) {
-            $query->whereIn('id', $ids);
-        }
+        $ids   = Escopo::turmaIds($request->user());
+        $query = Escopo::turmas($request->user());
 
         if ($busca = $request->query('busca')) {
             $query->where(function ($q) use ($busca) {
@@ -75,11 +43,11 @@ class TurmaController extends Controller
             ->get()
             ->map(function (Turma $t) {
                 $totalAlunos = DB::table('alunos')
-                    ->where('turma_id', $t->id)
+                    ->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))
                     ->where('ativo', true)
                     ->count();
 
-                $media = DB::table('notas')->where('turma_id', $t->id)->avg('nota_final');
+                $media = DB::table('notas')->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))->avg('nota_final');
 
                 return array_merge($t->toArray(), [
                     'total_alunos' => $totalAlunos,
@@ -88,14 +56,14 @@ class TurmaController extends Controller
                 ]);
             });
 
-        $baseQ = Turma::query();
-        if ($ids !== null) $baseQ->whereIn('id', $ids);
+        $baseQ = Escopo::turmas($request->user());
 
         $kpis = [
             'total_turmas'  => $baseQ->count(),
             'total_ativas'  => (clone $baseQ)->where('ativo', true)->count(),
             'total_alunos'  => (int) DB::table('alunos')
                 ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+                ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('alunos.espaco_id', 'turmas.espaco_id'))
                 ->when($ids !== null, fn ($q) => $q->whereIn('turmas.id', $ids))
                 ->where('alunos.ativo', true)
                 ->count(),
@@ -106,6 +74,10 @@ class TurmaController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $request->validate(['escola_id' => 'required|integer']);
+        $escolaId = (int) $request->input('escola_id');
+        abort_unless(\App\Support\Cadastro::escolaNoEscopo($request->user(), $escolaId)
+            && DB::table('escolas')->where('id', $escolaId)->exists(), 404);
         $data = $request->validate([
             'escola_id'  => 'required|integer|exists:escolas,id',
             'nome'       => 'required|string|max:50',
@@ -115,19 +87,16 @@ class TurmaController extends Controller
             'ativo'      => 'sometimes|boolean',
         ]);
 
-        $turma = Turma::create($data);
+        $turma = new Turma($data);
+        if (Espacos::ativo()) $turma->forceFill(Espacos::autoria(Espacos::daEscola($request->user(), (int) $data['escola_id']), $request->user()));
+        $turma->save();
 
         return ApiResponse::success($turma, null, 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $ids   = $this->escopoIds($request);
-        $query = Turma::with('escola:id,nome,nucleo_id');
-
-        if ($ids !== null) {
-            $query->whereIn('id', $ids);
-        }
+        $query = Escopo::turmas($request->user())->with('escola:id,nome,nucleo_id');
 
         $turma = $query->find($id);
 
@@ -136,31 +105,32 @@ class TurmaController extends Controller
         }
 
         $alunos = DB::table('alunos')
-            ->where('turma_id', $id)
+            ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))
             ->orderBy('nome')
             ->select('id', 'nome', 'avatar_id', 'matricula', 'data_nascimento', 'ativo')
             ->get()
-            ->map(function ($a) {
-                $a->media_geral = DB::table('notas')->where('aluno_id', $a->id)->avg('nota_final');
+            ->map(function ($a) use ($turma) {
+                $a->media_geral = DB::table('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
                 $a->media_geral = $a->media_geral !== null ? round((float) $a->media_geral, 1) : null;
-                $a->total_provas = DB::table('notas')->where('aluno_id', $a->id)->count();
+                $a->total_provas = DB::table('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->count();
                 return $a;
             });
 
         $totalAlunos = $alunos->where('ativo', true)->count();
 
-        $mediaTurma = DB::table('notas')->where('turma_id', $id)->avg('nota_final');
+        $mediaTurma = DB::table('notas')->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
 
         $provas = DB::table('prova_turmas')
             ->join('provas', 'prova_turmas.prova_id', '=', 'provas.id')
             ->where('prova_turmas.turma_id', $id)
+            ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $turma->espaco_id)->whereColumn('provas.espaco_id', 'prova_turmas.espaco_id'))
             ->orderByDesc('provas.data_aplicacao')
             ->select('provas.id', 'provas.titulo', 'provas.disciplina', 'provas.status', 'provas.data_aplicacao')
             ->get()
-            ->map(function ($p) use ($id) {
+            ->map(function ($p) use ($id, $turma) {
                 $media = DB::table('notas')
                     ->where('prova_id', $p->id)
-                    ->where('turma_id', $id)
+                    ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))
                     ->avg('nota_final');
 
                 return [
@@ -185,7 +155,7 @@ class TurmaController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $turma = Turma::find($id);
+        $turma = Escopo::turmas($request->user())->find($id);
 
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');
@@ -200,14 +170,17 @@ class TurmaController extends Controller
             'ativo'      => 'sometimes|boolean',
         ]);
 
+        if (isset($data['escola_id'])) {
+            abort_unless((int) $data['escola_id'] === (int) $turma->escola_id, 422, 'Transferência entre escolas exige procedimento próprio.');
+        }
         $turma->update($data);
 
         return ApiResponse::success($turma->fresh());
     }
 
-    public function toggle(int $id): JsonResponse
+    public function toggle(Request $request, int $id): JsonResponse
     {
-        $turma = Turma::find($id);
+        $turma = Escopo::turmas($request->user())->find($id);
 
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Prova;
 use App\Support\Escopo;
+use App\Support\Espacos;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,9 +19,15 @@ class ProvaController extends Controller
     {
         $escolas = Escopo::escolaIds($usuario);
         if ($escolas !== null && !in_array($escolaId, $escolas, true)) {
-            return ApiResponse::error('Escola fora do seu escopo.', [], 403);
+            return Espacos::ativo() ? ApiResponse::notFound('Escola não encontrada.') : ApiResponse::error('Escola fora do seu escopo.', [], 403);
         }
 
+        if (Espacos::ativo()) {
+            $espaco = Espacos::daEscola($usuario, $escolaId);
+            if (DB::table('turmas')->whereIn('id', $turmaIds)->where('espaco_id', $espaco)->count() !== count(array_unique($turmaIds))) {
+                return ApiResponse::notFound('Turma não encontrada.');
+            }
+        }
         $turmas = Escopo::turmaIds($usuario);
         $invalidas = DB::table('turmas')->whereIn('id', $turmaIds)
             ->where(fn ($q) => $q->where('escola_id', '!=', $escolaId)
@@ -36,9 +43,9 @@ class ProvaController extends Controller
     private function progresso(Prova $p): array
     {
         if ($p->status === 'corrigida') {
-            $totalCartoes = DB::table('cartoes')->where('prova_id', $p->id)->count();
-            $lidos        = DB::table('cartoes')->where('prova_id', $p->id)->whereIn('status', ['lido', 'ambiguo'])->count();
-            $media        = DB::table('notas')->where('prova_id', $p->id)->avg('nota_final');
+            $totalCartoes = DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count();
+            $lidos        = DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->whereIn('status', ['lido', 'ambiguo'])->count();
+            $media        = DB::table('notas')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->avg('nota_final');
 
             return [
                 'tipo'          => 'media',
@@ -49,15 +56,15 @@ class ProvaController extends Controller
         }
 
         if ($p->status === 'em_correcao') {
-            $totalCartoes = DB::table('cartoes')->where('prova_id', $p->id)->count();
-            $lidos        = DB::table('cartoes')->where('prova_id', $p->id)->whereIn('status', ['lido', 'ambiguo'])->count();
+            $totalCartoes = DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count();
+            $lidos        = DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->whereIn('status', ['lido', 'ambiguo'])->count();
 
             return ['tipo' => 'correcao', 'lidos' => $lidos, 'total' => $totalCartoes];
         }
 
         if ($p->status === 'rascunho') {
-            $gabarito    = DB::table('gabaritos')->where('prova_id', $p->id)->first();
-            $preenchidas = $gabarito ? DB::table('gabarito_questoes')->where('gabarito_id', $gabarito->id)->count() : 0;
+            $gabarito    = DB::table('gabaritos')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->first();
+            $preenchidas = $gabarito ? DB::table('gabarito_questoes')->where('gabarito_id', $gabarito->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->count() : 0;
 
             return ['tipo' => 'gabarito', 'preenchidas' => $preenchidas, 'total' => $p->num_questoes];
         }
@@ -90,7 +97,9 @@ class ProvaController extends Controller
             ->map(function (Prova $p) {
                 $turmasLista = DB::table('prova_turmas')
                     ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+                    ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('turmas.espaco_id', 'prova_turmas.espaco_id'))
                     ->where('prova_turmas.prova_id', $p->id)
+                    ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $p->espaco_id))
                     ->orderBy('turmas.nome')
                     ->get(['turmas.id', 'turmas.nome']);
 
@@ -100,8 +109,10 @@ class ProvaController extends Controller
                     'turmas_lista' => $turmasLista->map(fn ($t) => ['id' => (int) $t->id, 'nome' => $t->nome])->all(),
                     'total_alunos' => DB::table('prova_turmas')
                         ->join('alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
-                        ->where('prova_turmas.prova_id', $p->id)->where('alunos.ativo', true)->count(),
-                    'cartoes_lidos' => DB::table('cartoes')->where('prova_id', $p->id)->where('status', 'lido')->count(),
+                        ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('alunos.espaco_id', 'prova_turmas.espaco_id'))
+                        ->where('prova_turmas.prova_id', $p->id)
+                        ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $p->espaco_id))->where('alunos.ativo', true)->count(),
+                    'cartoes_lidos' => DB::table('cartoes')->where('prova_id', $p->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $p->espaco_id))->where('status', 'lido')->count(),
                     'progresso'   => $this->progresso($p),
                 ]);
             });
@@ -137,7 +148,7 @@ class ProvaController extends Controller
             'gerar_cartao_pdf'=> 'sometimes|boolean',
             'data_aplicacao'  => 'sometimes|date|nullable',
             'turma_ids'       => 'sometimes|array',
-            'turma_ids.*'     => 'integer|exists:turmas,id',
+            'turma_ids.*'     => 'integer|distinct|exists:turmas,id',
         ]);
 
         $turmaIds = $data['turma_ids'] ?? [];
@@ -150,12 +161,17 @@ class ProvaController extends Controller
         $data['criado_por'] = $usuario->id;
         $data['status']     = 'rascunho';
 
-        $prova = Prova::create($data);
+        $prova = DB::transaction(function () use ($data, $usuario, $turmaIds) {
+            $prova = new Prova($data);
+            if (Espacos::ativo()) $prova->forceFill(Espacos::autoria(Espacos::daEscola($usuario, (int) $data['escola_id']), $usuario));
+            $prova->save();
 
-        if ($turmaIds) {
-            $inserts = array_map(fn ($tid) => ['prova_id' => $prova->id, 'turma_id' => $tid], $turmaIds);
-            DB::table('prova_turmas')->insert($inserts);
-        }
+            if ($turmaIds) {
+                $inserts = array_map(fn ($tid) => ['prova_id' => $prova->id, 'turma_id' => $tid] + (Espacos::ativo() ? Espacos::autoria((int) $prova->espaco_id, $usuario) : []), $turmaIds);
+                DB::table('prova_turmas')->insert($inserts);
+            }
+            return $prova;
+        });
 
         return ApiResponse::success($prova, null, 201);
     }
@@ -170,7 +186,9 @@ class ProvaController extends Controller
 
         $turmas = DB::table('prova_turmas')
             ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+            ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('turmas.espaco_id', 'prova_turmas.espaco_id'))
             ->where('prova_turmas.prova_id', $id)
+            ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $prova->espaco_id))
             ->select('turmas.id', 'turmas.nome', 'turmas.serie')
             ->get();
 
@@ -202,25 +220,30 @@ class ProvaController extends Controller
             'status'          => ['sometimes', Rule::in(['rascunho', 'publicada', 'em_correcao', 'corrigida'])],
             'data_aplicacao'  => 'sometimes|date|nullable',
             'turma_ids'       => 'sometimes|array',
-            'turma_ids.*'     => 'integer|exists:turmas,id',
+            'turma_ids.*'     => 'integer|distinct|exists:turmas,id',
         ]);
 
-        if (isset($data['turma_ids'])) {
-            $turmaIds = $data['turma_ids'];
-            unset($data['turma_ids']);
-
-            if ($erro = $this->foraDoEscopo($request->user(), (int) $prova->escola_id, $turmaIds)) {
-                return $erro;
-            }
-
-            DB::table('prova_turmas')->where('prova_id', $id)->delete();
-            if ($turmaIds) {
-                $inserts = array_map(fn ($tid) => ['prova_id' => $id, 'turma_id' => $tid], $turmaIds);
-                DB::table('prova_turmas')->insert($inserts);
-            }
+        $turmaIds = $data['turma_ids'] ?? null;
+        unset($data['turma_ids']);
+        if ($turmaIds !== null && ($erro = $this->foraDoEscopo($request->user(), (int) $prova->escola_id, $turmaIds))) {
+            return $erro;
         }
-
-        $prova->update($data);
+        DB::transaction(function () use ($prova, $id, $data, $turmaIds, $request) {
+            // Serializa edição das associações e preserva autoria de vínculos mantidos.
+            DB::table('provas')->where('id', $id)->lockForUpdate()->first();
+            if ($turmaIds !== null) {
+                $q = DB::table('prova_turmas')->where('prova_id', $id)
+                    ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $prova->espaco_id));
+                $existentes = (clone $q)->pluck('turma_id')->all();
+                (clone $q)->whereNotIn('turma_id', $turmaIds)->delete();
+                $novas = array_values(array_diff($turmaIds, $existentes));
+                if ($novas) {
+                    DB::table('prova_turmas')->insert(array_map(fn ($tid) => ['prova_id' => $id, 'turma_id' => $tid]
+                        + (Espacos::ativo() ? Espacos::autoria((int) $prova->espaco_id, $request->user()) : []), $novas));
+                }
+            }
+            $prova->update($data);
+        });
 
         return ApiResponse::success($prova->fresh(), null, 200);
     }
@@ -254,7 +277,7 @@ class ProvaController extends Controller
             return ApiResponse::error('Apenas rascunhos podem ser excluídos.', [], 422);
         }
 
-        DB::table('prova_turmas')->where('prova_id', $id)->delete();
+        DB::table('prova_turmas')->where('prova_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $prova->espaco_id))->delete();
         $prova->delete();
 
         return ApiResponse::success(['excluido' => true]);
