@@ -968,7 +968,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | L5 Incidentes | pendente: depende de AU1 | | |
 | L6 Trocar foto por avatar | concluído funcionalmente: galeria de 36 avatares e iniciais publicadas e verificadas em produção (docs/operacao/avatares-alunos.md); foto_path e fotos preservados, remoção não autorizada | Codex | #70 |
 | T1 Modelo de dados | concluído: modelo aprovado pelo responsável; PR #73 incorporado; docs/40 e docs/41 | Codex | #73 |
-| T2 Clientes e espaços | em andamento: T2-A/B/C incorporados; manifesto aprovado (docs/42); T2-D1 incorporado; T2-D2 incorporado; T2-D3 incorporado; T2-D4 incorporado (docs/47); T2-E em revisão (docs/48), com auditoria e corte explícito; ativação e ensaio operacional representativo pendentes | Codex | #74, #75, #76, #77, #78, #79, #80 |
+| T2 Clientes e espaços | em andamento: T2-A/B/C incorporados; manifesto aprovado (docs/42); T2-D1 incorporado; T2-D2 incorporado; T2-D3 incorporado; T2-D4 incorporado (docs/47); T2-E incorporado (docs/48); preparação operacional em revisão (docs/49), sem deploy; ensaio equivalente ao ambiente real, ativação e corte pendentes | Codex | #74, #75, #76, #77, #78, #79, #80, #81 |
 | V1 Vínculos | pendente | | |
 | V2 Escolha do vínculo | pendente | | |
 | T3 Perfis por espaço | pendente | | |

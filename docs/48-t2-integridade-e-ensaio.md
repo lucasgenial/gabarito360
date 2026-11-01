@@ -2,9 +2,9 @@
 
 Base: PR #79 incorporado em `718472178aa6229689326dfeb2ca108480f5a785`. O responsável autorizou implementar T2-E, sem deploy. Esta implementação deriva do T1 aprovado (doc. 40, seções 4 e 9) e do roteiro D/E (doc. 44).
 
-## Entrega em revisão — PR #80
+## Entrega incorporada — PR #80
 
-[PR #80](https://github.com/lucasgenial/gabarito360/pull/80), aguardando aprovação de merge.
+[PR #80](https://github.com/lucasgenial/gabarito360/pull/80) incorporado em `1d7ed629f4a321788c9687c041a14f0ccd3cdd84`, sem deploy. Continuidade: [preparação operacional](49-t2-preparacao-operacional.md).
 
 ## Escopo autorizado
 
