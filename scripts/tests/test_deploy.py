@@ -52,6 +52,7 @@ elif cmd=='php':
             print(q)
 elif cmd=='composer': code=int(s.get('composer_failure',False))
 elif cmd=='systemctl':
+    if args[0]=='show': print('active' if s.get('stop_failure') else 'inactive')
     if args[0]=='is-active' and (s.get('inactive') or args[-1]==s.get('inactive_unit')): code=3
 elif cmd=='curl': print('500' if s.get('http_failure') else '200')
 p.write_text(json.dumps(s))
@@ -85,7 +86,7 @@ class DeployTest(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def run_deploy(self, *, check=False, target=ALVO, legacy=False, **scenario):
+    def run_deploy(self, *, check=False, target=ALVO, legacy=False, hold=False, **scenario):
         s = {'root': str(self.root), 'head': ANTES, 'events': [], 'source': str(self.source), **scenario}
         self.state.write_text(json.dumps(s))
         env = {**os.environ, 'PATH': str(self.bin) + os.pathsep + os.environ['PATH'],
@@ -93,6 +94,8 @@ class DeployTest(unittest.TestCase):
         env.pop('G360_DEPLOY_SNAPSHOT', None)
         source = SCRIPT.parents[2] / 'infra/deploy.sh' if legacy else self.source
         args = ['bash', str(source), '--root', str(self.root), '--commit', target, '--from', ANTES, '--wait', '0']
+        if hold:
+            args.append('--manter-manutencao')
         if check:
             args.append('--check')
         self.result = subprocess.run(args, env=env, capture_output=True, text=True, timeout=20)
@@ -108,6 +111,33 @@ class DeployTest(unittest.TestCase):
         self.assertFalse(self.artisan('down'))
         self.assertFalse(self.artisan('migrate'))
         self.assertFalse([e for e in self.s['events'] if e[:2] == ['systemctl', 'stop']])
+
+    def test_preparacao_mantem_manutencao_e_nao_inicia_servicos_nem_corte(self):
+        self.assertEqual(self.run_deploy(hold=True), 0, self.result.stderr)
+        self.assertEqual(self.s['head'], ALVO)
+        self.assertEqual(len(self.artisan('migrate')), 1)
+        self.assertFalse(self.artisan('up'))
+        self.assertFalse([e for e in self.s['events'] if e[:2] == ['systemctl', 'start']])
+        self.assertFalse([e for e in self.s['events'] if e[0] == 'curl'])
+        self.assertFalse([e for e in self.s['events'] if any('g360:' in a for a in e)])
+        self.assertIn(['systemctl', 'stop', 'gabarito360-agendador.service'], self.s['events'])
+        for app in ['api', 'web']:
+            self.assertTrue((self.root / f'apps/{app}/storage/framework/down').exists())
+        self.assertIn('PREPARADO EM MANUTENÇÃO', self.result.stdout)
+        self.assertNotIn('DEPLOY CONCLUÍDO', self.result.stdout)
+
+    def test_check_com_manutencao_nao_muda_o_ambiente(self):
+        self.assertEqual(self.run_deploy(check=True, hold=True), 0, self.result.stderr)
+        self.assertEqual(self.s['head'], ANTES)
+        self.assertFalse(self.artisan('down'))
+        self.assertFalse(self.artisan('migrate'))
+        self.assertFalse([e for e in self.s['events'] if e[:2] == ['systemctl', 'stop']])
+
+    def test_preparacao_nao_confirma_sucesso_se_servico_permanece_ativo(self):
+        self.assertNotEqual(self.run_deploy(hold=True, stop_failure=True), 0)
+        self.assertEqual(self.s['head'], ANTES)
+        self.assertFalse(self.artisan('migrate'))
+        self.assertNotIn('PREPARADO EM MANUTENÇÃO', self.result.stdout)
 
     def test_sha_invalido_nao_chega_ao_git(self):
         self.assertEqual(self.run_deploy(target='invalido; comando'), 2)
