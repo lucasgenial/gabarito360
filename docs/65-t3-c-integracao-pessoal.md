@@ -2,6 +2,8 @@
 
 01/11/2026. PR #97/T3-B incorporado em `525ae3c`, com autorização para avançar sem deploy. Correção do painel institucional (PR #98) preservada.
 
+Atualização: PR #99 aprovado e incorporado em `3b8aa5b`; CI final `a09e9f1` aprovado na execução 41353580112. T4 iniciado pela base descrita em docs/66, sem deploy. Os registros abaixo preservam os resultados e limites do ensaio anterior ao merge.
+
 ## Comportamento
 
 O vínculo `professor_autonomo` válido do proprietário aparece na seleção por aba. O painel usa as consultas isoladas do professor, com turmas/provas do espaço pessoal e seu nome no cabeçalho. Menu móvel prioriza Painel, Corrigir, Provas e Turmas; Alunos permanece no menu completo. Não aparecem gestão de equipe, escolas, coluna escolar ou associação de professores na turma pessoal.
