@@ -32,9 +32,9 @@ Regras de concessão (valem para extras e retiradas):
 
 ## 2. Perfis
 
-### Extensão A1-A — contexto interno (01/11/2026, em revisão)
+### Extensão A1 — contexto interno (01/11/2026)
 
-Os perfis internos usam atribuição própria, sem integrar a matriz institucional de oito colunas nem ampliar o escopo de um vínculo escolar. Habilitação desligada por padrão; seleção por token/aba e gestão são A1-B. Não há promoção automática de contas.
+Os perfis internos usam atribuição própria, sem integrar a matriz institucional de oito colunas nem ampliar o escopo de um vínculo escolar. Habilitação desligada por padrão; base A1-A e seleção por token/aba A1-B1 incorporadas nos PRs #101/#102. Gestão A1-B2 em revisão. Não há promoção automática de contas.
 
 | Contexto interno | Cadastro comercial | Gestão de acessos internos | Dados pedagógicos |
 |---|---|---|---|
@@ -42,7 +42,7 @@ Os perfis internos usam atribuição própria, sem integrar a matriz institucion
 | Suporte | Consultar e gerir clientes | Negado | Negado neste contexto; atendimento auditado é AU3 |
 | Financeiro | Consultar e gerir clientes | Negado | Negado |
 
-Cada uso revalida titularidade, conta ativa, situação, vigência e versão da atribuição. Selecionar contexto interno remove o vínculo pedagógico do objeto e vice-versa; não há união de poderes. Primeiro Desenvolvedor e concessão de mesmo nível exigem procedimento próprio, ainda não implementado. Secretário Escolar permanece A1-C. Detalhes: [docs/67](67-a1-planejamento-e-acessos-internos.md).
+Cada uso revalida titularidade, conta ativa, situação, vigência e versão da atribuição. Selecionar contexto interno remove o vínculo pedagógico do objeto e vice-versa; não há união de poderes. A1-B2 prepara comando controlado para o primeiro Desenvolvedor e gestão auditada de Suporte/Financeiro de outras contas. Autogestão e gestão de pares são recusadas. Concessão de outros Desenvolvedores não é oferecida. Secretário Escolar permanece A1-C. Detalhes: [docs/69](69-a1-b2-gestao-interna.md).
 
 ### Perfis institucionais
 

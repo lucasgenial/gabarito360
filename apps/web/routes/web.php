@@ -68,6 +68,9 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/vinculos/interno', [\App\Http\Controllers\Auth\VinculoController::class, 'interno'])->middleware('throttle:20,1')->name('vinculos.interno');
     Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
+    Route::get('/acessos-internos', [\App\Http\Controllers\AcessoInternoController::class,'index'])->name('internos.index');
+    Route::post('/acessos-internos', [\App\Http\Controllers\AcessoInternoController::class,'store'])->name('internos.store');
+    Route::put('/acessos-internos/{id}', [\App\Http\Controllers\AcessoInternoController::class,'update'])->whereNumber('id')->name('internos.update');
 
     // Meu perfil (MP-024)
     Route::view('/referencia-visual', 'referencia.index')->name('referencia');

@@ -55,6 +55,9 @@ Route::prefix('v1')->group(function () {
 
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
+        Route::get('acessos-internos', [\App\Http\Controllers\Api\GestaoAcessoInternoController::class,'index']);
+        Route::post('acessos-internos', [\App\Http\Controllers\Api\GestaoAcessoInternoController::class,'store'])->middleware('throttle:10,1');
+        Route::put('acessos-internos/{id}', [\App\Http\Controllers\Api\GestaoAcessoInternoController::class,'update'])->whereNumber('id')->middleware('throttle:20,1');
         Route::prefix('auth')->group(function () {
             Route::get('acessos-internos', [\App\Http\Controllers\Api\SelecaoInternaController::class, 'index'])->middleware('throttle:30,1');
             Route::post('acessos-internos/selecionar', [\App\Http\Controllers\Api\SelecaoInternaController::class, 'selecionar'])->middleware('throttle:20,1');

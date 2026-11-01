@@ -31,7 +31,7 @@ class ContextoPorAba
         $request->attributes->set('vinculo_contexto', $dados);
         ContextoWeb::renovar($id, $dados);
         if (($dados['tipo_contexto'] ?? null) === 'interno') {
-            abort_unless($request->routeIs('painel', 'perfil', 'perfil.*'), 403, 'Escolha um vínculo para abrir esta área.');
+            abort_unless($request->routeIs('painel', 'perfil', 'perfil.*', 'internos.*'), 403, 'Escolha um vínculo para abrir esta área.');
         }
         $response = $next($request);
         // Redirecionamentos de formulários preservam o contexto da requisição.
