@@ -3,13 +3,16 @@
 namespace App\Services\Omr;
 
 use App\Models\Prova;
+use App\Support\ContextoCorrecao;
+use App\Support\Espacos;
 use Illuminate\Support\Facades\DB;
 
 class AtualizadorStatusProva
 {
     public static function atualizar(Prova $prova): void
     {
-        $total = DB::table('cartoes')->where('prova_id', $prova->id)->count();
+        if (Espacos::ativo() && !ContextoCorrecao::provaValida($prova)) return;
+        $total = ContextoCorrecao::filtrar(DB::table('cartoes'), $prova->espaco_id)->where('prova_id', $prova->id)->count();
 
         if ($total === 0) {
             // Sem cartões (ex.: o único foi movido para a prova do QR): volta a "publicada"
@@ -19,13 +22,11 @@ class AtualizadorStatusProva
             return;
         }
 
-        $lidos = DB::table('cartoes')->where('prova_id', $prova->id)->where('status', 'lido')->count();
+        $lidos = ContextoCorrecao::filtrar(DB::table('cartoes'), $prova->espaco_id)->where('prova_id', $prova->id)->where('status', 'lido')->count();
 
         // "Todos os cartões" (RN) = um cartão por aluno ativo das turmas da prova.
         // Sem isso a prova virava "corrigida" logo após o 1º cartão lido.
-        $esperados = DB::table('alunos')
-            ->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
-            ->where('prova_turmas.prova_id', $prova->id)
+        $esperados = ContextoCorrecao::alunos($prova)
             ->where('alunos.ativo', true)
             ->count();
 

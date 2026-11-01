@@ -16,7 +16,7 @@ class Cartao extends Model
 
     protected static function booted(): void
     {
-        static::deleted(fn (Cartao $cartao) => app(ImagensCartao::class)->apagar($cartao->id));
+        static::deleted(fn (Cartao $cartao) => \Illuminate\Support\Facades\DB::afterCommit(fn () => app(ImagensCartao::class)->apagar($cartao->id, $cartao->espaco_id)));
     }
 
     public function prova()

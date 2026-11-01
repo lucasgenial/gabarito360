@@ -3,6 +3,10 @@
 namespace App\Services\Omr;
 
 use App\Models\Cartao;
+use App\Models\Usuario;
+use App\Support\ContextoCorrecao;
+use App\Support\Espacos;
+use App\Support\Permissao;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
@@ -20,9 +24,17 @@ class ImagensCartao
 
     private const PASTA = 'cartoes/derivados';
 
-    public static function caminho(int $cartaoId, string $tipo): string
+    public static function caminho(int $cartaoId, string $tipo, ?int $espaco = null): string
     {
+        if (Espacos::ativo() && $espaco) return "cartoes/espacos/{$espaco}/derivados/{$cartaoId}-{$tipo}.jpg";
         return self::PASTA . "/{$cartaoId}-{$tipo}.jpg";
+    }
+
+    /** Compatibilidade explícita dos arquivos antigos: ID global do cartão já autorizado. */
+    public static function disponivel(int $cartaoId, string $tipo, ?int $espaco = null): string
+    {
+        $novo = self::caminho($cartaoId, $tipo, $espaco);
+        return Storage::disk('public')->exists($novo) ? $novo : self::PASTA."/{$cartaoId}-{$tipo}.jpg";
     }
 
     /**
@@ -69,6 +81,7 @@ class ImagensCartao
     /** Falha aqui nunca derruba a leitura: sem a versão leve, a tela usa a foto original. */
     public function gerar(Cartao $cartao): bool
     {
+        if (Espacos::ativo() && !ContextoCorrecao::cartaoValido($cartao)) return false;
         if (!$cartao->imagem_url) {
             return false;
         }
@@ -76,14 +89,14 @@ class ImagensCartao
         $disco = Storage::disk('public');
 
         try {
-            $disco->makeDirectory(self::PASTA);
+            $disco->makeDirectory(dirname(self::caminho($cartao->id, 'miniatura', $cartao->espaco_id)));
             $resultado = Process::path(config('omr.scripts'))
                 ->timeout(config('omr.timeout'))
                 ->run([
                     config('omr.python'), 'gerar_imagens.py',
                     $disco->path($cartao->imagem_url),
-                    $disco->path(self::caminho($cartao->id, 'miniatura')),
-                    $disco->path(self::caminho($cartao->id, 'endireitada')),
+                    $disco->path(self::caminho($cartao->id, 'miniatura', $cartao->espaco_id)),
+                    $disco->path(self::caminho($cartao->id, 'endireitada', $cartao->espaco_id)),
                 ]);
             $json = json_decode(trim($resultado->output()), true);
         } catch (Throwable $e) {
@@ -98,21 +111,30 @@ class ImagensCartao
         return true;
     }
 
-    public function apagar(int $cartaoId): void
+    public function apagar(int $cartaoId, ?int $espaco = null): void
     {
         Storage::disk('public')->delete([
-            self::caminho($cartaoId, 'miniatura'),
-            self::caminho($cartaoId, 'endireitada'),
+            self::caminho($cartaoId, 'miniatura', $espaco),
+            self::PASTA."/{$cartaoId}-miniatura.jpg",
+            self::caminho($cartaoId, 'endireitada', $espaco),
+            self::PASTA."/{$cartaoId}-endireitada.jpg",
         ]);
     }
 
     /** A validade fecha em hora cheia: o link fica igual entre consultas e o navegador reaproveita o cache. */
-    public function url(int $cartaoId, string $tipo): string
+    public function url(int $cartaoId, string $tipo, ?Usuario $ator = null): string
     {
+        $parametros = ['id' => $cartaoId, 'tipo' => $tipo];
+        if (Espacos::ativo()) {
+            abort_unless($ator && $ator->ativo && $ator->perfil !== 'aplicador' && Permissao::pode($ator, 'correcao.acompanhar'), 404);
+            $cartao = ContextoCorrecao::cartoes($ator)->findOrFail($cartaoId);
+            abort_unless(ContextoCorrecao::cartaoValido($cartao), 404);
+            $parametros += ['espaco' => $cartao->espaco_id, 'ator' => $ator->id, 'acesso' => ContextoCorrecao::versaoAcesso($ator)];
+        }
         return URL::temporarySignedRoute(
             'cartoes.arquivo',
             now()->startOfHour()->addHours(2),
-            ['id' => $cartaoId, 'tipo' => $tipo],
+            $parametros,
             false
         );
     }

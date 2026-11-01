@@ -3,6 +3,9 @@
 namespace App\Services\Omr;
 
 use App\Models\Prova;
+use App\Models\Usuario;
+use App\Support\ContextoCorrecao;
+use App\Support\Espacos;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Process;
 use RuntimeException;
@@ -15,15 +18,15 @@ use RuntimeException;
 class GeradorCartoes
 {
     /** @return string caminho absoluto do PDF gerado (arquivo temporário) */
-    public function gerar(Prova $prova, ?int $turmaId = null, int $brancos = 0): string
+    public function gerar(Prova $prova, ?int $turmaId = null, int $brancos = 0, ?Usuario $ator = null): string
     {
-        $turmaIds = DB::table('prova_turmas')->where('prova_id', $prova->id)->pluck('turma_id');
+        if (Espacos::ativo()) abort_unless($ator && ContextoCorrecao::provaValida($prova) && \App\Support\Escopo::provaComConteudo($ator, $prova->id), 404);
+        $turmaIds = ContextoCorrecao::filtrar(DB::table('prova_turmas'), $prova->espaco_id)->where('prova_id', $prova->id)->pluck('turma_id');
         if ($turmaId) {
             $turmaIds = $turmaIds->filter(fn ($id) => (int) $id === $turmaId);
         }
 
-        $alunos = DB::table('alunos')
-            ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+        $alunos = ContextoCorrecao::alunos($prova, $ator)
             ->whereIn('alunos.turma_id', $turmaIds)
             ->where('alunos.ativo', true)
             ->orderBy('turmas.nome')
@@ -38,7 +41,9 @@ class GeradorCartoes
             ->where('nucleos.id', $escola->nucleo_id)
             ->value('redes.nome') : null;
 
-        $saida = tempnam(sys_get_temp_dir(), 'g360_cartoes_') . '.pdf';
+        $saida = tempnam(sys_get_temp_dir(), 'g360_e'.($prova->espaco_id ?? 0).'_cartoes_');
+        @unlink($saida);
+        $saida .= '.pdf';
 
         $dados = [
             'saida'            => $saida,
