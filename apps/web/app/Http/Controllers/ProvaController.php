@@ -29,7 +29,7 @@ class ProvaController extends Controller
     public function create(Request $request): View
     {
         $turmas  = $this->api->get('/v1/turmas', ['ativo' => 1])->json('data.turmas') ?? [];
-        $escolas = $this->api->get('/v1/escolas')->json('data.escolas') ?? [];
+        $escolas = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
 
         return view('provas.create', [
             'turmas'  => $turmas,
@@ -40,7 +40,7 @@ class ProvaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'escola_id'       => 'required|integer',
+            'escola_id'       => \App\Support\Acesso::pessoal() ? 'prohibited' : 'required|integer',
             'titulo'          => 'required|string|max:255',
             'disciplina'      => 'required|string|max:100',
             'serie'           => 'required|string|max:50',

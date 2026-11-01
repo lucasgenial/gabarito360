@@ -20,7 +20,15 @@ A [documentação do MariaDB](https://mariadb.com/docs/server/server-management/
 - O controller ainda gera cerca de 1.100 consultas neste cenário. Reduzir reconstruções de escopo é melhoria posterior, preservando isolamento; esta correção trata o bloqueio do acesso.
 - O ensaio chamou o controller com o ator da autenticação recente, sem imprimir nomes, notas, tokens ou senhas. Não substitui o aceite final pelo navegador após a publicação autorizada.
 
-## Publicação pendente de autorização
+## Aplicação autorizada e aceite
+
+PR #98 incorporado no commit `9088ae9b934af715040246af8767116cd2c4ff94`. Em 01/11/2026 às 17:05 BRT, com autorização expressa, foi aplicado somente o ajuste de `apps/api/config/database.php` no CT 111. A base publicada permaneceu `af4c6d1e9e1d324ebd10e404af149b78a28270a4`; não houve migração, alteração de flags ou publicação das fases pendentes.
+
+Backup do original, diff e registro: `/root/g360-hotfix-pr98-20261101T200522Z` no CT 111. Cache da API reconstruído como `www-data` e PHP-FPM recarregado. Conexão e reconexão confirmaram profundidade 4, com global 62. Controller do professor respondeu 200 em 0,842 s; login e health públicos retornaram 200. Serviços ativos e nenhum novo erro durante a verificação. O responsável confirmou depois: “perfeito, agora funcionando”. Incidente encerrado com aceite funcional.
+
+O próximo deploy deve reconciliar esse único diff operacional com a correção já incorporada na main antes da checagem de árvore limpa. Não descartar outras alterações nem executar reset geral.
+
+## Procedimento da aplicação pontual
 
 Há funcionalidades posteriores na main ainda não autorizadas para deploy. **Não publicar toda a main para corrigir este incidente.** A correção operacional deve conter somente as duas opções PDO adicionadas em `apps/api/config/database.php`, aplicadas sobre o commit publicado, com cópia de segurança do arquivo, conferência do diff e reconstrução do cache da API como `www-data`. Registrar essa exceção operacional e o diff até sua reconciliação com o próximo release aprovado.
 

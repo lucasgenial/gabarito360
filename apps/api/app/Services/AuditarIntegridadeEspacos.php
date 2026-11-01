@@ -58,7 +58,7 @@ class AuditarIntegridadeEspacos
             }
             $problemas['cartoes_aluno_fora_da_prova'] = DB::table('cartoes as c')->whereNotNull('c.aluno_id')
                 ->whereNotExists(fn ($q) => $q->selectRaw('1')->from('alunos as a')
-                    ->join('prova_turmas as pt', 'pt.turma_id', '=', 'a.turma_id')->whereColumn('a.id', 'c.aluno_id')
+                    ->join('prova_turmas as pt', fn ($j) => $j->whereRaw('pt.turma_id = COALESCE(c.turma_aplicacao_id, a.turma_id)'))->whereColumn('a.id', 'c.aluno_id')
                     ->whereColumn('pt.prova_id', 'c.prova_id')->whereColumn('pt.espaco_id', 'c.espaco_id')->whereColumn('a.espaco_id', 'c.espaco_id'))->count();
             $problemas['notas_turma_fora_da_prova'] = DB::table('notas as n')->whereNotExists(fn ($q) => $q->selectRaw('1')->from('prova_turmas as pt')
                 ->whereColumn('pt.prova_id', 'n.prova_id')->whereColumn('pt.turma_id', 'n.turma_id')->whereColumn('pt.espaco_id', 'n.espaco_id'))->count();
@@ -66,6 +66,15 @@ class AuditarIntegridadeEspacos
                 ->where(fn ($q) => $q->whereColumn('n.prova_id', '<>', 'c.prova_id')->orWhereColumn('n.aluno_id', '<>', 'c.aluno_id')->orWhereNull('c.aluno_id'))->count();
             $problemas['alunos_cpf_sem_indice'] = DB::table('alunos')->whereNotNull('cpf')->whereNull('cpf_hash')->count();
             $problemas['alunos_indice_sem_cpf'] = DB::table('alunos')->whereNull('cpf')->whereNotNull('cpf_hash')->count();
+            foreach (['turmas', 'provas', 'alunos'] as $t) {
+                $problemas[$t.'_tipo_espaco'] = DB::table($t.' as t')->whereNotNull('t.espaco_id')->whereNotExists(fn ($q) =>
+                    $q->selectRaw('1')->from('espacos as e')->whereColumn('e.id','t.espaco_id')->whereColumn('e.tipo','t.espaco_tipo'))->count();
+            }
+            $problemas['alunos_pessoais_excesso'] = DB::table('alunos')->where('espaco_tipo','pessoal')->where(function ($q) {
+                foreach (['cpf','cpf_hash','data_nascimento','genero','nome_responsavel','foto_path'] as $c) $q->orWhereNotNull($c);
+            })->count();
+            $problemas['notas_turma_historica'] = DB::table('notas as n')->join('cartoes as c','c.id','=','n.cartao_id')
+                ->whereNotNull('c.turma_aplicacao_id')->whereColumn('c.turma_aplicacao_id','<>','n.turma_id')->count();
             return ['plano' => PlanoIntegridadeEspacos::VERSAO, 'somente_leitura' => true,
                 'contagens' => $contagens, 'cobertura' => $cobertura, 'inconsistencias' => $problemas,
                 'ocorrencias' => array_sum($problemas), 'apto_dados' => array_sum($problemas) === 0];

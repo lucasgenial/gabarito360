@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Support\Escopo;
 use App\Support\Espacos;
+use App\Support\EspacoPessoal;
 use App\Support\ConsultasPedagogicas;
 use App\Http\Responses\ApiResponse;
 use App\Models\Turma;
@@ -76,12 +77,13 @@ class TurmaController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $request->validate(['escola_id' => 'required|integer']);
+        $pessoal = EspacoPessoal::doAtor($request->user());
+        $request->validate(['escola_id' => $pessoal ? 'prohibited' : 'required|integer']);
         $escolaId = (int) $request->input('escola_id');
-        abort_unless(\App\Support\Cadastro::escolaNoEscopo($request->user(), $escolaId)
-            && DB::table('escolas')->where('id', $escolaId)->exists(), 404);
+        abort_unless($pessoal || (\App\Support\Cadastro::escolaNoEscopo($request->user(), $escolaId)
+            && DB::table('escolas')->where('id', $escolaId)->exists()), 404);
         $data = $request->validate([
-            'escola_id'  => 'required|integer|exists:escolas,id',
+            'escola_id'  => $pessoal ? 'prohibited' : 'required|integer|exists:escolas,id',
             'nome'       => 'required|string|max:50',
             'serie'      => 'required|string|max:50',
             'turno'      => ['required', Rule::in(['manha','tarde','noite','integral'])],
@@ -90,7 +92,8 @@ class TurmaController extends Controller
         ]);
 
         $turma = new Turma($data);
-        if (Espacos::ativo()) $turma->forceFill(Espacos::autoria(Espacos::daEscola($request->user(), (int) $data['escola_id']), $request->user()));
+        if (Espacos::ativo()) $turma->forceFill(Espacos::autoria($pessoal ?? Espacos::daEscola($request->user(), (int) $data['escola_id']), $request->user()));
+        if ($pessoal) $turma->forceFill(['escola_id'=>null, 'espaco_tipo'=>'pessoal']);
         $turma->save();
 
         return ApiResponse::success($turma, null, 201);
@@ -165,7 +168,7 @@ class TurmaController extends Controller
         }
 
         $data = $request->validate([
-            'escola_id'  => 'sometimes|integer|exists:escolas,id',
+            'escola_id'  => EspacoPessoal::doAtor($request->user()) ? 'prohibited' : 'sometimes|integer|exists:escolas,id',
             'nome'       => 'sometimes|string|max:50',
             'serie'      => 'sometimes|string|max:50',
             'turno'      => ['sometimes', Rule::in(['manha','tarde','noite','integral'])],

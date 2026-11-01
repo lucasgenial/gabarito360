@@ -40,12 +40,13 @@ class AlunoController extends Controller
 
     public function store(Request $request)
     {
+        $this->validarMinimo($request);
         $request->validate([
             'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'required|integer',
             'nome'            => 'required|string|max:200',
             'matricula'       => 'required|string|max:20',
-            'data_nascimento' => 'required|date',
+            'data_nascimento' => \App\Support\Acesso::pessoal() ? 'prohibited' : 'required|date',
             'cpf'             => 'sometimes|string|nullable',
             'genero'          => 'sometimes|in:M,F,O|nullable',
             'foto'            => 'prohibited',
@@ -90,6 +91,7 @@ class AlunoController extends Controller
 
     public function update(Request $request, int $id)
     {
+        $this->validarMinimo($request);
         $request->validate([
             'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'foto' => 'prohibited',
@@ -128,5 +130,11 @@ class AlunoController extends Controller
 
         $status = $resp->json('data.ativo') ? 'ativado' : 'desativado';
         return back()->with('sucesso', "Aluno {$status}.");
+    }
+
+    private function validarMinimo(Request $request): void
+    {
+        if (\App\Support\Acesso::pessoal()) $request->validate(array_fill_keys(
+            ['cpf', 'data_nascimento', 'genero', 'nome_responsavel', 'foto', 'foto_path'], 'prohibited'));
     }
 }

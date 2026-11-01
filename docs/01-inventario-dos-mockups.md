@@ -859,3 +859,7 @@ Autorização explícita para V2-B após PR #93, com origem no T1 e V2 do plano 
 ## Extensão aprovada — V2-C (01/11/2026)
 
 Autorização explícita após PR #94, T1/V2 e telas de equipe dos itens 26–28: `membros/vinculo`, `membros/convidar-vinculo` e `auth/convite-vinculo`; adaptação de equipe/permissões/turmas para alvo por vínculo. Detalhes em [docs/62](62-v2-gestao-e-aceite-de-convites.md). Mantém os tokens visuais e o catálogo aprovado.
+
+### T3-B — variante pessoal dos cadastros
+
+Autorizada após PR #96 em 01/11/2026 (docs/64). Reutiliza `alunos/create`, `alunos/show`, `turmas/index`, `turmas/show` e `provas/create`: remove campos institucionais e dados excessivos no contexto pessoal, preservando layout/tokens e avatar. A API continua responsável pela autorização. Acesso pessoal desligado por padrão até T3-C.
