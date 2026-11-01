@@ -57,3 +57,7 @@ O candidato passou no CI, no corte da cópia atual (doc. 50) e no ensaio dos ser
 3. Janela, operador, ponto final coerente e nova autorização expressa de deploy/migração.
 
 Não houve alteração de código, dados, acesso, serviços ou rotina de backup em produção. A próxima etapa é conferir o novo ciclo de backup e usá-lo no ensaio completo; o responsável será avisado quando esses critérios estiverem atendidos.
+
+## Atualização posterior
+
+Com nova autorização para antecipar backups e cópia, os bloqueios de backup e restauração foram resolvidos em 01/11/2026: backups atuais nas duas camadas, restauração completa via Proxmox, chaves recuperadas, B5/corte no clone e retomada supervisionada após reboot. Evidências e decisão atual em [docs/52](52-t2-ensaio-completo-e-prontidao.md). O servidor de referência segue sem deploy/migração T2.
