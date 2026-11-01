@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 uso() {
-  echo 'Uso: bash scripts/operacao/deploy.sh --commit SHA --from SHA [--check] [--wait SEGUNDOS] [--root DIRETORIO]'
+  echo 'Uso: bash scripts/operacao/deploy.sh --commit SHA --from SHA [--check] [--manter-manutencao] [--wait SEGUNDOS] [--root DIRETORIO]'
 }
 
 [[ "$(id -u)" = 0 ]] || { echo 'Execute como root no contêiner da aplicação.' >&2; exit 1; }
@@ -18,7 +18,7 @@ if [[ "${G360_DEPLOY_SNAPSHOT:-}" != 1 ]]; then
 fi
 
 RAIZ=/home/lucasdev/projetos/gabarito360
-ALVO= ANTERIOR= CHECK=0 ESPERA=300
+ALVO= ANTERIOR= CHECK=0 ESPERA=300 MANTER_MANUTENCAO=0
 while (( $# )); do
   case "$1" in
     --commit|--from|--root|--wait)
@@ -26,6 +26,7 @@ while (( $# )); do
       case "$1" in --commit) ALVO=$2 ;; --from) ANTERIOR=$2 ;; --root) RAIZ=$2 ;; --wait) ESPERA=$2 ;; esac
       shift 2 ;;
     --check) CHECK=1; shift ;;
+    --manter-manutencao) MANTER_MANUTENCAO=1; shift ;;
     --help) uso; exit 0 ;;
     *) uso >&2; exit 2 ;;
   esac
@@ -47,6 +48,13 @@ artisan() { (cd "$RAIZ/apps/$1"; shift; runuser -u www-data -- php artisan "$@")
 servicos_ativos() {
   local unidade
   for unidade in "$@"; do systemctl is-active --quiet "$unidade"; done
+}
+confirmar_parados() {
+  local unidade estado
+  for unidade in gabarito360-worker@1 gabarito360-worker@2 gabarito360-agendador.timer gabarito360-agendador.service; do
+    estado=$(systemctl show "$unidade" --property=ActiveState --value)
+    [[ "$estado" = inactive ]] || { log "Serviço não está parado: $unidade."; return 1; }
+  done
 }
 log() { printf '[%s] %s\n' "$(date -u +%FT%TZ)" "$*"; }
 limpar() {
@@ -137,6 +145,7 @@ if (( CHECK )); then log 'CHECK concluído: sem publicação, manutenção ou mi
 etapa=manutencao
 manutencao_web=1; artisan web down --retry=60
 timer_parado=1; systemctl stop gabarito360-agendador.timer
+if (( MANTER_MANUTENCAO )); then systemctl stop gabarito360-agendador.service; fi
 etapa=drenagem
 limite=$((SECONDS + ESPERA))
 while true; do
@@ -152,6 +161,7 @@ sleep 3
 pendentes=$(fila)
 [[ "$pendentes" = 0 ]] || { log 'Novo job entrou durante a manutenção; cancelar sem atualizar código.'; false; }
 workers_parados=1; systemctl stop gabarito360-worker@1 gabarito360-worker@2
+if (( MANTER_MANUTENCAO )); then confirmar_parados; fi
 etapa=codigo
 [[ "$(git_projeto rev-parse HEAD)" = "$ANTERIOR" ]]
 git_projeto diff --quiet
@@ -177,6 +187,13 @@ for app in api web; do
   artisan "$app" route:cache
   artisan "$app" view:cache
 done
+if (( MANTER_MANUTENCAO )); then
+  etapa=entrega-em-manutencao
+  [[ -f "$RAIZ/apps/api/storage/framework/down" && -f "$RAIZ/apps/web/storage/framework/down" ]]
+  confirmar_parados
+  log "PREPARADO EM MANUTENÇÃO: $ALVO. Sem abertura HTTP, workers ou agendador. Corte e retomada exigem roteiro autorizado."
+  exit 0
+fi
 etapa=servicos
 systemctl reload php8.3-fpm
 systemctl start gabarito360-worker@1 gabarito360-worker@2
