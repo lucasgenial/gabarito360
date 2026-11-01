@@ -154,5 +154,6 @@
   "execucao_utc": "2026-11-01T02:13:24.655483+00:00",
   "base_codigo_api": "1d7ed629f4a321788c9687c041a14f0ccd3cdd84",
   "script_sha256": "600260bd163bfb4d61a6bad32a19780033a6fcdb6931660a1bbfd8998db7580c",
-  "total_etapas_corte_ms": 21320.92
+  "total_etapas_corte_ms": 21320.92,
+  "script_sha256_normalizado_lf": "2d8604bf0b92e15e7f220de45a68b7855695b200328f2eae094af49b073839b4"
 }

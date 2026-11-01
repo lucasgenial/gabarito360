@@ -2,6 +2,10 @@
 
 Autorização: após aprovar o merge do PR #80, o responsável autorizou preparar o ensaio e a janela, sem deploy. PR #80 incorporado em `1d7ed629f4a321788c9687c041a14f0ccd3cdd84`. Responsável operacional: administrador do ambiente; execução e decisão de abertura dependem de autorização específica.
 
+## Entrega em revisão — PR #81
+
+[PR #81](https://github.com/lucasgenial/gabarito360/pull/81), aguardando aprovação de merge.
+
 ## Entrega autorizada
 
 Preparar ensaio sintético isolado, usando a hierarquia e as quantidades históricas do doc. 42, e um cenário de crescimento. Não copiar backups, chaves ou dados pessoais de produção nesta entrega. Preparar opção explícita `--manter-manutencao` no B5 para terminar após instalação/migração/cache, mantendo API/web em manutenção e workers/agendador parados. O modo normal conserva seu comportamento. Nenhum comando de preenchimento, conciliação, restrição ou ativação T2 será chamado automaticamente pelo deploy.
@@ -141,7 +145,7 @@ Guardar em área operacional restrita: operador e autorização; SHAs antes/depo
 
 ## Evidências desta preparação
 
-Ensaios em 31/10/2026 BRT (01/11 UTC), WSL local, MariaDB 10.11.14 e PHP 8.3.6. Base da API: merge aprovado do PR #80. Evidências versionadas contêm somente metadados e dados sintéticos, com hash do script:
+Ensaios em 31/10/2026 BRT (01/11 UTC), WSL local, MariaDB 10.11.14 e PHP 8.3.6. Base da API: merge aprovado do PR #80. Evidências versionadas contêm somente metadados e dados sintéticos, com hash dos bytes executados e hash normalizado para LF (o Git normaliza finais de linha):
 
 - [Escala histórica 1×](operacao/evidencias/t2-ensaio-sintetico-2026-10-31-1x.json).
 - [Alunos/correções 10×](operacao/evidencias/t2-ensaio-sintetico-2026-10-31-10x.json).
@@ -158,4 +162,3 @@ Totais excluem recriação do esquema e geração de dados fictícios; incluem i
 B5: 13 testes simulados passaram, incluindo manutenção preservada, ausência de abertura/retomada automática, ausência de comandos T2, `--check` sem publicação e serviço que não para bloqueando antes de trocar código. Sintaxe Bash/PHP aprovada. Guardas do ensaio recusaram ausência de confirmação, escala não permitida e banco diferente do banco fixo descartável. CI e revisão final serão registrados no PR.
 
 Nenhuma data foi agendada e nenhum procedimento foi executado na produção. Não houve cópia de dados reais, abertura de backup, deploy, mudança de acesso ou ativação. Próxima decisão: aprovar este preparo; depois validar ambiente equivalente/recuperação e revisar o release de ativação antes de solicitar autorização operacional.
-
