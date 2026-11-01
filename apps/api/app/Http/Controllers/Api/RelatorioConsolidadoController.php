@@ -61,7 +61,7 @@ class RelatorioConsolidadoController extends Controller
         $usuario = $request->user();
         // A rota exige relatorio.nucleo; o admin da rede vê todos, os demais só os núcleos do seu escopo
         $meus = $usuario->perfil === 'admin_rede' ? null
-            : DB::table('usuario_escopos')->where('usuario_id', $usuario->id)->where('escopo_tipo', 'nucleo')->pluck('escopo_id')->map(fn ($v) => (int) $v)->all();
+            : Instituicoes::referencias($usuario, 'nucleo');
         if (Espacos::ativo()) $meus = Instituicoes::nucleosIds($usuario) ?? [];
         abort_if(Espacos::ativo() && !$id && count($meus ?? []) > 1, 422, 'Selecione o núcleo.');
         $id ??= $meus[0] ?? null;

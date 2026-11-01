@@ -30,6 +30,7 @@ class ResultadoEnvio
 
     public static function resposta(CartaoEnvio $envio, Usuario $usuario): array
     {
+        $envio->exigirContexto($usuario);
         if (Espacos::ativo()) {
             $prova = Escopo::prova($usuario, $envio->prova_id);
             abort_unless((int) $envio->usuario_id === (int) $usuario->id && $prova && (int) $prova->espaco_id === (int) $envio->espaco_id, 404);
@@ -55,7 +56,7 @@ class ResultadoEnvio
             $resultado = array_intersect_key($resultado, array_flip(['id', 'status', 'aluno_id', 'aluno_nome']));
         }
 
-        return ['envio_id' => $envio->chave, 'processamento' => $envio->status, 'pode_repetir' => $envio->podeRepetir(),
+        return ['envio_id' => $envio->chave_cliente ?? $envio->chave, 'processamento' => $envio->status, 'pode_repetir' => $envio->podeRepetir(),
             'mensagem' => $envio->mensagem, 'resultado' => $resultado];
     }
 }
