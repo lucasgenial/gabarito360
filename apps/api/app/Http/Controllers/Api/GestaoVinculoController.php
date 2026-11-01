@@ -32,7 +32,9 @@ class GestaoVinculoController extends Controller
     public function show(Request $r, int $id)
     {
         $v = GestaoVinculos::alvo($r, $id, false);
-        return ApiResponse::success(GestaoVinculos::pessoas($r->user(), vigentes: false)->where('contextual.vinculo_id', $v->id)->firstOrFail());
+        $pessoa = GestaoVinculos::pessoas($r->user(), vigentes: false)->where('contextual.vinculo_id', $v->id)->firstOrFail();
+        $pessoa->setAttribute('convite_primeiro_acesso', DB::table('password_reset_tokens')->where('vinculo_id', $v->id)->where('expira_em', '>', now())->exists());
+        return ApiResponse::success($pessoa);
     }
 
     public function update(Request $r, int $id)

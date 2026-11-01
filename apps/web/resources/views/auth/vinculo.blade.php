@@ -6,6 +6,7 @@
   <section class="card vinculo-card" aria-labelledby="vinculo-titulo">
     <h1 id="vinculo-titulo">Escolha seu vínculo</h1>
     <p>Olá, {{ session('auth_nome') }}. Selecione onde deseja trabalhar nesta aba.</p>
+    @if(session('sucesso'))<p role="status">{{ session('sucesso') }}</p>@endif
     @if(session('erro'))<p role="alert">{{ session('erro') }}</p>@endif
     @if($errors->any())<p role="alert">Escolha um vínculo válido.</p>@endif
     @forelse($vinculos as $v)

@@ -14,6 +14,7 @@
 
     <form method="POST" action="{{ route('trocar-senha.store') }}">
       @csrf
+        @if(request()->boolean('retorno_convite'))<input type="hidden" name="retorno_convite" value="1">@endif
       @method('PUT')
 
       <div class="field">

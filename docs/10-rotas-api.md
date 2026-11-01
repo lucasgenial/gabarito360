@@ -251,3 +251,7 @@ O contrato de emissão, consulta e resposta dos convites de conta existente est�
 ### V2-A — seleção autenticada
 
 `GET /api/v1/auth/vinculos` lista os vínculos válidos da própria identidade. `POST /api/v1/auth/vinculos/selecionar` recebe `vinculo_id` e emite token contextual independente (201). Exigem token de identidade, troca de senha concluída e regime obrigatório ligado. Contrato e sequência em [docs/61](61-v2-contexto-autenticado.md).
+
+### V2-C — opções para convite
+
+`GET /api/v1/usuarios/convites-vinculo/opcoes`: requer `usuario.gerir` e contexto válido; retorna instituições, perfis e turmas autorizados para emissão. A confirmação continua nas rotas V1-C3 existentes. [Contrato](62-v2-gestao-e-aceite-de-convites.md).
