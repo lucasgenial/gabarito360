@@ -58,3 +58,7 @@ Não houve alteração de `.env`, DNS, nginx, PHP-FPM ou unidades systemd. Não 
 ## Checkpoint de backup final
 
 A opção `--backup-final /root/pausa-backup-final.sh` introduz uma espera síncrona antes de código/DDL, com escritores/FPM parados e recibo verificado pelo host. Falhas após esse checkpoint preservam manutenção, sem reabertura automática. Procedimento e recuperação em [doc. 53](53-t2-checkpoint-backup-final.md). Sem a opção, permanece o comportamento anterior.
+
+## Máscara de criação dos arquivos
+
+O B5 normaliza `umask 022` para que Git/Composer gerem código legível pelo PHP mesmo quando o chamador usa máscara 077. A falha foi identificada e recuperada durante a publicação T2 (doc. 54); um teste de regressão cobre arquivo 0644 e diretório 0755 sob chamador restritivo. Temporários privados continuam usando proteção explícita.
