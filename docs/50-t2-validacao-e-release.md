@@ -54,6 +54,6 @@ O ciclo OMR/fila é coberto com dependências simuladas na suíte MariaDB. Leitu
 
 ## Verificações da entrega
 
-Sete testes MariaDB passaram (89 assertions somadas nas execuções local anterior e da nova regressão), incluindo DDL real, integridade, retomada, unicidade, OMR simulado e acesso ao relatório. Quinze testes do B5 passaram. Sintaxe PHP/Bash aprovada. Regressão completa e CI final serão vinculados no PR.
+Sete testes MariaDB passaram (89 assertions somadas nas execuções local anterior e da nova regressão), incluindo DDL real, integridade, retomada, unicidade, OMR simulado e acesso ao relatório. Quinze testes do B5 passaram. Sintaxe PHP/Bash aprovada. Regressão completa da API: 162 testes aprovados, 1.127 assertions; os sete casos MariaDB são ignorados no SQLite e foram executados separadamente. Resultado final das quatro verificações de CI será registrado no PR #82 para o SHA final.
 
 Ao encerrar o ensaio, os dois processos MariaDB isolados foram parados, o banco temporário de dados reais foi removido e o diretório restrito de extrações/configurações foi eliminado. Arquivos originais de backup preservados; somente evidência sanitizada ficou versionada.
