@@ -13,6 +13,9 @@
 
 @php
   $perfilLabels = [
+    'desenvolvedor' => 'Desenvolvedor',
+    'suporte' => 'Suporte',
+    'financeiro' => 'Financeiro',
     'admin_rede'  => 'Administrador da Rede',
     'dir_nucleo'  => 'Diretor de Núcleo',
     'dir_escolar' => 'Diretor Escolar',

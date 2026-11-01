@@ -25,10 +25,14 @@ class ContextoPorAba
         abort_unless($resp->successful(), 503, 'Não foi possível conferir seu acesso. Tente novamente.');
         $me = $resp->json('data');
         abort_unless(is_array($me) && !empty($me['perfil']) && is_array($me['permissoes'] ?? null), 503);
+        abort_unless(($dados['tipo_contexto'] ?? 'vinculo') === ($me['tipo_contexto'] ?? 'vinculo'), 503);
         $dados['perfil'] = $me['perfil'];
         $dados['permissoes'] = $me['permissoes'];
         $request->attributes->set('vinculo_contexto', $dados);
         ContextoWeb::renovar($id, $dados);
+        if (($dados['tipo_contexto'] ?? null) === 'interno') {
+            abort_unless($request->routeIs('painel', 'perfil', 'perfil.*'), 403, 'Escolha um vínculo para abrir esta área.');
+        }
         $response = $next($request);
         // Redirecionamentos de formulários preservam o contexto da requisição.
         if ($response->isRedirect()) {
