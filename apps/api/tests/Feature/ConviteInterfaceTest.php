@@ -96,6 +96,19 @@ class ConviteInterfaceTest extends TestCase
         $this->assertDatabaseCount('vinculo_turmas',2);
     }
 
+    public function test_primeiro_acesso_vencido_continua_disponivel_para_reenvio(): void
+    {
+        Mail::fake();
+        DB::table('usuario_vinculos')->where('id',3)->update(['situacao'=>'convidado']);
+        $gestor=Usuario::find(1)->noVinculo(1);
+        app(\App\Services\ContaUsuario::class)->convidar(Usuario::find(2),$gestor,3);
+        $this->travel(8)->days();
+        Sanctum::actingAs($gestor);
+        $this->getJson('/api/v1/usuarios/2?vinculo_id=3')->assertOk()->assertJsonPath('data.convite_primeiro_acesso',true);
+        $this->postJson('/api/v1/usuarios/2/convite',['vinculo_id'=>3])->assertOk();
+        Mail::assertQueued(\App\Mail\EmailModelo::class,2);
+    }
+
     private function chamar(string $t, string $metodo, string $url, array $dados = [])
     {
         app('auth')->forgetGuards();
