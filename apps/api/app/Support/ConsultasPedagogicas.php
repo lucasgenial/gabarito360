@@ -98,7 +98,9 @@ class ConsultasPedagogicas
 
     private function alunosProprios()
     {
-        return Espacos::agregadoEscolar(DB::table('alunos'), 'alunos', $this->ator)->whereIn('alunos.id', Instituicoes::referencias($this->ator, 'aluno'));
+        RegimeVinculos::exigir($this->ator);
+        // O aluno acessa sua própria referência; não precisa de escopo de gestão de turma.
+        return Espacos::agregadoEscolar(DB::table('alunos'), 'alunos')->whereIn('alunos.id', Instituicoes::referencias($this->ator, 'aluno'));
     }
 
     public function modelo(string $classe)
