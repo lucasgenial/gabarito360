@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
  */
 class ImportarProvas extends Command
 {
-    protected $signature = 'g360:importar-provas {arquivo} {--escola=} {--usuario=} {--turmas=} {--ano=} {--espaco=} {--aplicar}';
+    protected $signature = 'g360:importar-provas {arquivo} {--escola=} {--usuario=} {--vinculo=} {--turmas=} {--ano=} {--espaco=} {--aplicar}';
 
     protected $description = 'Cria provas e gabaritos publicados a partir de um JSON';
 
@@ -34,7 +34,7 @@ class ImportarProvas extends Command
                 return self::FAILURE;
             }
 
-            $contexto = fn () => ContextoImportacao::resolver($escolaId, $usuarioId, (int) $this->option('espaco'), ['prova.criar', 'gabarito.editar']);
+            $contexto = fn () => ContextoImportacao::resolver($escolaId, $usuarioId, (int) $this->option('espaco'), ['prova.criar', 'gabarito.editar'], $this->option('vinculo') !== null ? (int) $this->option('vinculo') : null);
             $meta = $contexto();
             Validator::make($spec, ['titulo' => 'required|string|max:255', 'serie' => 'required|string|max:100', 'provas' => 'required|array|min:1', 'provas.*.disciplina' => 'required|string|max:100', 'provas.*.gabarito' => 'required|string|regex:/^[ABCDE]{1,100}$/', 'provas.*.gabarito_espanhol' => 'nullable|string|regex:/^[ABCDE-]{1,100}$/', 'num_alternativas' => 'sometimes|integer|min:2|max:5', 'nota_maxima' => 'sometimes|numeric|min:0.1|max:100', 'provas.*.data_aplicacao' => 'nullable|date'])->validate();
             foreach ($spec['provas'] as $p) {
@@ -43,7 +43,10 @@ class ImportarProvas extends Command
                 abort_unless(strspn($p['gabarito'], $letras) === strlen($p['gabarito']), 422);
             }
             $nomes = array_filter(array_map('trim', explode(',', (string) $this->option('turmas'))));
-            $turmas = Espacos::ativo() ? (new ConsultasPedagogicas(Usuario::findOrFail($usuarioId)))->tabela('turmas') : DB::table('turmas');
+            $ator = Usuario::findOrFail($usuarioId);
+            if ($this->option('vinculo') !== null) $ator = $ator->noVinculo((int) $this->option('vinculo'));
+            $turmas = $ator->vinculoContextoId() !== null ? \App\Support\Escopo::turmas($ator)
+                : (Espacos::ativo() ? (new ConsultasPedagogicas($ator))->tabela('turmas') : DB::table('turmas'));
             $turmaIds = $turmas->where('escola_id', $escolaId)
                 ->when($this->option('ano'), fn ($q, $a) => $q->where('ano_letivo', $a))
                 ->whereIn('nome', $nomes)->pluck('id')->all();

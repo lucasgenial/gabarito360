@@ -99,6 +99,7 @@ class CartaoController extends Controller
     /** Link assinado com versão do acesso; revalida ator e espaço a cada abertura. */
     public function arquivo(Request $request, int $id, string $tipo)
     {
+        abort_if(\App\Support\RegimeVinculos::obrigatorio() && (!Espacos::ativo() || !$request->has('vinculo')), 404);
         if (Espacos::ativo()) {
             $ator = Usuario::find($request->integer('ator'));
             if ($ator && $request->has('vinculo')) {

@@ -53,6 +53,7 @@ class ConverterVinculosLegados
 
     public function executar(array $manifesto, bool $aplicar = false, ?int $ator = null): array
     {
+        if (\App\Support\RegimeVinculos::obrigatorio()) throw new RuntimeException('Conversão legada indisponível após o corte por vínculo.');
         $this->validarFormato($manifesto);
         if ($aplicar && !app()->environment('testing') && !app()->isDownForMaintenance()) {
             throw new RuntimeException('Aplicação exige manutenção e escritores pausados pelo procedimento operacional.');

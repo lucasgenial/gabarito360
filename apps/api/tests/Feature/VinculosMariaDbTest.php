@@ -135,4 +135,18 @@ class VinculosMariaDbTest extends TestCase
         $this->recusa(fn () => DB::table('password_reset_tokens')->where('email', 'hash-ficticio')->update(['vinculo_id' => 999]));
     }
 
+    public function test_convite_de_vinculo_confere_emissor_composto_e_preserva_historico(): void
+    {
+        DB::table('usuarios')->insert(['id' => 2, 'perfil' => 'professor', 'nome' => 'Fictício', 'email' => 'v2@example.test', 'cpf' => '00000000002', 'password' => 'ficticio']);
+        DB::table('usuario_vinculos')->insert(['id' => 1, 'usuario_id' => 1, 'espaco_id' => 1, 'perfil' => 'admin_rede', 'situacao' => 'ativo', 'inicio_em' => now()]);
+        $c = ['vinculo_id' => 1, 'token_hash' => str_repeat('a', 64), 'expira_em' => now()->addDay(), 'convidado_por' => 1, 'convidado_por_vinculo_id' => 1];
+        DB::table('vinculo_convites')->insert($c);
+        $migration = require database_path('migrations/2026_11_01_000005_criar_vinculo_convites.php');
+        $migration->up();
+        $this->assertDatabaseCount('vinculo_convites', 1);
+        $this->recusa(fn () => DB::table('vinculo_convites')->insert($c));
+        $this->recusa(fn () => DB::table('vinculo_convites')->insert(array_replace($c, ['token_hash' => str_repeat('b', 64), 'convidado_por' => 2])));
+        $this->recusa(fn () => DB::table('usuario_vinculos')->where('id', 1)->delete());
+    }
+
 }
