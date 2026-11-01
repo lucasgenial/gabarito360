@@ -159,6 +159,8 @@ escolar · **COO** coordenador · **PRO** professor · **APL** aplicador · **AL
 
 ## 6. Assinatura (SaaS) e conta individual
 
+**Atualização T3, autorizada em 01/11/2026:** para o novo regime de vínculos, a conta individual será `professor_autonomo` em espaço pessoal próprio, sem escola fictícia nem extras automáticas de diretor. O contrato e as etapas estão em [docs/63](63-t3-perfis-por-espaco.md). T3-A prepara o catálogo, mas mantém esse contexto bloqueado até a integração. As regras abaixo descrevem o modelo anterior e não autorizam provisionar novas contas dessa forma.
+
 - **Assinatura e cobrança** não dependem do perfil: só o **titular** da conta (quem contratou) vê e
   gere plano, pagamentos e cancelamento.
 - **Professor em conta individual**: continua com perfil `professor`, mas na escola criada para ele
@@ -181,6 +183,8 @@ escolar · **COO** coordenador · **PRO** professor · **APL** aplicador · **AL
 ---
 
 ## 8. Histórico de decisões incorporadas
+
+- 01/11/2026 — T3 autorizado: `professor_autonomo` exclusivo do próprio espaço pessoal. Padrões preparados: `turma.ver`, `turma.gerir`, `turma.desativar`, `aluno.ver`, `aluno.gerir`, `aluno.desativar`, `prova.ver`, `prova.criar`, `prova.editar`, `gabarito.ver`, `gabarito.editar`, `cartao.imprimir`, `cartao.enviar`, `correcao.acompanhar`, `correcao.alterar`, `correcao.fechar`, `resultado.ver`, `resultado.compartilhar`, `relatorio.prova`, `relatorio.turma`. Sem extras, gestão institucional ou portal dos pais. Contexto ainda bloqueado (T3-A).
 
 - 29/10/2026 — Diretor escolar não cria prova (doc 19, decisão 3).
 - 29/10/2026 — Professor vê todas as provas das turmas em que está vinculado (doc 19, decisão 1).

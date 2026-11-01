@@ -368,3 +368,7 @@ A identidade continua na sessão compartilhada; perfil/permissões e token conte
 ### V2-C — gestão e confirmação de convite
 
 A gestão web transporta explicitamente vínculo-alvo; não envia alterações globais de identidade. A confirmação de convite usa o token de identidade e referência temporária cifrada vinculada à sessão. O fragmento do e-mail é consumido e removido do histórico; não se guarda o token do convite na sessão compartilhada. Aceite/recusa permanecem transacionais e revalidados na API. [Contrato e limites](62-v2-gestao-e-aceite-de-convites.md).
+
+### T3-A — contrato de perfil por tipo
+
+`PerfisEspaco` centraliza a compatibilidade de perfil/espaço usada por contexto, cadastro escolar e convites. Um perfil desconhecido não assume escola como destino padrão. `professor_autonomo` possui política independente no catálogo e exige titularidade do espaço pessoal; permanece sem contexto habilitado enquanto consumidores dependem de escola. Também não obtém permissões como perfil global legado, mesmo com cache preenchido. Não há DDL nem alteração dos poderes institucionais nesta etapa. [Contrato, dependências e sequência](63-t3-perfis-por-espaco.md).
