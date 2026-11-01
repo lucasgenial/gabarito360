@@ -473,7 +473,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### V1. Vínculos por pessoa
 
-- **Andamento em 01/11/2026:** V1-A implementado para revisão: estrutura aditiva e inventário somente leitura; veja [entrega e continuidade](55-v1-estrutura-e-inventario.md). Conversão e autorização por vínculo ainda pendentes; sem deploy desta fase.
+- **Andamento em 01/11/2026:** V1-A incorporado no PR #87. V1-B implementado para revisão: [conversão conciliada, restrições e comparação](56-v1-conversao-conciliada.md). Falta V1-C (autorização por vínculo e conciliação final para ativação); sem deploy destas fases.
 
 - **Objetivo:** permitir vários papéis para a mesma pessoa.
 - **Dependências:** T2.
