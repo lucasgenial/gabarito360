@@ -64,3 +64,7 @@ O teste provou que os arquivos podem ser recuperados e que o banco abre. Não ho
 ## Antecipação e ensaio T2 — 01/11/2026
 
 Com autorização do responsável, os backups dos CTs 106/111 foram antecipados e copiados com SHA-256 às 00h36 BRT, sem esperar 06h e sem aplicar retenção. Registro pontual: `D:\Backups-Proxmox\T2-COPIA-OK-2026-11-01.json`; o marcador da rotina completa não foi substituído. Restauração completa pelo Proxmox nos CTs temporários 9106/9111, recuperação das chaves pós-L3 e reinício supervisionado validados. Os temporários foram removidos; os originais e backups foram preservados. Veja [docs/52](../52-t2-ensaio-completo-e-prontidao.md) para arquivos, hashes, tempos e limites.
+
+## Corte T2 aplicado — 01/11/2026
+
+Backup final coerente dos CTs 106/111 gerado com escritores parados às 08h20/08h23 BRT, copiado e conferido nas duas camadas antes da migração. Marcador pontual `T2-CORTE-COPIA-OK-2026-11-01-4f3150d5.json` no computador. Arquivos, hashes e procedimento executado no [doc. 54](../54-t2-publicacao-homologacao.md). O servidor foi atualizado e reaberto com T2 ativo.
