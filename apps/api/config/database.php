@@ -61,6 +61,9 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // Limita o custo de planejamento das consultas de isolamento T2.
+                // Apenas esta conexão; não altera o otimizador global do servidor.
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION optimizer_search_depth=4',
             ]) : [],
         ],
 
@@ -81,6 +84,7 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION optimizer_search_depth=4',
             ]) : [],
         ],
 
