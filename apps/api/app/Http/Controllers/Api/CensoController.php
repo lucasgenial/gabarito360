@@ -83,8 +83,9 @@ class CensoController extends Controller
         $u = $request->user();
         $q = DB::table('nucleos')->where('orgao_regional', $orgao);
         if ($u->perfil === 'dir_nucleo') {
-            $q->whereIn('id', DB::table('usuario_escopos')->where('usuario_id', $u->id)->where('escopo_tipo', 'nucleo')->pluck('escopo_id'));
+            $q->whereIn('id', \App\Support\Instituicoes::referencias($u, 'nucleo'));
         }
+        if (\App\Support\Espacos::ativo()) $q->whereIn('id', \App\Support\Instituicoes::nucleosIds($u) ?? []);
         $n = $q->first(['id', 'nome']);
 
         return $n ? ['id' => $n->id, 'nome' => $n->nome] : null;

@@ -248,7 +248,8 @@ class CartaoController extends Controller
             return ApiResponse::notFound('Envio não encontrado.');
         }
         $envio = ContextoCorrecao::filtrar(CartaoEnvio::query(), $prova?->espaco_id)->where('usuario_id', $request->user()->id)
-            ->where('prova_id', $provaId)->where('chave', $chave)->first();
+            ->where('vinculo_id', $request->user()->vinculoContextoId())
+            ->where('prova_id', $provaId)->where('chave', CartaoEnvio::chaveContextual($request->user(), $chave, $prova?->espaco_id))->first();
         if (! $envio) {
             return ApiResponse::notFound('Envio não encontrado.');
         }
@@ -264,7 +265,8 @@ class CartaoController extends Controller
     {
         $prova = $this->encontrarProva($request, $provaId, envio: true);
         $envio = ContextoCorrecao::filtrar(CartaoEnvio::query(), $prova?->espaco_id)->where('usuario_id', $request->user()->id)
-            ->where('prova_id', $provaId)->where('chave', $chave)->first();
+            ->where('vinculo_id', $request->user()->vinculoContextoId())
+            ->where('prova_id', $provaId)->where('chave', CartaoEnvio::chaveContextual($request->user(), $chave, $prova?->espaco_id))->first();
         if (! $prova || ! $envio) {
             return ApiResponse::notFound('Envio não encontrado.');
         }

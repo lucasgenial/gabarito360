@@ -23,11 +23,18 @@ class FilaCartoes
         $prova = Escopo::prova($usuario, $provaId);
         abort_unless($prova, 404);
         $espaco = $prova->espaco_id;
+        $chaveCliente = $usuario->vinculoContextoId() === null ? null : $chave;
+        $chave = CartaoEnvio::chaveContextual($usuario, $chave, $espaco);
+        if ($chaveCliente !== null) {
+            abort_unless(\App\Support\Permissao::pode($usuario, 'cartao.enviar'), 403);
+            abort_if(\App\Support\Correcao::bloqueio($usuario, $prova), 403);
+        }
         if (Espacos::ativo() && $alunoId) abort_unless(ContextoCorrecao::alunos($prova, $usuario)->where('alunos.id', $alunoId)->exists(), 404);
-        return Cache::lock("cartao-envio:{$espaco}:{$usuario->id}:{$chave}", 30)->block(3, function () use ($usuario, $provaId, $chave, $foto, $alunoId, $espaco) {
+        return Cache::lock("cartao-envio:{$espaco}:{$usuario->id}:{$chave}", 30)->block(3, function () use ($usuario, $provaId, $chave, $chaveCliente, $foto, $alunoId, $espaco) {
             $existente = CartaoEnvio::where('usuario_id', $usuario->id)->where('chave', $chave)
                 ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $espaco))->first();
             if ($existente) {
+                $existente->exigirContexto($usuario);
                 if (Espacos::ativo()) abort_unless((int) $existente->espaco_id === (int) $espaco, 409, 'Identificador indisponível. Gere outro envio.');
                 abort_if((int) $existente->prova_id !== $provaId, 409, 'Este identificador já foi usado em outra prova.');
 
@@ -38,12 +45,14 @@ class FilaCartoes
                 throw new \RuntimeException('Não foi possível salvar a foto do cartão.');
             }
             try {
-                $envio = DB::transaction(function () use ($usuario, $provaId, $chave, $caminho, $alunoId, $espaco) {
+                $envio = DB::transaction(function () use ($usuario, $provaId, $chave, $chaveCliente, $caminho, $alunoId, $espaco) {
+                    if ($chaveCliente !== null) \App\Support\ContextoVinculo::resolver($usuario);
                     $cartao = new Cartao(['prova_id' => $provaId, 'aluno_id' => $alunoId,
                         'imagem_url' => $caminho, 'status' => 'pendente']);
                     $cartao->forceFill(ContextoCorrecao::autoria($espaco, $usuario->id))->save();
 
                     return CartaoEnvio::create(['usuario_id' => $usuario->id, 'prova_id' => $provaId,
+                        'vinculo_id' => $usuario->vinculoContextoId(), 'chave_cliente' => $chaveCliente,
                         'chave' => $chave, 'cartao_id' => $cartao->id, 'status' => 'na_fila', 'tentativa' => 1] + ContextoCorrecao::autoria($espaco, $usuario->id));
                 });
             } catch (Throwable $e) {
@@ -58,6 +67,11 @@ class FilaCartoes
 
     public function repetir(CartaoEnvio $envio, ?Usuario $usuario = null): CartaoEnvio
     {
+        if ($envio->vinculo_id !== null || $usuario?->vinculoContextoId() !== null) {
+            abort_unless($usuario, 404);
+            $envio->exigirContexto($usuario);
+            abort_unless(\App\Support\Permissao::pode($usuario, 'cartao.enviar'), 403);
+        }
         if (Espacos::ativo()) {
             abort_unless($usuario && (int) $envio->usuario_id === (int) $usuario->id, 404);
             $prova = Escopo::prova($usuario, $envio->prova_id);
@@ -65,9 +79,10 @@ class FilaCartoes
             $cartao = ContextoCorrecao::cartoes($usuario)->find($envio->cartao_id);
             abort_unless(ContextoCorrecao::cartaoValido($cartao) && (int) $cartao->espaco_id === (int) $envio->espaco_id, 404);
         }
-        return Cache::lock("cartao-envio:{$envio->espaco_id}:{$envio->usuario_id}:{$envio->chave}", 30)->block(3, function () use ($envio) {
-            $novo = DB::transaction(function () use ($envio) {
+        return Cache::lock("cartao-envio:{$envio->espaco_id}:{$envio->usuario_id}:{$envio->chave}", 30)->block(3, function () use ($envio, $usuario) {
+            $novo = DB::transaction(function () use ($envio, $usuario) {
                 $atual = CartaoEnvio::whereKey($envio->id)->lockForUpdate()->firstOrFail();
+                if ($usuario) $atual->exigirContexto($usuario);
                 if (! $atual->podeRepetir()) {
                     return null;
                 }
@@ -89,7 +104,7 @@ class FilaCartoes
             if (! in_array(config("queue.connections.{$conexao}.driver"), ['redis', 'database', 'sqs', 'beanstalkd'], true)) {
                 throw new \RuntimeException('A leitura de cartões exige uma fila persistente.');
             }
-            Bus::dispatch((new ProcessarCartaoJob($envio->cartao_id, $envio->id, $envio->tentativa, $envio->espaco_id, $envio->usuario_id))
+            Bus::dispatch((new ProcessarCartaoJob($envio->cartao_id, $envio->id, $envio->tentativa, $envio->espaco_id, $envio->usuario_id, $envio->vinculo_id))
                 ->onConnection($conexao)->onQueue('alta'));
         } catch (Throwable $e) {
             CartaoEnvio::whereKey($envio->id)->where('tentativa', $envio->tentativa)->where('status', 'na_fila')
