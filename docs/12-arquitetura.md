@@ -372,3 +372,7 @@ A gestão web transporta explicitamente vínculo-alvo; não envia alterações g
 ### T3-A — contrato de perfil por tipo
 
 `PerfisEspaco` centraliza a compatibilidade de perfil/espaço usada por contexto, cadastro escolar e convites. Um perfil desconhecido não assume escola como destino padrão. `professor_autonomo` possui política independente no catálogo e exige titularidade do espaço pessoal; permanece sem contexto habilitado enquanto consumidores dependem de escola. Também não obtém permissões como perfil global legado, mesmo com cache preenchido. Não há DDL nem alteração dos poderes institucionais nesta etapa. [Contrato, dependências e sequência](63-t3-perfis-por-espaco.md).
+
+### T3-B — dados pessoais sob gate
+
+Tipo de raiz e espaço são ligados por FK composta; triggers recusam escola nula em cadastro escolar e dados excessivos de aluno pessoal. Contexto pessoal só é resolvido com `espacos.pessoal`, desligado por padrão. Mudança de turma fixa a turma histórica dos cartões em transação e preserva as notas. Consultas/relatórios distinguem turma atual da turma de aplicação. [Contrato e limites](64-t3-b-dados-e-formularios-pessoais.md).

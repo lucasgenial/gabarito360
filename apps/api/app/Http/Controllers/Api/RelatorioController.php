@@ -19,8 +19,9 @@ class RelatorioController extends Controller
         return Escopo::provaComConteudo($request->user(), $provaId);
     }
 
-    private function metaRede(ConsultasPedagogicas $consulta, int $escolaId): float
+    private function metaRede(ConsultasPedagogicas $consulta, ?int $escolaId): float
     {
+        if ($escolaId === null) return 7.0;
         $meta = $consulta->tabela('escolas')
             ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
             ->join('redes', 'nucleos.rede_id', '=', 'redes.id')
@@ -61,7 +62,7 @@ class RelatorioController extends Controller
         $notasQuery   = $consulta->tabela('notas')->where('prova_id', $prova->id);
 
         if ($turmaId !== null) {
-            $cartoesQuery->whereIn('aluno_id', $consulta->tabela('alunos')->where('turma_id', $turmaId)->pluck('id'));
+            $cartoesQuery->whereRaw('COALESCE(cartoes.turma_aplicacao_id, (SELECT turma_id FROM alunos WHERE alunos.id = cartoes.aluno_id)) = ?', [$turmaId]);
             $notasQuery->where('turma_id', $turmaId);
         }
 
@@ -102,7 +103,7 @@ class RelatorioController extends Controller
 
         return ApiResponse::success([
             'prova'  => array_merge($prova->toArray(), ['turmas' => $turmas]),
-            'cabecalho' => Cabecalho::escola((int) $prova->escola_id),
+            'cabecalho' => Cabecalho::contexto($request->user(), $prova->escola_id),
             'kpis'     => $this->kpis($consulta, $prova),
             'alunos'   => $this->tabelaAlunos($consulta, $id),
             'questoes' => $this->analiseQuestoes($consulta, $prova),
@@ -126,7 +127,7 @@ class RelatorioController extends Controller
         return ApiResponse::success([
             'prova'  => $prova,
             'turma'  => $turma,
-            'cabecalho' => Cabecalho::escola((int) $prova->escola_id),
+            'cabecalho' => Cabecalho::contexto($request->user(), $prova->escola_id),
             'kpis'     => $this->kpis($consulta, $prova, $turmaId),
             'alunos'   => $this->tabelaAlunos($consulta, $provaId, $turmaId),
             'questoes' => $this->analiseQuestoes($consulta, $prova, $turmaId),
@@ -145,7 +146,8 @@ class RelatorioController extends Controller
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        $alunos = $consulta->tabela('alunos')->where('turma_id', $turmaId)->where('ativo', true)
+        $alunos = $consulta->tabela('alunos')->where(fn ($q) => $q->where('turma_id', $turmaId)
+            ->when(\App\Support\EspacoPessoal::doAtor($request->user()), fn ($h) => $h->orWhereIn('id', $consulta->tabela('notas')->where('turma_id', $turmaId)->select('aluno_id'))))->where('ativo', true)
             ->orderBy('nome')->get(['id', 'nome', 'matricula']);
         $provas = $this->provasDaTurma($request, $turmaId);
 
@@ -199,7 +201,7 @@ class RelatorioController extends Controller
 
         return ApiResponse::success([
             'turma'   => $turma,
-            'cabecalho' => Cabecalho::escola((int) $turma->escola_id),
+            'cabecalho' => Cabecalho::contexto($request->user(), $turma->escola_id),
             'kpis'    => [
                 'alunos'          => $alunos->count(),
                 'provas'          => $provas->count(),
@@ -224,8 +226,15 @@ class RelatorioController extends Controller
         }
 
         $provas = $this->provasDaTurma($request, (int) $aluno->turma_id);
-        $linhas = $provas->map(function ($p) use ($aluno, $consulta) {
-            $daTurma = $consulta->tabela('notas')->where('prova_id', $p->id)->where('turma_id', $aluno->turma_id)
+        $pessoal = \App\Support\EspacoPessoal::doAtor($request->user());
+        if ($pessoal) {
+            $historicas = Escopo::provas($request->user())->whereIn('provas.id', $consulta->tabela('notas')->where('aluno_id', $alunoId)->select('prova_id'))
+                ->whereIn('status', ['publicada', 'em_correcao', 'corrigida'])->get();
+            $provas = $provas->concat($historicas)->unique('id')->sortBy('disciplina')->values();
+        }
+        $linhas = $provas->map(function ($p) use ($aluno, $consulta, $pessoal) {
+            $turmaNota = $pessoal ? ($consulta->tabela('notas')->where('prova_id', $p->id)->where('aluno_id', $aluno->id)->value('turma_id') ?? $aluno->turma_id) : $aluno->turma_id;
+            $daTurma = $consulta->tabela('notas')->where('prova_id', $p->id)->where('turma_id', $turmaNota)
                 ->orderByDesc('nota_final')->get(['aluno_id', 'nota_final', 'acertos', 'total_questoes']);
             $minha = $daTurma->firstWhere('aluno_id', $aluno->id);
             $pos   = $minha ? $daTurma->search(fn ($n) => (float) $n->nota_final === (float) $minha->nota_final) + 1 : null;
@@ -253,7 +262,7 @@ class RelatorioController extends Controller
         return ApiResponse::success([
             'aluno'  => $aluno,
             'turma'  => $turma,
-            'cabecalho' => Cabecalho::escola((int) $turma->escola_id),
+            'cabecalho' => Cabecalho::contexto($request->user(), $turma->escola_id),
             'provas' => $linhas,
             'kpis'   => [
                 'provas'        => $linhas->count(),
@@ -312,7 +321,7 @@ class RelatorioController extends Controller
             ->joinSub($consulta->tabela('alunos'), 'a', 'a.id', '=', 'c.aluno_id')
             ->where('c.prova_id', $prova->id)
             ->where('c.status', 'lido')
-            ->when($turmaId, fn ($q) => $q->where('a.turma_id', $turmaId))
+            ->when($turmaId, fn ($q) => $q->whereRaw('COALESCE(c.turma_aplicacao_id, a.turma_id) = ?', [$turmaId]))
             ->get(['r.numero_questao', 'r.alternativa', 'c.lingua']);
 
         $letras = array_slice(['A', 'B', 'C', 'D', 'E'], 0, (int) $prova->num_alternativas);

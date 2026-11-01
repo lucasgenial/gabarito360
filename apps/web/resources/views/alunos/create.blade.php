@@ -47,7 +47,7 @@
   <div class="card card-pad" style="flex:1;">
     <div class="form-grid">
       <div class="field" style="grid-column:1/-1">
-        <label for="nome">Nome completo do aluno *</label>
+        <label for="nome">{{ \App\Support\Acesso::pessoal() ? 'Nome do aluno *' : 'Nome completo do aluno *' }}</label>
         <input class="input" type="text" id="nome" name="nome" required
                placeholder="Ex: João da Silva Santos"
                value="{{ old('nome') }}"
@@ -55,24 +55,29 @@
         @error('nome')<span class="field-error">{{ $message }}</span>@enderror
       </div>
       <div class="field">
-        <label for="matricula">Nº de Matrícula *</label>
+        <label for="matricula">{{ \App\Support\Acesso::pessoal() ? 'Identificação simples *' : 'Nº de Matrícula *' }}</label>
         <input class="input num" type="text" id="matricula" name="matricula" required
                placeholder="Ex: 2026.00001" value="{{ old('matricula') }}" />
         @error('matricula')<span class="field-error">{{ $message }}</span>@enderror
       </div>
-      <div class="field">
+      @unless(\App\Support\Acesso::pessoal())
+<div class="field">
         <label for="data_nascimento">Data de Nascimento *</label>
         <input class="input" type="date" id="data_nascimento" name="data_nascimento" required
                value="{{ old('data_nascimento') }}" />
         @error('data_nascimento')<span class="field-error">{{ $message }}</span>@enderror
       </div>
-      <div class="field">
+@endunless
+      @unless(\App\Support\Acesso::pessoal())
+<div class="field">
         <label for="cpf">CPF do Aluno (opcional)</label>
         <input class="input num" type="text" id="cpf" name="cpf" maxlength="14"
                placeholder="000.000.000-00" value="{{ old('cpf') }}" />
         @error('cpf')<span class="field-error">{{ $message }}</span>@enderror
       </div>
-      <div class="field">
+@endunless
+      @unless(\App\Support\Acesso::pessoal())
+<div class="field">
         <label for="genero">Gênero</label>
         <select class="select" id="genero" name="genero">
           <option value="">Selecione...</option>
@@ -81,6 +86,7 @@
           <option value="O" {{ old('genero') === 'O' ? 'selected' : '' }}>Outro / Não informar</option>
         </select>
       </div>
+@endunless
       <div class="field" style="grid-column:1/-1">
         <label for="turma_id">Turma de destino *</label>
         <select class="select" id="turma_id" name="turma_id" required onchange="atualizarPreview()">
@@ -96,12 +102,14 @@
         </select>
         @error('turma_id')<span class="field-error">{{ $message }}</span>@enderror
       </div>
-      <div class="field" style="grid-column:1/-1">
+      @unless(\App\Support\Acesso::pessoal())
+<div class="field" style="grid-column:1/-1">
         <label for="nome_responsavel">Nome do responsável (pai/mãe/tutor)</label>
         <input class="input" type="text" id="nome_responsavel" name="nome_responsavel"
                placeholder="Ex: Maria de Souza Silva"
                value="{{ old('nome_responsavel') }}" />
       </div>
+@endunless
     </div>
 
     <div class="form-actions">

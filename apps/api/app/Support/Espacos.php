@@ -39,6 +39,7 @@ class Espacos
     public static function ids(Usuario $u): array
     {
         RegimeVinculos::exigir($u);
+        if ($pessoal = EspacoPessoal::doAtor($u)) return [$pessoal];
         return self::escolas()->whereIn('e.id', Escopo::escolaIds($u) ?? [])
             ->pluck('ee.id')->map(fn ($id) => (int) $id)->all();
     }
@@ -70,7 +71,9 @@ class Espacos
     {
         if (self::ativo()) {
             $query->whereExists(fn ($q) => $q->selectRaw('1')->from('espacos as dono')
-                ->whereColumn('dono.id', $tabela.'.espaco_id')->whereColumn('dono.escola_id', $tabela.'.escola_id'));
+                ->whereColumn('dono.id', $tabela.'.espaco_id')->where(fn ($d) => $d
+                    ->where(fn ($e) => $e->where('dono.tipo', 'escola')->whereColumn('dono.escola_id', $tabela.'.escola_id'))
+                    ->orWhere(fn ($p) => $p->where('dono.tipo', 'pessoal')->whereNull($tabela.'.escola_id'))));
         }
         return $query;
     }

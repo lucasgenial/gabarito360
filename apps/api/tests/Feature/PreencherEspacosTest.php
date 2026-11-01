@@ -85,6 +85,9 @@ class PreencherEspacosTest extends TestCase
 
     public function test_espaco_divergente_nao_e_sobrescrito_e_transacao_e_revertida(): void
     {
+        // T3 já possui FK de tipo: exercita divergência de destino com um espaço existente.
+        DB::table('clientes')->insert(['id'=>999999,'chave_origem'=>'LEGADO-REDE-1','tipo'=>'rede','nome'=>'Preexistente','modalidade'=>'interno','situacao'=>'ativo']);
+        DB::table('espacos')->insert(['id'=>999999,'cliente_id'=>999999,'tipo'=>'escola','nome'=>'Preexistente','situacao'=>'ativo','escola_id'=>1]);
         DB::table('alunos')->where('id', 1)->update(['espaco_id' => 999999]);
         try {
             app(PreencherEspacosLegados::class)->executar(true);
@@ -92,8 +95,8 @@ class PreencherEspacosTest extends TestCase
         } catch (\RuntimeException $e) {
             $this->assertStringContainsString('divergente', $e->getMessage());
         }
-        $this->assertDatabaseCount('clientes', 0);
-        $this->assertDatabaseCount('espacos', 0);
+        $this->assertDatabaseCount('clientes', 1);
+        $this->assertDatabaseCount('espacos', 1);
         $this->assertNull(DB::table('turmas')->value('espaco_id'));
         $this->assertSame(999999, DB::table('alunos')->value('espaco_id'));
     }

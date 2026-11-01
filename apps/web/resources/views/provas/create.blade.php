@@ -111,7 +111,8 @@
           <input class="input" type="date" id="data_aplicacao" name="data_aplicacao"
                  value="{{ old('data_aplicacao') }}" onchange="atualizar()" />
         </div>
-        <div class="field">
+        @unless(\App\Support\Acesso::pessoal())
+<div class="field">
           <label for="escola_id">Escola *</label>
           <select class="select" id="escola_id" name="escola_id" required>
             <option value="">— Selecione —</option>
@@ -121,6 +122,7 @@
           </select>
           @error('escola_id')<span class="field-error">{{ $message }}</span>@enderror
         </div>
+@endunless
         <div class="field">
           <label for="nota_maxima">Nota máxima</label>
           <input class="input num" type="number" id="nota_maxima" name="nota_maxima"

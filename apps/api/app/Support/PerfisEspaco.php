@@ -29,7 +29,8 @@ final class PerfisEspaco
     /** Catálogo já preparado, mas consumidores pessoais ainda não estão integrados. */
     public static function habilitado(string $perfil): bool
     {
-        return in_array(self::tipo($perfil), ['rede', 'nucleo', 'escola'], true);
+        return in_array(self::tipo($perfil), ['rede', 'nucleo', 'escola'], true)
+            || ($perfil === 'professor_autonomo' && config('espacos.pessoal', false));
     }
 
     /** Portal futuro: nunca inferir habilitação pelo pagador ou por permissão extra. */

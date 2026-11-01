@@ -14,8 +14,9 @@ class CalculadoraNota
      * (RN-009.2 / RN-009.5). Assume escala de 0 a 10; quando a prova usa outra
      * nota_maxima, o limiar é escalado proporcionalmente.
      */
-    public static function metaMinima(int $escolaId): float
+    public static function metaMinima(?int $escolaId): float
     {
+        if ($escolaId === null) return 6.0;
         $meta = DB::table('escolas')
             ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
             ->join('redes', 'nucleos.rede_id', '=', 'redes.id')
@@ -92,7 +93,7 @@ class CalculadoraNota
         $dados = [
             'prova_id'         => $prova->id,
             'aluno_id'         => $cartao->aluno_id,
-            'turma_id'         => DB::table('alunos')->where('id', $cartao->aluno_id)->value('turma_id'),
+            'turma_id'         => $cartao->turma_aplicacao_id ?? DB::table('alunos')->where('id', $cartao->aluno_id)->value('turma_id'),
             'acertos'          => $acertos,
             'total_questoes'   => $totalQuestoes,
             'nota_final'       => $notaFinal,
