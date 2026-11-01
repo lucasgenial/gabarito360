@@ -26,7 +26,7 @@ final class PerfisEspaco
             && ($espaco->tipo !== 'pessoal' || (int) ($espaco->usuario_proprietario_id ?? 0) === $usuario);
     }
 
-    /** Catálogo já preparado, mas consumidores pessoais ainda não estão integrados. */
+    /** Habilitação de consumidores, além da compatibilidade e propriedade do espaço. */
     public static function habilitado(string $perfil): bool
     {
         return in_array(self::tipo($perfil), ['rede', 'nucleo', 'escola'], true)

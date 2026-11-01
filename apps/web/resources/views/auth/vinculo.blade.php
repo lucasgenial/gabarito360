@@ -18,7 +18,7 @@
       </form>
     @empty
       <h2>Nenhum vínculo disponível</h2>
-      <p>Solicite ao responsável pela instituição um vínculo ativo para acessar o sistema.</p>
+      <p>Você precisa de um vínculo ativo para acessar o sistema. Para acesso institucional, solicite ao responsável; para seu espaço pessoal, fale com o suporte.</p>
       <a class="btn btn-outline" href="{{ route('vinculos.index') }}">Verificar novamente</a>
     @endforelse
     <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn btn-outline" type="submit">Sair da conta</button></form>

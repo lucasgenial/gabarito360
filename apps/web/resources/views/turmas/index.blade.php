@@ -51,7 +51,7 @@
         <th>Turma</th>
         <th>Série</th>
         <th>Turno</th>
-        <th>Escola</th>
+        @unless(\App\Support\Acesso::pessoal())<th>Escola</th>@endunless
         <th>Alunos</th>
         <th>Desempenho médio</th>
         <th>Ano letivo</th>
@@ -70,9 +70,11 @@
           </td>
           <td><span class="badge badge-info">{{ $t['serie'] }}</span></td>
           <td>{{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$t['turno']] ?? $t['turno'] }}</td>
+          @unless(\App\Support\Acesso::pessoal())
           <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $t['escola_nome'] ?? '' }}">
             {{ $t['escola_nome'] ?? '—' }}
           </td>
+          @endunless
           <td style="font-family:var(--font-mono);">{{ $t['total_alunos'] ?? 0 }}</td>
           <td>
             @if(($t['media_turma'] ?? null) !== null)
@@ -100,7 +102,7 @@
         </tr>
       @empty
         <tr>
-          <td colspan="9" style="text-align:center;padding:48px 20px;color:var(--muted);">
+          <td colspan="{{ \App\Support\Acesso::pessoal() ? 8 : 9 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="escola" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma encontrada</div>
             <p>Crie a primeira turma usando o botão "+ Nova turma".</p>

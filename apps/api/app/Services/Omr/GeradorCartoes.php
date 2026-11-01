@@ -35,7 +35,8 @@ class GeradorCartoes
             ->map(fn ($a) => (array) $a)
             ->all();
 
-        $escola = DB::table('escolas')->where('id', $prova->escola_id)->first();
+        $pessoal = $ator && \App\Support\EspacoPessoal::doAtor($ator);
+        $escola = $pessoal ? null : DB::table('escolas')->where('id', $prova->escola_id)->first();
         $rede   = $escola ? DB::table('nucleos')
             ->join('redes', 'nucleos.rede_id', '=', 'redes.id')
             ->where('nucleos.id', $escola->nucleo_id)
@@ -48,7 +49,7 @@ class GeradorCartoes
         $dados = [
             'saida'            => $saida,
             'rede'             => $rede,
-            'escola'           => $escola->nome ?? '',
+            'escola'           => $pessoal ? \App\Support\ContextoVinculo::resolver($ator)->espaco->nome : ($escola->nome ?? ''),
             'titulo'           => $prova->titulo,
             'disciplina'       => $prova->disciplina,
             'data'             => $prova->data_aplicacao?->format('d/m/Y'),

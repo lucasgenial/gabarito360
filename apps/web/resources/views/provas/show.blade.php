@@ -92,8 +92,10 @@
       <span>{{ $prova['data_aplicacao'] ? \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '—' }}</span>
     </div>
     <div class="info-row">
+      @unless(\App\Support\Acesso::pessoal())
       <span class="lbl">Escola</span>
       <span>{{ $prova['escola_nome'] ?? '—' }}</span>
+      @endunless
     </div>
     <div class="info-row">
       <span class="lbl">Cartão PDF</span>

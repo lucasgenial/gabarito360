@@ -9,8 +9,8 @@ O autônomo gere turmas e alunos próprios (incluindo mudança de turma no mesmo
 Implementação em etapas revisáveis:
 
 1. **T3-A — contrato de perfis e limites (incorporado no PR #96):** catálogo central de compatibilidade perfil/espaço e permissões pessoais explícitas; validação institucional compartilhada em contexto e convites, bloqueio de uso como perfil global e testes. O acesso pessoal permanece bloqueado até a integração completa. O catálogo pode ser sincronizado sem habilitar esse acesso; a sincronização no servidor não foi executada.
-2. **T3-B — dados pessoais e fluxos (em revisão, docs/64):** preparar expansão do enum de perfil dos vínculos e DDL de turmas/provas sem escola, integridade e auditoria equivalentes, escritas e consultas por espaço pessoal, formulário mínimo, parâmetros e relatórios próprios. Exercitar movimento de aluno sem corromper histórico de notas/cartões.
-3. **T3-C — integração e habilitação:** seleção de vínculo pessoal, menu por tipo, dashboard, PDFs/filas e testes MariaDB/navegador. Só então liberar o contexto pessoal no resolvedor. Provisionamento comercial de cliente/espaço permanece T4.
+2. **T3-B — dados pessoais e fluxos (incorporado no PR #97, docs/64):** preparar expansão do enum de perfil dos vínculos e DDL de turmas/provas sem escola, integridade e auditoria equivalentes, escritas e consultas por espaço pessoal, formulário mínimo, parâmetros e relatórios próprios. Exercitar movimento de aluno sem corromper histórico de notas/cartões.
+3. **T3-C — integração e habilitação (em revisão, docs/65):** seleção de vínculo pessoal, menu por tipo, dashboard, PDFs/filas e testes MariaDB/navegador. Só então liberar o contexto pessoal no resolvedor. Provisionamento comercial de cliente/espaço permanece T4.
 
 Essa divisão mantém cada PR utilizável sem habilitar permissões sobre consumidores que ainda dependem de escola. T3 só estará concluído após as três etapas; catálogo preparado não significa acesso pessoal disponível. Não há alteração de configuração, criação de cliente real, migração ou publicação no servidor.
 

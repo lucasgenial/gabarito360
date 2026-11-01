@@ -55,6 +55,7 @@ class Acesso
         'dir_escolar'         => ['painel', 'provas', 'turmas', 'relatorios'],
         'coordenador'         => ['painel', 'corrigir', 'provas', 'turmas'],
         'professor'           => ['painel', 'corrigir', 'provas', 'turmas'],
+        'professor_autonomo'  => ['painel', 'corrigir', 'provas', 'turmas'],
         'aplicador'           => ['painel'],
         'aluno'               => ['painel'],
     ];
