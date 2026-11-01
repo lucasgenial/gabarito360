@@ -10,6 +10,7 @@ use App\Support\Correcao;
 use App\Support\Escopo;
 use App\Support\Espacos;
 use App\Support\ContextoCorrecao;
+use App\Support\ContextoVinculo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -70,6 +71,15 @@ class ResultadoController extends Controller
             return ApiResponse::error('Não foi possível gerar o PDF do resultado.', [], 500);
         }
 
+        // A geração pode demorar; não entregar dados após revogação do contexto.
+        if (ContextoVinculo::presente($request->user())) {
+            try {
+                abort_unless(\App\Support\Permissao::pode($request->user(), 'resultado.compartilhar'), 403);
+                $atual = $this->montar($request, $alunoId, $provaId);
+                if ($atual instanceof JsonResponse) { @unlink($saida); return $atual; }
+            } catch (\Throwable $e) { @unlink($saida); throw $e; }
+        }
+
         $nome = 'resultado-' . \Illuminate\Support\Str::slug($dados['aluno']['nome'] . ' ' . $dados['prova']['disciplina']) . '.pdf';
 
         return response()->download($saida, $nome, ['Content-Type' => 'application/pdf'])->deleteFileAfterSend();
@@ -78,7 +88,11 @@ class ResultadoController extends Controller
     /** Monta o resultado do aluno na prova, ou a resposta de erro. */
     private function montar(Request $request, int $alunoId, int $provaId): array|JsonResponse
     {
-        $prova = Escopo::provaComConteudo($request->user(), $provaId);
+        $individual = ContextoVinculo::presente($request->user()) && $request->user()->perfil === 'aluno';
+        $prova = $individual
+            ? Prova::query()->where('espaco_id', ContextoVinculo::resolver($request->user())->espaco_id)->find($provaId)
+            : Escopo::provaComConteudo($request->user(), $provaId);
+        if ($individual && !ContextoCorrecao::provaValida($prova)) $prova = null;
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
@@ -88,7 +102,7 @@ class ResultadoController extends Controller
             return ApiResponse::notFound('Aluno não encontrado.');
         }
 
-        if (Espacos::ativo() && !ContextoCorrecao::alunos($prova, $request->user())->where('alunos.id', $alunoId)->exists()) return ApiResponse::notFound('Resultado não encontrado.');
+        if (Espacos::ativo() && !ContextoCorrecao::alunos($prova, $individual ? null : $request->user())->where('alunos.id', $alunoId)->exists()) return ApiResponse::notFound('Resultado não encontrado.');
         $nota = ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id)->where('aluno_id', $alunoId)->where('prova_id', $provaId)->first();
         if (!$nota) {
             return ApiResponse::error('Resultado ainda não disponível para este aluno nesta prova.', [], 404);
@@ -135,7 +149,7 @@ class ResultadoController extends Controller
             ];
         }
 
-        $mediaTurma = ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id)
+        $mediaTurma = $individual ? null : ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id)
             ->where('prova_id', $provaId)
             ->where('turma_id', $nota->turma_id)
             ->avg('nota_final');

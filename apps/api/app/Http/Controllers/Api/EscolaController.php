@@ -237,15 +237,19 @@ class EscolaController extends Controller
                 ];
             });
 
-        $equipe = \App\Models\Usuario::query()
-            ->join('usuario_escopos', function ($j) use ($id) {
-                $j->on('usuarios.id', '=', 'usuario_escopos.usuario_id')
-                  ->where('usuario_escopos.escopo_tipo', 'escola')
-                  ->where('usuario_escopos.escopo_id', $id);
-            })
-            ->select('usuarios.id', 'usuarios.nome', 'usuarios.email', 'usuarios.perfil', 'usuarios.ativo')
-            ->orderBy('usuarios.nome')
-            ->get();
+        if (\App\Support\ContextoVinculo::presente($request->user())) {
+            $equipe = \App\Support\GestaoVinculos::pessoas($request->user(), $id)->orderBy('usuarios.nome')->get();
+        } else {
+            $equipe = \App\Models\Usuario::query()
+                ->join('usuario_escopos', function ($j) use ($id) {
+                    $j->on('usuarios.id', '=', 'usuario_escopos.usuario_id')
+                      ->where('usuario_escopos.escopo_tipo', 'escola')
+                      ->where('usuario_escopos.escopo_id', $id);
+                })
+                ->select('usuarios.id', 'usuarios.nome', 'usuarios.email', 'usuarios.perfil', 'usuarios.ativo')
+                ->orderBy('usuarios.nome')
+                ->get();
+        }
 
         $provasLista = Espacos::agregadoEscolar(DB::table('provas'), 'provas', $request->user())
             ->where('escola_id', $id)

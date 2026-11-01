@@ -134,7 +134,7 @@ class AuthController extends Controller
             return ApiResponse::error('Convite inválido ou vencido.', [], 422);
         }
 
-        return ApiResponse::success($conta->dadosDoConvite($usuario, Usuario::find($convite->convidado_por)));
+        return ApiResponse::success($conta->dadosDoConvite($usuario, Usuario::find($convite->convidado_por), $convite->vinculo_id ?? null));
     }
 
     public function recusarConvite(Request $request, ContaUsuario $conta): JsonResponse
@@ -176,38 +176,41 @@ class AuthController extends Controller
             'password'              => 'required|string|min:8|confirmed',
         ]);
 
-        $record = DB::table('password_reset_tokens')
-            ->where('email', \App\Support\DadoProtegido::conta($request->email))
-            ->first();
+        return DB::transaction(function () use ($request) {
+            $record = DB::table('password_reset_tokens')
+                ->where('email', \App\Support\DadoProtegido::conta($request->email))
+                ->lockForUpdate()->first();
 
-        if (!$record || !Hash::check($request->token, $record->token)) {
-            return ApiResponse::error('Token inválido ou expirado.', [], 422);
-        }
+            if (!$record || !Hash::check($request->token, $record->token) || !app(ContaUsuario::class)->contextoConviteValido($record)) {
+                return ApiResponse::error('Token inválido ou expirado.', [], 422);
+            }
 
-        DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::conta($request->email))->delete();
+            DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::conta($request->email))->delete();
 
-        $expira = $record->expira_em ? Carbon::parse($record->expira_em) : Carbon::parse($record->created_at)->addMinutes(self::VALIDADE_LINK_MINUTOS);
-        if ($expira->isPast()) {
-            return ApiResponse::error('Link expirado. Solicite um novo link de recuperação.', [], 422);
-        }
+            $expira = $record->expira_em ? Carbon::parse($record->expira_em) : Carbon::parse($record->created_at)->addMinutes(self::VALIDADE_LINK_MINUTOS);
+            if ($expira->isPast()) {
+                return ApiResponse::error('Link expirado. Solicite um novo link de recuperação.', [], 422);
+            }
 
-        $usuario = Usuario::where('email_hash', \App\Support\DadoProtegido::conta($request->email))->first();
-        if (!$usuario) {
-            return ApiResponse::error('Token inválido ou expirado.', [], 422);
-        }
+            $usuario = Usuario::where('email_hash', \App\Support\DadoProtegido::conta($request->email))->first();
+            if (!$usuario) {
+                return ApiResponse::error('Token inválido ou expirado.', [], 422);
+            }
 
-        $usuario->update(['password' => Hash::make($request->password), 'forcar_troca_senha' => false]);
-        $usuario->tokens()->delete(); // encerra as sessões abertas com a senha antiga
+            app(ContaUsuario::class)->aceitarContextoConvite($record, $usuario);
+            $usuario->update(['password' => Hash::make($request->password), 'forcar_troca_senha' => false]);
+            $usuario->tokens()->delete(); // encerra as sessões abertas com a senha antiga
 
-        if ($record->expira_em) { // convite: é a primeira senha, não uma troca
-            return ApiResponse::success(['mensagem' => 'Senha criada.']);
-        }
+            if ($record->expira_em) { // convite: é a primeira senha, não uma troca
+                return ApiResponse::success(['mensagem' => 'Senha criada.']);
+            }
 
-        Mail::to($usuario->email)->queue(new EmailModelo('senha-alterada', 'Sua senha do Gabarito360 foi alterada', [
-            'nome'   => $usuario->nome,
-            'quando' => now()->timezone('America/Bahia')->format('d/m/Y \à\s H:i'),
-        ]));
+            Mail::to($usuario->email)->queue(new EmailModelo('senha-alterada', 'Sua senha do Gabarito360 foi alterada', [
+                'nome'   => $usuario->nome,
+                'quando' => now()->timezone('America/Bahia')->format('d/m/Y \à\s H:i'),
+            ]));
 
-        return ApiResponse::success(['mensagem' => 'Senha redefinida.']);
+            return ApiResponse::success(['mensagem' => 'Senha redefinida.']);
+        });
     }
 }
