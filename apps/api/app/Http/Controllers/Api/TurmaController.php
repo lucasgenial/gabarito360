@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Support\Escopo;
 use App\Support\Espacos;
+use App\Support\ConsultasPedagogicas;
 use App\Http\Responses\ApiResponse;
 use App\Models\Turma;
 use Illuminate\Http\JsonResponse;
@@ -16,6 +17,7 @@ class TurmaController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $ids   = Escopo::turmaIds($request->user());
         $query = Escopo::turmas($request->user());
 
@@ -41,13 +43,13 @@ class TurmaController extends Controller
         $turmas = $query->with('escola:id,nome,nucleo_id')
             ->orderBy('nome')
             ->get()
-            ->map(function (Turma $t) {
-                $totalAlunos = DB::table('alunos')
+            ->map(function (Turma $t) use ($consulta) {
+                $totalAlunos = $consulta->tabela('alunos')
                     ->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))
                     ->where('ativo', true)
                     ->count();
 
-                $media = DB::table('notas')->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))->avg('nota_final');
+                $media = $consulta->tabela('notas')->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))->avg('nota_final');
 
                 return array_merge($t->toArray(), [
                     'total_alunos' => $totalAlunos,
@@ -61,8 +63,8 @@ class TurmaController extends Controller
         $kpis = [
             'total_turmas'  => $baseQ->count(),
             'total_ativas'  => (clone $baseQ)->where('ativo', true)->count(),
-            'total_alunos'  => (int) DB::table('alunos')
-                ->join('turmas', 'alunos.turma_id', '=', 'turmas.id')
+            'total_alunos'  => (int) $consulta->tabela('alunos')
+                ->joinSub($consulta->tabela('turmas'), 'turmas', 'alunos.turma_id', '=', 'turmas.id')
                 ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('alunos.espaco_id', 'turmas.espaco_id'))
                 ->when($ids !== null, fn ($q) => $q->whereIn('turmas.id', $ids))
                 ->where('alunos.ativo', true)
@@ -96,6 +98,7 @@ class TurmaController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $query = Escopo::turmas($request->user())->with('escola:id,nome,nucleo_id');
 
         $turma = $query->find($id);
@@ -104,31 +107,31 @@ class TurmaController extends Controller
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        $alunos = DB::table('alunos')
+        $alunos = $consulta->tabela('alunos')
             ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))
             ->orderBy('nome')
             ->select('id', 'nome', 'avatar_id', 'matricula', 'data_nascimento', 'ativo')
             ->get()
-            ->map(function ($a) use ($turma) {
-                $a->media_geral = DB::table('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
+            ->map(function ($a) use ($turma, $consulta) {
+                $a->media_geral = $consulta->tabela('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
                 $a->media_geral = $a->media_geral !== null ? round((float) $a->media_geral, 1) : null;
-                $a->total_provas = DB::table('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->count();
+                $a->total_provas = $consulta->tabela('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->count();
                 return $a;
             });
 
         $totalAlunos = $alunos->where('ativo', true)->count();
 
-        $mediaTurma = DB::table('notas')->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
+        $mediaTurma = $consulta->tabela('notas')->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
 
-        $provas = DB::table('prova_turmas')
-            ->join('provas', 'prova_turmas.prova_id', '=', 'provas.id')
+        $provas = $consulta->tabela('prova_turmas')
+            ->joinSub($consulta->tabela('provas'), 'provas', 'prova_turmas.prova_id', '=', 'provas.id')
             ->where('prova_turmas.turma_id', $id)
             ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $turma->espaco_id)->whereColumn('provas.espaco_id', 'prova_turmas.espaco_id'))
             ->orderByDesc('provas.data_aplicacao')
             ->select('provas.id', 'provas.titulo', 'provas.disciplina', 'provas.status', 'provas.data_aplicacao')
             ->get()
-            ->map(function ($p) use ($id, $turma) {
-                $media = DB::table('notas')
+            ->map(function ($p) use ($id, $turma, $consulta) {
+                $media = $consulta->tabela('notas')
                     ->where('prova_id', $p->id)
                     ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))
                     ->avg('nota_final');

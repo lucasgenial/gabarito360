@@ -7,6 +7,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Prova;
 use App\Support\Cabecalho;
 use App\Support\Escopo;
+use App\Support\ConsultasPedagogicas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,9 +19,9 @@ class RelatorioController extends Controller
         return Escopo::provaComConteudo($request->user(), $provaId);
     }
 
-    private function metaRede(int $escolaId): float
+    private function metaRede(ConsultasPedagogicas $consulta, int $escolaId): float
     {
-        $meta = DB::table('escolas')
+        $meta = $consulta->tabela('escolas')
             ->join('nucleos', 'escolas.nucleo_id', '=', 'nucleos.id')
             ->join('redes', 'nucleos.rede_id', '=', 'redes.id')
             ->where('escolas.id', $escolaId)
@@ -29,11 +30,11 @@ class RelatorioController extends Controller
         return $meta !== null ? (float) $meta : 7.0;
     }
 
-    private function tabelaAlunos(int $provaId, ?int $turmaId = null): array
+    private function tabelaAlunos(ConsultasPedagogicas $consulta, int $provaId, ?int $turmaId = null): array
     {
-        $query = DB::table('notas')
-            ->join('alunos', 'alunos.id', '=', 'notas.aluno_id')
-            ->join('turmas', 'turmas.id', '=', 'notas.turma_id')
+        $query = $consulta->tabela('notas')
+            ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.id', '=', 'notas.aluno_id')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'turmas.id', '=', 'notas.turma_id')
             ->where('notas.prova_id', $provaId);
 
         if ($turmaId !== null) {
@@ -54,13 +55,13 @@ class RelatorioController extends Controller
             ->toArray();
     }
 
-    private function kpis(Prova $prova, ?int $turmaId = null): array
+    private function kpis(ConsultasPedagogicas $consulta, Prova $prova, ?int $turmaId = null): array
     {
-        $cartoesQuery = DB::table('cartoes')->where('prova_id', $prova->id);
-        $notasQuery   = DB::table('notas')->where('prova_id', $prova->id);
+        $cartoesQuery = $consulta->tabela('cartoes')->where('prova_id', $prova->id);
+        $notasQuery   = $consulta->tabela('notas')->where('prova_id', $prova->id);
 
         if ($turmaId !== null) {
-            $cartoesQuery->whereIn('aluno_id', DB::table('alunos')->where('turma_id', $turmaId)->pluck('id'));
+            $cartoesQuery->whereIn('aluno_id', $consulta->tabela('alunos')->where('turma_id', $turmaId)->pluck('id'));
             $notasQuery->where('turma_id', $turmaId);
         }
 
@@ -75,7 +76,7 @@ class RelatorioController extends Controller
 
         return [
             'media'             => $media !== null ? round((float) $media, 1) : 0.0,
-            'meta_rede'         => $this->metaRede($prova->escola_id),
+            'meta_rede'         => $this->metaRede($consulta, $prova->escola_id),
             'aprovacao_pct'     => $totalNotas > 0 ? round(($aprovados / $totalNotas) * 100) : 0,
             'aprovados'         => $aprovados,
             'total_alunos'      => $totalNotas,
@@ -88,33 +89,36 @@ class RelatorioController extends Controller
 
     public function prova(Request $request, int $id): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $prova = $this->encontrarProva($request, $id);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        $turmas = DB::table('prova_turmas')
-            ->join('turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+        $turmas = $consulta->tabela('prova_turmas')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
             ->where('prova_turmas.prova_id', $id)
             ->pluck('turmas.nome');
 
         return ApiResponse::success([
             'prova'  => array_merge($prova->toArray(), ['turmas' => $turmas]),
             'cabecalho' => Cabecalho::escola((int) $prova->escola_id),
-            'kpis'     => $this->kpis($prova),
-            'alunos'   => $this->tabelaAlunos($id),
-            'questoes' => $this->analiseQuestoes($prova),
+            'kpis'     => $this->kpis($consulta, $prova),
+            'alunos'   => $this->tabelaAlunos($consulta, $id),
+            'questoes' => $this->analiseQuestoes($consulta, $prova),
         ]);
     }
 
     public function turmaProva(Request $request, int $turmaId, int $provaId): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $prova = $this->encontrarProva($request, $provaId);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        $turma = DB::table('turmas')->where('id', $turmaId)->first();
+        $turma = $this->turmaNoEscopo($request, $turmaId);
+        if ($turma && !$consulta->tabela('prova_turmas')->where('prova_id', $provaId)->where('turma_id', $turmaId)->exists()) $turma = null;
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');
         }
@@ -123,9 +127,9 @@ class RelatorioController extends Controller
             'prova'  => $prova,
             'turma'  => $turma,
             'cabecalho' => Cabecalho::escola((int) $prova->escola_id),
-            'kpis'     => $this->kpis($prova, $turmaId),
-            'alunos'   => $this->tabelaAlunos($provaId, $turmaId),
-            'questoes' => $this->analiseQuestoes($prova, $turmaId),
+            'kpis'     => $this->kpis($consulta, $prova, $turmaId),
+            'alunos'   => $this->tabelaAlunos($consulta, $provaId, $turmaId),
+            'questoes' => $this->analiseQuestoes($consulta, $prova, $turmaId),
         ]);
     }
 
@@ -135,24 +139,25 @@ class RelatorioController extends Controller
      */
     public function turma(Request $request, int $turmaId): JsonResponse
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $turma = $this->turmaNoEscopo($request, $turmaId);
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        $alunos = DB::table('alunos')->where('turma_id', $turmaId)->where('ativo', true)
+        $alunos = $consulta->tabela('alunos')->where('turma_id', $turmaId)->where('ativo', true)
             ->orderBy('nome')->get(['id', 'nome', 'matricula']);
         $provas = $this->provasDaTurma($request, $turmaId);
 
-        $notas = DB::table('notas')->where('turma_id', $turmaId)->whereIn('prova_id', $provas->pluck('id'))
+        $notas = $consulta->tabela('notas')->where('turma_id', $turmaId)->whereIn('prova_id', $provas->pluck('id'))
             ->get(['aluno_id', 'prova_id', 'nota_final', 'acertos', 'total_questoes'])
             ->keyBy(fn ($n) => $n->aluno_id . ':' . $n->prova_id);
 
-        $resumoProvas = $provas->map(function ($p) use ($turmaId, $turma, $notas, $alunos) {
+        $resumoProvas = $provas->map(function ($p) use ($turmaId, $turma, $notas, $alunos, $consulta) {
             $daProva = $alunos->map(fn ($a) => $notas->get($a->id . ':' . $p->id))->filter();
             $max     = (float) $p->nota_maxima;
             // Média da mesma prova nas outras turmas da escola (comparativo)
-            $porTurma = DB::table('notas')->join('turmas', 'turmas.id', '=', 'notas.turma_id')
+            $porTurma = $consulta->tabela('notas')->joinSub($consulta->tabela('turmas'), 'turmas', 'turmas.id', '=', 'notas.turma_id')
                 ->where('notas.prova_id', $p->id)->where('turmas.escola_id', $turma->escola_id)
                 ->select('turmas.id', 'turmas.nome', DB::raw('ROUND(AVG(notas.nota_final), 2) as media'), DB::raw('COUNT(*) as alunos'))
                 ->groupBy('turmas.id', 'turmas.nome')->orderBy('turmas.nome')->get();
@@ -211,19 +216,20 @@ class RelatorioController extends Controller
     /** Boletim do aluno: todas as provas da turma, nota, média e posição na turma. */
     public function aluno(Request $request, int $alunoId): JsonResponse
     {
-        $aluno = DB::table('alunos')->where('id', $alunoId)->first(['id', 'nome', 'matricula', 'turma_id', 'nome_responsavel']);
+        $consulta = new ConsultasPedagogicas($request->user());
+        $aluno = $consulta->tabela('alunos')->where('id', $alunoId)->first(['id', 'nome', 'matricula', 'turma_id', 'nome_responsavel']);
         $turma = $aluno ? $this->turmaNoEscopo($request, (int) $aluno->turma_id) : null;
         if (!$aluno || !$turma) {
             return ApiResponse::notFound('Aluno não encontrado.');
         }
 
         $provas = $this->provasDaTurma($request, (int) $aluno->turma_id);
-        $linhas = $provas->map(function ($p) use ($aluno) {
-            $daTurma = DB::table('notas')->where('prova_id', $p->id)->where('turma_id', $aluno->turma_id)
+        $linhas = $provas->map(function ($p) use ($aluno, $consulta) {
+            $daTurma = $consulta->tabela('notas')->where('prova_id', $p->id)->where('turma_id', $aluno->turma_id)
                 ->orderByDesc('nota_final')->get(['aluno_id', 'nota_final', 'acertos', 'total_questoes']);
             $minha = $daTurma->firstWhere('aluno_id', $aluno->id);
             $pos   = $minha ? $daTurma->search(fn ($n) => (float) $n->nota_final === (float) $minha->nota_final) + 1 : null;
-            $lingua = $minha ? DB::table('cartoes')->join('notas', 'notas.cartao_id', '=', 'cartoes.id')
+            $lingua = $minha ? $consulta->tabela('cartoes')->joinSub($consulta->tabela('notas'), 'notas', 'notas.cartao_id', '=', 'cartoes.id')
                 ->where('notas.prova_id', $p->id)->where('notas.aluno_id', $aluno->id)->value('cartoes.lingua') : null;
 
             return [
@@ -263,13 +269,14 @@ class RelatorioController extends Controller
     /** Turma dentro do escopo do usuário (com o nome da escola), ou null. */
     private function turmaNoEscopo(Request $request, int $turmaId): ?object
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
         $ids     = Escopo::turmaIds($usuario);
         if (in_array($usuario->perfil, ['aplicador', 'aluno'], true) || ($ids !== null && !in_array($turmaId, $ids, true))) {
             return null;
         }
 
-        return DB::table('turmas')->leftJoin('escolas', 'escolas.id', '=', 'turmas.escola_id')
+        return $consulta->tabela('turmas')->leftJoinSub($consulta->tabela('escolas'), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
             ->where('turmas.id', $turmaId)
             ->first(['turmas.id', 'turmas.nome', 'turmas.serie', 'turmas.escola_id', 'escolas.nome as escola_nome']);
     }
@@ -277,8 +284,9 @@ class RelatorioController extends Controller
     /** Provas da turma já aplicáveis e visíveis ao usuário, por disciplina. */
     private function provasDaTurma(Request $request, int $turmaId)
     {
+        $consulta = new ConsultasPedagogicas($request->user());
         return Escopo::provas($request->user())
-            ->join('prova_turmas', 'prova_turmas.prova_id', '=', 'provas.id')
+            ->joinSub($consulta->tabela('prova_turmas'), 'prova_turmas', 'prova_turmas.prova_id', '=', 'provas.id')
             ->where('prova_turmas.turma_id', $turmaId)
             ->whereIn('provas.status', ['publicada', 'em_correcao', 'corrigida'])
             ->orderBy('provas.disciplina')
@@ -290,18 +298,18 @@ class RelatorioController extends Controller
      * alternativa errada mais marcada. Considera só cartões lidos e com aluno; quem
      * marcou Espanhol é comparado com o gabarito de Espanhol (mesma regra da nota).
      */
-    private function analiseQuestoes(Prova $prova, ?int $turmaId = null): array
+    private function analiseQuestoes(ConsultasPedagogicas $consulta, Prova $prova, ?int $turmaId = null): array
     {
-        $gabarito = DB::table('gabaritos')->where('prova_id', $prova->id)->first();
+        $gabarito = $consulta->tabela('gabaritos')->where('prova_id', $prova->id)->first();
         if (!$gabarito) {
             return [];
         }
-        $questoes = DB::table('gabarito_questoes')->where('gabarito_id', $gabarito->id)
+        $questoes = $consulta->tabela('gabarito_questoes')->where('gabarito_id', $gabarito->id)
             ->orderBy('numero_questao')->get()->keyBy('numero_questao');
 
-        $respostas = DB::table('cartao_respostas as r')
-            ->join('cartoes as c', 'c.id', '=', 'r.cartao_id')
-            ->join('alunos as a', 'a.id', '=', 'c.aluno_id')
+        $respostas = DB::query()->fromSub($consulta->tabela('cartao_respostas'), 'r')
+            ->joinSub($consulta->tabela('cartoes'), 'c', 'c.id', '=', 'r.cartao_id')
+            ->joinSub($consulta->tabela('alunos'), 'a', 'a.id', '=', 'c.aluno_id')
             ->where('c.prova_id', $prova->id)
             ->where('c.status', 'lido')
             ->when($turmaId, fn ($q) => $q->where('a.turma_id', $turmaId))

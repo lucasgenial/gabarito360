@@ -86,3 +86,7 @@ Base: main `54bf834`, 31/10/2026. Complementa [o modelo T1](40-clientes-espacos-
 | Arquivo/PDF/link | Autorizar objeto e contexto, inclusive acesso após revogação e caches intermediários |
 | Conta/convite/permissão | Conta global; ações institucionais limitadas ao vínculo, sem modificar vínculos alheios |
 | Catálogo/plataforma | Exceção explícita e permissão própria; não reutilizar como consulta global de dados escolares |
+
+## Atualização T2-D4
+
+Adaptação dos consumidores e exceções revisadas em [docs/47](47-t2-consultas-e-integracoes.md). Novos suportes: `ConsultasPedagogicas` (ator explícito para agregados/joins) e `ContextoImportacao` (destino/ator/permissões CLI). O mapa não autoriza ativação: E e V1/V2 continuam com os limites descritos no roteiro.
