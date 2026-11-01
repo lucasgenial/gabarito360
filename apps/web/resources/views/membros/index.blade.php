@@ -30,8 +30,9 @@
 @endphp
 
 <x-pagina titulo="Equipe">
-  <x-slot:sub>Gerencie os usuários e perfis de acesso do sistema.</x-slot:sub>
+  <x-slot:sub>{{ session('auth_vinculos') ? 'Gerencie os vínculos da equipe neste contexto.' : 'Gerencie os usuários e perfis de acesso do sistema.' }}</x-slot:sub>
     <a href="{{ route('membros.perfis') }}" class="btn btn-ghost">O que cada perfil pode</a>
+    @if(session('auth_vinculos')) @pode('usuario.gerir')<a class="btn btn-secondary" href="{{ route('membros.convite-vinculo') }}">Convidar conta existente</a>@endpode @endif
     @pode('usuario.gerir')<a href="{{ route('membros.create') }}" class="btn btn-primary">+ Novo Membro</a>@endpode
 </x-pagina>
 
@@ -102,13 +103,16 @@
                     <div class="member-avatar">{{ $ini }}</div>
                     <div>
                       <div class="member-name">{{ $m['nome'] }}</div>
+                      @if(isset($m['vinculo_id']))<small>{{ $m['espaco_nome'] ?? '' }} · Vínculo #{{ $m['vinculo_id'] }}</small>@endif
                     </div>
                   </div>
                 </td>
                 <td class="mono" style="font-size:13px;">{{ $m['email'] }}</td>
-                <td class="num">{{ $m['created_at'] ? \Carbon\Carbon::parse($m['created_at'])->format('d/m/Y') : '—' }}</td>
+                <td class="num">{{ !empty($m['created_at']) ? \Carbon\Carbon::parse($m['created_at'])->format('d/m/Y') : '—' }}</td>
                 <td>
-                  @if($m['ativo'])
+                  @if(isset($m['situacao']))
+                    <span class="badge badge-info">{{ ucfirst($m['situacao']) }}</span>
+                  @elseif($m['ativo'])
                     <span class="badge badge-success">Ativo</span>
                   @else
                     <span class="badge badge-danger">Inativo</span>
@@ -116,14 +120,16 @@
                 </td>
                 <td>
                   <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <a href="{{ route('membros.edit', $m['id']) }}" class="btn btn-secondary btn-sm">Editar</a>
-                    <a href="{{ route('membros.permissoes', $m['id']) }}" class="btn btn-ghost btn-sm">Permissões</a>
-                    <form method="POST" action="{{ route('membros.toggle', $m['id']) }}" style="display:inline;">
+                    <a href="{{ route('membros.edit', array_filter(['id' => $m['id'], 'vinculo_id' => $m['vinculo_id'] ?? null])) }}" class="btn btn-secondary btn-sm">Editar</a>
+                    <a href="{{ route('membros.permissoes', array_filter(['id' => $m['id'], 'vinculo_id' => $m['vinculo_id'] ?? null])) }}" class="btn btn-ghost btn-sm">Permissões</a>
+                    @if(!isset($m['situacao']) || in_array($m['situacao'], ['ativo', 'suspenso']))
+                    <form method="POST" action="{{ route('membros.toggle', array_filter(['id' => $m['id'], 'vinculo_id' => $m['vinculo_id'] ?? null])) }}" style="display:inline;">
                       @csrf
                       <button type="submit" class="btn btn-ghost btn-sm">
-                        {{ $m['ativo'] ? 'Desativar' : 'Ativar' }}
+                        {{ isset($m['situacao']) ? ($m['situacao'] === 'ativo' ? 'Suspender vínculo' : 'Reativar vínculo') : ($m['ativo'] ? 'Desativar' : 'Ativar') }}
                       </button>
                     </form>
+                    @endif
                   </div>
                 </td>
               </tr>

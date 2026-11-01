@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Mail;
 
 class ConviteVinculoController extends Controller
 {
+    public function opcoes(Request $r, ConviteVinculo $servico)
+    {
+        return ApiResponse::success($servico->opcoes($r->user()));
+    }
+
     public function store(Request $request, ConviteVinculo $servico)
     {
         $d = $request->validate(['email' => 'required|email|max:255', 'espaco_id' => 'required|integer|min:1',
@@ -30,6 +35,7 @@ class ConviteVinculoController extends Controller
 
     public function consultar(Request $request, int $id)
     {
+        abort_unless($request->user()->ativo, 403);
         $d = $request->validate(['token' => 'required|string|size:64']);
         $c = \Illuminate\Support\Facades\DB::table('vinculo_convites as c')->join('usuario_vinculos as v', 'v.id', '=', 'c.vinculo_id')
             ->where('c.id', $id)->where('v.usuario_id', $request->user()->id)->where('v.situacao', 'convidado')

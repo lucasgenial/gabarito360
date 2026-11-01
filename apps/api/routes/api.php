@@ -172,6 +172,7 @@ Route::prefix('v1')->group(function () {
         // Usuários / equipe
         Route::get('permissoes/perfis', [UsuarioController::class, 'catalogoPerfis'])->middleware('permissao:usuario.ver');
 
+        Route::get('usuarios/convites-vinculo/opcoes', [ConviteVinculoController::class, 'opcoes'])->middleware('permissao:usuario.gerir');
         Route::post('usuarios/convites-vinculo', [ConviteVinculoController::class, 'store'])->middleware(['permissao:usuario.gerir', 'throttle:10,1']);
         Route::prefix('usuarios')->group(function () {
             Route::get('/',          [UsuarioController::class, 'index'])->middleware('permissao:usuario.ver');

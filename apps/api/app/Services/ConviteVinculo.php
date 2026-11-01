@@ -18,7 +18,7 @@ class ConviteVinculo
         return DB::transaction(function () use ($gestor, $email, $espaco, $perfil, $turmas) {
             $this->destino($gestor, $espaco, $perfil);
             if ($turmas && ($perfil !== 'professor' || !Permissao::pode($gestor, 'turma.vincular_professor'))) abort(403);
-            $turmas = array_values(array_unique($turmas));
+            $turmas = array_values(array_unique(array_map('intval', $turmas)));
             if ($turmas && \App\Support\Escopo::turmas($gestor)->where('turmas.espaco_id', $espaco)->whereIn('turmas.id', $turmas)->count() !== count($turmas)) abort(404);
             // Não retorna dados nem distingue conta ausente, inativa ou papel já existente.
             $alvo = Usuario::porEmail($email)->where('ativo', true)->lockForUpdate()->first();
@@ -68,6 +68,28 @@ class ConviteVinculo
             DB::table('vinculo_convites')->where('id', $id)->update([$aceitar ? 'aceito_em' : 'recusado_em' => now(), 'updated_at' => now()]);
             GestaoVinculos::evento($v, $titular, $aceitar ? 'convite_aceito' : 'convite_recusado', 'convite:'.$id);
         });
+    }
+
+    public function opcoes(Usuario $gestor): array
+    {
+        ContextoVinculo::resolver($gestor);
+        abort_unless(Permissao::pode($gestor, 'usuario.gerir'), 403);
+        $escolas = \App\Support\Escopo::escolaIds($gestor) ?? [];
+        $nucleos = $gestor->perfil === 'admin_rede' ? \App\Support\Instituicoes::nucleosIds($gestor) : [];
+        $redes = $gestor->perfil === 'admin_rede' ? \App\Support\Instituicoes::redesIds($gestor) : [];
+        $espacos = DB::table('espacos')->where(fn ($q) => $q->whereIn('escola_id', $escolas)
+            ->orWhereIn('nucleo_id', $nucleos)->orWhereIn('rede_id', $redes))->orderBy('nome')->get();
+        $opcoes = [];
+        foreach ($espacos as $e) {
+            if (!ContextoVinculo::espacoValido($e)) continue;
+            $perfis = array_values(array_filter(Cadastro::perfisGeridos($gestor), fn ($p) =>
+                (match ($p) { 'admin_rede' => 'rede', 'dir_nucleo' => 'nucleo', default => 'escola' }) === $e->tipo));
+            if (!$perfis) continue;
+            $turmas = $e->tipo === 'escola' && Permissao::pode($gestor, 'turma.vincular_professor')
+                ? \App\Support\Escopo::turmas($gestor)->where('turmas.espaco_id', $e->id)->where('turmas.ativo', true)->orderBy('turmas.nome')->get(['turmas.id', 'turmas.nome'])->toArray() : [];
+            $opcoes[] = ['id' => $e->id, 'nome' => $e->nome, 'tipo' => $e->tipo, 'perfis' => $perfis, 'turmas' => $turmas];
+        }
+        return $opcoes;
     }
 
     private function destino(Usuario $gestor, int $espaco, string $perfil): void

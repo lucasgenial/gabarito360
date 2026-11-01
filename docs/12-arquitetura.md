@@ -364,3 +364,7 @@ Contexto autenticado é reconstruído a partir de metadados internos do token Sa
 ### V2-B — contexto web por requisição
 
 A identidade continua na sessão compartilhada; perfil/permissões e token contextual são resolvidos por handle imutável por aba. Cache cifrado vincula o handle à sessão e identidade. Não se altera `auth_token`/`auth_perfil` global ao trocar. Cada requisição revalida a API, inclusive downloads e gravações; falhas não repetem POSTs. Contexto é transportado explicitamente em links/forms/headers. Detalhes, prazo deslizante e limites do ensaio em [docs/61](61-v2-contexto-autenticado.md).
+
+### V2-C — gestão e confirmação de convite
+
+A gestão web transporta explicitamente vínculo-alvo; não envia alterações globais de identidade. A confirmação de convite usa o token de identidade e referência temporária cifrada vinculada à sessão. O fragmento do e-mail é consumido e removido do histórico; não se guarda o token do convite na sessão compartilhada. Aceite/recusa permanecem transacionais e revalidados na API. [Contrato e limites](62-v2-gestao-e-aceite-de-convites.md).
