@@ -2,7 +2,9 @@
 
 Base: PR #76 incorporado em `1fc27bfd046eb04c505c51c19c55943884e4d846`. Continuidade autorizada pelo responsável, **sem deploy**. Deriva de [T1 aprovado](40-clientes-espacos-e-vinculos.md), do [manifesto](42-t2-inventario-e-manifesto.md) e do [roteiro D/E](44-t2-adaptacao-e-corte.md).
 
-## Entrega em revisão — PR #77
+## Entrega incorporada — PR #77
+
+Merge em `24e335ae3927fb6291f7346d18fc219c65d1654e`, sem deploy. Continuidade: [T2-D3](46-t2-cartoes-fila-e-arquivos.md).
 
 - Núcleos e escolas passam a usar o adaptador institucional. No modo novo, listas, detalhes, alterações, logos e contagens dependem da instituição atribuída e da hierarquia de espaços ativa. Agregados escolares conferem espaço e relações; referências de sede/anexos são limitadas antes da consulta.
 - Criação de núcleo/escola no modo novo cria o espaço na mesma transação, herdando o cliente do pai autorizado. O payload não escolhe cliente ou espaço. Mudança de rede/núcleo por edição simples é recusada; núcleo com espaço registrado não é apagado pelo CRUD.

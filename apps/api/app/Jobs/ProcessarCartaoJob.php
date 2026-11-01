@@ -14,6 +14,8 @@ use App\Services\Omr\OmrIdentificacaoInterface;
 use App\Services\Omr\ResultadoEnvio;
 use App\Support\Correcao;
 use App\Support\Escopo;
+use App\Support\Espacos;
+use App\Support\ContextoCorrecao;
 use App\Support\Permissao;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -35,7 +37,7 @@ class ProcessarCartaoJob implements ShouldQueue
 
     public bool $failOnTimeout = true;
 
-    public function __construct(public int $cartaoId, public int $envioId, public int $tentativa = 1)
+    public function __construct(public int $cartaoId, public int $envioId, public int $tentativa = 1, public ?int $espacoId = null, public ?int $atorId = null)
     {
         // Duas leituras (redirecionamento pelo QR) e geração das versões leves.
         $this->timeout = 3 * max(1, (int) config('omr.timeout', 60)) + 30;
@@ -49,12 +51,13 @@ class ProcessarCartaoJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [(new WithoutOverlapping("cartao:{$this->cartaoId}"))->dontRelease()->expireAfter($this->timeout + 15)];
+        return [(new WithoutOverlapping("cartao:{$this->espacoId}:{$this->cartaoId}"))->dontRelease()->expireAfter($this->timeout + 15)];
     }
 
     private function envioAtivo(): ?CartaoEnvio
     {
         return CartaoEnvio::whereKey($this->envioId)->where('tentativa', $this->tentativa)
+            ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $this->espacoId ?: 0)->where('usuario_id', $this->atorId ?: 0)->where('cartao_id', $this->cartaoId))
             ->whereIn('status', ['na_fila', 'processando'])->lockForUpdate()->first();
     }
 
@@ -70,11 +73,15 @@ class ProcessarCartaoJob implements ShouldQueue
 
             return;
         }
+        if (Espacos::ativo() && (!ContextoCorrecao::cartaoValido($cartao) || (int) $cartao->espaco_id !== (int) $this->espacoId)) {
+            $envio->update(['status' => 'recusado', 'resultado' => null, 'mensagem' => 'Contexto do cartão indisponível.']);
+            return;
+        }
         try {
             $usuario = Usuario::find($envio->usuario_id);
             Permissao::limparCache();
             $prova = Prova::find($envio->prova_id);
-            if (! $this->podeLer($usuario, $prova)) {
+            if (! $this->podeLer($usuario, $prova) || (Espacos::ativo() && $cartao->aluno_id && !ContextoCorrecao::alunos($prova, $usuario)->where('alunos.id', $cartao->aluno_id)->exists())) {
                 $this->recusar($envio, $cartao, 'A prova não está mais disponível para este envio.');
 
                 return;
@@ -109,13 +116,13 @@ class ProcessarCartaoJob implements ShouldQueue
                 }
                 if (! $atual) {
                     $recibo->update(['status' => 'recusado', 'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
-                    DB::afterCommit(fn () => app(ImagensCartao::class)->apagar($cartao->id));
+                    DB::afterCommit(fn () => app(ImagensCartao::class)->apagar($cartao->id, $cartao->espaco_id));
 
                     return;
                 }
                 Permissao::limparCache();
                 $usuario = $usuario->fresh();
-                if (! $this->podeLer($usuario, $provas->get($envio->prova_id)) || ! $this->podeLer($usuario, $provas->get($prova->id))) {
+                if ((Espacos::ativo() && (!ContextoCorrecao::cartaoValido($atual) || (int) $atual->espaco_id !== (int) $this->espacoId)) || ! $this->podeLer($usuario, $provas->get($envio->prova_id)) || ! $this->podeLer($usuario, $provas->get($prova->id))) {
                     $this->recusar($recibo, $atual, 'A prova foi fechada ou o acesso mudou durante a leitura.');
 
                     return;
@@ -125,9 +132,13 @@ class ProcessarCartaoJob implements ShouldQueue
                 }
                 $atual->prova_id = $prova->id;
                 $atual->setRelation('prova', $provas->get($prova->id));
-                $this->identificar($atual, $id);
+                $this->identificar($atual, $id, $usuario);
+                if (Espacos::ativo() && $atual->aluno_id && !ContextoCorrecao::alunos($atual->prova, $usuario)->where('alunos.id', $atual->aluno_id)->exists()) {
+                    $this->recusar($recibo, $atual, 'O acesso ao aluno mudou durante a leitura.');
+                    return;
+                }
                 if ($atual->aluno_id) {
-                    $anteriores = Cartao::where('prova_id', $prova->id)->where('aluno_id', $atual->aluno_id)
+                    $anteriores = ContextoCorrecao::filtrar(Cartao::query(), $prova->espaco_id)->where('prova_id', $prova->id)->where('aluno_id', $atual->aluno_id)
                         ->where('id', '!=', $atual->id)->where(function ($q) use ($atual) {
                             $q->whereIn('status', ['lido', 'ambiguo'])
                                 ->orWhere(function ($falhou) use ($atual) {
@@ -144,7 +155,7 @@ class ProcessarCartaoJob implements ShouldQueue
                         return;
                     }
                     foreach ($anteriores as $antigo) {
-                        CartaoEnvio::where('cartao_id', $antigo->id)->update(['status' => 'substituido', 'resultado' => null,
+                        ContextoCorrecao::filtrar(CartaoEnvio::query(), $this->espacoId)->where('cartao_id', $antigo->id)->update(['status' => 'substituido', 'resultado' => null,
                             'mensagem' => 'Uma foto mais recente deste aluno substituiu esta leitura.']);
                         $this->apagar($antigo);
                     }
@@ -156,7 +167,7 @@ class ProcessarCartaoJob implements ShouldQueue
                 ResultadoEnvio::concluir($recibo, $atual);
             }, 3);
         } catch (Throwable $e) {
-            CartaoEnvio::whereKey($this->envioId)->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
+            CartaoEnvio::whereKey($this->envioId)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $this->espacoId ?: 0)->where('usuario_id', $this->atorId ?: 0)->where('cartao_id', $this->cartaoId))->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
                 ->update(['status' => 'na_fila', 'mensagem' => 'A leitura será tentada novamente.']);
             throw $e;
         }
@@ -164,13 +175,13 @@ class ProcessarCartaoJob implements ShouldQueue
 
     public function failed(?Throwable $e): void
     {
-        CartaoEnvio::whereKey($this->envioId)->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
+        CartaoEnvio::whereKey($this->envioId)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $this->espacoId ?: 0)->where('usuario_id', $this->atorId ?: 0)->where('cartao_id', $this->cartaoId))->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
             ->update(['status' => 'erro', 'mensagem' => 'Não foi possível ler esta foto. Tente novamente ou fotografe outro cartão.']);
     }
 
     private function podeLer(?Usuario $u, ?Prova $p): bool
     {
-        return $u && $u->ativo && $p && in_array($p->status, ['publicada', 'em_correcao', 'corrigida'], true)
+        return $u && $u->ativo && $p && (!Espacos::ativo() || ((int) $p->espaco_id === (int) $this->espacoId && ContextoCorrecao::provaValida($p))) && in_array($p->status, ['publicada', 'em_correcao', 'corrigida'], true)
             && Permissao::pode($u, 'cartao.enviar') && Escopo::prova($u, $p->id) && ! Correcao::bloqueio($u, $p);
     }
 
@@ -183,6 +194,7 @@ class ProcessarCartaoJob implements ShouldQueue
                 return;
             }
             $envio->update(['status' => 'recusado', 'mensagem' => $mensagem, 'resultado' => null]);
+            if (Espacos::ativo()) return; // Recusa preserva cartão/foto para conciliação; não transfere nem apaga dados.
             $this->apagar($cartao);
             if ($prova) {
                 AtualizadorStatusProva::atualizar($prova);
@@ -205,26 +217,26 @@ class ProcessarCartaoJob implements ShouldQueue
             if ($cartao->imagem_url) {
                 Storage::disk('public')->delete($cartao->imagem_url);
             }
-            app(ImagensCartao::class)->apagar($cartao->id);
+            app(ImagensCartao::class)->apagar($cartao->id, $cartao->espaco_id);
         });
     }
 
-    private function identificar(Cartao $cartao, array $id): void
+    private function identificar(Cartao $cartao, array $id, Usuario $usuario): void
     {
         if (in_array($id['lingua'] ?? null, ['ING', 'ESP'], true) && $cartao->prova->opcao_lingua) {
             $cartao->lingua = $id['lingua'];
         }
         $alunoQr = (int) ($id['aluno_id'] ?? 0);
         if (! $cartao->aluno_id && $alunoQr && (int) ($id['prova_id'] ?? 0) === (int) $cartao->prova_id
-            && DB::table('alunos')->join('prova_turmas', 'prova_turmas.turma_id', '=', 'alunos.turma_id')
-                ->where('prova_turmas.prova_id', $cartao->prova_id)->where('alunos.id', $alunoQr)->exists()) {
+            && ContextoCorrecao::alunos($cartao->prova, $usuario)->where('alunos.id', $alunoQr)->exists()) {
             $cartao->aluno_id = $alunoQr;
         }
     }
 
     private function gravarLeituras(Cartao $cartao, array $leituras): void
     {
-        DB::table('cartao_respostas')->where('cartao_id', $cartao->id)->delete();
+        ContextoCorrecao::exigirFilhos('cartao_respostas', 'cartao_id', $cartao->id, $cartao->espaco_id);
+        ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)->where('cartao_id', $cartao->id)->delete();
         $rows = [];
         $soma = 0;
         $pendente = false;
@@ -238,7 +250,7 @@ class ProcessarCartaoJob implements ShouldQueue
             $soma += $l['confianca'];
             $rows[] = ['cartao_id' => $cartao->id, 'numero_questao' => $l['numero_questao'],
                 'alternativa' => $ambigua ? null : $l['alternativa'], 'confianca' => $l['confianca'],
-                'ambigua' => $ambigua, 'alternativas_detectadas' => json_encode($l['alternativas_detectadas'])];
+                'ambigua' => $ambigua, 'alternativas_detectadas' => json_encode($l['alternativas_detectadas'])] + ContextoCorrecao::autoria($cartao->espaco_id, $this->atorId);
         }
         if ($rows) {
             DB::table('cartao_respostas')->insert($rows);
@@ -247,7 +259,7 @@ class ProcessarCartaoJob implements ShouldQueue
         $cartao->confianca_geral = count($leituras) ? $soma / count($leituras) : 0;
         $cartao->save();
         if (! $pendente) {
-            CalculadoraNota::calcular($cartao);
+            CalculadoraNota::calcular($cartao, $this->atorId);
         }
     }
 }

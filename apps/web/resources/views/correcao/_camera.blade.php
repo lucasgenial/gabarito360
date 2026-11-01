@@ -112,7 +112,7 @@ var filaCartoes = criarFilaCartoes({
   uploadUrl: UPLOAD_URL,
   envioUrl: '{{ route('correcao.envio', ['id' => $prova['id'], 'chave' => '__ENVIO__'], false) }}',
   csrf: CAM_CSRF,
-  chaveSessao: @json('g360:envios:' . hash('sha256', session()->getId()) . ':' . $prova['id']),
+  chaveSessao: @json('g360:envios:' . hash('sha256', session()->getId()) . ':' . ($prova['espaco_id'] ?? 'legado') . ':' . $prova['id']),
   envioInicial: @json(session('cartao_envio')),
   linha: linhaEnvio, reduzir: reduzirFoto, erroHttp: erroHttp, resultado: resultadoCartao,
   atualizar: function () { if (typeof atualizar === 'function') atualizar(); }
