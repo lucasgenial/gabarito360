@@ -31,6 +31,8 @@ class VinculosMariaDbTest extends TestCase
 
     public function test_t3_migracao_retomavel_preserva_pessoal_e_suas_restricoes(): void
     {
+        // A migration não deve mudar uma habilitação explicitamente desligada.
+        config(['espacos.pessoal'=>false]);
         DB::table('espacos')->insert(['id'=>2,'cliente_id'=>1,'tipo'=>'pessoal','nome'=>'Pessoal','situacao'=>'ativo','usuario_proprietario_id'=>1]);
         DB::table('usuario_vinculos')->insert(['id'=>1,'usuario_id'=>1,'espaco_id'=>2,'perfil'=>'professor_autonomo','situacao'=>'ativo','inicio_em'=>now()]);
         DB::table('turmas')->insert(['id'=>1,'espaco_id'=>2,'espaco_tipo'=>'pessoal','nome'=>'Turma','serie'=>'3','turno'=>'tarde','ano_letivo'=>2026]);
