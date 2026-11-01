@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::define('gerir-clientes', fn (\App\Models\Usuario $u) => \App\Support\ContextoInterno::pode($u, 'cliente.gerir'));
         $this->app->extend('queue.failer', function ($original, $app) {
             $config = $app['config']['queue.failed'];
             return $config['driver'] === 'database-uuids'

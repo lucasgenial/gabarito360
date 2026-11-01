@@ -35,12 +35,12 @@ class CadastroClienteTest extends TestCase
         return $extra + ['tipo'=>'professor', 'nome'=>'Cliente fictício', 'modalidade'=>'teste'];
     }
 
-    public function test_ability_ausente_nega_cadastro_e_edicao_sem_conceder_poder_ao_admin_escolar(): void
+    public function test_sem_contexto_interno_nega_cadastro_e_edicao_ao_admin_escolar(): void
     {
         foreach (['criar', 'editar'] as $acao) {
             try {
                 $acao === 'criar' ? $this->cadastro->cadastrar($this->ator, $this->dados()) : $this->cadastro->atualizar($this->ator, 999, []);
-                $this->fail('Gate indefinido deve negar.');
+                $this->fail('Política comercial deve negar o administrador sem contexto interno.');
             } catch (AuthorizationException $e) { $this->assertTrue(true); }
         }
         $this->assertDatabaseCount('clientes', 0);
