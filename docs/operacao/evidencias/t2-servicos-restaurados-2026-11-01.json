@@ -1,0 +1,50 @@
+{
+  "dados_ficticios": true,
+  "producao_alterada": false,
+  "inicio_servicos_s": 0.96,
+  "login_web_sessao_redis": true,
+  "fila_redis_consumida": true,
+  "schedule_run": true,
+  "redis_aof_preservou_sessao_e_job": true,
+  "manutencao_503_e_retomada_200": true,
+  "auditoria_zero": true,
+  "http": {
+    "/": 200,
+    "/login": 200,
+    "/api/v1/health": 200,
+    "/api/v1/dashboard/admin": 200,
+    "/api/v1/relatorios/rede/1": 200,
+    "/api/v1/relatorios/rede/2": 200
+  },
+  "total_servicos_s": 23.94,
+  "concluido_brt": "2026-11-01",
+  "candidato_git": "b2fa772f3e46a5eb02e76336fc094bc42a1a607b",
+  "versoes": {
+    "nginx": "1.24.0",
+    "php_fpm": "8.3.6",
+    "redis": "7.0.15",
+    "mariadb": "10.11.14"
+  },
+  "unidades_systemd_verificacao_estatica": true,
+  "boot_lxc_systemd_testado": false,
+  "rto_restauracao_completa_medido": false,
+  "backup_posterior_L3_disponivel": false,
+  "sha256_confirmados_nas_duas_camadas": {
+    "vzdump-lxc-106-2026_10_31-02_36_34.tar.zst": "cd9cfde401f1b6c012b30cb787ba8d9b9e6f78e5da593236a968e0bedc99a87a",
+    "vzdump-lxc-111-2026_10_31-03_00_14.tar.zst": "7eef32b99d7c29079d5ff00e1790cb913d2b21918b8772e1c2829d604cdf424b"
+  },
+  "fontes_sha256_lf": {
+    "scripts/ensaios/t2-servicos.py": "0c2feafb13c45dbc20990f9a6a80654b6137a11c083043c87aa7aae3b888b95f",
+    "scripts/ensaios/t2-preparar-servicos.py": "7e96b5f9af09c17cbb9a231766df65261658df7e00502e2bcf7e53eb2692d9c7"
+  },
+  "limites": [
+    "WSL isolado; kernel/hardware diferentes do Proxmox",
+    "Configuração local de nginx e dois processos em cada pool FPM",
+    "Sem TLS/Cloudflare/rede externa",
+    "systemd: definições verificadas; processos e schedule:run exercitados sem inicialização do gerenciador restaurado",
+    "Duração cobre apenas ensaio de serviços; não extração/transferência/recuperação completa"
+  ],
+  "extracao_integral_ct111_s": 181.42,
+  "painel_autenticado_apos_reinicio_sem_redirecionar_login": true,
+  "failed_jobs_zero": true
+}
