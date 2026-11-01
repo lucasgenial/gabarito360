@@ -514,7 +514,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### T4. Cadastro de clientes
 
-- **Andamento em 01/11/2026:** T4-A (persistência cifrada e eventos comerciais) em revisão; nenhuma rota ou concessão de acesso. A1 ainda pendente é pré-requisito das telas T4-B. Detalhes e sequência: [docs/66](66-t4-a-base-cadastro-clientes.md). Sem deploy.
+- **Andamento em 01/11/2026:** T4-A incorporado no PR #100 (`a161e87`); nenhuma rota ou concessão de acesso. A1-A em revisão é a primeira parte do pré-requisito das telas T4-B. Sequência revista: [docs/67](67-a1-planejamento-e-acessos-internos.md). Sem deploy.
 - **Dependências:** T2, A1.
 - **Arquivos:** novas telas `clientes/*`.
 - **Passos:**
@@ -547,6 +547,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### A1. Perfis Desenvolvedor, Suporte, Financeiro e Secretário Escolar
 
+- **Replanejado em 01/11/2026:** antecipado como dependência de T4. A1-A prepara contexto interno e política comercial; A1-B cobre seleção/transporte e gestão; A1-C cobre Secretário Escolar e hierarquia institucional. [Plano e limites](67-a1-planejamento-e-acessos-internos.md). A1-A em revisão, habilitação desligada; sem deploy.
 - **Dependências:** V1.
 - **Arquivos disputados:** `CatalogoPermissoes.php`, `docs/03-perfis-e-permissoes.md`, `PerfisTest.php`.
 - **Passos:**
@@ -977,10 +978,10 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
 | V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
 | T3 Perfis por espaço | T3-A #96, T3-B #97 e T3-C #99 incorporados; sem deploy | Codex | docs/63–65 |
-| T4 Cadastro de clientes | T4-A base em revisão; A1 necessário antes das telas T4-B; sem deploy | Codex | docs/66 |
+| T4 Cadastro de clientes | T4-A #100 incorporado; A1 necessário antes das telas T4-B; sem deploy | Codex | docs/66–67 |
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
-| A1 Novos perfis | pendente | | |
+| A1 Novos perfis | A1-A contexto interno em revisão; A1-B/C pendentes; sem deploy | Codex | docs/67 |
 | AU1 Registro de auditoria | pendente | | |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |

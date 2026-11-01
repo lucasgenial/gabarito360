@@ -6,7 +6,7 @@ use App\Models\{Cliente, Usuario};
 use Illuminate\Support\Facades\{DB, Gate, Validator};
 use Illuminate\Validation\{Rule, ValidationException};
 
-/** Persistência comercial. A1 definirá a policy; sem policy o acesso é negado. */
+/** Persistência comercial autorizada somente por contexto interno explícito (A1). */
 class CadastroCliente
 {
     private const CAMPOS = ['tipo', 'nome', 'documento', 'modalidade', 'contato_nome', 'contato_email', 'contato_telefone', 'contrato_referencia'];
@@ -16,6 +16,7 @@ class CadastroCliente
         $this->autorizar($ator);
         $dados = $this->validar($dados, true);
         return DB::transaction(function () use ($ator, $dados) {
+            $this->autorizar($ator);
             $cliente = new Cliente;
             $cliente->forceFill($dados + ['situacao' => 'ativo', 'criado_por' => $ator->id])->save();
             $this->evento($cliente, $ator, 'cadastro', null);
@@ -29,6 +30,7 @@ class CadastroCliente
         $dados = $this->validar($dados, false);
         return DB::transaction(function () use ($ator, $id, $dados) {
             $cliente = Cliente::query()->lockForUpdate()->findOrFail($id);
+            $this->autorizar($ator);
             $anterior = $cliente->modalidade;
             $cliente->forceFill($dados);
             if ($cliente->isDirty()) {
@@ -44,7 +46,7 @@ class CadastroCliente
     {
         abort_unless($ator->exists && Usuario::query()->whereKey($ator->id)->where('ativo', true)->exists(), 403);
         // Não derivar poder comercial de perfil escolar, pagamento ou propriedade de espaço.
-        // Nenhuma definição/concessão desta ability acompanha T4-A.
+        // A política A1 exige contexto interno habilitado e revalidado.
         Gate::forUser($ator)->authorize('gerir-clientes');
     }
 
