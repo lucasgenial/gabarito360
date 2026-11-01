@@ -55,6 +55,10 @@ class EscolaController extends Controller
                     ->where('turmas.escola_id', $e->id)
                     ->count();
 
+                if ($request->user()->perfil === 'secretario_escolar') return array_merge($e->only(['id', 'nome', 'inep', 'ativo']), [
+                    'total_turmas' => $totalTurmas, 'total_alunos' => $totalAlunosEscola,
+                ]);
+
                 $provas = Espacos::agregadoEscolar(DB::table('provas'), 'provas', $request->user())->where('escola_id', $e->id)->count();
 
                 return array_merge($e->toArray(), [
@@ -211,6 +215,8 @@ class EscolaController extends Controller
         if (!$escola) {
             return ApiResponse::notFound('Escola não encontrada.');
         }
+
+        if ($request->user()->perfil === 'secretario_escolar') return ApiResponse::success($escola->only(['id', 'nome', 'inep', 'ativo']));
 
         $totalTurmas = Espacos::agregadoEscolar(DB::table('turmas'), 'turmas', $request->user())->where('escola_id', $id)->count();
 

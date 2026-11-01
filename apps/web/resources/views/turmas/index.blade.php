@@ -53,7 +53,7 @@
         <th>Turno</th>
         @unless(\App\Support\Acesso::pessoal())<th>Escola</th>@endunless
         <th>Alunos</th>
-        <th>Desempenho médio</th>
+        @if(\App\Support\Acesso::perfil() !== 'secretario_escolar')<th>Desempenho médio</th>@endif
         <th>Ano letivo</th>
         <th>Status</th>
         <th></th>
@@ -76,6 +76,7 @@
           </td>
           @endunless
           <td style="font-family:var(--font-mono);">{{ $t['total_alunos'] ?? 0 }}</td>
+          @if(\App\Support\Acesso::perfil() !== 'secretario_escolar')
           <td>
             @if(($t['media_turma'] ?? null) !== null)
               @php
@@ -88,6 +89,7 @@
               <span style="color:var(--muted);">—</span>
             @endif
           </td>
+          @endif
           <td style="font-family:var(--font-mono);">{{ $t['ano_letivo'] }}</td>
           <td>
             @if($t['ativo'])
@@ -102,7 +104,7 @@
         </tr>
       @empty
         <tr>
-          <td colspan="{{ \App\Support\Acesso::pessoal() ? 8 : 9 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
+          <td colspan="{{ (\App\Support\Acesso::pessoal() || \App\Support\Acesso::perfil() === 'secretario_escolar') ? 8 : 9 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="escola" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma encontrada</div>
             <p>Crie a primeira turma usando o botão "+ Nova turma".</p>

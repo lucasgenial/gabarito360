@@ -13,6 +13,7 @@ class Acesso
         'desenvolvedor' => 'Desenvolvedor',
         'suporte' => 'Suporte',
         'financeiro' => 'Financeiro',
+        'secretario_escolar' => 'Secretário Escolar',
         'secretario_educacao' => 'Secretário de Educação',
         'admin_rede'          => 'Administrador da Rede',
         'dir_nucleo'          => 'Diretor de Núcleo',
@@ -53,6 +54,7 @@ class Acesso
 
     /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
     private const PRINCIPAIS = [
+        'secretario_escolar' => ['painel', 'turmas', 'alunos'],
         'secretario_educacao' => ['painel', 'relatorios', 'escolas'],
         'admin_rede'          => ['painel', 'escolas', 'relatorios', 'equipe'],
         'dir_nucleo'          => ['painel', 'escolas', 'relatorios', 'equipe'],
@@ -66,9 +68,9 @@ class Acesso
 
     /** Perfis que cada gestor pode cadastrar/gerir (espelha App\Support\Cadastro da API). */
     public const PODE_GERIR = [
-        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
-        'dir_nucleo'  => ['dir_escolar', 'coordenador'],
-        'dir_escolar' => ['coordenador', 'professor', 'aplicador', 'aluno'],
+        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'dir_nucleo'  => ['dir_escolar', 'secretario_escolar', 'coordenador'],
+        'dir_escolar' => ['secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
         'coordenador' => ['professor', 'aplicador', 'aluno'],
     ];
 

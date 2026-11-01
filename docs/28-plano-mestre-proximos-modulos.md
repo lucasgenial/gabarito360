@@ -547,15 +547,15 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 
 #### A1. Perfis Desenvolvedor, Suporte, Financeiro e Secretário Escolar
 
-- **Replanejado em 01/11/2026:** antecipado como dependência de T4. A1-A prepara contexto interno e política comercial; A1-B cobre seleção/transporte e gestão; A1-C cobre Secretário Escolar e hierarquia institucional. [Plano e limites](67-a1-planejamento-e-acessos-internos.md). A1-A incorporado no PR #101 (`ee96bad`). A1-B revisto em [docs/68](68-a1-b-contextos-internos.md): B1 seleção/transporte incorporado no PR #102 (`29222ad`); B2 gestão/bootstrap em revisão conforme [docs/69](69-a1-b2-gestao-interna.md). Habilitação desligada; sem deploy.
+- **Replanejado em 01/11/2026:** antecipado como dependência de T4. A1-A prepara contexto interno e política comercial; A1-B cobre seleção/transporte e gestão; A1-C cobre Secretário Escolar e hierarquia institucional. [Plano e limites](67-a1-planejamento-e-acessos-internos.md). A1-A incorporado no PR #101 (`ee96bad`). A1-B revisto em [docs/68](68-a1-b-contextos-internos.md): B1 seleção/transporte incorporado no PR #102 (`29222ad`); B2 gestão/bootstrap incorporado no PR #103 (`98b28e1`), conforme [docs/69](69-a1-b2-gestao-interna.md). Habilitação desligada; sem deploy.
 - **Dependências:** V1.
 - **Arquivos disputados:** `CatalogoPermissoes.php`, `docs/03-perfis-e-permissoes.md`, `PerfisTest.php`.
 - **Passos:**
   1. Criar `desenvolvedor`, acima de todos os perfis.
   2. Criar `suporte`, com acesso amplo e ações de atendimento.
   3. Criar `financeiro`, restrito a clientes, contratos e cobranças, sem dados de alunos.
-  4. Criar `secretario_escolar`, para alunos, turmas e código do responsável. Ele é diferente de `secretario_educacao`.
-  5. Atualizar o mapa de colunas do catálogo para o novo número de perfis.
+  4. Criar `secretario_escolar`, para alunos e turmas. Código do responsável depende de P3/P4; importação XLSX permanece pendência do módulo de alunos. Ele é diferente de `secretario_educacao`. A1-C em revisão: [docs/70](70-a1-c-secretario-escolar.md).
+  5. Preservar a matriz legada de oito colunas e usar políticas independentes para os novos perfis (replanejado em A1-A/A1-C).
   6. Copiar a regra do `GuardaHierarquico` do ECOAR: ninguém altera perfil acima do seu.
   7. Impedir que esses perfis apareçam em relatórios pedagógicos.
 - **Pronto quando:** `PerfisTest` cobre os quatro perfis.
@@ -981,7 +981,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | T4 Cadastro de clientes | T4-A #100 incorporado; A1 necessário antes das telas T4-B; sem deploy | Codex | docs/66–67 |
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
-| A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 gestão em revisão; C pendente; sem deploy | Codex | docs/67–69 |
+| A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C Secretário Escolar em revisão; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
 | AU1 Registro de auditoria | pendente | | |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |
