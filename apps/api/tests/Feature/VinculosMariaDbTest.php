@@ -14,6 +14,8 @@ class VinculosMariaDbTest extends TestCase
         parent::setUp();
         if (!in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)) $this->markTestSkipped('Exige MariaDB descartável.');
         if (!str_ends_with(DB::connection()->getDatabaseName(), '_test')) throw new \RuntimeException('Use banco descartável terminado em _test.');
+        // DDL fora das transações invalida o estado compartilhado dos testes transacionais.
+        \Illuminate\Foundation\Testing\RefreshDatabaseState::$migrated = false;
         $this->artisan('migrate:fresh', ['--force' => true])->assertSuccessful();
         DB::table('usuarios')->insert(['id' => 1, 'perfil' => 'admin_rede', 'nome' => 'Fictício', 'email' => 'v1@example.test', 'cpf' => '00000000001', 'password' => 'ficticio']);
         DB::table('redes')->insert(['id' => 1, 'nome' => 'Rede', 'tipo' => 'estadual', 'uf' => 'BA']);
