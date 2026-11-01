@@ -52,6 +52,7 @@ elif cmd=='php':
             values=s.setdefault('queue',[0])
             q=values.pop(0) if len(values)>1 else values[0]
             print(q)
+elif cmd=='backup-observado': code=int(s.get('backup_failure',False))
 elif cmd=='composer': code=int(s.get('composer_failure',False))
 elif cmd=='systemctl':
     if args[0]=='show': print('active' if s.get('stop_failure') else 'inactive')
@@ -77,18 +78,26 @@ class DeployTest(unittest.TestCase):
             (pasta / 'bootstrap/cache').mkdir(parents=True)
         self.bin = self.base / 'bin'
         self.bin.mkdir()
-        for nome in ['id', 'runuser', 'git', 'php', 'composer', 'systemctl', 'curl', 'chown', 'sleep']:
+        for nome in ['id', 'runuser', 'git', 'php', 'composer', 'systemctl', 'curl', 'chown', 'sleep', 'backup-observado']:
             arq = self.bin / nome
             arq.write_text(MOCK)
             arq.chmod(0o755)
         self.source = self.base / 'deploy.sh'
         self.source.write_text(SCRIPT.read_text())
         self.state = self.base / 'state.json'
+        self.hook_temp = None
+        if os.geteuid() == 0:
+            self.hook_temp = tempfile.TemporaryDirectory(prefix='g360-hook-test-', dir='/root')
+            self.hook = Path(self.hook_temp.name) / 'hook.sh'
+            self.hook.write_text('backup-observado "$@"\n')
+            self.hook.chmod(0o700)
 
     def tearDown(self):
         self.temp.cleanup()
+        if self.hook_temp:
+            self.hook_temp.cleanup()
 
-    def run_deploy(self, *, check=False, target=ALVO, legacy=False, hold=False, **scenario):
+    def run_deploy(self, *, check=False, target=ALVO, legacy=False, hold=False, backup=False, **scenario):
         s = {'root': str(self.root), 'head': ANTES, 'events': [], 'source': str(self.source), **scenario}
         self.state.write_text(json.dumps(s))
         env = {**os.environ, 'PATH': str(self.bin) + os.pathsep + os.environ['PATH'],
@@ -96,6 +105,8 @@ class DeployTest(unittest.TestCase):
         env.pop('G360_DEPLOY_SNAPSHOT', None)
         source = SCRIPT.parents[2] / 'infra/deploy.sh' if legacy else self.source
         args = ['bash', str(source), '--root', str(self.root), '--commit', target, '--from', ANTES, '--wait', '0']
+        if backup:
+            args.extend(['--backup-final', str(self.hook)])
         if hold:
             args.append('--manter-manutencao')
         if check:
@@ -106,6 +117,46 @@ class DeployTest(unittest.TestCase):
 
     def artisan(self, command):
         return [e for e in self.s['events'] if e[:3] == ['php', 'artisan', command]]
+
+    @unittest.skipUnless(os.geteuid() == 0, 'Hook operacional requer root')
+    def test_backup_ocorre_apos_paradas_e_antes_de_codigo_e_ddl(self):
+        self.assertEqual(self.run_deploy(backup=True, hold=True), 0, self.result.stderr)
+        events = self.s['events']
+        backup = next(i for i,e in enumerate(events) if e[0] == 'backup-observado')
+        stop = events.index(['systemctl', 'stop', 'php8.3-fpm'])
+        merge = next(i for i,e in enumerate(events) if e[0] == 'git' and 'merge' in e)
+        migrate = next(i for i,e in enumerate(events) if e[:3] == ['php','artisan','migrate'])
+        self.assertLess(stop, backup)
+        self.assertLess(backup, merge)
+        self.assertLess(merge, migrate)
+        self.assertFalse(self.artisan('up'))
+        self.assertIn(['systemctl','start','php8.3-fpm'], events)
+
+    @unittest.skipUnless(os.geteuid() == 0, 'Hook operacional requer root')
+    def test_backup_falhou_nao_migra_nem_reabre(self):
+        self.assertNotEqual(self.run_deploy(backup=True, hold=True, backup_failure=True), 0)
+        self.assertEqual(self.s['head'], ANTES)
+        self.assertFalse(self.artisan('migrate'))
+        self.assertFalse(self.artisan('up'))
+        self.assertFalse([e for e in self.s['events'] if e[:2] == ['systemctl','start']])
+        for app in ['api','web']:
+            self.assertTrue((self.root / f'apps/{app}/storage/framework/down').exists())
+
+    @unittest.skipUnless(os.geteuid() == 0, 'Hook operacional requer root')
+    def test_check_nao_executa_hook_e_recusa_hook_gravavel(self):
+        self.assertEqual(self.run_deploy(backup=True, check=True), 0, self.result.stderr)
+        self.assertFalse([e for e in self.s['events'] if e[0] == 'backup-observado'])
+        self.assertFalse(self.artisan('down'))
+        self.hook.chmod(0o722)
+        self.assertNotEqual(self.run_deploy(backup=True), 0)
+        self.assertFalse(self.artisan('down'))
+
+    @unittest.skipUnless(os.geteuid() == 0, 'Hook operacional requer root')
+    def test_falha_http_apos_backup_fecha_e_para_escritores(self):
+        self.assertNotEqual(self.run_deploy(backup=True, http_failure=True), 0)
+        for app in ['api','web']:
+            self.assertTrue((self.root / f'apps/{app}/storage/framework/down').exists())
+        self.assertIn(['systemctl','stop','gabarito360-agendador.timer','gabarito360-agendador.service','gabarito360-worker@1','gabarito360-worker@2','php8.3-fpm'],self.s['events'])
 
     def test_check_nao_publica_nem_interrompe_servicos(self):
         self.assertEqual(self.run_deploy(check=True, queue=[7]), 0, self.result.stderr)

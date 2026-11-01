@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 uso() {
-  echo 'Uso: bash scripts/operacao/deploy.sh --commit SHA --from SHA [--check] [--manter-manutencao] [--wait SEGUNDOS] [--root DIRETORIO]'
+  echo 'Uso: bash scripts/operacao/deploy.sh --commit SHA --from SHA [--check] [--manter-manutencao] [--backup-final SCRIPT] [--wait SEGUNDOS] [--root DIRETORIO]'
 }
 
 [[ "$(id -u)" = 0 ]] || { echo 'Execute como root no contêiner da aplicação.' >&2; exit 1; }
@@ -18,12 +18,12 @@ if [[ "${G360_DEPLOY_SNAPSHOT:-}" != 1 ]]; then
 fi
 
 RAIZ=/home/lucasdev/projetos/gabarito360
-ALVO= ANTERIOR= CHECK=0 ESPERA=300 MANTER_MANUTENCAO=0
+ALVO= ANTERIOR= CHECK=0 ESPERA=300 MANTER_MANUTENCAO=0 BACKUP_FINAL=
 while (( $# )); do
   case "$1" in
-    --commit|--from|--root|--wait)
+    --commit|--from|--root|--wait|--backup-final)
       (( $# >= 2 )) || { uso >&2; exit 2; }
-      case "$1" in --commit) ALVO=$2 ;; --from) ANTERIOR=$2 ;; --root) RAIZ=$2 ;; --wait) ESPERA=$2 ;; esac
+      case "$1" in --commit) ALVO=$2 ;; --from) ANTERIOR=$2 ;; --root) RAIZ=$2 ;; --wait) ESPERA=$2 ;; --backup-final) BACKUP_FINAL=$2 ;; esac
       shift 2 ;;
     --check) CHECK=1; shift ;;
     --manter-manutencao) MANTER_MANUTENCAO=1; shift ;;
@@ -38,11 +38,20 @@ RAIZ=$(realpath -e -- "$RAIZ")
 for comando in git php composer runuser systemctl curl flock; do
   command -v "$comando" >/dev/null || { echo "Ferramenta ausente: $comando" >&2; exit 1; }
 done
+if [[ -n "$BACKUP_FINAL" ]]; then
+  BACKUP_FINAL=$(realpath -e -- "$BACKUP_FINAL")
+  # Hook revisado, de root, sem escrita por grupo/outros; copiar antes do deploy.
+  [[ -f "$BACKUP_FINAL" && "$(stat -c %u "$BACKUP_FINAL")" = 0 ]]
+  modo=$(stat -c %a "$BACKUP_FINAL")
+  (( (8#$modo & 0022) == 0 )) || { echo 'Hook de backup permite escrita indevida.' >&2; exit 2; }
+  [[ "$BACKUP_FINAL" == /root/* ]] || { echo 'Instale o hook revisado dentro de /root.' >&2; exit 2; }
+fi
 exec 9>"$RAIZ/.git/g360-deploy.lock"
 flock -n 9 || { echo 'Outro deploy está em andamento.' >&2; exit 1; }
 
 etapa=preflight mudou=0 manutencao_api=0 manutencao_web=0 timer_parado=0 workers_parados=0
-helper= cache_composer=
+checkpoint_iniciado=0 fpm_parado=0
+helper= cache_composer= hook_copia=
 git_projeto() { runuser -u lucasdev -- git -C "$RAIZ" "$@"; }
 artisan() { (cd "$RAIZ/apps/$1"; shift; runuser -u www-data -- php artisan "$@"); }
 servicos_ativos() {
@@ -58,6 +67,7 @@ confirmar_parados() {
 }
 log() { printf '[%s] %s\n' "$(date -u +%FT%TZ)" "$*"; }
 limpar() {
+  [[ -z "$hook_copia" ]] || rm -f -- "$hook_copia"
   [[ -z "$helper" ]] || rm -f -- "$helper"
   if [[ "$cache_composer" == /tmp/g360-composer.* && -d "$cache_composer" ]]; then
     rm -rf -- "$cache_composer"
@@ -68,7 +78,12 @@ falhou() {
   trap - ERR INT TERM
   set +e
   log "FALHA na etapa $etapa. Anterior: $ANTERIOR. Alvo: $ALVO."
-  if (( mudou == 0 )); then
+  if (( checkpoint_iniciado )); then
+    artisan web down --retry=60
+    artisan api down --retry=60
+    systemctl stop gabarito360-agendador.timer gabarito360-agendador.service gabarito360-worker@1 gabarito360-worker@2 php8.3-fpm
+    log 'Checkpoint iniciado: manutenção e escritores parados preservados. Não retomar automaticamente; conferir backup e estado antes de recuperar.'
+  elif (( mudou == 0 )); then
     (( workers_parados == 0 )) || systemctl start gabarito360-worker@1 gabarito360-worker@2
     (( timer_parado == 0 )) || systemctl start gabarito360-agendador.timer
     (( manutencao_api == 0 )) || artisan api up
@@ -85,6 +100,12 @@ trap 'falhou "$?"' ERR
 trap 'falhou 130' INT
 trap 'falhou 143' TERM
 trap limpar EXIT
+
+if [[ -n "$BACKUP_FINAL" ]]; then
+  hook_copia=$(mktemp /tmp/g360-backup-hook.XXXXXX)
+  cp -- "$BACKUP_FINAL" "$hook_copia"
+  chmod 700 "$hook_copia"
+fi
 
 etapa=preflight-git
 [[ "$(git_projeto rev-parse --show-toplevel)" = "$RAIZ" ]]
@@ -151,7 +172,7 @@ if (( CHECK )); then log 'CHECK concluído: sem publicação, manutenção ou mi
 etapa=manutencao
 manutencao_web=1; artisan web down --retry=60
 timer_parado=1; systemctl stop gabarito360-agendador.timer
-if (( MANTER_MANUTENCAO )); then systemctl stop gabarito360-agendador.service; fi
+if (( MANTER_MANUTENCAO )) || [[ -n "$BACKUP_FINAL" ]]; then systemctl stop gabarito360-agendador.service; fi
 etapa=drenagem
 limite=$((SECONDS + ESPERA))
 while true; do
@@ -167,7 +188,23 @@ sleep 3
 pendentes=$(fila)
 [[ "$pendentes" = 0 ]] || { log 'Novo job entrou durante a manutenção; cancelar sem atualizar código.'; false; }
 workers_parados=1; systemctl stop gabarito360-worker@1 gabarito360-worker@2
-if (( MANTER_MANUTENCAO )); then confirmar_parados; fi
+if (( MANTER_MANUTENCAO )) || [[ -n "$BACKUP_FINAL" ]]; then confirmar_parados; fi
+if [[ -n "$BACKUP_FINAL" ]]; then
+  etapa=backup-final
+  checkpoint_iniciado=1
+  # Encerrar também requisições PHP em andamento antes de criar o ponto coerente.
+  fpm_parado=1; systemctl stop php8.3-fpm
+  [[ "$(systemctl show php8.3-fpm --property=ActiveState --value)" = inactive ]]
+  [[ "$(fila)" = 0 ]]
+  log 'BACKUP FINAL: escritores e PHP-FPM parados; código e esquema ainda anteriores. Aguardando hook.'
+  bash "$hook_copia" "$RAIZ" "$ANTERIOR" "$ALVO"
+  # Um hook não deve reabrir escritores nem alterar código/manutenção.
+  confirmar_parados
+  [[ "$(systemctl show php8.3-fpm --property=ActiveState --value)" = inactive ]]
+  [[ -f "$RAIZ/apps/api/storage/framework/down" && -f "$RAIZ/apps/web/storage/framework/down" ]]
+  [[ "$(fila)" = 0 ]]
+  log 'BACKUP FINAL CONFIRMADO: prosseguindo para atualização e migração.'
+fi
 etapa=codigo
 [[ "$(git_projeto rev-parse HEAD)" = "$ANTERIOR" ]]
 git_projeto diff --quiet
@@ -193,6 +230,12 @@ for app in api web; do
   artisan "$app" route:cache
   artisan "$app" view:cache
 done
+if (( fpm_parado )); then
+  etapa=retomada-fpm
+  systemctl start php8.3-fpm
+  servicos_ativos php8.3-fpm
+  fpm_parado=0
+fi
 if (( MANTER_MANUTENCAO )); then
   etapa=entrega-em-manutencao
   [[ -f "$RAIZ/apps/api/storage/framework/down" && -f "$RAIZ/apps/web/storage/framework/down" ]]

@@ -90,3 +90,7 @@ O B5 atual para os escritores e segue diretamente para atualização e migraçã
 Próximo trabalho: preparar e ensaiar esse checkpoint no procedimento, com banco, arquivos e chaves coerentes, antes de executar a janela no servidor atual. Os backups online antecipados e a restauração completa continuam válidos como evidência de recuperação, mas não substituem esse ponto final. Nenhuma alteração do B5 foi incluída nesta entrega.
 
 Os auxiliares desta entrega registram o ensaio pontual de 01/11: contêm IDs, caminhos e SHAs fixos e dependem de arquivos temporários já removidos. Não são comandos genéricos para reexecutar automaticamente; revisar e preparar os pré-requisitos em novo ensaio.
+
+## Complemento — checkpoint anterior à migração
+
+O ajuste e o ensaio da pausa foram concluídos no [doc. 53](53-t2-checkpoint-backup-final.md), resolvendo a pendência operacional registrada acima. Nenhum deploy/migração foi feito no servidor atual. A nova entrega depende de revisão e merge autorizado antes da janela.
