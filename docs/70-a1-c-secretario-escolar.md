@@ -23,3 +23,7 @@ API: 21 testes/227 verificações (Secretário Escolar, perfis por espaço e ges
 Chrome/Computer Use: seleção explícita de Secretário Escolar, painel com Turmas/Alunos e criação de turma confirmada em SQLite local, com dados fictícios. Nenhuma ação no servidor. A conclusão da revisão automatizada e o ensaio de edição são conferidos no PR antes de solicitar merge.
 
 Próxima fase após aprovação de merge: revisar T4-B (API/telas de clientes e referência contratual), conforme docs/67. Publicação e migração no servidor continuam dependendo de autorização separada.
+
+## Incorporação
+
+PR #104 incorporado em `20a57bf` após aprovação. CI completo aprovado e ensaio de edição confirmado no Chrome (“Turma atualizada.”). Sem deploy ou migração no servidor. Continuidade em [T4-B](71-t4-b-interface-clientes.md).

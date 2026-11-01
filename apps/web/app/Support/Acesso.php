@@ -31,6 +31,7 @@ class Acesso
      * exige na tela de destino — assim nenhum item leva a 403 (docs/21, etapa 4).
      */
     private const ITENS = [
+        'clientes' => ['Clientes', 'Clientes', 'equipe', 'clientes.index', ['clientes.*'], ['cliente.ver']],
         'internos' => ['Acessos internos', 'Acessos internos', 'equipe', 'internos.index', ['internos.*'], ['acesso_interno.gerir']],
         'painel'     => ['Painel', 'Painel', 'casa', 'painel', ['painel'], []],
         'provas'     => ['Provas', 'Provas', 'prova', 'provas.index', ['provas.*', 'relatorios.prova', 'relatorios.turmaProva', 'resultados.*'], ['prova.ver+gabarito.ver']],
@@ -50,10 +51,13 @@ class Acesso
     ];
 
     /** Ordem do menu lateral. */
-    private const ORDEM = ['painel', 'internos', 'provas', 'corrigir', 'turmas', 'relatorios', 'escolas', 'alunos', 'equipe'];
+    private const ORDEM = ['painel', 'clientes', 'internos', 'provas', 'corrigir', 'turmas', 'relatorios', 'escolas', 'alunos', 'equipe'];
 
     /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
     private const PRINCIPAIS = [
+        'desenvolvedor' => ['painel', 'clientes', 'internos'],
+        'suporte' => ['painel', 'clientes'],
+        'financeiro' => ['painel', 'clientes'],
         'secretario_escolar' => ['painel', 'turmas', 'alunos'],
         'secretario_educacao' => ['painel', 'relatorios', 'escolas'],
         'admin_rede'          => ['painel', 'escolas', 'relatorios', 'equipe'],

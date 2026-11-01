@@ -38,11 +38,11 @@ Os perfis internos usam atribuição própria, sem integrar a matriz institucion
 
 | Contexto interno | Cadastro comercial | Gestão de acessos internos | Dados pedagógicos |
 |---|---|---|---|
-| Desenvolvedor | Consultar e gerir clientes | Política permite somente Suporte/Financeiro; consumidor ainda pendente | Negado neste contexto; atendimento auditado é AU3 |
+| Desenvolvedor | Consultar e gerir clientes | Gestão auditada de Suporte/Financeiro, incorporada no PR #103 | Negado neste contexto; atendimento auditado é AU3 |
 | Suporte | Consultar e gerir clientes | Negado | Negado neste contexto; atendimento auditado é AU3 |
 | Financeiro | Consultar e gerir clientes | Negado | Negado |
 
-Cada uso revalida titularidade, conta ativa, situação, vigência e versão da atribuição. Selecionar contexto interno remove o vínculo pedagógico do objeto e vice-versa; não há união de poderes. A1-B2 prepara comando controlado para o primeiro Desenvolvedor e gestão auditada de Suporte/Financeiro de outras contas. Autogestão e gestão de pares são recusadas. Concessão de outros Desenvolvedores não é oferecida. Secretário Escolar implementado no A1-C, em revisão: vínculo exclusivo de escola, gestão de alunos/turmas sem dados de desempenho, sem extras e sem gestão de equipe. Administrador de rede, diretor de núcleo e diretor escolar podem gerir esse vínculo no próprio escopo; coordenador não. Detalhes: [docs/69](69-a1-b2-gestao-interna.md).
+Cada uso revalida titularidade, conta ativa, situação, vigência e versão da atribuição. Selecionar contexto interno remove o vínculo pedagógico do objeto e vice-versa; não há união de poderes. A1-B2 prepara comando controlado para o primeiro Desenvolvedor e gestão auditada de Suporte/Financeiro de outras contas. Autogestão e gestão de pares são recusadas. Concessão de outros Desenvolvedores não é oferecida. Secretário Escolar incorporado no PR #104: vínculo exclusivo de escola, gestão de alunos/turmas sem dados de desempenho, sem extras e sem gestão de equipe. Administrador de rede, diretor de núcleo e diretor escolar podem gerir esse vínculo no próprio escopo; coordenador não. Detalhes: [docs/69](69-a1-b2-gestao-interna.md).
 
 ### Perfis institucionais
 
