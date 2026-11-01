@@ -9,6 +9,7 @@ class GestaoLegada
 {
     public static function usuarios(Usuario $gestor)
     {
+        if (ContextoVinculo::presente($gestor)) return Usuario::query()->whereIn('usuarios.id', GestaoVinculos::consulta($gestor)->select('v.usuario_id'));
         $escolas = Escopo::escolaIds($gestor) ?? [];
         $turmas = Escopo::turmaIds($gestor) ?? [];
         $mapa = [
@@ -24,6 +25,7 @@ class GestaoLegada
             }
         };
         return Usuario::query()->where('usuarios.id', '!=', $gestor->id)
+            ->whereNotExists(fn ($q) => $q->selectRaw('1')->from('usuario_vinculos as convertido')->whereColumn('convertido.usuario_id', 'usuarios.id'))
             ->whereExists(fn ($q) => $q->selectRaw('1')->from('usuario_escopos as ue')
                 ->whereColumn('ue.usuario_id', 'usuarios.id')->where($permitidos))
             ->whereNotExists(fn ($q) => $q->selectRaw('1')->from('usuario_escopos as ue')

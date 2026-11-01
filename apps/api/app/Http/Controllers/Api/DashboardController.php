@@ -457,7 +457,7 @@ class DashboardController extends Controller
             ->orderBy('turmas.serie')
             ->orderBy('turmas.nome')
             ->get()
-            ->map(function ($turma) use ($consulta) {
+            ->map(function ($turma) use ($consulta, $request) {
                 $totalAlunos = $consulta->tabela('alunos')
                     ->where('turma_id', $turma->id)
                     ->where('ativo', true)
@@ -475,12 +475,16 @@ class DashboardController extends Controller
                     ->orderByDesc('provas.data_aplicacao')
                     ->value('provas.disciplina');
 
-                $professor = DB::table('usuarios')
-                    ->join('usuario_escopos', 'usuarios.id', '=', 'usuario_escopos.usuario_id')
-                    ->where('usuario_escopos.escopo_tipo', 'turma')
-                    ->where('usuario_escopos.escopo_id', $turma->id)
-                    ->where('usuarios.perfil', 'professor')
-                    ->value('usuarios.nome');
+                if (\App\Support\ContextoVinculo::presente($request->user())) {
+                    $professor = \App\Support\GestaoVinculos::pessoas($request->user(), turma: (int) $turma->id)->orderBy('usuarios.id')->value('usuarios.nome');
+                } else {
+                    $professor = DB::table('usuarios')
+                        ->join('usuario_escopos', 'usuarios.id', '=', 'usuario_escopos.usuario_id')
+                        ->where('usuario_escopos.escopo_tipo', 'turma')
+                        ->where('usuario_escopos.escopo_id', $turma->id)
+                        ->where('usuarios.perfil', 'professor')
+                        ->value('usuarios.nome');
+                }
 
                 $status = match (true) {
                     $media === null     => 'sem_dados',
@@ -505,14 +509,18 @@ class DashboardController extends Controller
             });
 
         // Equipe da escola
-        $equipe = DB::table('usuarios')
-            ->join('usuario_escopos', 'usuarios.id', '=', 'usuario_escopos.usuario_id')
-            ->where('usuario_escopos.escopo_tipo', 'escola')
-            ->where('usuario_escopos.escopo_id', $escolaId)
-            ->where('usuarios.ativo', true)
-            ->select('usuarios.id', 'usuarios.nome', 'usuarios.perfil')
-            ->limit(6)
-            ->get();
+        if (\App\Support\ContextoVinculo::presente($request->user())) {
+            $equipe = \App\Support\GestaoVinculos::pessoas($request->user(), $escolaId)->limit(6)->get();
+        } else {
+            $equipe = DB::table('usuarios')
+                ->join('usuario_escopos', 'usuarios.id', '=', 'usuario_escopos.usuario_id')
+                ->where('usuario_escopos.escopo_tipo', 'escola')
+                ->where('usuario_escopos.escopo_id', $escolaId)
+                ->where('usuarios.ativo', true)
+                ->select('usuarios.id', 'usuarios.nome', 'usuarios.perfil')
+                ->limit(6)
+                ->get();
+        }
 
         // Próximas provas
         $proximasProvas = $consulta->modelo(Prova::class)->where('escola_id', $escolaId)
@@ -693,11 +701,15 @@ class DashboardController extends Controller
             $segesAtraso = $ultimaSync->duracao_minutos;
         }
 
-        $ultimosAcessos = $consulta->modelo(Usuario::class)->whereNotNull('ultimo_acesso')
-            ->where('ativo', true)
-            ->orderByDesc('ultimo_acesso')
-            ->limit(5)
-            ->get(['id', 'nome', 'perfil', 'escola_nome', 'ultimo_acesso']);
+        if (\App\Support\ContextoVinculo::presente($request->user())) {
+            $ultimosAcessos = \App\Support\GestaoVinculos::pessoas($request->user())->whereNotNull('usuarios.ultimo_acesso')->orderByDesc('usuarios.ultimo_acesso')->limit(5)->get();
+        } else {
+            $ultimosAcessos = $consulta->modelo(Usuario::class)->whereNotNull('ultimo_acesso')
+                ->where('ativo', true)
+                ->orderByDesc('ultimo_acesso')
+                ->limit(5)
+                ->get(['id', 'nome', 'perfil', 'escola_nome', 'ultimo_acesso']);
+        }
 
         // Rede(s) do admin: a do escopo dele ou, sem escopo, todas
         $redeIds = collect(Instituicoes::referencias($request->user(), 'rede'));

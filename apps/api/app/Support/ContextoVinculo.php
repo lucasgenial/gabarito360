@@ -33,7 +33,7 @@ class ContextoVinculo
         return $v;
     }
 
-    private static function espacoValido(object $e): bool
+    public static function espacoValido(object $e): bool
     {
         if (!in_array($e->tipo, ['rede', 'nucleo', 'escola'], true) || $e->situacao !== 'ativo') return false;
         foreach (['rede_id', 'nucleo_id', 'escola_id', 'usuario_proprietario_id'] as $campo) {

@@ -30,23 +30,50 @@ class ContaUsuario
         'aluno'               => 'Aluno',
     ];
 
-    public function convidar(Usuario $usuario, Usuario $convidadoPor): void
+    public function convidar(Usuario $usuario, Usuario $convidadoPor, ?int $vinculoId = null): void
     {
+        if ($vinculoId !== null) {
+            $v = DB::table('usuario_vinculos')->where('id', $vinculoId)->where('usuario_id', $usuario->id)->first();
+            abort_unless($v && $v->situacao === 'convidado' && $usuario->ativo
+                && \App\Support\ContextoVinculo::presente($convidadoPor)
+                && \App\Support\GestaoVinculos::consulta($convidadoPor)->where('v.id', $vinculoId)->exists()
+                && \App\Support\Cadastro::podeGerirPerfil($convidadoPor, $v->perfil), 403, 'Convite indisponível.');
+            // Este fluxo define a primeira senha; uma conta estabelecida usa recuperação pelo titular.
+            abort_unless(DB::table('usuario_vinculos')->where('usuario_id', $usuario->id)->count() === 1
+                && !$usuario->ultimo_acesso, 422, 'Conta existente exige convite de vínculo sem redefinir a identidade.');
+        } else {
+            abort_if(\App\Support\ContextoVinculo::presente($convidadoPor)
+                || DB::table('usuario_vinculos')->where('usuario_id', $usuario->id)->exists(), 422, 'Informe o vínculo do convite.');
+        }
         $token = Str::random(64);
 
         DB::table('password_reset_tokens')->updateOrInsert(
             ['email' => \App\Support\DadoProtegido::hash($usuario->email, 'email')],
-            ['token' => Hash::make($token), 'created_at' => now(), 'expira_em' => now()->addDays(self::VALIDADE_CONVITE_DIAS), 'convidado_por' => $convidadoPor->id]
+            ['token' => Hash::make($token), 'created_at' => now(), 'expira_em' => now()->addDays(self::VALIDADE_CONVITE_DIAS), 'convidado_por' => $convidadoPor->id, 'vinculo_id' => $vinculoId]
         );
 
         $link = config('emails.url_web') . '/convite?' . http_build_query(['token' => $token, 'conta' => \App\Support\DadoProtegido::hash($usuario->email, 'email')]);
 
-        Mail::to($usuario->email)->queue(new EmailModelo('convite-usuario', 'Convite para o Gabarito360', $this->dadosDoConvite($usuario, $convidadoPor) + ['link' => $link]));
+        Mail::to($usuario->email)->queue(new EmailModelo('convite-usuario', 'Convite para o Gabarito360', $this->dadosDoConvite($usuario, $convidadoPor, $vinculoId) + ['link' => $link]));
     }
 
     /** O que o convidado precisa saber para decidir. @return array<string, string> */
-    public function dadosDoConvite(Usuario $usuario, ?Usuario $convidadoPor): array
+    public function dadosDoConvite(Usuario $usuario, ?Usuario $convidadoPor, ?int $vinculoId = null): array
     {
+        if ($vinculoId !== null) {
+            $v = DB::table('usuario_vinculos')->where('id', $vinculoId)->where('usuario_id', $usuario->id)->first();
+            abort_unless($v, 422, 'Convite indisponível.');
+            $e = DB::table('espacos')->find($v->espaco_id);
+            abort_unless($e && \App\Support\ContextoVinculo::espacoValido($e), 422, 'Convite indisponível.');
+            $tabela = match ($e->tipo) { 'rede' => 'redes', 'nucleo' => 'nucleos', 'escola' => 'escolas' };
+            return ['nome' => $usuario->nome, 'funcao' => self::PERFIS[$v->perfil] ?? $v->perfil,
+                'tipo_vinculo' => match ($e->tipo) { 'rede' => 'Rede', 'nucleo' => 'Núcleo', 'escola' => 'Escola' }, 'vinculo' => DB::table($tabela)->where('id', $e->{$e->tipo.'_id'})->value('nome'),
+                'turmas' => DB::table('vinculo_turmas as vt')->join('turmas as t', 't.id', '=', 'vt.turma_id')
+                    ->where('vt.vinculo_id', $v->id)->where('vt.espaco_id', $e->id)->whereColumn('t.espaco_id', 'vt.espaco_id')
+                    ->orderBy('t.nome')->pluck('t.nome')->implode(', ') ?: 'Não se aplica',
+                'convidado_por' => $convidadoPor?->nome ?? 'Equipe Gabarito360'];
+        }
+        abort_if(DB::table('usuario_vinculos')->where('usuario_id', $usuario->id)->exists(), 422, 'Convite legado exige conciliação.');
         $escopos = DB::table('usuario_escopos')->where('usuario_id', $usuario->id)->get()->groupBy('escopo_tipo');
         $ids = fn (string $tipo) => collect($escopos->get($tipo, []))->pluck('escopo_id');
 
@@ -72,6 +99,7 @@ class ContaUsuario
     {
         $registro = DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::conta($email))->first();
 
+        if ($registro && !$this->contextoConviteValido($registro)) return null;
         return $registro
             && $registro->expira_em
             && now()->lessThan($registro->expira_em)
@@ -80,11 +108,18 @@ class ContaUsuario
 
     public function recusarConvite(Usuario $usuario, object $convite): void
     {
-        DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::hash($usuario->email, 'email'))->delete();
-
+        abort_unless(\App\Support\DadoProtegido::hash($usuario->email, 'email') === $convite->email, 422, 'Convite indisponível.');
         $gestor = Usuario::find($convite->convidado_por);
-        $dados = $this->dadosDoConvite($usuario, $gestor);
-        $usuario->update(['ativo' => false]);
+        $dados = $this->dadosDoConvite($usuario, $gestor, $convite->vinculo_id ?? null);
+        DB::transaction(function () use ($usuario, $convite) {
+            $atual = DB::table('password_reset_tokens')->where('email', $convite->email)->lockForUpdate()->first();
+            abort_unless($atual && $atual->expira_em && now()->lessThan($atual->expira_em) && hash_equals($atual->token, $convite->token) && $this->contextoConviteValido($atual), 422, 'Convite indisponível.');
+            if ($atual->vinculo_id) {
+                DB::table('usuario_vinculos')->where('id', $atual->vinculo_id)->update(['situacao' => 'encerrado', 'fim_em' => now()]);
+                \App\Support\GestaoVinculos::evento((object) ['id' => $atual->vinculo_id], $usuario, 'recusado', 'convite');
+            } else $usuario->update(['ativo' => false]);
+            DB::table('password_reset_tokens')->where('email', $convite->email)->delete();
+        });
 
         if ($gestor) {
             Mail::to($gestor->email)->queue(new EmailModelo('convite-recusado', 'Convite recusado', [
@@ -145,9 +180,9 @@ class ContaUsuario
         $token = Str::random(64);
 
         DB::table('password_reset_tokens')->upsert(
-            ['email' => \App\Support\DadoProtegido::hash($usuario->email, 'email'), 'token' => Hash::make($token), 'created_at' => now(), 'expira_em' => null],
+            ['email' => \App\Support\DadoProtegido::hash($usuario->email, 'email'), 'token' => Hash::make($token), 'created_at' => now(), 'expira_em' => null, 'vinculo_id' => null],
             ['email'],
-            ['token', 'created_at', 'expira_em']
+            ['token', 'created_at', 'expira_em', 'vinculo_id']
         );
 
         $link = config('emails.url_web') . '/redefinir-senha?' . http_build_query(['token' => $token, 'conta' => \App\Support\DadoProtegido::hash($usuario->email, 'email')]);
@@ -157,4 +192,28 @@ class ContaUsuario
             'link' => $link,
         ]));
     }
+    /** Um link antigo nunca passa a decidir sobre todos os vínculos após a conversão. */
+    public function contextoConviteValido(object $registro): bool
+    {
+        if (!$registro->expira_em) return true;
+        $u = Usuario::where('email_hash', $registro->email)->lockForUpdate()->first();
+        if (!$u || !$u->ativo) return false;
+        if (!($registro->vinculo_id ?? null)) return !DB::table('usuario_vinculos')->where('usuario_id', $u->id)->exists();
+        $v = DB::table('usuario_vinculos')->where('id', ($registro->vinculo_id ?? null))->where('usuario_id', $u->id)
+            ->where('situacao', 'convidado')->where('inicio_em', '<=', now())
+            ->where(fn ($q) => $q->whereNull('fim_em')->orWhere('fim_em', '>', now()))->lockForUpdate()->first();
+        if (!$v) return false;
+        $e = DB::table('espacos')->find($v->espaco_id);
+        return $e && \App\Support\ContextoVinculo::espacoValido($e)
+            && DB::table('usuario_vinculos')->where('usuario_id', $u->id)->count() === 1 && !$u->ultimo_acesso;
+    }
+
+    public function aceitarContextoConvite(object $registro, Usuario $usuario): void
+    {
+        if (!$registro->expira_em || !($registro->vinculo_id ?? null)) return;
+        DB::table('usuario_vinculos')->where('id', ($registro->vinculo_id ?? null))->where('usuario_id', $usuario->id)
+            ->update(['situacao' => 'ativo']);
+        \App\Support\GestaoVinculos::evento((object) ['id' => ($registro->vinculo_id ?? null)], $usuario, 'aceito', 'convite');
+    }
+
 }

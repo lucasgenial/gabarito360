@@ -121,4 +121,18 @@ class VinculosMariaDbTest extends TestCase
         $this->assertDatabaseCount('vinculo_eventos', 0);
         $this->assertSame($m['fonte_sha256'], $s->fonte());
     }
+    public function test_convites_contextuais_e_validade_do_historico_sao_aditivos_e_retomaveis(): void
+    {
+        DB::table('usuario_vinculos')->insert(['id' => 1, 'usuario_id' => 1, 'espaco_id' => 1, 'perfil' => 'admin_rede', 'situacao' => 'convidado', 'inicio_em' => now()]);
+        DB::table('password_reset_tokens')->insert(['email' => 'hash-ficticio', 'token' => 'token-ficticio', 'vinculo_id' => 1]);
+        DB::table('password_reset_tokens')->insert(['email' => 'hash-legado', 'token' => 'token-ficticio']);
+        DB::table('vinculo_eventos')->insert(['vinculo_id' => 1, 'acao' => 'retirar', 'motivo_tecnico' => 'prova.ver', 'ocorrido_em' => now(), 'valida_ate' => '2026-12-01']);
+        $migration = require database_path('migrations/2026_11_01_000004_contextualizar_convites.php');
+        $migration->up();
+        $this->assertDatabaseHas('password_reset_tokens', ['email' => 'hash-ficticio', 'vinculo_id' => 1]);
+        $this->assertDatabaseHas('password_reset_tokens', ['email' => 'hash-legado', 'vinculo_id' => null]);
+        $this->assertDatabaseHas('vinculo_eventos', ['vinculo_id' => 1, 'valida_ate' => '2026-12-01']);
+        $this->recusa(fn () => DB::table('password_reset_tokens')->where('email', 'hash-ficticio')->update(['vinculo_id' => 999]));
+    }
+
 }

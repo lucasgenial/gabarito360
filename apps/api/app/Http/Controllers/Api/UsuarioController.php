@@ -9,6 +9,8 @@ use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Support\Cadastro;
+use App\Support\ContextoVinculo;
+use App\Support\GestaoVinculos;
 use App\Support\Espacos;
 use App\Support\GestaoLegada;
 use App\Support\Permissao;
@@ -24,7 +26,8 @@ class UsuarioController extends Controller
         $usuario = $request->user();
         if (Espacos::ativo()) return GestaoLegada::usuarios($usuario);
 
-        $query = Usuario::query()->where('id', '!=', $usuario->id);
+        $query = Usuario::query()->where('id', '!=', $usuario->id)
+            ->whereNotExists(fn ($q) => $q->selectRaw('1')->from('usuario_vinculos as v')->whereColumn('v.usuario_id', 'usuarios.id'));
 
         if (in_array($usuario->perfil, ['dir_escolar', 'coordenador', 'dir_nucleo'], true)) {
             // Membros das escolas do escopo (diretor de núcleo: todas as escolas do núcleo)
@@ -42,6 +45,7 @@ class UsuarioController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        if (ContextoVinculo::presente($request->user())) return app(GestaoVinculoController::class)->index($request);
         $query = $this->escopoQuery($request);
 
         if ($perfil = $request->query('perfil')) {
@@ -120,14 +124,15 @@ class UsuarioController extends Controller
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        $usuario = DB::transaction(function () use ($data, $turmaIds) {
+        $contextual = ContextoVinculo::presente($gestor);
+        $usuario = DB::transaction(function () use ($data, $turmaIds, $gestor, $contextual) {
             $usuario = Usuario::create([
                 'nome'                  => $data['nome'],
                 'email'                 => $data['email'],
                 'cpf'                   => $data['cpf'],
                 'perfil'                => $data['perfil'],
                 'password'              => Hash::make(Str::random(32)),
-                'ativo'                 => $data['ativo'] ?? true,
+                'ativo'                 => $contextual ? true : ($data['ativo'] ?? true),
                 'data_nascimento'       => $data['data_nascimento'] ?? null,
                 'telefone'              => $data['telefone'] ?? null,
                 'data_ingresso'         => $data['data_ingresso'] ?? null,
@@ -136,6 +141,19 @@ class UsuarioController extends Controller
                 'registro_profissional' => $data['registro_profissional'] ?? null,
                 'observacoes'           => $data['observacoes'] ?? null,
             ]);
+
+            if ($contextual) {
+                $tipo = $data['perfil'] === 'dir_nucleo' ? 'nucleo' : 'escola';
+                $espaco = DB::table('espacos')->where('tipo', $tipo)->where($tipo.'_id', $data[$tipo.'_id'])->first();
+                abort_unless($espaco && ContextoVinculo::espacoValido($espaco), 422, 'Espaço indisponível.');
+                $vinculoId = DB::table('usuario_vinculos')->insertGetId(['usuario_id' => $usuario->id, 'espaco_id' => $espaco->id,
+                    'perfil' => $data['perfil'], 'situacao' => ($data['ativo'] ?? true) ? 'convidado' : 'suspenso', 'inicio_em' => now(), 'criado_por' => $gestor->id,
+                    'created_at' => now(), 'updated_at' => now()]);
+                foreach ($turmaIds as $turmaId) DB::table('vinculo_turmas')->insert(['vinculo_id' => $vinculoId, 'espaco_id' => $espaco->id, 'turma_id' => $turmaId]);
+                DB::table('vinculo_eventos')->insert(['vinculo_id' => $vinculoId, 'acao' => ($data['ativo'] ?? true) ? 'convidado' : 'suspenso', 'ator_id' => $gestor->id,
+                    'ocorrido_em' => now(), 'motivo_tecnico' => 'nova_conta']);
+                return $usuario;
+            }
 
             if (!empty($data['escola_id'])) {
                 DB::table('usuario_escopos')->insert([
@@ -163,15 +181,21 @@ class UsuarioController extends Controller
             return $usuario;
         });
 
-        if ($usuario->ativo) {
-            app(ContaUsuario::class)->convidar($usuario, $gestor);
+        if ($usuario->ativo && (!$contextual || ($data['ativo'] ?? true))) {
+            app(ContaUsuario::class)->convidar($usuario, $gestor, $contextual ? (int) DB::table('usuario_vinculos')->where('usuario_id', $usuario->id)->value('id') : null);
         }
 
+        if ($contextual) {
+            $v = DB::table('usuario_vinculos')->where('usuario_id', $usuario->id)->first();
+            return ApiResponse::success(['id' => $usuario->id, 'nome' => $usuario->nome, 'email' => $usuario->email,
+                'vinculo_id' => $v->id, 'perfil' => $v->perfil, 'situacao' => $v->situacao, 'ativo' => $v->situacao === 'ativo'], null, 201);
+        }
         return ApiResponse::success($usuario, null, 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
     {
+        if (ContextoVinculo::presente($request->user())) return app(GestaoVinculoController::class)->show($request, $id);
         $usuario = $this->escopoQuery($request)->where('id', $id)->first();
 
         if (!$usuario) {
@@ -197,6 +221,12 @@ class UsuarioController extends Controller
     /** Novo convite para quem ainda não criou a senha ou perdeu o link. */
     public function reenviarConvite(Request $request, int $id, ContaUsuario $conta): JsonResponse
     {
+        if (ContextoVinculo::presente($request->user())) {
+            $v = GestaoVinculos::alvo($request, $id);
+            abort_unless($v->situacao === 'convidado', 422, 'Este vínculo não aguarda convite.');
+            $conta->convidar(Usuario::findOrFail($id), $request->user(), $v->id);
+            return ApiResponse::success(['mensagem' => 'Convite enviado.']);
+        }
         $usuario = $this->escopoQuery($request)->where('id', $id)->first();
         if (!$usuario) {
             return ApiResponse::notFound('Usuário não encontrado.');
@@ -214,6 +244,10 @@ class UsuarioController extends Controller
     /** O gestor não define senha: a pessoa recebe o link e cria a própria. */
     public function enviarLinkSenha(Request $request, int $id, ContaUsuario $conta): JsonResponse
     {
+        if (ContextoVinculo::presente($request->user())) {
+            GestaoVinculos::alvo($request, $id);
+            abort(422, 'A recuperação da conta deve ser solicitada pelo titular em Esqueci minha senha.');
+        }
         $usuario = $this->escopoQuery($request)->where('id', $id)->first();
         if (!$usuario) {
             return ApiResponse::notFound('Usuário não encontrado.');
@@ -232,6 +266,7 @@ class UsuarioController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
+        if (ContextoVinculo::presente($request->user())) return app(GestaoVinculoController::class)->update($request, $id);
         $gestor  = $request->user();
         $usuario = $this->escopoQuery($request)->where('id', $id)->first();
 
@@ -300,6 +335,7 @@ class UsuarioController extends Controller
 
     public function toggle(Request $request, int $id): JsonResponse
     {
+        if (ContextoVinculo::presente($request->user())) return app(GestaoVinculoController::class)->toggle($request, $id);
         $usuario = $this->escopoQuery($request)->where('id', $id)->first();
 
         if (!$usuario) {
@@ -338,6 +374,7 @@ class UsuarioController extends Controller
      */
     public function permissoes(Request $request, int $id): JsonResponse
     {
+        if (ContextoVinculo::presente($request->user())) return app(GestaoVinculoController::class)->permissoes($request, $id);
         $gestor = $request->user();
         $alvo   = $id === $gestor->id ? $gestor : $this->escopoQuery($request)->where('id', $id)->first();
         if (!$alvo) {
@@ -387,6 +424,7 @@ class UsuarioController extends Controller
      */
     public function definirPermissoes(Request $request, int $id): JsonResponse
     {
+        if (ContextoVinculo::presente($request->user())) return app(GestaoVinculoController::class)->definirPermissoes($request, $id);
         $gestor = $request->user();
         $alvo   = $this->escopoQuery($request)->where('id', $id)->first();
         if (!$alvo) {
