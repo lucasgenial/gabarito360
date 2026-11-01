@@ -32,11 +32,13 @@ class ContextoVinculo
 
     public static function espacoValido(object $e): bool
     {
-        if (!in_array($e->tipo, ['rede', 'nucleo', 'escola'], true) || $e->situacao !== 'ativo') return false;
+        if (!in_array($e->tipo, ['rede', 'nucleo', 'escola', 'pessoal'], true) || $e->situacao !== 'ativo') return false;
+        $referencia = $e->tipo === 'pessoal' ? 'usuario_proprietario_id' : $e->tipo.'_id';
         foreach (['rede_id', 'nucleo_id', 'escola_id', 'usuario_proprietario_id'] as $campo) {
-            if (($campo === $e->tipo.'_id') !== ($e->$campo !== null)) return false;
+            if (($campo === $referencia) !== ($e->$campo !== null)) return false;
         }
         if (!DB::table('clientes')->where('id', $e->cliente_id)->where('situacao', 'ativo')->exists()) return false;
+        if ($e->tipo === 'pessoal') return DB::table('usuarios')->where('id', $e->usuario_proprietario_id)->where('ativo', true)->exists();
         $tabela = match ($e->tipo) { 'rede' => 'redes', 'nucleo' => 'nucleos', 'escola' => 'escolas' };
         $instituicao = DB::table($tabela)->find($e->{$e->tipo.'_id'});
         if (!$instituicao) return false;
@@ -69,6 +71,7 @@ class ContextoVinculo
     public static function escolas(Usuario $u): array
     {
         $e = self::resolver($u)->espaco;
+        if ($e->tipo === 'pessoal') return [];
         $q = Espacos::escolas();
         match ($e->tipo) {
             'rede' => $q->where('n.rede_id', $e->rede_id),

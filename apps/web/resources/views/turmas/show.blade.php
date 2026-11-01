@@ -297,7 +297,8 @@
               @endforeach
             </select>
           </div>
-          <div class="field">
+          @unless(\App\Support\Acesso::pessoal())
+<div class="field">
             <label for="ed-escola">Escola</label>
             <select class="select" id="ed-escola" name="escola_id">
               @foreach($escolas as $e)
@@ -305,6 +306,7 @@
               @endforeach
             </select>
           </div>
+@endunless
           <div class="field">
             <label for="ed-ano">Ano letivo</label>
             <input class="input num" type="number" id="ed-ano" name="ano_letivo"

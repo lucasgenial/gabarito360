@@ -41,11 +41,13 @@ class ConsultasPedagogicas
                 if ($this->ator->perfil === 'secretario_educacao') return $q->whereIn('nucleos.rede_id', $this->tabela('redes')->select('redes.id'))->whereIn('nucleos.id', Instituicoes::nucleosAtivos()->select('n.id'));
                 return $q->whereIn('nucleos.id', Instituicoes::nucleosIds($this->ator) ?? []);
             case 'turmas':
+                if (EspacoPessoal::doAtor($this->ator)) return $q->whereIn('turmas.id', Escopo::turmas($this->ator)->select('turmas.id'));
                 $q = Espacos::agregadoEscolar($q, 'turmas')->whereIn('turmas.escola_id', $this->escolasIds() ?? []);
                 if ($this->ator->perfil === 'professor') $q->whereIn('turmas.id', Escopo::turmaIds($this->ator) ?? []);
                 if ($this->ator->perfil === 'aluno') $q->whereIn('turmas.id', $this->alunosProprios()->select('alunos.turma_id'));
                 return $q;
             case 'alunos':
+                if (EspacoPessoal::doAtor($this->ator)) return $q->whereIn('alunos.id', Escopo::alunos($this->ator)->select('alunos.id'));
                 return Espacos::agregadoEscolar($q, 'alunos')->whereIn('alunos.turma_id', $this->tabela('turmas')->select('turmas.id'))
                     ->when($this->ator->perfil === 'aluno', fn ($q) => $q->whereIn('alunos.id', Instituicoes::referencias($this->ator, 'aluno')));
             case 'provas':
@@ -56,6 +58,8 @@ class ConsultasPedagogicas
                     ->whereIn('pt.turma_id', $this->tabela('turmas')->select('turmas.id')));
                 return $q;
             case 'prova_turmas':
+                if ($pessoal = EspacoPessoal::doAtor($this->ator)) return $q->where('prova_turmas.espaco_id', $pessoal)
+                    ->whereIn('prova_turmas.prova_id', $this->tabela('provas')->select('provas.id'))->whereIn('prova_turmas.turma_id', $this->tabela('turmas')->select('turmas.id'));
                 return Espacos::agregadoEscolar($q, 'prova_turmas')
                     ->whereIn('prova_turmas.prova_id', $this->tabela('provas')->select('provas.id'))
                     ->whereIn('prova_turmas.turma_id', $this->tabela('turmas')->select('turmas.id'));
@@ -64,7 +68,7 @@ class ConsultasPedagogicas
                 return $q->whereIn('cartoes.prova_id', $this->tabela('provas')->select('provas.id'))
                     ->whereExists(fn ($p) => $p->selectRaw('1')->from('provas as cp')->whereColumn('cp.id', 'cartoes.prova_id')->whereColumn('cp.espaco_id', 'cartoes.espaco_id'))
                     ->where(fn ($a) => $a->whereNull('cartoes.aluno_id')->orWhereExists(fn ($s) => $s->selectRaw('1')->from('alunos as ca')
-                        ->join('prova_turmas as ct', 'ct.turma_id', '=', 'ca.turma_id')->whereColumn('ca.id', 'cartoes.aluno_id')
+                        ->join('prova_turmas as ct', fn ($j) => $j->whereRaw('ct.turma_id = COALESCE(cartoes.turma_aplicacao_id, ca.turma_id)'))->whereColumn('ca.id', 'cartoes.aluno_id')
                         ->whereColumn('ca.espaco_id', 'cartoes.espaco_id')->whereColumn('ct.espaco_id', 'cartoes.espaco_id')
                         ->whereColumn('ct.prova_id', 'cartoes.prova_id')->whereIn('ca.id', $this->tabela('alunos')->select('alunos.id'))));
             case 'notas':
@@ -72,7 +76,7 @@ class ConsultasPedagogicas
                     ->whereExists(fn ($n) => $n->selectRaw('1')->from('cartoes as nc')->join('alunos as na', 'na.id', '=', 'nc.aluno_id')
                         ->whereColumn('nc.id', 'notas.cartao_id')->whereColumn('nc.espaco_id', 'notas.espaco_id')
                         ->whereColumn('nc.prova_id', 'notas.prova_id')->whereColumn('nc.aluno_id', 'notas.aluno_id')
-                        ->whereColumn('na.turma_id', 'notas.turma_id')->whereColumn('na.espaco_id', 'notas.espaco_id'));
+                        ->whereRaw('notas.turma_id = COALESCE(nc.turma_aplicacao_id, na.turma_id)')->whereColumn('na.espaco_id', 'notas.espaco_id'));
             case 'gabaritos':
                 return $q->whereIn('gabaritos.prova_id', $this->tabela('provas')->select('provas.id'))
                     ->whereExists(fn ($p) => $p->selectRaw('1')->from('provas as gp')->whereColumn('gp.id', 'gabaritos.prova_id')->whereColumn('gp.espaco_id', 'gabaritos.espaco_id'));

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Support\Escopo;
 use App\Support\Espacos;
+use App\Support\EspacoPessoal;
 use App\Http\Responses\ApiResponse;
 use App\Models\Aluno;
 use Illuminate\Http\JsonResponse;
@@ -53,6 +54,7 @@ class AlunoController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $pessoal = EspacoPessoal::validarAluno($request);
         $request->validate(['turma_id' => 'required|integer']);
         $turma = Escopo::turmas($request->user())->findOrFail((int) $request->input('turma_id'));
         $espaco = Espacos::ativo() ? (int) $turma->espaco_id : null;
@@ -62,7 +64,7 @@ class AlunoController extends Controller
             'nome'            => 'required|string|max:200',
             'matricula'       => ['required', 'string', 'max:20', Rule::unique('alunos', 'matricula')->when($espaco !== null, fn ($q) => $q->where('espaco_id', $espaco))],
             'cpf'             => ['sometimes', 'string', 'size:11', 'nullable', new \App\Rules\UnicoProtegido('alunos', 'cpf', espaco: $espaco)],
-            'data_nascimento' => 'required|date',
+            'data_nascimento' => $pessoal ? 'prohibited' : 'required|date',
             'genero'          => 'sometimes|in:M,F,O|nullable',
             'nome_responsavel'=> 'sometimes|string|max:200|nullable',
             'ativo'           => 'sometimes|boolean',
@@ -70,8 +72,9 @@ class AlunoController extends Controller
             'foto_path'       => 'prohibited',
         ]);
 
-        $aluno = new Aluno($data);
-        if (Espacos::ativo()) $aluno->forceFill(Espacos::autoria(Espacos::daEscola($request->user(), (int) $turma->escola_id), $request->user()));
+        $aluno = new Aluno($pessoal ? EspacoPessoal::dadosMinimos($data) : $data);
+        if (Espacos::ativo()) $aluno->forceFill(Espacos::autoria((int) $turma->espaco_id, $request->user()));
+        if ($pessoal) $aluno->forceFill(['espaco_tipo'=>'pessoal']);
         $aluno->save();
 
         return ApiResponse::success($aluno->load('turma:id,nome,serie'), null, 201);
@@ -95,6 +98,7 @@ class AlunoController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
+        $pessoal = EspacoPessoal::validarAluno($request);
         $aluno = Escopo::alunos($request->user())->find($id);
 
         if (!$aluno) {
@@ -121,7 +125,11 @@ class AlunoController extends Controller
             abort_unless((int) $destino->escola_id === (int) $origem->escola_id, 422, 'Transferência entre escolas exige procedimento próprio.');
             if (Espacos::ativo()) abort_unless((int) $destino->espaco_id === (int) $aluno->espaco_id, 422);
         }
-        $aluno->update($data);
+        if ($pessoal) {
+            app(\App\Services\AtualizarAlunoPessoal::class)->executar($request->user(), $id, EspacoPessoal::dadosMinimos($data));
+        } else {
+            $aluno->update($data);
+        }
 
         return ApiResponse::success($aluno->fresh());
     }

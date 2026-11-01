@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Storage;
  */
 class Cabecalho
 {
+    public static function contexto(\App\Models\Usuario $ator, ?int $escola): array
+    {
+        return EspacoPessoal::doAtor($ator)
+            ? self::unidade(ContextoVinculo::resolver($ator)->espaco->nome)
+            : self::escola($escola);
+    }
     public static function escola(?int $escolaId): array
     {
         $e = $escolaId ? DB::table('escolas')

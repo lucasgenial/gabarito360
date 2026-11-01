@@ -7,6 +7,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Prova;
 use App\Support\Escopo;
 use App\Support\Espacos;
+use App\Support\EspacoPessoal;
 use App\Support\ConsultasPedagogicas;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,10 @@ class ProvaController extends Controller
     /** Impede criar/editar prova em escola ou turma fora do escopo do usuário. */
     private function foraDoEscopo($usuario, int $escolaId, array $turmaIds): ?JsonResponse
     {
+        if (EspacoPessoal::doAtor($usuario)) {
+            return Escopo::turmas($usuario)->whereIn('id', $turmaIds)->count() === count(array_unique($turmaIds))
+                ? null : ApiResponse::notFound('Turma não encontrada.');
+        }
         $escolas = Escopo::escolaIds($usuario);
         if ($escolas !== null && !in_array($escolaId, $escolas, true)) {
             return Espacos::ativo() ? ApiResponse::notFound('Escola não encontrada.') : ApiResponse::error('Escola fora do seu escopo.', [], 403);
@@ -135,9 +140,10 @@ class ProvaController extends Controller
     public function store(Request $request): JsonResponse
     {
         $usuario = $request->user();
+        $pessoal = EspacoPessoal::doAtor($usuario);
 
         $data = $request->validate([
-            'escola_id'       => 'required|integer|exists:escolas,id',
+            'escola_id'       => $pessoal ? 'prohibited' : 'required|integer|exists:escolas,id',
             'titulo'          => 'required|string|max:255',
             'disciplina'      => 'required|string|max:100',
             'serie'           => 'required|string|max:50',
@@ -156,16 +162,17 @@ class ProvaController extends Controller
         $turmaIds = $data['turma_ids'] ?? [];
         unset($data['turma_ids']);
 
-        if ($erro = $this->foraDoEscopo($usuario, (int) $data['escola_id'], $turmaIds)) {
+        if ($erro = $this->foraDoEscopo($usuario, (int) ($data['escola_id'] ?? 0), $turmaIds)) {
             return $erro;
         }
 
         $data['criado_por'] = $usuario->id;
         $data['status']     = 'rascunho';
 
-        $prova = DB::transaction(function () use ($data, $usuario, $turmaIds) {
+        $prova = DB::transaction(function () use ($data, $usuario, $turmaIds, $pessoal) {
             $prova = new Prova($data);
-            if (Espacos::ativo()) $prova->forceFill(Espacos::autoria(Espacos::daEscola($usuario, (int) $data['escola_id']), $usuario));
+            if (Espacos::ativo()) $prova->forceFill(Espacos::autoria($pessoal ?? Espacos::daEscola($usuario, (int) $data['escola_id']), $usuario));
+            if ($pessoal) $prova->forceFill(['escola_id'=>null, 'espaco_tipo'=>'pessoal']);
             $prova->save();
 
             if ($turmaIds) {

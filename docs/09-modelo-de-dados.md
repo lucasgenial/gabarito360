@@ -491,3 +491,7 @@ Adicionar:
 - Adicionar campo `pontos_questao` configurável
 
 Estes campos não precisam ser implementados no MVP, mas a estrutura não deve impossibilitá-los.
+
+### Expansão T3-B
+
+Migration `2026_11_01_000006_preparar_dados_pessoais`: novo perfil de vínculo `professor_autonomo`; `espaco_tipo` com FK composta nas raízes e triggers para escola/pessoal e cadastro mínimo; escola nullable em turmas/provas; snapshot `cartoes.turma_aplicacao_id` com FK composta. Sem conversão de identidade ou backfill inferido do histórico. Contrato e gates em [docs/64](64-t3-b-dados-e-formularios-pessoais.md).

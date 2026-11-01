@@ -47,6 +47,10 @@ class Escopo
     public static function turmaIds(Usuario $u): ?array
     {
         RegimeVinculos::exigir($u);
+        if ($pessoal = EspacoPessoal::doAtor($u)) {
+            return DB::table('turmas')->where('espaco_id', $pessoal)->where('espaco_tipo', 'pessoal')
+                ->whereNull('escola_id')->pluck('id')->map(fn ($id) => (int) $id)->all();
+        }
         // Aluno não recebe a turma inteira por ter vínculo individual.
         if (ContextoVinculo::presente($u) && $u->perfil === 'aluno') return [];
         if ($u->perfil === 'professor') {
@@ -79,7 +83,7 @@ class Escopo
         Espacos::conferirEscola($q, 'provas');
 
         $escolas = self::escolaIds($u);
-        if ($escolas !== null) {
+        if ($escolas !== null && !EspacoPessoal::doAtor($u)) {
             $q->whereIn('provas.escola_id', $escolas);
         }
 

@@ -29,6 +29,21 @@ class VinculosMariaDbTest extends TestCase
         catch (QueryException $e) { $this->assertNotEmpty($e->getCode()); }
     }
 
+    public function test_t3_migracao_retomavel_preserva_pessoal_e_suas_restricoes(): void
+    {
+        DB::table('espacos')->insert(['id'=>2,'cliente_id'=>1,'tipo'=>'pessoal','nome'=>'Pessoal','situacao'=>'ativo','usuario_proprietario_id'=>1]);
+        DB::table('usuario_vinculos')->insert(['id'=>1,'usuario_id'=>1,'espaco_id'=>2,'perfil'=>'professor_autonomo','situacao'=>'ativo','inicio_em'=>now()]);
+        DB::table('turmas')->insert(['id'=>1,'espaco_id'=>2,'espaco_tipo'=>'pessoal','nome'=>'Turma','serie'=>'3','turno'=>'tarde','ano_letivo'=>2026]);
+        DB::table('alunos')->insert(['id'=>1,'turma_id'=>1,'espaco_id'=>2,'espaco_tipo'=>'pessoal','nome'=>'Fictício','matricula'=>'T3-1']);
+        $migration=require database_path('migrations/2026_11_01_000006_preparar_dados_pessoais.php');
+        $migration->up();
+        $this->assertDatabaseHas('usuario_vinculos',['id'=>1,'perfil'=>'professor_autonomo']);
+        $this->assertDatabaseHas('alunos',['id'=>1,'espaco_tipo'=>'pessoal']);
+        $this->recusa(fn()=>DB::table('alunos')->where('id',1)->update(['cpf'=>'12345678901']));
+        $this->recusa(fn()=>DB::table('turmas')->where('id',1)->update(['espaco_tipo'=>'escola']));
+        $this->assertFalse(config('espacos.pessoal'));
+    }
+
     public function test_expansao_retomavel_preserva_dados_e_aplica_constraints(): void
     {
         $v = ['id' => 1, 'usuario_id' => 1, 'espaco_id' => 1, 'perfil' => 'admin_rede', 'situacao' => 'ativo', 'inicio_em' => now()];
