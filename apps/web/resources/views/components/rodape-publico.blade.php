@@ -22,7 +22,8 @@
       <ul class="rodape-redes" aria-label="Redes sociais oficiais">
         <li><a href="https://www.instagram.com/gabarito360/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @gabarito360 (abre em nova aba)">Instagram · @gabarito360</a></li>
         <li><a href="https://www.facebook.com/gabarito360/" target="_blank" rel="noopener noreferrer" aria-label="Facebook @gabarito360 (abre em nova aba)">Facebook · @gabarito360</a></li>
-        @foreach(['YouTube', 'TikTok'] as $rede)
+        <li><a href="https://www.tiktok.com/@gabarito360" target="_blank" rel="noopener noreferrer" aria-label="TikTok @gabarito360 (abre em nova aba)">TikTok · @gabarito360</a></li>
+        @foreach(['YouTube'] as $rede)
           <li><span>{{ $rede }}</span><span class="rodape-em-breve">Em breve</span></li>
         @endforeach
       </ul>
