@@ -34,7 +34,7 @@ Não executar exemplos genéricos de REVOKE em credenciais compartilhadas: isso 
 
 O alerta `auditoria_enfileiramento_indisponivel` agora passa pela lista positiva L3, sem contexto livre. Monitorar esse alerta, jobs falhos, atraso/profundidade de `baixa` e espaço disponível; falha deve abrir incidente e registrar possível lacuna. Limites e destinatário operacional serão definidos no ensaio, sem e-mails automáticos nesta entrega.
 
-Não aplicar particionamento nativo por mês ao esquema atual: a chave UUID global conflita com a exigência de incluir o mês nas chaves únicas. Projeto posterior deve ensaiar ledger global de deduplicação + tabela mensal, ou arquivo mensal verificável, incluindo replay tardio e preservação parcial. Índices atuais são mantidos. Fonte: [MariaDB — limitações](https://mariadb.com/docs/server/server-usage/partitioning-tables/partitioning-limitations).
+Não aplicar particionamento nativo por mês ao esquema atual: a chave UUID global conflita com a exigência de incluir o mês nas chaves únicas. AU1-B3 propõe arquivo mensal verificável, com replay tardio e preservação do mês inteiro. Índices e unicidade global atuais são mantidos; a cópia não diminui o banco. Fonte: [MariaDB — limitações](https://mariadb.com/docs/server/server-usage/partitioning-tables/partitioning-limitations).
 
 ## Falha, interrupção e escalonamento
 
@@ -52,3 +52,19 @@ O comando de conferência não precisa de rollback: não altera dados. Para falh
 O responsável aprovou 180 dias com preservação excepcional documentada. O padrão e `.env.example` passam a 180; arquivos `.env` existentes não são alterados. Valor vazio explícito continua sinalizando política não configurada, para evitar uma ativação implícita durante a release. Não há expurgo.
 
 O job CI `auditoria-recuperacao` cria serviços descartáveis MariaDB/Redis, prova os grants da credencial do job, falha e recuperação do banco dedicado, payload cifrado, snapshot Redis com job pendente, parada/reinício e replay idempotente. O script exige banco `g360_auditoria_ci`, loopback e ambiente de teste, e não deve ser executado no servidor. É teste de fila com snapshot Redis; não comprova restauração completa de banco/contêiner nem desempenho em volume real. AU1-B3 continua necessário.
+
+## AU1-B3: cópia mensal cifrada
+
+Com escritores parados e destino fora de qualquer diretório público, usar `php artisan g360:arquivar-auditoria AAAA-MM /destino/privado/revisao-nova`. Aceita apenas mês UTC fechado e diretório inexistente, com pai previamente criado. Cria diretório 0700 e arquivos 0600 em Linux; em Windows, aplicar ACL equivalente antes do uso. Não habilita captura, não escreve no banco e não executa expurgo. Não há agendamento automático.
+
+O pacote contém `eventos.enc` (um evento cifrado e autenticado por linha, com APP_KEY) e `manifesto.json` (mês, contagem e digests). O digest do conteúdo canônico coincide com o manifesto de conferência do banco. O manifesto só é gravado após fechar o arquivo; falha deixa pacote incompleto que não pode ser utilizado. Não sobrescrever nem completar manualmente: investigar e gerar outra revisão em novo destino.
+
+Verificar com `php artisan g360:arquivar-auditoria AAAA-MM /destino/privado/revisao-nova --verificar`. A verificação não consulta o banco e não expõe conteúdo decifrado. Confere chave, cifra, sequência UUID, quantidade e digests; falha retorna código não zero. Guardar a referência SHA-256 externamente, com acesso separado: um pacote e seu manifesto alterados em conjunto não são evidência independente.
+
+Evento tardio em mês fechado exige nova revisão e comparação com a referência anterior. Não substituir a anterior. Preservação excepcional continua cobrindo o mês inteiro e todas as revisões correspondentes; o pacote não é autorização de eliminação. Cópias cifradas ainda contêm dados pessoais: acesso, transporte, chaves e conservação seguem o procedimento restrito de backup.
+
+## AU1-B3: ensaio descartável de restauração dos serviços
+
+`scripts/auditoria/ensaio-restauracao.sh` é exclusivo do runner CI, com banco fictício e Docker local. Faz dump de todos os bancos do serviço MariaDB de teste, incluindo grants, salva Redis com pendência, para as origens e restaura em contêineres novos com volumes próprios. Confere manifesto antes do consumo, grants, tabela de controle fora da auditoria, migrations, arquivo mensal, job cifrado pendente e replay sem duplicação. A chave da aplicação é mantida no runner e não é impressa. Backups e chaves não são publicados como artefatos.
+
+O ensaio mede sua própria duração; isso não é RTO de produção. Não restaura o contêiner Proxmox, unidades systemd, arquivos de usuários, duas cópias externas ou volume real. Restauração completa em ambiente equivalente e teste de capacidade continuam pendentes; AU1 não está concluído nem autorizado para ativação. Revisão do plano em [AU1-B3](../75-au1-b3-arquivos-e-restauracao.md).
