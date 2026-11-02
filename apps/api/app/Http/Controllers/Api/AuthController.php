@@ -41,6 +41,8 @@ class AuthController extends Controller
         // O token de quem precisa trocar a senha só abre a troca (ver SenhaTrocada).
         $nomeToken = $usuario->forcar_troca_senha ? SenhaTrocada::TOKEN_RESTRITO : 'api-token';
         $token = $usuario->createToken($nomeToken)->plainTextToken;
+        // Identidade confirmada pelo servidor; não é inferida do e-mail enviado.
+        $request->attributes->set('auditoria.usuario_id', (int) $usuario->id);
 
         $ehTitular = Assinatura::where('titular_id', $usuario->id)->exists();
 
