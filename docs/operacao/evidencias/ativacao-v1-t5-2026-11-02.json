@@ -1,0 +1,117 @@
+{
+  "release": "a90fbf51d1ddc89a34b808c9de1c2997d1705914",
+  "fase": "INICIAL-V1-T5",
+  "migracoes_aplicadas": 21,
+  "preservacao": {
+    "modo": "conferir",
+    "preservado": true,
+    "tabelas": {
+      "turmas": 14,
+      "alunos": 414,
+      "provas": 4,
+      "prova_turmas": 8,
+      "gabaritos": 4,
+      "gabarito_questoes": 180,
+      "cartoes": 47,
+      "cartao_respostas": 2115,
+      "notas": 47,
+      "ambiguidade_logs": 28,
+      "cartao_envios": 0,
+      "visitas": 0,
+      "sincronizacoes_seges": 0
+    },
+    "arquivos": 47,
+    "identidades_decifradas": 7
+  },
+  "backup_final": {
+    "utc": "2026-11-02T15:26:06.001549-03:00",
+    "arquivos": [
+      {
+        "arquivo": "vzdump-lxc-106-2026_11_02-15_10_12.tar.zst",
+        "bytes": 2235381567,
+        "sha256": "86a8d81cc87856dec4c85b1f4dd937bdcad6457d2dbda0a012c4b5d4c5ccc10d"
+      },
+      {
+        "arquivo": "vzdump-lxc-111-2026_11_02-15_13_09.tar.zst",
+        "bytes": 8794201239,
+        "sha256": "d8e9d7553be0f9e9de84d5a568a275c78f3d10d2cf583f9ee4f8c4d0d40d4dd5"
+      }
+    ]
+  },
+  "restauracao_backup_final": {
+    "temporarios": {
+      "9106": "g360-t2-db-20261102",
+      "9111": "g360-t2-app-20261102"
+    },
+    "sem_rede_externa": true,
+    "tempos_s": {
+      "restaurar_9106": 43.51,
+      "restaurar_9111": 417.42,
+      "boot_e_servicos": 49.47,
+      "restauracao_ate_health": 510.41
+    },
+    "inicio_utc": "2026-11-02T15:23:02.642322-03:00",
+    "mariadb_check": true,
+    "servicos_ativos": true,
+    "health": 200
+  },
+  "comparacao_restaurada": {
+    "modo": "conferir",
+    "preservado": true,
+    "tabelas": {
+      "turmas": 14,
+      "alunos": 414,
+      "provas": 4,
+      "prova_turmas": 8,
+      "gabaritos": 4,
+      "gabarito_questoes": 180,
+      "cartoes": 47,
+      "cartao_respostas": 2115,
+      "notas": 47,
+      "ambiguidade_logs": 28,
+      "cartao_envios": 0,
+      "visitas": 0,
+      "sincronizacoes_seges": 0
+    },
+    "arquivos": 47,
+    "identidades_decifradas": 7
+  },
+  "interface": {
+    "login": true,
+    "logout": true,
+    "verificacoes": [
+      {
+        "vinculo": 1,
+        "pagina": "/painel",
+        "http": 200
+      },
+      {
+        "vinculo": 1,
+        "pagina": "/provas",
+        "http": 200
+      },
+      {
+        "vinculo": 1,
+        "pagina": "/copias",
+        "http": 200
+      },
+      {
+        "vinculo": 2,
+        "pagina": "/painel",
+        "http": 200
+      },
+      {
+        "vinculo": 2,
+        "pagina": "/provas",
+        "http": 200
+      },
+      {
+        "vinculo": 2,
+        "pagina": "/copias",
+        "http": 200
+      }
+    ]
+  },
+  "clones_encerrados": true,
+  "contas_internas": "pendentes da escolha sobre identificadores de teste no CPF obrigatorio; nao criadas no servidor"
+}
