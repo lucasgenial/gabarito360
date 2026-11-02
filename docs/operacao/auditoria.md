@@ -1,6 +1,6 @@
 # Conservação e recuperação da auditoria — preparação, não ativação
 
-Responsável: administrador da infraestrutura. Uso: antes e depois de restauração autorizada, ou em investigação de lacunas. Revisado em 01/11/2026; ainda não executado em ambiente equivalente.
+Responsável: administrador da infraestrutura. Uso: antes e depois de restauração autorizada, ou em investigação de lacunas. Revisado em 01/11/2026; ensaio em contêineres completos isolados e volume sintético registrado em [docs/76](../76-au1-ensaio-equivalente.md). Sem ativação no servidor.
 
 Pré-requisitos: release e esquema compatíveis, acesso de leitura ao banco, manifesto de referência protegido, destino isolado e autorização específica antes de parar serviços ou restaurar backups. Os comandos abaixo são executados em `apps/api`.
 
@@ -16,7 +16,7 @@ O inventário percorre a auditoria inteira em ordem de mês/UUID com cursor e me
 
 Antes de qualquer futura eliminação: responsável registra referência do incidente/apuração, meses cobertos, justificativa, data e responsável pela revisão em repositório operacional restrito; adiciona todos os meses ao bloqueio, gera manifesto e preserva cópia cifrada separada. Revisar periodicamente. Remover o bloqueio exige decisão registrada e nova conferência; não é automático. Não colocar nomes, motivos livres ou dados do incidente na configuração da aplicação.
 
-## Ensaio de restauração autorizado, ainda pendente no ambiente equivalente
+## Roteiro para repetir o ensaio de restauração autorizado
 
 1. Preparar destino isolado, com integrações externas e envio de mensagens desligados. Parar escritores da origem do ensaio e drenar a fila `baixa`; registrar pendências e falhas sem revelar payload.
 2. Salvar a saída de `g360:conferir-auditoria` em manifesto restrito. Guardar backup consistente do banco e Redis e chaves de cifra pelo procedimento existente, em duas cópias. SHA-256 do manifesto/backup deve ficar em referência independente; um digest sozinho não impede adulteração conjunta.
@@ -51,7 +51,7 @@ O comando de conferência não precisa de rollback: não altera dados. Para falh
 
 O responsável aprovou 180 dias com preservação excepcional documentada. O padrão e `.env.example` passam a 180; arquivos `.env` existentes não são alterados. Valor vazio explícito continua sinalizando política não configurada, para evitar uma ativação implícita durante a release. Não há expurgo.
 
-O job CI `auditoria-recuperacao` cria serviços descartáveis MariaDB/Redis, prova os grants da credencial do job, falha e recuperação do banco dedicado, payload cifrado, snapshot Redis com job pendente, parada/reinício e replay idempotente. O script exige banco `g360_auditoria_ci`, loopback e ambiente de teste, e não deve ser executado no servidor. É teste de fila com snapshot Redis; não comprova restauração completa de banco/contêiner nem desempenho em volume real. AU1-B3 continua necessário.
+O job CI `auditoria-recuperacao` cria serviços descartáveis MariaDB/Redis, prova os grants da credencial do job, falha e recuperação do banco dedicado, payload cifrado, snapshot Redis com job pendente, parada/reinício e replay idempotente. O script exige banco `g360_auditoria_ci`, loopback e ambiente de teste, e não deve ser executado no servidor. O ensaio inicial de fila foi complementado pelo AU1-B3 abaixo e pela recuperação completa documentada em docs/76.
 
 ## AU1-B3: cópia mensal cifrada
 
@@ -67,4 +67,4 @@ Evento tardio em mês fechado exige nova revisão e comparação com a referênc
 
 `scripts/auditoria/ensaio-restauracao.sh` é exclusivo do runner CI, com banco fictício e Docker local. Faz dump de todos os bancos do serviço MariaDB de teste, incluindo grants, salva Redis com pendência, para as origens e restaura em contêineres novos com volumes próprios. Confere manifesto antes do consumo, grants, tabela de controle fora da auditoria, migrations, arquivo mensal, job cifrado pendente e replay sem duplicação. A chave da aplicação é mantida no runner e não é impressa. Backups e chaves não são publicados como artefatos.
 
-O ensaio mede sua própria duração; isso não é RTO de produção. Não restaura o contêiner Proxmox, unidades systemd, arquivos de usuários, duas cópias externas ou volume real. Restauração completa em ambiente equivalente e teste de capacidade continuam pendentes; AU1 não está concluído nem autorizado para ativação. Revisão do plano em [AU1-B3](../75-au1-b3-arquivos-e-restauracao.md).
+O ensaio CI mede sua própria duração; isso não é RTO de produção. Não restaura o contêiner Proxmox, unidades systemd, arquivos de usuários, duas cópias externas ou volume real. Ele foi complementado pelo ensaio de contêineres completos, chaves, arquivos, reinício e 1,8 milhão de eventos sintéticos em [docs/76](../76-au1-ensaio-equivalente.md). A ativação no servidor ainda requer release autorizada e seus controles operacionais. Decisão de arquitetura em [AU1-B3](../75-au1-b3-arquivos-e-restauracao.md).
