@@ -63,3 +63,4 @@ php scripts/auditoria/ensaio-copias.php recuperar
 php apps/api/artisan g360:arquivar-auditoria 2026-01 "$pacote/mensal-posterior" > /dev/null
 php apps/api/artisan g360:arquivar-auditoria 2026-01 "$pacote/mensal" --verificar > /dev/null
 printf '{"fase":"restauracao-servicos","containers_novos":true,"manifesto_confere":true,"arquivo_verificado":true,"duracao_segundos":%d}\n' "$((SECONDS-inicio))"
+bash scripts/auditoria/ensaio-copias-restauracao.sh
