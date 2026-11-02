@@ -1,5 +1,9 @@
 # Conservação e recuperação da auditoria — preparação, não ativação
 
+Responsável: administrador da infraestrutura. Uso: antes e depois de restauração autorizada, ou em investigação de lacunas. Revisado em 01/11/2026; ainda não executado em ambiente equivalente.
+
+Pré-requisitos: release e esquema compatíveis, acesso de leitura ao banco, manifesto de referência protegido, destino isolado e autorização específica antes de parar serviços ou restaurar backups. Os comandos abaixo são executados em `apps/api`.
+
 ## Comando somente de leitura
 
 `php artisan g360:conferir-auditoria` emite contagens e SHA-256 por mês, sem identidades ou conteúdo de eventos. Prazo vazio significa política ainda não definida. `--dias=180` é simulação explícita; não aprova a política e não exclui dados. Meses em `AUDITORIA_MESES_PRESERVADOS=2026-01,2026-02` ficam preservados integralmente. Configuração inválida impede a conferência.
@@ -31,3 +35,14 @@ Não executar exemplos genéricos de REVOKE em credenciais compartilhadas: isso 
 O alerta `auditoria_enfileiramento_indisponivel` agora passa pela lista positiva L3, sem contexto livre. Monitorar esse alerta, jobs falhos, atraso/profundidade de `baixa` e espaço disponível; falha deve abrir incidente e registrar possível lacuna. Limites e destinatário operacional serão definidos no ensaio, sem e-mails automáticos nesta entrega.
 
 Não aplicar particionamento nativo por mês ao esquema atual: a chave UUID global conflita com a exigência de incluir o mês nas chaves únicas. Projeto posterior deve ensaiar ledger global de deduplicação + tabela mensal, ou arquivo mensal verificável, incluindo replay tardio e preservação parcial. Índices atuais são mantidos. Fonte: [MariaDB — limitações](https://mariadb.com/docs/server/server-usage/partitioning-tables/partitioning-limitations).
+
+## Falha, interrupção e escalonamento
+
+| Sinal | Conduta |
+| --- | --- |
+| `politica_definida=false` | Registrar prazo pendente; não interpretar meses como liberados para exclusão. |
+| `restauracao_confere=false` ou saída 1 | Parar a aprovação da restauração; conferir se origem estava congelada, manifesto corresponde ao backup e fila foi consumida na etapa correta. Não sobrescrever a referência para esconder divergência. |
+| Conferência indisponível | Conferir esquema/configuração/permissão de leitura e validade do manifesto; não despejar credenciais ou dados de eventos no terminal. |
+| Job falho ou alerta de enfileiramento | Acionar administrador, preservar evidências e registrar intervalo da possível lacuna; só repetir job após diagnosticar a falha e confirmar chave de cifra. |
+
+O comando de conferência não precisa de rollback: não altera dados. Para falha de restauração, manter o destino isolado e a origem preservada; retomar somente pelo roteiro de backup existente e pela decisão do administrador. Não reverter o banco original nem desabilitar proteções para obter resultado verde. Canal de escalonamento é o acompanhamento deste projeto com o responsável; nenhum envio automático foi configurado.
