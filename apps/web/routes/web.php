@@ -65,6 +65,14 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/copias', [\App\Http\Controllers\CopiaController::class,'index'])->name('copias.index');
     Route::get('/copias/materiais', [\App\Http\Controllers\SelecaoMaterialCopiaController::class,'index'])->name('copias.materiais');
     Route::post('/copias/materiais/previa', [\App\Http\Controllers\SelecaoMaterialCopiaController::class,'previa'])->name('copias.materiais.previa');
+    Route::get('/copias/receber-material', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'receber'])->name('copias.material.receber');
+    Route::post('/copias/receber-material', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'emitir'])->name('copias.material.emitir');
+    Route::post('/copias/materiais/preparar', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'preparar'])->name('copias.material.preparar');
+    Route::post('/copias/materiais/lotes', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'criar'])->name('copias.material.criar');
+    Route::post('/copias/materiais/abrir', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'abrir'])->name('copias.material.abrir');
+    Route::get('/copias/materiais/lotes/{id}', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'show'])->whereUuid('id')->name('copias.material.decisao');
+    Route::post('/copias/materiais/lotes/{id}/revisar', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'revisar'])->whereUuid('id')->name('copias.material.revisar');
+    Route::post('/copias/materiais/lotes/{id}/aprovar', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'aprovar'])->whereUuid('id')->name('copias.material.aprovar');
     Route::post('/vinculos/convite/consultar', [\App\Http\Controllers\ConviteVinculoController::class, 'consultar'])->middleware('throttle:20,1')->name('vinculos.convite.consultar');
     Route::post('/vinculos/convite/responder', [\App\Http\Controllers\ConviteVinculoController::class, 'responder'])->middleware('throttle:10,1')->name('vinculos.convite.responder');
     Route::get('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'index'])->name('vinculos.index');

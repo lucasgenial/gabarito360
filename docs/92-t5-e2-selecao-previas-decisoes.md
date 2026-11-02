@@ -7,7 +7,7 @@ Revisão antes da implementação, após merges #123/#124. E1 (#125) continua em
 | Parte | Entrega | Fronteira |
 |---|---|---|
 | E2a — este incremento | Seleção paginada de provas e prévia dos materiais na origem | Somente leitura; não cria lote, revisão, destinatário ou decisão |
-| E2b | Identificação explícita do destinatário e duas decisões para materiais | Revisar compartilhamento mínimo e confirmação do espaço de destino antes de expor criação/aprovação HTTP; nunca receber credenciais/atores de outro contexto |
+| E2b — implementação em revisão, docs/93 | Código temporário do destinatário, confirmação de espaço/seleção, revisão e duas decisões para materiais | Nome/tipo do destino mediante código; material somente após saída válida; consumo atômico; nunca receber credenciais/atores de outro contexto; sem execução |
 | E2c | Cadastro e resultados: dependências, evidência restrita, guarda e reconhecimento do legado | Não reaproveitar revisão de material; não divulgar documento ao outro contexto |
 | E3 | Execução, revogação/retentativa e consulta do acervo | Ações explícitas e revalidação dos contratos já implementados |
 
