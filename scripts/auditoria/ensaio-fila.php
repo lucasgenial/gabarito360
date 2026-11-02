@@ -7,7 +7,8 @@ $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 use App\Jobs\GravarAuditoria;
 use Illuminate\Support\Facades\{DB, Queue, Redis};
 
-function conferir(bool $ok, string $codigo): void { if (!$ok) throw new RuntimeException($codigo); }
+class FalhaEnsaio extends RuntimeException {}
+function conferir(bool $ok, string $codigo): void { if (!$ok) throw new FalhaEnsaio($codigo); }
 try {
     conferir(getenv('G360_AUDITORIA_ENSAIO') === '1' && app()->environment('testing')
         && config('database.connections.mariadb.database') === 'g360_auditoria_ci'
@@ -55,7 +56,7 @@ try {
         $request=Illuminate\Http\Request::create('/api/v1/alunos','GET',[],[],[],['HTTP_ACCEPT'=>'application/json']);
         $kernel=app(Illuminate\Contracts\Http\Kernel::class);
         $response=$kernel->handle($request); $kernel->terminate($request,$response);
-        conferir($response->getStatusCode()===401,'falha_fila_alterou_resposta');
+        conferir($response->getStatusCode()===401,'resposta_http_'.$response->getStatusCode());
         conferir($alerta,'falha_fila_sem_alerta');
         echo json_encode(['fase'=>$fase,'resposta_preservada'=>true,'alerta_emitido'=>true]).PHP_EOL;
     } elseif ($fase === 'recuperar') {
@@ -66,5 +67,5 @@ try {
     } else throw new RuntimeException('fase_invalida');
 } catch (Throwable $e) {
     // Não imprimir conexão, credencial, payload ou exceção livre.
-    fwrite(STDERR,'Ensaio de auditoria falhou: '.get_class($e).PHP_EOL); exit(1);
+    fwrite(STDERR,'Ensaio de auditoria falhou: '.($e instanceof FalhaEnsaio ? $e->getMessage() : get_class($e)).PHP_EOL); exit(1);
 }
