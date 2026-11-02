@@ -1,6 +1,6 @@
 # Auditoria geral
 
-AU1-A prepara a captura da API; AU1-B ainda é necessária antes de concluir AU1. Não existe tela de consulta nesta entrega (AU2).
+AU1-A e AU1-B implementam captura, credencial dedicada, conferência e cópia mensal. A recuperação completa em clones isolados e o volume sintético foram validados em [docs/76](76-au1-ensaio-equivalente.md). A captura continua desligada no servidor e a ativação depende de release autorizada, configuração e grants próprios. Não existe tela de consulta nesta entrega (AU2).
 
 ## Registro e privacidade
 

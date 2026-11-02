@@ -17,3 +17,5 @@ Atualização após PR #107: responsável aprovou explicitamente 180 dias com pr
 O MariaDB exige que toda chave única inclua a coluna de particionamento. Particionar por mês mudaria a garantia atual de UUID global. Não alterar a chave apenas para cumprir uma etapa do plano. Esta preparação não conclui AU1: faltam ensaio de recuperação completa em ambiente equivalente, credenciais restritas e solução física mensal aprovada antes da ativação. T5 continua pendente dessa conclusão. AU1-B2 trata credencial de gravação e fila isolada (docs/74).
 
 Fonte técnica: [limitações de particionamento MariaDB](https://mariadb.com/docs/server/server-usage/partitioning-tables/partitioning-limitations).
+
+Atualização após os PRs #108/#109: credencial dedicada e arquivo mensal cifrado incorporados. Recuperação completa e volume sintético foram validados em [docs/76](76-au1-ensaio-equivalente.md); os requisitos restantes pertencem à preparação e autorização da ativação no servidor.
