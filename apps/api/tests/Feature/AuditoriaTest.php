@@ -191,7 +191,7 @@ class AuditoriaTest extends TestCase
         $this->assertStringNotContainsString('SEGREDO',json_encode($job->evento));
         $invalido=$job->evento;
         $invalido['rota']=null;
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(\LogicException::class);
         (new GravarAuditoria($invalido))->handle();
     }
 

@@ -41,10 +41,11 @@ class LotesCopia
             DB::table('copias_lotes')->insert(['id'=>$lote, 'chave'=>$chave, 'origem_espaco_id'=>$origem,
                 'destino_espaco_id'=>$destino, 'solicitante_id'=>$ator['usuario_id'], 'solicitante_vinculo_id'=>$ator['vinculo_id'],
                 'finalidade'=>'preparacao_material', 'politica'=>self::POLITICA, 'pedido_digest'=>$pedido,
-                'selecao_digest'=>$selecao, 'estado'=>'aguardando_autorizacao', 'total_itens'=>count($itens),
+                'selecao_digest'=>$selecao, 'estado'=>'aguardando_autorizacao', 'total_itens'=>count($itens), 'auditoria_versao'=>1,
                 'created_at'=>now(), 'updated_at'=>now()]);
             foreach ($itens as $item) DB::table('copias_itens')->insert($item + ['lote_id'=>$lote,
                 'origem_espaco_id'=>$origem, 'destino_espaco_id'=>$destino]);
+            OutboxCopia::registrar($lote,$solicitante,'solicitado');
             return $lote;
         });
     }
@@ -73,8 +74,9 @@ class LotesCopia
                     'ator_id'=>$contexto['usuario_id'], 'vinculo_id'=>$contexto['vinculo_id'],
                     'versao_acesso'=>$contexto['versao_acesso'], 'selecao_digest'=>$lote->selecao_digest,
                     'valida_ate'=>$validade, 'created_at'=>now()]);
+                OutboxCopia::registrar($id,$ator,'aprovado',$decisao);
             }
-            $this->conferir($lote);
+            $this->conferir($lote,$ator);
             return ['decisao_id'=>$decisao, 'estado'=>DB::table('copias_lotes')->where('id', $id)->value('estado')];
         });
     }
@@ -85,7 +87,7 @@ class LotesCopia
         return $this->transacao(function () use ($ator, $id, $lado) {
             $lote = $this->lote($id);
             $this->contexto($ator, $lote, $lado);
-            return $this->conferir($lote);
+            return $this->conferir($lote,$ator);
         });
     }
 
@@ -95,37 +97,39 @@ class LotesCopia
             $lote = $this->lote($id);
             $contexto = $this->contexto($ator, $lote, $lado);
             // Gestor atualmente elegível do mesmo lado pode interromper, sem aprovar em nome do anterior.
-            DB::table('copias_autorizacoes')->where('lote_id', $id)->where('lado', $lado)->whereNull('revogada_em')
+            $decisao = DB::table('copias_autorizacoes')->where('lote_id',$id)->where('lado',$lado)->first();
+            $alteradas = DB::table('copias_autorizacoes')->where('lote_id', $id)->where('lado', $lado)->whereNull('revogada_em')
                 ->update(['revogada_em'=>now(), 'revogada_por'=>$contexto['usuario_id'],
                     'revogada_vinculo_id'=>$contexto['vinculo_id'], 'revogada_versao_acesso'=>$contexto['versao_acesso']]);
-            $this->estado($lote, 'bloqueado');
+            if ($alteradas) OutboxCopia::registrar($id,$ator,'revogado',$decisao->id);
+            $this->estado($lote, 'bloqueado',$ator);
         });
     }
 
-    private function conferir(object $lote): bool
+    private function conferir(object $lote, Usuario $ator): bool
     {
         if ($lote->estado === 'bloqueado') return false;
         $decisoes = DB::table('copias_autorizacoes')->where('lote_id', $lote->id)->get();
         try {
-            if (!$this->fonteAtual($lote)) { $this->estado($lote, 'bloqueado'); return false; }
+            if (!$this->fonteAtual($lote)) { $this->estado($lote, 'bloqueado',$ator); return false; }
             foreach ($decisoes as $d) {
                 if ($d->revogada_em || CarbonImmutable::parse($d->valida_ate, 'UTC')->lessThanOrEqualTo(now())
                     || $d->selecao_digest !== $lote->selecao_digest) {
-                    $this->estado($lote, 'bloqueado'); return false;
+                    $this->estado($lote, 'bloqueado',$ator); return false;
                 }
                 $usuario = Usuario::find($d->ator_id);
                 abort_unless($usuario, 403);
                 $contexto = $this->contexto($usuario->noVinculo($d->vinculo_id), $lote, $d->lado);
                 if (!hash_equals($d->versao_acesso, $contexto['versao_acesso'])) {
-                    $this->estado($lote, 'bloqueado'); return false;
+                    $this->estado($lote, 'bloqueado',$ator); return false;
                 }
             }
         } catch (HttpException $e) {
             if (!in_array($e->getStatusCode(), [403, 404], true)) throw $e;
-            $this->estado($lote, 'bloqueado'); return false;
+            $this->estado($lote, 'bloqueado',$ator); return false;
         }
         if ($decisoes->count() !== 2) return false;
-        $this->estado($lote, 'aguardando_auditoria');
+        $this->estado($lote, 'aguardando_auditoria',$ator);
         return true;
     }
 
@@ -138,13 +142,15 @@ class LotesCopia
     private function lote(string $id): object
     {
         $lote = DB::table('copias_lotes')->where('id', $id)->lockForUpdate()->first();
-        abort_unless($lote && $lote->politica === self::POLITICA, 404, 'Lote indisponível.');
+        abort_unless($lote && $lote->politica === self::POLITICA && (int)$lote->auditoria_versao === 1, 404, 'Lote indisponível; prepare nova seleção.');
         return $lote;
     }
 
-    private function estado(object $lote, string $estado): void
+    private function estado(object $lote, string $estado, Usuario $ator): void
     {
+        if ($lote->estado === $estado) return;
         DB::table('copias_lotes')->where('id', $lote->id)->update(['estado'=>$estado, 'updated_at'=>now()]);
+        if ($estado === 'bloqueado') OutboxCopia::registrar($lote->id,$ator,'bloqueado');
     }
 
     private function fonteAtual(object $lote): bool
