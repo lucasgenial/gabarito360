@@ -495,3 +495,7 @@ Estes campos não precisam ser implementados no MVP, mas a estrutura não deve i
 ### Expansão T3-B
 
 Migration `2026_11_01_000006_preparar_dados_pessoais`: novo perfil de vínculo `professor_autonomo`; `espaco_tipo` com FK composta nas raízes e triggers para escola/pessoal e cadastro mínimo; escola nullable em turmas/provas; snapshot `cartoes.turma_aplicacao_id` com FK composta. Sem conversão de identidade ou backfill inferido do histórico. Contrato e gates em [docs/64](64-t3-b-dados-e-formularios-pessoais.md).
+
+### L4-B1 — protocolos de titulares
+
+Migration aditiva cria pedidos_titulares, pedido_titular_eventos e pedido_titular_recibos. O par espaço/cliente é protegido por FK composta. Relato, identificação declarada e motivos são cifrados; recibos contêm somente referência/estado/versão e HMAC do payload. Histórico é escrito junto da operação; não há exclusão automática nem down destrutivo. Contrato em docs/104-l4-b1-protocolos.md.
