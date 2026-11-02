@@ -53,4 +53,4 @@ A criação foi ensaiada apenas no clone descartado, mantendo o hash de senha do
 
 ## Próxima execução
 
-Concluir a observação operacional, encerrar o marcador da primeira ativação e usar o [fluxo por fase](99-publicacao-por-fase.md) a partir do SHA realmente publicado. A criação das contas e o aceite visual do responsável permanecem tarefas identificadas, sem bloquear por si só a consulta aos gabaritos existentes na versão publicada.
+O uso rotineiro exige a observação operacional final e o encerramento do marcador da primeira ativação. Usar o [fluxo por fase](99-publicacao-por-fase.md) a partir do SHA realmente publicado. A criação das contas e o aceite visual do responsável permanecem tarefas identificadas, sem bloquear por si só a consulta aos gabaritos existentes na versão publicada.
