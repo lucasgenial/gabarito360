@@ -27,11 +27,20 @@ class GravarAuditoria implements ShouldQueue, ShouldBeEncrypted
             throw new \LogicException('Credencial de auditoria obrigatória.');
         }
         $banco = DB::connection($nome);
+        if (($this->evento['metodo'] ?? null) === null) \App\Support\EventoCopia::validar($this->evento);
+        elseif (!is_string($this->evento['rota'] ?? null) || $this->evento['rota'] === ''
+            || !is_int($this->evento['status_http'] ?? null)) throw new \LogicException('Evento HTTP incompleto.');
         // Reentrega não altera o evento existente nem duplica o histórico.
         try {
             $banco->table('auditoria_eventos')->insert($this->evento);
         } catch (UniqueConstraintViolationException $e) {
-            if (!$banco->table('auditoria_eventos')->where('id', $this->evento['id'])->exists()) throw $e;
+            $existente = $banco->table('auditoria_eventos')->where('id', $this->evento['id'])->first();
+            if (!$existente) throw $e;
+            $esperado = (object) array_replace(array_fill_keys(\App\Services\ConferenciaAuditoria::CAMPOS,null),$this->evento);
+            if (!hash_equals(\App\Services\ConferenciaAuditoria::linhaCanonica($existente),
+                \App\Services\ConferenciaAuditoria::linhaCanonica($esperado))) {
+                throw new \LogicException('UUID de auditoria possui conteúdo divergente.');
+            }
         }
     }
 }
