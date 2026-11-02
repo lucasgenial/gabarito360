@@ -3,20 +3,14 @@
 @section('content')
 <x-pagina titulo="Prévia do cadastro"><x-slot:sub>Simulação para destino {{ $dados['tipo_destino']==='escola'?'escolar':'pessoal' }}.</x-slot:sub></x-pagina>
 <x-aviso>Esta prévia não identifica um destinatário, não autoriza nem inicia uma cópia. A solicitação ainda exigirá evidência aplicável e decisões separadas de origem e destino.</x-aviso>
-@if($dados['pendencias'])<x-aviso tipo="erro">Há data de nascimento ausente na seleção. O cadastro precisará de complementação autorizada antes de uma cópia para escola.</x-aviso>@endif
-@foreach($dados['turmas'] as $t)
-<section class="card card-pad" style="margin-top:20px;"><h2>{{ $t['dados']['nome'] }}</h2>
-  <dl><dt>Série</dt><dd>{{ $t['dados']['serie'] }}</dd><dt>Turno</dt><dd>{{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$t['dados']['turno']] }}</dd>
-    <dt>Ano letivo</dt><dd>{{ $t['dados']['ano_letivo'] }}</dd><dt>Ativa</dt><dd>{{ $t['dados']['ativo']?'Sim':'Não' }}</dd></dl>
-</section>
-@endforeach
-<section class="card card-pad" style="margin-top:20px;overflow-x:auto;">
-  <table class="table"><caption>{{ count($dados['alunos']) }} aluno(s) selecionado(s)</caption>
-    <thead><tr><th scope="col">Nome</th><th scope="col">Matrícula</th><th scope="col">Avatar</th><th scope="col">Ativo</th>@if($dados['tipo_destino']==='escola')<th scope="col">Nascimento</th>@endif</tr></thead>
-    <tbody>@forelse($dados['alunos'] as $a)<tr><td>{{ $a['dados']['nome'] }}</td><td>{{ $a['dados']['matricula'] }}</td><td>{{ $a['dados']['avatar_id'] ?? 'Não informado' }}</td><td>{{ $a['dados']['ativo']?'Sim':'Não' }}</td>
-      @if($dados['tipo_destino']==='escola')<td>{{ isset($a['dados']['data_nascimento'])?\Carbon\Carbon::parse($a['dados']['data_nascimento'])->format('d/m/Y'):'Pendente — não informado' }}</td>@endif</tr>
-    @empty<tr><td colspan="{{ $dados['tipo_destino']==='escola'?5:4 }}">Somente a turma foi selecionada. Nenhum aluno foi incluído automaticamente.</td></tr>@endforelse</tbody>
-  </table>
-</section>
+@include('copias._cadastro')
+<form method="POST" action="{{ route('copias.cadastro.preparar') }}" class="card card-pad" style="margin-top:20px;">
+  @csrf<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}"><input type="hidden" name="espaco_id" value="{{ $dados['origem_espaco_id'] }}">
+  @foreach($dados['turmas'] as $t)<input type="hidden" name="turmas[]" value="{{ $t['origem_id'] }}">@endforeach
+  @foreach($dados['alunos'] as $a)<input type="hidden" name="alunos[]" value="{{ $a['origem_id'] }}">@endforeach
+  <div class="field"><label for="codigo">Código de cadastro fornecido pelo destinatário</label><input class="input" id="codigo" name="codigo" required minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></div>
+  <p>Peça um código em “Receber cadastro”. Os campos serão conferidos novamente pelo tipo real do destino.</p>
+  <button class="btn btn-primary" type="submit">Conferir destino do cadastro</button>
+</form>
 <a class="btn btn-secondary" style="margin-top:20px;" href="{{ route('copias.cadastros',['espaco_id'=>$dados['origem_espaco_id'],'turma_id'=>$dados['turmas'][0]['origem_id'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">Voltar e fazer nova seleção</a>
 @endsection

@@ -1,7 +1,7 @@
 <?php
 namespace Tests\Feature;
 use App\Models\Usuario;
-use App\Services\{SelecaoMaterialCopia,LotesCopia,RecebimentosMaterial};
+use App\Services\{SelecaoMaterialCopia,LotesCopia,RecebimentosCopia};
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabaseState;
@@ -52,7 +52,7 @@ class DecisaoMaterialCopiaTest extends TestCase
     { try { $f(); $this->fail('Deveria recusar.'); } catch(HttpException $e) { $this->assertSame($status,$e->getStatusCode()); } }
     private function pedido(): array
     {
-        config(['copias.interface_ativa'=>true]); $s=new RecebimentosMaterial;
+        config(['copias.interface_ativa'=>true]); $s=new RecebimentosCopia;
         $r=$s->emitir($this->ator(1),7); $d=$s->consultar($this->ator(),5,$r['codigo']);
         $p=(new SelecaoMaterialCopia)->previa($this->ator(),5,[2]);
         return [$this->ator(),5,$r['codigo'],$d['destino_digest'],$p['conteudo_digest'],(string)Str::uuid(),[2]];
@@ -88,7 +88,7 @@ class DecisaoMaterialCopiaTest extends TestCase
     }
     public function test_expiracao_versao_papel_limite_e_flags(): void
     {
-        $a=$this->pedido(); $s=new RecebimentosMaterial;
+        $a=$this->pedido(); $s=new RecebimentosCopia;
         $this->recusa(404,fn()=>$s->consultar($this->ator(),5,str_repeat('f',64)));
         $this->recusa(404,fn()=>$s->consultar($this->ator(1),7,$a[2]));
         $this->recusa(403,fn()=>$s->emitir(Usuario::find(1)->noVinculo(3),6));
@@ -162,7 +162,7 @@ class DecisaoMaterialCopiaTest extends TestCase
     }
     public function test_mesma_identidade_exige_contextos_separados_e_destino_vigente(): void
     {
-        config(['copias.interface_ativa'=>true]); $r=new RecebimentosMaterial; $s=new LotesCopia;
+        config(['copias.interface_ativa'=>true]); $r=new RecebimentosCopia; $s=new LotesCopia;
         $codigo=$r->emitir($this->ator(4),6)['codigo']; $d=$r->consultar($this->ator(),5,$codigo);
         $p=(new SelecaoMaterialCopia)->previa($this->ator(),5,[2]);
         $id=$s->criarViaRecebimento($this->ator(),5,$codigo,$d['destino_digest'],$p['conteudo_digest'],(string)Str::uuid(),[2]);

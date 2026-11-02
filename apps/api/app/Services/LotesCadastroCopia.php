@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\{Crypt,DB};
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-/** Contrato interno de cadastro; sem endpoints ou exposição de documentos. */
+/** Contrato de cadastro e adaptador de interface, sem exposição de documentos. */
 final class LotesCadastroCopia
 {
     use \App\Services\Concerns\ExecutaCadastroCopia;
+    use \App\Services\Concerns\DecideCadastroInterface;
     public const POLITICA='t5-cadastro-v1';
 
     public function criar(Usuario $ator,int $origem,int $destino,string $chave,array $turmas,array $alunos): string
@@ -24,7 +25,11 @@ final class LotesCadastroCopia
         }
         abort_unless(count($turmas)+count($alunos)>=1 && count($turmas)+count($alunos)<=100,422);
         sort($turmas); sort($alunos); $chave=strtolower($chave);
-        return $this->transacao(function() use($ator,$origem,$destino,$chave,$turmas,$alunos) {
+        return $this->transacao(fn()=>$this->criarDentro($ator,$origem,$destino,$chave,$turmas,$alunos));
+    }
+
+    private function criarDentro(Usuario $ator,int $origem,int $destino,string $chave,array $turmas,array $alunos): string
+    {
             $c=ElegibilidadeCopia::lado($ator,$origem,'origem');
             $d=DB::table('espacos')->find($destino);
             abort_unless($d && in_array($d->tipo,['pessoal','escola'],true) && ContextoVinculo::espacoValido($d),403,'Destino indisponível.');
@@ -40,7 +45,7 @@ final class LotesCadastroCopia
             foreach ($itens as $item) DB::table('copias_itens')->insert($item+['lote_id'=>$id,'origem_espaco_id'=>$origem,'destino_espaco_id'=>$destino]);
             DB::table('copias_cadastros')->insert(['lote_id'=>$id,'conteudo_digest'=>$this->conteudo($p)]);
             OutboxCopia::registrar($id,$ator,'solicitado'); return $id;
-        });
+
     }
 
     public function previaOrigem(Usuario $ator,string $id): array
@@ -57,7 +62,11 @@ final class LotesCadastroCopia
         abort_unless($aplicabilidadeRevisada && trim($documento)!=='' && strlen($documento)<=65536
             && filter_var(trim($documento),FILTER_VALIDATE_URL)===false,422,'Evidência e revisão explícita obrigatórias.');
         $validade=$this->validade($validaAte);
-        return $this->transacao(function() use($ator,$id,$digest,$documento,$validade) {
+        return $this->transacao(fn()=>$this->evidenciaDentro($ator,$id,$digest,$documento,$validade));
+    }
+
+    private function evidenciaDentro(Usuario $ator,string $id,string $digest,string $documento,string $validade): string
+    {
             $l=$this->lote($id); $c=$this->contexto($ator,$l,'origem'); $p=$this->fonte($l);
             abort_unless(hash_equals($this->conteudo($p),$digest),409,'Prévia desatualizada.');
             $hash=hash('sha256',$documento);
@@ -73,13 +82,17 @@ final class LotesCadastroCopia
                 'categorias'=>json_encode($this->categorias($p),JSON_THROW_ON_ERROR),'documento_cifrado'=>Crypt::encryptString($documento),
                 'documento_digest'=>$hash,'confirmacao'=>'aplicabilidade_revisada','valida_ate'=>$validade,'created_at'=>now()]);
             OutboxCopia::registrar($id,$ator,'revisado'); return $eid;
-        });
+
     }
 
     public function aprovar(Usuario $ator,string $id,string $lado,CarbonImmutable $validaAte,?string $conciliacaoDigest=null): string
     {
         $validade=$this->validade($validaAte);
-        return $this->transacao(function() use($ator,$id,$lado,$validade,$conciliacaoDigest) {
+        return $this->transacao(fn()=>$this->aprovarDentro($ator,$id,$lado,$validade,$conciliacaoDigest));
+    }
+
+    private function aprovarDentro(Usuario $ator,string $id,string $lado,string $validade,?string $conciliacaoDigest): string
+    {
             $l=$this->lote($id); $c=$this->contexto($ator,$l,$lado);
             abort_unless($this->evidenciaValida($l),409,'Evidência indisponível.');
             $e=DB::table('copias_evidencias')->where('lote_id',$id)->first();
@@ -106,7 +119,7 @@ final class LotesCadastroCopia
                 DB::table('copias_lotes')->where('id',$id)->update(['estado'=>'aguardando_auditoria','updated_at'=>now()]);
             }
             OutboxCopia::registrar($id,$ator,'aprovado',$decisao); return $decisao;
-        });
+
     }
 
     public function conciliar(Usuario $ator,string $id): array
