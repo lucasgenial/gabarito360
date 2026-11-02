@@ -74,6 +74,24 @@ class ArquivoMensalAuditoriaTest extends TestCase
         $this->artisan('g360:arquivar-auditoria',['mes'=>'2026-01','destino'=>$dir,'--verificar'=>true])->assertFailed();
         $this->assertDatabaseCount('auditoria_eventos',2);
     }
+    public function test_arquivo_legado_com_ordem_nao_textual_confere_pelos_hashes_sem_banco(): void
+    {
+        $dir=$this->raiz.'/ordem-nativa'; mkdir($dir,0700); $plano=''; $cifrado='';
+        // Fixture v1 de ordem não lexical, possível com UUID nativo; não reordenar na leitura.
+        foreach ([2,1] as $id) {
+            $evento=(object)array_replace(array_fill_keys(ConferenciaAuditoria::CAMPOS,null),$this->evento($id));
+            $linha=ConferenciaAuditoria::linhaCanonica($evento);
+            $plano.=$linha; $cifrado.=Crypt::encryptString($linha)."\n";
+        }
+        file_put_contents($dir.'/eventos.enc',$cifrado);
+        $m=['versao'=>1,'mes'=>'2026-01','quantidade'=>2,'sha256'=>hash('sha256',$plano),'arquivo_sha256'=>hash('sha256',$cifrado)];
+        file_put_contents($dir.'/manifesto.json',json_encode($m));
+        $this->assertSame($m,(new ArquivoMensalAuditoria)->verificar('2026-01',$dir));
+        file_put_contents($dir.'/eventos.enc',implode("\n",array_reverse(explode("\n",trim($cifrado))))."\n");
+        $this->expectException(\RuntimeException::class);
+        (new ArquivoMensalAuditoria)->verificar('2026-01',$dir);
+    }
+
     public function test_recusa_mes_aberto_e_inconsistencia_e_verifica_copia_sem_banco(): void
     {
         foreach (['2026-11','2027-01','../2026-01','2026-99'] as $mes) {

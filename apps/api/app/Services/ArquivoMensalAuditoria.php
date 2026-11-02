@@ -62,16 +62,17 @@ final class ArquivoMensalAuditoria
         }
         $entrada = fopen($destino.'/eventos.enc', 'rb');
         if (!$entrada) throw new RuntimeException();
-        $hash = hash_init('sha256'); $cifra = hash_init('sha256'); $quantidade = 0; $anterior = null;
+        $hash = hash_init('sha256'); $cifra = hash_init('sha256'); $quantidade = 0;
         try {
             while (($cifrada = fgets($entrada, 1048577)) !== false) {
                 if (!str_ends_with($cifrada, "\n")) throw new RuntimeException();
                 $linha = Crypt::decryptString(substr($cifrada, 0, -1));
                 $evento = json_decode($linha, true, 32, JSON_THROW_ON_ERROR);
                 if (($evento['mes'] ?? null) !== $mes || !is_string($evento['id'] ?? null)
-                    || !preg_match('/^[a-f0-9-]{36}$/D', $evento['id'])
-                    || ($anterior !== null && strcmp($anterior, $evento['id']) >= 0)) throw new RuntimeException();
-                $anterior = $evento['id'];
+                    || !preg_match('/^[a-f0-9-]{36}$/D', $evento['id'])) throw new RuntimeException();
+                // MariaDB UUID nativo não usa necessariamente ordem textual. A ordem
+                // exata do arquivo é protegida pelos dois hashes do manifesto, sem
+                // reinterpretar ORDER BY id e sem mudar hashes de arquivos existentes.
                 hash_update($hash, $linha); hash_update($cifra, $cifrada); $quantidade++;
             }
             if (!feof($entrada)) throw new RuntimeException();
