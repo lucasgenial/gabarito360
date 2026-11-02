@@ -4,6 +4,8 @@ Solicitação aprovada pelo responsável em 02/11/2026, após observar a home re
 
 ## Comportamento
 
+Na mesma data, o responsável informou também o Facebook `@gabarito360`: link oficial `https://www.facebook.com/gabarito360/`, com o mesmo comportamento acessível do Instagram.
+
 Em 02/11/2026, o responsável informou o perfil oficial Instagram `@gabarito360`. O rodapé público passa a oferecer o link `https://www.instagram.com/gabarito360/`, em nova aba identificada de forma acessível; demais redes continuam em preparação.
 
 - Nginx entrega `/` e seu CSS diretamente de `/var/www/gabarito360-publico/current`, sem PHP, Redis ou banco na requisição pública. É a mesma home Blade existente, renderizada previamente de forma anônima; não há duplicação manual do conteúdo ou mudança de identidade visual.
