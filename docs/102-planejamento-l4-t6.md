@@ -27,6 +27,8 @@ Planejamento revisto em 02/11/2026 após autorização para avançar. Base: plan
 
 O primeiro incremento de implementação é L4-A. Cada microfase deve revisar este quadro, detalhar seu contrato, executar testes proporcionais e seguir o fluxo de publicação do doc. 99. Publicar a tela permite conferência visual pelo responsável; indisponibilidade do computer-use deve ser registrada, não tratada como teste aprovado.
 
+L4-A preparado para revisão em 02/11/2026: [contrato detalhado](103-l4-a-contrato-protocolos.md) e máquina de estados sem efeitos de escrita. Cinco testes unitários e 43 asserções aprovados localmente. Persistência, autorização por escopo e isolamento integrado ainda pertencem a L4-B; não há tela L4 disponível nesta microfase.
+
 ## Contratos a fechar em L4-A
 
 1. Separar pedido de titular, encerramento comercial e operação sobre dados. Um protocolo nunca dispara exportação/exclusão implicitamente.

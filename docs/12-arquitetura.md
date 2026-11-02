@@ -376,3 +376,7 @@ A gestão web transporta explicitamente vínculo-alvo; não envia alterações g
 ### T3-B — dados pessoais sob gate
 
 Tipo de raiz e espaço são ligados por FK composta; triggers recusam escola nula em cadastro escolar e dados excessivos de aluno pessoal. Contexto pessoal só é resolvido com `espacos.pessoal`, desligado por padrão. Mudança de turma fixa a turma histórica dos cartões em transação e preserva as notas. Consultas/relatórios distinguem turma atual da turma de aplicação. [Contrato e limites](64-t3-b-dados-e-formularios-pessoais.md).
+
+### L4-A — contrato de pedidos dos titulares
+
+EstadoPedidoTitular define transições sem acesso a banco ou efeitos sobre dados. Não concede autorização: fatos de identidade/autoridade vêm do serviço transacional futuro, com escopo e contexto revalidados. Contrato de persistência, permissões e validação em docs/103-l4-a-contrato-protocolos.md; registro/triagem ficam em L4-B.
