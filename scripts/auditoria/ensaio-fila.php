@@ -48,11 +48,16 @@ try {
         echo json_encode(['fase'=>$fase,'payload_cifrado'=>true,'privilegios_restritos'=>true,'retry_recuperado'=>true,'snapshot_com_pendencia'=>true]).PHP_EOL;
     } elseif ($fase === 'indisponivel') {
         config(['auditoria.ativa'=>true]);
+        $alerta=false;
+        \Illuminate\Support\Facades\Log::listen(function ($e) use (&$alerta) {
+            if ($e->message === 'auditoria_enfileiramento_indisponivel') $alerta=true;
+        });
         $request=Illuminate\Http\Request::create('/api/v1/alunos','GET',[],[],[],['HTTP_ACCEPT'=>'application/json']);
         $kernel=app(Illuminate\Contracts\Http\Kernel::class);
         $response=$kernel->handle($request); $kernel->terminate($request,$response);
         conferir($response->getStatusCode()===401,'falha_fila_alterou_resposta');
-        echo json_encode(['fase'=>$fase,'resposta_preservada'=>true]).PHP_EOL;
+        conferir($alerta,'falha_fila_sem_alerta');
+        echo json_encode(['fase'=>$fase,'resposta_preservada'=>true,'alerta_emitido'=>true]).PHP_EOL;
     } elseif ($fase === 'recuperar') {
         conferir(Queue::connection('redis')->size('baixa')===1,'snapshot_perdeu_job');
         $consumir(); $enviar(3); $consumir();
