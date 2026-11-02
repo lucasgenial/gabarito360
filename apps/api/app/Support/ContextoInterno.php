@@ -38,7 +38,13 @@ final class ContextoInterno
 
     public static function permissoes(Usuario $u): array
     {
-        return self::PERMISSOES[self::resolver($u)->perfil];
+        $perfil = self::resolver($u)->perfil;
+        $permissoes = self::PERMISSOES[$perfil];
+        if (config('pedidos_titulares.ativo') && in_array($perfil,['desenvolvedor','suporte'],true)) {
+            $permissoes[] = 'pedido.atender';
+            if ($perfil === 'desenvolvedor') $permissoes[] = 'pedido.abrir';
+        }
+        return $permissoes;
     }
 
     public static function pode(Usuario $u, string $permissao): bool
