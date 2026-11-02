@@ -982,7 +982,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
 | A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C #104 incorporado; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
-| AU1 Registro de auditoria | AU1-A #106 e preparação AU1-B #107 incorporados; 180 dias aprovados; B2 credencial/fila em revisão; B3 solução mensal e recuperação completa pendentes; sem deploy | Codex | docs/32 e docs/72–74 |
+| AU1 Registro de auditoria | AU1-A #106 e AU1-B #107–108 incorporados; 180 dias aprovados; B3 arquivos mensais cifrados e restauração dos serviços em revisão; ambiente equivalente e volume representativo pendentes; sem deploy | Codex | docs/32 e docs/72–75 |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |
 | A2 Painel técnico | pendente | | |
