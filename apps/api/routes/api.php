@@ -62,6 +62,12 @@ Route::prefix('v1')->group(function () {
         Route::get('copias/cadastros/lotes/{id}', [\App\Http\Controllers\Api\DecisaoCadastroCopiaController::class,'show'])->whereUuid('id')->middleware('throttle:60,1');
         Route::post('copias/cadastros/lotes/{id}/evidencia', [\App\Http\Controllers\Api\DecisaoCadastroCopiaController::class,'evidencia'])->whereUuid('id')->middleware('throttle:10,1');
         Route::post('copias/cadastros/lotes/{id}/aprovar', [\App\Http\Controllers\Api\DecisaoCadastroCopiaController::class,'aprovar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('copias/resultados/recebimentos', [\App\Http\Controllers\Api\DecisaoResultadosCopiaController::class,'emitir'])->middleware('throttle:5,1');
+        Route::post('copias/resultados/preparar', [\App\Http\Controllers\Api\DecisaoResultadosCopiaController::class,'preparar'])->middleware('throttle:10,1');
+        Route::post('copias/resultados/lotes', [\App\Http\Controllers\Api\DecisaoResultadosCopiaController::class,'criar'])->middleware('throttle:10,1');
+        Route::get('copias/resultados/lotes/{id}', [\App\Http\Controllers\Api\DecisaoResultadosCopiaController::class,'show'])->whereUuid('id')->middleware('throttle:60,1');
+        Route::post('copias/resultados/lotes/{id}/evidencia', [\App\Http\Controllers\Api\DecisaoResultadosCopiaController::class,'evidencia'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('copias/resultados/lotes/{id}/aprovar', [\App\Http\Controllers\Api\DecisaoResultadosCopiaController::class,'aprovar'])->whereUuid('id')->middleware('throttle:10,1');
         Route::get('copias/resultados', [\App\Http\Controllers\Api\SelecaoResultadosCopiaController::class,'index'])->middleware('throttle:60,1');
         Route::post('copias/resultados/previa', [\App\Http\Controllers\Api\SelecaoResultadosCopiaController::class,'previa'])->middleware('throttle:20,1');
         Route::get('copias/cadastros', [\App\Http\Controllers\Api\SelecaoCadastroCopiaController::class,'index'])->middleware('throttle:60,1');
