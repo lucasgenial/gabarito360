@@ -62,3 +62,5 @@ Validação por tokens temporários, removidos ao final: as três contas consult
 ## Atualização da cadência e de L4-B
 
 L4-A e backend L4-B1/B2 integrados pelos PRs #139–141. A interface L4-B3 é detalhada no doc. 106. Conforme orientação atual do usuário, não publicar microfases nem L4-B isoladamente: deploy e migrations ficam para o fechamento completo de L4 (A–E). Até lá, validar localmente e no CI. Esta regra substitui previsões anteriores de publicação intermediária.
+
+L4-B3 integrado no PR #142, com cinco checks aprovados. L4-C foi dividido em C1 (contrato), C2 (sujeito e concessão), C3 (geração), C4 (entrega) e C5 (interface/ensaio), conforme doc. 107. C1 não disponibiliza exportações e não altera o catálogo de permissões. Permanece a publicação somente no fechamento de L4 completo.
