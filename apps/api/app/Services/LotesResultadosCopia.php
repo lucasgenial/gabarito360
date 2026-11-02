@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 final class LotesResultadosCopia
 {
     use \App\Services\Concerns\ExecutaResultadosCopia;
+    use \App\Services\Concerns\DecideResultadosInterface;
     public const POLITICA='t5-resultados-v1';
 
     public function criar(Usuario $ator,int $origem,int $destino,string $chave,array $notas,array $dependencias): string
@@ -25,7 +26,11 @@ final class LotesResultadosCopia
             $deps[$k]=$this->ids($dependencias[$k],20);
         }
         $chave=strtolower($chave);
-        return $this->transacao(function() use($ator,$origem,$destino,$chave,$notas,$deps) {
+        return $this->transacao(fn()=>$this->criarDentro($ator,$origem,$destino,$chave,$notas,$deps));
+    }
+
+    private function criarDentro(Usuario $ator,int $origem,int $destino,string $chave,array $notas,array $deps): string
+    {
             $c=ElegibilidadeCopia::lado($ator,$origem,'origem'); $d=DB::table('espacos')->find($destino);
             abort_unless($d && in_array($d->tipo,['escola','pessoal'],true) && ContextoVinculo::espacoValido($d),403,'Destino indisponível.');
             $pedido=$this->digest([self::POLITICA,$c['usuario_id'],$c['vinculo_id'],$origem,$destino,$notas,$deps]);
@@ -44,7 +49,7 @@ final class LotesResultadosCopia
             DB::table('copias_resultados')->insert(['lote_id'=>$id,'conteudo_cifrado'=>Crypt::encryptString($json),
                 'conteudo_digest'=>hash('sha256',$json),'solicitante_versao'=>$c['versao_acesso'],'capturado_em'=>now()->utc()]);
             OutboxCopia::registrar($id,$ator,'solicitado'); return $id;
-        });
+
     }
 
     public function previa(Usuario $ator,string $id,string $lado): array
@@ -66,7 +71,11 @@ final class LotesResultadosCopia
         $validade=$this->validade($validaAte);
         $doc=$this->json(['politica'=>self::POLITICA,'documento'=>$documento,'guarda_contratual'=>$guarda,
             'preservacao_excepcional'=>$preservacao,'legado_reconhecido'=>true]);
-        return $this->transacao(function() use($ator,$id,$digest,$doc,$validade) {
+        return $this->transacao(fn()=>$this->evidenciaDentro($ator,$id,$digest,$doc,$validade));
+    }
+
+    private function evidenciaDentro(Usuario $ator,string $id,string $digest,string $doc,string $validade): string
+    {
             $l=$this->lote($id); $c=$this->contexto($ator,$l,'origem'); $p=$this->fonte($l);
             abort_unless(hash_equals($this->digest($p),$digest),409,'Prévia desatualizada.');
             $hash=hash('sha256',$doc); $e=DB::table('copias_evidencias')->where('lote_id',$id)->first();
@@ -80,13 +89,17 @@ final class LotesResultadosCopia
                 'categorias'=>$this->json(PacoteResultadosCopia::CATEGORIAS),'documento_cifrado'=>Crypt::encryptString($doc),
                 'documento_digest'=>$hash,'confirmacao'=>'aplicabilidade_revisada','valida_ate'=>$validade,'created_at'=>now()]);
             OutboxCopia::registrar($id,$ator,'revisado'); return $eid;
-        });
+
     }
 
     public function aprovar(Usuario $ator,string $id,string $lado,string $digest,bool $legadoReconhecido,CarbonImmutable $validaAte): string
     {
         abort_unless($legadoReconhecido,422,'Reconhecimento do legado obrigatório.'); $validade=$this->validade($validaAte);
-        return $this->transacao(function() use($ator,$id,$lado,$digest,$validade) {
+        return $this->transacao(fn()=>$this->aprovarDentro($ator,$id,$lado,$digest,$validade));
+    }
+
+    private function aprovarDentro(Usuario $ator,string $id,string $lado,string $digest,string $validade): string
+    {
             $l=$this->lote($id); $c=$this->contexto($ator,$l,$lado); $p=$this->fonte($l);
             abort_unless(hash_equals($this->digest($p),$digest) && $this->evidenciaValida($l),409,'Evidência ou prévia indisponível.');
             $e=DB::table('copias_evidencias')->where('lote_id',$id)->first();
@@ -104,7 +117,7 @@ final class LotesResultadosCopia
             DB::table('copias_resultados_decisoes')->insert(['decisao_id'=>$aid,'conteudo_digest'=>$digest,'legado_reconhecido'=>true]);
             if ($lado==='destino') DB::table('copias_lotes')->where('id',$id)->update(['estado'=>'aguardando_auditoria','updated_at'=>now()]);
             OutboxCopia::registrar($id,$ator,'aprovado',$aid); return $aid;
-        });
+
     }
 
     public function situacao(Usuario $ator,string $id): array
