@@ -62,6 +62,10 @@ Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController:
 
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
+    Route::get('/copias/operacao/{id}', [\App\Http\Controllers\OperacaoCopiaController::class,'show'])->whereUuid('id')->name('copias.operacao');
+    Route::post('/copias/operacao/{id}/solicitar', [\App\Http\Controllers\OperacaoCopiaController::class,'solicitar'])->whereUuid('id')->name('copias.solicitar');
+    Route::post('/copias/operacao/{id}/revogar', [\App\Http\Controllers\OperacaoCopiaController::class,'revogar'])->whereUuid('id')->name('copias.revogar');
+    Route::get('/copias/operacao/{id}/acervo', [\App\Http\Controllers\OperacaoCopiaController::class,'acervo'])->whereUuid('id')->name('copias.acervo');
     Route::get('/copias', [\App\Http\Controllers\CopiaController::class,'index'])->name('copias.index');
     Route::get('/copias/receber-cadastro', [\App\Http\Controllers\DecisaoCadastroCopiaController::class,'receber'])->name('copias.cadastro.receber');
     Route::post('/copias/receber-cadastro', [\App\Http\Controllers\DecisaoCadastroCopiaController::class,'emitir'])->name('copias.cadastro.emitir');

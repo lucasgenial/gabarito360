@@ -30,10 +30,11 @@ final class AcompanhamentoCopias
         $total=(clone $q)->count(); $pagina=max(1,min($pagina,max(1,(int)ceil($total/20))));
         $linhas=$q->orderByDesc('created_at')->orderByDesc('id')->offset(($pagina-1)*20)->limit(20)
             ->select(['id','finalidade','estado','total_itens','created_at'])
+            ->selectSub(DB::table('copias_recebimentos')->selectRaw('COUNT(*)')->whereColumn('lote_id','copias_lotes.id')->whereColumn('finalidade','copias_lotes.finalidade'),'indicacoes')
             ->selectSub(DB::table('copias_itens')->selectRaw('COUNT(*)')->whereColumn('lote_id','copias_lotes.id')->where('estado','publicado'),'publicados')
             ->selectSub(DB::table('copias_outbox')->selectRaw('COUNT(*)')->whereColumn('lote_id','copias_lotes.id')->whereNull('entregue_em'),'recibos_pendentes')->get();
         $dados=$linhas->map(fn($l)=>['id'=>$l->id,'finalidade'=>$l->finalidade,'estado'=>$l->estado,'selecionados'=>(int)$l->total_itens,
-            'publicados'=>(int)$l->publicados,'auditoria_pendente'=>(int)$l->recibos_pendentes>0,'criado_em'=>$l->created_at])->all();
+            'publicados'=>(int)$l->publicados,'auditoria_pendente'=>(int)$l->recibos_pendentes>0,'criado_em'=>$l->created_at,'operacao_disponivel'=>(int)$l->indicacoes>0])->all();
         return ['espacos'=>$opcoes,'espaco_id'=>$espaco,'lado'=>$lado,'lados'=>$lados,
             'lista'=>['data'=>$dados,'total'=>$total,'current_page'=>$pagina,'last_page'=>max(1,(int)ceil($total/20))]];
     }
