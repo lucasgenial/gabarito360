@@ -25,3 +25,7 @@ Registro HTTP não prova commit de todas as operações internas e não substitu
 Não há rotas de manutenção. O modelo rejeita save/delete; a escrita é exclusiva do job no código atual. Isso não é armazenamento inviolável: SQL direto e operações em massa com credenciais de banco podem alterar registros. AU1-B deve definir privilégios, conservação externa, retenção específica e particionamento físico MariaDB. Mês indexado é preparação, não particionamento físico.
 
 Não há expurgo ou agendamento de exclusões. Os 30 dias de logs da aplicação aprovados anteriormente não são aplicados automaticamente à auditoria. A migration aditiva deve entrar somente em release aprovada; nenhum evento histórico é reconstruído.
+
+## Preparação AU1-B
+
+Conferência mensal somente de leitura e roteiro de recuperação em [operação da auditoria](operacao/auditoria.md). O comando não implementa expurgo nem particionamento e não torna a ativação automaticamente aprovada. Decisões e limites em [docs/73](73-au1-b-operacao-auditoria.md).
