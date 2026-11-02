@@ -103,7 +103,7 @@ class DeployTest(unittest.TestCase):
         if self.hook_temp:
             self.hook_temp.cleanup()
 
-    def run_deploy(self, *, check=False, target=ALVO, legacy=False, hold=False, backup=False, mask=-1, **scenario):
+    def run_deploy(self, *, check=False, target=ALVO, legacy=False, hold=False, backup=False, mask=-1, phase=None, **scenario):
         s = {'root': str(self.root), 'head': ANTES, 'events': [], 'source': str(self.source), **scenario}
         self.state.write_text(json.dumps(s))
         env = {**os.environ, 'PATH': str(self.bin) + os.pathsep + os.environ['PATH'],
@@ -111,6 +111,8 @@ class DeployTest(unittest.TestCase):
         env.pop('G360_DEPLOY_SNAPSHOT', None)
         source = SCRIPT.parents[2] / 'infra/deploy.sh' if legacy else self.source
         args = ['bash', str(source), '--root', str(self.root), '--commit', target, '--from', ANTES, '--wait', '0']
+        if phase is not None:
+            args.extend(['--fase',phase])
         if backup:
             args.extend(['--backup-final', str(self.hook)])
         if hold:
@@ -123,6 +125,25 @@ class DeployTest(unittest.TestCase):
 
     def artisan(self, command):
         return [e for e in self.s['events'] if e[:3] == ['php', 'artisan', command]]
+
+    def test_fase_publicada_identifica_sha_sem_segredos(self):
+        self.assertEqual(self.run_deploy(phase='T5-E3'),0,self.result.stderr)
+        for app in ['api','web']:
+            f=self.root / f'apps/{app}/storage/app/release.json'
+            data=json.loads(f.read_text())
+            self.assertEqual(data['sha'],ALVO)
+            self.assertEqual(data['fase'],'T5-E3')
+            self.assertEqual(set(data),{'sha','fase','publicado_em'})
+            self.assertEqual(f.stat().st_mode & 0o777,0o644)
+
+    def test_check_e_falha_antes_da_migracao_nao_mudam_versao(self):
+        for scenario in [{'check':True},{'migration_failure':True}]:
+            self.run_deploy(phase='T5-E3',**scenario)
+            self.assertFalse((self.root/'apps/web/storage/app/release.json').exists())
+
+    def test_fase_invalida_recusada_antes_de_tocar_git(self):
+        self.assertEqual(self.run_deploy(phase='T5; id'),2)
+        self.assertFalse([e for e in self.s['events'] if e[0]=='git'])
 
     @unittest.skipUnless(os.geteuid() == 0, 'Hook operacional requer root')
     def test_backup_ocorre_apos_paradas_e_antes_de_codigo_e_ddl(self):
