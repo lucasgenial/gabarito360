@@ -96,6 +96,10 @@ try {
     } elseif ($fase==='recuperar') {
         $c=json_decode(DB::table('t5_b3_controle')->where('id',1)->value('dados'),true,32,JSON_THROW_ON_ERROR);
         $lotes=$c['lotes']; validarB3(hash_equals($c['manifesto'],manifestoB3($lotes)),'manifesto_restaurado');
+        $negado=false;
+        try { DB::connection('auditoria_gravacao')->statement('DELETE FROM auditoria_eventos WHERE 1=0'); }
+        catch (Illuminate\Database\QueryException $e) { $negado=(int)($e->errorInfo[1]??0)===1142; }
+        validarB3($negado,'grants_restaurados');
         validarB3(DB::table('copias_itens')->whereIn('lote_id',$lotes)->where('estado','publicado')->count()===1
             && DB::table('copias_itens')->whereIn('lote_id',$lotes)->where('estado','preparado')->count()===1,'estado_parcial');
         $inicio=hrtime(true); $tempos=[]; $esperas=[];
@@ -129,6 +133,13 @@ try {
         validarB3(DB::table('provas')->whereIn('id',$destinos)->where('espaco_id',902)->where('status','rascunho')->count()===119,'destinos');
         validarB3(DB::table('gabaritos')->whereIn('prova_id',$destinos)->where('espaco_id',902)->count()===119,'gabaritos');
         validarB3(DB::table('gabarito_questoes')->whereIn('gabarito_id',DB::table('gabaritos')->whereIn('prova_id',$destinos)->select('id'))->where('espaco_id',902)->count()===11900,'questoes');
+        foreach ($mapas as $mapa) {
+            validarB3((int)$mapa->origem_id!==(int)$mapa->destino_id,'id_reutilizado');
+            $origem=App\Support\MaterialCopia::projetar(901,(int)$mapa->origem_id);
+            $destino=App\Support\MaterialCopia::projetar(902,(int)$mapa->destino_id);
+            if ((int)$mapa->destino_id===(int)$c['editado']) $origem['prova']['titulo']='Edição legítima fictícia';
+            validarB3(hash_equals(hashB3($origem),hashB3($destino)),'conteudo_destino');
+        }
         validarB3(DB::table('copias_staging')->whereIn('item_id',DB::table('copias_itens')->whereIn('lote_id',$lotes)->select('id'))->whereNotNull('conteudo_cifrado')->count()===0,'staging_final');
         validarB3(DB::table('copias_outbox')->whereNull('entregue_em')->count()===0 && Queue::connection('redis')->size('baixa')===0,'pendencias');
         sort($tempos); $max=max($tempos); $espera=max($esperas);
