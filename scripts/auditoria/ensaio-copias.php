@@ -30,32 +30,35 @@ try {
         }
         DB::table('provas')->insert(['id'=>901,'espaco_id'=>901,'espaco_tipo'=>'pessoal','criado_por'=>901,
             'titulo'=>'Fictício','disciplina'=>'Matemática','serie'=>'3','num_questoes'=>1,'num_alternativas'=>4]);
+        DB::table('gabaritos')->insert(['id'=>901,'prova_id'=>901,'espaco_id'=>901]);
+        DB::table('gabarito_questoes')->insert(['id'=>901,'gabarito_id'=>901,'espaco_id'=>901,'numero_questao'=>1,'alternativa'=>'A']);
         $s=new LotesCopia; $a=Usuario::find(901)->noVinculo(901); $b=Usuario::find(902)->noVinculo(902);
         $id=$s->criar($a,901,902,$chave,[901]);
+        $previa=$s->previaMaterial($a,$id); $s->revisarMaterial($a,$id,$previa['conteudo_digest'],true);
         $s->aprovar($a,$id,'origem',CarbonImmutable::now()->addDay());
         $s->aprovar($b,$id,'destino',CarbonImmutable::now()->addDay());
-        exigir(DB::table('copias_outbox')->count()===3 && !$outbox->confirmada($id));
+        exigir(DB::table('copias_outbox')->count()===4 && !$outbox->confirmada($id));
     } elseif ($fase==='indisponivel') {
         $r=$outbox->publicar();
-        exigir($r===['enviados'=>0,'falhas'=>3] && DB::table('copias_outbox')->whereNull('entregue_em')->count()===3);
+        exigir($r===['enviados'=>0,'falhas'=>4] && DB::table('copias_outbox')->whereNull('entregue_em')->count()===4);
     } elseif ($fase==='recuperar') {
         $id=DB::table('copias_lotes')->where('chave',$chave)->value('id');
-        exigir($id && DB::table('copias_outbox')->where('erro_tecnico','fila_indisponivel')->count()===3);
+        exigir($id && DB::table('copias_outbox')->where('erro_tecnico','fila_indisponivel')->count()===4);
         $recibo=DB::table('copias_outbox')->first(); $porta=config('database.connections.auditoria_gravacao.port');
         config(['database.connections.auditoria_gravacao.port'=>1]); DB::purge('auditoria_gravacao');
         $falhou=false; try { $outbox->entregar($recibo->id); } catch (RuntimeException) { $falhou=true; }
-        exigir($falhou && DB::table('copias_outbox')->whereNull('entregue_em')->count()===3);
+        exigir($falhou && DB::table('copias_outbox')->whereNull('entregue_em')->count()===4);
         config(['database.connections.auditoria_gravacao.port'=>$porta]); DB::purge('auditoria_gravacao');
         // Commit remoto sem confirmação local, antes de republicar a outbox restaurada.
         (new GravarAuditoria(json_decode($recibo->evento,true,32,JSON_THROW_ON_ERROR)))->handle();
         DB::table('copias_outbox')->update(['proxima_tentativa_em'=>now()]);
-        exigir($outbox->publicar()===['enviados'=>3,'falhas'=>0]);
+        exigir($outbox->publicar()===['enviados'=>4,'falhas'=>0]);
         $payloads=Redis::connection()->lrange('queues:baixa',0,-1);
-        exigir(count($payloads)===3);
+        exigir(count($payloads)===4);
         foreach ($payloads as $payload) exigir(!str_contains($payload,'reciboId') && !str_contains($payload,'referencias'));
-        for ($i=0;$i<3;$i++) { $job=Queue::connection('redis')->pop('baixa'); exigir($job!==null); $job->fire(); }
+        for ($i=0;$i<4;$i++) { $job=Queue::connection('redis')->pop('baixa'); exigir($job!==null); $job->fire(); }
         $outbox->entregar($recibo->id);
-        exigir($outbox->confirmada($id) && DB::table('auditoria_eventos')->count()===6
+        exigir($outbox->confirmada($id) && DB::table('auditoria_eventos')->count()===7
             && DB::table('copias_outbox')->whereNull('entregue_em')->count()===0 && Queue::connection('redis')->size('baixa')===0);
     } else throw new RuntimeException('Fase inválida.');
     echo json_encode(['fase'=>'t5-'.$fase,'validado'=>true,'sem_copia'=>true]).PHP_EOL;

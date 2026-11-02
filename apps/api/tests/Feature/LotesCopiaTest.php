@@ -56,6 +56,10 @@ class LotesCopiaTest extends TestCase
     }
     private function aprovar(string $lote, string $lado = 'origem', ?CarbonImmutable $validade = null): array
     {
+        if (!DB::table('copias_revisoes')->where('lote_id',$lote)->exists()) {
+            $previa=$this->servico->previaMaterial($this->ator(),$lote);
+            $this->servico->revisarMaterial($this->ator(),$lote,$previa['conteudo_digest'],true);
+        }
         return $this->servico->aprovar($this->ator($lado === 'origem' ? 1 : 2),$lote,$lado,$validade ?? CarbonImmutable::now()->addHour());
     }
     private function recusa(int $status, callable $acao): void
@@ -234,5 +238,95 @@ class LotesCopiaTest extends TestCase
             $this->assertSame($id,$this->criar([1],$chave));
             $this->assertDatabaseCount('copias_lotes',1);
         } finally { DB::purge('t5_disputa'); }
+    }
+
+    public function test_previa_lista_positiva_e_textos_exigem_revisao_sem_acesso_do_destino(): void
+    {
+        DB::table('provas')->where('id',1)->update(['titulo'=>'Texto livre a revisar','status'=>'corrigida','data_aplicacao'=>'2026-01-01']);
+        $lote=$this->criar(); $previa=$this->servico->previaMaterial($this->ator(),$lote);
+        $this->assertTrue($previa['revisao_humana_obrigatoria']);
+        $material=$previa['itens'][0]['material'];
+        $this->assertSame(\App\Support\MaterialCopia::CAMPOS,array_keys($material['prova']));
+        $this->assertSame(['numero_questao','alternativa','alternativa_espanhol','peso','anulada'],array_keys($material['questoes'][0]));
+        $this->assertSame('Texto livre a revisar',$material['prova']['titulo']);
+        foreach (['criado_por','escola_id','espaco_id','status','data_aplicacao','publicado_por','cartoes','alunos','notas'] as $campo) {
+            $this->assertArrayNotHasKey($campo,$material['prova']); $this->assertArrayNotHasKey($campo,$material['questoes'][0]);
+        }
+        $this->recusa(403,fn()=>$this->servico->previaMaterial($this->ator(2),$lote));
+        $this->recusa(409,fn()=>$this->servico->aprovar($this->ator(),$lote,'origem',CarbonImmutable::now()->addHour()));
+        $this->assertDatabaseCount('copias_revisoes',0);
+        $this->assertDatabaseCount('copias_autorizacoes',0);
+    }
+
+    public function test_revisao_explicita_idempotente_e_digest_desatualizado_recusado(): void
+    {
+        $lote=$this->criar(); $p=$this->servico->previaMaterial($this->ator(),$lote);
+        $this->recusa(422,fn()=>$this->servico->revisarMaterial($this->ator(),$lote,$p['conteudo_digest'],false));
+        $this->recusa(409,fn()=>$this->servico->revisarMaterial($this->ator(),$lote,str_repeat('a',64),true));
+        $id=$this->servico->revisarMaterial($this->ator(),$lote,$p['conteudo_digest'],true);
+        $this->assertSame($id,$this->servico->revisarMaterial($this->ator(),$lote,$p['conteudo_digest'],true));
+        $this->assertDatabaseCount('copias_revisoes',1); $this->assertDatabaseCount('copias_outbox',2);
+        $this->assertStringNotContainsString('Material fictício',json_encode(DB::table('copias_revisoes')->get()));
+        DB::table('provas')->where('id',1)->update(['titulo'=>'Nova versão']);
+        $this->recusa(409,fn()=>$this->servico->revisarMaterial($this->ator(),$lote,$p['conteudo_digest'],true));
+        $this->assertDatabaseCount('copias_revisoes',1);
+    }
+
+    public function test_configuracoes_incompletas_nao_sao_corrigidas_silenciosamente(): void
+    {
+        $this->recusa(422,fn()=>$this->servico->previaMaterial($this->ator(),$this->criar([2])));
+        foreach ([['alternativa'=>'E'],['numero_questao'=>2],['peso'=>-1]] as $mudanca) {
+            DB::table('gabarito_questoes')->where('id',1)->update($mudanca);
+            $id=$this->criar();
+            $this->recusa(422,fn()=>$this->servico->previaMaterial($this->ator(),$id));
+            DB::table('gabarito_questoes')->where('id',1)->update(['alternativa'=>'A','numero_questao'=>1,'peso'=>1]);
+        }
+        DB::table('provas')->where('id',1)->update(['tipo_pontuacao'=>'personalizado']);
+        DB::table('gabarito_questoes')->where('id',1)->update(['peso'=>0]);
+        $this->recusa(422,fn()=>$this->servico->previaMaterial($this->ator(),$this->criar()));
+        $this->assertDatabaseCount('copias_revisoes',0); $this->assertDatabaseCount('registros_origem',0);
+    }
+
+    public function test_opcao_lingua_exige_alternativa_valida_e_nao_carrega_valor_oculto(): void
+    {
+        DB::table('provas')->where('id',1)->update(['opcao_lingua'=>true]);
+        $this->recusa(422,fn()=>$this->servico->previaMaterial($this->ator(),$this->criar()));
+        DB::table('gabarito_questoes')->where('id',1)->update(['alternativa_espanhol'=>'B']);
+        $p=$this->servico->previaMaterial($this->ator(),$this->criar());
+        $this->assertSame('B',$p['itens'][0]['material']['questoes'][0]['alternativa_espanhol']);
+        DB::table('provas')->where('id',1)->update(['opcao_lingua'=>false]);
+        $this->recusa(422,fn()=>$this->servico->previaMaterial($this->ator(),$this->criar()));
+    }
+
+    public function test_revisao_nao_pode_ser_fabricada_depois_das_decisoes(): void
+    {
+        $id=$this->criar(); $this->aprovar($id);
+        // Simula lote do pacote anterior, cujas decisões não tiveram revisão de conteúdo.
+        DB::table('copias_revisoes')->where('lote_id',$id)->delete();
+        $previa=$this->servico->previaMaterial($this->ator(),$id);
+        $this->recusa(409,fn()=>$this->servico->revisarMaterial($this->ator(),$id,$previa['conteudo_digest'],true));
+        $this->assertFalse($this->servico->revalidar($this->ator(2),$id,'destino'));
+        $this->assertDatabaseHas('copias_lotes',['id'=>$id,'estado'=>'bloqueado']);
+    }
+
+    public function test_revisao_perde_validade_quando_muda_versao_do_revisor(): void
+    {
+        $id=$this->criar(); $p=$this->servico->previaMaterial($this->ator(),$id);
+        $this->servico->revisarMaterial($this->ator(),$id,$p['conteudo_digest'],true);
+        DB::table('usuario_vinculos')->where('id',1)->increment('versao_autorizacao');
+        $this->recusa(409,fn()=>$this->servico->aprovar($this->ator(2),$id,'destino',CarbonImmutable::now()->addHour()));
+        $this->recusa(409,fn()=>$this->servico->revisarMaterial($this->ator(),$id,$p['conteudo_digest'],true));
+        $this->assertDatabaseCount('copias_autorizacoes',0);
+    }
+
+    public function test_falha_no_recibo_reverte_revisao(): void
+    {
+        $id=$this->criar(); $p=$this->servico->previaMaterial($this->ator(),$id);
+        DB::listen(function ($q) {
+            if (preg_match('/^insert into ["`]copias_outbox["`]/',$q->sql)) throw new \RuntimeException('recibo-revisao-falhou');
+        });
+        try { $this->servico->revisarMaterial($this->ator(),$id,$p['conteudo_digest'],true); $this->fail('Deveria reverter.'); }
+        catch (\RuntimeException $e) { $this->assertSame('recibo-revisao-falhou',$e->getMessage()); }
+        $this->assertDatabaseCount('copias_revisoes',0); $this->assertDatabaseCount('copias_outbox',1);
     }
 }
