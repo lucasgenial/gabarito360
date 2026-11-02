@@ -16,7 +16,7 @@ return new class extends Migration {
             $t->foreignId('ator_id')->constrained('usuarios')->restrictOnDelete();
             $t->foreignId('acesso_id')->constrained('usuario_acessos_internos')->restrictOnDelete();
             $t->unsignedInteger('acesso_versao'); $t->text('evidencia_referencia');
-            $t->timestamp('registrada_em'); $t->timestamp('valida_ate');
+            $t->timestamp('registrada_em'); $t->dateTime('valida_ate');
             $t->unique(['pedido_id','ciclo','tipo'], 'pedido_verificacao_ciclo_unico');
         });
     }

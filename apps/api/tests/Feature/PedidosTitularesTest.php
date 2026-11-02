@@ -292,4 +292,13 @@ class PedidosTitularesTest extends TestCase
         $this->assertDatabaseHas('pedidos_titulares',['id'=>$p['referencia'],'situacao'=>'em_analise','versao'=>5,'resposta_referencia'=>null,'concluido_em'=>null]);
         $this->assertDatabaseCount('pedido_titular_recibos',5);
     }
+    public function test_validade_recusa_passado_e_aceita_data_futura_sem_limite_timestamp_2038(): void
+    {
+        $p=$this->emVerificacao();$t=$this->token(2);$url='pedidos-titulares/'.$p['referencia'].'/verificacoes';
+        $v=$this->conferencia('identidade',2);
+        $this->chamar($t,'POST',$url,array_replace($v,['valida_ate'=>now()->subMinute()->toIso8601String()]))->assertUnprocessable();
+        // Data de fronteira técnica, não uma política recomendada de validade.
+        $this->chamar($t,'POST',$url,array_replace($v,['valida_ate'=>'2040-01-01T00:00:00+00:00']))->assertOk();
+        $this->assertDatabaseHas('pedido_titular_verificacoes',['pedido_id'=>$p['referencia'],'valida_ate'=>'2040-01-01 00:00:00']);
+    }
 }
