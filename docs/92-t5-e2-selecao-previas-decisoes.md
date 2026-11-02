@@ -8,7 +8,7 @@ Revisão antes da implementação, após merges #123/#124. E1 (#125) continua em
 |---|---|---|
 | E2a — este incremento | Seleção paginada de provas e prévia dos materiais na origem | Somente leitura; não cria lote, revisão, destinatário ou decisão |
 | E2b — implementação em revisão, docs/93 | Código temporário do destinatário, confirmação de espaço/seleção, revisão e duas decisões para materiais | Nome/tipo do destino mediante código; material somente após saída válida; consumo atômico; nunca receber credenciais/atores de outro contexto; sem execução |
-| E2c | Cadastro e resultados: dependências, evidência restrita, guarda e reconhecimento do legado | Não reaproveitar revisão de material; não divulgar documento ao outro contexto |
+| E2c — dividido em E2c1–E2c4, docs/94 | Seleção/prévia de cadastro em revisão; seguem evidência/decisões de cadastro e fluxo de resultados | Não reaproveitar revisão de material; não divulgar documento ao outro contexto; sem execução |
 | E3 | Execução, revogação/retentativa e consulta do acervo | Ações explícitas e revalidação dos contratos já implementados |
 
 A interface começa por materiais, conforme a ordem do plano T5. Os serviços internos das outras modalidades permanecem disponíveis para ensaios; este incremento não declara E2 concluído.

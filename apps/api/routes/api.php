@@ -56,6 +56,8 @@ Route::prefix('v1')->group(function () {
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
         Route::get('copias', [\App\Http\Controllers\Api\AcompanhamentoCopiaController::class,'index'])->middleware('throttle:60,1');
+        Route::get('copias/cadastros', [\App\Http\Controllers\Api\SelecaoCadastroCopiaController::class,'index'])->middleware('throttle:60,1');
+        Route::post('copias/cadastros/previa', [\App\Http\Controllers\Api\SelecaoCadastroCopiaController::class,'previa'])->middleware('throttle:20,1');
         Route::get('copias/materiais', [\App\Http\Controllers\Api\SelecaoMaterialCopiaController::class,'index'])->middleware('throttle:60,1');
         Route::post('copias/materiais/previa', [\App\Http\Controllers\Api\SelecaoMaterialCopiaController::class,'previa'])->middleware('throttle:20,1');
         Route::post('copias/recebimentos', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'emitir'])->middleware('throttle:5,1');
