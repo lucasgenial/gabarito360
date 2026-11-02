@@ -6,7 +6,7 @@ set -Eeuo pipefail
 umask 022
 
 uso() {
-  echo 'Uso: bash scripts/operacao/deploy.sh --commit SHA --from SHA [--check] [--manter-manutencao] [--backup-final SCRIPT] [--wait SEGUNDOS] [--root DIRETORIO]'
+  echo 'Uso: bash scripts/operacao/deploy.sh --commit SHA --from SHA [--fase IDENTIFICADOR] [--check] [--manter-manutencao] [--backup-final SCRIPT] [--wait SEGUNDOS] [--root DIRETORIO]'
 }
 
 [[ "$(id -u)" = 0 ]] || { echo 'Execute como root no contêiner da aplicação.' >&2; exit 1; }
@@ -21,12 +21,12 @@ if [[ "${G360_DEPLOY_SNAPSHOT:-}" != 1 ]]; then
 fi
 
 RAIZ=/home/lucasdev/projetos/gabarito360
-ALVO= ANTERIOR= CHECK=0 ESPERA=300 MANTER_MANUTENCAO=0 BACKUP_FINAL=
+ALVO= ANTERIOR= CHECK=0 ESPERA=300 MANTER_MANUTENCAO=0 BACKUP_FINAL= FASE=desenvolvimento
 while (( $# )); do
   case "$1" in
-    --commit|--from|--root|--wait|--backup-final)
+    --commit|--from|--root|--wait|--backup-final|--fase)
       (( $# >= 2 )) || { uso >&2; exit 2; }
-      case "$1" in --commit) ALVO=$2 ;; --from) ANTERIOR=$2 ;; --root) RAIZ=$2 ;; --wait) ESPERA=$2 ;; --backup-final) BACKUP_FINAL=$2 ;; esac
+      case "$1" in --commit) ALVO=$2 ;; --from) ANTERIOR=$2 ;; --root) RAIZ=$2 ;; --wait) ESPERA=$2 ;; --backup-final) BACKUP_FINAL=$2 ;; --fase) FASE=$2 ;; esac
       shift 2 ;;
     --check) CHECK=1; shift ;;
     --manter-manutencao) MANTER_MANUTENCAO=1; shift ;;
@@ -35,6 +35,7 @@ while (( $# )); do
   esac
 done
 [[ "$ALVO" =~ ^[0-9a-f]{40}$ && "$ANTERIOR" =~ ^[0-9a-f]{40}$ ]] || { echo 'Informe os dois SHAs completos em minúsculas.' >&2; exit 2; }
+[[ "$FASE" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]] || { echo 'Identificador da fase inválido.' >&2; exit 2; }
 [[ "$ESPERA" =~ ^(0|[1-9][0-9]{0,3})$ && "$ESPERA" -le 3600 ]] || { echo 'Espera deve ser de 0 a 3600 segundos.' >&2; exit 2; }
 RAIZ=$(realpath -e -- "$RAIZ")
 [[ -d "$RAIZ/.git" && -d "$RAIZ/apps/api" && -d "$RAIZ/apps/web" ]] || { echo 'Raiz do projeto inválida.' >&2; exit 2; }
@@ -228,6 +229,11 @@ done
 etapa=migracoes
 artisan api migrate --force --no-interaction
 etapa=caches
+for app in api web; do
+  mkdir -p "$RAIZ/apps/$app/storage/app"
+  printf '{"sha":"%s","fase":"%s","publicado_em":"%s"}\n' "$ALVO" "$FASE" "$(date -u +%FT%TZ)" > "$RAIZ/apps/$app/storage/app/release.json"
+  chmod 644 "$RAIZ/apps/$app/storage/app/release.json"
+done
 for app in api web; do
   artisan "$app" config:cache
   artisan "$app" route:cache

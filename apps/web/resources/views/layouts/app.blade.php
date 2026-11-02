@@ -100,6 +100,9 @@
 
   {{-- Conteúdo --}}
   @yield('content')
+  @if(config('release.sha'))
+  <p class="text-muted" style="margin-top:24px;font-size:12px;">Versão de testes: {{ config('release.fase') }} · {{ substr(config('release.sha'),0,8) }}</p>
+  @endif
 </div>
 
 </div>{{-- .app-corpo --}}
