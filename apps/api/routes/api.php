@@ -58,6 +58,12 @@ Route::prefix('v1')->group(function () {
         Route::get('copias', [\App\Http\Controllers\Api\AcompanhamentoCopiaController::class,'index'])->middleware('throttle:60,1');
         Route::get('copias/materiais', [\App\Http\Controllers\Api\SelecaoMaterialCopiaController::class,'index'])->middleware('throttle:60,1');
         Route::post('copias/materiais/previa', [\App\Http\Controllers\Api\SelecaoMaterialCopiaController::class,'previa'])->middleware('throttle:20,1');
+        Route::post('copias/recebimentos', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'emitir'])->middleware('throttle:5,1');
+        Route::post('copias/materiais/preparar', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'preparar'])->middleware('throttle:10,1');
+        Route::post('copias/materiais/lotes', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'criar'])->middleware('throttle:10,1');
+        Route::get('copias/materiais/lotes/{id}', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'show'])->whereUuid('id')->middleware('throttle:60,1');
+        Route::post('copias/materiais/lotes/{id}/revisar', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'revisar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('copias/materiais/lotes/{id}/aprovar', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'aprovar'])->whereUuid('id')->middleware('throttle:10,1');
         Route::get('clientes', [\App\Http\Controllers\Api\ClienteController::class,'index']);
         Route::post('clientes', [\App\Http\Controllers\Api\ClienteController::class,'store'])->middleware('throttle:20,1');
         Route::get('clientes/{id}', [\App\Http\Controllers\Api\ClienteController::class,'show'])->whereNumber('id');

@@ -33,6 +33,7 @@ final class SelecaoMaterialCopia
         }
         // Reconfere o contexto no fim da leitura; não substitui locks/decisões do lote futuro.
         ElegibilidadeCopia::lado($ator,$espaco,'origem');
-        return ['espaco_id'=>$espaco,'materiais'=>$itens,'revisao_obrigatoria'=>true,'autoriza_execucao'=>false];
+        return ['espaco_id'=>$espaco,'materiais'=>$itens,'conteudo_digest'=>hash('sha256',json_encode([$espaco,$itens],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR)),
+            'revisao_obrigatoria'=>true,'autoriza_execucao'=>false];
     }
 }
