@@ -54,3 +54,7 @@ A criação foi ensaiada apenas no clone descartado, mantendo o hash de senha do
 ## Próxima execução
 
 O uso rotineiro exige a observação operacional final e o encerramento do marcador da primeira ativação. Usar o [fluxo por fase](99-publicacao-por-fase.md) a partir do SHA realmente publicado. A criação das contas e o aceite visual do responsável permanecem tarefas identificadas, sem bloquear por si só a consulta aos gabaritos existentes na versão publicada.
+
+## Atualização posterior — contas internas
+
+Em 02/11/2026, após autorização explícita para identificadores fictícios de teste, as três contas foram criadas e verificadas. A pendência descrita no registro inicial foi resolvida; ver execução e limites no doc. 102.
