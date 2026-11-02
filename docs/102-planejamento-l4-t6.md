@@ -58,3 +58,7 @@ Após autorização explícita para identificadores fictícios de teste, criadas
 Bootstrap executado sob manutenção breve, com escritores pausados e acesso interno temporariamente desabilitado; configuração original restaurada e serviços retomados. Manifesto das tabelas escolares e hashes dos arquivos capturados antes e conferidos depois, sem alteração. Nenhuma migration.
 
 Validação por tokens temporários, removidos ao final: as três contas consultam clientes (200); apenas Desenvolvedor gere acessos internos (200), Suporte e Financeiro recebem 403; as três recebem 403 ao consultar provas sem vínculo escolar. Igualdade de senha verificada sem exposição. Isso valida seleção e autorização via API, não substitui conferência visual de login. Home, login e health públicos HTTP 200 após retomada. Evidências privadas em `/root/g360-contas-20261102` no CT111; scripts ensaiados anteriormente em `/root/g360-ativacao-20261102`.
+
+## Atualização da cadência e de L4-B
+
+L4-A e backend L4-B1/B2 integrados pelos PRs #139–141. A interface L4-B3 é detalhada no doc. 106. Conforme orientação atual do usuário, não publicar microfases nem L4-B isoladamente: deploy e migrations ficam para o fechamento completo de L4 (A–E). Até lá, validar localmente e no CI. Esta regra substitui previsões anteriores de publicação intermediária.

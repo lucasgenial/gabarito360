@@ -301,4 +301,20 @@ class PedidosTitularesTest extends TestCase
         $this->chamar($t,'POST',$url,array_replace($v,['valida_ate'=>'2040-01-01T00:00:00+00:00']))->assertOk();
         $this->assertDatabaseHas('pedido_titular_verificacoes',['pedido_id'=>$p['referencia'],'valida_ate'=>'2040-01-01 00:00:00']);
     }
+    public function test_opcoes_e_permissoes_de_navegacao_nao_ampliam_acesso(): void
+    {
+        $dev=$this->token(1);$suporte=$this->token(2);$financeiro=$this->token(3);
+        DB::table('usuario_acessos_internos')->where('id',4)->update(['fim_em'=>now()->subMinute()]);
+        $r=$this->chamar($dev,'GET','pedidos-titulares/opcoes?cliente_id=1')->assertOk()
+            ->assertJsonCount(2,'data.responsaveis.data')->assertJsonCount(1,'data.espacos.data');
+        $this->assertSame([1,2],array_column($r->json('data.responsaveis.data'),'id'));
+        $this->assertArrayNotHasKey('email',$r->json('data.responsaveis.data.0'));
+        foreach ([$suporte,$financeiro] as $t) $this->chamar($t,'GET','pedidos-titulares/opcoes')->assertForbidden();
+        $this->assertContains('pedido.abrir',$this->chamar($dev,'GET','auth/me')->assertOk()->json('data.permissoes'));
+        $this->assertNotContains('pedido.abrir',$this->chamar($suporte,'GET','auth/me')->assertOk()->json('data.permissoes'));
+        $this->assertNotContains('pedido.atender',$this->chamar($financeiro,'GET','auth/me')->assertOk()->json('data.permissoes'));
+        config(['pedidos_titulares.ativo'=>false]);
+        $this->assertNotContains('pedido.atender',$this->chamar($dev,'GET','auth/me')->assertOk()->json('data.permissoes'));
+        $this->chamar($dev,'GET','pedidos-titulares/opcoes')->assertForbidden();
+    }
 }
