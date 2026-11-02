@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-/** Fundação interna. Nenhum método publica dados, grava mapas ou despacha jobs. */
+/** Serviços internos de seleção, autorização e execução; não há rotas de cópia expostas. */
 class LotesCopia
 {
+    use \App\Services\Concerns\ExecutaMaterialCopia;
     private const POLITICA = 't5-material-v1';
 
     public function criar(Usuario $solicitante, int $origem, int $destino, string $chave, array $provas): string
@@ -132,6 +133,7 @@ class LotesCopia
         $this->transacao(function () use ($ator, $id, $lado) {
             $lote = $this->lote($id);
             $contexto = $this->contexto($ator, $lote, $lado);
+            abort_if($lote->estado === 'concluido',409,'Lote já concluído; objetos publicados são independentes.');
             // Gestor atualmente elegível do mesmo lado pode interromper, sem aprovar em nome do anterior.
             $decisao = DB::table('copias_autorizacoes')->where('lote_id',$id)->where('lado',$lado)->first();
             $alteradas = DB::table('copias_autorizacoes')->where('lote_id', $id)->where('lado', $lado)->whereNull('revogada_em')
@@ -169,7 +171,9 @@ class LotesCopia
             $this->estado($lote, 'bloqueado',$ator); return false;
         }
         if ($decisoes->count() !== 2) return false;
-        $this->estado($lote, 'aguardando_auditoria',$ator);
+        if (in_array($lote->estado,['aguardando_autorizacao','aguardando_auditoria'],true)) {
+            $this->estado($lote, 'aguardando_auditoria',$ator);
+        }
         return true;
     }
 
