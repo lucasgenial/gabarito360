@@ -16,6 +16,14 @@ final class OutboxCopia
         $lote = DB::table('copias_lotes')->find($loteId);
         if (!$lote || (int)$lote->auditoria_versao !== 1) throw new \LogicException('Lote anterior ao contrato de auditoria.');
         $evento = EventoCopia::criar($lote,$ator,$acao,$decisao);
+        self::persistir($evento);
+    }
+
+    public static function persistir(array $evento): void
+    {
+        if (DB::transactionLevel() === 0) throw new \LogicException('Recibo exige a transação de negócio.');
+        EventoCopia::validar($evento);
+        $loteId=json_decode($evento['referencias'],true,16,JSON_THROW_ON_ERROR)['lote_id'];
         DB::table('copias_outbox')->insert(['id'=>$evento['id'],'lote_id'=>$loteId,
             'evento'=>json_encode($evento,JSON_THROW_ON_ERROR), 'digest'=>self::digest($evento),
             'proxima_tentativa_em'=>now(),'created_at'=>now()]);
