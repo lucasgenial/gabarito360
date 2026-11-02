@@ -12,6 +12,28 @@ class AuditoriaTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_conexao_ausente_nao_recorre_ao_banco_geral(): void
+    {
+        config(['auditoria.conexao_gravacao'=>'inexistente']);
+        try { (new GravarAuditoria([]))->handle(); $this->fail('Deveria recusar conexão ausente.'); }
+        catch (\LogicException $e) { $this->assertStringContainsString('dedicada',$e->getMessage()); }
+        $this->assertDatabaseCount('auditoria_eventos',0);
+    }
+
+    public function test_conexao_geral_e_credencial_vazia_sao_recusadas(): void
+    {
+        $ambiente=app()->environment();
+        app()->instance('env','production');
+        try {
+            try { (new GravarAuditoria([]))->handle(); $this->fail('Não pode usar conexão geral.'); }
+            catch (\LogicException $e) { $this->assertStringContainsString('dedicada',$e->getMessage()); }
+            config(['auditoria.conexao_gravacao'=>'auditoria_gravacao','database.connections.auditoria_gravacao.username'=>'']);
+            try { (new GravarAuditoria([]))->handle(); $this->fail('Não pode usar usuário vazio.'); }
+            catch (\LogicException $e) { $this->assertStringContainsString('Credencial',$e->getMessage()); }
+        } finally { app()->instance('env',$ambiente); }
+        $this->assertDatabaseCount('auditoria_eventos',0);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -129,7 +151,7 @@ class AuditoriaTest extends TestCase
         $this->mock(Dispatcher::class)->shouldReceive('dispatch')->andThrow(new \RuntimeException('SEGREDO-EXCECAO'));
         Log::spy();
         $this->chamar($token,'POST','auth/acessos-internos/selecionar',['acesso_interno_id'=>1])->assertCreated();
-        Log::shouldHaveReceived('warning')->once()->with('auditoria_enfileiramento_indisponivel');
+        Log::shouldHaveReceived('error')->once()->with('auditoria_enfileiramento_indisponivel');
     }
 
     public function test_flag_desligada_e_health_nao_enfileiram(): void
@@ -154,7 +176,7 @@ class AuditoriaTest extends TestCase
         Log::spy();
         $this->getJson('/api/v1/alunos')->assertUnauthorized();
         Queue::assertPushed(GravarAuditoria::class,1);
-        Log::shouldHaveReceived('warning')->once()->with('auditoria_enfileiramento_indisponivel');
+        Log::shouldHaveReceived('error')->once()->with('auditoria_enfileiramento_indisponivel');
     }
 
     public function test_erro_http_ipv6_e_falha_de_persistencia_nao_sao_ocultados(): void

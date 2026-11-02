@@ -71,7 +71,7 @@ class ConferenciaAuditoriaTest extends TestCase
     }
     public function test_alerta_operacional_sobrevive_ao_filtro_sem_dados_livres(): void
     {
-        $r=ProtegerDados::registro(new LogRecord(new \DateTimeImmutable(),'teste',Level::Warning,
+        $r=ProtegerDados::registro(new LogRecord(new \DateTimeImmutable(),'teste',Level::Error,
             'auditoria_enfileiramento_indisponivel',['token'=>'SEGREDO'],['email'=>'SEGREDO']));
         $this->assertSame('auditoria_enfileiramento_indisponivel',$r->message);
         $this->assertSame([],$r->context); $this->assertSame([],$r->extra);
