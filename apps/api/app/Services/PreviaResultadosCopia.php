@@ -16,9 +16,9 @@ final class PreviaResultadosCopia
         abort_unless(Espacos::ativo() && RegimeVinculos::obrigatorio(),403,'Prévia indisponível.');
         $contexto=ElegibilidadeCopia::lado($ator,$origem,'origem');
         abort_unless(in_array($tipoDestino,['pessoal','escola'],true),422,'Tipo de destino inválido.');
-        abort_unless(array_is_list($notas) && count($notas)>=1 && count($notas)<=20
-            && count(array_unique($notas,SORT_REGULAR))===count($notas),422,'Seleção inválida.');
+        abort_unless(array_is_list($notas) && count($notas)>=1 && count($notas)<=20,422,'Seleção inválida.');
         foreach ($notas as $id) abort_unless(is_int($id) && $id>0,422,'Seleção inválida.');
+        abort_unless(count(array_unique($notas,SORT_REGULAR))===count($notas),422,'Seleção inválida.');
         sort($notas);
         $linhas=DB::table('notas')->where('espaco_id',$origem)->whereIn('id',$notas)->orderBy('id')->get();
         abort_unless($linhas->count()===count($notas),404,'Seleção indisponível.');
