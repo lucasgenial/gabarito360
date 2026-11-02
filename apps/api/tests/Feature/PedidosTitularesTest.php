@@ -159,4 +159,146 @@ class PedidosTitularesTest extends TestCase
         try { $s->consultar($outro,$a['referencia']);$this->fail('Acesso deveria ser recusado'); }
         catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(404,$e->getStatusCode()); }
     }
+
+    private function emVerificacao(): array
+    {
+        $s=app(PedidosTitulares::class);$p=$s->abrir($this->ator(),$this->dados());
+        return $s->triar($this->ator(2),$p['referencia'],$this->triagem());
+    }
+    private function conferencia(string $tipo,int $versao): array
+    {
+        return ['tipo'=>$tipo,'metodo'=>$tipo==='identidade'?'conferencia_documental':'confirmacao_institucional',
+            'evidencia_referencia'=>'Referência reservada fictícia '.$tipo,'valida_ate'=>now()->addHour()->toIso8601String(),
+            'versao'=>$versao,'motivo'=>'Conferência manual fictícia','chave'=>(string)Str::uuid()];
+    }
+    private function comConferencias(): array
+    {
+        $s=app(PedidosTitulares::class);$p=$this->emVerificacao();
+        foreach (['identidade','autoridade'] as $tipo) $p=$s->verificar($this->ator(2),$p['referencia'],$this->conferencia($tipo,$p['versao']));
+        return $p;
+    }
+    private function decisao(int $versao,bool $concluir=false): array
+    {
+        $v=['situacao'=>$concluir?'concluida':'em_analise','versao'=>$versao,'motivo'=>'Decisão administrativa fictícia','chave'=>(string)Str::uuid()];
+        return $concluir ? $v+['resultado'=>'indeferido','resposta_referencia'=>'Resposta administrativa fictícia'] : $v;
+    }
+    public function test_api_verifica_analisa_e_conclui_sem_operar_dados_escolares(): void
+    {
+        $p=$this->emVerificacao();$t=$this->token(2);$base='pedidos-titulares/'.$p['referencia'];
+        foreach (['identidade','autoridade'] as $tipo) {
+            $v=$this->conferencia($tipo,$p['versao']);
+            $p=$this->chamar($t,'POST',$base.'/verificacoes',$v)->assertOk()->json('data');
+        }
+        $this->chamar($t,'GET',$base)->assertOk()->assertJsonCount(2,'data.verificacoes')->assertJsonPath('data.ciclo_verificacao',1);
+        $p=$this->chamar($t,'POST',$base.'/decisao',$this->decisao($p['versao']))->assertOk()->assertJsonPath('data.situacao','em_analise')->json('data');
+        $final=$this->decisao($p['versao'],true);
+        $r=$this->chamar($t,'POST',$base.'/decisao',$final)->assertOk()->assertJsonPath('data.situacao','concluida')->json('data');
+        $this->assertSame($r,$this->chamar($t,'POST',$base.'/decisao',$final)->assertOk()->json('data'));
+        $this->chamar($t,'POST',$base.'/decisao',$this->decisao($r['versao']))->assertUnprocessable();
+        $row=DB::table('pedidos_titulares')->where('id',$r['referencia'])->first();
+        $this->assertSame($final['resposta_referencia'],Crypt::decryptString($row->resposta_referencia));
+        $this->assertNotNull($row->concluido_em);
+        $e=DB::table('pedido_titular_verificacoes')->first();
+        $this->assertStringStartsWith('Referência reservada',Crypt::decryptString($e->evidencia_referencia));
+        $this->assertSame(2,(int)$e->ator_id);$this->assertSame(1,(int)$e->ciclo);
+        $this->assertDatabaseCount('gabaritos',0);$this->assertDatabaseCount('pedido_titular_verificacoes',2);
+    }
+    public function test_faltas_de_evidencia_flags_fabricadas_metodo_errado_e_versao_obsoleta(): void
+    {
+        $p=$this->emVerificacao();$t=$this->token(2);$base='pedidos-titulares/'.$p['referencia'];
+        $this->chamar($t,'POST',$base.'/decisao',$this->decisao(2))->assertUnprocessable();
+        $this->chamar($t,'POST',$base.'/decisao',$this->decisao(2)+['identidade_verificada'=>true,'autoridade_verificada'=>true])->assertUnprocessable();
+        $v=$this->conferencia('identidade',2);
+        $this->chamar($t,'POST',$base.'/verificacoes',array_replace($v,['metodo'=>'confirmacao_institucional']))->assertUnprocessable();
+        $this->chamar($t,'POST',$base.'/verificacoes',$v+['ator_id'=>1])->assertUnprocessable();
+        $this->chamar($t,'POST',$base.'/verificacoes',$v)->assertOk();
+        $this->chamar($t,'POST',$base.'/decisao',$this->decisao(3))->assertUnprocessable();
+        $this->chamar($t,'POST',$base.'/verificacoes',$this->conferencia('autoridade',2))->assertConflict();
+        $this->assertDatabaseCount('pedido_titular_verificacoes',1);
+    }
+    public function test_idempotencia_nao_sobrescreve_ou_renova_evidencia(): void
+    {
+        $p=$this->emVerificacao();$t=$this->token(2);$url='pedidos-titulares/'.$p['referencia'].'/verificacoes';
+        $v=$this->conferencia('identidade',2);$r=$this->chamar($t,'POST',$url,$v)->assertOk()->json('data');
+        $this->assertSame($r,$this->chamar($t,'POST',$url,$v)->assertOk()->json('data'));
+        $this->chamar($t,'POST',$url,array_replace($v,['evidencia_referencia'=>'Outra referência']))->assertConflict();
+        $this->chamar($t,'POST',$url,$this->conferencia('identidade',3))->assertConflict();
+        $this->travel(2)->hours();
+        $this->assertSame($r,$this->chamar($t,'POST',$url,$v)->assertOk()->json('data'));
+        $this->chamar($t,'GET','pedidos-titulares/'.$p['referencia'])->assertOk()->assertJsonPath('data.verificacoes.0.vigente',false);
+        $this->travelBack();$this->assertDatabaseCount('pedido_titular_verificacoes',1);
+    }
+    public function test_expiracao_e_novo_ciclo_invalidam_as_duas_conferencias(): void
+    {
+        $s=app(PedidosTitulares::class);$p=$this->comConferencias();$t=$this->token(2);$base='pedidos-titulares/'.$p['referencia'];
+        $p=$s->decidir($this->ator(2),$p['referencia'],$this->decisao($p['versao']));
+        $this->travel(2)->hours();
+        $this->chamar($t,'POST',$base.'/decisao',$this->decisao($p['versao'],true))->assertUnprocessable();
+        $this->travelBack();
+        $p=$s->triar($this->ator(2),$p['referencia'],array_replace($this->triagem(),['situacao'=>'aguardando_informacao','versao'=>$p['versao']]));
+        $p=$s->triar($this->ator(2),$p['referencia'],array_replace($this->triagem(),['versao'=>$p['versao']]));
+        $this->chamar($t,'GET',$base)->assertOk()->assertJsonPath('data.ciclo_verificacao',2)->assertJsonCount(0,'data.verificacoes');
+        $this->chamar($t,'POST',$base.'/decisao',$this->decisao($p['versao']))->assertUnprocessable();
+        foreach (['identidade','autoridade'] as $tipo) $p=$s->verificar($this->ator(2),$p['referencia'],$this->conferencia($tipo,$p['versao']));
+        $this->chamar($t,'POST',$base.'/decisao',$this->decisao($p['versao']))->assertOk();
+        $this->assertDatabaseCount('pedido_titular_verificacoes',4);
+    }
+    public function test_novas_rotas_preservam_atribuicao_e_revogacao(): void
+    {
+        $p=$this->comConferencias();$base='pedidos-titulares/'.$p['referencia'];
+        foreach ([1=>404,3=>403,4=>404] as $id=>$status) {
+            $t=$this->token($id);
+            $this->chamar($t,'POST',$base.'/verificacoes',$this->conferencia('identidade',4))->assertStatus($status);
+            $this->chamar($t,'POST',$base.'/decisao',$this->decisao(4))->assertStatus($status);
+        }
+        $t=$this->token(2);
+        DB::table('usuario_acessos_internos')->where('id',2)->update(['versao_autorizacao'=>2]);
+        $this->chamar($t,'POST',$base.'/decisao',$this->decisao(4))->assertForbidden();
+        $this->chamar($this->token(2),'POST',$base.'/decisao',$this->decisao(4))->assertNotFound();
+    }
+    public function test_conclusao_exige_resultado_e_referencia_de_resposta(): void
+    {
+        $s=app(PedidosTitulares::class);$p=$this->comConferencias();$t=$this->token(2);$url='pedidos-titulares/'.$p['referencia'].'/decisao';
+        $this->chamar($t,'POST',$url,$this->decisao(4)+['resposta_referencia'=>'Resposta antecipada'])->assertUnprocessable();
+        $p=$s->decidir($this->ator(2),$p['referencia'],$this->decisao(4));
+        $v=$this->decisao($p['versao'],true);
+        foreach (['resultado','resposta_referencia'] as $campo) {
+            $incompleto=$v;unset($incompleto[$campo]);
+            $this->chamar($t,'POST',$url,$incompleto)->assertUnprocessable();
+        }
+        $this->chamar($t,'POST',$url,array_replace($v,['resultado'=>'cancelado_pelo_solicitante']))->assertUnprocessable();
+        $this->assertDatabaseHas('pedidos_titulares',['id'=>$p['referencia'],'situacao'=>'em_analise','resposta_referencia'=>null]);
+    }
+    public function test_historico_falhando_desfaz_evidencia_versao_e_recibo(): void
+    {
+        $p=$this->emVerificacao();
+        DB::listen(function ($q) {
+            if (str_starts_with(strtolower($q->sql),'insert') && str_contains($q->sql,'pedido_titular_eventos')) throw new \RuntimeException('Falha fictícia de histórico');
+        });
+        try { app(PedidosTitulares::class)->verificar($this->ator(2),$p['referencia'],$this->conferencia('identidade',2));$this->fail('Deveria falhar'); }
+        catch (\RuntimeException $e) { $this->assertSame('Falha fictícia de histórico',$e->getMessage()); }
+        $this->assertDatabaseCount('pedido_titular_verificacoes',0);
+        $this->assertDatabaseHas('pedidos_titulares',['id'=>$p['referencia'],'versao'=>2]);
+        $this->assertDatabaseCount('pedido_titular_recibos',2);
+    }
+    public function test_historico_falhando_desfaz_conclusao_e_resposta(): void
+    {
+        $s=app(PedidosTitulares::class);$p=$this->comConferencias();$p=$s->decidir($this->ator(2),$p['referencia'],$this->decisao(4));
+        DB::listen(function ($q) {
+            if (str_starts_with(strtolower($q->sql),'insert') && str_contains($q->sql,'pedido_titular_eventos')) throw new \RuntimeException('Falha fictícia de histórico');
+        });
+        try { $s->decidir($this->ator(2),$p['referencia'],$this->decisao(5,true));$this->fail('Deveria falhar'); }
+        catch (\RuntimeException $e) { $this->assertSame('Falha fictícia de histórico',$e->getMessage()); }
+        $this->assertDatabaseHas('pedidos_titulares',['id'=>$p['referencia'],'situacao'=>'em_analise','versao'=>5,'resposta_referencia'=>null,'concluido_em'=>null]);
+        $this->assertDatabaseCount('pedido_titular_recibos',5);
+    }
+    public function test_validade_recusa_passado_e_aceita_data_futura_sem_limite_timestamp_2038(): void
+    {
+        $p=$this->emVerificacao();$t=$this->token(2);$url='pedidos-titulares/'.$p['referencia'].'/verificacoes';
+        $v=$this->conferencia('identidade',2);
+        $this->chamar($t,'POST',$url,array_replace($v,['valida_ate'=>now()->subMinute()->toIso8601String()]))->assertUnprocessable();
+        // Data de fronteira técnica, não uma política recomendada de validade.
+        $this->chamar($t,'POST',$url,array_replace($v,['valida_ate'=>'2040-01-01T00:00:00+00:00']))->assertOk();
+        $this->assertDatabaseHas('pedido_titular_verificacoes',['pedido_id'=>$p['referencia'],'valida_ate'=>'2040-01-01 00:00:00']);
+    }
 }

@@ -259,3 +259,7 @@ O contrato de emissão, consulta e resposta dos convites de conta existente est�
 ### L4-B1 — pedidos de titulares (flag desligada por padrão)
 
 GET /api/v1/pedidos-titulares lista somente atribuições do contexto interno atual. POST abre/designa, exclusivo de Desenvolvedor. GET /api/v1/pedidos-titulares/{uuid} consulta com evento obrigatório. POST /api/v1/pedidos-titulares/{uuid}/triagem exige chave idempotente, versão e motivo. Detalhe fora da atribuição retorna 404; perfil inadequado ou flag desligada retorna 403. Sem exportação, exclusão ou verificação de identidade nesta fase. Contrato e campos em docs/104-l4-b1-protocolos.md.
+
+### L4-B2 — verificação e decisão
+
+POST /api/v1/pedidos-titulares/{uuid}/verificacoes registra conferência manual do responsável com evidência referenciada, método e validade. POST /api/v1/pedidos-titulares/{uuid}/decisao permite análise/conclusão administrativa usando conferências vigentes gravadas no servidor. Ambos exigem contexto, atribuição, versão, motivo e chave idempotente. Conclusão exige resultado e referência da resposta; nenhuma comunicação ou operação sobre dados é executada. Campos e limites no doc. 105.
