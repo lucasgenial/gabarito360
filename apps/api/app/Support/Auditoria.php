@@ -68,7 +68,7 @@ final class Auditoria
             app(Dispatcher::class)->dispatch((new GravarAuditoria($evento))->onConnection($conexao));
         } catch (Throwable) {
             // Sem exceção, dados pessoais ou payload no log operacional.
-            try { Log::warning('auditoria_enfileiramento_indisponivel'); } catch (Throwable) {}
+            try { Log::error('auditoria_enfileiramento_indisponivel'); } catch (Throwable) {}
         }
     }
 
