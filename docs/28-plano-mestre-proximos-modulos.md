@@ -983,10 +983,10 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | V1 Vínculos | publicado e ativado em 02/11: seis contas convertidas em sete vínculos, sem ampliar acesso; aluno sem origem escolar continua sem vínculo | Codex | #87–#92; docs/60 e 100 |
 | V2 Escolha do vínculo | publicado; seleção das duas redes e isolamento verificados; novo login necessário | Codex | docs/61–62 e 100 |
 | T3 Perfis por espaço | código publicado na release inicial; preservação dos dados escolares conferida | Codex | docs/63–65 e 100 |
-| T4 Cadastro de clientes | código publicado; criação das contas operacionais pendente da escolha do CPF obrigatório | Codex | docs/66–71 e 100 |
+| T4 Cadastro de clientes | código publicado; contas operacionais criadas e permissões conferidas após autorização de CPFs fictícios de teste (doc. 102) | Codex | docs/66–71 e 100 |
 | T5 Cópia de dados | A–D e E1–E3 publicados em 02/11, com backup final restaurado e dados preservados. Interface habilitada e testada via HTTPS nas duas redes; aceite visual do responsável pendente | Codex | docs/77–100 |
 | T6 Encerramento | preparação iniciada; depende de L4, sem eliminação nesta etapa; doc. 102 | Codex | |
-| A1 Novos perfis | código publicado; Desenvolvedor/Suporte/Financeiro ensaiados no clone. Contas no servidor pendentes do CPF obrigatório; código responsável continua dependente de P3/P4 | Codex | docs/67–70 e 100 |
+| A1 Novos perfis | código publicado; Desenvolvedor/Suporte/Financeiro criados no servidor com identificadores de teste autorizados e permissões verificadas (doc. 102); código responsável continua dependente de P3/P4 | Codex | docs/67–70 e 100 |
 | AU1 Registro de auditoria | publicado e ativado, com credencial restrita de escrita, negação de alteração/exclusão e retenção de 180 dias; sem expurgo | Codex | docs/32, 72–76 e 100 |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |

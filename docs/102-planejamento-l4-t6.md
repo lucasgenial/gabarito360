@@ -7,7 +7,7 @@ Planejamento revisto em 02/11/2026 após autorização para avançar. Base: plan
 - V1–T5 e AU1 estão publicados. Aceite visual de T5 ainda deve ser registrado separadamente.
 - PRs #136 (links públicos) e #137 (redes sociais) integrados com cinco checks aprovados por head. Correções pontuais já disponíveis no servidor.
 - CadastroCliente cria clientes ativos e permite editar apenas campos comerciais explícitos; não oferece mudança arbitrária de situação. Manter essa separação.
-- Contas internas dev/suporte/financeiro aguardam decisão sobre CPF. Essa pendência não autoriza criar identidades fictícias e não impede o planejamento.
+- Contas internas dev/suporte/financeiro criadas após autorização explícita para identificadores fictícios de teste, em 02/11/2026. Detalhes da execução abaixo.
 - Servidor ainda usa a release a90fbf5 com ajustes operacionais documentados. Antes de próxima publicação pelo B5, reconciliar o rodapé modificado e preservar os helpers da home; merge não atualiza automaticamente a release.
 
 ## Sequência de implementação
@@ -47,4 +47,12 @@ O primeiro incremento de implementação é L4-A. Cada microfase deve revisar es
 
 ## Saída desta preparação
 
-Sequência e limites registrados; nenhum schema, endpoint ou interface L4/T6 criado. Não houve migration, encerramento de cliente, exportação de dados pessoais ou exclusão nesta etapa. Pendências operacionais e decisões de contas permanecem separadas.
+Sequência e limites registrados; nenhum schema, endpoint ou interface L4/T6 criado. Não houve migration, encerramento de cliente, exportação de dados pessoais ou exclusão nesta etapa.
+
+## Pendência operacional resolvida: contas internas
+
+Após autorização explícita para identificadores fictícios de teste, criadas em transação as contas `dev@gabarito360.com.br` (Desenvolvedor), `suporte@gabarito360.com.br` (Suporte) e `financeiro@gabarito360.com.br` (Financeiro). Observação das identidades registra homologação e CPF fictício. Mantido o hash de senha do administrador existente, sem revelar credenciais. Nenhum vínculo escolar criado.
+
+Bootstrap executado sob manutenção breve, com escritores pausados e acesso interno temporariamente desabilitado; configuração original restaurada e serviços retomados. Manifesto das tabelas escolares e hashes dos arquivos capturados antes e conferidos depois, sem alteração. Nenhuma migration.
+
+Validação por tokens temporários, removidos ao final: as três contas consultam clientes (200); apenas Desenvolvedor gere acessos internos (200), Suporte e Financeiro recebem 403; as três recebem 403 ao consultar provas sem vínculo escolar. Igualdade de senha verificada sem exposição. Isso valida seleção e autorização via API, não substitui conferência visual de login. Home, login e health públicos HTTP 200 após retomada. Evidências privadas em `/root/g360-contas-20261102` no CT111; scripts ensaiados anteriormente em `/root/g360-ativacao-20261102`.
