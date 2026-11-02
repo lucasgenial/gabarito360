@@ -12,3 +12,5 @@ Artisan::command('inspire', function () {
 Schedule::job(VerificarInadimplenciaJob::class)->dailyAt('03:00');
 Schedule::command('g360:copias-auditoria')->everyMinute()->withoutOverlapping()
     ->when(fn () => (bool) config('copias.auditoria_entrega'));
+Schedule::command('g360:copias-executar')->everyMinute()->withoutOverlapping()
+    ->when(fn () => (bool) config('copias.execucao_ativa') && (bool) config('copias.ativo'));
