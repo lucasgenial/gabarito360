@@ -380,3 +380,7 @@ Tipo de raiz e espaço são ligados por FK composta; triggers recusam escola nul
 ### L4-A — contrato de pedidos dos titulares
 
 EstadoPedidoTitular define transições sem acesso a banco ou efeitos sobre dados. Não concede autorização: fatos de identidade/autoridade vêm do serviço transacional futuro, com escopo e contexto revalidados. Contrato de persistência, permissões e validação em docs/103-l4-a-contrato-protocolos.md; registro/triagem ficam em L4-B.
+
+### L4-C1 — ciclo do artefato de exportação
+
+EstadoExportacaoTitular é um contrato puro: transições e disponibilidade temporal não concedem autorização. A geração e a entrega futuras exigirão concessão delimitada, sujeito validado, escopo e destinatário revalidados. Estado terminal não reabre nem apaga dados. Planejamento e dependências em [107-l4-c1-contrato-exportacao.md](107-l4-c1-contrato-exportacao.md). Sem schema, endpoint ou deploy nesta parte.
