@@ -976,14 +976,14 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | L6 Trocar foto por avatar | concluído funcionalmente: galeria de 36 avatares e iniciais publicadas e verificadas em produção (docs/operacao/avatares-alunos.md); foto_path e fotos preservados, remoção não autorizada | Codex | #70 |
 | T1 Modelo de dados | concluído: modelo aprovado pelo responsável; PR #73 incorporado; docs/40 e docs/41 | Codex | #73 |
 | T2 Clientes e espaços | concluído e publicado na homologação representativa em 01/11/2026: release af4c6d1 (PR #85); backup final em duas camadas, preenchimento e restrições aplicados; 2 clientes internos/13 espaços, administrador com dois vínculos separados; auditoria, dados e validação funcional aprovados (docs/54). V1/V2 permanecem próximos pacotes distintos | Codex | #74, #75, #76, #77, #78, #79, #80, #81, #82, #83, #84, #85 |
-| V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
-| V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
-| T3 Perfis por espaço | T3-A #96, T3-B #97 e T3-C #99 incorporados; sem deploy | Codex | docs/63–65 |
-| T4 Cadastro de clientes | T4-A #100 e A1 #101–104 incorporados; T4-B #105 incorporado; sem deploy | Codex | docs/66–71 |
-| T5 Cópia de dados | A–D e E1–E3 incorporados (#112–132). Cinco checks aprovados; aceite visual após disponibilizar homologação. Servidor e fluxo por fase em preparação (docs/99); primeira publicação acumulada ainda pendente | Codex | docs/77–99 |
+| V1 Vínculos | publicado e ativado em 02/11: seis contas convertidas em sete vínculos, sem ampliar acesso; aluno sem origem escolar continua sem vínculo | Codex | #87–#92; docs/60 e 100 |
+| V2 Escolha do vínculo | publicado; seleção das duas redes e isolamento verificados; novo login necessário | Codex | docs/61–62 e 100 |
+| T3 Perfis por espaço | código publicado na release inicial; preservação dos dados escolares conferida | Codex | docs/63–65 e 100 |
+| T4 Cadastro de clientes | código publicado; criação das contas operacionais pendente da escolha do CPF obrigatório | Codex | docs/66–71 e 100 |
+| T5 Cópia de dados | A–D e E1–E3 publicados em 02/11, com backup final restaurado e dados preservados. Interface habilitada e testada via HTTPS nas duas redes; aceite visual do responsável pendente | Codex | docs/77–100 |
 | T6 Encerramento | pendente | | |
-| A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C #104 incorporado; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
-| AU1 Registro de auditoria | implementação #106–109 e evidência #110 incorporadas; recuperação completa em clones e 1,8 milhão de eventos sintéticos validados; captura/credencial e release no servidor ainda não ativadas; sem deploy | Codex | docs/32 e docs/72–76 |
+| A1 Novos perfis | código publicado; Desenvolvedor/Suporte/Financeiro ensaiados no clone. Contas no servidor pendentes do CPF obrigatório; código responsável continua dependente de P3/P4 | Codex | docs/67–70 e 100 |
+| AU1 Registro de auditoria | publicado e ativado, com credencial restrita de escrita, negação de alteração/exclusão e retenção de 180 dias; sem expurgo | Codex | docs/32, 72–76 e 100 |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |
 | A2 Painel técnico | pendente | | |

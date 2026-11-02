@@ -1,5 +1,7 @@
 # 99 — Publicação por fase na homologação
 
+**Atualização de 02/11/2026:** publicação inicial executada após autorização, com backup final restaurado, preservação dos gabaritos e validação funcional. Consulte o [registro da execução e pendência das contas internas](100-publicacao-inicial-v1-t5.md). As seções abaixo preservam o planejamento e o diagnóstico anteriores ao corte.
+
 Em 02/11/2026 o responsável solicitou preparar o projeto e o servidor para receber deploys por fase/microfase. A conferência visual passa a ocorrer **depois de disponibilizar a versão de homologação**, sem condicionar o merge à disponibilidade do computer-use. Isso substitui o bloqueio visual dos rascunhos E1–E3; não dispensa CI ou correção de falhas conhecidas.
 
 ## Integração concluída
