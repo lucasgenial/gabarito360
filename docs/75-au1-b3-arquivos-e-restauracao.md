@@ -1,6 +1,6 @@
 # AU1-B3 — arquivos mensais e restauração dos serviços
 
-Status: proposta implementada para revisão; sem ativação. Data: 01/11/2026.
+Status: aprovada no merge do PR #109; sem ativação. Data: 01/11/2026. Ensaio equivalente posterior em [docs/76](76-au1-ensaio-equivalente.md).
 Responsável pela aprovação: administrador do projeto. PR #108 incorporado mediante autorização.
 
 ## Planejamento revisto antes da fase
@@ -23,4 +23,4 @@ Fonte: [limitações oficiais do MariaDB](https://mariadb.com/docs/server/server
 - A chave de cifra da aplicação deve ser conservada separadamente junto às instruções de recuperação; sua perda impede leitura dos arquivos e da fila. Não compartilhar a chave nos manifestos.
 - Digests detectam divergência diante de referência confiável; não impedem adulteração conjunta por quem controla chave e cópias. Referência independente e acesso restrito continuam necessários.
 - A verificação do pacote é local e não importa eventos no banco. Para recuperação operacional usar backup consistente do banco e conferir o manifesto.
-- Ainda pendentes antes de ativar: restauração completa em ambiente equivalente, volume representativo, dois destinos de backup, revisão real de grants, monitoração e autorização de release. AU1 permanece parcial e T5 dependente.
+- Atualização posterior: recuperação completa e volume sintético validados em docs/76. Antes de ativar continuam necessários backup final atual nas duas camadas, revisão real de grants, monitoração e autorização da release consolidada. T5 pode retomar o planejamento de desenvolvimento, sem ativação de cópias reais.
