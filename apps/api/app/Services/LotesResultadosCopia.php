@@ -12,6 +12,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 /** Pacote cifrado e decisões internas. Não publica nem agenda resultados. */
 final class LotesResultadosCopia
 {
+    use \App\Services\Concerns\ExecutaResultadosCopia;
     public const POLITICA='t5-resultados-v1';
 
     public function criar(Usuario $ator,int $origem,int $destino,string $chave,array $notas,array $dependencias): string
@@ -114,7 +115,8 @@ final class LotesResultadosCopia
                 if ($l->estado!=='bloqueado') { $this->fonte($l); $valido=$this->evidenciaValida($l) && $this->decisaoValida($l,'origem') && $this->decisaoValida($l,'destino'); }
             } catch (HttpException $e) { if (!in_array($e->getStatusCode(),[403,404,409,422],true)) throw $e; }
             return ['decisoes_validas'=>$valido,'auditoria_confirmada'=>$valido && (new OutboxCopia)->confirmada($id),
-                'autoriza_execucao'=>false,'bloqueio'=>'execucao_resultados_pendente'];
+                'estado'=>$l->estado,'autoriza_execucao'=>false,
+                'bloqueio'=>$this->execucaoHabilitada()?'solicitacao_explicita_obrigatoria':'execucao_resultados_desabilitada'];
         });
     }
 
@@ -122,7 +124,7 @@ final class LotesResultadosCopia
     {
         $this->transacao(function() use($ator,$id,$lado) {
             $l=$this->lote($id,false); $c=$this->contexto($ator,$l,$lado);
-            abort_if($l->estado==='concluido',409,'Lote concluído.'); if ($l->estado==='bloqueado') return;
+            abort_if(in_array($l->estado,['aguardando_recibo','concluido'],true),409,'Pacote já publicado.'); if ($l->estado==='bloqueado') return;
             DB::table('copias_autorizacoes')->where('lote_id',$id)->where('lado',$lado)->whereNull('revogada_em')->update([
                 'revogada_em'=>now(),'revogada_por'=>$c['usuario_id'],'revogada_vinculo_id'=>$c['vinculo_id'],'revogada_versao_acesso'=>$c['versao_acesso']]);
             if ($lado==='origem') DB::table('copias_evidencias')->where('lote_id',$id)->update(['revogada_em'=>now()]);

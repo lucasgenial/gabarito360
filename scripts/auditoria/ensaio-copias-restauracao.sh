@@ -15,6 +15,10 @@ case "$fase" in
         [[ "${DB_PORT:-}" == 3308 && "${REDIS_PORT:-}" == 6381 ]]
         origem_prefixo=t5-b3; destino_prefixo=t5-c3; porta_db=3309; porta_redis=6382
         ensaio=scripts/auditoria/ensaio-cadastro-recuperacao.php ;;
+    resultados)
+        [[ "${DB_PORT:-}" == 3309 && "${REDIS_PORT:-}" == 6382 ]]
+        origem_prefixo=t5-c3; destino_prefixo=t5-d3; porta_db=3310; porta_redis=6383
+        ensaio=scripts/auditoria/ensaio-resultados-recuperacao.php ;;
     *) exit 1 ;;
 esac
 origem_db="${origem_prefixo}-db-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
@@ -62,3 +66,4 @@ done
 export DB_PORT=$porta_db REDIS_PORT=$porta_redis
 php "$ensaio" recuperar
 if [[ "$fase" == material ]]; then bash scripts/auditoria/ensaio-copias-restauracao.sh cadastro; fi
+if [[ "$fase" == cadastro ]]; then bash scripts/auditoria/ensaio-copias-restauracao.sh resultados; fi
