@@ -20,4 +20,11 @@
   <h3>Alunos</h3><ul>@foreach($dados['dependencias']['alunos'] as $a)<li>{{ $a['nome'] }} — {{ $a['matricula'] }}</li>@endforeach</ul>
 </section>
 <a class="btn btn-secondary" style="margin-top:20px;" href="{{ route('copias.resultados',['espaco_id'=>$dados['espaco_id'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">Voltar e fazer nova seleção</a>
+<form method="POST" action="{{ route('copias.resultado.preparar') }}" class="card card-pad" style="margin-top:20px;">
+  @csrf<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}"><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
+  @foreach($dados['resultados'] as $r)<input type="hidden" name="notas[]" value="{{ $r['id'] }}">@endforeach
+  <div class="field"><label for="codigo">Código de resultados fornecido pelo destinatário</label><input class="input" id="codigo" name="codigo" required minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></div>
+  <p>Peça um código em “Receber resultados”. Antes de criar a solicitação, você conferirá o destino real e o conteúdo completo do pacote.</p>
+  <button class="btn btn-primary" type="submit">Conferir pacote e destino</button>
+</form>
 @endsection

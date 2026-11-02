@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 final class RecebimentosCopia
 {
     public function __construct(private string $finalidade='preparacao_material')
-    { if (!in_array($finalidade,['preparacao_material','cadastro_minimo'],true)) throw new \InvalidArgumentException('Finalidade inválida.'); }
+    { if (!in_array($finalidade,['preparacao_material','cadastro_minimo','resultados_identificados'],true)) throw new \InvalidArgumentException('Finalidade inválida.'); }
     public static function exigirInterface(): void
     {
         abort_unless(config('copias.interface_ativa')===true && config('copias.ativo')===true
