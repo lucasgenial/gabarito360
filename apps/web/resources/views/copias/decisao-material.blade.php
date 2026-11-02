@@ -31,4 +31,5 @@
   @endif
 </section>
 @endif
+<p style="margin-top:20px;"><a class="btn btn-secondary" href="{{ route('copias.operacao',['id'=>$dados['lote_id'],'lado'=>$dados['lado'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">Acompanhar operação da cópia</a></p>
 @endsection

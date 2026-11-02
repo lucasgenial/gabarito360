@@ -55,6 +55,10 @@ Route::prefix('v1')->group(function () {
 
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
+        Route::get('copias/operacao/{id}', [\App\Http\Controllers\Api\OperacaoCopiaController::class,'show'])->whereUuid('id')->middleware('throttle:60,1');
+        Route::post('copias/operacao/{id}/solicitar', [\App\Http\Controllers\Api\OperacaoCopiaController::class,'solicitar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('copias/operacao/{id}/revogar', [\App\Http\Controllers\Api\OperacaoCopiaController::class,'revogar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::get('copias/operacao/{id}/acervo', [\App\Http\Controllers\Api\OperacaoCopiaController::class,'acervo'])->whereUuid('id')->middleware('throttle:30,1');
         Route::get('copias', [\App\Http\Controllers\Api\AcompanhamentoCopiaController::class,'index'])->middleware('throttle:60,1');
         Route::post('copias/cadastros/recebimentos', [\App\Http\Controllers\Api\DecisaoCadastroCopiaController::class,'emitir'])->middleware('throttle:5,1');
         Route::post('copias/cadastros/preparar', [\App\Http\Controllers\Api\DecisaoCadastroCopiaController::class,'preparar'])->middleware('throttle:10,1');
