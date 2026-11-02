@@ -9,7 +9,7 @@ Revisão anterior à implementação, dependente do PR #127. Sem merge, deploy o
 | E2c1 — PR #128 em rascunho | Catálogo de turmas/alunos e prévia de cadastro na origem | Consulta sem lote, evidência, decisão ou destinatário real |
 | E2c2 — PR #129 em rascunho, docs/95 | Indicação de destino para cadastro, evidência restrita e decisões com conciliação | Revalidar tipo real, dependências, pendências e conflito de matrícula; documento nunca aparece ao destino |
 | E2c3 — PR #130 em rascunho, docs/96 | Seleção e prévia de resultados com dependências explícitas | Distinguir observação atual de versão histórica comprovada; somente leitura na origem |
-| E2c4 — implementado em revisão, docs/97 | Pacote de resultados, evidência, guarda contratual e reconhecimento do legado | Duas decisões sobre pacote cifrado; nenhuma execução implícita |
+| E2c4 — PR #131 em rascunho, docs/97 | Pacote de resultados, evidência, guarda contratual e reconhecimento do legado | Duas decisões sobre pacote cifrado; nenhuma execução implícita |
 | E3 | Execução, revogação/retentativa e acervo | Continua separado |
 
 ## Contrato E2c1
