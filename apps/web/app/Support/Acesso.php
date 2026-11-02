@@ -31,6 +31,7 @@ class Acesso
      * exige na tela de destino — assim nenhum item leva a 403 (docs/21, etapa 4).
      */
     private const ITENS = [
+        'copias' => ['Cópias', 'Cópias', 'prova', 'copias.index', ['copias.*'], ['copia.autorizar_origem','copia.autorizar_destino']],
         'clientes' => ['Clientes', 'Clientes', 'equipe', 'clientes.index', ['clientes.*'], ['cliente.ver']],
         'internos' => ['Acessos internos', 'Acessos internos', 'equipe', 'internos.index', ['internos.*'], ['acesso_interno.gerir']],
         'painel'     => ['Painel', 'Painel', 'casa', 'painel', ['painel'], []],
@@ -51,7 +52,7 @@ class Acesso
     ];
 
     /** Ordem do menu lateral. */
-    private const ORDEM = ['painel', 'clientes', 'internos', 'provas', 'corrigir', 'turmas', 'relatorios', 'escolas', 'alunos', 'equipe'];
+    private const ORDEM = ['painel', 'clientes', 'internos', 'provas', 'corrigir', 'turmas', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
 
     /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
     private const PRINCIPAIS = [
@@ -151,6 +152,8 @@ class Acesso
         $atual = request()->route()?->getName() ?? '';
         $itens = [];
         foreach (self::ORDEM as $chave) {
+            if ($chave==='copias' && (config('services.copias.interface_ativa')!==true || !session('auth_vinculos') || self::interno()
+                || !in_array(self::perfil(),['admin_rede','dir_escolar','professor_autonomo'],true))) continue;
             [$rotulo, $curto, $icone, $rota, $padroes, $perms] = self::ITENS[$chave];
             if ($perms && !collect($perms)->contains(fn ($p) => collect(explode('+', $p))->every(fn ($c) => self::pode($c)))) {
                 continue;
