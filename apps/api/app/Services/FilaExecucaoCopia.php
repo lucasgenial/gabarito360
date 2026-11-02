@@ -1,7 +1,7 @@
 <?php
 namespace App\Services;
 
-use App\Jobs\ProcessarCopiaMaterial;
+use App\Jobs\{ProcessarCopiaMaterial,ProcessarCopiaCadastro};
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Facades\DB;
 
@@ -14,13 +14,24 @@ final class FilaExecucaoCopia
         if (!config('copias.execucao_ativa') || !config('copias.ativo')) return $resultado;
         $conexao=config('auditoria.connection');
         if (config("queue.connections.$conexao.driver") !== 'redis') throw new \LogicException('Execução exige Redis.');
-        $ids=DB::table('copias_execucoes')->whereIn('estado',['pendente','aguardando_recibo'])
+        $politicas=['t5-material-v1'];
+        if (config('copias.cadastro_execucao_ativa')===true) $politicas[]=LotesCadastroCopia::POLITICA;
+        $ids=DB::table('copias_execucoes')->whereExists(fn($q)=>$q->selectRaw('1')->from('copias_lotes')
+                ->whereColumn('copias_lotes.id','copias_execucoes.lote_id')->whereIn('politica',$politicas))
+            ->whereIn('estado',['pendente','aguardando_recibo'])
             ->where('proxima_tentativa_em','<=',now())->orderBy('proxima_tentativa_em')->orderBy('lote_id')->limit($limite)->pluck('lote_id');
         foreach ($ids as $id) DB::transaction(function () use ($id,$conexao,&$resultado) {
             $e=DB::table('copias_execucoes')->where('lote_id',$id)->lockForUpdate()->first();
             if (!$e || !in_array($e->estado,['pendente','aguardando_recibo'],true) || $e->proxima_tentativa_em > now()) return;
             try {
-                app(Dispatcher::class)->dispatch((new ProcessarCopiaMaterial($id))->onConnection($conexao));
+                $politica=DB::table('copias_lotes')->where('id',$id)->value('politica');
+                $job=match($politica) {
+                    't5-material-v1'=>new ProcessarCopiaMaterial($id),
+                    LotesCadastroCopia::POLITICA=>config('copias.cadastro_execucao_ativa')===true?new ProcessarCopiaCadastro($id):null,
+                    default=>null,
+                };
+                if (!$job) return;
+                app(Dispatcher::class)->dispatch($job->onConnection($conexao));
                 DB::table('copias_execucoes')->where('lote_id',$id)->increment('envios',1,['proxima_tentativa_em'=>now()->addMinutes(5)]);
                 $resultado['enviados']++;
             } catch (\Throwable) {

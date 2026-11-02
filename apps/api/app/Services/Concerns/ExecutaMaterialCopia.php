@@ -110,6 +110,7 @@ trait ExecutaMaterialCopia
     public function registrarFalhaExecucao(string $id): void
     {
         DB::transaction(function () use ($id) {
+            if (!DB::table('copias_lotes')->where('id',$id)->where('politica','t5-material-v1')->exists()) return;
             $exec=DB::table('copias_execucoes')->where('lote_id',$id)->lockForUpdate()->first();
             if (!$exec || in_array($exec->estado,['concluido','bloqueado'],true)) return;
             DB::table('copias_execucoes')->where('lote_id',$id)->increment('falhas',1,
