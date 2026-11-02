@@ -14,13 +14,15 @@ class ElegibilidadeCopia
         abort_if($espacoOrigem === $espacoDestino, 403, 'Cópia indisponível.');
 
         return [
-            'origem' => self::lado($origem, $espacoOrigem, 'copia.autorizar_origem'),
-            'destino' => self::lado($destino, $espacoDestino, 'copia.autorizar_destino'),
+            'origem' => self::lado($origem, $espacoOrigem, 'origem'),
+            'destino' => self::lado($destino, $espacoDestino, 'destino'),
         ];
     }
 
-    private static function lado(Usuario $ator, int $espacoId, string $capacidade): array
+    public static function lado(Usuario $ator, int $espacoId, string $lado): array
     {
+        abort_unless(config('copias.ativo') === true && in_array($lado, ['origem', 'destino'], true), 403, 'Cópia indisponível.');
+        $capacidade = 'copia.autorizar_'.$lado;
         abort_if(ContextoInterno::presente($ator) || !ContextoVinculo::presente($ator), 403, 'Cópia indisponível.');
         $v = ContextoVinculo::resolver($ator);
         abort_unless(in_array($v->perfil, ['admin_rede', 'dir_escolar', 'professor_autonomo'], true)
