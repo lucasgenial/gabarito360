@@ -12,6 +12,28 @@ class AuditoriaTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_conexao_ausente_nao_recorre_ao_banco_geral(): void
+    {
+        config(['auditoria.conexao_gravacao'=>'inexistente']);
+        try { (new GravarAuditoria([]))->handle(); $this->fail('Deveria recusar conexão ausente.'); }
+        catch (\LogicException $e) { $this->assertStringContainsString('dedicada',$e->getMessage()); }
+        $this->assertDatabaseCount('auditoria_eventos',0);
+    }
+
+    public function test_conexao_geral_e_credencial_vazia_sao_recusadas(): void
+    {
+        $ambiente=app()->environment();
+        app()->instance('env','production');
+        try {
+            try { (new GravarAuditoria([]))->handle(); $this->fail('Não pode usar conexão geral.'); }
+            catch (\LogicException $e) { $this->assertStringContainsString('dedicada',$e->getMessage()); }
+            config(['auditoria.conexao_gravacao'=>'auditoria_gravacao','database.connections.auditoria_gravacao.username'=>'']);
+            try { (new GravarAuditoria([]))->handle(); $this->fail('Não pode usar usuário vazio.'); }
+            catch (\LogicException $e) { $this->assertStringContainsString('Credencial',$e->getMessage()); }
+        } finally { app()->instance('env',$ambiente); }
+        $this->assertDatabaseCount('auditoria_eventos',0);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
