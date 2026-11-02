@@ -1,7 +1,7 @@
 <?php
 namespace App\Services;
 
-use App\Jobs\{ProcessarCopiaMaterial,ProcessarCopiaCadastro};
+use App\Jobs\{ProcessarCopiaMaterial,ProcessarCopiaCadastro,ProcessarCopiaResultados};
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Facades\DB;
 
@@ -16,6 +16,7 @@ final class FilaExecucaoCopia
         if (config("queue.connections.$conexao.driver") !== 'redis') throw new \LogicException('Execução exige Redis.');
         $politicas=['t5-material-v1'];
         if (config('copias.cadastro_execucao_ativa')===true) $politicas[]=LotesCadastroCopia::POLITICA;
+        if (config('copias.resultados_execucao_ativa')===true) $politicas[]=LotesResultadosCopia::POLITICA;
         $ids=DB::table('copias_execucoes')->whereExists(fn($q)=>$q->selectRaw('1')->from('copias_lotes')
                 ->whereColumn('copias_lotes.id','copias_execucoes.lote_id')->whereIn('politica',$politicas))
             ->whereIn('estado',['pendente','aguardando_recibo'])
@@ -28,6 +29,7 @@ final class FilaExecucaoCopia
                 $job=match($politica) {
                     't5-material-v1'=>new ProcessarCopiaMaterial($id),
                     LotesCadastroCopia::POLITICA=>config('copias.cadastro_execucao_ativa')===true?new ProcessarCopiaCadastro($id):null,
+                    LotesResultadosCopia::POLITICA=>config('copias.resultados_execucao_ativa')===true?new ProcessarCopiaResultados($id):null,
                     default=>null,
                 };
                 if (!$job) return;
