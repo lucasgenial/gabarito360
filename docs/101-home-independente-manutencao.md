@@ -4,6 +4,8 @@ Solicitação aprovada pelo responsável em 02/11/2026, após observar a home re
 
 ## Comportamento
 
+Em 02/11/2026, o responsável informou o perfil oficial Instagram `@gabarito360`. O rodapé público passa a oferecer o link `https://www.instagram.com/gabarito360/`, em nova aba identificada de forma acessível; demais redes continuam em preparação.
+
 - Nginx entrega `/` e seu CSS diretamente de `/var/www/gabarito360-publico/current`, sem PHP, Redis ou banco na requisição pública. É a mesma home Blade existente, renderizada previamente de forma anônima; não há duplicação manual do conteúdo ou mudança de identidade visual.
 - As seções da home continuam navegáveis. Login, recuperação de senha, contato com envio e demais funções da aplicação continuam sujeitos à manutenção; não há aceitação silenciosa de formulários enquanto o sistema estiver parado.
 - Login/rotas web recebem 503 com uma página responsiva e links para voltar à home ou tentar novamente. API recebe 503 JSON. Ambos usam `Retry-After: 60` e `Cache-Control: no-store`, inclusive na indisponibilidade do PHP.
