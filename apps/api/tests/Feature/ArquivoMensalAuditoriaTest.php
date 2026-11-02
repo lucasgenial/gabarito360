@@ -45,7 +45,8 @@ class ArquivoMensalAuditoriaTest extends TestCase
         $this->assertTrue($inventario['meses']['2026-01']['preservado']);
         $this->artisan('g360:arquivar-auditoria',['mes'=>'2026-01','destino'=>$this->raiz.'/primeira'])->assertFailed();
         // Evento tardio exige revisão nova; replay com outro mês não contorna UUID global.
-        (new GravarAuditoria($this->evento(1,'2026-02')))->handle();
+        try { (new GravarAuditoria($this->evento(1,'2026-02')))->handle(); $this->fail('UUID divergente deveria falhar.'); }
+        catch (\LogicException $e) { $this->assertStringContainsString('divergente',$e->getMessage()); }
         (new GravarAuditoria($this->evento(5)))->handle();
         $novo = $s->criar('2026-01',$this->raiz.'/segunda');
         $this->assertSame(4,$novo['quantidade']);

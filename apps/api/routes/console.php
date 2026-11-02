@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::job(VerificarInadimplenciaJob::class)->dailyAt('03:00');
+Schedule::command('g360:copias-auditoria')->everyMinute()->withoutOverlapping()
+    ->when(fn () => (bool) config('copias.auditoria_entrega'));
