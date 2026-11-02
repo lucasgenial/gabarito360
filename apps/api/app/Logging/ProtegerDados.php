@@ -12,6 +12,7 @@ final class ProtegerDados
     private static ?\WeakMap $handlers = null;
 
     private const MENSAGENS = [
+        'auditoria_enfileiramento_indisponivel',
         'MP Webhook: assinatura inválida', 'MP Webhook recebido',
         'OMR nativo: leitura falhou', 'Imagens do cartão não geradas',
         'Assinatura: trial expirado, acesso suspenso.', 'Assinatura: inadimplente após carência, acesso suspenso.',
