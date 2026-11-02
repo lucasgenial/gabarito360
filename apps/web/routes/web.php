@@ -63,6 +63,8 @@ Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController:
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
     Route::get('/copias', [\App\Http\Controllers\CopiaController::class,'index'])->name('copias.index');
+    Route::get('/copias/materiais', [\App\Http\Controllers\SelecaoMaterialCopiaController::class,'index'])->name('copias.materiais');
+    Route::post('/copias/materiais/previa', [\App\Http\Controllers\SelecaoMaterialCopiaController::class,'previa'])->name('copias.materiais.previa');
     Route::post('/vinculos/convite/consultar', [\App\Http\Controllers\ConviteVinculoController::class, 'consultar'])->middleware('throttle:20,1')->name('vinculos.convite.consultar');
     Route::post('/vinculos/convite/responder', [\App\Http\Controllers\ConviteVinculoController::class, 'responder'])->middleware('throttle:10,1')->name('vinculos.convite.responder');
     Route::get('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'index'])->name('vinculos.index');
