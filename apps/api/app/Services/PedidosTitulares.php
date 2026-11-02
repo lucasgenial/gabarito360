@@ -125,7 +125,27 @@ final class PedidosTitulares
     {
         $a = $this->ator($u);
         return $this->atribuicoes($a)->select('id as referencia','cliente_id','espaco_id','tipo','situacao','versao','created_at','updated_at')
+            ->selectSub(DB::table('clientes')->select('nome')->whereColumn('clientes.id','pedidos_titulares.cliente_id'),'cliente_nome')
+            ->selectSub(DB::table('espacos')->select('nome')->whereColumn('espacos.id','pedidos_titulares.espaco_id'),'espaco_nome')
             ->orderByDesc('created_at')->orderBy('id')->paginate(20,['*'],'page',$pagina);
+    }
+
+    public function opcoes(Usuario $u, array $dados): array
+    {
+        abort_unless($this->ator($u)->perfil === 'desenvolvedor',403);
+        $v = $this->validar($dados,['cliente_id'=>'nullable|integer|min:1','clientes_page'=>'sometimes|integer|min:1',
+            'espacos_page'=>'sometimes|integer|min:1','responsaveis_page'=>'sometimes|integer|min:1']);
+        $cliente = empty($v['cliente_id']) ? null : DB::table('clientes')->where('id',$v['cliente_id'])->where('situacao','ativo')->first(['id','nome']);
+        abort_if(!empty($v['cliente_id']) && !$cliente,404);
+        $responsaveis = DB::table('usuario_acessos_internos as a')->join('usuarios as u','u.id','=','a.usuario_id')
+            ->whereIn('a.perfil',['desenvolvedor','suporte'])->where('a.situacao','ativo')->where('u.ativo',true)
+            ->where('u.forcar_troca_senha',false)->where('a.inicio_em','<=',now())
+            ->where(fn ($q) => $q->whereNull('a.fim_em')->orWhere('a.fim_em','>',now()))
+            ->select('a.id','a.perfil','u.nome')->orderBy('a.id')->paginate(20,['*'],'responsaveis_page',$v['responsaveis_page'] ?? 1);
+        return ['cliente'=>$cliente,
+            'clientes'=>DB::table('clientes')->where('situacao','ativo')->select('id','nome')->orderBy('nome')->orderBy('id')->paginate(20,['*'],'clientes_page',$v['clientes_page'] ?? 1),
+            'espacos'=>$cliente ? DB::table('espacos')->where('cliente_id',$cliente->id)->where('situacao','ativo')->select('id','nome','tipo')->orderBy('id')->paginate(20,['*'],'espacos_page',$v['espacos_page'] ?? 1) : null,
+            'responsaveis'=>$responsaveis];
     }
 
     public function consultar(Usuario $u, string $id): array
@@ -138,6 +158,8 @@ final class PedidosTitulares
             $this->evento($u,$a,$p,'consulta',$p->situacao,'Consulta do protocolo atribuído.');
             return ['referencia'=>$p->id,'tipo'=>$p->tipo,'situacao'=>$p->situacao,'versao'=>(int)$p->versao,
                 'cliente_id'=>(int)$p->cliente_id,'espaco_id'=>(int)$p->espaco_id,
+                'cliente_nome'=>DB::table('clientes')->where('id',$p->cliente_id)->value('nome'),
+                'espaco_nome'=>DB::table('espacos')->where('id',$p->espaco_id)->value('nome'),
                 'identificacao_declarada'=>Crypt::decryptString($p->identificacao_declarada),
                 'relato'=>Crypt::decryptString($p->relato),'resultado'=>$p->resultado,
                 'ciclo_verificacao'=>(int)$p->ciclo_verificacao,
