@@ -6,6 +6,7 @@ import urllib.request, urllib.error
 ROOT = Path(__file__).resolve().parents[2]
 
 class FastCGI(socketserver.BaseRequestHandler):
+    status = 200
     def handle(self):
         def ler(n):
             b = b''
@@ -20,7 +21,9 @@ class FastCGI(socketserver.BaseRequestHandler):
             if tipo == 5 and size == 0: break
         def enviar(tipo, data):
             self.request.sendall(struct.pack('!BBHHBB', 1, tipo, rid, len(data), 0, 0)+data)
-        enviar(6, b'Status: 200 OK\r\nContent-Type: text/plain\r\n\r\nsistema-ativo')
+        resposta = (b'Status: 200 OK\r\nContent-Type: text/plain\r\n\r\nsistema-ativo' if self.status == 200
+            else b'Status: 503 Service Unavailable\r\nContent-Type: application/json\r\n\r\n{"code":"falha-operacional"}')
+        enviar(6, resposta)
         enviar(6, b'')
         enviar(3, b'\0'*8)
 
@@ -71,6 +74,12 @@ class PublicoNginxTest(unittest.TestCase):
                 self.assertEqual(get('/')[0], 200)
                 self.assertEqual(get('/login')[2], 'sistema-ativo')
                 self.assertEqual(get('/api/v1/health')[0], 200)
+                FastCGI.status = 503
+                for path in ['/login', '/api/v1/health']:
+                    status, _, body = get(path)
+                    self.assertEqual(status, 503)
+                    self.assertEqual(json.loads(body)['code'], 'falha-operacional')
+                FastCGI.status = 200
                 for app in ['web', 'api']: (p/app/'storage/framework/down').write_text('{}')
                 self.assertEqual(get('/?origem=teste')[0], 200)
                 self.assertEqual(get('/', 'POST')[0], 405)
@@ -87,6 +96,7 @@ class PublicoNginxTest(unittest.TestCase):
                 self.assertEqual(get('/login')[0], 503)
                 self.assertEqual(get('/api/v1/health')[0], 503)
             finally:
+                FastCGI.status = 200
                 proc.terminate(); proc.communicate(timeout=5)
                 if thread.is_alive(): backend.shutdown(); backend.server_close(); thread.join()
 

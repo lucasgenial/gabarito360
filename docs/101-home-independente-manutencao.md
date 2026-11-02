@@ -7,6 +7,7 @@ Solicitação aprovada pelo responsável em 02/11/2026, após observar a home re
 - Nginx entrega `/` e seu CSS diretamente de `/var/www/gabarito360-publico/current`, sem PHP, Redis ou banco na requisição pública. É a mesma home Blade existente, renderizada previamente de forma anônima; não há duplicação manual do conteúdo ou mudança de identidade visual.
 - As seções da home continuam navegáveis. Login, recuperação de senha, contato com envio e demais funções da aplicação continuam sujeitos à manutenção; não há aceitação silenciosa de formulários enquanto o sistema estiver parado.
 - Login/rotas web recebem 503 com uma página responsiva e links para voltar à home ou tentar novamente. API recebe 503 JSON. Ambos usam `Retry-After: 60` e `Cache-Control: no-store`, inclusive na indisponibilidade do PHP.
+- Respostas de erro produzidas pela aplicação em funcionamento são preservadas, inclusive JSON 503 de uma operação. O aviso trata manutenção declarada e falhas de conexão do Nginx com o PHP.
 - Não se libera a aplicação por exceção ao middleware de manutenção. O bloqueio de gravações e o procedimento de backup permanecem válidos.
 
 ## Publicação
