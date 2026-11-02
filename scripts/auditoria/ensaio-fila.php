@@ -15,12 +15,14 @@ try {
         && config('database.connections.mariadb.host') === '127.0.0.1'
         && config('database.redis.default.host') === '127.0.0.1', 'ambiente_nao_descartavel');
     $fase=$argv[1] ?? '';
-    $evento=fn($n)=>['id'=>sprintf('00000000-0000-4000-8000-%012d',$n),'mes'=>'2026-11',
-        'ocorrido_em'=>'2026-11-01 12:00:00.000000','metodo'=>'GET','rota'=>'api/v1/alunos/{id}',
+    $evento=fn($n)=>['id'=>sprintf('00000000-0000-4000-8000-%012d',$n),'mes'=>$n===2 ? '2026-02' : '2026-01',
+        'ocorrido_em'=>($n===2 ? '2026-02' : '2026-01').'-01 12:00:00.000000','metodo'=>'GET','rota'=>'api/v1/alunos/{id}',
         'usuario_real_id'=>1,'referencias'=>'{"id":"1"}','status_http'=>200,'resultado'=>'sucesso'];
     $enviar=fn($n)=>app(Illuminate\Contracts\Bus\Dispatcher::class)->dispatch((new GravarAuditoria($evento($n)))->onConnection('redis'));
     $consumir=function () { $j=Queue::connection('redis')->pop('baixa'); conferir($j!==null,'job_ausente'); $j->fire(); };
     if ($fase === 'preparar') {
+        DB::statement('CREATE TABLE au1_controle_recuperacao (id INT PRIMARY KEY, valor VARCHAR(32))');
+        DB::table('au1_controle_recuperacao')->insert(['id'=>1,'valor'=>'fixture-sem-dados-reais']);
         DB::unprepared("CREATE USER 'au1_writer_ci'@'%' IDENTIFIED BY 'senha-ficticia-ci'");
         DB::unprepared("GRANT SELECT, INSERT ON g360_auditoria_ci.auditoria_eventos TO 'au1_writer_ci'@'%'");
         $enviar(1);
@@ -60,6 +62,13 @@ try {
         conferir($alerta,'falha_fila_sem_alerta');
         echo json_encode(['fase'=>$fase,'resposta_preservada'=>true,'alerta_emitido'=>true]).PHP_EOL;
     } elseif ($fase === 'recuperar') {
+        conferir(DB::table('au1_controle_recuperacao')->where('id',1)->value('valor') === 'fixture-sem-dados-reais'
+            && DB::table('migrations')->count() > 0, 'banco_incompleto');
+        // Os grants precisam continuar restritos após restauração do banco inteiro.
+        $negado=false;
+        try { DB::connection('auditoria_gravacao')->statement('DELETE FROM auditoria_eventos'); }
+        catch (Illuminate\Database\QueryException $e) { $negado=(int)($e->errorInfo[1]??0)===1142; }
+        conferir($negado,'grants_nao_restaurados');
         conferir(Queue::connection('redis')->size('baixa')===1,'snapshot_perdeu_job');
         $consumir(); $enviar(3); $consumir();
         conferir(DB::table('auditoria_eventos')->count()===3 && Queue::connection('redis')->size('baixa')===0,'recuperacao_divergente');
