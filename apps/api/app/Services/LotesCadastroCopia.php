@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\{Crypt,DB};
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-/** Contrato interno de cadastro. Não publica alunos/turmas nem expõe documentos. */
+/** Contrato interno de cadastro; sem endpoints ou exposição de documentos. */
 final class LotesCadastroCopia
 {
+    use \App\Services\Concerns\ExecutaCadastroCopia;
     public const POLITICA='t5-cadastro-v1';
 
     public function criar(Usuario $ator,int $origem,int $destino,string $chave,array $turmas,array $alunos): string
@@ -121,6 +122,7 @@ final class LotesCadastroCopia
     {
         return $this->transacao(function() use($ator,$id) {
             $l=$this->lote($id); $this->contexto($ator,$l,'destino');
+            if ($l->estado==='concluido') return (new OutboxCopia)->confirmada($id);
             $valido=$this->evidenciaValida($l) && $this->decisaoValida($l,'origem') && $this->decisaoValida($l,'destino');
             try {
                 if ($valido) {
@@ -132,7 +134,7 @@ final class LotesCadastroCopia
                 DB::table('copias_lotes')->where('id',$id)->update(['estado'=>'bloqueado','updated_at'=>now()]);
                 OutboxCopia::registrar($id,$ator,'bloqueado'); return false;
             }
-            return (new OutboxCopia)->confirmada($id); // Sinal técnico; C3 ainda não existe.
+            return (new OutboxCopia)->confirmada($id); // Sinal técnico, não substitui validação do worker.
         });
     }
 
@@ -140,6 +142,7 @@ final class LotesCadastroCopia
     {
         $this->transacao(function() use($ator,$id,$lado) {
             $l=$this->lote($id,false); $this->contexto($ator,$l,$lado);
+            abort_if($l->estado==='concluido',409,'Lote concluído; objetos publicados são independentes.');
             if ($l->estado==='bloqueado') return;
             $c=$this->contexto($ator,$l,$lado);
             DB::table('copias_autorizacoes')->where('lote_id',$id)->where('lado',$lado)->whereNull('revogada_em')->update([
@@ -165,7 +168,8 @@ final class LotesCadastroCopia
                 $alvo=$publicado?$q->first():null; $codigo=$alvo?'reutilizar_mapa':'mapa_invalido';
                 if ($alvo && $entidade==='aluno' && ($pais[$i['turma_origem_id']]??null)!==(int)$alvo->turma_id) $codigo='dependencia_incompativel';
                 // Hash interno detecta mudança do mapeamento, sem expor os IDs existentes.
-                $mapas[]=[$entidade,$i['origem_id'],(int)$mapa->id,(int)$mapa->destino_id,$codigo];
+                if ($mapa->lote_id===$l->id && $codigo==='reutilizar_mapa') $codigo='novo';
+                else $mapas[]=[$entidade,$i['origem_id'],(int)$mapa->id,(int)$mapa->destino_id,$codigo];
             } elseif ($entidade==='aluno' && DB::table('alunos')->where('espaco_id',$l->destino_espaco_id)->where('matricula',$i['dados']['matricula'])->exists()) {
                 $codigo='conflito_matricula';
             }

@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 final class EventoCopia
 {
     public const ACOES = ['solicitado','revisado','aprovado','revogado','bloqueado','execucao_solicitada',
-        'item_publicado','publicacao_concluida','execucao_falhou'];
+        'item_publicado','item_reutilizado','publicacao_concluida','execucao_falhou'];
 
     /** Contexto histórico da intenção, não credencial: o worker revalida acesso antes de copiar. */
     public static function sistema(array $base, string $acao, ?int $item = null): array
