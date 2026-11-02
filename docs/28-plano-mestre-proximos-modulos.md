@@ -978,11 +978,11 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
 | V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
 | T3 Perfis por espaço | T3-A #96, T3-B #97 e T3-C #99 incorporados; sem deploy | Codex | docs/63–65 |
-| T4 Cadastro de clientes | T4-A #100 e A1 #101–104 incorporados; T4-B interface comercial em revisão; sem deploy | Codex | docs/66–71 |
+| T4 Cadastro de clientes | T4-A #100 e A1 #101–104 incorporados; T4-B #105 incorporado; sem deploy | Codex | docs/66–71 |
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
 | A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C #104 incorporado; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
-| AU1 Registro de auditoria | pendente | | |
+| AU1 Registro de auditoria | AU1-A base em revisão; AU1-B retenção, operação e particionamento pendente; sem deploy | Codex | docs/32 e docs/72 |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |
 | A2 Painel técnico | pendente | | |
