@@ -572,7 +572,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
   4. Nunca gravar senhas, tokens ou códigos; mascarar dados pessoais.
   5. Gravar pela fila `baixa`, sem atrasar a resposta.
   6. Impedir edição e exclusão dos registros pelo sistema.
-  7. Definir retenção e particionar por mês.
+  7. Retenção de 180 dias aprovada, com preservação excepcional documentada. Solução mensal aprovada no PR #109: cópia cifrada verificável, mantendo UUID global e banco autoritativo; não é particionamento MariaDB nem expurgo. [Decisão](75-au1-b3-arquivos-e-restauracao.md).
 - **Pronto quando:** testes confirmam registro, mascaramento e que falha no registro não derruba a operação.
 
 #### AU2. Tela de auditoria
@@ -982,7 +982,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | T5 Cópia de dados | pendente | | |
 | T6 Encerramento | pendente | | |
 | A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C #104 incorporado; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
-| AU1 Registro de auditoria | AU1-A #106 e AU1-B #107–108 incorporados; 180 dias aprovados; B3 arquivos mensais cifrados e restauração dos serviços em revisão; ambiente equivalente e volume representativo pendentes; sem deploy | Codex | docs/32 e docs/72–75 |
+| AU1 Registro de auditoria | implementação #106–109 incorporada; recuperação completa em clones e 1,8 milhão de eventos sintéticos validados; evidência em revisão; captura/credencial e release no servidor ainda não ativadas; sem deploy | Codex | docs/32 e docs/72–76 |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |
 | A2 Painel técnico | pendente | | |
