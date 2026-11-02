@@ -384,3 +384,7 @@ EstadoPedidoTitular define transições sem acesso a banco ou efeitos sobre dado
 ### L4-C1 — ciclo do artefato de exportação
 
 EstadoExportacaoTitular é um contrato puro: transições e disponibilidade temporal não concedem autorização. A geração e a entrega futuras exigirão concessão delimitada, sujeito validado, escopo e destinatário revalidados. Estado terminal não reabre nem apaga dados. Planejamento e dependências em [107-l4-c1-contrato-exportacao.md](107-l4-c1-contrato-exportacao.md). Sem schema, endpoint ou deploy nesta parte.
+
+### L4-C2 — vinculação explícita do sujeito
+
+A primeira parte de C2 vincula um aluno ao protocolo no espaço exato, sob atribuição interna vigente. Cada revisão cria versão e histórico cifrado, renova o ciclo das conferências e não altera o cadastro escolar. Isso não concede leitura escolar nem autorização de exportação. A política dos aprovadores permanece dependente da escolha do responsável pelo produto. [Planejamento e limites](108-l4-c2-sujeito-autorizacao.md).

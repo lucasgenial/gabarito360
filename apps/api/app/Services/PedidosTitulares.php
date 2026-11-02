@@ -163,6 +163,8 @@ final class PedidosTitulares
                 'identificacao_declarada'=>Crypt::decryptString($p->identificacao_declarada),
                 'relato'=>Crypt::decryptString($p->relato),'resultado'=>$p->resultado,
                 'ciclo_verificacao'=>(int)$p->ciclo_verificacao,
+                'aluno_id'=>$p->aluno_id === null ? null : (int)$p->aluno_id,
+                'sujeito_versao'=>(int)$p->sujeito_versao,
                 'resposta_referencia'=>$p->resposta_referencia === null ? null : Crypt::decryptString($p->resposta_referencia),
                 'verificacoes'=>$this->verificacoes($p)->orderBy('tipo')->get()->map(fn ($v) => [
                     'tipo'=>$v->tipo,'metodo'=>$v->metodo,'registrada_em'=>$v->registrada_em,'valida_ate'=>$v->valida_ate,
@@ -192,6 +194,39 @@ final class PedidosTitulares
                 'resultado'=>$v['resultado'] ?? null,'concluido_em'=>$destino->terminal() ? now() : null,'updated_at'=>now()]);
             $this->evento($u,$a,$p,'triagem',$anterior,$v['motivo']);
             return $this->gravarRecibo($a,'triar:'.$id,$v,$p);
+        });
+    }
+
+    public function vincularSujeito(Usuario $u, string $id, array $dados): array
+    {
+        $this->ator($u);
+        abort_unless(\App\Support\Espacos::ativo(),403);
+        $v = $this->validar($dados, ['aluno_id'=>'required|integer|min:1','versao'=>'required|integer|min:1',
+            'evidencia_referencia'=>'required|string|min:5|max:500','motivo'=>'required|string|min:5|max:500','chave'=>'required|uuid']);
+        return DB::transaction(function () use ($u,$id,$v) {
+            $a = $this->bloquear($u);
+            $p = $this->atribuicoes($a)->where('id',$id)->lockForUpdate()->first(); abort_unless($p,404);
+            $this->escopo((int)$p->cliente_id,(int)$p->espaco_id);
+            if ($resposta = $this->recibo($a,'sujeito:'.$id,$v)) return $resposta;
+            abort_unless((int)$p->versao === (int)$v['versao'],409,'Protocolo alterado. Atualize a consulta.');
+            abort_unless(in_array($p->situacao,['recebida','em_verificacao','aguardando_informacao'],true),422,'Vinculação indisponível nesta etapa.');
+            $e = DB::table('espacos')->where('id',$p->espaco_id)->first();
+            abort_unless($e && \App\Support\ContextoVinculo::espacoValido($e),404);
+            abort_if($e->tipo === 'pessoal' && !config('espacos.pessoal',false),403);
+            $aluno = DB::table('alunos')->where('id',$v['aluno_id'])->where('espaco_id',$p->espaco_id)->lockForUpdate()->first();
+            abort_unless($aluno,404);
+            $turma = DB::table('turmas')->where('id',$aluno->turma_id)->where('espaco_id',$p->espaco_id)->lockForUpdate()->first();
+            abort_unless($turma && (($e->tipo === 'pessoal' && $turma->escola_id === null)
+                || ($e->tipo === 'escola' && (int)$turma->escola_id === (int)$e->escola_id)),404);
+            $evidencia = Crypt::encryptString($v['evidencia_referencia']);
+            DB::table('pedido_titular_sujeitos')->insert(['pedido_id'=>$id,'versao'=>$p->sujeito_versao+1,
+                'aluno_id'=>$aluno->id,'ator_id'=>$u->id,'evidencia'=>$evidencia,'registrado_em'=>now()]);
+            $anterior=$p->situacao;$p->situacao='em_verificacao';$p->versao++;
+            DB::table('pedidos_titulares')->where('id',$id)->update(['aluno_id'=>$aluno->id,
+                'sujeito_versao'=>$p->sujeito_versao+1,'sujeito_evidencia'=>$evidencia,
+                'ciclo_verificacao'=>$p->ciclo_verificacao+1,'situacao'=>$p->situacao,'versao'=>$p->versao,'updated_at'=>now()]);
+            $this->evento($u,$a,$p,'vincular_sujeito',$anterior,$v['motivo']);
+            return $this->gravarRecibo($a,'sujeito:'.$id,$v,$p);
         });
     }
 
