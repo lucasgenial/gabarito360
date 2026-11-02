@@ -23,3 +23,5 @@ A revisão guarda apenas hashes e referências, nunca o texto do material. A fut
 ## Validação e continuidade
 
 Testar lista positiva, alternativas/idioma/pesos, dados incompletos, ausência de revisão, digest forjado/desatualizado, origem/destino separados, revisão idempotente, versão revogada e recibo durável. Rodar MariaDB e repetir o ensaio de recuperação com quatro recibos (solicitação, revisão e duas aprovações). Não declarar T5-B concluído: B2 ainda precisa provar isolamento do staging, concorrência/publicação e recuperação da execução.
+
+O ensaio MariaDB revelou uma suposição anterior incorreta no leitor de arquivos AU1: a ordem de UUID nativo não deve ser comparada como texto PHP. A verificação mantém a ordem original, formato v1 e hashes, e confere integridade pelos hashes do conteúdo/cifra e contagem. Alteração/reordenação sem manifesto correspondente continua recusada. Não há recálculo de hashes históricos nem mudança do ORDER BY usado no inventário/exportação.
