@@ -88,6 +88,8 @@ Route::prefix('v1')->group(function () {
         Route::post('pedidos-titulares', [\App\Http\Controllers\Api\PedidoTitularController::class,'store'])->middleware('throttle:10,1');
         Route::get('pedidos-titulares/{id}', [\App\Http\Controllers\Api\PedidoTitularController::class,'show'])->whereUuid('id')->middleware('throttle:30,1');
         Route::post('pedidos-titulares/{id}/triagem', [\App\Http\Controllers\Api\PedidoTitularController::class,'triar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('pedidos-titulares/{id}/verificacoes', [\App\Http\Controllers\Api\PedidoTitularController::class,'verificar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('pedidos-titulares/{id}/decisao', [\App\Http\Controllers\Api\PedidoTitularController::class,'decidir'])->whereUuid('id')->middleware('throttle:10,1');
         Route::get('clientes', [\App\Http\Controllers\Api\ClienteController::class,'index']);
         Route::post('clientes', [\App\Http\Controllers\Api\ClienteController::class,'store'])->middleware('throttle:20,1');
         Route::get('clientes/{id}', [\App\Http\Controllers\Api\ClienteController::class,'show'])->whereNumber('id');
