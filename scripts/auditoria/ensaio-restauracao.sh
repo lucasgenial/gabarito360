@@ -58,6 +58,7 @@ export DB_PORT=3307 REDIS_PORT=6380
 php apps/api/artisan g360:conferir-auditoria --comparar="$pacote/antes.json" > /dev/null
 php apps/api/artisan g360:arquivar-auditoria 2026-01 "$pacote/mensal" --verificar > /dev/null
 php scripts/auditoria/ensaio-fila.php recuperar
+php scripts/auditoria/ensaio-copias.php recuperar
 # A pendência restaurada é um evento tardio de janeiro: uma nova revisão tem dois registros.
 php apps/api/artisan g360:arquivar-auditoria 2026-01 "$pacote/mensal-posterior" > /dev/null
 php apps/api/artisan g360:arquivar-auditoria 2026-01 "$pacote/mensal" --verificar > /dev/null

@@ -51,6 +51,7 @@ jobs:
           php artisan key:generate
           php artisan migrate --force
       - run: php scripts/auditoria/ensaio-fila.php preparar
+      - run: php scripts/auditoria/ensaio-copias.php preparar
       - name: Identificar Redis descartável
         run: |
           redis_ensaio=$(docker ps -q --filter ancestor=redis:7-alpine)
@@ -58,6 +59,7 @@ jobs:
           echo "AUDITORIA_REDIS_CONTAINER=$redis_ensaio" >> "$GITHUB_ENV"
       - run: docker stop "$AUDITORIA_REDIS_CONTAINER"
       - run: php scripts/auditoria/ensaio-fila.php indisponivel
+      - run: php scripts/auditoria/ensaio-copias.php indisponivel
       - run: docker start "$AUDITORIA_REDIS_CONTAINER"
       - run: |
           for tentativa in $(seq 1 20); do
@@ -140,4 +142,4 @@ jobs:
       - run: mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
       - run: composer install --no-interaction --no-progress
       - run: cp .env.example .env && php artisan key:generate
-      - run: php artisan test --filter='IntegridadeEspacosMariaDbTest|VinculosMariaDbTest|SelecaoVinculoTest|ConviteInterfaceTest|PerfisEspacoTest|DadosPessoaisTest|PlanejamentoConsultasMariaDbTest|IntegracaoPessoalTest|CadastroClienteTest|AcessosInternosTest|SelecaoInternaTest|GestaoAcessosInternosTest|SecretarioEscolarTest|ClientesInterfaceTest|AuditoriaTest|ConferenciaAuditoriaTest|ArquivoMensalAuditoriaTest|ElegibilidadeCopiaTest|LotesCopiaTest'
+      - run: php artisan test --filter='IntegridadeEspacosMariaDbTest|VinculosMariaDbTest|SelecaoVinculoTest|ConviteInterfaceTest|PerfisEspacoTest|DadosPessoaisTest|PlanejamentoConsultasMariaDbTest|IntegracaoPessoalTest|CadastroClienteTest|AcessosInternosTest|SelecaoInternaTest|GestaoAcessosInternosTest|SecretarioEscolarTest|ClientesInterfaceTest|AuditoriaTest|ConferenciaAuditoriaTest|ArquivoMensalAuditoriaTest|ElegibilidadeCopiaTest|LotesCopiaTest|OutboxCopiaTest'

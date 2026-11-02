@@ -527,7 +527,7 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 #### T5. Cópia de dados entre espaços
 
 - **Dependências:** T3, B4, AU1.
-- **Planejamento aprovado:** [docs/77](77-t5-planejamento-copias.md), incorporado no PR #111. T5-A1 incorporado no PR #112. [T5-A2 / docs/79](79-t5-a2-lotes-autorizacoes.md) prepara seleção imutável, decisões separadas, lotes/itens e constraints de proveniência, sem executar cópia. A3 ainda deve entregar outbox e auditoria durável antes da execução. Recurso desligado; T6/F1 conservam seus bloqueios.
+- **Planejamento aprovado:** [docs/77](77-t5-planejamento-copias.md), incorporado no PR #111. T5-A1 #112 e T5-A2 #113 incorporados. [T5-A3 / docs/80](80-t5-a3-outbox-auditoria.md) prepara recibos transacionais, entrega idempotente e eventos de domínio compatíveis com AU1. Ainda sem executor de cópia: próximo pacote T5-B revisará prévia/classificação e staging. Recurso e entrega desligados; T6/F1 conservam seus bloqueios.
 - **Passos:**
   1. Criar serviço de cópia, repetível e pela fila.
   2. Registrar origem em `registros_origem`.
@@ -980,7 +980,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
 | T3 Perfis por espaço | T3-A #96, T3-B #97 e T3-C #99 incorporados; sem deploy | Codex | docs/63–65 |
 | T4 Cadastro de clientes | T4-A #100 e A1 #101–104 incorporados; T4-B #105 incorporado; sem deploy | Codex | docs/66–71 |
-| T5 Cópia de dados | T5-A1 #112 incorporado; A2 em revisão (lotes/decisões/constraints); A3 e B–E pendentes; flag desligada, sem deploy/cópias reais | Codex | docs/77–79 |
+| T5 Cópia de dados | A1 #112 e A2 #113 incorporados; A3 em revisão (outbox e auditoria); B–E pendentes; flags desligadas, sem deploy/cópias reais | Codex | docs/77–80 |
 | T6 Encerramento | pendente | | |
 | A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C #104 incorporado; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
 | AU1 Registro de auditoria | implementação #106–109 e evidência #110 incorporadas; recuperação completa em clones e 1,8 milhão de eventos sintéticos validados; captura/credencial e release no servidor ainda não ativadas; sem deploy | Codex | docs/32 e docs/72–76 |
