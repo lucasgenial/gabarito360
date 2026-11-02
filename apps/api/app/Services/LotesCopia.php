@@ -239,7 +239,7 @@ class LotesCopia
 
     private function fonte(int $espaco, int $id): string
     {
-        $prova = DB::table('provas')->where('espaco_id', $espaco)->where('id', $id)->first();
+        $prova = \App\Support\Espacos::conferirEscola(DB::table('provas'),'provas')->where('espaco_id', $espaco)->where('id', $id)->first();
         abort_unless($prova, 404, 'Seleção indisponível.');
         $gabarito = DB::table('gabaritos')->where('prova_id', $id)->first();
         abort_if($gabarito && (int) $gabarito->espaco_id !== $espaco, 403, 'Seleção indisponível.');
