@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Usuario;
-use App\Support\{ContextoVinculo, ElegibilidadeCopia, RegimeVinculos};
+use App\Support\{ContextoVinculo, ElegibilidadeCopia, RegimeVinculos, MaterialCopia};
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -50,6 +50,41 @@ class LotesCopia
         });
     }
 
+    /** Prévia restrita à origem. Não expõe dados ao destinatário antes do consentimento de saída. */
+    public function previaMaterial(Usuario $ator, string $id): array
+    {
+        return $this->transacao(function () use ($ator,$id) {
+            $lote=$this->lote($id); $this->contexto($ator,$lote,'origem');
+            abort_unless($lote->estado !== 'bloqueado' && $this->fonteAtual($lote),409,'Seleção indisponível; prepare novo lote.');
+            return $this->projecao($lote);
+        });
+    }
+
+    public function revisarMaterial(Usuario $ator, string $id, string $digestApresentado, bool $semDadosPessoais): string
+    {
+        return $this->transacao(function () use ($ator,$id,$digestApresentado,$semDadosPessoais) {
+            $lote=$this->lote($id); $contexto=$this->contexto($ator,$lote,'origem');
+            abort_unless($semDadosPessoais,422,'Revisão explícita do conteúdo obrigatória.');
+            abort_unless($lote->estado !== 'bloqueado' && $this->fonteAtual($lote),409,'Seleção indisponível; prepare novo lote.');
+            $previa=$this->projecao($lote);
+            abort_unless(hash_equals($previa['conteudo_digest'],$digestApresentado),409,'Prévia desatualizada.');
+            $anterior=DB::table('copias_revisoes')->where('lote_id',$id)->first();
+            if ($anterior) {
+                abort_unless((int)$anterior->ator_id === $contexto['usuario_id'] && (int)$anterior->vinculo_id === $contexto['vinculo_id']
+                    && $anterior->versao_acesso === $contexto['versao_acesso'] && $this->revisaoValida($lote),409,'Revisão já registrada; prepare novo lote.');
+                return $anterior->id;
+            }
+            abort_if(DB::table('copias_autorizacoes')->where('lote_id',$id)->exists(),409,'Decisões anteriores à revisão; prepare novo lote.');
+            $revisao=(string)Str::uuid();
+            DB::table('copias_revisoes')->insert(['id'=>$revisao,'lote_id'=>$id,'ator_id'=>$contexto['usuario_id'],
+                'vinculo_id'=>$contexto['vinculo_id'],'versao_acesso'=>$contexto['versao_acesso'],
+                'selecao_digest'=>$lote->selecao_digest,'conteudo_digest'=>$previa['conteudo_digest'],'politica'=>MaterialCopia::POLITICA,
+                'classificacao'=>'material_sem_dados_pessoais','created_at'=>now()]);
+            OutboxCopia::registrar($id,$ator,'revisado');
+            return $revisao;
+        });
+    }
+
     public function aprovar(Usuario $ator, string $id, string $lado, CarbonImmutable $validaAte): array
     {
         return $this->transacao(function () use ($ator, $id, $lado, $validaAte) {
@@ -57,6 +92,7 @@ class LotesCopia
             $contexto = $this->contexto($ator, $lote, $lado);
             abort_unless($lote->estado !== 'bloqueado' && $validaAte->isFuture(), 409, 'Decisão indisponível.');
             abort_unless($this->fonteAtual($lote), 409, 'Seleção mudou; prepare novo lote.');
+            abort_unless($this->revisaoValida($lote),409,'Material exige revisão válida antes das decisões.');
             $validade = $validaAte->utc()->format('Y-m-d H:i:s');
             // Precisão persistida é de segundos; não admitir validade truncada já vencida.
             abort_unless(CarbonImmutable::parse($validade, 'UTC')->isFuture(), 422, 'Validade inválida.');
@@ -81,7 +117,7 @@ class LotesCopia
         });
     }
 
-    /** Retorna elegibilidade atual, nunca permissão de execução; A3 ainda deve confirmar auditoria. */
+    /** Retorna elegibilidade atual; auditoria confirmada e publicação são verificações separadas. */
     public function revalidar(Usuario $ator, string $id, string $lado): bool
     {
         return $this->transacao(function () use ($ator, $id, $lado) {
@@ -110,6 +146,10 @@ class LotesCopia
     {
         if ($lote->estado === 'bloqueado') return false;
         $decisoes = DB::table('copias_autorizacoes')->where('lote_id', $lote->id)->get();
+        if (!$this->revisaoValida($lote)) {
+            if ($decisoes->isNotEmpty()) $this->estado($lote,'bloqueado',$ator);
+            return false;
+        }
         try {
             if (!$this->fonteAtual($lote)) { $this->estado($lote, 'bloqueado',$ator); return false; }
             foreach ($decisoes as $d) {
@@ -131,6 +171,34 @@ class LotesCopia
         if ($decisoes->count() !== 2) return false;
         $this->estado($lote, 'aguardando_auditoria',$ator);
         return true;
+    }
+
+    private function projecao(object $lote): array
+    {
+        $itens=[];
+        foreach (DB::table('copias_itens')->where('lote_id',$lote->id)->orderBy('origem_id')->get() as $item) {
+            $itens[]=['origem_id'=>(int)$item->origem_id,'material'=>MaterialCopia::projetar((int)$lote->origem_espaco_id,(int)$item->origem_id)];
+        }
+        return ['lote_id'=>$lote->id,'politica'=>MaterialCopia::POLITICA,'selecao_digest'=>$lote->selecao_digest,
+            'conteudo_digest'=>$this->digest([MaterialCopia::POLITICA,$lote->selecao_digest,$itens]),
+            'revisao_humana_obrigatoria'=>true,'itens'=>$itens];
+    }
+
+    private function revisaoValida(object $lote): bool
+    {
+        $r=DB::table('copias_revisoes')->where('lote_id',$lote->id)->first();
+        if (!$r || $r->politica !== MaterialCopia::POLITICA || $r->classificacao !== 'material_sem_dados_pessoais'
+            || $r->selecao_digest !== $lote->selecao_digest) return false;
+        try {
+            $usuario=Usuario::find($r->ator_id);
+            if (!$usuario) return false;
+            $contexto=$this->contexto($usuario->noVinculo($r->vinculo_id),$lote,'origem');
+            return hash_equals($r->versao_acesso,$contexto['versao_acesso'])
+                && hash_equals($r->conteudo_digest,$this->projecao($lote)['conteudo_digest']);
+        } catch (HttpException $e) {
+            if (!in_array($e->getStatusCode(),[403,404,422],true)) throw $e;
+            return false;
+        }
     }
 
     private function contexto(Usuario $ator, object $lote, string $lado): array
@@ -171,7 +239,7 @@ class LotesCopia
 
     private function fonte(int $espaco, int $id): string
     {
-        $prova = DB::table('provas')->where('espaco_id', $espaco)->where('id', $id)->first();
+        $prova = \App\Support\Espacos::conferirEscola(DB::table('provas'),'provas')->where('espaco_id', $espaco)->where('id', $id)->first();
         abort_unless($prova, 404, 'Seleção indisponível.');
         $gabarito = DB::table('gabaritos')->where('prova_id', $id)->first();
         abort_if($gabarito && (int) $gabarito->espaco_id !== $espaco, 403, 'Seleção indisponível.');

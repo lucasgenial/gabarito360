@@ -37,6 +37,8 @@ class OutboxCopiaTest extends TestCase
         }
         DB::table('provas')->insert(['id'=>1,'espaco_id'=>1,'espaco_tipo'=>'pessoal','criado_por'=>1,
             'titulo'=>'CONTEUDO-NAO-AUDITAVEL','disciplina'=>'Matemática','serie'=>'3','num_questoes'=>1,'num_alternativas'=>4]);
+        DB::table('gabaritos')->insert(['id'=>1,'prova_id'=>1,'espaco_id'=>1]);
+        DB::table('gabarito_questoes')->insert(['id'=>1,'gabarito_id'=>1,'espaco_id'=>1,'numero_questao'=>1,'alternativa'=>'A']);
     }
 
     private function ator(int $id=1): Usuario { return Usuario::find($id)->noVinculo($id); }
@@ -52,18 +54,20 @@ class OutboxCopiaTest extends TestCase
     {
         $chave=(string)Str::uuid(); $lote=$this->criar($chave); $this->assertSame($lote,$this->criar($chave));
         $validade=CarbonImmutable::now()->addHour()->startOfSecond(); $servico=new LotesCopia;
+        $previa=$servico->previaMaterial($this->ator(),$lote);
+        $servico->revisarMaterial($this->ator(),$lote,$previa['conteudo_digest'],true);
         foreach ([1=>'origem',2=>'destino'] as $id=>$lado) {
             $servico->aprovar($this->ator($id),$lote,$lado,$validade);
             $servico->aprovar($this->ator($id),$lote,$lado,$validade);
         }
-        $this->assertDatabaseCount('copias_outbox',3);
+        $this->assertDatabaseCount('copias_outbox',4);
         $this->assertFalse((new OutboxCopia)->confirmada($lote));
         foreach (DB::table('copias_outbox')->pluck('id') as $id) (new OutboxCopia)->entregar($id);
         $this->assertTrue((new OutboxCopia)->confirmada($lote));
-        $this->assertDatabaseCount('auditoria_eventos',3);
+        $this->assertDatabaseCount('auditoria_eventos',4);
         $this->assertDatabaseCount('provas',1);
         $servico->revogar($this->ator(),$lote,'origem'); $servico->revogar($this->ator(),$lote,'origem');
-        $this->assertDatabaseCount('copias_outbox',5);
+        $this->assertDatabaseCount('copias_outbox',6);
         $this->assertFalse((new OutboxCopia)->confirmada($lote));
         $this->assertStringNotContainsString('CONTEUDO-NAO-AUDITAVEL',json_encode(DB::table('copias_outbox')->get()));
     }
