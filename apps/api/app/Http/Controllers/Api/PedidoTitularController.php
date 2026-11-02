@@ -24,4 +24,12 @@ final class PedidoTitularController extends Controller
     {
         return ApiResponse::success($s->triar($r->user(),$id,$r->all()));
     }
+    public function verificar(Request $r, string $id, PedidosTitulares $s)
+    {
+        return ApiResponse::success($s->verificar($r->user(),$id,$r->all()));
+    }
+    public function decidir(Request $r, string $id, PedidosTitulares $s)
+    {
+        return ApiResponse::success($s->decidir($r->user(),$id,$r->all()));
+    }
 }

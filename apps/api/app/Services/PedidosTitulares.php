@@ -139,7 +139,14 @@ final class PedidosTitulares
             return ['referencia'=>$p->id,'tipo'=>$p->tipo,'situacao'=>$p->situacao,'versao'=>(int)$p->versao,
                 'cliente_id'=>(int)$p->cliente_id,'espaco_id'=>(int)$p->espaco_id,
                 'identificacao_declarada'=>Crypt::decryptString($p->identificacao_declarada),
-                'relato'=>Crypt::decryptString($p->relato),'resultado'=>$p->resultado];
+                'relato'=>Crypt::decryptString($p->relato),'resultado'=>$p->resultado,
+                'ciclo_verificacao'=>(int)$p->ciclo_verificacao,
+                'resposta_referencia'=>$p->resposta_referencia === null ? null : Crypt::decryptString($p->resposta_referencia),
+                'verificacoes'=>$this->verificacoes($p)->orderBy('tipo')->get()->map(fn ($v) => [
+                    'tipo'=>$v->tipo,'metodo'=>$v->metodo,'registrada_em'=>$v->registrada_em,'valida_ate'=>$v->valida_ate,
+                    'vigente'=>\Illuminate\Support\Carbon::parse($v->valida_ate)->isFuture(),
+                    'evidencia_referencia'=>Crypt::decryptString($v->evidencia_referencia),
+                ])->all()];
         });
     }
 
@@ -159,9 +166,73 @@ final class PedidosTitulares
             catch (DomainException) { throw ValidationException::withMessages(['situacao'=>'Transição de protocolo indisponível.']); }
             $anterior = $p->situacao; $p->situacao = $destino->value; $p->versao++;
             DB::table('pedidos_titulares')->where('id',$id)->update(['situacao'=>$p->situacao,'versao'=>$p->versao,
+                'ciclo_verificacao'=>$p->ciclo_verificacao + ($destino === EstadoPedidoTitular::AguardandoInformacao ? 1 : 0),
                 'resultado'=>$v['resultado'] ?? null,'concluido_em'=>$destino->terminal() ? now() : null,'updated_at'=>now()]);
             $this->evento($u,$a,$p,'triagem',$anterior,$v['motivo']);
             return $this->gravarRecibo($a,'triar:'.$id,$v,$p);
+        });
+    }
+
+    private function verificacoes(object $p)
+    {
+        return DB::table('pedido_titular_verificacoes')->where('pedido_id',$p->id)->where('ciclo',$p->ciclo_verificacao)
+            ->where('acesso_id',$p->responsavel_acesso_id)->where('acesso_versao',$p->responsavel_versao);
+    }
+
+    public function verificar(Usuario $u, string $id, array $dados): array
+    {
+        $this->ator($u);
+        $v = $this->validar($dados, ['tipo'=>['required',Rule::in(['identidade','autoridade'])],
+            'metodo'=>['required',Rule::in(['conferencia_documental','canal_autenticado','confirmacao_institucional','instrumento_representacao'])],
+            'evidencia_referencia'=>'required|string|min:5|max:500','valida_ate'=>'required|date',
+            'versao'=>'required|integer|min:1','motivo'=>'required|string|min:5|max:500','chave'=>'required|uuid']);
+        $metodos = $v['tipo'] === 'identidade' ? ['conferencia_documental','canal_autenticado'] : ['confirmacao_institucional','instrumento_representacao'];
+        if (!in_array($v['metodo'],$metodos,true)) throw ValidationException::withMessages(['metodo'=>'Método incompatível com a conferência.']);
+        return DB::transaction(function () use ($u,$id,$v) {
+            $a = $this->bloquear($u);
+            $p = $this->atribuicoes($a)->where('id',$id)->lockForUpdate()->first(); abort_unless($p,404);
+            $this->escopo((int)$p->cliente_id,(int)$p->espaco_id);
+            if ($resposta = $this->recibo($a,'verificar:'.$id,$v)) return $resposta;
+            abort_unless((int)$p->versao === (int)$v['versao'],409,'Protocolo alterado. Atualize a consulta.');
+            if ($p->situacao !== 'em_verificacao') throw ValidationException::withMessages(['pedido'=>'Protocolo fora da etapa de verificação.']);
+            Validator::make($v,['valida_ate'=>'date|after:now'])->validate();
+            abort_if($this->verificacoes($p)->where('tipo',$v['tipo'])->exists(),409,'Conferência já registrada neste ciclo.');
+            DB::table('pedido_titular_verificacoes')->insert(['pedido_id'=>$id,'ciclo'=>$p->ciclo_verificacao,
+                'tipo'=>$v['tipo'],'metodo'=>$v['metodo'],'ator_id'=>$u->id,'acesso_id'=>$a->id,'acesso_versao'=>$a->versao_autorizacao,
+                'evidencia_referencia'=>Crypt::encryptString($v['evidencia_referencia']),'registrada_em'=>now(),
+                'valida_ate'=>\Illuminate\Support\Carbon::parse($v['valida_ate'])->utc()->format('Y-m-d H:i:s')]);
+            $p->versao++;
+            DB::table('pedidos_titulares')->where('id',$id)->update(['versao'=>$p->versao,'updated_at'=>now()]);
+            $this->evento($u,$a,$p,'verificar_'.$v['tipo'],$p->situacao,$v['motivo']);
+            return $this->gravarRecibo($a,'verificar:'.$id,$v,$p);
+        });
+    }
+
+    public function decidir(Usuario $u, string $id, array $dados): array
+    {
+        $this->ator($u);
+        $v = $this->validar($dados, ['situacao'=>['required',Rule::in(['em_analise','concluida'])],
+            'versao'=>'required|integer|min:1','motivo'=>'required|string|min:5|max:500','chave'=>'required|uuid',
+            'resultado'=>['required_if:situacao,concluida','prohibited_unless:situacao,concluida',Rule::in(['atendido','parcialmente_atendido','indeferido'])],
+            'resposta_referencia'=>'required_if:situacao,concluida|prohibited_unless:situacao,concluida|string|min:5|max:500']);
+        return DB::transaction(function () use ($u,$id,$v) {
+            $a = $this->bloquear($u);
+            $p = $this->atribuicoes($a)->where('id',$id)->lockForUpdate()->first(); abort_unless($p,404);
+            $this->escopo((int)$p->cliente_id,(int)$p->espaco_id);
+            if ($resposta = $this->recibo($a,'decidir:'.$id,$v)) return $resposta;
+            abort_unless((int)$p->versao === (int)$v['versao'],409,'Protocolo alterado. Atualize a consulta.');
+            $tipos = $this->verificacoes($p)->where('valida_ate','>',now())->pluck('tipo')->all();
+            try {
+                $destino = EstadoPedidoTitular::from($p->situacao)->transicionar(EstadoPedidoTitular::from($v['situacao']),
+                    in_array('identidade',$tipos,true),in_array('autoridade',$tipos,true),$v['resultado'] ?? null);
+            } catch (DomainException) { throw ValidationException::withMessages(['pedido'=>'Transição indisponível ou conferências pendentes.']); }
+            $anterior = $p->situacao; $p->situacao = $destino->value; $p->versao++;
+            DB::table('pedidos_titulares')->where('id',$id)->update(['situacao'=>$p->situacao,'versao'=>$p->versao,
+                'resultado'=>$v['resultado'] ?? null,
+                'resposta_referencia'=>isset($v['resposta_referencia']) ? Crypt::encryptString($v['resposta_referencia']) : null,
+                'concluido_em'=>$destino->terminal() ? now() : null,'updated_at'=>now()]);
+            $this->evento($u,$a,$p,'decisao',$anterior,$v['motivo']);
+            return $this->gravarRecibo($a,'decidir:'.$id,$v,$p);
         });
     }
 }
