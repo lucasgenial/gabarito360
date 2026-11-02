@@ -13,7 +13,7 @@ final class MaterialCopia
 
     public static function projetar(int $espaco, int $id): array
     {
-        $p=DB::table('provas')->where('espaco_id',$espaco)->where('id',$id)->first();
+        $p=Espacos::conferirEscola(DB::table('provas'),'provas')->where('espaco_id',$espaco)->where('id',$id)->first();
         abort_unless($p,404,'Material indisponível.');
         $qtd=(int)$p->num_questoes; $alternativas=(int)$p->num_alternativas;
         abort_unless($qtd >= 1 && $qtd <= 100 && in_array($alternativas,[3,4,5],true)

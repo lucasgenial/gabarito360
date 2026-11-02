@@ -329,4 +329,14 @@ class LotesCopiaTest extends TestCase
         catch (\RuntimeException $e) { $this->assertSame('recibo-revisao-falhou',$e->getMessage()); }
         $this->assertDatabaseCount('copias_revisoes',0); $this->assertDatabaseCount('copias_outbox',1);
     }
+
+    public function test_escola_da_prova_divergente_do_espaco_nao_revela_previa(): void
+    {
+        $id=$this->criar();
+        DB::table('escolas')->insert(['id'=>2,'nucleo_id'=>1,'nome'=>'Outra escola','inep'=>'00000002','tipo_rede'=>'estadual']);
+        DB::table('provas')->where('id',1)->update(['escola_id'=>2]);
+        $this->recusa(404,fn()=>$this->servico->previaMaterial($this->ator(),$id));
+        $this->recusa(404,fn()=>$this->criar());
+        $this->assertDatabaseCount('copias_revisoes',0);
+    }
 }
