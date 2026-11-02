@@ -71,6 +71,8 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/copias/cadastros/lotes/{id}', [\App\Http\Controllers\DecisaoCadastroCopiaController::class,'show'])->whereUuid('id')->name('copias.cadastro.decisao');
     Route::post('/copias/cadastros/lotes/{id}/evidencia', [\App\Http\Controllers\DecisaoCadastroCopiaController::class,'evidencia'])->whereUuid('id')->name('copias.cadastro.evidencia');
     Route::post('/copias/cadastros/lotes/{id}/aprovar', [\App\Http\Controllers\DecisaoCadastroCopiaController::class,'aprovar'])->whereUuid('id')->name('copias.cadastro.aprovar');
+    Route::get('/copias/resultados', [\App\Http\Controllers\SelecaoResultadosCopiaController::class,'index'])->name('copias.resultados');
+    Route::post('/copias/resultados/previa', [\App\Http\Controllers\SelecaoResultadosCopiaController::class,'previa'])->name('copias.resultados.previa');
     Route::get('/copias/cadastros', [\App\Http\Controllers\SelecaoCadastroCopiaController::class,'index'])->name('copias.cadastros');
     Route::post('/copias/cadastros/previa', [\App\Http\Controllers\SelecaoCadastroCopiaController::class,'previa'])->name('copias.cadastros.previa');
     Route::get('/copias/materiais', [\App\Http\Controllers\SelecaoMaterialCopiaController::class,'index'])->name('copias.materiais');
