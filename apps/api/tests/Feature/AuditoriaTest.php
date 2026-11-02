@@ -151,7 +151,7 @@ class AuditoriaTest extends TestCase
         $this->mock(Dispatcher::class)->shouldReceive('dispatch')->andThrow(new \RuntimeException('SEGREDO-EXCECAO'));
         Log::spy();
         $this->chamar($token,'POST','auth/acessos-internos/selecionar',['acesso_interno_id'=>1])->assertCreated();
-        Log::shouldHaveReceived('warning')->once()->with('auditoria_enfileiramento_indisponivel');
+        Log::shouldHaveReceived('error')->once()->with('auditoria_enfileiramento_indisponivel');
     }
 
     public function test_flag_desligada_e_health_nao_enfileiram(): void
@@ -176,7 +176,7 @@ class AuditoriaTest extends TestCase
         Log::spy();
         $this->getJson('/api/v1/alunos')->assertUnauthorized();
         Queue::assertPushed(GravarAuditoria::class,1);
-        Log::shouldHaveReceived('warning')->once()->with('auditoria_enfileiramento_indisponivel');
+        Log::shouldHaveReceived('error')->once()->with('auditoria_enfileiramento_indisponivel');
     }
 
     public function test_erro_http_ipv6_e_falha_de_persistencia_nao_sao_ocultados(): void
