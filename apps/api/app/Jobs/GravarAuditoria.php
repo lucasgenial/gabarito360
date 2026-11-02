@@ -17,11 +17,21 @@ class GravarAuditoria implements ShouldQueue, ShouldBeEncrypted
     public function backoff(): array { return [10, 60]; }
     public function handle(): void
     {
+        $nome = config('auditoria.conexao_gravacao');
+        if (!is_string($nome) || $nome === '' || !config("database.connections.$nome")
+            || (!app()->environment('testing') && $nome === config('database.default'))) {
+            throw new \LogicException('Conexão dedicada de auditoria obrigatória.');
+        }
+        if (in_array(config("database.connections.$nome.driver"), ['mysql','mariadb'], true)
+            && !config("database.connections.$nome.username")) {
+            throw new \LogicException('Credencial de auditoria obrigatória.');
+        }
+        $banco = DB::connection($nome);
         // Reentrega não altera o evento existente nem duplica o histórico.
         try {
-            DB::table('auditoria_eventos')->insert($this->evento);
+            $banco->table('auditoria_eventos')->insert($this->evento);
         } catch (UniqueConstraintViolationException $e) {
-            if (!DB::table('auditoria_eventos')->where('id', $this->evento['id'])->exists()) throw $e;
+            if (!$banco->table('auditoria_eventos')->where('id', $this->evento['id'])->exists()) throw $e;
         }
     }
 }

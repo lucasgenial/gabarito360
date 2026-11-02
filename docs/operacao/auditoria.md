@@ -26,7 +26,7 @@ Antes de qualquer futura eliminação: responsável registra referência do inci
 
 ## Privilégios antes de ativar
 
-Usar identidade dedicada de gravação de auditoria com somente INSERT/SELECT na tabela, separada das credenciais de migration e conservação; leitor operacional somente SELECT. A aplicação atual usa a conexão geral: a separação técnica das conexões e o teste de negação de UPDATE/DELETE/ALTER ainda são requisito de ativação, não garantia entregue por este PR. Não conceder privilégios neste procedimento sem validar o ambiente e a autorização da janela.
+AU1-B2 usa conexão `auditoria_gravacao`, com `AUDITORIA_DB_USERNAME` e `AUDITORIA_DB_PASSWORD` próprios, sem herdar a credencial geral. Configuração ausente falha no job; não usa a conexão geral como fallback. Usar somente INSERT/SELECT na tabela, separado das credenciais de migration e conservação; leitor operacional somente SELECT. O CI ensaia negação de UPDATE/DELETE/ALTER. Aplicação desses grants no servidor e revisão das outras credenciais permanecem requisito de ativação. Não conceder privilégios neste procedimento sem validar o ambiente e a autorização da janela.
 
 Não executar exemplos genéricos de REVOKE em credenciais compartilhadas: isso pode interromper outras funções. Documentar os grants exatos e ensaiar numa cópia. O administrador do banco continua tecnicamente capaz de alterar dados; preservação externa deve oferecer a evidência independente.
 
@@ -46,3 +46,9 @@ Não aplicar particionamento nativo por mês ao esquema atual: a chave UUID glob
 | Job falho ou alerta de enfileiramento | Acionar administrador, preservar evidências e registrar intervalo da possível lacuna; só repetir job após diagnosticar a falha e confirmar chave de cifra. |
 
 O comando de conferência não precisa de rollback: não altera dados. Para falha de restauração, manter o destino isolado e a origem preservada; retomar somente pelo roteiro de backup existente e pela decisão do administrador. Não reverter o banco original nem desabilitar proteções para obter resultado verde. Canal de escalonamento é o acompanhamento deste projeto com o responsável; nenhum envio automático foi configurado.
+
+## Política aprovada e alcance do ensaio AU1-B2
+
+O responsável aprovou 180 dias com preservação excepcional documentada. O padrão e `.env.example` passam a 180; arquivos `.env` existentes não são alterados. Valor vazio explícito continua sinalizando política não configurada, para evitar uma ativação implícita durante a release. Não há expurgo.
+
+O job CI `auditoria-recuperacao` cria serviços descartáveis MariaDB/Redis, prova os grants da credencial do job, falha e recuperação do banco dedicado, payload cifrado, snapshot Redis com job pendente, parada/reinício e replay idempotente. O script exige banco `g360_auditoria_ci`, loopback e ambiente de teste, e não deve ser executado no servidor. É teste de fila com snapshot Redis; não comprova restauração completa de banco/contêiner nem desempenho em volume real. AU1-B3 continua necessário.
