@@ -10,10 +10,12 @@ class ExigirContextoVinculo
 {
     public function handle(Request $request, Closure $next)
     {
+        if ($request->is('api/v1/auth/logout')) \App\Support\Auditoria::capturarContexto($request);
         // O token persistido define o contexto; IDs em payload/header não o substituem.
         if (!$request->is('api/v1/auth/logout')) {
             $usuario = \App\Support\TokenInterno::resolver(\App\Support\TokenVinculo::resolver($request->user()));
             $request->setUserResolver(fn () => $usuario);
+            \App\Support\Auditoria::capturarContexto($request);
             if ($request->is('api/v1/acessos-internos', 'api/v1/acessos-internos/*')) {
                 app(\App\Services\GestaoAcessosInternos::class)->autorizar($usuario);
                 return $next($request);
