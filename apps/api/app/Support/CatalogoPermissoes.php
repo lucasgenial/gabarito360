@@ -15,6 +15,7 @@ class CatalogoPermissoes
 
     /** T3: política pessoal independente, sem herdar poderes institucionais do professor. */
     public const AUTONOMO = [
+        'copia.autorizar_origem', 'copia.autorizar_destino',
         'turma.ver', 'turma.gerir', 'turma.desativar',
         'aluno.ver', 'aluno.gerir', 'aluno.desativar',
         'prova.ver', 'prova.criar', 'prova.editar', 'gabarito.ver', 'gabarito.editar',
@@ -30,6 +31,9 @@ class CatalogoPermissoes
     ];
 
     public const LISTA = [
+        // T5: elegibilidade exige vínculo explícito e escopo; o recurso permanece desligado.
+        ['copia.autorizar_origem', 'copias', 'Autorizar origem de cópia entre espaços', '-v-v----'],
+        ['copia.autorizar_destino', 'copias', 'Autorizar destino de cópia entre espaços', '-v-v----'],
         // 4.1 Rede, núcleos e escolas
         ['rede.configurar',          'escolas',   'Parâmetros da rede (metas etc.)',                        '-v------'],
         ['rede.logo',                'escolas',   'Enviar logo da rede ou da mantenedora',                 '-vvo----'],
