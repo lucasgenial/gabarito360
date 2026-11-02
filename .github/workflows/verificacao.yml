@@ -6,6 +6,61 @@ on:
     branches: [main]
 
 jobs:
+  auditoria-recuperacao:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: teste-local-ci
+          MARIADB_DATABASE: g360_auditoria_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=3s --health-retries=10
+    env:
+      APP_ENV: testing
+      G360_AUDITORIA_ENSAIO: '1'
+      DB_CONNECTION: mariadb
+      DB_HOST: 127.0.0.1
+      DB_DATABASE: g360_auditoria_ci
+      DB_USERNAME: root
+      DB_PASSWORD: teste-local-ci
+      AUDITORIA_DB_USERNAME: au1_writer_ci
+      AUDITORIA_DB_PASSWORD: senha-ficticia-ci
+      REDIS_HOST: 127.0.0.1
+      REDIS_MAX_RETRIES: '0'
+      QUEUE_CONNECTION: redis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, pdo_mysql, redis
+      - run: composer install --working-dir=apps/api --no-interaction --no-progress
+      - run: |
+          cd apps/api
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+      - run: php scripts/auditoria/ensaio-fila.php preparar
+      - run: docker stop '${{ job.services.redis.id }}'
+      - run: php scripts/auditoria/ensaio-fila.php indisponivel
+      - run: docker start '${{ job.services.redis.id }}'
+      - run: |
+          for tentativa in $(seq 1 20); do
+            if docker exec '${{ job.services.redis.id }}' redis-cli ping; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - run: php scripts/auditoria/ensaio-fila.php recuperar
+
   telas:
     runs-on: ubuntu-latest
     steps:

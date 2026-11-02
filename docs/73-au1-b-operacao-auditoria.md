@@ -12,8 +12,8 @@ PR #106 incorporado com autorização. Nenhuma ativação ou migração no servi
 
 ## Decisões pendentes
 
-Proposta de guarda de 180 dias enviada ao responsável; não aprovada por inferência. Até resposta, `AUDITORIA_RETENCAO_DIAS` vazio e nenhuma exclusão implementada. Meses preservados bloqueiam a classificação de descarte do mês inteiro; justificativa e revisão ficam no registro operacional restrito, referenciado fora dos eventos.
+Atualização após PR #107: responsável aprovou explicitamente 180 dias com preservação excepcional documentada. AU1-B2 registra o padrão configurável; nenhuma exclusão é implementada. Meses preservados bloqueiam a classificação de descarte do mês inteiro; justificativa e revisão ficam no registro operacional restrito, referenciado fora dos eventos.
 
-O MariaDB exige que toda chave única inclua a coluna de particionamento. Particionar por mês mudaria a garantia atual de UUID global. Não alterar a chave apenas para cumprir uma etapa do plano. Esta preparação não conclui AU1: faltam decisão de conservação, ensaio de Redis/backup completo em ambiente equivalente, credenciais restritas e solução física mensal aprovada antes da ativação. T5 continua pendente dessa conclusão.
+O MariaDB exige que toda chave única inclua a coluna de particionamento. Particionar por mês mudaria a garantia atual de UUID global. Não alterar a chave apenas para cumprir uma etapa do plano. Esta preparação não conclui AU1: faltam ensaio de recuperação completa em ambiente equivalente, credenciais restritas e solução física mensal aprovada antes da ativação. T5 continua pendente dessa conclusão. AU1-B2 trata credencial de gravação e fila isolada (docs/74).
 
 Fonte técnica: [limitações de particionamento MariaDB](https://mariadb.com/docs/server/server-usage/partitioning-tables/partitioning-limitations).
