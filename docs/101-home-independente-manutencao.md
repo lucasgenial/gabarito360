@@ -4,6 +4,8 @@ Solicitação aprovada pelo responsável em 02/11/2026, após observar a home re
 
 ## Comportamento
 
+O responsável também informou o TikTok `@gabarito360`: link `https://www.tiktok.com/@gabarito360`, em nova aba com identificação acessível. Apenas YouTube permanece em preparação.
+
 Na mesma data, o responsável informou também o Facebook `@gabarito360`: link oficial `https://www.facebook.com/gabarito360/`, com o mesmo comportamento acessível do Instagram.
 
 Em 02/11/2026, o responsável informou o perfil oficial Instagram `@gabarito360`. O rodapé público passa a oferecer o link `https://www.instagram.com/gabarito360/`, em nova aba identificada de forma acessível; demais redes continuam em preparação.
