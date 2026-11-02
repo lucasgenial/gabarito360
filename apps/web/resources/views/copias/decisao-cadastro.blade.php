@@ -44,4 +44,5 @@
   <button class="btn btn-primary" type="submit">{{ $dados['lado']==='origem'?'Autorizar saída do cadastro':'Autorizar entrada do cadastro' }}</button>
 </form>
 @endif
+<p style="margin-top:20px;"><a class="btn btn-secondary" href="{{ route('copias.operacao',['id'=>$dados['lote_id'],'lado'=>$dados['lado'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">Acompanhar operação da cópia</a></p>
 @endsection

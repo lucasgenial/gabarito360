@@ -31,7 +31,7 @@
   <table class="table"><caption style="text-align:left;margin-bottom:16px;">{{ $lista['total'] }} solicitação(ões) neste acompanhamento</caption>
     <thead><tr><th scope="col">Conteúdo</th><th scope="col">Criado em</th><th scope="col">Situação</th><th scope="col">Publicação</th></tr></thead>
     <tbody>@forelse($lista['data'] as $c)
-      <tr><td>{{ $tipos[$c['finalidade']] ?? 'Cópia' }}</td>
+      <tr><td>@if($c['operacao_disponivel']??false)<a href="{{ route('copias.operacao',['id'=>$c['id'],'lado'=>$dados['lado'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">{{ $tipos[$c['finalidade']] ?? 'Cópia' }}</a>@else{{ $tipos[$c['finalidade']] ?? 'Cópia' }}@endif</td>
         <td>{{ \Carbon\Carbon::parse($c['criado_em'],'UTC')->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</td>
         <td>{{ $estados[$c['estado']] ?? 'Em acompanhamento' }}
           @if($c['auditoria_pendente'])<div class="text-muted">Há registros aguardando confirmação.</div>@endif
