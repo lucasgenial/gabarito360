@@ -87,6 +87,8 @@ jobs:
           bash -n scripts/operacao/deploy.sh
           bash -n infra/deploy.sh
           bash -n scripts/operacao/pausa-backup-final.sh
+          bash -n scripts/operacao/preparar-release.sh
+          bash -n scripts/operacao/publicar-fase.sh
           sudo python3 scripts/tests/test_deploy.py
           sudo python3 scripts/tests/test_pausa_backup.py
           sudo python3 scripts/tests/test_confirmar_backup.py

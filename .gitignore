@@ -34,3 +34,5 @@ Thumbs.db
 
 # Imagens de cartões (dados de produção)
 apps/api/storage/app/cartoes/
+apps/api/storage/app/release.json
+apps/web/storage/app/release.json

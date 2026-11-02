@@ -1,5 +1,7 @@
 # Deploy e serviços
 
+**Cadência atual:** preparar e disponibilizar versões de homologação por fase/microfase, com aceite visual após publicação. Procedimento e preparação do servidor em [docs/99](../99-publicacao-por-fase.md). A primeira atualização acumulada exige a transição inicial descrita ali; não usar o atalho rotineiro antes dela.
+
 Produção: CT 111 do Proxmox, em `/home/lucasdev/projetos/gabarito360`. Acesso por `ssh pve` e `pct exec 111`.
 
 ## Serviços
