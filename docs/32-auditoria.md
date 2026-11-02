@@ -22,7 +22,7 @@ Registro HTTP não prova commit de todas as operações internas e não substitu
 
 ## Integridade e conservação
 
-Não há rotas de manutenção. O modelo rejeita save/delete; a escrita é exclusiva do job no código atual. Isso não é armazenamento inviolável: SQL direto e operações em massa com credenciais de banco podem alterar registros. AU1-B deve definir privilégios, conservação externa, retenção específica e particionamento físico MariaDB. Mês indexado é preparação, não particionamento físico.
+Não há rotas de manutenção. O modelo rejeita save/delete; a escrita é exclusiva do job no código atual. Isso não é armazenamento inviolável: SQL direto e operações em massa com credenciais de banco podem alterar registros. AU1-B2 separa a credencial do job; AU1-B3 propõe arquivos mensais cifrados mantendo UUID global e o banco autoritativo, conforme [decisão de arquitetura](75-au1-b3-arquivos-e-restauracao.md). Mês indexado e cópia mensal não são particionamento físico MariaDB nem redução do banco.
 
 Não há expurgo ou agendamento de exclusões. Os 30 dias de logs da aplicação aprovados anteriormente não são aplicados automaticamente à auditoria. A migration aditiva deve entrar somente em release aprovada; nenhum evento histórico é reconstruído.
 
