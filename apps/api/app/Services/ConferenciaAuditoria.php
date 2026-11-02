@@ -8,7 +8,7 @@ use InvalidArgumentException;
 /** Inventário determinístico para comparar origem e restauração; nunca escreve. */
 final class ConferenciaAuditoria
 {
-    private const CAMPOS = ['id','mes','ocorrido_em','usuario_real_id','usuario_visto_id','vinculo_id',
+    public const CAMPOS = ['id','mes','ocorrido_em','usuario_real_id','usuario_visto_id','vinculo_id',
         'acesso_interno_id','espaco_id','cliente_id','escola_id','nucleo_id','perfil','metodo','rota',
         'referencias','status_http','resultado','ip_rede'];
 
@@ -39,19 +39,7 @@ final class ConferenciaAuditoria
                     $atual = $linha->mes; $hash = hash_init('sha256');
                     $meses[$atual] = ['quantidade'=>0];
                 }
-                $normal = [];
-                foreach (self::CAMPOS as $campo) {
-                    $v = $linha->$campo;
-                    if ($campo === 'referencias') {
-                        $v = json_decode($v,true,512,JSON_THROW_ON_ERROR);
-                        if (!is_array($v)) throw new InvalidArgumentException('Referências inválidas.');
-                        ksort($v);
-                    } elseif ($campo === 'ocorrido_em') {
-                        $v = CarbonImmutable::parse($v,'UTC')->format('Y-m-d H:i:s.u');
-                    } else $v = $v === null ? null : (string)$v;
-                    $normal[$campo] = $v;
-                }
-                hash_update($hash,json_encode($normal,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR)."\n");
+                hash_update($hash,self::linhaCanonica($linha));
                 $meses[$atual]['quantidade']++;
             }
             if ($atual !== null) $meses[$atual]['sha256'] = hash_final($hash);
@@ -64,6 +52,23 @@ final class ConferenciaAuditoria
         unset($info);
         return ['versao'=>1,'somente_leitura'=>true,'simulacao'=>$dias !== null,'retencao_dias'=>$prazo,
             'politica_definida'=>$prazo !== null,'corte_utc'=>$corte?->format('Y-m-d H:i:s'), 'meses'=>$meses];
+    }
+
+    public static function linhaCanonica(object $linha): string
+    {
+        $normal = [];
+        foreach (self::CAMPOS as $campo) {
+            $v = $linha->$campo;
+            if ($campo === 'referencias') {
+                $v = json_decode($v,true,512,JSON_THROW_ON_ERROR);
+                if (!is_array($v)) throw new InvalidArgumentException('Referências inválidas.');
+                ksort($v);
+            } elseif ($campo === 'ocorrido_em') {
+                $v = CarbonImmutable::parse($v,'UTC')->format('Y-m-d H:i:s.u');
+            } else $v = $v === null ? null : (string)$v;
+            $normal[$campo] = $v;
+        }
+        return json_encode($normal,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR)."\n";
     }
 
     public function comparar(array $atual, array $anterior): bool

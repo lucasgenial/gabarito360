@@ -65,7 +65,8 @@ jobs:
             sleep 1
           done
           exit 1
-      - run: php scripts/auditoria/ensaio-fila.php recuperar
+      - name: Restaurar banco e fila em contêineres novos
+        run: bash scripts/auditoria/ensaio-restauracao.sh
 
   telas:
     runs-on: ubuntu-latest
@@ -139,4 +140,4 @@ jobs:
       - run: mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
       - run: composer install --no-interaction --no-progress
       - run: cp .env.example .env && php artisan key:generate
-      - run: php artisan test --filter='IntegridadeEspacosMariaDbTest|VinculosMariaDbTest|SelecaoVinculoTest|ConviteInterfaceTest|PerfisEspacoTest|DadosPessoaisTest|PlanejamentoConsultasMariaDbTest|IntegracaoPessoalTest|CadastroClienteTest|AcessosInternosTest|SelecaoInternaTest|GestaoAcessosInternosTest|SecretarioEscolarTest|ClientesInterfaceTest|AuditoriaTest|ConferenciaAuditoriaTest'
+      - run: php artisan test --filter='IntegridadeEspacosMariaDbTest|VinculosMariaDbTest|SelecaoVinculoTest|ConviteInterfaceTest|PerfisEspacoTest|DadosPessoaisTest|PlanejamentoConsultasMariaDbTest|IntegracaoPessoalTest|CadastroClienteTest|AcessosInternosTest|SelecaoInternaTest|GestaoAcessosInternosTest|SecretarioEscolarTest|ClientesInterfaceTest|AuditoriaTest|ConferenciaAuditoriaTest|ArquivoMensalAuditoriaTest'
