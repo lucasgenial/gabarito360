@@ -68,6 +68,11 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/vinculos/interno', [\App\Http\Controllers\Auth\VinculoController::class, 'interno'])->middleware('throttle:20,1')->name('vinculos.interno');
     Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
+    Route::get('/clientes', [\App\Http\Controllers\ClienteController::class,'index'])->name('clientes.index');
+    Route::get('/clientes/novo', [\App\Http\Controllers\ClienteController::class,'create'])->name('clientes.create');
+    Route::post('/clientes', [\App\Http\Controllers\ClienteController::class,'store'])->name('clientes.store');
+    Route::get('/clientes/{id}', [\App\Http\Controllers\ClienteController::class,'show'])->whereNumber('id')->name('clientes.show');
+    Route::put('/clientes/{id}', [\App\Http\Controllers\ClienteController::class,'update'])->whereNumber('id')->name('clientes.update');
     Route::get('/acessos-internos', [\App\Http\Controllers\AcessoInternoController::class,'index'])->name('internos.index');
     Route::post('/acessos-internos', [\App\Http\Controllers\AcessoInternoController::class,'store'])->name('internos.store');
     Route::put('/acessos-internos/{id}', [\App\Http\Controllers\AcessoInternoController::class,'update'])->whereNumber('id')->name('internos.update');
