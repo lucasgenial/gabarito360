@@ -4,21 +4,14 @@
 @section('content')
 <x-pagina titulo="Prévia dos materiais"><x-slot:sub>Confira os dados incluídos na seleção.</x-slot:sub></x-pagina>
 <x-aviso>Esta consulta não autoriza nem inicia uma cópia. Os textos precisam de revisão antes das decisões de origem e destino.</x-aviso>
-@foreach($dados['materiais'] as $item)
-@php($p=$item['material']['prova'])
-<section class="card card-pad" style="margin-top:20px;">
-  <h2>{{ $p['titulo'] }}</h2>
-  <dl><dt>Disciplina e série</dt><dd>{{ $p['disciplina'] }} · {{ $p['serie'] }}</dd>
-    <dt>Formato</dt><dd>{{ $p['num_questoes'] }} questões · {{ $p['num_alternativas'] }} alternativas</dd>
-    <dt>Nota máxima</dt><dd>{{ $p['nota_maxima'] }}</dd>
-    <dt>Pontuação</dt><dd>{{ $p['tipo_pontuacao']==='personalizado'?'Personalizada':'Igual por questão' }}</dd>
-    <dt>Anular se todas marcadas</dt><dd>{{ $p['anular_se_todas']?'Sim':'Não' }}</dd>
-    <dt>Opção de língua</dt><dd>{{ $p['opcao_lingua']?'Sim':'Não' }}</dd></dl>
-  <details><summary>Conferir gabarito</summary><div style="overflow-x:auto;">
-    <table class="table"><thead><tr><th scope="col">Questão</th><th scope="col">Alternativa</th><th scope="col">Espanhol</th><th scope="col">Peso</th><th scope="col">Anulada</th></tr></thead>
-      <tbody>@foreach($item['material']['questoes'] as $q)<tr><td>{{ $q['numero_questao'] }}</td><td>{{ $q['alternativa'] }}</td><td>{{ $q['alternativa_espanhol'] ?? '—' }}</td><td>{{ $q['peso'] }}</td><td>{{ $q['anulada']?'Sim':'Não' }}</td></tr>@endforeach</tbody>
-    </table></div></details>
-</section>
-@endforeach
+@include('copias._materiais',['materiais'=>$dados['materiais']])
+<form method="POST" action="{{ route('copias.material.preparar') }}" class="card card-pad" style="margin-top:20px;">
+  @csrf<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
+  <input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
+  @foreach($dados['materiais'] as $item)<input type="hidden" name="provas[]" value="{{ $item['origem_id'] }}">@endforeach
+  <div class="field"><label for="codigo">Código fornecido pelo destinatário</label><input class="input" name="codigo" id="codigo" required minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></div>
+  <p>Peça ao destinatário que gere um código em “Receber materiais”. Você conferirá o espaço antes de preparar a solicitação.</p>
+  <button class="btn btn-primary" type="submit">Conferir destinatário</button>
+</form>
 <a class="btn btn-secondary" style="margin-top:20px;" href="{{ route('copias.materiais',['espaco_id'=>$dados['espaco_id'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">Voltar à seleção</a>
 @endsection

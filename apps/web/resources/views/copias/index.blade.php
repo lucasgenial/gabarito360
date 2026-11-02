@@ -12,6 +12,7 @@
 @endphp
 <x-pagina titulo="Cópias entre espaços"><x-slot:sub>Acompanhe as solicitações do espaço selecionado.</x-slot:sub></x-pagina>
 @if(\App\Support\Acesso::pode('copia.autorizar_origem'))<a class="btn btn-primary" href="{{ route('copias.materiais',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Selecionar materiais</a>@endif
+@if(\App\Support\Acesso::pode('copia.autorizar_destino'))<a class="btn btn-secondary" href="{{ route('copias.material.receber',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Receber materiais</a>@endif
 <form method="GET" action="{{ route('copias.index') }}" class="card card-pad" style="margin-top:20px;">
   <input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
   <div class="form-row-2">
