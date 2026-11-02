@@ -104,6 +104,11 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
     Route::get('/clientes', [\App\Http\Controllers\ClienteController::class,'index'])->name('clientes.index');
+    Route::get('/pedidos-titulares', [\App\Http\Controllers\PedidoTitularController::class,'index'])->name('pedidos.index');
+    Route::get('/pedidos-titulares/novo', [\App\Http\Controllers\PedidoTitularController::class,'create'])->name('pedidos.create');
+    Route::post('/pedidos-titulares', [\App\Http\Controllers\PedidoTitularController::class,'store'])->middleware('throttle:10,1')->name('pedidos.store');
+    Route::get('/pedidos-titulares/{id}', [\App\Http\Controllers\PedidoTitularController::class,'show'])->whereUuid('id')->name('pedidos.show');
+    Route::post('/pedidos-titulares/{id}/{acao}', [\App\Http\Controllers\PedidoTitularController::class,'alterar'])->whereUuid('id')->whereIn('acao',['triagem','verificacoes','decisao'])->middleware('throttle:10,1')->name('pedidos.alterar');
     Route::get('/clientes/novo', [\App\Http\Controllers\ClienteController::class,'create'])->name('clientes.create');
     Route::post('/clientes', [\App\Http\Controllers\ClienteController::class,'store'])->name('clientes.store');
     Route::get('/clientes/{id}', [\App\Http\Controllers\ClienteController::class,'show'])->whereNumber('id')->name('clientes.show');

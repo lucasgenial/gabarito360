@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 
 final class PedidoTitularController extends Controller
 {
+    public function opcoes(Request $r, PedidosTitulares $s)
+    {
+        return ApiResponse::success($s->opcoes($r->user(),$r->query()));
+    }
     public function index(Request $r, PedidosTitulares $s)
     {
         // Sem filtros livres ou busca por identidade nesta primeira entrega.
