@@ -11,7 +11,7 @@ for nome, app, pagina in [('web', 'web', '/_g360_manutencao.html'), ('api', 'api
     assert texto.count(marcador) == 1
     texto = texto.replace(marcador, marcador+'\n'
         '        if (-f /home/lucasdev/projetos/gabarito360/apps/'+app+'/storage/framework/down) { return 503; }\n'
-        '        fastcgi_intercept_errors on;\n'
+        '        fastcgi_intercept_errors off;\n'
         '        error_page 502 503 504 =503 '+pagina+';')
 marcador = '    client_max_body_size 20m;'
 assert texto.count(marcador) == 1
