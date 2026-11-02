@@ -20,6 +20,12 @@ try {
         fn ($plano) => ($plano['modo'] ?? null) === 'autoatendimento' && ($plano['ativo'] ?? true)));
     if (!$planos) throw new RuntimeException('Planos públicos exigem conferência antes da exportação.');
     $html = view('home.index', compact('planos'))->render();
+    // APP_URL pode identificar o servidor interno. A home publicada navega
+    // sempre na origem acessada pelo visitante, sem congelar esse endereço.
+    $html = preg_replace_callback(
+        '~\b(href|src)="'.preg_quote($url, '~').'(?=[/#?\"])([^"<>]*)"~',
+        fn ($m) => $m[1].'="'.(str_starts_with($m[2], '/') ? $m[2] : '/'.$m[2]).'"',
+        $html);
     // Não congelar formulários, tokens ou estado de usuário em conteúdo público.
     if (preg_match('/<form\b|csrf|name=["\x27]_token/i', $html)
         || !str_contains($html, 'tela-inicio') || !str_contains($html, '</html>')) {
