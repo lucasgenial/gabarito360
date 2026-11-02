@@ -62,6 +62,8 @@ Route::prefix('v1')->group(function () {
         Route::get('copias/cadastros/lotes/{id}', [\App\Http\Controllers\Api\DecisaoCadastroCopiaController::class,'show'])->whereUuid('id')->middleware('throttle:60,1');
         Route::post('copias/cadastros/lotes/{id}/evidencia', [\App\Http\Controllers\Api\DecisaoCadastroCopiaController::class,'evidencia'])->whereUuid('id')->middleware('throttle:10,1');
         Route::post('copias/cadastros/lotes/{id}/aprovar', [\App\Http\Controllers\Api\DecisaoCadastroCopiaController::class,'aprovar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::get('copias/resultados', [\App\Http\Controllers\Api\SelecaoResultadosCopiaController::class,'index'])->middleware('throttle:60,1');
+        Route::post('copias/resultados/previa', [\App\Http\Controllers\Api\SelecaoResultadosCopiaController::class,'previa'])->middleware('throttle:20,1');
         Route::get('copias/cadastros', [\App\Http\Controllers\Api\SelecaoCadastroCopiaController::class,'index'])->middleware('throttle:60,1');
         Route::post('copias/cadastros/previa', [\App\Http\Controllers\Api\SelecaoCadastroCopiaController::class,'previa'])->middleware('throttle:20,1');
         Route::get('copias/materiais', [\App\Http\Controllers\Api\SelecaoMaterialCopiaController::class,'index'])->middleware('throttle:60,1');
