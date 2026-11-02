@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-/** Serviços internos de seleção, autorização e execução; não há rotas de cópia expostas. */
+/** Núcleo transacional de material, com adaptador de interface em trait próprio. */
 class LotesCopia
 {
     use \App\Services\Concerns\ExecutaMaterialCopia;
+    use \App\Services\Concerns\DecideMaterialInterface;
     private const POLITICA = 't5-material-v1';
 
     public function criar(Usuario $solicitante, int $origem, int $destino, string $chave, array $provas): string
@@ -21,7 +22,11 @@ class LotesCopia
         abort_unless(count(array_filter($provas, fn ($id) => is_int($id) && $id > 0)) === count($provas)
             && count(array_unique($provas)) === count($provas), 422, 'Seleção inválida.');
         sort($provas); $chave = strtolower($chave);
-        return $this->transacao(function () use ($solicitante, $origem, $destino, $chave, $provas) {
+        return $this->transacao(fn()=>$this->criarDentro($solicitante,$origem,$destino,$chave,$provas));
+    }
+
+    private function criarDentro(Usuario $solicitante,int $origem,int $destino,string $chave,array $provas): string
+    {
             $ator = ElegibilidadeCopia::lado($solicitante, $origem, 'origem');
             $espaco = DB::table('espacos')->find($destino);
             abort_unless($espaco && in_array($espaco->tipo, ['escola', 'pessoal'], true)
@@ -48,7 +53,6 @@ class LotesCopia
                 'origem_espaco_id'=>$origem, 'destino_espaco_id'=>$destino]);
             OutboxCopia::registrar($lote,$solicitante,'solicitado');
             return $lote;
-        });
     }
 
     /** Prévia restrita à origem. Não expõe dados ao destinatário antes do consentimento de saída. */
@@ -63,7 +67,11 @@ class LotesCopia
 
     public function revisarMaterial(Usuario $ator, string $id, string $digestApresentado, bool $semDadosPessoais): string
     {
-        return $this->transacao(function () use ($ator,$id,$digestApresentado,$semDadosPessoais) {
+        return $this->transacao(fn()=>$this->revisarDentro($ator,$id,$digestApresentado,$semDadosPessoais));
+    }
+
+    private function revisarDentro(Usuario $ator,string $id,string $digestApresentado,bool $semDadosPessoais): string
+    {
             $lote=$this->lote($id); $contexto=$this->contexto($ator,$lote,'origem');
             abort_unless($semDadosPessoais,422,'Revisão explícita do conteúdo obrigatória.');
             abort_unless($lote->estado !== 'bloqueado' && $this->fonteAtual($lote),409,'Seleção indisponível; prepare novo lote.');
@@ -83,12 +91,15 @@ class LotesCopia
                 'classificacao'=>'material_sem_dados_pessoais','created_at'=>now()]);
             OutboxCopia::registrar($id,$ator,'revisado');
             return $revisao;
-        });
     }
 
     public function aprovar(Usuario $ator, string $id, string $lado, CarbonImmutable $validaAte): array
     {
-        return $this->transacao(function () use ($ator, $id, $lado, $validaAte) {
+        return $this->transacao(fn()=>$this->aprovarDentro($ator,$id,$lado,$validaAte));
+    }
+
+    private function aprovarDentro(Usuario $ator,string $id,string $lado,CarbonImmutable $validaAte): array
+    {
             $lote = $this->lote($id);
             $contexto = $this->contexto($ator, $lote, $lado);
             abort_unless($lote->estado !== 'bloqueado' && $validaAte->isFuture(), 409, 'Decisão indisponível.');
@@ -115,7 +126,6 @@ class LotesCopia
             }
             $this->conferir($lote,$ator);
             return ['decisao_id'=>$decisao, 'estado'=>DB::table('copias_lotes')->where('id', $id)->value('estado')];
-        });
     }
 
     /** Retorna elegibilidade atual; auditoria confirmada e publicação são verificações separadas. */
