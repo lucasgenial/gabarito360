@@ -980,7 +980,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
 | T3 Perfis por espaço | T3-A #96, T3-B #97 e T3-C #99 incorporados; sem deploy | Codex | docs/63–65 |
 | T4 Cadastro de clientes | T4-A #100 e A1 #101–104 incorporados; T4-B #105 incorporado; sem deploy | Codex | docs/66–71 |
-| T5 Cópia de dados | A1–A3 incorporados (#112–114); B1 em revisão (prévia e revisão de conteúdo); B2 e C–E pendentes; flags desligadas, sem deploy/cópias reais | Codex | docs/77–81 |
+| T5 Cópia de dados | A1–A3 e B1 incorporados (#112–115); B2 em revisão (execução privada e retomável); C–E pendentes; flags desligadas, sem deploy/cópias reais | Codex | docs/77–82 |
 | T6 Encerramento | pendente | | |
 | A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C #104 incorporado; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
 | AU1 Registro de auditoria | implementação #106–109 e evidência #110 incorporadas; recuperação completa em clones e 1,8 milhão de eventos sintéticos validados; captura/credencial e release no servidor ainda não ativadas; sem deploy | Codex | docs/32 e docs/72–76 |

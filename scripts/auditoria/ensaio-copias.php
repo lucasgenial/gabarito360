@@ -60,6 +60,21 @@ try {
         $outbox->entregar($recibo->id);
         exigir($outbox->confirmada($id) && DB::table('auditoria_eventos')->count()===7
             && DB::table('copias_outbox')->whereNull('entregue_em')->count()===0 && Queue::connection('redis')->size('baixa')===0);
+        config(['copias.execucao_ativa'=>true]);
+        $s=new LotesCopia;
+        $s->solicitarExecucao(Usuario::find(902)->noVinculo(902),$id);
+        foreach (DB::table('copias_outbox')->whereNull('entregue_em')->pluck('id') as $rid) $outbox->entregar($rid);
+        exigir($s->executarPasso($id)==='preparado');
+        exigir(DB::table('provas')->where('espaco_id',902)->count()===0);
+        DB::table('copias_execucoes')->where('lote_id',$id)->update(['proxima_tentativa_em'=>now()]);
+        exigir((new App\Services\FilaExecucaoCopia)->publicar()===['enviados'=>1,'falhas'=>0]);
+        $job=Queue::connection('redis')->pop('baixa'); exigir($job!==null); $job->fire();
+        (new App\Jobs\ProcessarCopiaMaterial($id))->handle();
+        exigir(DB::table('provas')->where('espaco_id',902)->where('status','rascunho')->count()===1
+            && DB::table('registros_origem')->where('lote_id',$id)->count()===1
+            && DB::table('provas')->where('id',901)->where('espaco_id',901)->exists());
+        foreach (DB::table('copias_outbox')->whereNull('entregue_em')->pluck('id') as $rid) $outbox->entregar($rid);
+        exigir($s->executarPasso($id)==='concluido');
     } else throw new RuntimeException('Fase inválida.');
-    echo json_encode(['fase'=>'t5-'.$fase,'validado'=>true,'sem_copia'=>true]).PHP_EOL;
+    echo json_encode(['fase'=>'t5-'.$fase,'validado'=>true,'somente_dados_ficticios'=>true]).PHP_EOL;
 } catch (Throwable) { fwrite(STDERR,"Ensaio T5 falhou; detalhes não expostos.\n"); exit(1); }
