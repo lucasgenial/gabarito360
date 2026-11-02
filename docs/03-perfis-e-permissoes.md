@@ -211,3 +211,7 @@ escolar · **COO** coordenador · **PRO** professor · **APL** aplicador · **AL
 ### A1-C — política administrativa
 
 O perfil `secretario_escolar` usa política independente da matriz legada: `escola.ver`, `turma.ver`, `turma.gerir`, `turma.desativar`, `aluno.ver`, `aluno.gerir`, `aluno.importar` e `aluno.desativar`. A permissão de importação fica preparada; o importador XLSX ainda não está implementado. O código do responsável depende de P3/P4. Sem vínculo válido, o perfil global não concede permissões. [Escopo e validação](70-a1-c-secretario-escolar.md).
+
+### L4-B1 — atendimento a pedidos de titulares
+
+Sob flag própria, Desenvolvedor pode abrir/designar protocolo de cliente e espaço ativos. Leitura e triagem exigem acesso interno responsável e versão de autorização idêntica à atribuição, ainda vigente. Ser criador ou Desenvolvedor não concede leitura automática. Suporte só atende os protocolos atribuídos; Financeiro, identidades sem contexto e perfis escolares não acessam as rotas L4. Nenhuma permissão pedagógica é adicionada. Contrato em docs/104-l4-b1-protocolos.md.

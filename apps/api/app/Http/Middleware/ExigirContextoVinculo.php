@@ -20,6 +20,11 @@ class ExigirContextoVinculo
                 app(\App\Services\GestaoAcessosInternos::class)->autorizar($usuario);
                 return $next($request);
             }
+            if ($request->is('api/v1/pedidos-titulares', 'api/v1/pedidos-titulares/*')) {
+                // A política L4 revalida perfil e atribuição específica no serviço.
+                \App\Support\ContextoInterno::resolver($request->user());
+                return $next($request);
+            }
             if ($request->is('api/v1/clientes', 'api/v1/clientes/*')) {
                 \App\Http\Controllers\Api\ClienteController::autorizar($request);
                 return $next($request);

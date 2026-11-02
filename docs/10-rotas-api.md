@@ -255,3 +255,7 @@ O contrato de emissão, consulta e resposta dos convites de conta existente est�
 ### V2-C — opções para convite
 
 `GET /api/v1/usuarios/convites-vinculo/opcoes`: requer `usuario.gerir` e contexto válido; retorna instituições, perfis e turmas autorizados para emissão. A confirmação continua nas rotas V1-C3 existentes. [Contrato](62-v2-gestao-e-aceite-de-convites.md).
+
+### L4-B1 — pedidos de titulares (flag desligada por padrão)
+
+GET /api/v1/pedidos-titulares lista somente atribuições do contexto interno atual. POST abre/designa, exclusivo de Desenvolvedor. GET /api/v1/pedidos-titulares/{uuid} consulta com evento obrigatório. POST /api/v1/pedidos-titulares/{uuid}/triagem exige chave idempotente, versão e motivo. Detalhe fora da atribuição retorna 404; perfil inadequado ou flag desligada retorna 403. Sem exportação, exclusão ou verificação de identidade nesta fase. Contrato e campos em docs/104-l4-b1-protocolos.md.
