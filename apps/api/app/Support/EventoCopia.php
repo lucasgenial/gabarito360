@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 /** Envelope v1 de domínio; nunca simula requisição HTTP. */
 final class EventoCopia
 {
-    public const ACOES = ['solicitado','aprovado','revogado','bloqueado'];
+    public const ACOES = ['solicitado','revisado','aprovado','revogado','bloqueado'];
 
     public static function criar(object $lote, Usuario $ator, string $acao, ?string $decisao): array
     {

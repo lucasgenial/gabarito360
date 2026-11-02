@@ -86,6 +86,7 @@ final class OutboxCopia
         if ((clone $recibos)->whereNull('entregue_em')->exists()) return false;
         $acoes = $recibos->get(['evento'])->map(fn($r)=>json_decode($r->evento,true,32,JSON_THROW_ON_ERROR))
             ->map(fn($e)=>json_decode($e['referencias'],true,16,JSON_THROW_ON_ERROR));
-        return $acoes->where('acao','solicitado')->count() === 1 && $acoes->where('acao','aprovado')->count() === 2;
+        return $acoes->where('acao','solicitado')->count() === 1 && $acoes->where('acao','revisado')->count() === 1
+            && $acoes->where('acao','aprovado')->count() === 2;
     }
 }
