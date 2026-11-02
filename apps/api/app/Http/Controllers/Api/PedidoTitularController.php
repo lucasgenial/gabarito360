@@ -36,4 +36,8 @@ final class PedidoTitularController extends Controller
     {
         return ApiResponse::success($s->decidir($r->user(),$id,$r->all()));
     }
+    public function vincularSujeito(Request $r, string $id, PedidosTitulares $s)
+    {
+        return ApiResponse::success($s->vincularSujeito($r->user(),$id,$r->all()));
+    }
 }

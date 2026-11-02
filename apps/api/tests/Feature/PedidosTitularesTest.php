@@ -301,6 +301,96 @@ class PedidosTitularesTest extends TestCase
         $this->chamar($t,'POST',$url,array_replace($v,['valida_ate'=>'2040-01-01T00:00:00+00:00']))->assertOk();
         $this->assertDatabaseHas('pedido_titular_verificacoes',['pedido_id'=>$p['referencia'],'valida_ate'=>'2040-01-01 00:00:00']);
     }
+    private function alunosParaSujeito(): void
+    {
+        config(['espacos.ativo'=>true,'espacos.pessoal'=>true]);
+        foreach ([1,2] as $id) {
+            DB::table('turmas')->insert(['id'=>$id,'escola_id'=>null,'espaco_id'=>$id,'espaco_tipo'=>'pessoal',
+                'nome'=>'Turma fictícia','serie'=>'3','turno'=>'tarde','ano_letivo'=>2026]);
+            DB::table('alunos')->insert(['id'=>$id,'turma_id'=>$id,'espaco_id'=>$id,'espaco_tipo'=>'pessoal',
+                'nome'=>'Aluno reservado fictício','matricula'=>'L4-'.$id]);
+        }
+    }
+    private function sujeito(int $versao=1): array
+    {
+        return ['aluno_id'=>1,'versao'=>$versao,'evidencia_referencia'=>'Registro fictício de identificação',
+            'motivo'=>'Vinculação revisada fictícia','chave'=>(string)Str::uuid()];
+    }
+    public function test_vinculacao_do_sujeito_cifra_historico_e_invalida_conferencias_anteriores(): void
+    {
+        $this->alunosParaSujeito();$p=$this->emVerificacao();$s=app(PedidosTitulares::class);
+        $s->verificar($this->ator(2),$p['referencia'],$this->conferencia('identidade',2));
+        $d=$this->sujeito(3);$r=$s->vincularSujeito($this->ator(2),$p['referencia'],$d);
+        $this->assertSame(4,$r['versao']);
+        $this->assertSame($r,$s->vincularSujeito($this->ator(2),$p['referencia'],$d));
+        $this->assertDatabaseHas('pedidos_titulares',['id'=>$p['referencia'],'aluno_id'=>1,'sujeito_versao'=>1,'ciclo_verificacao'=>2]);
+        $this->assertDatabaseCount('pedido_titular_sujeitos',1);
+        $h=DB::table('pedido_titular_sujeitos')->first();
+        $this->assertNotSame($d['evidencia_referencia'],$h->evidencia);
+        $this->assertSame($d['evidencia_referencia'],Crypt::decryptString($h->evidencia));
+        $atual=$s->consultar($this->ator(2),$p['referencia']);
+        $this->assertSame([],$atual['verificacoes']);$this->assertSame(1,$atual['aluno_id']);
+        $this->assertDatabaseCount('pedido_titular_verificacoes',1);
+        $this->assertArrayNotHasKey('nome',$r);
+        $this->assertDatabaseHas('alunos',['id'=>1,'nome'=>'Aluno reservado fictício','turma_id'=>1]);
+    }
+    public function test_sujeito_nao_enumera_outro_espaco_nem_admite_perfil_ou_atribuicao_incorretos(): void
+    {
+        $this->alunosParaSujeito();$p=app(PedidosTitulares::class)->abrir($this->ator(),$this->dados());
+        $url='pedidos-titulares/'.$p['referencia'].'/sujeito';$d=$this->sujeito();$t=$this->token(2);
+        foreach ([2,999999] as $aluno) $this->chamar($t,'POST',$url,array_replace($d,['aluno_id'=>$aluno]))->assertNotFound();
+        foreach ([1,4] as $id) $this->chamar($this->token($id),'POST',$url,$d)->assertNotFound();
+        $this->chamar($this->token(3),'POST',$url,$d)->assertForbidden();
+        $this->chamar($t,'POST',$url,$d+['autoridade_verificada'=>true])->assertUnprocessable();
+        $this->assertDatabaseCount('pedido_titular_sujeitos',0);
+        config(['espacos.pessoal'=>false]);$this->chamar($t,'POST',$url,$d)->assertForbidden();
+        config(['espacos.pessoal'=>true]);
+        config(['espacos.ativo'=>false]);$this->chamar($t,'POST',$url,$d)->assertForbidden();
+    }
+    public function test_sujeito_escolar_exige_espaco_exato_e_hierarquia_ativa(): void
+    {
+        $this->alunosParaSujeito();
+        DB::table('redes')->insert(['id'=>1,'nome'=>'Rede fictícia','tipo'=>'estadual','uf'=>'BA']);
+        DB::table('nucleos')->insert(['id'=>1,'rede_id'=>1,'nome'=>'Núcleo fictício']);
+        DB::table('escolas')->insert(['id'=>1,'nucleo_id'=>1,'nome'=>'Escola fictícia','inep'=>'00000001','tipo_rede'=>'estadual']);
+        foreach (['rede'=>3,'nucleo'=>4,'escola'=>5] as $tipo=>$id) {
+            DB::table('espacos')->insert(['id'=>$id,'cliente_id'=>1,'tipo'=>$tipo,'nome'=>'Espaço fictício','situacao'=>'ativo',$tipo.'_id'=>1]);
+        }
+        DB::table('turmas')->insert(['id'=>3,'escola_id'=>1,'espaco_id'=>5,'nome'=>'Turma fictícia','serie'=>'3','turno'=>'tarde','ano_letivo'=>2026]);
+        DB::table('alunos')->insert(['id'=>3,'turma_id'=>3,'espaco_id'=>5,'nome'=>'Aluno fictício','matricula'=>'L4-escolar']);
+        $p=app(PedidosTitulares::class)->abrir($this->ator(),array_replace($this->dados(),['espaco_id'=>5]));
+        $t=$this->token(2);$url='pedidos-titulares/'.$p['referencia'].'/sujeito';
+        $this->chamar($t,'POST',$url,$this->sujeito())->assertNotFound(); // Mesmo cliente, outro espaço.
+        $this->chamar($t,'POST',$url,array_replace($this->sujeito(),['aluno_id'=>3]))->assertOk();
+        DB::table('espacos')->where('id',3)->update(['situacao'=>'suspenso']);
+        $this->chamar($t,'POST',$url,array_replace($this->sujeito(2),['aluno_id'=>3]))->assertNotFound();
+    }
+    public function test_sujeito_rejeita_conflito_de_versao_payload_e_estado_e_preserva_historico(): void
+    {
+        $this->alunosParaSujeito();$p=app(PedidosTitulares::class)->abrir($this->ator(),$this->dados());
+        $t=$this->token(2);$url='pedidos-titulares/'.$p['referencia'].'/sujeito';$d=$this->sujeito();
+        $this->chamar($t,'POST',$url,array_replace($d,['versao'=>2]))->assertConflict();
+        $this->chamar($t,'POST',$url,$d)->assertOk();
+        $this->chamar($t,'POST',$url,array_replace($d,['motivo'=>'Outra justificativa']))->assertConflict();
+        $this->chamar($t,'POST',$url,$this->sujeito(2))->assertOk();
+        $this->assertDatabaseCount('pedido_titular_sujeitos',2);
+        $this->assertDatabaseHas('pedidos_titulares',['id'=>$p['referencia'],'sujeito_versao'=>2,'ciclo_verificacao'=>3]);
+        foreach (['em_analise','concluida','cancelada'] as $estado) {
+            DB::table('pedidos_titulares')->where('id',$p['referencia'])->update(['situacao'=>$estado]);
+            $this->chamar($t,'POST',$url,$this->sujeito(3))->assertUnprocessable();
+        }
+    }
+    public function test_falha_do_evento_reverte_sujeito_ciclo_historico_e_recibo(): void
+    {
+        $this->alunosParaSujeito();$s=app(PedidosTitulares::class);$p=$s->abrir($this->ator(),$this->dados());
+        DB::listen(function($q){
+            if (str_starts_with(strtolower($q->sql),'insert') && str_contains($q->sql,'pedido_titular_eventos')) throw new \RuntimeException('Falha fictícia de histórico');
+        });
+        try {$s->vincularSujeito($this->ator(2),$p['referencia'],$this->sujeito());$this->fail('Deveria reverter');}
+        catch (\RuntimeException $e) {$this->assertSame('Falha fictícia de histórico',$e->getMessage());}
+        $this->assertDatabaseHas('pedidos_titulares',['id'=>$p['referencia'],'aluno_id'=>null,'sujeito_versao'=>0,'versao'=>1,'ciclo_verificacao'=>1]);
+        $this->assertDatabaseCount('pedido_titular_sujeitos',0);$this->assertDatabaseCount('pedido_titular_recibos',1);
+    }
     public function test_opcoes_e_permissoes_de_navegacao_nao_ampliam_acesso(): void
     {
         $dev=$this->token(1);$suporte=$this->token(2);$financeiro=$this->token(3);
