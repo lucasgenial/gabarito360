@@ -89,9 +89,13 @@ jobs:
           bash -n scripts/operacao/pausa-backup-final.sh
           bash -n scripts/operacao/preparar-release.sh
           bash -n scripts/operacao/publicar-fase.sh
+          bash -n scripts/operacao/publicar-home.sh
           sudo python3 scripts/tests/test_deploy.py
           sudo python3 scripts/tests/test_pausa_backup.py
           sudo python3 scripts/tests/test_confirmar_backup.py
+      - run: sudo apt-get update && sudo apt-get install -y nginx php-cli
+      - run: sudo python3 scripts/tests/test_publico_nginx.py
+      - run: sudo python3 scripts/tests/test_publicar_home.py
 
   testes:
     runs-on: ubuntu-latest
