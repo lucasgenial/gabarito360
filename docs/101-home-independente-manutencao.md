@@ -22,6 +22,8 @@ O B5 atualiza o conteúdo público após reabrir API/web, quando a instalação 
 
 ## Verificação e limites
 
+Correção solicitada em 02/11/2026: a exportação não deve congelar o APP_URL interno nos links públicos. Hrefs e recursos da própria aplicação são convertidos para caminhos relativos à origem, preservando HTTPS e domínio do visitante; links externos permanecem intactos. Conferir todos os links da home, incluindo contato, login, planos e recuperação, após publicar.
+
 Integração com Nginx real e FastCGI fictício em porta exclusivamente local: aplicação normal, arquivos de manutenção presentes e backend removido. Conferir home/CSS 200, POST na home recusado, login 503 legível, API 503 JSON e cabeçalhos de não armazenamento. Isso não exige derrubar o PHP do servidor usado pelas pessoas.
 
 Teste separado interrompe a exportação após uma publicação válida, altera o CSS da aplicação e confirma que o HTML/CSS anteriores continuam disponíveis. Regressões do B5 continuam obrigatórias.
