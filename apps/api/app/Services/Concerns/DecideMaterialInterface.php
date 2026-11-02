@@ -1,7 +1,7 @@
 <?php
 namespace App\Services\Concerns;
 use App\Models\Usuario;
-use App\Services\{RecebimentosMaterial,SelecaoMaterialCopia};
+use App\Services\{RecebimentosCopia,SelecaoMaterialCopia};
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -11,12 +11,12 @@ trait DecideMaterialInterface
 {
     public function criarViaRecebimento(Usuario $ator,int $origem,string $codigo,string $destinoDigest,string $conteudoDigest,string $chave,array $provas): string
     {
-        RecebimentosMaterial::exigirInterface();
+        RecebimentosCopia::exigirInterface();
         abort_unless(Str::isUuid($chave) && array_is_list($provas) && count($provas)>=1 && count($provas)<=20,422,'Seleção inválida.');
         foreach ($provas as $id) abort_unless(is_int($id) && $id>0,422,'Seleção inválida.');
         abort_unless(count(array_unique($provas))===count($provas),422,'Seleção inválida.'); sort($provas); $chave=strtolower($chave);
         return $this->transacao(function() use($ator,$origem,$codigo,$destinoDigest,$conteudoDigest,$chave,$provas) {
-            $s=new RecebimentosMaterial; $r=$s->resolverDentro($ator,$origem,$codigo,true);
+            $s=new RecebimentosCopia; $r=$s->resolverDentro($ator,$origem,$codigo,true);
             abort_unless(hash_equals($s->apresentar($r)['destino_digest'],$destinoDigest),409,'Destino mudou; confira novamente.');
             if ($r->lote_id) {
                 $l=DB::table('copias_lotes')->where('id',$r->lote_id)->first();
@@ -35,7 +35,7 @@ trait DecideMaterialInterface
 
     public function previaInterface(Usuario $ator,string $id,string $lado): array
     {
-        RecebimentosMaterial::exigirInterface();
+        RecebimentosCopia::exigirInterface();
         return $this->transacao(function() use($ator,$id,$lado) {
             $l=$this->lote($id); $this->exigirInterfaceMaterial($ator,$l,$lado); $p=$this->projecao($l);
             $decisao=DB::table('copias_autorizacoes')->where('lote_id',$id)->where('lado',$lado)->first();
@@ -52,7 +52,7 @@ trait DecideMaterialInterface
 
     public function aprovarInterface(Usuario $ator,string $id,string $lado,string $digest,CarbonImmutable $validade): array
     {
-        RecebimentosMaterial::exigirInterface();
+        RecebimentosCopia::exigirInterface();
         abort_unless($validade->isFuture() && $validade->lessThanOrEqualTo(CarbonImmutable::now()->addDay()),422,'Prazo inválido.');
         return $this->transacao(function() use($ator,$id,$lado,$digest,$validade) {
             $l=$this->lote($id); $this->exigirInterfaceMaterial($ator,$l,$lado);
@@ -67,7 +67,7 @@ trait DecideMaterialInterface
 
     public function revisarInterface(Usuario $ator,string $id,string $digest,bool $semDadosPessoais): string
     {
-        RecebimentosMaterial::exigirInterface();
+        RecebimentosCopia::exigirInterface();
         return $this->transacao(function() use($ator,$id,$digest,$semDadosPessoais) {
             $l=$this->lote($id); $this->exigirInterfaceMaterial($ator,$l,'origem');
             return $this->revisarDentro($ator,$id,$digest,$semDadosPessoais);
@@ -77,7 +77,7 @@ trait DecideMaterialInterface
     private function exigirInterfaceMaterial(Usuario $ator,object $l,string $lado): void
     {
         $this->contexto($ator,$l,$lado);
-        abort_unless(DB::table('copias_recebimentos')->where('lote_id',$l->id)->exists(),404,'Solicitação indisponível.');
+        abort_unless(DB::table('copias_recebimentos')->where('lote_id',$l->id)->where('finalidade','preparacao_material')->exists(),404,'Solicitação indisponível.');
         abort_unless(in_array($l->estado,['aguardando_autorizacao','aguardando_auditoria'],true),409,'Solicitação indisponível.');
         if ($lado==='destino') abort_unless($this->origemValidaInterface($l),404,'Solicitação indisponível.');
         abort_unless($this->fonteAtual($l),409,'Seleção mudou; prepare novo lote.');

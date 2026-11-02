@@ -2,7 +2,7 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
-use App\Services\{LotesCopia,RecebimentosMaterial,SelecaoMaterialCopia};
+use App\Services\{LotesCopia,RecebimentosCopia,SelecaoMaterialCopia};
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 
@@ -10,18 +10,18 @@ class DecisaoMaterialCopiaController extends Controller
 {
     private const VEDADOS=['usuario_id'=>'prohibited','vinculo_id'=>'prohibited','ator_id'=>'prohibited','destino_espaco_id'=>'prohibited','autorizado_por'=>'prohibited'];
     private function dados(Request $r,array $regras): array
-    { RecebimentosMaterial::exigirInterface(); return $r->validate($regras+self::VEDADOS); }
+    { RecebimentosCopia::exigirInterface(); return $r->validate($regras+self::VEDADOS); }
     public function emitir(Request $r)
     {
         $d=$this->dados($r,['espaco_id'=>'required|integer|min:1']);
-        return ApiResponse::success((new RecebimentosMaterial)->emitir($r->user(),(int)$d['espaco_id']),null,201);
+        return ApiResponse::success((new RecebimentosCopia)->emitir($r->user(),(int)$d['espaco_id']),null,201);
     }
     public function preparar(Request $r)
     {
         $d=$this->dados($r,['espaco_id'=>'required|integer|min:1','codigo'=>'required|string|size:64',
             'provas'=>'required|array|list|min:1|max:20','provas.*'=>'integer|min:1|distinct']);
         $p=(new SelecaoMaterialCopia)->previa($r->user(),(int)$d['espaco_id'],array_map('intval',$d['provas']));
-        $destino=(new RecebimentosMaterial)->consultar($r->user(),(int)$d['espaco_id'],$d['codigo']);
+        $destino=(new RecebimentosCopia)->consultar($r->user(),(int)$d['espaco_id'],$d['codigo']);
         return ApiResponse::success(['previa'=>$p,'recebimento'=>$destino]);
     }
     public function criar(Request $r)

@@ -6,8 +6,10 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-final class RecebimentosMaterial
+final class RecebimentosCopia
 {
+    public function __construct(private string $finalidade='preparacao_material')
+    { if (!in_array($finalidade,['preparacao_material','cadastro_minimo'],true)) throw new \InvalidArgumentException('Finalidade inválida.'); }
     public static function exigirInterface(): void
     {
         abort_unless(config('copias.interface_ativa')===true && config('copias.ativo')===true
@@ -20,7 +22,7 @@ final class RecebimentosMaterial
             DB::table('usuario_vinculos')->where('id',$c['vinculo_id'])->lockForUpdate()->first();
             abort_if(DB::table('copias_recebimentos')->where('vinculo_id',$c['vinculo_id'])->whereNull('lote_id')->where('valida_ate','>',now()->utc())->count()>=5,429,'Aguarde os códigos anteriores expirarem.');
             $codigo=bin2hex(random_bytes(32)); $validade=now()->utc()->addMinutes(15)->format('Y-m-d H:i:s');
-            DB::table('copias_recebimentos')->insert(['id'=>(string)Str::uuid(),'codigo_hash'=>hash('sha256',$codigo),
+            DB::table('copias_recebimentos')->insert(['id'=>(string)Str::uuid(),'codigo_hash'=>hash('sha256',$codigo),'finalidade'=>$this->finalidade,
                 'destino_espaco_id'=>$destino,'ator_id'=>$c['usuario_id'],'vinculo_id'=>$c['vinculo_id'],
                 'versao_acesso'=>$c['versao_acesso'],'valida_ate'=>$validade,'created_at'=>now()->utc()]);
             return ['codigo'=>$codigo,'valida_ate'=>$validade,'destino'=>$this->nome($destino),'autoriza_execucao'=>false];
@@ -33,7 +35,7 @@ final class RecebimentosMaterial
         self::exigirInterface(); if (DB::transactionLevel()===0) throw new \LogicException('Indicação exige transação.');
         ElegibilidadeCopia::lado($ator,$origem,'origem');
         abort_unless(preg_match('/^[a-f0-9]{64}$/D',$codigo),404,'Indicação indisponível.');
-        $r=DB::table('copias_recebimentos')->where('codigo_hash',hash('sha256',$codigo))->lockForUpdate()->first();
+        $r=DB::table('copias_recebimentos')->where('codigo_hash',hash('sha256',$codigo))->where('finalidade',$this->finalidade)->lockForUpdate()->first();
         abort_unless($r && (int)$r->destino_espaco_id!==$origem && (!$r->lote_id || $retry)
             && (($r->lote_id && $retry) || CarbonImmutable::parse($r->valida_ate,'UTC')->isFuture()),404,'Indicação indisponível.');
         $u=Usuario::find($r->ator_id); abort_unless($u,404,'Indicação indisponível.');
@@ -44,7 +46,7 @@ final class RecebimentosMaterial
     public function apresentar(object $r): array
     {
         $nome=$this->nome((int)$r->destino_espaco_id);
-        return ['destino'=>$nome,'valida_ate'=>$r->valida_ate,'destino_digest'=>hash('sha256',json_encode([$r->id,$r->destino_espaco_id,$r->versao_acesso,$nome],JSON_THROW_ON_ERROR))];
+        return ['destino'=>$nome,'valida_ate'=>$r->valida_ate,'destino_digest'=>hash('sha256',json_encode([$r->id,$r->destino_espaco_id,$r->versao_acesso,$nome,$r->finalidade],JSON_THROW_ON_ERROR))];
     }
     private function nome(int $id): array
     { $e=DB::table('espacos')->find($id); return ['nome'=>$e->nome,'tipo'=>$e->tipo]; }
