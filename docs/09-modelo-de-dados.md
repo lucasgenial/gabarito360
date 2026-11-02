@@ -499,3 +499,7 @@ Migration `2026_11_01_000006_preparar_dados_pessoais`: novo perfil de vínculo `
 ### L4-B1 — protocolos de titulares
 
 Migration aditiva cria pedidos_titulares, pedido_titular_eventos e pedido_titular_recibos. O par espaço/cliente é protegido por FK composta. Relato, identificação declarada e motivos são cifrados; recibos contêm somente referência/estado/versão e HMAC do payload. Histórico é escrito junto da operação; não há exclusão automática nem down destrutivo. Contrato em docs/104-l4-b1-protocolos.md.
+
+### L4-B2 — conferências e conclusão administrativa
+
+Pedidos ganham ciclo_verificacao e resposta_referencia cifrada. A tabela pedido_titular_verificacoes preserva conferências manuais por protocolo/ciclo/tipo, autor, acesso/versão, método e validade; referência da evidência cifrada. Retorno para coleta de informações incrementa o ciclo, sem apagar conferências anteriores. Não há expurgo ou vínculo automático de identidade por CPF. Ver doc. 105.
