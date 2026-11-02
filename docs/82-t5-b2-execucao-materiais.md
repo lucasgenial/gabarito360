@@ -30,3 +30,7 @@ Envelope v2 acrescenta `item_id` opcional e executor `worker_copia`, mantendo le
 Testar staging invisível/cifrado, novo rascunho e FKs, origem preservada, repetição e edições do destino, fonte/revisor/vínculo revogados entre preparação e publicação, corrupção da cifra, rollback de unidade, interrupção após commit, auditoria indisponível, colisão SQL e recuperação com Redis real em ambiente descartável.
 
 Não declarar a release apta para deploy só por este PR: acompanhamento de usuário, autorização dos fluxos posteriores, ensaio de volume/vazão e preparação operacional continuam pendentes. T5-C/D/E e F1/T6 mantêm seus limites. Próximo passo deve revisar as evidências e o acompanhamento da execução antes de expor a funcionalidade.
+
+### Continuidade proposta: T5-B3
+
+Antes de avançar a outros tipos de dados, completar o ensaio de recuperação com backup contendo staging e execução pendentes, além de medir volume, duração das unidades e atraso da auditoria na fila baixa. O ensaio B2 com Redis real cria o staging após restaurar os serviços: prova retomada da execução nesse ambiente, mas ainda não prova restauração de um backup do staging. A interface de acompanhamento permanece em T5-E. Nenhuma dessas evidências autoriza ativação ou deploy automaticamente.
