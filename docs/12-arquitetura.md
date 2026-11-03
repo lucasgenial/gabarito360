@@ -409,3 +409,6 @@ LeitorInstituicoes usa adaptadores explícitos básica2025-V2 e superior2024, le
 
 ### CI1-B2 — preparação transacional, sem promoção
 ManifestoCatalogo compartilha a validação pura entre comandos e calcula digest ordenado das observações normalizadas. PrepararCatalogoInstituicoes usa lease por token/prazo sob lock e transações curtas por lote; checkpoint e inserções avançam juntos. Retomada revalida fonte/geografia, preserva observações e confere digest persistido por paginação de chave antes de validar. Snapshot/cursor não concedem acesso nem alteram tabelas operacionais. Estados parciais não são publicados; promoção e consulta ficam para CI1-B3..F. Ver doc120.
+
+### CI1-B3 — promoção atômica e leitura da edição fixada
+PublicarCatalogoInstituicoes confere staging selado, prepara lotes sob lease e compara toda projeção com observações antes de trocar o ponteiro da fonte em transação com evento. Política impede regressão anual e exige revisão explícita para substituir no mesmo ano. ConsultarCatalogoInstituicoes fixa IDs de edição para contagem/itens e para o relatório inteiro; uma troca concorrente não mistura resultados de versões distintas. Ainda sem endpoints/UI; identidade pública não concede vínculo ou acesso escolar. Ver121.
