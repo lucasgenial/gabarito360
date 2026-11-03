@@ -15,6 +15,7 @@ class CatalogoPermissoes
 
     /** T3: política pessoal independente, sem herdar poderes institucionais do professor. */
     public const AUTONOMO = [
+        'pedido.exportacao.autorizar',
         'copia.autorizar_origem', 'copia.autorizar_destino',
         'turma.ver', 'turma.gerir', 'turma.desativar',
         'aluno.ver', 'aluno.gerir', 'aluno.desativar',
@@ -31,6 +32,7 @@ class CatalogoPermissoes
     ];
 
     public const LISTA = [
+        ['pedido.exportacao.autorizar', 'titulares', 'Autorizar exportação delimitada do titular', '-v------'],
         // T5: elegibilidade exige vínculo explícito e escopo; o recurso permanece desligado.
         ['copia.autorizar_origem', 'copias', 'Autorizar origem de cópia entre espaços', '-v-v----'],
         ['copia.autorizar_destino', 'copias', 'Autorizar destino de cópia entre espaços', '-v-v----'],

@@ -23,3 +23,7 @@ Cobrir espaço correto, espaço de outra instituição, aluno e turma incoerente
 ## Validação da vinculação
 
 24 testes de pedidos e 214 asserções aprovados localmente. Inclui contexto pessoal e escolar, hierarquia suspensa, aluno de outro espaço do mesmo cliente, outro cliente, perfil/atribuição incorretos, flags, conflito de versão/payload, histórico cifrado, novo ciclo e rollback. Migration 000009 somente aditiva; reversão destrutiva bloqueada. Não aplicada no servidor. C2 permanece parcial até implementar a concessão após decisão dos aprovadores.
+
+## Decisão aprovada e implementação da concessão
+
+O usuário aprovou somente Administrador da Rede no próprio contexto ou proprietário de espaço pessoal. A pendência acima foi resolvida; a implementação complementar está detalhada no doc109. A vinculação foi integrada pelo PR144. Não incluir Diretor Escolar ou perfis internos entre aprovadores. Não há deploy ou migração no servidor.

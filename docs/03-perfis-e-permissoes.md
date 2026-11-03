@@ -217,3 +217,7 @@ O perfil `secretario_escolar` usa política independente da matriz legada: `esco
 Sob flag própria, Desenvolvedor pode abrir/designar protocolo de cliente e espaço ativos. Leitura e triagem exigem acesso interno responsável e versão de autorização idêntica à atribuição, ainda vigente. Ser criador ou Desenvolvedor não concede leitura automática. Suporte só atende os protocolos atribuídos; Financeiro, identidades sem contexto e perfis escolares não acessam as rotas L4. Nenhuma permissão pedagógica é adicionada. Contrato em docs/104-l4-b1-protocolos.md.
 
 L4-B2 mantém a mesma atribuição de B1: somente o responsável vigente registra conferências e decisões. Não basta ser Desenvolvedor ou criador. O registro atesta conferência humana no escopo; não confere novos poderes pedagógicos nem autentica documentos automaticamente. Ver doc. 105.
+
+## L4-C2 — aprovação de exportação (02/11/2026)
+
+Aprovado pelo responsável do produto: pedido.exportacao.autorizar é padrão somente de Administrador da Rede e professor_autonomo proprietário do espaço pessoal. Exige contexto explícito e escopo vigente; não é extra dos demais perfis. Suporte, Desenvolvedor, Financeiro e Diretor Escolar não aprovam exportações. Retirada no vínculo é respeitada. Operação permanece atrás de flag desligada, até publicação do L4 completo. Contrato: doc109.

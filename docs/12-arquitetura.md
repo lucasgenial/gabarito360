@@ -388,3 +388,7 @@ EstadoExportacaoTitular é um contrato puro: transições e disponibilidade temp
 ### L4-C2 — vinculação explícita do sujeito
 
 A primeira parte de C2 vincula um aluno ao protocolo no espaço exato, sob atribuição interna vigente. Cada revisão cria versão e histórico cifrado, renova o ciclo das conferências e não altera o cadastro escolar. Isso não concede leitura escolar nem autorização de exportação. A política dos aprovadores permanece dependente da escolha do responsável pelo produto. [Planejamento e limites](108-l4-c2-sujeito-autorizacao.md).
+
+### L4-C2 — concessão delimitada
+
+A concessão é separada da atribuição de atendimento e exige a permissão específica do aprovador institucional ou proprietário, conforme aprovação do produto. Guarda sujeito/ciclo, contexto, destinatário, campos mínimos e prazo; revogação e eventos são transacionais. Consumidores futuros devem revalidar dentro de comAutorizacao, mantendo locks e sem tratar recibo antigo como poder de acesso. A flag própria inicia desligada. Detalhes em [109-l4-c2-concessao-exportacao.md](109-l4-c2-concessao-exportacao.md).
