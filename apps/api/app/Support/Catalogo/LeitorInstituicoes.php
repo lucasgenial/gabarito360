@@ -7,6 +7,7 @@ use RuntimeException;
 /** Adaptadores versionados de dados públicos; não grava nem consulta o banco operacional. */
 final class LeitorInstituicoes
 {
+    public const UFS_IBGE = [11=>'RO',12=>'AC',13=>'AM',14=>'RR',15=>'PA',16=>'AP',17=>'TO',21=>'MA',22=>'PI',23=>'CE',24=>'RN',25=>'PB',26=>'PE',27=>'AL',28=>'SE',29=>'BA',31=>'MG',32=>'ES',33=>'RJ',35=>'SP',41=>'PR',42=>'SC',43=>'RS',50=>'MS',51=>'MT',52=>'GO',53=>'DF'];
     public const TIPOS_IES = ['1'=>'universidade','2'=>'centro_universitario','3'=>'faculdade','4'=>'instituto_federal','5'=>'cefet'];
     public const COLUNAS = [
         'basica'=>['NU_ANO_CENSO','CO_ENTIDADE','NO_ENTIDADE','SG_UF','CO_UF','CO_MUNICIPIO','NO_MUNICIPIO','TP_DEPENDENCIA','TP_SITUACAO_FUNCIONAMENTO'],
@@ -27,14 +28,19 @@ final class LeitorInstituicoes
             if (!$cab) throw new RuntimeException('Cabeçalho ausente.');
             $cab=array_map(fn($c)=>trim(ltrim($c,"\xEF\xBB\xBF")),$cab);
             if (count($cab)!==count(array_unique($cab)) || array_diff(self::COLUNAS[$fonte],$cab)) throw new RuntimeException('Cabeçalho incompatível com o adaptador.');
+            $indices = array_flip($cab);
+            $selecionadas = self::COLUNAS[$fonte];
+            if ($fonte === 'superior' && isset($indices['SG_IES'])) $selecionadas[] = 'SG_IES';
             $linha=1;
             while (($dados=fgetcsv($h,262144,';','"',''))!==false) {
                 $linha++;
                 if (count($dados)!==count($cab)) throw new RuntimeException("Linha {$linha}: quantidade de campos incompatível.");
-                $r=array_combine($cab,array_map(function($v) use($encoding) {
+                $r = [];
+                foreach ($selecionadas as $coluna) {
+                    $v = $dados[$indices[$coluna]];
                     if ($encoding==='UTF-8' && !mb_check_encoding($v,'UTF-8')) throw new RuntimeException('Texto UTF-8 inválido.');
-                    return trim($encoding==='UTF-8'?$v:mb_convert_encoding($v,'UTF-8',$encoding));
-                },$dados));
+                    $r[$coluna] = trim($encoding==='UTF-8'?$v:mb_convert_encoding($v,'UTF-8',$encoding));
+                }
                 if ($r['NU_ANO_CENSO']!==(string)$ano) throw new RuntimeException("Linha {$linha}: ano divergente.");
                 $ies=$fonte==='superior';
                 $codigo=$r[$ies?'CO_IES':'CO_ENTIDADE'];
@@ -70,7 +76,7 @@ final class LeitorInstituicoes
         $lista=json_decode(file_get_contents($arquivoMunicipios),true,512,JSON_THROW_ON_ERROR);
         $porUf=[];
         foreach ($ufs as $u) {
-            if (!isset($u['id'],$u['sigla']) || isset($porUf[$u['id']])) throw new RuntimeException('UF duplicada ou inválida.');
+            if (!isset($u['id'],$u['sigla']) || isset($porUf[$u['id']]) || (self::UFS_IBGE[$u['id']] ?? null) !== $u['sigla']) throw new RuntimeException('UF duplicada ou inválida.');
             $porUf[$u['id']]=$u['sigla'];
         }
         $municipios=[];
