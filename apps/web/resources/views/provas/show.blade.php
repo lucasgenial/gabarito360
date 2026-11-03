@@ -13,6 +13,9 @@
 @section('content')
 
 <x-pagina titulo="{{ $prova['titulo'] }}">
+    @if($prova['pode_copiar'] ?? false)
+      <a href="{{ route('provas.copiar', $prova['id']) }}" class="btn btn-secondary">Copiar prova</a>
+    @endif
   <x-slot:sub>{{ $prova['disciplina'] }} · {{ $prova['serie'] }} · {{ $prova['num_questoes'] }} questões</x-slot:sub>
     @if($prova['status'] === 'rascunho')
       @pode('prova.editar')
@@ -40,6 +43,17 @@
 </x-pagina>
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if($prova['procedencia'] ?? null)
+  <x-aviso tipo="info">
+    Cópia independente criada em {{ \Carbon\Carbon::parse($prova['procedencia']['copiada_em'])->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}.
+    @if($prova['procedencia']['origem_id'])
+      Origem: <a href="{{ route('provas.show',$prova['procedencia']['origem_id']) }}">{{ $prova['procedencia']['origem_titulo'] }}</a>.
+    @else
+      A prova de origem não está disponível no seu acesso atual.
+    @endif
+    Alterações nesta cópia não modificam a original.
+  </x-aviso>
+@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 {{-- Status --}}
@@ -87,6 +101,7 @@
       <span class="lbl">Tipo de pontuação</span>
       <span>{{ $prova['tipo_pontuacao'] === 'igual' ? 'Igual (todas valem o mesmo)' : 'Personalizado' }}</span>
     </div>
+    <div class="info-row"><span class="lbl">Formato da avaliação</span><span>Gabarito e cartão-resposta</span></div>
     <div class="info-row">
       <span class="lbl">Data de aplicação</span>
       <span>{{ $prova['data_aplicacao'] ? \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '—' }}</span>

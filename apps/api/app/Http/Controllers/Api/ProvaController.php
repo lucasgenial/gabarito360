@@ -16,6 +16,13 @@ use Illuminate\Validation\Rule;
 
 class ProvaController extends Controller
 {
+    public function copiar(Request $request, int $id): JsonResponse
+    {
+        $dados = $request->validate(['titulo'=>'required|string|max:255','chave'=>'required|uuid']);
+        $prova = app(\App\Services\DuplicarProva::class)->executar($request->user(),$id,trim($dados['titulo']),strtolower($dados['chave']));
+        return ApiResponse::success(['id'=>$prova->id],null,201);
+    }
+
     /** Impede criar/editar prova em escola ou turma fora do escopo do usuário. */
     private function foraDoEscopo($usuario, int $escolaId, array $turmaIds): ?JsonResponse
     {
@@ -145,6 +152,7 @@ class ProvaController extends Controller
         $data = $request->validate([
             'escola_id'       => $pessoal ? 'prohibited' : 'required|integer|exists:escolas,id',
             'titulo'          => 'required|string|max:255',
+            'formato_avaliacao' => 'sometimes|in:gabarito',
             'disciplina'      => 'required|string|max:100',
             'serie'           => 'required|string|max:50',
             'num_questoes'    => 'required|integer|min:1|max:100',
@@ -203,6 +211,8 @@ class ProvaController extends Controller
             ->get();
 
         return ApiResponse::success(array_merge($prova->toArray(), [
+            'pode_copiar' => \App\Services\DuplicarProva::elegivel($request->user(),$prova),
+            'procedencia' => $this->procedencia($request, $prova),
             'escola_nome' => $prova->escola?->nome,
             'turmas'      => $turmas,
         ]));
@@ -218,6 +228,7 @@ class ProvaController extends Controller
 
         $data = $request->validate([
             'titulo'          => 'sometimes|string|max:255',
+            'formato_avaliacao' => 'prohibited',
             'disciplina'      => 'sometimes|string|max:100',
             'serie'           => 'sometimes|string|max:50',
             'num_questoes'    => 'sometimes|integer|min:1|max:100',
@@ -287,9 +298,23 @@ class ProvaController extends Controller
             return ApiResponse::error('Apenas rascunhos podem ser excluídos.', [], 422);
         }
 
-        DB::table('prova_turmas')->where('prova_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $prova->espaco_id))->delete();
-        $prova->delete();
+        $excluida = DB::transaction(function () use ($id, $prova) {
+            DB::table('provas')->where('id',$id)->lockForUpdate()->firstOrFail();
+            if (DB::table('prova_duplicacoes')->where('prova_id',$id)->orWhere('origem_id',$id)->orWhere('raiz_id',$id)->exists()) return false;
+            DB::table('prova_turmas')->where('prova_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $prova->espaco_id))->delete();
+            $prova->delete();
+            return true;
+        });
+        if (!$excluida) return ApiResponse::error('Esta prova possui registro de cópia e deve ser preservada.', [],409);
 
         return ApiResponse::success(['excluido' => true]);
+    }
+
+    private function procedencia(Request $request, Prova $prova): ?array
+    {
+        $p = DB::table('prova_duplicacoes')->where('prova_id',$prova->id)->where('espaco_id',$prova->espaco_id)->first();
+        if (!$p) return null;
+        $origem = Escopo::prova($request->user(),$p->origem_id);
+        return ['origem_id'=>$origem?->id,'origem_titulo'=>$origem?->titulo,'copiada_em'=>$p->created_at,'contrato_versao'=>$p->contrato_versao];
     }
 }
