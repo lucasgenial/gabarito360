@@ -104,6 +104,14 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
     Route::get('/clientes', [\App\Http\Controllers\ClienteController::class,'index'])->name('clientes.index');
+    Route::get('/exportacoes-titulares', [\App\Http\Controllers\ExportacaoTitularController::class,'index'])->name('pedidos.exportacoes');
+    Route::post('/exportacoes-titulares/{acao}', [\App\Http\Controllers\ExportacaoTitularController::class,'enviar'])->whereIn('acao',['conceder','revogar','gerar'])->middleware('throttle:10,1')->name('pedidos.exportacoes.enviar');
+    Route::get('/exportacoes-titulares/{id}/arquivo', [\App\Http\Controllers\ExportacaoTitularController::class,'arquivo'])->whereUuid('id')->name('pedidos.exportacoes.arquivo');
+    Route::get('/pedidos-titulares', [\App\Http\Controllers\PedidoTitularController::class,'index'])->name('pedidos.index');
+    Route::get('/pedidos-titulares/novo', [\App\Http\Controllers\PedidoTitularController::class,'create'])->name('pedidos.create');
+    Route::post('/pedidos-titulares', [\App\Http\Controllers\PedidoTitularController::class,'store'])->middleware('throttle:10,1')->name('pedidos.store');
+    Route::get('/pedidos-titulares/{id}', [\App\Http\Controllers\PedidoTitularController::class,'show'])->whereUuid('id')->name('pedidos.show');
+    Route::post('/pedidos-titulares/{id}/{acao}', [\App\Http\Controllers\PedidoTitularController::class,'alterar'])->whereUuid('id')->whereIn('acao',['triagem','verificacoes','decisao','sujeito'])->middleware('throttle:10,1')->name('pedidos.alterar');
     Route::get('/clientes/novo', [\App\Http\Controllers\ClienteController::class,'create'])->name('clientes.create');
     Route::post('/clientes', [\App\Http\Controllers\ClienteController::class,'store'])->name('clientes.store');
     Route::get('/clientes/{id}', [\App\Http\Controllers\ClienteController::class,'show'])->whereNumber('id')->name('clientes.show');
@@ -175,6 +183,7 @@ Route::middleware('autenticado')->group(function () {
     // Provas (MP-019)
     Route::get('/provas',             [ProvaController::class, 'index'])->name('provas.index');
     Route::get('/provas/nova',        [ProvaController::class, 'create'])->name('provas.create');
+    Route::post('/provas/{id}/copiar', [ProvaController::class, 'copiar'])->name('provas.copiar.store');
     Route::post('/provas',            [ProvaController::class, 'store'])->name('provas.store');
     Route::get('/provas/{id}',        [ProvaController::class, 'show'])->name('provas.show');
     Route::put('/provas/{id}',        [ProvaController::class, 'update'])->name('provas.update');

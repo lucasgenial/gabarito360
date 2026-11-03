@@ -35,7 +35,7 @@ class EscolaController extends Controller
                           'campo' => 'Educação do campo', 'indigena' => 'Educação indígena', 'quilombola' => 'Educação quilombola'],
     ];
 
-    private const CAMPOS = ['nucleo_id', 'nome', 'inep', 'tipo_rede', 'tipo', 'escola_sede_id', 'situacao_funcionamento',
+    private const CAMPOS = ['nucleo_id', 'nome', 'sigla', 'inep', 'tipo_rede', 'tipo', 'escola_sede_id', 'situacao_funcionamento',
         'localizacao', 'orgao_regional', 'logradouro', 'numero', 'complemento', 'bairro', 'cep', 'cidade', 'co_municipio',
         'uf', 'latitude', 'longitude', 'telefone', 'email'];
 

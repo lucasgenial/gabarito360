@@ -376,3 +376,42 @@ A gestão web transporta explicitamente vínculo-alvo; não envia alterações g
 ### T3-B — dados pessoais sob gate
 
 Tipo de raiz e espaço são ligados por FK composta; triggers recusam escola nula em cadastro escolar e dados excessivos de aluno pessoal. Contexto pessoal só é resolvido com `espacos.pessoal`, desligado por padrão. Mudança de turma fixa a turma histórica dos cartões em transação e preserva as notas. Consultas/relatórios distinguem turma atual da turma de aplicação. [Contrato e limites](64-t3-b-dados-e-formularios-pessoais.md).
+
+### L4-A — contrato de pedidos dos titulares
+
+EstadoPedidoTitular define transições sem acesso a banco ou efeitos sobre dados. Não concede autorização: fatos de identidade/autoridade vêm do serviço transacional futuro, com escopo e contexto revalidados. Contrato de persistência, permissões e validação em docs/103-l4-a-contrato-protocolos.md; registro/triagem ficam em L4-B.
+
+### L4-C1 — ciclo do artefato de exportação
+
+EstadoExportacaoTitular é um contrato puro: transições e disponibilidade temporal não concedem autorização. A geração e a entrega futuras exigirão concessão delimitada, sujeito validado, escopo e destinatário revalidados. Estado terminal não reabre nem apaga dados. Planejamento e dependências em [107-l4-c1-contrato-exportacao.md](107-l4-c1-contrato-exportacao.md). Sem schema, endpoint ou deploy nesta parte.
+
+### L4-C2 — vinculação explícita do sujeito
+
+A primeira parte de C2 vincula um aluno ao protocolo no espaço exato, sob atribuição interna vigente. Cada revisão cria versão e histórico cifrado, renova o ciclo das conferências e não altera o cadastro escolar. Isso não concede leitura escolar nem autorização de exportação. A política dos aprovadores permanece dependente da escolha do responsável pelo produto. [Planejamento e limites](108-l4-c2-sujeito-autorizacao.md).
+
+### L4-C2 — concessão delimitada
+
+A concessão é separada da atribuição de atendimento e exige a permissão específica do aprovador institucional ou proprietário, conforme aprovação do produto. Guarda sujeito/ciclo, contexto, destinatário, campos mínimos e prazo; revogação e eventos são transacionais. Consumidores futuros devem revalidar dentro de comAutorizacao, mantendo locks e sem tratar recibo antigo como poder de acesso. A flag própria inicia desligada. Detalhes em [109-l4-c2-concessao-exportacao.md](109-l4-c2-concessao-exportacao.md).
+
+### L4-C3 — artefato mínimo cifrado e transacional
+
+GeracaoExportacaoTitular gera cadastro_minimo_v1 sob os locks/revalidação de comAutorizacao. Documento JSON de até16KiB, somente nome/matrícula selecionados, manifesto versionado e hash dos dados dentro da cifra autenticada. Armazenamento privado em pedido_exportacao_artefatos, sem arquivo público: ciphertext, integridade, prazo, concessão e chave idempotente; eventos obrigatórios na mesma transação. Um artefato por concessão, chave única por acesso/versão. Falha ou expiração durante geração reverte tudo. Essa execução síncrona evita estado intermediário persistido e efeitos externos; formatos maiores exigem nova decisão de armazenamento/fila. Flag de geração desligada por padrão. Endpoint retorna só recibo mínimo; consulta/download seguros ficam para C4. Ver doc110.
+
+### L4-C4 — consulta e entrega protegidas
+
+EntregaExportacaoTitular resolve somente referência mínima por acesso/versão antes de comAutorizacao; conteúdo é lido sob locks e revalidado contra concessão/versão/destinatário atuais. Consulta e download verificam estado, validade, SHA-256 do ciphertext, MAC e manifesto fechado canônico. Eventos síncronos obrigatórios e nova conferência de validade precedem o retorno da transação; controller monta o anexo JSON depois do serviço, sem streaming tardio. Consulta só retorna metadados. Download_liberado representa autorização de entrega, não confirmação de recebimento. Proteção private/no-store existente da API, nome opaco e nosniff. Flag própria desligada, sem nova migration. Ver doc111; UI/ensaio C5 pendentes.
+
+### CP1 — duplicação pedagógica versionada
+DuplicarProva copia por lista positiva configuração e gabarito no mesmo espaço, com vínculo vigente, autoria própria, transação e intenção idempotente. prova_duplicacoes preserva origem/raiz/ator e contrato v1. formato_avaliacao classifica o gerador atual gabarito; conteúdo futuro terá enunciados e questões em entidades separadas, sem texto de questões em provas ou confusão com respostas de gabarito. Detalhes no doc118.
+
+### CI1 — catálogo nacional e sigla
+LeitorInstituicoes usa adaptadores explícitos básica2025-V2 e superior2024, leitura CSV streaming e conciliação com geografia IBGE local. g360:catalogo-validar não usa banco: confere checksum, esquema, identidade, geografia, duplicidade e cobertura nacional, emitindo manifesto. É validação de entrada, ainda sem staging/promoção/API de catálogo. Sede administrativa de IES não é convertida em campus. Contrato, fronteiras e próximas partes no doc119.
+
+### CI1-B2 — preparação transacional, sem promoção
+ManifestoCatalogo compartilha a validação pura entre comandos e calcula digest ordenado das observações normalizadas. PrepararCatalogoInstituicoes usa lease por token/prazo sob lock e transações curtas por lote; checkpoint e inserções avançam juntos. Retomada revalida fonte/geografia, preserva observações e confere digest persistido por paginação de chave antes de validar. Snapshot/cursor não concedem acesso nem alteram tabelas operacionais. Estados parciais não são publicados; promoção e consulta ficam para CI1-B3..F. Ver doc120.
+
+### CI1-B3 — promoção atômica e leitura da edição fixada
+PublicarCatalogoInstituicoes confere staging selado, prepara lotes sob lease e compara toda projeção com observações antes de trocar o ponteiro da fonte em transação com evento. Política impede regressão anual e exige revisão explícita para substituir no mesmo ano. ConsultarCatalogoInstituicoes fixa IDs de edição para contagem/itens e para o relatório inteiro; uma troca concorrente não mistura resultados de versões distintas. Ainda sem endpoints/UI; identidade pública não concede vínculo ou acesso escolar. Ver121.
+
+### CI1-C — relações sem inferência institucional
+LeitorRelacoesCatalogo extrai somente os códigos declarados na fonte, com checksum/contagem, spool temporário e digest determinístico. Ciclos/autorreferências e alvos ausentes ficam preservados para revisão. PrepararRelacoesCatalogo resolve contra duas publicações fixadas, grava lotes/checkpoint sob lease e ativa somente se as fontes e a vigência anterior continuarem iguais. ConsultarRelacoesCatalogo não expõe conjunto de par superado; consultas paginadas fixam o conjunto. Fila técnica pública não se confunde com solicitações privadas de professores (E). Sem concessão de autoridade ou alteração acadêmica. Ver122.

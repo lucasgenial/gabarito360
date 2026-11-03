@@ -68,6 +68,14 @@
       <div style="font-size:14px;font-weight:700;margin-bottom:16px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Dados da prova</div>
       <div class="form-grid-2" style="gap:16px;">
         <div class="field" style="grid-column:1/-1">
+          <label for="formato_avaliacao">Formato da avaliação *</label>
+          <select class="select" id="formato_avaliacao" name="formato_avaliacao" required aria-describedby="formato-ajuda">
+            <option value="gabarito">Gabarito e cartão-resposta</option>
+          </select>
+          <p id="formato-ajuda">Cadastre as respostas corretas para corrigir cartões. A elaboração dos enunciados é feita fora deste fluxo.</p>
+          @error('formato_avaliacao')<span class="field-error">{{ $message }}</span>@enderror
+        </div>
+        <div class="field" style="grid-column:1/-1">
           <label for="titulo">Título da prova *</label>
           <input class="input" type="text" id="titulo" name="titulo" required
                  placeholder="Ex: Avaliação Bimestral — Matemática"

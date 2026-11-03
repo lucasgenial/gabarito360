@@ -20,6 +20,7 @@
       <div class="escola-hero-icon"><x-icone nome="escola" /></div>
       <div class="escola-hero-info">
         <h1>{{ $escola['nome'] }}</h1>
+        @if($escola['sigla'] ?? null)<p>{{ $escola['sigla'] }}</p>@endif
         <div class="escola-hero-meta">
           <span>
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>

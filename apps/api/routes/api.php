@@ -84,6 +84,20 @@ Route::prefix('v1')->group(function () {
         Route::get('copias/materiais/lotes/{id}', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'show'])->whereUuid('id')->middleware('throttle:60,1');
         Route::post('copias/materiais/lotes/{id}/revisar', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'revisar'])->whereUuid('id')->middleware('throttle:10,1');
         Route::post('copias/materiais/lotes/{id}/aprovar', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'aprovar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('pedidos-titulares/exportacoes/{id}', [\App\Http\Controllers\Api\GeracaoExportacaoTitularController::class,'store'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::get('pedidos-titulares/exportacoes/{id}', [\App\Http\Controllers\Api\EntregaExportacaoTitularController::class,'show'])->whereUuid('id')->middleware('throttle:30,1');
+        Route::get('pedidos-titulares/exportacoes/{id}/arquivo', [\App\Http\Controllers\Api\EntregaExportacaoTitularController::class,'arquivo'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::get('pedidos-titulares', [\App\Http\Controllers\Api\PedidoTitularController::class,'index'])->middleware('throttle:30,1');
+        Route::get('pedidos-titulares/opcoes', [\App\Http\Controllers\Api\PedidoTitularController::class,'opcoes'])->middleware('throttle:30,1');
+        Route::post('pedidos-titulares', [\App\Http\Controllers\Api\PedidoTitularController::class,'store'])->middleware('throttle:10,1');
+        Route::get('pedidos-titulares/{id}', [\App\Http\Controllers\Api\PedidoTitularController::class,'show'])->whereUuid('id')->middleware('throttle:30,1');
+        Route::post('pedidos-titulares/{id}/triagem', [\App\Http\Controllers\Api\PedidoTitularController::class,'triar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('pedidos-titulares/{id}/verificacoes', [\App\Http\Controllers\Api\PedidoTitularController::class,'verificar'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('pedidos-titulares/{id}/decisao', [\App\Http\Controllers\Api\PedidoTitularController::class,'decidir'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('pedidos-titulares/{id}/sujeito', [\App\Http\Controllers\Api\PedidoTitularController::class,'vincularSujeito'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::get('autorizacoes-exportacao/pedidos/{id}', [\App\Http\Controllers\Api\AutorizacaoExportacaoTitularController::class,'show'])->whereUuid('id')->middleware('throttle:30,1');
+        Route::post('autorizacoes-exportacao/pedidos/{id}', [\App\Http\Controllers\Api\AutorizacaoExportacaoTitularController::class,'store'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::post('autorizacoes-exportacao/{id}/revogar', [\App\Http\Controllers\Api\AutorizacaoExportacaoTitularController::class,'revogar'])->whereUuid('id')->middleware('throttle:10,1');
         Route::get('clientes', [\App\Http\Controllers\Api\ClienteController::class,'index']);
         Route::post('clientes', [\App\Http\Controllers\Api\ClienteController::class,'store'])->middleware('throttle:20,1');
         Route::get('clientes/{id}', [\App\Http\Controllers\Api\ClienteController::class,'show'])->whereNumber('id');
@@ -108,6 +122,7 @@ Route::prefix('v1')->group(function () {
         // Provas
         Route::prefix('provas')->group(function () {
             Route::get('{provaId}/resultados/pdf', [ResultadoController::class, 'lote'])->middleware(['permissao:relatorio.prova', 'permissao:resultado.compartilhar', 'throttle:5,1']);
+            Route::post('{id}/copiar', [ProvaController::class, 'copiar'])->middleware('permissao:prova.duplicar_propria');
             Route::get('/',             [ProvaController::class, 'index'])->middleware('permissao:prova.ver');
             Route::post('/',            [ProvaController::class, 'store'])->middleware('permissao:prova.criar'); // doc 03: diretor não cria prova
             Route::get('{id}',          [ProvaController::class, 'show'])->middleware('permissao:prova.ver');

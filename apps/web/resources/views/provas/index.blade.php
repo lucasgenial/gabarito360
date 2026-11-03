@@ -124,6 +124,7 @@
               <span style="color:var(--muted);font-size:13px;">Aguardando aplicação</span>
             @endif
           </td>
+          {{-- A ação reutiliza o rascunho no mesmo espaço, sem sair para outra página. --}}
           <td style="text-align:right;white-space:nowrap;">
             @if($p['status'] === 'rascunho' && \App\Support\Acesso::pode('prova.editar'))
               <form method="POST" action="{{ route('provas.publicar', $p['id']) }}" style="display:inline;">
@@ -137,6 +138,9 @@
               <a href="{{ route('relatorios.prova', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">Relatório</a>
             @else
               <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary" style="margin-left:6px;">Ver</a>
+            @endif
+            @if($p['pode_copiar'] ?? false)
+              @include('provas._botao-copiar',['origem'=>$p])
             @endif
           </td>
         </tr>
@@ -154,4 +158,5 @@
 </div>
 
 <div style="height:48px;"></div>
+@include('provas._modal-copiar')
 @endsection

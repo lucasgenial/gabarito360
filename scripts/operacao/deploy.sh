@@ -263,6 +263,10 @@ servicos_ativos nginx php8.3-fpm redis-server gabarito360-worker@1 gabarito360-w
 etapa=abertura
 artisan api up; manutencao_api=0
 artisan web up; manutencao_web=0
+if [[ -L /var/www/gabarito360-publico/current ]]; then
+  etapa=pagina-publica
+  bash /root/g360-operacao/publicar-home.sh "$RAIZ"
+fi
 etapa=http
 for caminho in / /login /api/v1/health; do
   codigo=$(curl --connect-timeout 5 --max-time 20 -sS -o /dev/null -w '%{http_code}' -H 'Host: gabarito360.com.br' "http://127.0.0.1$caminho")

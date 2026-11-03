@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'pedidos' => ['interface_ativa' => env('PEDIDOS_TITULARES_INTERFACE_ATIVA', false),
+        'exportacoes' => env('PEDIDOS_EXPORTACOES_INTERFACE_ATIVA', false)],
     'copias' => ['interface_ativa' => env('COPIAS_INTERFACE_ATIVA', false)],
     'turnstile' => [
         'enabled' => env('TURNSTILE_ENABLED', false),

@@ -401,6 +401,8 @@ Texto-base: `docs/33-lgpd-privacidade-e-consentimento.md`.
 
 #### L4. Pedidos dos titulares
 
+- **Replanejado em 02/11/2026:** sequência L4-A–E antes de T6, com protocolos, exportação controlada e ensaio de retenção. [Preparação e critérios](102-planejamento-l4-t6.md). Implementação ainda pendente.
+
 - **Dependências:** T2.
 - **Passos:**
   1. Criar protocolo e prazo por pedido.
@@ -539,6 +541,8 @@ Turmas, alunos, provas, gabaritos, cartões e notas ganham `espaco_id` e autor. 
 - **Pronto quando:** testes cobrem os 6 casos e nenhum lado perde dados.
 
 #### T6. Encerramento de cliente
+
+- **Preparação iniciada em 02/11/2026:** depende da entrega L4; encerramento separado de eliminação, preservando outros vínculos e cópias independentes. [Microfases](102-planejamento-l4-t6.md).
 
 - **Dependências:** T5, L4.
 - **Passos:** bloquear acesso, oferecer exportação, manter dados no prazo, oferecer continuidade aos professores e eliminar ao final.
@@ -971,19 +975,19 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | L1 Publicar termos | em andamento: prévias com campos a preencher autorizadas; publicação e aceite pendentes (docs/35) | Codex | #64 |
 | L2 Inventário | parcial: inventário incorporado; políticas e conferências em docs/39; contratos, prazos por instituição e validação residual pendentes | Codex | #68, #71 |
 | L3 Proteção | concluído: chave dedicada, migração e logs protegidos publicados; verificações operacionais em 31/10/2026 (docs/operacao/protecao-dados.md) | Codex | #69 |
-| L4 Titulares | pendente: depende de T2 | | |
+| L4 Titulares | planejamento revisto: próxima implementação L4-A; doc. 102 | Codex | |
 | L5 Incidentes | pendente: depende de AU1 | | |
 | L6 Trocar foto por avatar | concluído funcionalmente: galeria de 36 avatares e iniciais publicadas e verificadas em produção (docs/operacao/avatares-alunos.md); foto_path e fotos preservados, remoção não autorizada | Codex | #70 |
 | T1 Modelo de dados | concluído: modelo aprovado pelo responsável; PR #73 incorporado; docs/40 e docs/41 | Codex | #73 |
 | T2 Clientes e espaços | concluído e publicado na homologação representativa em 01/11/2026: release af4c6d1 (PR #85); backup final em duas camadas, preenchimento e restrições aplicados; 2 clientes internos/13 espaços, administrador com dois vínculos separados; auditoria, dados e validação funcional aprovados (docs/54). V1/V2 permanecem próximos pacotes distintos | Codex | #74, #75, #76, #77, #78, #79, #80, #81, #82, #83, #84, #85 |
-| V1 Vínculos | código incorporado; ativação depende de V2 e ensaio; sem deploy | Codex | #87–#92; docs/60 |
-| V2 Escolha do vínculo | V2-A/B/C incorporados nos PRs #93/#94/#95; ensaio da release em ambiente equivalente pendente; sem deploy | Codex | docs/61–62 |
-| T3 Perfis por espaço | T3-A #96, T3-B #97 e T3-C #99 incorporados; sem deploy | Codex | docs/63–65 |
-| T4 Cadastro de clientes | T4-A #100 e A1 #101–104 incorporados; T4-B #105 incorporado; sem deploy | Codex | docs/66–71 |
-| T5 Cópia de dados | A–D e E1–E3 incorporados (#112–132). Cinco checks aprovados; aceite visual após disponibilizar homologação. Servidor e fluxo por fase em preparação (docs/99); primeira publicação acumulada ainda pendente | Codex | docs/77–99 |
-| T6 Encerramento | pendente | | |
-| A1 Novos perfis | A1-A #101 e B1 #102 incorporados; B2 #103 incorporado; C #104 incorporado; código responsável depende P3/P4; sem deploy | Codex | docs/67–70 |
-| AU1 Registro de auditoria | implementação #106–109 e evidência #110 incorporadas; recuperação completa em clones e 1,8 milhão de eventos sintéticos validados; captura/credencial e release no servidor ainda não ativadas; sem deploy | Codex | docs/32 e docs/72–76 |
+| V1 Vínculos | publicado e ativado em 02/11: seis contas convertidas em sete vínculos, sem ampliar acesso; aluno sem origem escolar continua sem vínculo | Codex | #87–#92; docs/60 e 100 |
+| V2 Escolha do vínculo | publicado; seleção das duas redes e isolamento verificados; novo login necessário | Codex | docs/61–62 e 100 |
+| T3 Perfis por espaço | código publicado na release inicial; preservação dos dados escolares conferida | Codex | docs/63–65 e 100 |
+| T4 Cadastro de clientes | código publicado; contas operacionais criadas e permissões conferidas após autorização de CPFs fictícios de teste (doc. 102) | Codex | docs/66–71 e 100 |
+| T5 Cópia de dados | A–D e E1–E3 publicados em 02/11, com backup final restaurado e dados preservados. Interface habilitada e testada via HTTPS nas duas redes; aceite visual do responsável pendente | Codex | docs/77–100 |
+| T6 Encerramento | preparação iniciada; depende de L4, sem eliminação nesta etapa; doc. 102 | Codex | |
+| A1 Novos perfis | código publicado; Desenvolvedor/Suporte/Financeiro criados no servidor com identificadores de teste autorizados e permissões verificadas (doc. 102); código responsável continua dependente de P3/P4 | Codex | docs/67–70 e 100 |
+| AU1 Registro de auditoria | publicado e ativado, com credencial restrita de escrita, negação de alteração/exclusão e retenção de 180 dias; sem expurgo | Codex | docs/32, 72–76 e 100 |
 | AU2 Tela de auditoria | pendente | | |
 | S1 Ver como | pendente | | |
 | A2 Painel técnico | pendente | | |
@@ -1034,3 +1038,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | Fase 8 | Sequencial | Revisão de segurança em cada etapa |
 
 Arquivos disputados: `CatalogoPermissoes.php`, `Permissao.php`, `Escopo.php`, `app.css`, `layouts/app.blade.php`, `routes/api.php` e `routes/web.php`. Faça mudanças pequenas e atualize o branch antes do PR.
+
+## Replanejamento de03/11/2026 — orientação posterior do produto
+
+A solicitação posterior distinguiu duplicação pedagógica de prova, movimentação de matrícula e transferência institucional de dados. As regras incompatíveis deste documento (nome/posicionamento T5, capacidades de escola, restrições do CPF pessoal e identificação por espaço) devem ser revistas pelo [plano integrado115](115-replanejamento-provas-identidade-transferencias.md). O histórico deste documento descreve o que foi decidido/implementado antes; não é autorização para publicar a política antiga como se atendesse ao pedido novo. Plano115 é desenho para implementação, sem migration ou deploy nesta entrega. L4-D/E e o gate de publicação devem ser conciliados com as novas dependências.

@@ -291,6 +291,7 @@ class CartaoController extends Controller
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
+        \App\Services\DuplicarProva::conferirAplicacao($request->user(),$prova,true);
 
         $data = $request->validate([
             'turma_id' => 'sometimes|integer|nullable',

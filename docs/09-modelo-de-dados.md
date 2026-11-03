@@ -495,3 +495,27 @@ Estes campos não precisam ser implementados no MVP, mas a estrutura não deve i
 ### Expansão T3-B
 
 Migration `2026_11_01_000006_preparar_dados_pessoais`: novo perfil de vínculo `professor_autonomo`; `espaco_tipo` com FK composta nas raízes e triggers para escola/pessoal e cadastro mínimo; escola nullable em turmas/provas; snapshot `cartoes.turma_aplicacao_id` com FK composta. Sem conversão de identidade ou backfill inferido do histórico. Contrato e gates em [docs/64](64-t3-b-dados-e-formularios-pessoais.md).
+
+### L4-B1 — protocolos de titulares
+
+Migration aditiva cria pedidos_titulares, pedido_titular_eventos e pedido_titular_recibos. O par espaço/cliente é protegido por FK composta. Relato, identificação declarada e motivos são cifrados; recibos contêm somente referência/estado/versão e HMAC do payload. Histórico é escrito junto da operação; não há exclusão automática nem down destrutivo. Contrato em docs/104-l4-b1-protocolos.md.
+
+### L4-B2 — conferências e conclusão administrativa
+
+Pedidos ganham ciclo_verificacao e resposta_referencia cifrada. A tabela pedido_titular_verificacoes preserva conferências manuais por protocolo/ciclo/tipo, autor, acesso/versão, método e validade; referência da evidência cifrada. Retorno para coleta de informações incrementa o ciclo, sem apagar conferências anteriores. Não há expurgo ou vínculo automático de identidade por CPF. Ver doc. 105.
+
+### L4-C3 — artefatos privados
+
+Migration000011 adiciona pedido_exportacao_artefatos (UUID, concessão/versão, acesso/versão, chave, estado, ciphertext, SHA-256 do ciphertext, expiração e datas) e pedido_exportacao_artefato_eventos (artefato, ator, ação e instante). FKs restritivas preservam histórico; índices únicos para concessão e acesso/versão/chave. Documento e manifesto cifrados; sem nomes/matrículas em colunas de metadados. Prazo DATETIME e ausência de rollback destrutivo. Não aplicada no servidor.
+
+### CI1 — sigla institucional opcional
+Migration 2026_11_03_000002_adicionar_sigla_escolas acrescenta escolas.sigla VARCHAR(40) nullable, sem unicidade ou mudança de chaves/escopos. Nome completo/INEP e registros acadêmicos permanecem independentes da sigla. Sem preenchimento automático por iniciais e sem migration executada no servidor. Estrutura nacional futura e proveniência no doc119.
+
+### CI1-B2 — staging público retomável
+catalogo_geografias mantém snapshot IBGE versionado/imutável, separado dos locks do cursor. catalogo_importacoes identifica ingestão por conteúdo/schema/geografia e possui manifesto, checkpoint e lease; catalogo_observacoes guarda payload público mínimo e SHA-256, com unicidade por código e ordem na carga. Triggers recusam UPDATE/DELETE de geografia/observações, inclusive antes da validação. Estado validado não significa publicado. Migration 2026_11_03_000003 somente aditiva, sem execução no servidor. Ver doc120.
+
+### CI1-B3 — edições públicas indexadas
+Migration000004 acrescenta identidades públicas UUIDv5, identificadores por namespace e unidades estáveis; projeções catalogo_entradas por publicação; geografia IBGE indexada; ponteiros por fonte e eventos operacionais. FKs compostas impedem entrada com importação, geografia, identificador ou unidade incompatíveis. Projeções/eventos/identificadores/geografia são append-only por triggers; publicação finalizada também recusa alteração/exclusão. Não relaciona automaticamente escolas operacionais. Ver121.
+
+### CI1-C — relações públicas e lacunas
+Migration000005 cria conjuntos por par de edições, relações declaradas com origem/alvo por FK composta às entradas públicas, fila técnica de lacunas, vigência e evento de fechamento. Dados confirmados são imutáveis; inserções de filhos exigem pai em preparação. Acrescenta também proteção contra inserts tardios nas observações B2/entradas B3, sem mudar suas linhas. Fonte escolar/IES não cria campus, contrato ou vínculo pessoal. Detalhes122.

@@ -10,6 +10,17 @@ class ProvaController extends Controller
 {
     public function __construct(private ApiClient $api) {}
 
+    public function copiar(Request $request, int $id)
+    {
+        $dados = $request->validate(['titulo'=>'required|string|max:255','chave'=>'required|uuid']);
+        try { $resp = $this->api->post("/v1/provas/{$id}/copiar",$dados); }
+        catch (\Illuminate\Http\Client\ConnectionException) {
+            return redirect()->route('provas.index')->withInput($dados+['origem_id'=>$id])->with('erro','Não foi possível confirmar a cópia. Tente novamente com a mesma solicitação.');
+        }
+        if ($resp->failed()) return redirect()->route('provas.index')->withInput($dados+['origem_id'=>$id])->with('erro',$resp->json('message') ?? 'Não foi possível copiar a prova. Tente novamente com a mesma solicitação.');
+        return redirect()->route('provas.show',$resp->json('data.id'))->with('sucesso','Cópia criada como rascunho. Revise o gabarito e selecione as turmas antes de publicar.');
+    }
+
     public function index(Request $request): View
     {
         $resp = $this->api->get('/v1/provas', $request->only('busca', 'disciplina', 'status'));
@@ -42,6 +53,7 @@ class ProvaController extends Controller
         $request->validate([
             'escola_id'       => \App\Support\Acesso::pessoal() ? 'prohibited' : 'required|integer',
             'titulo'          => 'required|string|max:255',
+            'formato_avaliacao' => 'sometimes|in:gabarito',
             'disciplina'      => 'required|string|max:100',
             'serie'           => 'required|string|max:50',
             'num_questoes'    => 'required|integer|min:1|max:100',
@@ -49,7 +61,7 @@ class ProvaController extends Controller
         ]);
 
         $payload = $request->only(
-            'escola_id','titulo','disciplina','serie','num_questoes',
+            'escola_id','titulo','formato_avaliacao','disciplina','serie','num_questoes',
             'num_alternativas','nota_maxima','tipo_pontuacao',
             'anular_se_todas','opcao_lingua','gerar_cartao_pdf','data_aplicacao'
         );
