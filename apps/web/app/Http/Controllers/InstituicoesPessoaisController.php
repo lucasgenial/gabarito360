@@ -46,7 +46,7 @@ class InstituicoesPessoaisController extends Controller
     public function conferir(Request $r,string $unidade)
     {
         $this->autorizar();$v=$r->validate(['edicao_id'=>'required|uuid']);$e=$this->get('instituicoes/'.$unidade);
-        abort_unless($e['edicao_id']===$v['edicao_id'],409,'O catálogo mudou. Volte à busca e confira novamente.');
+        abort_unless($e['edicao_id']===strtolower($v['edicao_id']),409,'O catálogo mudou. Volte à busca e confira novamente.');
         return view('instituicoes.conferir',['e'=>$e,'tipos'=>self::TIPOS]);
     }
     public function selecionar(Request $r)

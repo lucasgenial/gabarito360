@@ -128,4 +128,14 @@ class CatalogoPessoalTest extends TestCase
         $this->postJson('/api/v1/catalogo/referencias-pessoais',$d)->assertForbidden();
         $this->assertDatabaseCount('referencias_instituicoes_pessoais',0);$this->assertDatabaseCount('catalogo_referencia_eventos',0);
     }
+    public function test_uuid_maiusculo_e_canonico_geram_a_mesma_referencia_corrente(): void {
+        $this->publicar();$d=$this->escolha();$maiusculo=$d;$maiusculo['unidade_id']=strtoupper($d['unidade_id']);$maiusculo['edicao_id']=strtoupper($d['edicao_id']);
+        $id=$this->postJson('/api/v1/catalogo/referencias-pessoais',$maiusculo)->assertOk()->json('data.id');
+        $this->postJson('/api/v1/catalogo/referencias-pessoais',$d)->assertOk()->assertJsonPath('data.id',$id);
+        $this->getJson('/api/v1/catalogo/instituicoes/'.strtoupper($d['unidade_id']))->assertOk()->assertJsonPath('data.unidade_id',$d['unidade_id']);
+        $this->getJson('/api/v1/catalogo/referencias-pessoais')->assertOk()->assertJsonPath('data.itens.0.edicao_corrente',true);
+        $this->assertDatabaseHas('referencias_instituicoes_pessoais',['id'=>$id,'unidade_id'=>$d['unidade_id'],'publicacao_id'=>$d['edicao_id']]);
+        $this->postJson('/api/v1/catalogo/referencias-pessoais/'.strtoupper($id).'/arquivar',['versao'=>1])->assertOk();
+        $this->assertDatabaseCount('referencias_instituicoes_pessoais',1);$this->assertDatabaseCount('catalogo_referencia_eventos',2);
+    }
 }

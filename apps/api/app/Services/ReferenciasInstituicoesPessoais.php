@@ -50,6 +50,7 @@ class ReferenciasInstituicoesPessoais
 
     public function selecionar(Usuario $u,string $unidade,string $edicao): array
     {
+        $unidade=strtolower($unidade);$edicao=strtolower($edicao);
         $p=DB::table('catalogo_publicacoes')->where('id',$edicao)->where('estado','publicada')->first();
         abort_unless($p,409,'A edição mudou. Busque e confira a instituição novamente.');
         return DB::transaction(function()use($u,$unidade,$edicao,$p){
@@ -74,6 +75,7 @@ class ReferenciasInstituicoesPessoais
 
     public function arquivar(Usuario $u,string $id,int $versao): array
     {
+        $id=strtolower($id);
         return DB::transaction(function()use($u,$id,$versao){
             $v=$this->contexto($u,true);
             $q=DB::table('referencias_instituicoes_pessoais')->where('id',$id)->where('espaco_id',$v->espaco_id)->where('usuario_id',$u->id);

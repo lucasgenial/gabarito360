@@ -15,7 +15,8 @@
     <label style="display:flex;gap:10px;align-items:flex-start;margin:20px 0;"><input type="checkbox" name="confirmacao" value="1" required>Confirmo esta instituição como referência de atuação no meu espaço pessoal.</label>
     <button class="btn btn-primary" type="submit">Adicionar às minhas instituições</button>
   </form>
-  @else<p>Esta referência não está disponível para uma nova seleção no seu contexto atual.</p>@endif
+  @elseif(!$e['elegivel'])<p>A situação desta referência não permite uma nova seleção.</p>
+  @else<p>Seu acesso permite consultar o catálogo, mas não adicionar referências pessoais.</p>@endif
   <a class="btn btn-ghost" style="margin-top:12px;" href="{{ route('instituicoes.buscar') }}">Voltar à busca</a>
 </div>
 @endsection

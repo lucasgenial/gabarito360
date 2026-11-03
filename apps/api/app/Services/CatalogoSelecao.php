@@ -50,6 +50,7 @@ class CatalogoSelecao
 
     public function entrada(string $unidade): object
     {
+        $unidade=strtolower($unidade);
         $ids=array_column($this->edicoes(),'id');
         $e=DB::table('catalogo_entradas as e')->join('catalogo_publicacoes as p','p.id','=','e.publicacao_id')
             ->join('catalogo_municipios as m',fn($j)=>$j->on('m.geografia_id','=','e.geografia_id')->on('m.codigo_ibge','=','e.municipio_ibge'))
