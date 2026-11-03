@@ -403,3 +403,6 @@ EntregaExportacaoTitular resolve somente referência mínima por acesso/versão 
 
 ### CP1 — duplicação pedagógica versionada
 DuplicarProva copia por lista positiva configuração e gabarito no mesmo espaço, com vínculo vigente, autoria própria, transação e intenção idempotente. prova_duplicacoes preserva origem/raiz/ator e contrato v1. formato_avaliacao classifica o gerador atual gabarito; conteúdo futuro terá enunciados e questões em entidades separadas, sem texto de questões em provas ou confusão com respostas de gabarito. Detalhes no doc118.
+
+### CI1 — catálogo nacional e sigla
+LeitorInstituicoes usa adaptadores explícitos básica2025-V2 e superior2024, leitura CSV streaming e conciliação com geografia IBGE local. g360:catalogo-validar não usa banco: confere checksum, esquema, identidade, geografia, duplicidade e cobertura nacional, emitindo manifesto. É validação de entrada, ainda sem staging/promoção/API de catálogo. Sede administrativa de IES não é convertida em campus. Contrato, fronteiras e próximas partes no doc119.
