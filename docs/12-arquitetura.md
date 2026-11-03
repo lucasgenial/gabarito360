@@ -400,3 +400,6 @@ GeracaoExportacaoTitular gera cadastro_minimo_v1 sob os locks/revalidação de c
 ### L4-C4 — consulta e entrega protegidas
 
 EntregaExportacaoTitular resolve somente referência mínima por acesso/versão antes de comAutorizacao; conteúdo é lido sob locks e revalidado contra concessão/versão/destinatário atuais. Consulta e download verificam estado, validade, SHA-256 do ciphertext, MAC e manifesto fechado canônico. Eventos síncronos obrigatórios e nova conferência de validade precedem o retorno da transação; controller monta o anexo JSON depois do serviço, sem streaming tardio. Consulta só retorna metadados. Download_liberado representa autorização de entrega, não confirmação de recebimento. Proteção private/no-store existente da API, nome opaco e nosniff. Flag própria desligada, sem nova migration. Ver doc111; UI/ensaio C5 pendentes.
+
+### CP1 — duplicação pedagógica versionada
+DuplicarProva copia por lista positiva configuração e gabarito no mesmo espaço, com vínculo vigente, autoria própria, transação e intenção idempotente. prova_duplicacoes preserva origem/raiz/ator e contrato v1. formato_avaliacao classifica o gerador atual gabarito; conteúdo futuro terá enunciados e questões em entidades separadas, sem texto de questões em provas ou confusão com respostas de gabarito. Detalhes no doc118.

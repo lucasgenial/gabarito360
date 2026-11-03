@@ -121,6 +121,7 @@ Route::prefix('v1')->group(function () {
 
         // Provas
         Route::prefix('provas')->group(function () {
+            Route::post('{id}/copiar', [ProvaController::class, 'copiar'])->middleware('permissao:prova.duplicar_propria');
             Route::get('/',             [ProvaController::class, 'index'])->middleware('permissao:prova.ver');
             Route::post('/',            [ProvaController::class, 'store'])->middleware('permissao:prova.criar'); // doc 03: diretor não cria prova
             Route::get('{id}',          [ProvaController::class, 'show'])->middleware('permissao:prova.ver');

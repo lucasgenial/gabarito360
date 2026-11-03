@@ -132,6 +132,7 @@ class GabaritoController extends Controller
 
         return DB::transaction(function () use ($prova, $provaId, $usuario) {
             DB::table('provas')->where('id', $provaId)->lockForUpdate()->firstOrFail();
+            \App\Services\DuplicarProva::conferirAplicacao($usuario,$prova);
             $gabarito = ContextoCorrecao::filtrar(DB::table('gabaritos'), $prova->espaco_id)->where('prova_id', $provaId)->first();
             if (!$gabarito) {
                 return ApiResponse::error('Gabarito não preenchido. Preencha o gabarito antes de publicar.', [], 422);

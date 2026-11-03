@@ -1,5 +1,7 @@
 # 03 — Perfis e Permissões (catálogo oficial)
 
+Complemento CP1 aprovado em03/11/2026: prova.duplicar_propria é padrão somente para professor e professor_autonomo; exige contexto aceito/vigente, autoria própria e as capacidades de prova/gabarito descritas no doc118. Não concede cópia de colega ao coordenador (CP2 posterior), nem transferência institucional. Planos115/116 prevalecem nas orientações posteriores de produto.
+
 > **Versão 2 — 30/10/2026** (etapa 1 do `docs/21-plano-perfis-permissoes-e-telas.md`).
 > Substitui as matrizes da versão de 18/06/2026. Este documento é a **fonte única** do que cada
 > perfil pode fazer: o motor de permissões (etapa 2) é semeado a partir dele, as rotas da API e os
