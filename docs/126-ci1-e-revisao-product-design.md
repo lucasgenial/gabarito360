@@ -20,4 +20,4 @@ Revisor independente: agente product_design_review. **Versão inicial REPROVADA;
 
 ## Gate de saída
 
-A interface CI1-E não está aprovada até o especialista inspecionar a nova renderização, apontar a resolução das pendências e emitir parecer final explícito, ou o usuário aprovar a versão concreta. Sem merge/publicação da UI reprovada. Sem deploy/migration/carga no servidor até fechar o L4 completo. CI1-F continua separado.
+A interface CI1-E não está aprovada até o especialista inspecionar a nova renderização, apontar a resolução das pendências e emitir parecer final explícito, ou o usuário aprovar a versão concreta. Sem merge da UI reprovada. A nova homologação isolada foi autorizada posteriormente no127: todas as entregas passam por ela. Publicação em produção somente por decisão explícita do responsável, mesmo após aprovação de design/CI/homologação. CI1-F continua separado.

@@ -29,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\RateLimiter::for('catalogo-operacao',function(\Illuminate\Http\Request $r){
+            $limite=$r->isMethod('GET')?60:($r->is('api/v1/catalogo/minhas-solicitacoes')?5:10);
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute($limite)->by(($r->user()?->id??$r->ip()).'|'.$r->route()->uri().'|'.$r->method());
+        });
         \Illuminate\Support\Facades\Gate::define('gerir-clientes', fn (\App\Models\Usuario $u) => \App\Support\ContextoInterno::pode($u, 'cliente.gerir'));
         $this->app->extend('queue.failer', function ($original, $app) {
             $config = $app['config']['queue.failed'];

@@ -40,6 +40,9 @@ final class ContextoInterno
     {
         $perfil = self::resolver($u)->perfil;
         $permissoes = self::PERMISSOES[$perfil];
+        if (config('catalogo.interface_ativa') === true && in_array($perfil,['desenvolvedor','suporte'],true)) {
+            $permissoes = array_merge($permissoes,['catalogo.solicitacao.analisar','catalogo.manter_global']);
+        }
         if (config('pedidos_titulares.ativo') && in_array($perfil,['desenvolvedor','suporte'],true)) {
             $permissoes[] = 'pedido.atender';
             if ($perfil === 'desenvolvedor') $permissoes[] = 'pedido.abrir';

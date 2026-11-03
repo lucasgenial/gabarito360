@@ -24,7 +24,9 @@ class ConsultarCatalogoInstituicoes
     private function edicoes(array $ids): Builder
     {
         return DB::table('catalogo_publicacoes as p')->join('catalogo_entradas as e','e.publicacao_id','=','p.id')
-            ->whereIn('p.id',$ids)->where('p.estado','publicada');
+            ->whereIn('p.id',$ids)->where('p.estado','publicada')
+            ->where(fn($q)=>$q->where('p.fonte','manual')->orWhereNotExists(fn($m)=>$m->selectRaw('1')->from('catalogo_entradas as ajuste')
+                ->join('catalogo_publicacoes as pm','pm.id','=','ajuste.publicacao_id')->whereIn('pm.id',$ids)->where('pm.fonte','manual')->where('pm.estado','publicada')->whereColumn('ajuste.unidade_id','e.unidade_id')));
     }
 
     public function buscar(array $filtros, ?array $edicoesFixadas = null): LengthAwarePaginator
@@ -34,8 +36,8 @@ class ConsultarCatalogoInstituicoes
             'municipio_ibge'=>['sometimes','regex:/^[0-9]{7}$/D'],
             'tipo'=>['sometimes',Rule::in(['escola','faculdade','centro_universitario','universidade','instituto_federal','cefet','instituto','outro'])],
             'dependencia'=>['sometimes',Rule::in(['federal','estadual','municipal','privada','especial'])],
-            'namespace'=>['required_with:codigo',Rule::in(['inep_escola','inep_ies'])],
-            'codigo'=>['sometimes','string','regex:/^[0-9]{1,8}$/D'],
+            'namespace'=>['required_with:codigo',Rule::in(['inep_escola','inep_ies','plataforma'])],
+            'codigo'=>['sometimes','string','max:30'],
             'busca'=>['sometimes','string','min:2','max:100'],
             'situacao'=>['sometimes',Rule::in(['1','2','3','4','nao_informada','todas'])],
             'page'=>['sometimes','integer','min:1','max:100000'], 'per_page'=>['sometimes','integer','min:1','max:50'],
@@ -43,7 +45,7 @@ class ConsultarCatalogoInstituicoes
         if (!isset($v['uf']) && !isset($v['municipio_ibge']) && !isset($v['codigo']) && mb_strlen(trim($v['busca']??''))<3) {
             throw ValidationException::withMessages(['busca'=>'Informe localização, código ou pelo menos três caracteres.']);
         }
-        if (isset($v['codigo']) && !preg_match($v['namespace'] === 'inep_escola' ? '/^[0-9]{8}$/D' : '/^[1-9][0-9]{0,7}$/D',$v['codigo'])) throw ValidationException::withMessages(['codigo'=>'Código incompatível com a fonte.']);
+        if (isset($v['codigo']) && !preg_match(match($v['namespace']){'inep_escola'=>'/^[0-9]{8}$/D','inep_ies'=>'/^[1-9][0-9]{0,7}$/D',default=>'/^[0-9A-HJKMNP-TV-Z]{26}$/D'},$v['codigo'])) throw ValidationException::withMessages(['codigo'=>'Código incompatível com a fonte.']);
         $edicoes = $edicoesFixadas ?? $this->idsVigentes();
         if (isset($v['municipio_ibge'])) {
             $municipio = DB::table('catalogo_municipios as m')->join('catalogo_publicacoes as p','p.geografia_id','=','m.geografia_id')

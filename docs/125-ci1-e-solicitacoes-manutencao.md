@@ -1,6 +1,6 @@
 # CI1-E — solicitações privadas e manutenção do catálogo
 
-03/11/2026. Revisão anterior ao código, após PR157 integrado e conferência visual CI1-D aprovada pelo responsável. Sem deploy, migration, carga ou e-mails no servidor até concluir L4. Gabaritos e demais tabelas acadêmicas não são alvos desta entrega.
+03/11/2026. Revisão anterior ao código, após PR157 integrado e conferência visual CI1-D aprovada pelo responsável. Sem deploy, migration, carga ou e-mails na produção. A decisão posterior127 autoriza preparar homologação isolada e publicar nela todas as entregas; produção depende de decisão explícita do responsável. Gabaritos e demais tabelas acadêmicas existentes não são alvos desta entrega.
 
 ## Sequência e autorização
 
