@@ -73,33 +73,33 @@
     <h3 style="font-size:17px;">Resultado por aluno</h3>
     <p class="page-sub no-print">O PDF em lote reúne os resultados disponíveis, com uma página por aluno e o mesmo modelo individual. Alunos ainda sem resultado não entram no arquivo.</p>
   </div>
-  <table class="table lista-cel">
-    <thead><tr><th>Aluno</th><th>Turma</th><th>Nota</th><th>Status</th><th></th></tr></thead>
+  <x-tabela titulo="Resultados dos alunos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Resultados dos alunos</caption>
+    <thead><tr><th scope="col">Aluno</th><th scope="col">Turma</th><th scope="col">Nota</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
     <tbody>
       @forelse($alunos as $a)
         <tr>
-          <td>
+          <td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor">
             <div class="student-name">
               <span class="av">{{ strtoupper(implode('', array_map(fn($p) => $p[0], array_slice(explode(' ', $a['aluno_nome']), 0, 2)))) }}</span>
               <b>{{ $a['aluno_nome'] }}</b>
             </div>
-          </td>
-          <td><span class="badge badge-info">{{ $a['turma_nome'] }}</span></td>
-          <td class="num"><b>{{ number_format($a['nota_final'], 1, ',', '.') }}</b></td>
-          <td>
+          </div></td>
+          <td data-rotulo="Turma"><div class="tabela-valor"><span class="badge badge-info">{{ $a['turma_nome'] }}</span></div></td>
+          <td class="num" data-rotulo="Nota"><div class="tabela-valor"><b>{{ number_format($a['nota_final'], 1, ',', '.') }}</b></div></td>
+          <td data-rotulo="Status"><div class="tabela-valor">
             <span class="badge {{ $a['status_aprovacao'] === 'aprovado' ? 'badge-success' : 'badge-warn' }} badge-dot">
               {{ $a['status_aprovacao'] === 'aprovado' ? 'Aprovado' : 'Recuperação' }}
             </span>
-          </td>
-          <td style="text-align:right;">
+          </div></td>
+          <td style="text-align:right;" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
             <a href="{{ route('resultados.show', [$a['aluno_id'], $prova['id']]) }}?from=prova" class="btn btn-result btn-sm" aria-label="Ver prova">Ver prova</a>
-          </td>
+          </div></td>
         </tr>
       @empty
         <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Nenhum resultado disponível ainda.</td></tr>
       @endforelse
     </tbody>
-  </table>
+  </table></x-tabela>
 </div>
 
 <div style="height:48px"></div>

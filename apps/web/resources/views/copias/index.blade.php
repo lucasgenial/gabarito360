@@ -29,16 +29,16 @@
 </form>
 @if($dados['lado']==='destino')<p style="margin-top:16px;">As entradas aparecem aqui depois que este espaço registra sua decisão.</p>@endif
 <div class="card card-pad" style="margin-top:20px;overflow-x:auto;">
-  <table class="table"><caption style="text-align:left;margin-bottom:16px;">{{ $lista['total'] }} solicitação(ões) neste acompanhamento</caption>
+  <x-tabela titulo="Solicitações de cópia" modo="lista"><table class="tabela-padrao table"><caption style="text-align:left;margin-bottom:16px;">{{ $lista['total'] }} solicitação(ões) neste acompanhamento</caption>
     <thead><tr><th scope="col">Conteúdo</th><th scope="col">Criado em</th><th scope="col">Situação</th><th scope="col">Publicação</th></tr></thead>
     <tbody>@forelse($lista['data'] as $c)
-      <tr><td>@if($c['operacao_disponivel']??false)<a href="{{ route('copias.operacao',['id'=>$c['id'],'lado'=>$dados['lado'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">{{ $tipos[$c['finalidade']] ?? 'Cópia' }}</a>@else{{ $tipos[$c['finalidade']] ?? 'Cópia' }}@endif</td>
-        <td>{{ \Carbon\Carbon::parse($c['criado_em'],'UTC')->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</td>
-        <td>{{ $estados[$c['estado']] ?? 'Em acompanhamento' }}
+      <tr><td class="tabela-principal" data-rotulo="Conteúdo"><div class="tabela-valor">@if($c['operacao_disponivel']??false)<a href="{{ route('copias.operacao',['id'=>$c['id'],'lado'=>$dados['lado'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">{{ $tipos[$c['finalidade']] ?? 'Cópia' }}</a>@else{{ $tipos[$c['finalidade']] ?? 'Cópia' }}@endif</div></td>
+        <td data-rotulo="Criado em"><div class="tabela-valor">{{ \Carbon\Carbon::parse($c['criado_em'],'UTC')->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</div></td>
+        <td data-rotulo="Situação"><div class="tabela-valor">{{ $estados[$c['estado']] ?? 'Em acompanhamento' }}
           @if($c['auditoria_pendente'])<div class="text-muted">Há registros aguardando confirmação.</div>@endif
-        </td><td>{{ $c['publicados'] }} de {{ $c['selecionados'] }} item(ns)</td></tr>
+        </div></td><td data-rotulo="Publicação"><div class="tabela-valor">{{ $c['publicados'] }} de {{ $c['selecionados'] }} item(ns)</div></td></tr>
     @empty<tr><td colspan="4">Nenhuma solicitação encontrada para este espaço e direção.</td></tr>@endforelse</tbody>
-  </table>
+  </table></x-tabela>
   @if($lista['last_page']>1)<nav aria-label="Paginação das cópias" style="margin-top:16px;">
     @if($lista['current_page']>1)<a class="btn btn-secondary" href="{{ route('copias.index',array_merge($filtros,['page'=>$lista['current_page']-1])) }}">Anterior</a>@endif
     <span>Página {{ $lista['current_page'] }} de {{ $lista['last_page'] }}</span>

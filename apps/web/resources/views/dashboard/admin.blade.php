@@ -208,14 +208,14 @@
       <a href="{{ route('membros.index') }}" class="btn btn-secondary btn-sm">Gerenciar usuários</a>
     </div>
   </div>
-  <table class="table lista-cel">
+  <x-tabela titulo="Últimos acessos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Últimos acessos</caption>
     <thead>
       <tr>
-        <th>Nome</th>
-        <th>Perfil</th>
-        <th>Escola / Unidade</th>
-        <th>Último acesso</th>
-        <th class="status-cell">Status</th>
+        <th scope="col">Nome</th>
+        <th scope="col">Perfil</th>
+        <th scope="col">Escola / Unidade</th>
+        <th scope="col">Último acesso</th>
+        <th scope="col" class="status-cell">Status</th>
       </tr>
     </thead>
     <tbody>
@@ -231,11 +231,11 @@
           }
         @endphp
         <tr>
-          <td>{{ $u['nome'] }}</td>
-          <td>{{ $perfisLegivel[$u['perfil']] ?? $u['perfil'] }}</td>
-          <td>{{ $u['escola_nome'] ?? '—' }}</td>
-          <td class="num">{{ \Carbon\Carbon::parse($u['ultimo_acesso'])->format('d/m/Y · H:i') }}</td>
-          <td class="status-cell"><span class="badge {{ $statusBadge }} badge-dot">{{ $statusLabel }}</span></td>
+          <td class="tabela-principal" data-rotulo="Nome"><div class="tabela-valor">{{ $u['nome'] }}</div></td>
+          <td data-rotulo="Perfil"><div class="tabela-valor">{{ $perfisLegivel[$u['perfil']] ?? $u['perfil'] }}</div></td>
+          <td data-rotulo="Escola / Unidade"><div class="tabela-valor">{{ $u['escola_nome'] ?? '—' }}</div></td>
+          <td class="num" data-rotulo="Último acesso"><div class="tabela-valor">{{ \Carbon\Carbon::parse($u['ultimo_acesso'])->format('d/m/Y · H:i') }}</div></td>
+          <td class="status-cell" data-rotulo="Status"><div class="tabela-valor"><span class="badge {{ $statusBadge }} badge-dot">{{ $statusLabel }}</span></div></td>
         </tr>
       @empty
         <tr>
@@ -245,7 +245,7 @@
         </tr>
       @endforelse
     </tbody>
-  </table>
+  </table></x-tabela>
 </div>
 
 {{-- Ações rápidas --}}

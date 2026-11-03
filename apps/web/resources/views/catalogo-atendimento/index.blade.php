@@ -13,12 +13,12 @@
 @if(count($dados['itens']))
   @if($modo==='gestao')<div style="display:grid;gap:16px;margin-top:24px;">@foreach($dados['itens'] as $e)<article class="card card-pad">@include('instituicoes._identidade',['tipos'=>\App\Http\Controllers\InstituicoesPessoaisController::TIPOS])<p style="margin-top:16px;"><a class="btn btn-secondary" href="{{ route('catalogo-gestao.editar',['unidade'=>$e['unidade_id']]) }}">Revisar cadastro</a></p></article>@endforeach</div>
   @else
-  <div class="card catalogo-lista" style="margin-top:24px;overflow-x:auto;"><table class="lista-cel"><thead><tr><th>Instituição solicitada</th><th>Situação</th><th>Atualização</th><th>Acompanhamento</th></tr></thead><tbody>@foreach($dados['itens'] as $item)<tr>
-  <td data-label="Instituição"><strong>{{ $item['nome_instituicao']??($item['dados']['nome']??'Instituição solicitada') }}</strong>@if(!empty($item['municipio_nome']))<span class="page-sub">{{ $item['municipio_nome'] }} — {{ $item['uf'] }}</span>@endif</td>
-  <td data-label="Situação">@include('catalogo-atendimento._estado',['situacao'=>$item['situacao']])</td>
-  <td data-label="Atualização">{{ \Illuminate\Support\Carbon::parse($item['atualizado_em'],'UTC')->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</td>
-  <td data-label="Acompanhamento"><a class="btn btn-secondary btn-sm" href="{{ route($prefix.'.show',['id'=>$item['id']]) }}">{{ $modo==='atendimento'?'Abrir atendimento':'Acompanhar solicitação' }}</a></td>
-  </tr>@endforeach</tbody></table></div>
+  <div class="card catalogo-lista" style="margin-top:24px;overflow-x:auto;"><x-tabela titulo="Solicitações de instituições" modo="lista"><table class="tabela-padrao "><caption class="sr-only">Solicitações de instituições</caption><thead><tr><th scope="col">Instituição solicitada</th><th scope="col">Situação</th><th scope="col">Atualização</th><th scope="col">Acompanhamento</th></tr></thead><tbody>@foreach($dados['itens'] as $item)<tr>
+  <td data-label="Instituição" class="tabela-principal" data-rotulo="Instituição"><div class="tabela-valor"><strong>{{ $item['nome_instituicao']??($item['dados']['nome']??'Instituição solicitada') }}</strong>@if(!empty($item['municipio_nome']))<span class="page-sub">{{ $item['municipio_nome'] }} — {{ $item['uf'] }}</span>@endif</div></td>
+  <td data-label="Situação" data-rotulo="Situação"><div class="tabela-valor">@include('catalogo-atendimento._estado',['situacao'=>$item['situacao']])</div></td>
+  <td data-label="Atualização" data-rotulo="Atualização"><div class="tabela-valor">{{ \Illuminate\Support\Carbon::parse($item['atualizado_em'],'UTC')->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</div></td>
+  <td data-label="Acompanhamento" class="tabela-acoes" data-rotulo="Acompanhamento"><div class="tabela-valor"><a class="btn btn-secondary btn-sm" href="{{ route($prefix.'.show',['id'=>$item['id']]) }}">{{ $modo==='atendimento'?'Abrir atendimento':'Acompanhar solicitação' }}</a></div></td>
+  </tr>@endforeach</tbody></table></x-tabela></div>
   @endif
 @else
 <section class="card card-pad" style="margin-top:24px;">

@@ -20,6 +20,7 @@ class AlunoController extends Controller
         $turmas = $this->api->get('/v1/turmas')->json('data.turmas') ?? [];
 
         return view('alunos.index', [
+            'erroLista' => !$resp->successful(),
             'alunos'   => $alunos,
             'kpis'     => $kpis,
             'turmas'   => $turmas,

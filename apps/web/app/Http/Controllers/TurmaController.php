@@ -20,6 +20,7 @@ class TurmaController extends Controller
         $escolas = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
 
         return view('turmas.index', [
+            'erroLista' => !$resp->successful(),
             'turmas'     => $turmas,
             'kpis'       => $kpis,
             'escolas'    => $escolas,

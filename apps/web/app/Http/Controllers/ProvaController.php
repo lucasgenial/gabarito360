@@ -29,6 +29,7 @@ class ProvaController extends Controller
         $kpis   = $resp->successful() ? $resp->json('data.kpis')   : [];
 
         return view('provas.index', [
+            'erroLista' => !$resp->successful(),
             'provas'     => $provas,
             'kpis'       => $kpis,
             'busca'      => $request->query('busca', ''),
