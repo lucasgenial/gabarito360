@@ -15,4 +15,6 @@ Regra solicitada pelo responsável em03/11/2026: toda alteração que afete inte
 
 Revisar o planejamento antes de implementar cada etapa e apresentar a tabela atualizada ao finalizar. Prosseguir autonomamente pelas subdivisões internas autorizadas. Usar terminal para Git/GitHub e preferir o Chrome do usuário para testes visuais do aplicativo.
 
-Sem deploy, migration ou carga no servidor até fechar e validar o L4 completo. Preservar os gabaritos e os demais dados existentes. Não incluir arquivos ou alterações preexistentes de outras tarefas nos commits desta entrega.
+Decisão atualizada pelo responsável em03/11/2026: toda entrega deve ser publicada primeiro na homologação isolada `homologa.gabarito360.com.br`, com banco, arquivos, filas, credenciais e dados de teste próprios. Isso substitui o bloqueio de deploy para esse novo ambiente; não autoriza usar o banco ou os arquivos de produção nos testes.
+
+O ambiente atual `gabarito360.com.br` é produção. Sua publicação depende de decisão explícita do responsável no momento combinado, mesmo após CI, revisão do especialista e validação na homologação. Concluir L4 ou obter parecer de design não autoriza promoção automática. Preservar os gabaritos e os demais dados existentes. Não incluir arquivos ou alterações preexistentes de outras tarefas nos commits desta entrega.
