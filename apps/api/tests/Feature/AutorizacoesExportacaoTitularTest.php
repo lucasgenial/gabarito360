@@ -114,7 +114,7 @@ class AutorizacoesExportacaoTitularTest extends TestCase
     }
     public static function invalidacoes(): array
     {
-        return array_map(fn($v)=>[$v],['expiracao','conferencia','ciclo','sujeito','responsavel','vinculo','vinculo_revogado','permissao','aluno','flag','proprietario','conclusao']);
+        return array_map(fn($v)=>[$v],['expiracao','conferencia','ciclo','sujeito','responsavel','vinculo','vinculo_encerrado','permissao','aluno','flag','proprietario','conclusao']);
     }
     #[DataProvider('invalidacoes')]
     public function test_uso_revalida_todas_as_condicoes_e_nao_executa_callback(string $caso): void
@@ -127,7 +127,7 @@ class AutorizacoesExportacaoTitularTest extends TestCase
             'sujeito'=>DB::table('pedidos_titulares')->where('id',$p['referencia'])->increment('sujeito_versao'),
             'responsavel'=>DB::table('usuario_acessos_internos')->where('id',2)->increment('versao_autorizacao'),
             'vinculo'=>DB::table('usuario_vinculos')->where('id',3)->increment('versao_autorizacao'),
-            'vinculo_revogado'=>DB::table('usuario_vinculos')->where('id',3)->update(['situacao'=>'revogado']),
+            'vinculo_encerrado'=>DB::table('usuario_vinculos')->where('id',3)->update(['situacao'=>'encerrado']),
             'permissao'=>DB::table('vinculo_permissoes')->insert(['vinculo_id'=>3,'permissao'=>'pedido.exportacao.autorizar','efeito'=>'retirar']),
             'aluno'=>DB::table('alunos')->where('id',1)->update(['updated_at'=>now()->addMinute()]),
             'flag'=>config(['pedidos_titulares.autorizacoes_exportacao'=>false]),
