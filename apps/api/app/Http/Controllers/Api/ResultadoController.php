@@ -44,25 +44,7 @@ class ResultadoController extends Controller
 
         $r = Process::path(config('omr.scripts'))
             ->timeout(max(60, config('omr.timeout')))
-            ->input(json_encode([
-                'saida'       => $saida,
-                'rede'        => $escola ? DB::table('nucleos')->join('redes', 'nucleos.rede_id', '=', 'redes.id')
-                    ->where('nucleos.id', $escola->nucleo_id)->value('redes.nome') : null,
-                'escola'      => $dados['cabecalho']['nome'] ?? '',
-                'titulo'      => $dados['prova']['titulo'],
-                'disciplina'  => $dados['prova']['disciplina'],
-                'data'        => $prova->data_aplicacao?->format('d/m/Y'),
-                'nota_maxima' => $dados['prova']['nota_maxima'],
-                'aluno'       => ['nome' => $dados['aluno']['nome'], 'matricula' => $dados['aluno']['matricula'], 'turma' => $dados['aluno']['turma_nome']],
-                'nota'        => $dados['nota'],
-                'lingua'      => $dados['lingua'],
-                'media_turma' => $dados['media_turma'],
-                'folha'       => $dados['folha'],
-                'logo'        => Cabecalho::logoPath($escola->logo_path ?? null),
-                'logo_ente'   => $escola ? Cabecalho::logoPath(DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
-                    ->where('nucleos.id', $escola->nucleo_id)->value('redes.logo_path')) : null,
-                'detalhe'     => $dados['cabecalho']['detalhe'] ?? null,
-            ], JSON_UNESCAPED_UNICODE))
+            ->input(json_encode($this->dadosPdf($dados, $prova, $escola, $saida), JSON_UNESCAPED_UNICODE))
             ->run([config('omr.python'), 'gerar_resultado.py']);
 
         $json = json_decode(trim($r->output()), true);
@@ -83,6 +65,80 @@ class ResultadoController extends Controller
         $nome = 'resultado-' . \Illuminate\Support\Str::slug($dados['aluno']['nome'] . ' ' . $dados['prova']['disciplina']) . '.pdf';
 
         return response()->download($saida, $nome, ['Content-Type' => 'application/pdf'])->deleteFileAfterSend();
+    }
+
+    /** Um documento com uma página por aluno, usando o mesmo modelo individual. */
+    public function lote(Request $request, int $provaId)
+    {
+        $request->validate(['turma_id' => 'nullable|integer|min:1']);
+        abort_if(in_array($request->user()->perfil, ['aluno', 'aplicador']), 403);
+        $versao = ContextoCorrecao::versaoAcesso($request->user());
+        $prova = Escopo::provaComConteudo($request->user(), $provaId);
+        abort_unless($prova, 404, 'Prova não encontrada.');
+        $consulta = new \App\Support\ConsultasPedagogicas($request->user());
+        $turma = $request->filled('turma_id') ? (int) $request->query('turma_id') : null;
+        if ($turma) abort_unless(Escopo::turmas($request->user())->whereKey($turma)->exists(), 404, 'Turma não encontrada.');
+        $ids = $consulta->tabela('notas')->where('prova_id', $provaId)
+            ->whereIn('aluno_id', Escopo::alunos($request->user())->select('alunos.id'))
+            ->when($turma, fn ($q) => $q->where('turma_id', $turma))
+            ->orderBy('turma_id')->orderBy('aluno_id')->limit(501)->pluck('aluno_id')->all();
+        abort_unless(count($ids), 422, 'Nenhum resultado disponível para este lote.');
+        abort_if(count($ids) > 500, 422, 'O limite é de 500 resultados por PDF. Selecione uma turma.');
+        $escola = $prova->escola_id ? DB::table('escolas')->find($prova->escola_id) : null;
+        $resultados = [];
+        foreach ($ids as $id) {
+            $dados = $this->montar($request, (int) $id, $provaId);
+            if ($dados instanceof JsonResponse) return $dados;
+            $resultados[] = $this->dadosPdf($dados, $prova, $escola, '');
+        }
+        usort($resultados, fn ($a, $b) => strnatcasecmp(($a['aluno']['turma'] ?? '').' '.$a['aluno']['nome'], ($b['aluno']['turma'] ?? '').' '.$b['aluno']['nome']));
+        $saida = tempnam(sys_get_temp_dir(), 'g360_lote_');
+        abort_unless($saida !== false, 500, 'Não foi possível preparar o PDF.');
+        chmod($saida, 0600);
+        try {
+            $r = Process::path(config('omr.scripts'))->timeout(120)
+                ->input(json_encode(['saida' => $saida, 'resultados' => $resultados], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR))
+                ->run([config('omr.python'), 'gerar_resultado.py']);
+            $json = json_decode(trim($r->output()), true);
+            if (!$r->successful() || empty($json['ok']) || ($json['total'] ?? null) !== count($ids) || !filesize($saida)) {
+                throw new \RuntimeException('Geração do lote de resultados não concluída.');
+            }
+            abort_unless(hash_equals($versao, ContextoCorrecao::versaoAcesso($request->user()))
+                && \App\Support\Permissao::pode($request->user(), 'resultado.compartilhar')
+                && \App\Support\Permissao::pode($request->user(), 'relatorio.prova'), 403);
+            // Revalidar todos os alunos antes de liberar qualquer página do arquivo.
+            foreach ($ids as $id) {
+                $atual = $this->montar($request, (int) $id, $provaId);
+                if ($atual instanceof JsonResponse) { @unlink($saida); return $atual; }
+            }
+            return response()->download($saida, 'resultados-prova-'.$provaId.($turma ? '-turma-'.$turma : '').'.pdf', [
+                'Content-Type' => 'application/pdf', 'Cache-Control' => 'private, no-store',
+                'X-Content-Type-Options' => 'nosniff',
+            ])->deleteFileAfterSend();
+        } catch (\Throwable $e) { @unlink($saida); throw $e; }
+    }
+
+    private function dadosPdf(array $dados, Prova $prova, ?object $escola, string $saida): array
+    {
+        return [
+                'saida'       => $saida,
+                'rede'        => $escola ? DB::table('nucleos')->join('redes', 'nucleos.rede_id', '=', 'redes.id')
+                    ->where('nucleos.id', $escola->nucleo_id)->value('redes.nome') : null,
+                'escola'      => $dados['cabecalho']['nome'] ?? '',
+                'titulo'      => $dados['prova']['titulo'],
+                'disciplina'  => $dados['prova']['disciplina'],
+                'data'        => $prova->data_aplicacao?->format('d/m/Y'),
+                'nota_maxima' => $dados['prova']['nota_maxima'],
+                'aluno'       => ['nome' => $dados['aluno']['nome'], 'matricula' => $dados['aluno']['matricula'], 'turma' => $dados['aluno']['turma_nome']],
+                'nota'        => $dados['nota'],
+                'lingua'      => $dados['lingua'],
+                'media_turma' => $dados['media_turma'],
+                'folha'       => $dados['folha'],
+                'logo'        => Cabecalho::logoPath($escola->logo_path ?? null),
+                'logo_ente'   => $escola ? Cabecalho::logoPath(DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
+                    ->where('nucleos.id', $escola->nucleo_id)->value('redes.logo_path')) : null,
+                'detalhe'     => $dados['cabecalho']['detalhe'] ?? null,
+            ];
     }
 
     /** Monta o resultado do aluno na prova, ou a resposta de erro. */
