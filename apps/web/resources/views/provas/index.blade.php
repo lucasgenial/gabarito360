@@ -43,7 +43,7 @@
     <option value="corrigida"   {{ $status==='corrigida'   ? 'selected' : '' }}>Corrigida</option>
   </select>
   <button type="submit" class="btn btn-secondary">Filtrar</button>
-  @if($busca || $disciplina || $status)
+  @if($haFiltros)
     <a href="{{ route('provas.index') }}" class="btn btn-ghost">Limpar</a>
   @endif
 </form>
@@ -158,7 +158,7 @@
           <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="prova" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma prova encontrada</div>
-            <p>Crie a primeira prova usando o botão "+ Nova prova".</p>
+            <p>@if($haFiltros) Ajuste ou limpe os filtros para encontrar outros registros. @elseif(\App\Support\Acesso::pode('prova.criar')) Crie a primeira prova usando o botão "+ Nova prova". @else As provas disponíveis neste espaço aparecerão aqui. @endif</p>
           </td>
         </tr>
       @endforelse

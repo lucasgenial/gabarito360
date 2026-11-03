@@ -35,7 +35,7 @@
     @endforeach
   </select>
   <button type="submit" class="btn btn-secondary">Filtrar</button>
-  @if($busca || $turma_id)
+  @if($haFiltros)
     <a href="{{ route('alunos.index') }}" class="btn btn-ghost">Limpar</a>
   @endif
 </form>
@@ -86,7 +86,7 @@
           <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="aluno" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhum aluno encontrado</div>
-            <p>Cadastre o primeiro aluno usando o botão "+ Cadastrar aluno".</p>
+            <p>@if($haFiltros) Ajuste ou limpe os filtros para encontrar outros registros. @else Cadastre o primeiro aluno usando o botão "+ Cadastrar aluno". @endif</p>
           </td>
         </tr>
       @endforelse

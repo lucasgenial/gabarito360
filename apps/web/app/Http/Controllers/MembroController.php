@@ -45,6 +45,7 @@ class MembroController extends Controller
 
         return view('membros.index', [
             'erroLista' => !$resp->successful(),
+            'haFiltros' => collect(['busca', 'perfil'])->contains(fn (string $campo) => $request->filled($campo)),
             'agrupados'  => $agrupados,
             'totais'     => $totais,
             'perfis'     => self::PERFIS,

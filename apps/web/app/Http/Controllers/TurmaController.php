@@ -21,6 +21,7 @@ class TurmaController extends Controller
 
         return view('turmas.index', [
             'erroLista' => !$resp->successful(),
+            'haFiltros' => collect(['busca', 'escola_id', 'ano_letivo', 'ativo'])->contains(fn (string $campo) => $request->filled($campo)),
             'turmas'     => $turmas,
             'kpis'       => $kpis,
             'escolas'    => $escolas,

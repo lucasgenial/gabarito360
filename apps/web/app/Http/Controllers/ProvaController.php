@@ -30,6 +30,7 @@ class ProvaController extends Controller
 
         return view('provas.index', [
             'erroLista' => !$resp->successful(),
+            'haFiltros' => collect(['busca', 'disciplina', 'status'])->contains(fn (string $campo) => $request->filled($campo)),
             'provas'     => $provas,
             'kpis'       => $kpis,
             'busca'      => $request->query('busca', ''),
