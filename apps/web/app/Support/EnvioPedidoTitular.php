@@ -41,13 +41,24 @@ final class EnvioPedidoTitular
                 }
                 if ($d['recibo']!==null) return ['status'=>200,'recibo'=>$d['recibo']];
                 abort_unless(is_array($d['payload']),409,'Envio ainda não preparado.');
-                $path='/v1/pedidos-titulares'.($acao==='abrir'?'':'/'.$id.'/'.$acao);
-                try { $r=app(ApiClient::class)->post($path,$d['payload']); }
+                $alvo=$id;$payload=$d['payload'];
+                if (in_array($acao,['gerar','revogar'],true)) {
+                    $alvo=$payload['referencia_alvo']??null;abort_unless(is_string($alvo)&&Str::isUuid($alvo),422);unset($payload['referencia_alvo']);
+                }
+                $path=match($acao) {
+                    'conceder'=>'/v1/autorizacoes-exportacao/pedidos/'.$id,
+                    'revogar'=>'/v1/autorizacoes-exportacao/'.$alvo.'/revogar',
+                    'gerar'=>'/v1/pedidos-titulares/exportacoes/'.$alvo,
+                    default=>'/v1/pedidos-titulares'.($acao==='abrir'?'':'/'.$id.'/'.$acao),
+                };
+                try { $r=app(ApiClient::class)->post($path,$payload); }
                 catch (ConnectionException) { return ['status'=>503]; }
                 if (!$r->successful()) return ['status'=>in_array($r->status(),[401,403,404,409,422,429],true)?$r->status():503];
                 $v=$r->json('data');
-                if (!is_array($v) || !Str::isUuid($v['referencia'] ?? '') || !is_string($v['situacao'] ?? null) || !is_numeric($v['versao'] ?? null)) return ['status'=>503];
-                $d['recibo']=array_intersect_key($v,array_flip(['referencia','situacao','versao']));$d['payload']=null;
+                if (!is_array($v) || !Str::isUuid($v['referencia'] ?? '')
+                    || ($acao!=='gerar' && !is_numeric($v['versao'] ?? null))
+                    || (!in_array($acao,['conceder','revogar'],true) && !is_string($v['situacao'] ?? null))) return ['status'=>503];
+                $d['recibo']=array_intersect_key($v,array_flip(['referencia','situacao','versao','valida_ate','expira_em','revogada']));$d['payload']=null;
                 $this->salvar($key,$d);
                 return ['status'=>200,'recibo'=>$d['recibo']];
             });

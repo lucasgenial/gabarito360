@@ -47,7 +47,7 @@ final class PedidoTitularController extends Controller
     public function show(string $id)
     {
         $this->autorizar();$p=$this->consultar('/'.$id);
-        $envios=[];foreach (['triagem','verificacoes','decisao'] as $acao) $envios[$acao]=$this->envios->criar($acao,$id);
+        $envios=[];foreach (['triagem','verificacoes','decisao','sujeito'] as $acao) $envios[$acao]=$this->envios->criar($acao,$id);
         return view('pedidos.show',['pedido'=>$p,'envios'=>$envios,'estados'=>self::ESTADOS,'tipos'=>self::TIPOS]);
     }
     public function store(Request $r) { return $this->enviar($r,'abrir',null); }
@@ -55,13 +55,15 @@ final class PedidoTitularController extends Controller
     private function enviar(Request $r,string $acao,?string $id)
     {
         $this->autorizar($acao==='abrir');
-        abort_unless(in_array($acao,['abrir','triagem','verificacoes','decisao'],true),404);
+        abort_unless(in_array($acao,['abrir','triagem','verificacoes','decisao','sujeito'],true),404);
+        if ($acao==='sujeito') abort_unless(config('services.pedidos.exportacoes'),404);
         $ticket=$this->validar($r->only('envio'),['envio'=>'required|string|size:48'])['envio'];
         $this->validar($r->only('confirmado'),['confirmado'=>'required|accepted']);
         $d=null;
         if ($r->boolean('repetir')) abort_if(array_diff(array_keys($r->all()),['_ctx','_token','envio','confirmado','repetir']),422);
         if (!$r->boolean('repetir')) {
             $regras=match($acao) {
+                'sujeito'=>['versao'=>'required|integer|min:1','aluno_id'=>'required|integer|min:1','evidencia_referencia'=>'required|string|min:5|max:500','motivo'=>'required|string|min:5|max:500'],
                 'abrir'=>['cliente_id'=>'required|integer|min:1','espaco_id'=>'required|integer|min:1','responsavel_acesso_id'=>'required|integer|min:1',
                     'tipo'=>'required|in:'.implode(',',array_keys(self::TIPOS)),'identificacao_declarada'=>'required|string|max:200','relato'=>'required|string|max:2000','motivo'=>'required|string|min:5|max:500'],
                 'triagem'=>['versao'=>'required|integer|min:1','situacao'=>'required|in:em_verificacao,aguardando_informacao,cancelada','motivo'=>'required|string|min:5|max:500','resultado'=>'nullable|string|max:40'],
