@@ -392,3 +392,7 @@ A primeira parte de C2 vincula um aluno ao protocolo no espaço exato, sob atrib
 ### L4-C2 — concessão delimitada
 
 A concessão é separada da atribuição de atendimento e exige a permissão específica do aprovador institucional ou proprietário, conforme aprovação do produto. Guarda sujeito/ciclo, contexto, destinatário, campos mínimos e prazo; revogação e eventos são transacionais. Consumidores futuros devem revalidar dentro de comAutorizacao, mantendo locks e sem tratar recibo antigo como poder de acesso. A flag própria inicia desligada. Detalhes em [109-l4-c2-concessao-exportacao.md](109-l4-c2-concessao-exportacao.md).
+
+### L4-C3 — artefato mínimo cifrado e transacional
+
+GeracaoExportacaoTitular gera cadastro_minimo_v1 sob os locks/revalidação de comAutorizacao. Documento JSON de até16KiB, somente nome/matrícula selecionados, manifesto versionado e hash dos dados dentro da cifra autenticada. Armazenamento privado em pedido_exportacao_artefatos, sem arquivo público: ciphertext, integridade, prazo, concessão e chave idempotente; eventos obrigatórios na mesma transação. Um artefato por concessão, chave única por acesso/versão. Falha ou expiração durante geração reverte tudo. Essa execução síncrona evita estado intermediário persistido e efeitos externos; formatos maiores exigem nova decisão de armazenamento/fila. Flag de geração desligada por padrão. Endpoint retorna só recibo mínimo; consulta/download seguros ficam para C4. Ver doc110.
