@@ -224,32 +224,32 @@
           <h3 style="margin:0;">Turmas cadastradas</h3>
           <button class="btn btn-sm btn-secondary" onclick="document.getElementById('tab-btn-turmas').click()">Ver todas</button>
         </div>
-        <table class="data-table lista-cel">
+        <x-tabela titulo="Turmas da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Turmas da escola</caption>
           <thead>
             <tr>
-              <th>Turma</th>
-              <th>Turno</th>
-              <th>Alunos</th>
-              <th>Status</th>
+              <th scope="col">Turma</th>
+              <th scope="col">Turno</th>
+              <th scope="col">Alunos</th>
+              <th scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
             @foreach(array_slice($escola['turmas'], 0, 5) as $t)
             <tr>
-              <td><strong>{{ $t['nome'] }}</strong> <span style="color:var(--muted);font-size:12px;">{{ $t['ano'] ?? '' }}</span></td>
-              <td>{{ ucfirst($t['turno'] ?? '—') }}</td>
-              <td style="font-family:var(--font-mono);">{{ $t['total_alunos'] ?? 0 }}</td>
-              <td>
+              <td class="tabela-principal" data-rotulo="Turma"><div class="tabela-valor"><strong>{{ $t['nome'] }}</strong> <span style="color:var(--muted);font-size:12px;">{{ $t['ano'] ?? '' }}</span></div></td>
+              <td data-rotulo="Turno"><div class="tabela-valor">{{ ucfirst($t['turno'] ?? '—') }}</div></td>
+              <td style="font-family:var(--font-mono);" data-rotulo="Alunos"><div class="tabela-valor">{{ $t['total_alunos'] ?? 0 }}</div></td>
+              <td data-rotulo="Status"><div class="tabela-valor">
                 @if($t['ativo'] ?? true)
                   <span class="badge badge-success">Ativa</span>
                 @else
                   <span class="badge badge-danger">Inativa</span>
                 @endif
-              </td>
+              </div></td>
             </tr>
             @endforeach
           </tbody>
-        </table>
+        </table></x-tabela>
         @if(count($escola['turmas']) > 5)
           <div style="padding:10px 0 0;font-size:13px;color:var(--muted);">
             Exibindo 5 de {{ count($escola['turmas']) }} turmas.
@@ -331,34 +331,34 @@
       <a href="{{ route('turmas.index') }}" class="btn btn-sm btn-primary">+ Nova turma</a>
     </div>
     @if(count($escola['turmas'] ?? []) > 0)
-    <table class="data-table lista-cel">
+    <x-tabela titulo="Turmas por ano" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Turmas por ano</caption>
       <thead>
         <tr>
-          <th>Turma</th>
-          <th>Ano</th>
-          <th>Turno</th>
-          <th>Alunos</th>
-          <th>Status</th>
+          <th scope="col">Turma</th>
+          <th scope="col">Ano</th>
+          <th scope="col">Turno</th>
+          <th scope="col">Alunos</th>
+          <th scope="col">Status</th>
         </tr>
       </thead>
       <tbody>
         @foreach($escola['turmas'] as $t)
         <tr>
-          <td><strong>{{ $t['nome'] }}</strong></td>
-          <td>{{ $t['ano'] ?? '—' }}</td>
-          <td>{{ ucfirst($t['turno'] ?? '—') }}</td>
-          <td style="font-family:var(--font-mono);">{{ $t['total_alunos'] ?? 0 }}</td>
-          <td>
+          <td class="tabela-principal" data-rotulo="Turma"><div class="tabela-valor"><strong>{{ $t['nome'] }}</strong></div></td>
+          <td data-rotulo="Ano"><div class="tabela-valor">{{ $t['ano'] ?? '—' }}</div></td>
+          <td data-rotulo="Turno"><div class="tabela-valor">{{ ucfirst($t['turno'] ?? '—') }}</div></td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Alunos"><div class="tabela-valor">{{ $t['total_alunos'] ?? 0 }}</div></td>
+          <td data-rotulo="Status"><div class="tabela-valor">
             @if($t['ativo'] ?? true)
               <span class="badge badge-success">Ativa</span>
             @else
               <span class="badge badge-danger">Inativa</span>
             @endif
-          </td>
+          </div></td>
         </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
     @else
     <div style="text-align:center;padding:48px 20px;color:var(--muted);">
       <div class="icone-grande"><x-icone nome="escola" /></div>
@@ -377,17 +377,17 @@
       <a href="{{ route('provas.create') }}" class="btn btn-sm btn-primary">+ Nova prova</a>
     </div>
     @if(count($escola['provas'] ?? []) > 0)
-    <table class="data-table lista-cel">
+    <x-tabela titulo="Provas da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Provas da escola</caption>
       <thead>
         <tr>
-          <th>Prova</th>
-          <th>Disciplina</th>
-          <th>Turma</th>
-          <th>Aplicação</th>
-          <th>Alunos</th>
-          <th>Média</th>
-          <th>Status</th>
-          <th></th>
+          <th scope="col">Prova</th>
+          <th scope="col">Disciplina</th>
+          <th scope="col">Turma</th>
+          <th scope="col">Aplicação</th>
+          <th scope="col">Alunos</th>
+          <th scope="col">Média</th>
+          <th scope="col">Status</th>
+          <th scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -402,14 +402,14 @@
             $sc = $statusCfg[$p['status']] ?? ['cls'=>'badge-info','label'=>$p['status']];
           @endphp
           <tr>
-            <td><strong>{{ $p['titulo'] }}</strong></td>
-            <td>{{ $p['disciplina'] }}</td>
-            <td>{{ $p['turma'] }}</td>
-            <td>{{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}</td>
-            <td style="font-family:var(--font-mono);">{{ $p['total_alunos'] }}</td>
-            <td style="font-family:var(--font-mono);">{{ $p['media'] !== null ? number_format($p['media'], 1, ',', '') : '—' }}</td>
-            <td><span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span></td>
-            <td>
+            <td class="tabela-principal" data-rotulo="Prova"><div class="tabela-valor"><strong>{{ $p['titulo'] }}</strong></div></td>
+            <td data-rotulo="Disciplina"><div class="tabela-valor">{{ $p['disciplina'] }}</div></td>
+            <td data-rotulo="Turma"><div class="tabela-valor">{{ $p['turma'] }}</div></td>
+            <td data-rotulo="Aplicação"><div class="tabela-valor">{{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}</div></td>
+            <td style="font-family:var(--font-mono);" data-rotulo="Alunos"><div class="tabela-valor">{{ $p['total_alunos'] }}</div></td>
+            <td style="font-family:var(--font-mono);" data-rotulo="Média"><div class="tabela-valor">{{ $p['media'] !== null ? number_format($p['media'], 1, ',', '') : '—' }}</div></td>
+            <td data-rotulo="Status"><div class="tabela-valor"><span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span></div></td>
+            <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
               @if($p['status'] === 'em_correcao')
                 <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary">Acompanhar</a>
               @elseif($p['status'] === 'corrigida')
@@ -417,11 +417,11 @@
               @else
                 <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
               @endif
-            </td>
+            </div></td>
           </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
     @else
     <div style="text-align:center;padding:48px 20px;color:var(--muted);">
       <div class="icone-grande"><x-icone nome="prova" /></div>
@@ -440,38 +440,38 @@
       <a href="{{ route('alunos.create') }}" class="btn btn-sm btn-primary">+ Cadastrar</a>
     </div>
     @if(count($escola['alunos'] ?? []) > 0)
-    <table class="data-table lista-cel">
+    <x-tabela titulo="Alunos da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Alunos da escola</caption>
       <thead>
         <tr>
-          <th>Aluno</th>
-          <th>Matrícula</th>
-          <th>Turma</th>
-          <th>Média geral</th>
-          <th>Provas</th>
-          <th>Status</th>
-          <th></th>
+          <th scope="col">Aluno</th>
+          <th scope="col">Matrícula</th>
+          <th scope="col">Turma</th>
+          <th scope="col">Média geral</th>
+          <th scope="col">Provas</th>
+          <th scope="col">Status</th>
+          <th scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
         @foreach($escola['alunos'] as $a)
           <tr>
-            <td><strong>{{ $a['nome'] }}</strong></td>
-            <td style="font-family:var(--font-mono);">{{ $a['matricula'] }}</td>
-            <td>{{ $a['turma'] }}</td>
-            <td style="font-family:var(--font-mono);">{{ $a['media_geral'] !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</td>
-            <td style="font-family:var(--font-mono);">{{ $a['total_provas'] }}</td>
-            <td>
+            <td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>{{ $a['nome'] }}</strong></div></td>
+            <td style="font-family:var(--font-mono);" data-rotulo="Matrícula"><div class="tabela-valor">{{ $a['matricula'] }}</div></td>
+            <td data-rotulo="Turma"><div class="tabela-valor">{{ $a['turma'] }}</div></td>
+            <td style="font-family:var(--font-mono);" data-rotulo="Média geral"><div class="tabela-valor">{{ $a['media_geral'] !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</div></td>
+            <td style="font-family:var(--font-mono);" data-rotulo="Provas"><div class="tabela-valor">{{ $a['total_provas'] }}</div></td>
+            <td data-rotulo="Status"><div class="tabela-valor">
               @if($a['ativo'])
                 <span class="badge badge-success">Ativa</span>
               @else
                 <span class="badge badge-danger">Inativa</span>
               @endif
-            </td>
-            <td><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a></td>
+            </div></td>
+            <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a></div></td>
           </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
     @else
     <div style="text-align:center;padding:48px 20px;color:var(--muted);">
       <div class="icone-grande"><x-icone nome="aluno" /></div>

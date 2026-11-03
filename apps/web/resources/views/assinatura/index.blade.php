@@ -175,28 +175,28 @@
       @if(empty($assinatura['historico_pagamentos']))
         <p style="color:var(--color-secondary-06);font-size:.875rem">Nenhum pagamento registrado ainda.</p>
       @else
-        <table class="historico-table lista-cel">
+        <x-tabela titulo="Pagamentos" modo="lista"><table class="tabela-padrao historico-table "><caption class="sr-only">Pagamentos</caption>
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Valor</th>
-              <th>Método</th>
-              <th>Status</th>
-              <th>ID</th>
+              <th scope="col">Data</th>
+              <th scope="col">Valor</th>
+              <th scope="col">Método</th>
+              <th scope="col">Status</th>
+              <th scope="col">ID</th>
             </tr>
           </thead>
           <tbody>
             @foreach($assinatura['historico_pagamentos'] as $p)
             <tr>
-              <td>{{ $p['pago_em'] ? \Carbon\Carbon::parse($p['pago_em'])->format('d/m/Y') : '—' }}</td>
-              <td>R$ {{ number_format($p['valor'], 2, ',', '.') }}</td>
-              <td>{{ ucfirst($p['metodo'] ?? '—') }}</td>
-              <td class="pgto-{{ $p['status'] }}">{{ ucfirst($p['status']) }}</td>
-              <td style="font-size:.75rem;color:var(--color-secondary-06)">{{ $p['gateway_payment_id'] ?? '—' }}</td>
+              <td data-rotulo="Data"><div class="tabela-valor">{{ $p['pago_em'] ? \Carbon\Carbon::parse($p['pago_em'])->format('d/m/Y') : '—' }}</div></td>
+              <td class="tabela-principal" data-rotulo="Valor"><div class="tabela-valor">R$ {{ number_format($p['valor'], 2, ',', '.') }}</div></td>
+              <td data-rotulo="Método"><div class="tabela-valor">{{ ucfirst($p['metodo'] ?? '—') }}</div></td>
+              <td class="pgto-{{ $p['status'] }}" data-rotulo="Status"><div class="tabela-valor">{{ ucfirst($p['status']) }}</div></td>
+              <td style="font-size:.75rem;color:var(--color-secondary-06)" data-rotulo="ID"><div class="tabela-valor">{{ $p['gateway_payment_id'] ?? '—' }}</div></td>
             </tr>
             @endforeach
           </tbody>
-        </table>
+        </table></x-tabela>
       @endif
     </div>
 

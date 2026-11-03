@@ -157,14 +157,14 @@
       <h2 class="section-title" style="margin-bottom:0;">Minhas notas</h2>
       <span class="badge badge-muted">{{ $bimAtual }}º bimestre</span>
     </div>
-    <table class="table lista-cel">
+    <x-tabela titulo="Resultados por disciplina" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Resultados por disciplina</caption>
       <thead>
         <tr>
-          <th>Disciplina</th>
-          <th>Última prova</th>
-          <th>Nota</th>
-          <th>Média bimestral</th>
-          <th>Tendência</th>
+          <th scope="col">Disciplina</th>
+          <th scope="col">Última prova</th>
+          <th scope="col">Nota</th>
+          <th scope="col">Média bimestral</th>
+          <th scope="col">Tendência</th>
         </tr>
       </thead>
       <tbody>
@@ -182,17 +182,17 @@
             };
           @endphp
           <tr>
-            <td>{{ $n['disciplina'] }}</td>
-            <td class="num">
+            <td class="tabela-principal" data-rotulo="Disciplina"><div class="tabela-valor">{{ $n['disciplina'] }}</div></td>
+            <td class="num" data-rotulo="Última prova"><div class="tabela-valor">
               {{ $n['ultima_data'] ? \Carbon\Carbon::parse($n['ultima_data'])->format('d/m/Y') : '—' }}
-            </td>
-            <td class="num">
+            </div></td>
+            <td class="num" data-rotulo="Nota"><div class="tabela-valor">
               {{ $n['ultima_nota'] !== null ? number_format($n['ultima_nota'], 1, ',', '') : '—' }}
-            </td>
-            <td class="num">
+            </div></td>
+            <td class="num" data-rotulo="Média bimestral"><div class="tabela-valor">
               {{ $n['media_bimestral'] !== null ? number_format($n['media_bimestral'], 1, ',', '') : '—' }}
-            </td>
-            <td><span class="trend-cell {{ $tendCls }}">{{ $tendSym }}</span></td>
+            </div></td>
+            <td data-rotulo="Tendência"><div class="tabela-valor"><span class="trend-cell {{ $tendCls }}">{{ $tendSym }}</span></div></td>
           </tr>
         @empty
           <tr>
@@ -202,7 +202,7 @@
           </tr>
         @endforelse
       </tbody>
-    </table>
+    </table></x-tabela>
   </div>
 
   {{-- Coluna lateral --}}

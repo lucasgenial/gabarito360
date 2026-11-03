@@ -20,6 +20,8 @@ class TurmaController extends Controller
         $escolas = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
 
         return view('turmas.index', [
+            'erroLista' => !$resp->successful(),
+            'haFiltros' => collect(['busca', 'escola_id', 'ano_letivo', 'ativo'])->contains(fn (string $campo) => $request->filled($campo)),
             'turmas'     => $turmas,
             'kpis'       => $kpis,
             'escolas'    => $escolas,

@@ -115,25 +115,25 @@
     <div class="card-pad" style="padding-bottom:0;">
       <h3 style="font-size:18px;">Últimas provas por turma</h3>
     </div>
-    <table class="table lista-cel">
+    <x-tabela titulo="Turmas da escola" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Turmas da escola</caption>
       <thead>
         <tr>
-          <th>Turma</th>
-          <th>Alunos</th>
-          <th>Última prova</th>
-          <th>Média</th>
-          <th>Status</th>
+          <th scope="col">Turma</th>
+          <th scope="col">Alunos</th>
+          <th scope="col">Última prova</th>
+          <th scope="col">Média</th>
+          <th scope="col">Status</th>
         </tr>
       </thead>
       <tbody>
         @forelse($turmas as $t)
           @php $cfg = $statusConfig[$t['status']] ?? ['badge' => 'badge-muted', 'label' => 'N/D']; @endphp
           <tr>
-            <td>{{ $t['nome'] }}</td>
-            <td class="num">{{ $t['total_alunos'] }}</td>
-            <td>{{ $t['ultima_prova'] ?? '—' }}</td>
-            <td class="num">{{ $t['media'] !== null ? number_format($t['media'], 1, ',', '') : '—' }}</td>
-            <td><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></td>
+            <td class="tabela-principal" data-rotulo="Turma"><div class="tabela-valor">{{ $t['nome'] }}</div></td>
+            <td class="num" data-rotulo="Alunos"><div class="tabela-valor">{{ $t['total_alunos'] }}</div></td>
+            <td data-rotulo="Última prova"><div class="tabela-valor">{{ $t['ultima_prova'] ?? '—' }}</div></td>
+            <td class="num" data-rotulo="Média"><div class="tabela-valor">{{ $t['media'] !== null ? number_format($t['media'], 1, ',', '') : '—' }}</div></td>
+            <td data-rotulo="Status"><div class="tabela-valor"><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></div></td>
           </tr>
         @empty
           <tr>
@@ -143,7 +143,7 @@
           </tr>
         @endforelse
       </tbody>
-    </table>
+    </table></x-tabela>
   </div>
 
   {{-- Coluna lateral --}}

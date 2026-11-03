@@ -11,8 +11,12 @@
 @section('content')
 
 <x-pagina titulo="Turmas">
-  <x-slot:sub><b>{{ count($turmas) }}</b> turma(s) ·
-      <b>{{ $kpis['total_alunos'] ?? 0 }}</b> alunos no total</x-slot:sub>
+  <x-slot:sub>@if($erroLista)Listagem temporariamente indisponível
+  @else
+  <b>{{ count($turmas) }}</b> turma(s) ·
+      <b>{{ $kpis['total_alunos'] ?? 0 }}</b> alunos no total
+  @endif
+  </x-slot:sub>
     @unless(\App\Support\Acesso::pessoal())<button class="btn btn-secondary" onclick="abrirModal('modal-importar')">Importar planilha</button>@endunless
     <button class="btn btn-primary" onclick="abrirModal('modal-criar')">+ Nova turma</button>
 </x-pagina>
@@ -38,46 +42,51 @@
   <input class="input" type="number" name="ano_letivo" placeholder="Ano letivo"
          value="{{ $ano_letivo }}" style="width:130px;" min="2020" max="2099" />
   <button type="submit" class="btn btn-secondary">Filtrar</button>
-  @if($busca || $escola_id || $ano_letivo)
+  @if($haFiltros)
     <a href="{{ route('turmas.index') }}" class="btn btn-ghost">Limpar</a>
   @endif
 </form>
 
 {{-- Tabela --}}
-<div class="card" style="margin-top:18px;overflow:hidden;">
-  <table class="table lista-cel" id="turmas-table">
+@if($erroLista)
+<x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
+@else
+<div class="card tabela-superficie" style="margin-top:18px;overflow:hidden;">
+  <x-tabela titulo="Turmas" :completa="true">
+<table class="table tabela-padrao" id="turmas-table">
+    <caption class="sr-only">Turmas</caption>
     <thead>
       <tr>
-        <th>Turma</th>
-        <th>Série</th>
-        <th>Turno</th>
-        @unless(\App\Support\Acesso::pessoal())<th>Escola</th>@endunless
-        <th>Alunos</th>
-        @if(\App\Support\Acesso::perfil() !== 'secretario_escolar')<th>Desempenho médio</th>@endif
-        <th>Ano letivo</th>
-        <th>Status</th>
-        <th></th>
+        <th scope="col" data-ordenar="texto">Turma</th>
+        <th scope="col">Série</th>
+        <th scope="col">Turno</th>
+        @unless(\App\Support\Acesso::pessoal())<th scope="col">Escola</th>@endunless
+        <th scope="col">Alunos</th>
+        @if(\App\Support\Acesso::perfil() !== 'secretario_escolar')<th scope="col">Desempenho médio</th>@endif
+        <th scope="col">Ano letivo</th>
+        <th scope="col">Status</th>
+        <th scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
       @forelse($turmas as $t)
         <tr data-nome="{{ strtolower($t['nome']) }}">
-          <td>
+          <td data-valor-ordem="{{ $t['nome'] }}" data-rotulo="Turma" class="tabela-principal"><div class="tabela-valor">
             <div class="turma-name">
               <div class="turma-av">{{ strtoupper(str_replace(['º ','ª '], '', $t['nome'])) }}</div>
               <strong>{{ $t['nome'] }}</strong>
             </div>
-          </td>
-          <td><span class="badge badge-info">{{ $t['serie'] }}</span></td>
-          <td>{{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$t['turno']] ?? $t['turno'] }}</td>
+          </div></td>
+          <td data-rotulo="Série"><div class="tabela-valor"><span class="badge badge-info">{{ $t['serie'] }}</span></div></td>
+          <td data-rotulo="Turno"><div class="tabela-valor">{{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$t['turno']] ?? $t['turno'] }}</div></td>
           @unless(\App\Support\Acesso::pessoal())
-          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $t['escola_nome'] ?? '' }}">
+          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $t['escola_nome'] ?? '' }}" data-rotulo="Escola"><div class="tabela-valor">
             {{ $t['escola_nome'] ?? '—' }}
-          </td>
+          </div></td>
           @endunless
-          <td style="font-family:var(--font-mono);">{{ $t['total_alunos'] ?? 0 }}</td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Alunos"><div class="tabela-valor">{{ $t['total_alunos'] ?? 0 }}</div></td>
           @if(\App\Support\Acesso::perfil() !== 'secretario_escolar')
-          <td>
+          <td data-rotulo="Desempenho médio"><div class="tabela-valor">
             @if(($t['media_turma'] ?? null) !== null)
               @php
                 $pct = min(100, max(0, ($t['media_turma'] / 10) * 100));
@@ -88,32 +97,34 @@
             @else
               <span style="color:var(--muted);">—</span>
             @endif
-          </td>
+          </div></td>
           @endif
-          <td style="font-family:var(--font-mono);">{{ $t['ano_letivo'] }}</td>
-          <td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Ano letivo"><div class="tabela-valor">{{ $t['ano_letivo'] }}</div></td>
+          <td data-rotulo="Status"><div class="tabela-valor">
             @if($t['ativo'])
               <span class="badge badge-success badge-dot">Ativa</span>
             @else
               <span class="badge badge-danger badge-dot">Inativa</span>
             @endif
-          </td>
-          <td style="text-align:right;">
+          </div></td>
+          <td style="text-align:right;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
             <a href="{{ route('turmas.show', $t['id']) }}" class="btn btn-sm btn-secondary">Ver turma</a>
-          </td>
+          </div></td>
         </tr>
       @empty
         <tr>
           <td colspan="{{ (\App\Support\Acesso::pessoal() || \App\Support\Acesso::perfil() === 'secretario_escolar') ? 8 : 9 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="escola" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma encontrada</div>
-            <p>Crie a primeira turma usando o botão "+ Nova turma".</p>
+            <p>@if($haFiltros) Ajuste ou limpe os filtros para encontrar outros registros. @else Crie a primeira turma usando o botão "+ Nova turma". @endif</p>
           </td>
         </tr>
       @endforelse
     </tbody>
   </table>
+</x-tabela>
 </div>
+@endif
 
 {{-- Modal: criar turma --}}
 <div class="modal-backdrop" id="modal-criar" aria-hidden="true">

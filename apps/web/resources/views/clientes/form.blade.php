@@ -29,11 +29,11 @@
 <section class="card card-pad" style="margin-top:20px;overflow-x:auto;">
 <h2>Espaços do cliente</h2>
 <p>{{ $espacos['total'] }} espaço(s). Vínculos agrupados pela situação cadastral.</p>
-<table class="table"><thead><tr><th>Espaço</th><th>Tipo</th><th>Situação</th><th>Vínculos</th></tr></thead><tbody>
+<x-tabela titulo="Espaços do cliente" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Espaços do cliente</caption><thead><tr><th scope="col">Espaço</th><th scope="col">Tipo</th><th scope="col">Situação</th><th scope="col">Vínculos</th></tr></thead><tbody>
 @forelse($espacos['data'] as $e)
-<tr><td>{{ $e['nome'] }}</td><td>{{ ucfirst($e['tipo']) }}</td><td>{{ ucfirst($e['situacao']) }}</td><td>@forelse($e['vinculos'] as $situacao=>$total)<span>{{ ucfirst($situacao) }}: {{ $total }} </span>@empty Nenhum @endforelse</td></tr>
+<tr><td class="tabela-principal" data-rotulo="Espaço"><div class="tabela-valor">{{ $e['nome'] }}</div></td><td data-rotulo="Tipo"><div class="tabela-valor">{{ ucfirst($e['tipo']) }}</div></td><td data-rotulo="Situação"><div class="tabela-valor">{{ ucfirst($e['situacao']) }}</div></td><td data-rotulo="Vínculos"><div class="tabela-valor">@forelse($e['vinculos'] as $situacao=>$total)<span>{{ ucfirst($situacao) }}: {{ $total }} </span>@empty Nenhum @endforelse</div></td></tr>
 @empty <tr><td colspan="4">Nenhum espaço associado a este cliente.</td></tr> @endforelse
-</tbody></table>
+</tbody></table></x-tabela>
 <nav aria-label="Paginação dos espaços" style="margin-top:16px;">
 @if($espacos['current_page'] > 1)<a class="btn btn-secondary" href="{{ route('clientes.show',['id'=>$cliente['id'],'page'=>$espacos['current_page']-1]) }}">Anterior</a>@endif
 <span>Página {{ $espacos['current_page'] }} de {{ $espacos['last_page'] }}</span>

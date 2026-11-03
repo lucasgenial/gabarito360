@@ -75,22 +75,22 @@
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Resumo por prova</h3>
   <div>
-    <table class="tab lista-cel">
-      <thead><tr><th class="esq">Prova</th><th>Corrigidos</th><th>Média</th><th>Aprovação</th><th>Maior</th><th>Menor</th><th class="no-print"></th></tr></thead>
+    <x-tabela titulo="Resultados por prova" modo="lista"><table class="tabela-padrao tab "><caption class="sr-only">Resultados por prova</caption>
+      <thead><tr><th scope="col" class="esq">Prova</th><th scope="col">Corrigidos</th><th scope="col">Média</th><th scope="col">Aprovação</th><th scope="col">Maior</th><th scope="col">Menor</th><th scope="col" class="no-print"></th></tr></thead>
       <tbody>
         @foreach($provas as $p)
           <tr>
-            <td class="esq"><b>{{ $p['disciplina'] }}</b><div style="font-size:12px;color:var(--muted);">{{ $p['titulo'] }}</div></td>
-            <td>{{ $p['corrigidos'] }}/{{ $kpis['alunos'] }}</td>
-            <td><b>{{ $fmt($p['media']) }}</b></td>
-            <td>{{ $p['aprovacao_pct'] !== null ? $p['aprovacao_pct'] . '%' : '—' }}</td>
-            <td>{{ $fmt($p['maior']) }}</td>
-            <td>{{ $fmt($p['menor']) }}</td>
-            <td class="no-print">@if($p['corrigidos'])<a class="btn btn-sm btn-ghost" href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}">Análise por questão</a>@endif</td>
+            <td class="tabela-principal esq" data-rotulo="Prova"><div class="tabela-valor"><b>{{ $p['disciplina'] }}</b><div style="font-size:12px;color:var(--muted);">{{ $p['titulo'] }}</div></div></td>
+            <td data-rotulo="Corrigidos"><div class="tabela-valor">{{ $p['corrigidos'] }}/{{ $kpis['alunos'] }}</div></td>
+            <td data-rotulo="Média"><div class="tabela-valor"><b>{{ $fmt($p['media']) }}</b></div></td>
+            <td data-rotulo="Aprovação"><div class="tabela-valor">{{ $p['aprovacao_pct'] !== null ? $p['aprovacao_pct'] . '%' : '—' }}</div></td>
+            <td data-rotulo="Maior"><div class="tabela-valor">{{ $fmt($p['maior']) }}</div></td>
+            <td data-rotulo="Menor"><div class="tabela-valor">{{ $fmt($p['menor']) }}</div></td>
+            <td class="tabela-acoes no-print" data-rotulo="Ações"><div class="tabela-valor">@if($p['corrigidos'])<a class="btn btn-sm btn-ghost" href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}">Análise por questão</a>@endif</div></td>
           </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
   </div>
 </div>
 
@@ -98,27 +98,27 @@
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Ranking dos alunos</h3>
   <div class="quadro-cel" style="overflow-x:auto;">
-    <table class="tab">
+    <x-tabela titulo="Notas por aluno e prova" modo="matriz"><table class="tabela-padrao tabela-matriz tab"><caption class="sr-only">Notas por aluno e prova</caption>
       <thead>
-        <tr><th>#</th><th class="esq fixa">Aluno</th>@foreach($provas as $p)<th title="{{ $p['titulo'] }}">{{ \Illuminate\Support\Str::limit($p['disciplina'], 14) }}</th>@endforeach<th>Média</th></tr>
+        <tr><th scope="col">#</th><th scope="col" class="esq fixa">Aluno</th>@foreach($provas as $p)<th scope="col" title="{{ $p['titulo'] }}">{{ $p['disciplina'] }}</th>@endforeach<th scope="col">Média</th></tr>
       </thead>
       <tbody>
         @foreach($ranking as $a)
           <tr>
-            <td><b>{{ $a['posicao'] ? $a['posicao'] . 'º' : '—' }}</b></td>
-            <td class="esq fixa"><a href="{{ route('relatorios.aluno', $a['id']) }}" style="color:inherit;">{{ $a['nome'] }}</a></td>
+            <td data-rotulo="Posição"><b>{{ $a['posicao'] ? $a['posicao'] . 'º' : '—' }}</b></td>
+            <td class="tabela-principal esq fixa" data-rotulo="Aluno"><a href="{{ route('relatorios.aluno', $a['id']) }}" style="color:inherit;">{{ $a['nome'] }}</a></td>
             @foreach($provas as $p)
               @php $n = $a['notas'][$p['id']] ?? null; @endphp
-              <td>
+              <td data-rotulo="{{ $p['disciplina'] }}">
                 @if($n === null)<span style="color:var(--muted);">—</span>
                 @else<a class="nota {{ $n >= $p['nota_maxima'] * 0.6 ? 'ok' : 'baixa' }}" href="{{ route('resultados.show', [$a['id'], $p['id']]) }}?from=rel-turma" style="text-decoration:none;">{{ $fmt($n) }}</a>@endif
               </td>
             @endforeach
-            <td><b>{{ $fmt($a['media']) }}</b></td>
+            <td data-rotulo="Média"><b>{{ $fmt($a['media']) }}</b></td>
           </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
   </div>
   <p class="no-print" style="font-size:12px;color:var(--muted);margin-top:8px;">Toque no nome para o boletim do aluno e na nota para os acertos e erros.</p>
 </div>
