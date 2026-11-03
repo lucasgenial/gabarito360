@@ -37,3 +37,7 @@ Rotas separadas: catalogo/minhas-solicitacoes, catalogo/atendimento e catalogo/g
 ## Verificação e saída
 
 Fixtures acadêmicas não vazias antes/depois; dois proprietários, IDs adivinhados, financeiro/gestores negados à fila, retirada de permissão/revogação, escopo cruzado, versão obsoleta, reenvio/decisão duplicados, falha no evento/aviso revertendo tudo. Cadastro sem código, código conferido coincidindo com importação, revisão manual preservada após fonte nova, histórico pessoal imutável, FKs/triggers e operações concorrentes em MariaDB. Web testa permissões e encaminhamento seguro; Chrome local com API fictícia, desktop e celular. Gate CI1-F nacional/20consultas/recuperação integrada permanece distinto. Atualizar a tabela ao finalizar; não pedir autorização por subdivisões internas.
+
+## Encerramento E1–E5
+
+Implementados, testes/CI aprovados e PR158 integrado em68671c8. UI reformulada aprovada pelo especialista independente no head a3ad1b7, mesma árvore do merge. Publicado somente na nova homologação por autorização posterior do responsável. Catálogo nacional, preservação do acervo, evidências e tabela atualizados no129. CI1-F continua separado; vinte requisições HTTP e restauração da VM já adiantadas não encerram automaticamente todos os seus cenários.

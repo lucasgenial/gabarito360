@@ -33,3 +33,7 @@ Imagem oficial Ubuntu, HTTPS e checksum antes de importar. Instalação cloud-in
 Conferir antes/depois os estados dos serviços operacionais, sem tocar nos dados dos CT106/111. Provar banco/filas/arquivos separados, ausência de e-mail/pagamento real e incapacidade de conectar aos bancos operacionais. Health público/autenticado, perfil de teste, marcador de homologação e comportamento de sessões/HTTPS. Guardar backup próprio e ensaiar restauração isolada. Não declarar domínio/VM prontos por apenas criar o recurso; verificar o acesso real.
 
 Primeiro objetivo é tornar a homologação disponível. O CI1-E será reformulado segundo o126 e passará por revisão independente no ambiente disponível. CI1-F e fechamento L4 continuam com seus próprios critérios; nenhum deles substitui a decisão de produção.
+
+## Estado após execução
+
+H1-A–E executados; CI1-E aprovado e publicado na homologação. Por autorização posterior, o banco inicial fictício foi substituído por cópia pontual dos usuários/dados de produção, conforme128. O129 registra release68671c8, carga nacional, funcionalidades habilitadas, verificações de integridade/acessos e restauração completa dessa release em clone sem rede. Dados, configurações e recibos privados ficam fora do Git. A decisão de produção permanece exclusiva do responsável.
