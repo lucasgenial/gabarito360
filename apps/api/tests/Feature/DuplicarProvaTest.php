@@ -45,6 +45,7 @@ class DuplicarProvaTest extends TestCase
     public function test_copia_limpa_e_independente_com_procedencia_e_reenvio(): void
     {
         $t=$this->token(); $original=(array)DB::table('provas')->find(1);
+        $this->chamar($t,'GET','provas')->assertOk()->assertJsonPath('data.provas.0.pode_copiar',true);
         $d=['titulo'=>'Versão 1B','chave'=>(string)Str::uuid()];
         $id=$this->chamar($t,'POST','provas/1/copiar',$d)->assertCreated()->json('data.id');
         $this->chamar($t,'POST','provas/1/copiar',$d)->assertCreated()->assertJsonPath('data.id',$id);
@@ -128,5 +129,19 @@ class DuplicarProvaTest extends TestCase
         $this->chamar($t,'POST','provas',$d+['formato_avaliacao'=>'editor'])->assertUnprocessable();
         $this->chamar($t,'POST','provas',$d+['formato_avaliacao'=>'gabarito'])->assertCreated()->assertJsonPath('data.formato_avaliacao','gabarito');
         $this->chamar($t,'PUT','provas/1',['formato_avaliacao'=>'editor'])->assertUnprocessable();
+    }
+
+    public function test_copia_exige_novas_turmas_e_publicacao_do_gabarito_antes_dos_cartoes(): void
+    {
+        $t=$this->token();
+        $id=$this->chamar($t,'POST','provas/1/copiar',['titulo'=>'Aplicação','chave'=>(string)Str::uuid()])->assertCreated()->json('data.id');
+        $this->chamar($t,'GET',"provas/$id/cartoes/pdf?brancos=5")->assertUnprocessable();
+        $this->chamar($t,'POST',"provas/$id/publicar")->assertUnprocessable();
+        $this->chamar($t,'PUT',"provas/$id",['status'=>'publicada'])->assertUnprocessable();
+        $this->chamar($t,'POST',"provas/$id/gabarito/publicar")->assertUnprocessable();
+        $this->chamar($t,'PUT',"provas/$id",['turma_ids'=>[1]])->assertOk();
+        $this->chamar($t,'GET',"provas/$id/cartoes/pdf?brancos=5")->assertUnprocessable();
+        $this->chamar($t,'POST',"provas/$id/gabarito/publicar")->assertOk();
+        $this->assertDatabaseHas('provas',['id'=>$id,'status'=>'publicada']);
     }
 }

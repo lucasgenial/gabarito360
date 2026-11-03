@@ -9,6 +9,15 @@ use Illuminate\Support\Facades\DB;
 /** CP1 v1: configuração e gabarito; enunciados/questões do futuro editor são outro domínio. */
 class DuplicarProva
 {
+    /** Cópias exigem novas turmas explicitamente conferidas antes de uso pedagógico. */
+    public static function conferirAplicacao(Usuario $ator, Prova $prova, bool $impressao = false): void
+    {
+        if (!DB::table('prova_duplicacoes')->where('prova_id',$prova->id)->exists()) return;
+        $turmas = DB::table('prova_turmas')->where('prova_id',$prova->id)->where('espaco_id',$prova->espaco_id)->pluck('turma_id')->all();
+        abort_unless($turmas && Escopo::turmas($ator)->where('espaco_id',$prova->espaco_id)->whereIn('id',$turmas)->count() === count($turmas),422,'Selecione as turmas desta cópia antes de publicar ou gerar cartões.');
+        if ($impressao) abort_unless($prova->status !== 'rascunho' && DB::table('gabaritos')->where('prova_id',$prova->id)->where('espaco_id',$prova->espaco_id)->whereNotNull('publicado_em')->exists(),422,'Revise e publique o gabarito desta cópia antes de gerar cartões.');
+    }
+
     public static function elegivel(Usuario $ator, Prova $prova): bool
     {
         if (!Espacos::ativo() || !ContextoVinculo::presente($ator)) return false;
@@ -16,9 +25,7 @@ class DuplicarProva
         if (!in_array($v->perfil, ['professor','professor_autonomo'], true)
             || $prova->formato_avaliacao !== 'gabarito'
             || (int)$prova->criado_por !== (int)$ator->id || (int)$prova->espaco_id !== (int)$v->espaco_id) return false;
-        foreach (['prova.duplicar_propria','prova.ver','prova.criar','prova.editar','gabarito.ver','gabarito.editar'] as $p) {
-            if (!Permissao::pode($ator, $p)) return false;
-        }
+        if (array_diff(['prova.duplicar_propria','prova.ver','prova.criar','prova.editar','gabarito.ver','gabarito.editar'],Permissao::efetivas($ator))) return false;
         return ContextoCorrecao::provaValida($prova);
     }
 

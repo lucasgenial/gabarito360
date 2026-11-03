@@ -118,6 +118,7 @@ class ProvaController extends Controller
                     ->get(['turmas.id', 'turmas.nome']);
 
                 return array_merge($p->toArray(), [
+                    'pode_copiar' => \App\Services\DuplicarProva::elegivel($consulta->ator,$p),
                     'escola_nome'  => $p->escola?->nome,
                     'turmas'       => $turmasLista->pluck('nome')->all(),
                     'turmas_lista' => $turmasLista->map(fn ($t) => ['id' => (int) $t->id, 'nome' => $t->nome])->all(),
@@ -252,6 +253,7 @@ class ProvaController extends Controller
         DB::transaction(function () use ($prova, $id, $data, $turmaIds, $request) {
             // Serializa edição das associações e preserva autoria de vínculos mantidos.
             DB::table('provas')->where('id', $id)->lockForUpdate()->first();
+            abort_if(isset($data['status']) && $data['status'] !== 'rascunho' && DB::table('prova_duplicacoes')->where('prova_id',$id)->exists(),422,'Use a publicação do gabarito para publicar esta cópia.');
             if ($turmaIds !== null) {
                 $q = DB::table('prova_turmas')->where('prova_id', $id)
                     ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $prova->espaco_id));
@@ -281,6 +283,9 @@ class ProvaController extends Controller
             return ApiResponse::error('Apenas rascunhos podem ser publicados.', [], 422);
         }
 
+        if (DB::table('prova_duplicacoes')->where('prova_id',$id)->exists()) {
+            return ApiResponse::error('Revise e publique o gabarito para publicar esta cópia.',[],422);
+        }
         $prova->update(['status' => 'publicada']);
 
         return ApiResponse::success(['status' => 'publicada'], null, 200);

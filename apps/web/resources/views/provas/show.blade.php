@@ -14,7 +14,7 @@
 
 <x-pagina titulo="{{ $prova['titulo'] }}">
     @if($prova['pode_copiar'] ?? false)
-      <a href="{{ route('provas.copiar', $prova['id']) }}" class="btn btn-secondary">Copiar prova</a>
+      @include('provas._botao-copiar',['origem'=>$prova])
     @endif
   <x-slot:sub>{{ $prova['disciplina'] }} · {{ $prova['serie'] }} · {{ $prova['num_questoes'] }} questões</x-slot:sub>
     @if($prova['status'] === 'rascunho')
@@ -43,6 +43,7 @@
 </x-pagina>
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@include('provas._modal-copiar')
 @if($prova['procedencia'] ?? null)
   <x-aviso tipo="info">
     Cópia independente criada em {{ \Carbon\Carbon::parse($prova['procedencia']['copiada_em'])->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}.

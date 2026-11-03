@@ -12,17 +12,19 @@ class DuplicarProvaWebTest extends TestCase
         config(['release.fase'=>'INICIAL-V1-T5','release.sha'=>'a90fbf51-teste-visual']);
         $this->withSession(['auth_token'=>'token-ficticio','auth_nome'=>'Professor','auth_perfil'=>'professor','auth_permissoes'=>['prova.ver','prova.criar','prova.duplicar_propria','gabarito.ver']]);
         Http::preventStrayRequests();
-        Http::fake(['*/v1/provas/1'=>Http::response(['data'=>['id'=>1,'titulo'=>'Matemática <script>','disciplina'=>'Matemática','serie'=>'1º ano','pode_copiar'=>$elegivel]])]);
+        $p=['id'=>1,'titulo'=>'Matemática <script>','disciplina'=>'Matemática','serie'=>'1º ano','pode_copiar'=>$elegivel,'status'=>'publicada','num_questoes'=>10,'data_aplicacao'=>null,'turmas'=>[],'progresso'=>['tipo'=>'nenhum']];
+        Http::fake(['*/v1/provas/1'=>Http::response(['data'=>$p]),'*/v1/provas'=>Http::response(['data'=>['provas'=>[$p],'kpis'=>[]]])]);
     }
 
     public function test_formulario_explica_copia_escapa_origem_e_preserva_intencao(): void
     {
         $this->preparar();
-        $r=$this->get('/provas/1/copiar')->assertOk()->assertSee('Criar cópia em rascunho')->assertSee('não serão copiados')->assertSee('Matemática &lt;script&gt;',false)
+        $r=$this->get('/provas')->assertOk()->assertSee('Criar cópia')->assertSee('não serão copiados')->assertSee('Matemática &lt;script&gt;',false)
             ->assertSee('aria-label="Versão do software"',false)->assertSee('Versão de testes: INICIAL-V1-T5 · a90fbf51');
         $this->assertStringContainsString('name="chave"',$r->getContent());
+        $r->assertSee('aria-haspopup="dialog"',false)->assertSee('id="cp1-modal"',false)->assertSee('Nome da nova prova')->assertDontSee('Ver o que será copiado');
         if (getenv('G360_CP1_PREVIEW_DIR')) {
-            file_put_contents(getenv('G360_CP1_PREVIEW_DIR').'/copiar.html',$r->getContent());
+            file_put_contents(getenv('G360_CP1_PREVIEW_DIR').'/provas.html',$r->getContent());
         }
     }
 
@@ -39,14 +41,15 @@ class DuplicarProvaWebTest extends TestCase
     {
         $this->preparar();
         Http::fake(['*/v1/provas/1/copiar'=>Http::response(['message'=>'Solicitação conflitante'],409)]);
-        $this->from('/provas/1/copiar')->post('/provas/1/copiar',['titulo'=>'Versão B','chave'=>'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'])
-            ->assertRedirect('/provas/1/copiar')->assertSessionHas('erro','Solicitação conflitante')->assertSessionMissing('sucesso')->assertSessionHasInput('titulo','Versão B');
+        $this->post('/provas/1/copiar',['titulo'=>'Versão B','chave'=>'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'])
+            ->assertRedirect('/provas')->assertSessionHas('erro','Solicitação conflitante')->assertSessionMissing('sucesso')->assertSessionHasInput('titulo','Versão B')->assertSessionHasInput('origem_id',1);
     }
 
     public function test_origem_nao_elegivel_nao_abre_formulario(): void
     {
         $this->preparar(false);
-        $this->get('/provas/1/copiar')->assertNotFound();
+        $this->get('/provas')->assertOk()->assertDontSee('data-origem="1"',false);
+        $this->get('/provas/1/copiar')->assertStatus(405);
     }
 
     public function test_nova_avaliacao_mostra_formato_suportado_sem_prometer_editor(): void
