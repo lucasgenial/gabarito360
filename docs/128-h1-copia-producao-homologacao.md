@@ -36,7 +36,7 @@ Os152 arquivos importados foram comparados individualmente por tamanho e SHA256 
 
 Dez identidades foram consultadas pelo HTTP da API com tokens temporários próprios; sete vínculos foram selecionados e consultaram provas; três acessos internos foram selecionados e consultados. Leitura cifrada e busca por e-mail conferidas para os dez usuários. Esses tokens e seus contextos filhos foram encerrados ao final. Isso verifica identidade/contextos e preservação dos hashes, sem conhecer ou modificar as senhas atuais dos usuários.
 
-HTTPS externo autenticado: `/up` e `/login` retornaram200, com cabeçalho noindex, formulário apontando para o host correto e cookie exclusivo. Corrigida a configuração interna da web para `http://127.0.0.1:8081/api/v1`. Os serviços MariaDB de produção e Nginx/PHP-FPM/workers da aplicação de produção permaneceram ativos. Conferência visual no Chrome continua pendente; não apresentá-la como realizada por testes HTTP.
+HTTPS externo autenticado: `/up` e `/login` retornaram200, com cabeçalho noindex, formulário apontando para o host correto e cookie exclusivo. Corrigida a configuração interna da web para `http://127.0.0.1:8081/api`. Os serviços MariaDB de produção e Nginx/PHP-FPM/workers da aplicação de produção permaneceram ativos. Conferência visual no Chrome continua pendente; não apresentá-la como realizada por testes HTTP.
 
 Snapshot e manifesto privados no Proxmox: `/root/g360-homologa/snapshot-20261103`. A mesma captura está protegida na VM. O banco fictício anterior `gabarito360_homolog` foi mantido; backup SQL, arquivos e configurações anteriores em `/root/g360-homologa/antes-snapshot-20261103`, na VM. As pastas anteriores de arquivos, cache e sessões também foram preservadas com sufixo ficticio-20261103. Não armazenar esses backups, material de leitura ou dados pessoais em Git.
 
@@ -54,3 +54,10 @@ Retorno: colocar somente a homologação em manutenção, parar seu worker, rest
 | CI1-E — Solicitações e manutenção do catálogo |Em reformulação; revisão visual final pendente; fora desta release|
 
 Produção permanece sujeita à decisão explícita do responsável para cada promoção combinada. Nenhuma alteração de dados feita na homologação deve ser promovida como se fosse código.
+
+
+## Correção do login após relato do responsável
+
+O formulário mostrava “E-mail ou senha incorretos” porque a URL base da web continha /api/v1 e o LoginController acrescenta /v1/auth/login, formando /api/v1/v1/auth/login (404). Os testes diretos de API e GET da página não cobriam esse caminho; a validação anterior foi insuficiente para comprovar o formulário. Corrigida apenas a configuração da homologação para base /api, reconstruído o cache e recarregado seu PHP-FPM. Nenhuma senha foi redefinida.
+
+Teste pelo formulário HTTPS real, usando sessão/cookie/CSRF e identidade propositalmente inexistente: o POST da web chegou a /api/v1/auth/login e recebeu401, em vez de404; o formulário retornou200 com rejeição controlada. Isso comprova a correção do roteamento, mas não é um teste de login com a senha pessoal do responsável, que não foi solicitada nem alterada. As identidades reais e hashes de senha já haviam sido comparados com a origem. Atualizado o script operacional para não reintroduzir /v1 na base. Em próximos ensaios, incluir o caminho efetivo web→API, além das chamadas diretas.
