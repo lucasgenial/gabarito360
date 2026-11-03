@@ -267,3 +267,7 @@ POST /api/v1/pedidos-titulares/{uuid}/verificacoes registra conferência manual 
 ### L4-C3 — geração privada
 
 POST /api/v1/pedidos-titulares/exportacoes/{id}: UUID da concessão, entrada fechada versao/chave, contexto interno responsável e concessão atual obrigatórios. Flag PEDIDOS_EXPORTACAO_GERACAO_ATIVA=false. Resposta201 apenas referencia/situacao/expira_em, inclusive repetição idempotente autorizada. Nenhum download ou URL de arquivo; C4 implementará entrega. Contrato doc110.
+
+### L4-C4 — consulta e arquivo
+
+GET /api/v1/pedidos-titulares/exportacoes/{id}: UUID do artefato (diferente do UUID de concessão usado no POST), somente metadados referencia/situacao/formato/campos/expira_em. GET na mesma rota com /arquivo: JSON como anexo após revalidação e auditoria síncrona; HEAD recusado. Ambas exigem destinatário interno responsável atual e concessão vigente; flag PEDIDOS_EXPORTACAO_ENTREGA_ATIVA=false. Sem lista global ou link público. Cache privado/no-store. Doc111.

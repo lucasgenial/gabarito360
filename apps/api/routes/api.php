@@ -85,6 +85,8 @@ Route::prefix('v1')->group(function () {
         Route::post('copias/materiais/lotes/{id}/revisar', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'revisar'])->whereUuid('id')->middleware('throttle:10,1');
         Route::post('copias/materiais/lotes/{id}/aprovar', [\App\Http\Controllers\Api\DecisaoMaterialCopiaController::class,'aprovar'])->whereUuid('id')->middleware('throttle:10,1');
         Route::post('pedidos-titulares/exportacoes/{id}', [\App\Http\Controllers\Api\GeracaoExportacaoTitularController::class,'store'])->whereUuid('id')->middleware('throttle:10,1');
+        Route::get('pedidos-titulares/exportacoes/{id}', [\App\Http\Controllers\Api\EntregaExportacaoTitularController::class,'show'])->whereUuid('id')->middleware('throttle:30,1');
+        Route::get('pedidos-titulares/exportacoes/{id}/arquivo', [\App\Http\Controllers\Api\EntregaExportacaoTitularController::class,'arquivo'])->whereUuid('id')->middleware('throttle:10,1');
         Route::get('pedidos-titulares', [\App\Http\Controllers\Api\PedidoTitularController::class,'index'])->middleware('throttle:30,1');
         Route::get('pedidos-titulares/opcoes', [\App\Http\Controllers\Api\PedidoTitularController::class,'opcoes'])->middleware('throttle:30,1');
         Route::post('pedidos-titulares', [\App\Http\Controllers\Api\PedidoTitularController::class,'store'])->middleware('throttle:10,1');
