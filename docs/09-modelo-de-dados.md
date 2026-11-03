@@ -516,3 +516,6 @@ catalogo_geografias mantém snapshot IBGE versionado/imutável, separado dos loc
 
 ### CI1-B3 — edições públicas indexadas
 Migration000004 acrescenta identidades públicas UUIDv5, identificadores por namespace e unidades estáveis; projeções catalogo_entradas por publicação; geografia IBGE indexada; ponteiros por fonte e eventos operacionais. FKs compostas impedem entrada com importação, geografia, identificador ou unidade incompatíveis. Projeções/eventos/identificadores/geografia são append-only por triggers; publicação finalizada também recusa alteração/exclusão. Não relaciona automaticamente escolas operacionais. Ver121.
+
+### CI1-C — relações públicas e lacunas
+Migration000005 cria conjuntos por par de edições, relações declaradas com origem/alvo por FK composta às entradas públicas, fila técnica de lacunas, vigência e evento de fechamento. Dados confirmados são imutáveis; inserções de filhos exigem pai em preparação. Acrescenta também proteção contra inserts tardios nas observações B2/entradas B3, sem mudar suas linhas. Fonte escolar/IES não cria campus, contrato ou vínculo pessoal. Detalhes122.
