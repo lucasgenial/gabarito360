@@ -31,6 +31,7 @@ class Acesso
      * exige na tela de destino — assim nenhum item leva a 403 (docs/21, etapa 4).
      */
     private const ITENS = [
+        'exportacoes' => ['Exportações de titulares', 'Exportações', 'equipe', 'pedidos.exportacoes', ['pedidos.exportacoes*'], ['pedido.exportacao.autorizar','pedido.atender']],
         'pedidos' => ['Pedidos de titulares', 'Pedidos', 'equipe', 'pedidos.index', ['pedidos.*'], ['pedido.atender']],
         'copias' => ['Cópias', 'Cópias', 'prova', 'copias.index', ['copias.*'], ['copia.autorizar_origem','copia.autorizar_destino']],
         'clientes' => ['Clientes', 'Clientes', 'equipe', 'clientes.index', ['clientes.*'], ['cliente.ver']],
@@ -53,7 +54,7 @@ class Acesso
     ];
 
     /** Ordem do menu lateral. */
-    private const ORDEM = ['painel', 'clientes', 'internos', 'pedidos', 'provas', 'corrigir', 'turmas', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
+    private const ORDEM = ['painel', 'clientes', 'internos', 'pedidos', 'exportacoes', 'provas', 'corrigir', 'turmas', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
 
     /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
     private const PRINCIPAIS = [
@@ -153,6 +154,7 @@ class Acesso
         $atual = request()->route()?->getName() ?? '';
         $itens = [];
         foreach (self::ORDEM as $chave) {
+            if ($chave==='exportacoes' && (!config('services.pedidos.exportacoes') || !config('services.pedidos.interface_ativa') || !session('auth_vinculos'))) continue;
             if ($chave==='pedidos' && (config('services.pedidos.interface_ativa')!==true || !self::interno())) continue;
             if ($chave==='copias' && (config('services.copias.interface_ativa')!==true || !session('auth_vinculos') || self::interno()
                 || !in_array(self::perfil(),['admin_rede','dir_escolar','professor_autonomo'],true))) continue;

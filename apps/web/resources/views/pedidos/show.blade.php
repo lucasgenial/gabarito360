@@ -14,6 +14,20 @@
 @if($p['resultado'])<h3>Resultado informado</h3><p>{{ str_replace('_',' ',$p['resultado']) }}</p>@endif
 @if($p['resposta_referencia'])<h3>Referência da resposta administrativa</h3><p class="pedidos-texto">{{ $p['resposta_referencia'] }}</p>@endif
 </section>
+@if(config('services.pedidos.exportacoes'))
+<section class="card card-pad pedidos-bloco"><h2>Sujeito e exportação</h2>
+<p>Aluno vinculado: {{ $p['aluno_id'] ?? 'Ainda não vinculado' }}. A referência deve pertencer ao espaço deste protocolo.</p>
+@if(in_array($p['situacao'],['recebida','em_verificacao','aguardando_informacao']))
+<form class="pedidos-form" method="POST" action="{{ route('pedidos.alterar',['id'=>$id,'acao'=>'sujeito']) }}">
+@include('pedidos._envio',['envio'=>$envios['sujeito']])<input type="hidden" name="versao" value="{{ $p['versao'] }}">
+<label for="aluno-sujeito">Referência do aluno conferido</label><input class="input" id="aluno-sujeito" name="aluno_id" type="number" min="1" required>
+<label for="evidencia-sujeito">Referência da evidência da vinculação</label><input class="input" id="evidencia-sujeito" name="evidencia_referencia" minlength="5" maxlength="500" required>
+<p>Vincular inicia novo ciclo de conferências. A identificação declarada não é suficiente para autorizar acesso.</p>
+@include('pedidos._confirmacao',['sufixo'=>'sujeito'])<button class="btn btn-outline">Vincular aluno conferido</button></form>
+@endif
+<a href="{{ route('pedidos.exportacoes',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Abrir exportações autorizadas</a>
+</section>
+@endif
 <section class="card card-pad pedidos-bloco"><h2>Conferências atuais</h2>
 @forelse($p['verificacoes'] as $v)
 <div class="pedidos-bloco"><h3>{{ $v['tipo']==='identidade'?'Identidade e representação':'Autoridade institucional' }} · {{ $v['vigente']?'Vigente':'Vencida' }}</h3>
