@@ -1038,3 +1038,7 @@ Atualizado em 31/10/2026 com autorização do responsável para manter a complet
 | Fase 8 | Sequencial | Revisão de segurança em cada etapa |
 
 Arquivos disputados: `CatalogoPermissoes.php`, `Permissao.php`, `Escopo.php`, `app.css`, `layouts/app.blade.php`, `routes/api.php` e `routes/web.php`. Faça mudanças pequenas e atualize o branch antes do PR.
+
+## Replanejamento de03/11/2026 — orientação posterior do produto
+
+A solicitação posterior distinguiu duplicação pedagógica de prova, movimentação de matrícula e transferência institucional de dados. As regras incompatíveis deste documento (nome/posicionamento T5, capacidades de escola, restrições do CPF pessoal e identificação por espaço) devem ser revistas pelo [plano integrado115](115-replanejamento-provas-identidade-transferencias.md). O histórico deste documento descreve o que foi decidido/implementado antes; não é autorização para publicar a política antiga como se atendesse ao pedido novo. Plano115 é desenho para implementação, sem migration ou deploy nesta entrega. L4-D/E e o gate de publicação devem ser conciliados com as novas dependências.
