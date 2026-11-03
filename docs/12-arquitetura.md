@@ -412,3 +412,6 @@ ManifestoCatalogo compartilha a validação pura entre comandos e calcula digest
 
 ### CI1-B3 — promoção atômica e leitura da edição fixada
 PublicarCatalogoInstituicoes confere staging selado, prepara lotes sob lease e compara toda projeção com observações antes de trocar o ponteiro da fonte em transação com evento. Política impede regressão anual e exige revisão explícita para substituir no mesmo ano. ConsultarCatalogoInstituicoes fixa IDs de edição para contagem/itens e para o relatório inteiro; uma troca concorrente não mistura resultados de versões distintas. Ainda sem endpoints/UI; identidade pública não concede vínculo ou acesso escolar. Ver121.
+
+### CI1-C — relações sem inferência institucional
+LeitorRelacoesCatalogo extrai somente os códigos declarados na fonte, com checksum/contagem, spool temporário e digest determinístico. Ciclos/autorreferências e alvos ausentes ficam preservados para revisão. PrepararRelacoesCatalogo resolve contra duas publicações fixadas, grava lotes/checkpoint sob lease e ativa somente se as fontes e a vigência anterior continuarem iguais. ConsultarRelacoesCatalogo não expõe conjunto de par superado; consultas paginadas fixam o conjunto. Fila técnica pública não se confunde com solicitações privadas de professores (E). Sem concessão de autoridade ou alteração acadêmica. Ver122.

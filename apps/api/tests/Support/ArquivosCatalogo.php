@@ -40,4 +40,20 @@ trait ArquivosCatalogo
             'ufs'=>$this->arquivoCatalogo(json_encode($ufs)), 'municipios'=>$this->arquivoCatalogo(json_encode($municipios)),
             'sha256'=>hash_file('sha256',$arquivo),'encoding'=>'UTF-8'];
     }
+
+    private function fonteCatalogoComRelacoes(array $vinculos): array
+    {
+        $entrada = $this->fonteCatalogo();
+        $linhas = explode("\n",trim(file_get_contents($entrada['arquivo'])));
+        $linhas[0] .= ';CO_ESCOLA_SEDE_VINCULADA;CO_IES_OFERTANTE';
+        foreach ($linhas as $n=>$linha) {
+            if ($n === 0) continue;
+            $codigo = explode(';',$linha)[1];
+            [$sede,$ies] = $vinculos[$codigo]??['',''];
+            $linhas[$n] .= ';'.$sede.';'.$ies;
+        }
+        file_put_contents($entrada['arquivo'],implode("\n",$linhas)."\n");
+        $entrada['sha256'] = hash_file('sha256',$entrada['arquivo']);
+        return $entrada;
+    }
 }
