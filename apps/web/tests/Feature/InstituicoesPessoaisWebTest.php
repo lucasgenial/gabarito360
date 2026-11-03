@@ -38,6 +38,31 @@ class InstituicoesPessoaisWebTest extends TestCase
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['unidade_id']===self::UNIDADE && !isset($r['espaco_id']) && !isset($r['_ctx']));
         $this->get('/minhas-instituicoes?_ctx='.$ctx)->assertOk()->assertSee('Minhas instituições')->assertSee('Arquivar referência')->assertDontSee('href="'.route('escolas.index').'"',false);
     }
+    public function test_busca_combinada_recupera_422_preservando_valores_sem_enviar_modo_ou_contexto_a_api(): void {
+        [$ctx,$me]=$this->preparar();
+        Http::fake(function($r)use($me){
+            $path=parse_url($r->url(),PHP_URL_PATH);
+            if($path==='/api/v1/auth/me')return Http::response(['data'=>$me]);
+            if($path==='/api/v1/catalogo/ufs')return Http::response(['data'=>['itens'=>[['sigla'=>'BA','nome'=>'Bahia','codigo_ibge'=>29]]]]);
+            return Http::response(['errors'=>['codigo'=>['Código incompatível com a fonte.']]],422);
+        });
+        $this->get('/minhas-instituicoes/buscar?'.http_build_query(['_ctx'=>$ctx,'modo'=>'codigo','namespace'=>'inep_escola','codigo'=>'123','uf'=>'BA','tipo'=>'escola','busca'=>'Colégio fictício']))
+            ->assertStatus(422)->assertSee('Confira os filtros para continuar')->assertSee('Código incompatível com a fonte.')
+            ->assertSee('value="Colégio fictício"',false)->assertSee('value="123"',false)->assertSee('Restringir também por nome, localização ou tipo')
+            ->assertDontSee('Nenhuma instituição corresponde');
+        Http::assertSent(fn($r)=>str_contains($r->url(),'/catalogo/instituicoes') && $r['uf']==='BA' && $r['busca']==='Colégio fictício'
+            && $r['codigo']==='123' && !isset($r['modo']) && !isset($r['_ctx']));
+    }
+    public function test_percurso_por_codigo_sem_criterios_nao_consulta_catalogo_e_array_de_filtro_e_recusado(): void {
+        [$ctx,$me]=$this->preparar();
+        Http::fake(fn($r)=>str_contains($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['data'=>['itens'=>[['sigla'=>'BA','nome'=>'Bahia','codigo_ibge'=>29]]]]));
+        $this->get('/minhas-instituicoes/buscar?_ctx='.$ctx.'&modo=codigo')->assertOk()->assertSee('Qual é a origem do código?')->assertSee('Código da instituição');
+        $this->get('/minhas-instituicoes/buscar?_ctx='.$ctx.'&modo=nome&pesquisar=1')->assertStatus(422)->assertSee('Informe um nome, uma localização ou use a busca por código.');
+        Http::assertNotSent(fn($r)=>str_contains($r->url(),'/catalogo/instituicoes'));
+        $this->get('/minhas-instituicoes/buscar?'.http_build_query(['_ctx'=>$ctx,'busca'=>['filtro-inválido']]))
+            ->assertStatus(422)->assertSee('Informe um único valor para este filtro.');
+        Http::assertNotSent(fn($r)=>str_contains($r->url(),'/catalogo/instituicoes'));
+    }
     public function test_erro_api_e_rede_nao_sao_exibidos_como_resultado_vazio(): void {
         [$ctx,$me]=$this->preparar();
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'SEGREDO-INTERNO'],500));

@@ -32,11 +32,30 @@ class InstituicoesPessoaisController extends Controller
     {
         $this->autorizar();
         $f=array_filter($r->only(['uf','municipio_ibge','tipo','dependencia','busca','namespace','codigo','situacao','page']),fn($v)=>$v!==null && $v!=='');
+        $erros=[];
+        foreach($f as $campo=>$valor)if(!is_scalar($valor)){unset($f[$campo]);$erros[$campo]=['Informe um único valor para este filtro.'];}
+        $modo=$r->query('modo')==='codigo' || (!empty($f['codigo']) && $r->query('modo')!=='nome') ? 'codigo' : 'nome';
         $ufs=$this->get('ufs')['itens'];$municipios=[];
-        if(!empty($f['uf']) && !empty($f['municipio_ibge'])) $municipios=$this->get('municipios',['uf'=>$f['uf'],'codigo_ibge'=>$f['municipio_ibge']])['itens'];
+        if(!empty($f['uf']) && !empty($f['municipio_ibge'])) {
+            try {$resp=$this->api->get('/v1/catalogo/municipios',['uf'=>$f['uf'],'codigo_ibge'=>$f['municipio_ibge']]);}
+            catch(ConnectionException){abort(503,'Não foi possível consultar o catálogo. Tente novamente.');}
+            if($resp->status()===422)$erros=$resp->json('errors')??['municipio_ibge'=>['Confira a UF e o município.']];
+            elseif($resp->successful())$municipios=$resp->json('data.itens')??[];
+            else abort(in_array($resp->status(),[403,404],true)?$resp->status():503);
+        }
         $temBusca=count(array_intersect(array_keys($f),['uf','municipio_ibge','busca','codigo']))>0;
-        $dados=$temBusca ? $this->get('instituicoes',$f) : null;
-        return view('instituicoes.buscar',compact('f','ufs','municipios','dados')+['tipos'=>self::TIPOS]);
+        if(!$temBusca && $r->boolean('pesquisar'))$erros['busca']=['Informe um nome, uma localização ou use a busca por código.'];
+        $dados=null;
+        if($temBusca && !$erros){
+            try {$resp=$this->api->get('/v1/catalogo/instituicoes',$f);}
+            catch(ConnectionException){abort(503,'Não foi possível consultar o catálogo. Tente novamente.');}
+            if($resp->status()===422)$erros=$resp->json('errors')??['busca'=>['Confira os filtros da busca.']];
+            elseif($resp->successful())$dados=$resp->json('data');
+            else abort(in_array($resp->status(),[403,404,409],true)?$resp->status():503,'Não foi possível consultar o catálogo. Tente novamente.');
+        }
+        return response()->view('instituicoes.buscar',compact('f','modo','ufs','municipios','dados')+[
+            'tipos'=>self::TIPOS,'errors'=>(new \Illuminate\Support\ViewErrorBag())->put('default',new \Illuminate\Support\MessageBag($erros)),
+        ],$erros?422:200);
     }
     public function municipios(Request $r)
     {

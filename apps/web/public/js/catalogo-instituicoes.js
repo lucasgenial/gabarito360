@@ -5,6 +5,7 @@
   var uf = document.getElementById('cat-uf'), municipio = document.getElementById('cat-municipio');
   var busca = document.getElementById('cat-municipio-busca'), status = document.getElementById('cat-status');
   var anterior = document.getElementById('cat-anterior'), proximo = document.getElementById('cat-proximo');
+  var ferramentas = document.getElementById('cat-ferramentas');
   var sequencia = 0, pagina = 1;
   function invalidarResultados(e) {
     if (!e.target.name || e.target.name === '_ctx') return;
@@ -20,6 +21,7 @@
   async function carregar(p) {
     var seq = ++sequencia, selecionado = municipio.value;
     pagina = p; anterior.hidden = true; proximo.hidden = true;
+    if (ferramentas) ferramentas.hidden = !uf.value;
     if (!uf.value) { limpar(); municipio.disabled = true; status.textContent = 'Escolha uma UF para localizar municípios.'; return; }
     municipio.disabled = true; status.textContent = 'Carregando municípios…';
     var url = new URL(form.dataset.municipios, location.origin);
@@ -49,4 +51,10 @@
   anterior.addEventListener('click', function () { carregar(pagina - 1); });
   proximo.addEventListener('click', function () { carregar(pagina + 1); });
   if (uf.value && !municipio.value) carregar(1);
+  var invalido = form.querySelector ? form.querySelector('[aria-invalid="true"]') : null;
+  if (invalido) {
+    var pai = invalido.parentElement;
+    while (pai && pai !== form) { if (pai.tagName === 'DETAILS') pai.open = true; pai = pai.parentElement; }
+    invalido.focus();
+  }
 })();

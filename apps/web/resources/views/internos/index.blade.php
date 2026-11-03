@@ -2,7 +2,7 @@
 @section('title', 'Acessos internos')
 @push('styles')
 <style>
-.internos-form { display:grid; gap:16px; max-width:760px; }
+.internos-form { display:grid; gap:16px; width:100%; }
 .internos-bloco { margin-bottom:24px; }
 .internos-bloco h2, .internos-bloco h3 { margin-bottom:16px; }
 </style>
