@@ -31,6 +31,8 @@ for app in ['api','web']:
  (folder/'.env').symlink_to(BASE/'shared'/app/'.env')
  out=run(['composer','install','--no-dev','--prefer-dist','--no-interaction','--optimize-autoloader'],cwd=folder,env={**os.environ,'COMPOSER_ALLOW_SUPERUSER':'1'})
  (recibo/(app+'-composer.log')).write_text(out)
+ # Dependências também são criadas sob umask restritivo.
+ run(['chmod','-R','a+rX',str(folder/'vendor')])
  run(['chown','-R','www-data:www-data',str(folder/'bootstrap/cache')]);(folder/'bootstrap/cache').chmod(0o750)
 # Pausa apenas na homologação, após preparar dependências.
 run(['systemctl','stop','g360-homologa-worker.service'])
