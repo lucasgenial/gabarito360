@@ -66,3 +66,5 @@ L4-A e backend L4-B1/B2 integrados pelos PRs #139–141. A interface L4-B3 é de
 L4-B3 integrado no PR #142, com cinco checks aprovados. L4-C foi dividido em C1 (contrato), C2 (sujeito e concessão), C3 (geração), C4 (entrega) e C5 (interface/ensaio), conforme doc. 107. C1 não disponibiliza exportações e não altera o catálogo de permissões. Permanece a publicação somente no fechamento de L4 completo.
 
 L4-C1 integrado no PR #143 com cinco checks aprovados. O detalhamento de C2 está no doc. 108: vinculação do sujeito em implementação; concessão de exportação depende da definição dos perfis aprovadores. Não marcar C2 completo enquanto essa concessão não estiver implementada e validada.
+
+C2: vinculação integrada no PR144. Escolha dos aprovadores resolvida pelo usuário: somente Administrador da Rede ou proprietário pessoal. Implementação complementar de concessão/revogação e revalidação em doc109; geração de arquivos permanece C3 e entrega C4. Deploy continua reservado ao L4 completo.
