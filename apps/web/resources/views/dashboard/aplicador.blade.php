@@ -45,32 +45,32 @@
   <div class="card-pad" style="padding-bottom:0;">
     <h3 style="font-size:18px;">Provas para enviar cartões</h3>
   </div>
-  <table class="table lista-cel">
+  <x-tabela titulo="Provas para aplicação" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Provas para aplicação</caption>
     <thead>
       <tr>
-        <th>Prova</th>
-        <th>Disciplina</th>
-        <th>Turmas</th>
-        <th>Alunos</th>
-        <th>Cartões enviados</th>
-        <th>Enviar cartão</th>
+        <th scope="col">Prova</th>
+        <th scope="col">Disciplina</th>
+        <th scope="col">Turmas</th>
+        <th scope="col">Alunos</th>
+        <th scope="col">Cartões enviados</th>
+        <th scope="col">Enviar cartão</th>
       </tr>
     </thead>
     <tbody>
       @forelse($provas as $p)
         <tr>
-          <td>{{ $p['titulo'] }}</td>
-          <td>{{ $p['disciplina'] }}</td>
-          <td>{{ $p['turmas'] }}</td>
-          <td class="num">{{ $p['total_alunos'] }}</td>
-          <td class="num">{{ $p['cartoes_enviados'] }}</td>
-          <td>
+          <td class="tabela-principal" data-rotulo="Prova"><div class="tabela-valor">{{ $p['titulo'] }}</div></td>
+          <td data-rotulo="Disciplina"><div class="tabela-valor">{{ $p['disciplina'] }}</div></td>
+          <td data-rotulo="Turmas"><div class="tabela-valor">{{ $p['turmas'] }}</div></td>
+          <td class="num" data-rotulo="Alunos"><div class="tabela-valor">{{ $p['total_alunos'] }}</div></td>
+          <td class="num" data-rotulo="Cartões enviados"><div class="tabela-valor">{{ $p['cartoes_enviados'] }}</div></td>
+          <td class="tabela-acoes" data-rotulo="Enviar cartão"><div class="tabela-valor">
             @if(in_array($p['status'], ['publicada', 'em_correcao', 'corrigida'], true))
               <a class="btn btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera"><x-icone nome="camera" /> Fotografar</a>
             @else
               <span class="badge badge-muted">aguardando gabarito</span>
             @endif
-          </td>
+          </div></td>
         </tr>
       @empty
         <tr>
@@ -80,7 +80,7 @@
         </tr>
       @endforelse
     </tbody>
-  </table>
+  </table></x-tabela>
 </div>
 
 <div style="height:48px"></div>

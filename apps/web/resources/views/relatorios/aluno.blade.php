@@ -66,27 +66,27 @@
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Provas</h3>
   <div style="overflow-x:auto;">
-    <table class="tab lista-cel">
-      <thead><tr><th class="esq">Prova</th><th>Nota</th><th>Acertos</th><th class="opc">Média turma</th><th>Posição</th><th class="no-print"></th></tr></thead>
+    <x-tabela titulo="Provas do aluno" modo="lista"><table class="tabela-padrao tab "><caption class="sr-only">Provas do aluno</caption>
+      <thead><tr><th scope="col" class="esq">Prova</th><th scope="col">Nota</th><th scope="col">Acertos</th><th scope="col" class="opc">Média turma</th><th scope="col">Posição</th><th scope="col" class="no-print"></th></tr></thead>
       <tbody>
         @foreach($provas as $p)
           <tr>
-            <td class="esq"><b>{{ $p['disciplina'] }}</b><div style="font-size:12px;color:var(--muted);">{{ $p['titulo'] }}{{ $p['lingua'] ? ' · ' . ($p['lingua'] === 'ESP' ? 'Espanhol' : 'Inglês') : '' }}</div></td>
-            <td>
+            <td class="tabela-principal esq" data-rotulo="Prova"><div class="tabela-valor"><b>{{ $p['disciplina'] }}</b><div style="font-size:12px;color:var(--muted);">{{ $p['titulo'] }}{{ $p['lingua'] ? ' · ' . ($p['lingua'] === 'ESP' ? 'Espanhol' : 'Inglês') : '' }}</div></div></td>
+            <td data-rotulo="Nota"><div class="tabela-valor">
               @if($p['nota'] !== null)
                 <span class="nota" style="color:{{ $p['nota'] >= $p['nota_maxima'] * 0.6 ? 'var(--success)' : 'var(--danger)' }};">{{ $fmt($p['nota']) }}</span>
               @else
                 <span style="color:var(--muted);">não corrigida</span>
               @endif
-            </td>
-            <td>{{ $p['nota'] !== null ? $p['acertos'] . '/' . $p['total'] : '—' }}</td>
-            <td class="opc">{{ $fmt($p['media_turma']) }}</td>
-            <td>{{ $p['posicao'] ? $p['posicao'] . 'º de ' . $p['corrigidos'] : '—' }}</td>
-            <td class="no-print">@if($p['nota'] !== null)<a class="btn btn-sm btn-ghost" href="{{ route('resultados.show', [$aluno['id'], $p['id']]) }}?from=rel-turma">Acertos e erros</a>@endif</td>
+            </div></td>
+            <td data-rotulo="Acertos"><div class="tabela-valor">{{ $p['nota'] !== null ? $p['acertos'] . '/' . $p['total'] : '—' }}</div></td>
+            <td class="opc" data-rotulo="Média turma"><div class="tabela-valor">{{ $fmt($p['media_turma']) }}</div></td>
+            <td data-rotulo="Posição"><div class="tabela-valor">{{ $p['posicao'] ? $p['posicao'] . 'º de ' . $p['corrigidos'] : '—' }}</div></td>
+            <td class="tabela-acoes no-print" data-rotulo="Ações"><div class="tabela-valor">@if($p['nota'] !== null)<a class="btn btn-sm btn-ghost" href="{{ route('resultados.show', [$aluno['id'], $p['id']]) }}?from=rel-turma">Acertos e erros</a>@endif</div></td>
           </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
   </div>
 </div>
 <div style="height:48px" class="no-print"></div>

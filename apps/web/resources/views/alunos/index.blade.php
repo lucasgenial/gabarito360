@@ -11,7 +11,11 @@
 @section('content')
 
 <x-pagina titulo="Alunos">
-  <x-slot:sub><b>{{ $kpis['total_alunos'] ?? 0 }}</b> aluno(s) cadastrado(s)</x-slot:sub>
+  <x-slot:sub>@if($erroLista)Listagem temporariamente indisponível
+  @else
+  <b>{{ $kpis['total_alunos'] ?? 0 }}</b> aluno(s) cadastrado(s)
+  @endif
+  </x-slot:sub>
   <a href="{{ route('alunos.create') }}" class="btn btn-primary">+ Cadastrar aluno</a>
 </x-pagina>
 
@@ -37,40 +41,45 @@
 </form>
 
 {{-- Tabela --}}
-<div class="card" style="margin-top:18px;overflow:hidden;">
-  <table class="table lista-cel">
+@if($erroLista)
+<x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
+@else
+<div class="card tabela-superficie" style="margin-top:18px;overflow:hidden;">
+  <x-tabela titulo="Alunos" :completa="true">
+<table class="table tabela-padrao">
+    <caption class="sr-only">Alunos</caption>
     <thead>
       <tr>
-        <th>Aluno</th>
-        <th>Matrícula</th>
-        <th>Turma</th>
-        <th>Série</th>
-        <th>Status</th>
-        <th></th>
+        <th scope="col" data-ordenar="texto">Aluno</th>
+        <th scope="col">Matrícula</th>
+        <th scope="col">Turma</th>
+        <th scope="col">Série</th>
+        <th scope="col">Status</th>
+        <th scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
       @forelse($alunos as $a)
         <tr>
-          <td>
+          <td data-valor-ordem="{{ $a['nome'] }}" data-rotulo="Aluno" class="tabela-principal"><div class="tabela-valor">
             <div class="student-name">
               <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id']" tamanho="sm" />
               <strong>{{ $a['nome'] }}</strong>
             </div>
-          </td>
-          <td style="font-family:var(--font-mono);">{{ $a['matricula'] }}</td>
-          <td>{{ $a['turma_nome'] ?? '—' }}</td>
-          <td>{{ $a['turma_serie'] ?? '—' }}</td>
-          <td>
+          </div></td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Matrícula"><div class="tabela-valor">{{ $a['matricula'] }}</div></td>
+          <td data-rotulo="Turma"><div class="tabela-valor">{{ $a['turma_nome'] ?? '—' }}</div></td>
+          <td data-rotulo="Série"><div class="tabela-valor">{{ $a['turma_serie'] ?? '—' }}</div></td>
+          <td data-rotulo="Status"><div class="tabela-valor">
             @if($a['ativo'])
               <span class="badge badge-success badge-dot">Ativo</span>
             @else
               <span class="badge badge-danger badge-dot">Inativo</span>
             @endif
-          </td>
-          <td style="text-align:right;">
+          </div></td>
+          <td style="text-align:right;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
             <a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
-          </td>
+          </div></td>
         </tr>
       @empty
         <tr>
@@ -83,7 +92,9 @@
       @endforelse
     </tbody>
   </table>
+</x-tabela>
 </div>
+@endif
 
 <div style="height:48px;"></div>
 @endsection

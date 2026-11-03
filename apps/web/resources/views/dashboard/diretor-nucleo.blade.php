@@ -93,14 +93,14 @@
     <div class="card-pad" style="padding-bottom:0;">
       <h3 style="font-size:18px;">Escolas do núcleo</h3>
     </div>
-    <table class="table lista-cel">
+    <x-tabela titulo="Escolas do núcleo" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Escolas do núcleo</caption>
       <thead>
         <tr>
-          <th>Escola</th>
-          <th>Turmas</th>
-          <th>Alunos</th>
-          <th>Média</th>
-          <th>Status</th>
+          <th scope="col">Escola</th>
+          <th scope="col">Turmas</th>
+          <th scope="col">Alunos</th>
+          <th scope="col">Média</th>
+          <th scope="col">Status</th>
         </tr>
       </thead>
       <tbody>
@@ -110,11 +110,11 @@
             $media = $e['media'] ?? null;
           @endphp
           <tr>
-            <td>{{ $e['nome'] }}</td>
-            <td class="num">{{ $e['total_turmas'] }}</td>
-            <td class="num">{{ number_format($e['total_alunos'], 0, ',', '.') }}</td>
-            <td class="num">{{ $media !== null ? number_format($media, 1, ',', '') : '—' }}</td>
-            <td><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></td>
+            <td class="tabela-principal" data-rotulo="Escola"><div class="tabela-valor">{{ $e['nome'] }}</div></td>
+            <td class="num" data-rotulo="Turmas"><div class="tabela-valor">{{ $e['total_turmas'] }}</div></td>
+            <td class="num" data-rotulo="Alunos"><div class="tabela-valor">{{ number_format($e['total_alunos'], 0, ',', '.') }}</div></td>
+            <td class="num" data-rotulo="Média"><div class="tabela-valor">{{ $media !== null ? number_format($media, 1, ',', '') : '—' }}</div></td>
+            <td data-rotulo="Status"><div class="tabela-valor"><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></div></td>
           </tr>
         @empty
           <tr>
@@ -124,7 +124,7 @@
           </tr>
         @endforelse
       </tbody>
-    </table>
+    </table></x-tabela>
   </div>
 
   {{-- Coluna lateral --}}

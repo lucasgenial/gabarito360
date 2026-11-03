@@ -17,13 +17,13 @@
 <form method="POST" action="{{ route('copias.materiais.previa') }}" class="card card-pad" style="margin-top:20px;">
   @csrf<input type="hidden" name="_ctx" value="{{ $ctx }}"><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   <p>A seleção usa apenas os itens desta página. Trocar a página ou o espaço inicia uma nova seleção.</p>
-  <div style="overflow-x:auto;"><table class="table"><caption style="text-align:left;">{{ $lista['total'] }} prova(s) disponíveis neste espaço</caption>
+  <div style="overflow-x:auto;"><x-tabela titulo="Selecionar provas" modo="selecao"><table class="tabela-padrao table"><caption style="text-align:left;">{{ $lista['total'] }} prova(s) disponíveis neste espaço</caption>
     <thead><tr><th scope="col">Selecionar</th><th scope="col">Prova</th><th scope="col">Disciplina</th><th scope="col">Série</th><th scope="col">Questões</th></tr></thead>
     <tbody>@forelse($lista['data'] as $p)<tr>
-      <td><input type="checkbox" id="prova-{{ $p['id'] }}" name="provas[]" value="{{ $p['id'] }}" aria-label="Selecionar {{ $p['titulo'] }}"></td>
-      <td><label for="prova-{{ $p['id'] }}">{{ $p['titulo'] }}</label></td><td>{{ $p['disciplina'] }}</td><td>{{ $p['serie'] }}</td><td>{{ $p['num_questoes'] }}</td>
+      <td class="tabela-selecionar" data-rotulo="Selecionar"><div class="tabela-valor"><input type="checkbox" id="prova-{{ $p['id'] }}" name="provas[]" value="{{ $p['id'] }}" aria-label="Selecionar {{ $p['titulo'] }}"></div></td>
+      <td class="tabela-principal" data-rotulo="Prova"><div class="tabela-valor"><label for="prova-{{ $p['id'] }}">{{ $p['titulo'] }}</label></div></td><td data-rotulo="Disciplina"><div class="tabela-valor">{{ $p['disciplina'] }}</div></td><td data-rotulo="Série"><div class="tabela-valor">{{ $p['serie'] }}</div></td><td data-rotulo="Questões"><div class="tabela-valor">{{ $p['num_questoes'] }}</div></td>
     </tr>@empty<tr><td colspan="5">Nenhum material disponível neste espaço.</td></tr>@endforelse</tbody>
-  </table></div>
+  </table></x-tabela></div>
   <button class="btn btn-primary" type="submit" @disabled(!$lista['data'])>Conferir prévia</button>
 </form>
 @if($lista['last_page']>1)<nav aria-label="Paginação dos materiais" style="margin-top:16px;">

@@ -56,20 +56,20 @@
       <summary style="cursor:pointer;font-weight:600;font-size:14px;">Ver marcações de cada questão (A–E)</summary>
       @php $letras = array_keys(collect($questoes)->first()['distribuicao'] ?? []); @endphp
       <div class="quadro-cel" style="overflow-x:auto;">
-        <table class="aq-tabela">
-          <thead><tr><th class="fixa">Questão</th>@foreach($letras as $l)<th>{{ $l === 'branco' ? 'Branco' : $l }}</th>@endforeach<th>Acerto</th></tr></thead>
+        <x-tabela titulo="Distribuição das alternativas" modo="matriz"><table class="tabela-padrao tabela-matriz aq-tabela"><caption class="sr-only">Distribuição das alternativas</caption>
+          <thead><tr><th scope="col" class="fixa">Questão</th>@foreach($letras as $l)<th scope="col">{{ $l === 'branco' ? 'Branco' : $l }}</th>@endforeach<th scope="col">Acerto</th></tr></thead>
           <tbody>
             @foreach($questoes as $q)
               <tr>
-                <td class="fixa"><b>{{ str_pad($q['numero'], 2, '0', STR_PAD_LEFT) }}</b>@if($q['gabarito_espanhol']) <span style="font-size:10px;color:var(--muted);">ING {{ $q['gabarito'] }} · ESP {{ $q['gabarito_espanhol'] }}</span>@endif</td>
+                <td class="tabela-principal fixa" data-rotulo="Questão"><b>{{ str_pad($q['numero'], 2, '0', STR_PAD_LEFT) }}</b>@if($q['gabarito_espanhol']) <span style="font-size:10px;color:var(--muted);">ING {{ $q['gabarito'] }} · ESP {{ $q['gabarito_espanhol'] }}</span>@endif</td>
                 @foreach($letras as $l)
-                  <td><span class="{{ $l === $q['gabarito'] ? 'aq-certa' : ($l === $q['distrator'] ? 'aq-distr' : '') }}" style="padding:1px 6px;">{{ $q['distribuicao'][$l] ?? 0 }}</span></td>
+                  <td data-rotulo="{{ $l === 'branco' ? 'Branco' : $l }}"><span class="{{ $l === $q['gabarito'] ? 'aq-certa' : ($l === $q['distrator'] ? 'aq-distr' : '') }}" style="padding:1px 6px;">{{ $q['distribuicao'][$l] ?? 0 }}</span></td>
                 @endforeach
-                <td><b style="color:{{ $nivel($q['anulada'] ? null : $q['pct'])[0] }};">{{ $q['anulada'] ? 'anulada' : ($q['pct'] !== null ? $q['pct'] . '%' : '—') }}</b></td>
+                <td data-rotulo="Acerto"><b style="color:{{ $nivel($q['anulada'] ? null : $q['pct'])[0] }};">{{ $q['anulada'] ? 'anulada' : ($q['pct'] !== null ? $q['pct'] . '%' : '—') }}</b></td>
               </tr>
             @endforeach
           </tbody>
-        </table>
+        </table></x-tabela>
       </div>
       <p style="font-size:12px;color:var(--muted);margin-top:6px;">Verde = alternativa correta · vermelho = alternativa errada mais marcada (distrator).</p>
     </details>

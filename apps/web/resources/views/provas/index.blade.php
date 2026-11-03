@@ -11,7 +11,11 @@
 @section('content')
 
 <x-pagina titulo="Provas e gabaritos">
-  <x-slot:sub><b>{{ count($provas) }}</b> prova(s) encontrada(s)</x-slot:sub>
+  <x-slot:sub>@if($erroLista)Listagem temporariamente indisponível
+  @else
+  <b>{{ count($provas) }}</b> prova(s) encontrada(s)
+  @endif
+  </x-slot:sub>
   @pode('prova.criar')<a href="{{ route('provas.create') }}" class="btn btn-primary">+ Nova prova</a>@endpode
 </x-pagina>
 
@@ -45,16 +49,21 @@
 </form>
 
 {{-- Tabela --}}
-<div class="card" style="margin-top:18px;overflow:hidden;">
-  <table class="table lista-cel">
+@if($erroLista)
+<x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
+@else
+<div class="card tabela-superficie" style="margin-top:18px;overflow:hidden;">
+  <x-tabela titulo="Provas e gabaritos" :completa="true">
+<table class="table tabela-padrao">
+    <caption class="sr-only">Provas e gabaritos</caption>
     <thead>
       <tr>
-        <th>Prova</th>
-        <th class="hide-sm">Turmas</th>
-        <th class="hide-sm">Aplicação</th>
-        <th>Status</th>
-        <th>Progresso</th>
-        <th></th>
+        <th scope="col" data-ordenar="texto">Prova</th>
+        <th scope="col" class="hide-sm">Turmas</th>
+        <th scope="col" class="hide-sm">Aplicação</th>
+        <th scope="col">Status</th>
+        <th scope="col">Progresso</th>
+        <th scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -69,7 +78,7 @@
           $sc = $statusCfg[$p['status']] ?? ['cls'=>'badge-info','label'=>$p['status']];
         @endphp
         <tr>
-          <td>
+          <td data-valor-ordem="{{ $p['titulo'] }}" data-rotulo="Prova" class="tabela-principal"><div class="tabela-valor">
             <div style="display:flex;align-items:center;gap:10px;">
               <div style="width:36px;height:36px;border-radius:8px;background:var(--accent-light);color:var(--accent-dark);display:grid;place-items:center;flex-shrink:0;"><x-icone nome="prova" /></div>
               <div>
@@ -77,8 +86,8 @@
                 <div class="exam-meta">{{ $p['disciplina'] }} · {{ $p['serie'] }} · {{ $p['num_questoes'] }} questões</div>
               </div>
             </div>
-          </td>
-          <td class="hide-sm">
+          </div></td>
+          <td class="hide-sm" data-rotulo="Turmas"><div class="tabela-valor">
             @if(count($p['turmas'] ?? []) > 0)
               <span style="color:var(--fg-2);font-size:13px;">{{ implode(' · ', array_slice($p['turmas'], 0, 3)) }}</span>
               @if(count($p['turmas']) > 3)
@@ -87,14 +96,14 @@
             @else
               <span style="color:var(--muted);font-size:13px;">—</span>
             @endif
-          </td>
-          <td class="hide-sm" style="font-size:13px;">
+          </div></td>
+          <td class="hide-sm" style="font-size:13px;" data-rotulo="Aplicação"><div class="tabela-valor">
             {{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}
-          </td>
-          <td>
+          </div></td>
+          <td data-rotulo="Status"><div class="tabela-valor">
             <span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span>
-          </td>
-          <td>
+          </div></td>
+          <td data-rotulo="Progresso"><div class="tabela-valor">
             @php $prog = $p['progresso'] ?? ['tipo' => 'nenhum']; @endphp
             @if($prog['tipo'] === 'media')
               @php
@@ -123,9 +132,9 @@
             @else
               <span style="color:var(--muted);font-size:13px;">Aguardando aplicação</span>
             @endif
-          </td>
+          </div></td>
           {{-- A ação reutiliza o rascunho no mesmo espaço, sem sair para outra página. --}}
-          <td style="text-align:right;white-space:nowrap;">
+          <td style="text-align:right;white-space:nowrap;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
             @if($p['status'] === 'rascunho' && \App\Support\Acesso::pode('prova.editar'))
               <form method="POST" action="{{ route('provas.publicar', $p['id']) }}" style="display:inline;">
                 @csrf
@@ -142,7 +151,7 @@
             @if($p['pode_copiar'] ?? false)
               @include('provas._botao-copiar',['origem'=>$p])
             @endif
-          </td>
+          </div></td>
         </tr>
       @empty
         <tr>
@@ -155,7 +164,9 @@
       @endforelse
     </tbody>
   </table>
+</x-tabela>
 </div>
+@endif
 
 <div style="height:48px;"></div>
 @include('provas._modal-copiar')

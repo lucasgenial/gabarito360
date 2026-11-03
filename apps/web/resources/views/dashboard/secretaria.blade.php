@@ -62,14 +62,14 @@
   <div class="card-pad" style="padding-bottom:0;">
     <h3 style="font-size:18px;">Redes</h3>
   </div>
-  <table class="table lista-cel">
+  <x-tabela titulo="Redes da secretaria" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Redes da secretaria</caption>
     <thead>
       <tr>
-        <th>Rede</th>
-        <th>Modalidade</th>
-        <th>Escolas</th>
-        <th>Alunos</th>
-        <th>Média</th>
+        <th scope="col">Rede</th>
+        <th scope="col">Modalidade</th>
+        <th scope="col">Escolas</th>
+        <th scope="col">Alunos</th>
+        <th scope="col">Média</th>
       </tr>
     </thead>
     <tbody>
@@ -79,11 +79,11 @@
           $media = $r['media'] ?? null;
         @endphp
         <tr>
-          <td>{{ $r['nome'] }}</td>
-          <td><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></td>
-          <td class="num">{{ $r['total_escolas'] }}</td>
-          <td class="num">{{ number_format($r['total_alunos'], 0, ',', '.') }}</td>
-          <td class="num">{{ $media !== null ? number_format($media, 1, ',', '') : '—' }}</td>
+          <td class="tabela-principal" data-rotulo="Rede"><div class="tabela-valor">{{ $r['nome'] }}</div></td>
+          <td data-rotulo="Modalidade"><div class="tabela-valor"><span class="badge {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span></div></td>
+          <td class="num" data-rotulo="Escolas"><div class="tabela-valor">{{ $r['total_escolas'] }}</div></td>
+          <td class="num" data-rotulo="Alunos"><div class="tabela-valor">{{ number_format($r['total_alunos'], 0, ',', '.') }}</div></td>
+          <td class="num" data-rotulo="Média"><div class="tabela-valor">{{ $media !== null ? number_format($media, 1, ',', '') : '—' }}</div></td>
         </tr>
       @empty
         <tr>
@@ -93,7 +93,7 @@
         </tr>
       @endforelse
     </tbody>
-  </table>
+  </table></x-tabela>
 </div>
 
 <div style="height:48px"></div>

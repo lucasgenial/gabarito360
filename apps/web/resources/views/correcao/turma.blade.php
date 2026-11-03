@@ -92,12 +92,12 @@
     </label>
   </div>
   <div class="quadro-wrap quadro-cel">
-    <table class="quadro">
+    <x-tabela titulo="Correções por aluno e prova" modo="matriz"><table class="tabela-padrao tabela-matriz quadro"><caption class="sr-only">Correções por aluno e prova</caption>
       <thead>
         <tr>
-          <th class="aluno"><span>Aluno</span></th>
-          @foreach($provas as $p)<th title="{{ $p['titulo'] }}">{{ $p['disciplina'] }}</th>@endforeach
-          <th>Média</th>
+          <th scope="col" class="aluno"><span>Aluno</span></th>
+          @foreach($provas as $p)<th scope="col" title="{{ $p['titulo'] }}">{{ $p['disciplina'] }}</th>@endforeach
+          <th scope="col">Média</th>
         </tr>
       </thead>
       <tbody>
@@ -107,10 +107,10 @@
             $falta = collect($a['celulas'])->contains(fn ($c) => $c === null);
           @endphp
           <tr data-falta="{{ $falta ? 1 : 0 }}">
-            <td class="aluno" title="{{ $a['nome'] }}"><a href="{{ route('alunos.show', $a['id']) }}" style="color:inherit;">{{ $a['nome'] }}</a></td>
+            <td class="tabela-principal aluno" title="{{ $a['nome'] }}" data-rotulo="Aluno"><a href="{{ route('alunos.show', $a['id']) }}" style="color:inherit;">{{ $a['nome'] }}</a></td>
             @foreach($provas as $p)
               @php $c = $a['celulas'][$p['id']] ?? null; @endphp
-              <td>
+              <td data-rotulo="{{ $p['disciplina'] }}">
                 @if(!$c)
                   <span class="cel falta" title="Ainda não corrigido">—</span>
                 @elseif($c['status'] === 'ambiguo')
@@ -124,11 +124,11 @@
                 @endif
               </td>
             @endforeach
-            <td><b>{{ $notas->isNotEmpty() ? $fmt($notas->avg()) : '—' }}</b></td>
+            <td data-rotulo="Média"><b>{{ $notas->isNotEmpty() ? $fmt($notas->avg()) : '—' }}</b></td>
           </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
   </div>
   <p style="font-size:12px;color:var(--muted);margin-top:8px;">Toque na nota para ver os acertos e erros do aluno. "—" = cartão ainda não corrigido.</p>
 </div>
