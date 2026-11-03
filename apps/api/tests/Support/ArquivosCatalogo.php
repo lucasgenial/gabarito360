@@ -29,7 +29,7 @@ trait ArquivosCatalogo
         if ($fonte === 'superior') $campos[] = 'SG_IES';
         $numero = 0;
         foreach (LeitorInstituicoes::UFS_IBGE as $id => $sigla) {
-            $uf = ['id'=>$id,'sigla'=>$sigla]; $ufs[] = $uf; $numero++;
+            $uf = ['id'=>$id,'sigla'=>$sigla,'nome'=>'Estado fictício '.$sigla]; $ufs[] = $uf; $numero++;
             $municipios[] = ['id'=>(int)($id.'00001'),'nome'=>'Município fictício '.$sigla,'microrregiao'=>['mesorregiao'=>['UF'=>$uf]]];
             $linhas[] = $fonte === 'basica'
                 ? [2025,$id.'000001','Escola fictícia '.$sigla,$sigla,$id,$id.'00001','Município fictício '.$sigla,2,1]

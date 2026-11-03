@@ -513,3 +513,6 @@ Migration 2026_11_03_000002_adicionar_sigla_escolas acrescenta escolas.sigla VAR
 
 ### CI1-B2 — staging público retomável
 catalogo_geografias mantém snapshot IBGE versionado/imutável, separado dos locks do cursor. catalogo_importacoes identifica ingestão por conteúdo/schema/geografia e possui manifesto, checkpoint e lease; catalogo_observacoes guarda payload público mínimo e SHA-256, com unicidade por código e ordem na carga. Triggers recusam UPDATE/DELETE de geografia/observações, inclusive antes da validação. Estado validado não significa publicado. Migration 2026_11_03_000003 somente aditiva, sem execução no servidor. Ver doc120.
+
+### CI1-B3 — edições públicas indexadas
+Migration000004 acrescenta identidades públicas UUIDv5, identificadores por namespace e unidades estáveis; projeções catalogo_entradas por publicação; geografia IBGE indexada; ponteiros por fonte e eventos operacionais. FKs compostas impedem entrada com importação, geografia, identificador ou unidade incompatíveis. Projeções/eventos/identificadores/geografia são append-only por triggers; publicação finalizada também recusa alteração/exclusão. Não relaciona automaticamente escolas operacionais. Ver121.
