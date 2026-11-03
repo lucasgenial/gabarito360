@@ -8,13 +8,18 @@
 @section('content')
 <x-pagina titulo="Copiar prova"><x-slot:sub>Crie um rascunho independente para outra turma ou uma nova versão da avaliação.</x-slot:sub></x-pagina>
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
-<div class="cp1-grade">
-<section class="card card-pad stack cp1-contexto" aria-labelledby="cp1-incluido">
-  <h2 id="cp1-incluido">O que será copiado?</h2>
+<div class="cp1-origem">
   <p>Origem: <strong>{{ $prova['titulo'] }}</strong> · {{ $prova['disciplina'] }} · {{ $prova['serie'] }}.</p>
-  <p>A cópia inclui as configurações da avaliação e o gabarito preenchido, quando existente. O gabarito copiado ficará sem publicação para você revisar.</p>
-  <p>Turmas, alunos, cartões, respostas, notas e datas de aplicação não serão copiados. A original permanece igual.</p>
-</section>
+  <p>A nova versão reaproveita as configurações e o gabarito, sem turmas ou resultados. A original permanece igual.</p>
+  <details class="cp1-detalhes">
+    <summary>Ver o que será copiado</summary>
+    <div>
+      <p>O gabarito preenchido, quando existente, será copiado sem publicação para você revisar.</p>
+      <p>Turmas, alunos, cartões, respostas, notas e datas de aplicação não serão copiados.</p>
+    </div>
+  </details>
+</div>
+<div class="cp1-grade">
   <form method="POST" action="{{ route('provas.copiar.store',$prova['id']) }}" class="card card-pad cp1-formulario">
     <h2>Prepare a nova versão</h2>
     @csrf
