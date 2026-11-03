@@ -16,7 +16,7 @@
 {{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
 <script>try { if (localStorage.getItem('g360-menu') === 'recolhido') document.documentElement.classList.add('menu-recolhido'); } catch (e) {}</script>
 </head>
-<body class="area-logada @yield('tela')">
+<body class="area-logada {{ config('release.sha') ? 'com-release' : '' }} @yield('tela')">
 
 <div class="app-casca">
 
@@ -101,7 +101,7 @@
   {{-- Conteúdo --}}
   @yield('content')
   @if(config('release.sha'))
-  <p class="text-muted" style="margin-top:24px;font-size:12px;">Versão de testes: {{ config('release.fase') }} · {{ substr(config('release.sha'),0,8) }}</p>
+  <footer class="app-footer" aria-label="Versão do software">Versão de testes: {{ config('release.fase') }} · {{ substr(config('release.sha'),0,8) }}</footer>
   @endif
 </div>
 

@@ -9,6 +9,7 @@ class Prova extends Model
     protected $table = 'provas';
 
     protected $fillable = [
+        'formato_avaliacao',
         'escola_id', 'criado_por', 'titulo', 'disciplina', 'serie',
         'num_questoes', 'num_alternativas', 'nota_maxima', 'tipo_pontuacao',
         'anular_se_todas', 'opcao_lingua', 'gerar_cartao_pdf', 'status', 'data_aplicacao',

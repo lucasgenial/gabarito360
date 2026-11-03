@@ -10,9 +10,10 @@
     'aguardando_recibo'=>'Publicado; confirmação dos registros pendente','concluido'=>'Concluído','bloqueado'=>'Bloqueado para revisão'];
   $filtros=['lado'=>$dados['lado'],'espaco_id'=>$dados['espaco_id'],'_ctx'=>\App\Support\ContextoWeb::id()];
 @endphp
-<x-pagina titulo="Cópias entre espaços"><x-slot:sub>Acompanhe as solicitações do espaço selecionado.</x-slot:sub></x-pagina>
-@if(\App\Support\Acesso::pode('copia.autorizar_origem'))<a class="btn btn-primary" href="{{ route('copias.materiais',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Selecionar materiais</a> <a class="btn btn-secondary" href="{{ route('copias.cadastros',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Selecionar cadastro</a> <a class="btn btn-secondary" href="{{ route('copias.resultados',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Selecionar resultados</a>@endif
-@if(\App\Support\Acesso::pode('copia.autorizar_destino'))<a class="btn btn-secondary" href="{{ route('copias.material.receber',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Receber materiais</a> <a class="btn btn-secondary" href="{{ route('copias.cadastro.receber',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Receber cadastro</a> <a class="btn btn-secondary" href="{{ route('copias.resultado.receber',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Receber resultados</a>@endif
+<x-pagina titulo="Cópias entre espaços"><x-slot:sub>Envie ou receba cópias independentes, com autorização de cada espaço.</x-slot:sub></x-pagina>
+@include('copias._guia')
+<h2 id="acompanhamento">Acompanhar solicitações</h2>
+<p>Selecione o espaço e veja o que está saindo dele ou entrando nele. Abra uma solicitação para conferir decisões, processamento e conteúdo publicado.</p>
 <form method="GET" action="{{ route('copias.index') }}" class="card card-pad" style="margin-top:20px;">
   <input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
   <div class="form-row-2">

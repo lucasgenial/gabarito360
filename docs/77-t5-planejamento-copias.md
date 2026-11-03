@@ -120,3 +120,7 @@ Executar constraints/concorrência no MariaDB, e recuperação com Redis real. T
 Este PR contém apenas planejamento. Próximo passo proposto: **T5-A**, com revisão da matriz de autorização acima e do modelo de auditoria durável antes de criar migrations e serviços. Não alterar agora o catálogo oficial de permissões, o aceite dos convites ou os fluxos de desligamento.
 
 T5 deve permanecer desligado por padrão. Ativação futura exige V1/V2 conciliados, AU1 operacional com credencial própria e monitoramento, evidência de autorização válida, testes de recuperação e aprovação da release. Não estimar porcentagem de T5 implementado a partir deste plano: execução funcional ainda não iniciada.
+
+## Replanejamento de03/11/2026 — orientação posterior do produto
+
+A solicitação posterior distinguiu duplicação pedagógica de prova, movimentação de matrícula e transferência institucional de dados. As regras incompatíveis deste documento (nome/posicionamento T5, capacidades de escola, restrições do CPF pessoal e identificação por espaço) devem ser revistas pelo [plano integrado115](115-replanejamento-provas-identidade-transferencias.md). O histórico deste documento descreve o que foi decidido/implementado antes; não é autorização para publicar a política antiga como se atendesse ao pedido novo. Plano115 é desenho para implementação, sem migration ou deploy nesta entrega. L4-D/E e o gate de publicação devem ser conciliados com as novas dependências.

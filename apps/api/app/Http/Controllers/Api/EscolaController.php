@@ -35,6 +35,7 @@ class EscolaController extends Controller
         if ($busca = $request->query('busca')) {
             $query->where(function ($q) use ($busca) {
                 $q->where('nome', 'like', "%{$busca}%")
+                  ->orWhere('sigla', 'like', "%{$busca}%")
                   ->orWhere('cidade', 'like', "%{$busca}%")
                   ->orWhere('inep', 'like', "%{$busca}%");
             });
@@ -111,6 +112,7 @@ class EscolaController extends Controller
         return [
             'nucleo_id'              => "{$req}|integer|exists:nucleos,id",
             'nome'                   => "{$req}|string|max:200",
+            'sigla'                  => 'sometimes|nullable|string|max:40',
             'inep'                   => [$req, 'regex:/^\d{8}$/', Rule::unique('escolas', 'inep')->ignore($id)],
             'tipo_rede'              => [$req, Rule::in(['estadual', 'municipal', 'federal', 'privada'])],
             'tipo'                   => ['sometimes', Rule::in(['sede', 'anexo', 'unidade_vinculada'])],

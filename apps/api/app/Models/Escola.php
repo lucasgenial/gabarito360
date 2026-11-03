@@ -9,7 +9,7 @@ class Escola extends Model
     protected $table = 'escolas';
 
     protected $fillable = [
-        'nucleo_id', 'nome', 'inep', 'tipo_rede', 'tipo', 'escola_sede_id',
+        'nucleo_id', 'nome', 'sigla', 'inep', 'tipo_rede', 'tipo', 'escola_sede_id',
         'situacao_funcionamento', 'localizacao', 'orgao_regional',
         'logradouro', 'numero', 'complemento', 'bairro', 'cep', 'cidade', 'co_municipio', 'uf',
         'latitude', 'longitude', 'telefone', 'email', 'turnos', 'etapas', 'modalidades',

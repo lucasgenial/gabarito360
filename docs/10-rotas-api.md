@@ -255,3 +255,19 @@ O contrato de emissão, consulta e resposta dos convites de conta existente est�
 ### V2-C — opções para convite
 
 `GET /api/v1/usuarios/convites-vinculo/opcoes`: requer `usuario.gerir` e contexto válido; retorna instituições, perfis e turmas autorizados para emissão. A confirmação continua nas rotas V1-C3 existentes. [Contrato](62-v2-gestao-e-aceite-de-convites.md).
+
+### L4-B1 — pedidos de titulares (flag desligada por padrão)
+
+GET /api/v1/pedidos-titulares lista somente atribuições do contexto interno atual. POST abre/designa, exclusivo de Desenvolvedor. GET /api/v1/pedidos-titulares/{uuid} consulta com evento obrigatório. POST /api/v1/pedidos-titulares/{uuid}/triagem exige chave idempotente, versão e motivo. Detalhe fora da atribuição retorna 404; perfil inadequado ou flag desligada retorna 403. Sem exportação, exclusão ou verificação de identidade nesta fase. Contrato e campos em docs/104-l4-b1-protocolos.md.
+
+### L4-B2 — verificação e decisão
+
+POST /api/v1/pedidos-titulares/{uuid}/verificacoes registra conferência manual do responsável com evidência referenciada, método e validade. POST /api/v1/pedidos-titulares/{uuid}/decisao permite análise/conclusão administrativa usando conferências vigentes gravadas no servidor. Ambos exigem contexto, atribuição, versão, motivo e chave idempotente. Conclusão exige resultado e referência da resposta; nenhuma comunicação ou operação sobre dados é executada. Campos e limites no doc. 105.
+
+### L4-C3 — geração privada
+
+POST /api/v1/pedidos-titulares/exportacoes/{id}: UUID da concessão, entrada fechada versao/chave, contexto interno responsável e concessão atual obrigatórios. Flag PEDIDOS_EXPORTACAO_GERACAO_ATIVA=false. Resposta201 apenas referencia/situacao/expira_em, inclusive repetição idempotente autorizada. Nenhum download ou URL de arquivo; C4 implementará entrega. Contrato doc110.
+
+### L4-C4 — consulta e arquivo
+
+GET /api/v1/pedidos-titulares/exportacoes/{id}: UUID do artefato (diferente do UUID de concessão usado no POST), somente metadados referencia/situacao/formato/campos/expira_em. GET na mesma rota com /arquivo: JSON como anexo após revalidação e auditoria síncrona; HEAD recusado. Ambas exigem destinatário interno responsável atual e concessão vigente; flag PEDIDOS_EXPORTACAO_ENTREGA_ATIVA=false. Sem lista global ou link público. Cache privado/no-store. Doc111.

@@ -10,7 +10,7 @@
   <input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   @foreach($dados['materiais'] as $item)<input type="hidden" name="provas[]" value="{{ $item['origem_id'] }}">@endforeach
   <div class="field"><label for="codigo">Código fornecido pelo destinatário</label><input class="input" name="codigo" id="codigo" required minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></div>
-  <p>Peça ao destinatário que gere um código em “Receber materiais”. Você conferirá o espaço antes de preparar a solicitação.</p>
+  @include('copias._codigo-destino',['modalidade'=>'material'])
   <button class="btn btn-primary" type="submit">Conferir destinatário</button>
 </form>
 <a class="btn btn-secondary" style="margin-top:20px;" href="{{ route('copias.materiais',['espaco_id'=>$dados['espaco_id'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">Voltar à seleção</a>
