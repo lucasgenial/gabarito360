@@ -10,6 +10,21 @@ class ResultadoController extends Controller
 {
     public function __construct(private ApiClient $api) {}
 
+    public function lote(Request $request, int $provaId)
+    {
+        $dados = $request->validate(['turma_id' => 'nullable|integer|min:1']);
+        $resp = $this->api->getArquivo("/v1/provas/{$provaId}/resultados/pdf", $dados);
+        if ($resp->failed() || !str_contains((string) $resp->header('Content-Type'), 'pdf')) {
+            abort($resp->failed() ? $resp->status() : 502, $resp->json('message') ?? 'Não foi possível gerar os resultados.');
+        }
+        $nome = 'resultados-prova-'.$provaId.(!empty($dados['turma_id']) ? '-turma-'.(int)$dados['turma_id'] : '').'.pdf';
+        return response($resp->body(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$nome.'"',
+            'Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     public function show(Request $request, int $alunoId, int $provaId): View
     {
         $resp = $this->api->get("/v1/alunos/{$alunoId}/resultados/{$provaId}");

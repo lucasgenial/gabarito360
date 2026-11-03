@@ -20,6 +20,9 @@
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ $turma['nome'] }}{{ $prova['data_aplicacao'] ? ' · aplicada em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }} · {{ $kpis['cartoes_total'] > 0 ? round($kpis['cartoes_lidos'] / $kpis['cartoes_total'] * 100) : 0 }}% corrigido</p>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
+    @if(count($alunos) && \App\Support\Acesso::pode('resultado.compartilhar') && \App\Support\Acesso::pode('relatorio.prova'))
+      <a class="btn btn-primary no-print" href="{{ route('resultados.lote', ['provaId' => $prova['id'], 'turma_id' => $turma['id']]) }}">Baixar resultados desta turma (PDF)</a>
+    @endif
     <button class="btn btn-secondary no-print" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir / PDF</button>
     <span class="badge {{ $prova['status'] === 'corrigida' ? 'badge-success' : 'badge-info' }} badge-dot">
       {{ ['rascunho'=>'Rascunho','publicada'=>'Publicada','em_correcao'=>'Em correção','corrigida'=>'Corrigida'][$prova['status']] ?? $prova['status'] }}
