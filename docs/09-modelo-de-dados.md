@@ -519,3 +519,7 @@ Migration000004 acrescenta identidades públicas UUIDv5, identificadores por nam
 
 ### CI1-C — relações públicas e lacunas
 Migration000005 cria conjuntos por par de edições, relações declaradas com origem/alvo por FK composta às entradas públicas, fila técnica de lacunas, vigência e evento de fechamento. Dados confirmados são imutáveis; inserções de filhos exigem pai em preparação. Acrescenta também proteção contra inserts tardios nas observações B2/entradas B3, sem mudar suas linhas. Fonte escolar/IES não cria campus, contrato ou vínculo pessoal. Detalhes122.
+
+### CI1-D — referências pessoais canônicas (03/11/2026)
+
+Migration000006 adiciona referencias_instituicoes_pessoais e catalogo_referencia_eventos. Chave única por espaço/unidade; FKs compostas comprovam proprietário pessoal, vínculo original e entrada/unidade/edição escolhidas. Arquivamento preserva a associação; reativação/reconfirmação são explícitas. Identidade da referência não pode ser reatribuída e eventos são append-only. Nenhuma FK acadêmica foi alterada; associação de turmas/disciplinas permanece PA1. A declaração não cria contrato, emprego nem acesso institucional. Ver124.

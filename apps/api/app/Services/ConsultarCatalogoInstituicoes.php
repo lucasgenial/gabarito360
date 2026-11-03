@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-/** Consulta pública mínima interna. Rotas/permissões entram no CI1-D. */
+/** Projeção pública mínima; consumidores fixam edições entre validação e leitura. */
 class ConsultarCatalogoInstituicoes
 {
     public function vigentes(): Builder
@@ -27,7 +27,7 @@ class ConsultarCatalogoInstituicoes
             ->whereIn('p.id',$ids)->where('p.estado','publicada');
     }
 
-    public function buscar(array $filtros): LengthAwarePaginator
+    public function buscar(array $filtros, ?array $edicoesFixadas = null): LengthAwarePaginator
     {
         $v = Validator::make($filtros,[
             'uf'=>['sometimes',Rule::in(array_values(LeitorInstituicoes::UFS_IBGE))],
@@ -44,7 +44,7 @@ class ConsultarCatalogoInstituicoes
             throw ValidationException::withMessages(['busca'=>'Informe localização, código ou pelo menos três caracteres.']);
         }
         if (isset($v['codigo']) && !preg_match($v['namespace'] === 'inep_escola' ? '/^[0-9]{8}$/D' : '/^[1-9][0-9]{0,7}$/D',$v['codigo'])) throw ValidationException::withMessages(['codigo'=>'Código incompatível com a fonte.']);
-        $edicoes = $this->idsVigentes();
+        $edicoes = $edicoesFixadas ?? $this->idsVigentes();
         if (isset($v['municipio_ibge'])) {
             $municipio = DB::table('catalogo_municipios as m')->join('catalogo_publicacoes as p','p.geografia_id','=','m.geografia_id')
                 ->whereIn('p.id',$edicoes)->where('p.estado','publicada')->where('m.codigo_ibge',$v['municipio_ibge'])

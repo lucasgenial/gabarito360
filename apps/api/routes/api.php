@@ -55,6 +55,16 @@ Route::prefix('v1')->group(function () {
 
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
+        Route::prefix('catalogo')->middleware('permissao:catalogo.consultar')->group(function () {
+            $c=\App\Http\Controllers\Api\CatalogoPessoalController::class;
+            Route::get('ufs',[$c,'ufs'])->middleware('throttle:60,1');
+            Route::get('municipios',[$c,'municipios'])->middleware('throttle:60,1');
+            Route::get('instituicoes',[$c,'buscar'])->middleware('throttle:60,1');
+            Route::get('instituicoes/{unidade}',[$c,'show'])->whereUuid('unidade')->middleware('throttle:60,1');
+            Route::get('referencias-pessoais',[$c,'referencias'])->middleware('throttle:60,1');
+            Route::post('referencias-pessoais',[$c,'selecionar'])->middleware(['permissao:catalogo.referencia_pessoal.gerir','throttle:10,1']);
+            Route::post('referencias-pessoais/{id}/arquivar',[$c,'arquivar'])->whereUuid('id')->middleware(['permissao:catalogo.referencia_pessoal.gerir','throttle:10,1']);
+        });
         Route::get('copias/operacao/{id}', [\App\Http\Controllers\Api\OperacaoCopiaController::class,'show'])->whereUuid('id')->middleware('throttle:60,1');
         Route::post('copias/operacao/{id}/solicitar', [\App\Http\Controllers\Api\OperacaoCopiaController::class,'solicitar'])->whereUuid('id')->middleware('throttle:10,1');
         Route::post('copias/operacao/{id}/revogar', [\App\Http\Controllers\Api\OperacaoCopiaController::class,'revogar'])->whereUuid('id')->middleware('throttle:10,1');

@@ -62,6 +62,13 @@ Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController:
 
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
+    $instituicoes=\App\Http\Controllers\InstituicoesPessoaisController::class;
+    Route::get('/minhas-instituicoes',[$instituicoes,'index'])->name('instituicoes.index');
+    Route::get('/minhas-instituicoes/buscar',[$instituicoes,'buscar'])->name('instituicoes.buscar');
+    Route::get('/minhas-instituicoes/municipios',[$instituicoes,'municipios'])->name('instituicoes.municipios');
+    Route::get('/minhas-instituicoes/conferir/{unidade}',[$instituicoes,'conferir'])->whereUuid('unidade')->name('instituicoes.conferir');
+    Route::post('/minhas-instituicoes',[$instituicoes,'selecionar'])->name('instituicoes.selecionar');
+    Route::post('/minhas-instituicoes/{id}/arquivar',[$instituicoes,'arquivar'])->whereUuid('id')->name('instituicoes.arquivar');
     Route::get('/copias/operacao/{id}', [\App\Http\Controllers\OperacaoCopiaController::class,'show'])->whereUuid('id')->name('copias.operacao');
     Route::post('/copias/operacao/{id}/solicitar', [\App\Http\Controllers\OperacaoCopiaController::class,'solicitar'])->whereUuid('id')->name('copias.solicitar');
     Route::post('/copias/operacao/{id}/revogar', [\App\Http\Controllers\OperacaoCopiaController::class,'revogar'])->whereUuid('id')->name('copias.revogar');

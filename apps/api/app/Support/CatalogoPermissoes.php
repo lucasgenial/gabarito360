@@ -15,6 +15,7 @@ class CatalogoPermissoes
 
     /** T3: política pessoal independente, sem herdar poderes institucionais do professor. */
     public const AUTONOMO = [
+        'catalogo.consultar', 'catalogo.referencia_pessoal.gerir',
         'prova.duplicar_propria',
         'pedido.exportacao.autorizar',
         'copia.autorizar_origem', 'copia.autorizar_destino',
@@ -33,6 +34,8 @@ class CatalogoPermissoes
     ];
 
     public const LISTA = [
+        ['catalogo.consultar', 'catalogo', 'Consultar referências públicas institucionais', '--------'],
+        ['catalogo.referencia_pessoal.gerir', 'catalogo', 'Organizar instituições declaradas no próprio espaço pessoal', '--------'],
         ['prova.duplicar_propria', 'provas', 'Copiar a própria prova como rascunho independente', '-----v--'],
         ['pedido.exportacao.autorizar', 'titulares', 'Autorizar exportação delimitada do titular', '-v------'],
         // T5: elegibilidade exige vínculo explícito e escopo; o recurso permanece desligado.
