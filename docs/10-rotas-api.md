@@ -263,3 +263,7 @@ GET /api/v1/pedidos-titulares lista somente atribuições do contexto interno at
 ### L4-B2 — verificação e decisão
 
 POST /api/v1/pedidos-titulares/{uuid}/verificacoes registra conferência manual do responsável com evidência referenciada, método e validade. POST /api/v1/pedidos-titulares/{uuid}/decisao permite análise/conclusão administrativa usando conferências vigentes gravadas no servidor. Ambos exigem contexto, atribuição, versão, motivo e chave idempotente. Conclusão exige resultado e referência da resposta; nenhuma comunicação ou operação sobre dados é executada. Campos e limites no doc. 105.
+
+### L4-C3 — geração privada
+
+POST /api/v1/pedidos-titulares/exportacoes/{id}: UUID da concessão, entrada fechada versao/chave, contexto interno responsável e concessão atual obrigatórios. Flag PEDIDOS_EXPORTACAO_GERACAO_ATIVA=false. Resposta201 apenas referencia/situacao/expira_em, inclusive repetição idempotente autorizada. Nenhum download ou URL de arquivo; C4 implementará entrega. Contrato doc110.

@@ -503,3 +503,7 @@ Migration aditiva cria pedidos_titulares, pedido_titular_eventos e pedido_titula
 ### L4-B2 — conferências e conclusão administrativa
 
 Pedidos ganham ciclo_verificacao e resposta_referencia cifrada. A tabela pedido_titular_verificacoes preserva conferências manuais por protocolo/ciclo/tipo, autor, acesso/versão, método e validade; referência da evidência cifrada. Retorno para coleta de informações incrementa o ciclo, sem apagar conferências anteriores. Não há expurgo ou vínculo automático de identidade por CPF. Ver doc. 105.
+
+### L4-C3 — artefatos privados
+
+Migration000011 adiciona pedido_exportacao_artefatos (UUID, concessão/versão, acesso/versão, chave, estado, ciphertext, SHA-256 do ciphertext, expiração e datas) e pedido_exportacao_artefato_eventos (artefato, ator, ação e instante). FKs restritivas preservam histórico; índices únicos para concessão e acesso/versão/chave. Documento e manifesto cifrados; sem nomes/matrículas em colunas de metadados. Prazo DATETIME e ausência de rollback destrutivo. Não aplicada no servidor.
