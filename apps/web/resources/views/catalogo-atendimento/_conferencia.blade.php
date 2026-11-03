@@ -1,0 +1,8 @@
+<fieldset class="catalogo-secao">
+  <legend>Conferência do cadastro</legend>
+  <div class="catalogo-campos">
+    <div class="catalogo-campo"><label for="cad-situacao">Situação no cadastro da plataforma *</label><select id="cad-situacao" name="situacao" required aria-invalid="{{ $errors->has('situacao')?'true':'false' }}" aria-describedby="erro-situacao"><option value="1" @selected((string)old('situacao','1')==='1')>Ativa</option>@if(empty($somenteAtiva))<option value="2" @selected((string)old('situacao')==='2')>Paralisada</option><option value="3" @selected((string)old('situacao')==='3')>Inativa</option>@endif</select>@include('catalogo-atendimento._erro-campo',['campo'=>'situacao','erroId'=>'erro-situacao'])</div>
+    <div class="catalogo-campo catalogo-campo-inteiro"><label for="cad-motivo">Motivo e resultado da conferência *</label><textarea id="cad-motivo" name="motivo" required minlength="5" maxlength="1000" rows="3" aria-invalid="{{ $errors->has('motivo')?'true':'false' }}" aria-describedby="erro-motivo">{{ old('motivo') }}</textarea>@include('catalogo-atendimento._erro-campo',['campo'=>'motivo','erroId'=>'erro-motivo'])</div>
+  </div>
+  <label class="catalogo-confirmacao"><input type="checkbox" name="conferencia" value="1" required aria-invalid="{{ $errors->has('conferencia')?'true':'false' }}" aria-describedby="erro-conferencia"><span>Conferi a instituição, sua localização, o código quando informado e a evidência pública. Esta ação não concede vínculo nem acesso escolar.</span></label>@include('catalogo-atendimento._erro-campo',['campo'=>'conferencia','erroId'=>'erro-conferencia'])
+</fieldset>

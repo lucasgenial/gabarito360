@@ -4,6 +4,7 @@
 @section('content')
 <x-pagina titulo="Minhas instituições"><x-slot:sub>Referências de atuação no seu espaço pessoal.</x-slot:sub><a class="btn btn-primary" href="{{ route('instituicoes.buscar') }}">{{ \App\Support\Acesso::pode('catalogo.referencia_pessoal.gerir')?'Adicionar instituição':'Consultar catálogo' }}</a></x-pagina>
 <p style="margin:20px 0;">Use esta lista para registrar as instituições em que você atua. Adicionar uma instituição não confirma vínculo profissional e não libera acesso ao ambiente ou aos dados da escola.</p>
+@if(\App\Support\Acesso::pode('catalogo.solicitar'))<p><a href="{{ route('catalogo-pedidos.index') }}">Minhas solicitações de cadastro</a> · <a href="{{ route('catalogo-pedidos.novo') }}">Não encontrou uma instituição? Solicitar cadastro</a></p>@endif
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 <div style="display:grid;gap:16px;margin-top:20px;">

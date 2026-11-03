@@ -55,6 +55,23 @@ Route::prefix('v1')->group(function () {
 
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
+        $sol=\App\Http\Controllers\Api\SolicitacaoCatalogoController::class;
+        Route::prefix('catalogo/minhas-solicitacoes')->middleware('throttle:catalogo-operacao')->group(function()use($sol){
+            Route::get('opcoes',[$sol,'opcoes']);Route::get('municipios',[$sol,'municipios']);
+            Route::get('',[$sol,'index']);Route::post('',[$sol,'store']);
+            Route::get('{id}',[$sol,'show'])->whereUuid('id');Route::post('{id}/acoes',[$sol,'alterar'])->whereUuid('id');
+        });
+        Route::prefix('catalogo/atendimento')->middleware('throttle:catalogo-operacao')->group(function()use($sol){
+            Route::get('opcoes',[$sol,'opcoes']);Route::get('municipios',[$sol,'municipios']);Route::get('catalogo',[$sol,'buscar']);
+            Route::post('autoridades',[$sol,'autoridade']);
+            Route::post('instituicoes',[$sol,'gravar']);
+            Route::get('instituicoes/{unidade}',[$sol,'unidade'])->whereUuid('unidade');Route::post('instituicoes/{unidade}',[$sol,'gravar'])->whereUuid('unidade');
+            Route::get('',[$sol,'index']);Route::get('{id}',[$sol,'show'])->whereUuid('id');Route::post('{id}/acoes',[$sol,'alterar'])->whereUuid('id');
+        });
+        Route::prefix('catalogo/gestao')->middleware('throttle:catalogo-operacao')->group(function()use($sol){
+            Route::get('',[$sol,'gestao']);Route::get('opcoes',[$sol,'opcoes']);Route::get('municipios',[$sol,'municipios']);
+            Route::get('instituicoes/{unidade}',[$sol,'unidade'])->whereUuid('unidade');Route::post('instituicoes/{unidade}',[$sol,'gravar'])->whereUuid('unidade');
+        });
         Route::prefix('catalogo')->middleware('permissao:catalogo.consultar')->group(function () {
             $c=\App\Http\Controllers\Api\CatalogoPessoalController::class;
             Route::get('ufs',[$c,'ufs'])->middleware('throttle:60,1');

@@ -25,6 +25,10 @@ class ExigirContextoVinculo
                 \App\Support\ContextoInterno::resolver($request->user());
                 return $next($request);
             }
+            if ($request->is('api/v1/catalogo/atendimento', 'api/v1/catalogo/atendimento/*')) {
+                app(\App\Services\PoliticaCatalogo::class)->interno($usuario);
+                return $next($request);
+            }
             if ($request->is('api/v1/clientes', 'api/v1/clientes/*')) {
                 \App\Http\Controllers\Api\ClienteController::autorizar($request);
                 return $next($request);

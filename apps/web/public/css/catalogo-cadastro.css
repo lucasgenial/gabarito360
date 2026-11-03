@@ -1,0 +1,46 @@
+.tela-catalogo-cadastro [hidden]{display:none!important}
+.tela-catalogo-cadastro .catalogo-formulario{width:100%;max-width:1120px;padding:28px 32px;margin-top:24px}
+.tela-catalogo-cadastro .catalogo-secao{min-width:0;border:0;border-bottom:1px solid var(--border-soft);padding:26px 0;margin:0}
+.tela-catalogo-cadastro .catalogo-secao:first-child{padding-top:0}
+.tela-catalogo-cadastro .catalogo-secao legend,.tela-catalogo-cadastro .catalogo-secao>summary{font-size:18px;line-height:1.4;font-weight:700;color:var(--fg)}
+.tela-catalogo-cadastro .catalogo-secao>summary{cursor:pointer;padding:2px 0}
+.tela-catalogo-cadastro .catalogo-adicionais{border-bottom:0}
+.tela-catalogo-cadastro .catalogo-ajuda{font-size:14px;line-height:1.5;color:var(--muted);max-width:76ch;margin:6px 0 16px}
+.tela-catalogo-cadastro .catalogo-campos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px 24px;margin-top:18px}
+.tela-catalogo-cadastro .catalogo-campos-localizacao{grid-template-columns:minmax(160px,.48fr) minmax(0,1fr)}
+.tela-catalogo-cadastro .catalogo-campo{min-width:0}
+.tela-catalogo-cadastro .catalogo-campo-inteiro{grid-column:1/-1}
+.tela-catalogo-cadastro label{display:block;font-size:14px;font-weight:600;line-height:1.5;color:var(--fg);margin-bottom:6px}
+.tela-catalogo-cadastro input:not([type=hidden]):not([type=checkbox]):not([type=radio]),.tela-catalogo-cadastro select,.tela-catalogo-cadastro textarea{display:block;width:100%;max-width:100%;min-width:0;min-height:44px;border:1.5px solid var(--border);border-radius:var(--radius-md);padding:11px 14px;font:inherit;font-size:15px;background:var(--surface);color:var(--fg)}
+.tela-catalogo-cadastro textarea{resize:vertical}
+.tela-catalogo-cadastro input:focus,.tela-catalogo-cadastro select:focus,.tela-catalogo-cadastro textarea:focus{outline:2px solid var(--accent);outline-offset:2px}
+.tela-catalogo-cadastro [aria-invalid=true]{border-color:var(--danger)!important}
+.tela-catalogo-cadastro input[type=checkbox]{width:18px;height:18px;flex-shrink:0;margin-top:3px;accent-color:var(--accent)}
+.tela-catalogo-cadastro .catalogo-busca-linha{display:flex;gap:10px;align-items:flex-start}
+.tela-catalogo-cadastro .catalogo-busca-linha input{flex:1;min-width:0}
+.tela-catalogo-cadastro .catalogo-pesquisa-municipio{max-width:640px;margin-top:18px}
+.tela-catalogo-cadastro .catalogo-pesquisa-municipio label{font-weight:500}
+.tela-catalogo-cadastro .catalogo-acoes{display:flex;gap:16px;align-items:center;justify-content:space-between;border-top:1px solid var(--border-soft);padding-top:24px;margin-top:8px}
+.tela-catalogo-cadastro .catalogo-acoes .btn{white-space:normal;text-align:center;min-height:44px}
+.tela-catalogo-cadastro .catalogo-confirmacao{display:flex;align-items:flex-start;gap:12px;margin:20px 0;font-weight:400;max-width:76ch}
+.tela-catalogo-cadastro .catalogo-erros{max-width:1120px;padding:18px 22px;margin:20px 0;border:1px solid var(--danger);border-radius:var(--radius-md);color:var(--danger);background:var(--danger-light)}
+.tela-catalogo-cadastro .catalogo-erros h2{font-size:17px;margin-bottom:8px}
+.tela-catalogo-cadastro .catalogo-erros ul{padding-left:22px;line-height:1.6}
+.tela-catalogo-cadastro .catalogo-erro-campo{color:var(--danger);font-size:14px;line-height:1.45;margin-top:8px}
+.tela-catalogo-cadastro .catalogo-resumo,.tela-catalogo-cadastro .catalogo-historico,.tela-catalogo-cadastro .catalogo-decisao{max-width:1120px;padding:24px;margin-top:20px;overflow-wrap:anywhere}
+.tela-catalogo-cadastro .catalogo-resumo h2{font-size:22px;margin:12px 0 6px}
+.tela-catalogo-cadastro .catalogo-resumo p,.tela-catalogo-cadastro .catalogo-decisao p{line-height:1.6;max-width:76ch}
+.tela-catalogo-cadastro .catalogo-proximo{background:var(--accent-light);padding:18px 20px;margin-top:20px;border-radius:var(--radius-md)}
+.tela-catalogo-cadastro .catalogo-proximo h3{font-size:16px;margin-bottom:6px}
+.tela-catalogo-cadastro .catalogo-metadados{font-size:13px;color:var(--muted);margin-top:16px;overflow-wrap:anywhere}
+.tela-catalogo-cadastro .catalogo-metadados summary{cursor:pointer}
+.tela-catalogo-cadastro .catalogo-historico h2,.tela-catalogo-cadastro .catalogo-decisao h2{font-size:18px;margin-bottom:16px}
+.tela-catalogo-cadastro .catalogo-eventos{list-style:none;padding:0;margin:0}
+.tela-catalogo-cadastro .catalogo-eventos li{border-left:2px solid var(--border);padding:2px 0 20px 18px;margin-left:4px;line-height:1.5}
+.tela-catalogo-cadastro .catalogo-eventos li:last-child{padding-bottom:0}
+.tela-catalogo-cadastro .catalogo-eventos time{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+.tela-catalogo-cadastro .catalogo-lista strong{display:block;margin-bottom:4px}
+.tela-catalogo-cadastro .catalogo-lista .page-sub{font-size:13px}
+.tela-catalogo-cadastro .catalogo-decisao summary{cursor:pointer;font-weight:600}
+@media(max-width:700px){.tela-catalogo-cadastro .catalogo-formulario{padding:20px}.tela-catalogo-cadastro .catalogo-campos,.tela-catalogo-cadastro .catalogo-campos-localizacao{grid-template-columns:minmax(0,1fr);gap:18px}.tela-catalogo-cadastro .catalogo-secao{padding:22px 0}.tela-catalogo-cadastro .catalogo-acoes{flex-wrap:wrap}.tela-catalogo-cadastro .catalogo-acoes .btn-primary{width:100%}.tela-catalogo-cadastro .catalogo-resumo,.tela-catalogo-cadastro .catalogo-historico,.tela-catalogo-cadastro .catalogo-decisao{padding:20px}.tela-catalogo-cadastro .catalogo-busca-linha{flex-wrap:wrap}.tela-catalogo-cadastro .catalogo-busca-linha input{flex-basis:200px}.tela-catalogo-cadastro .catalogo-metadados{font-size:12px}}
+.tela-catalogo-cadastro .alert{max-width:1120px}
