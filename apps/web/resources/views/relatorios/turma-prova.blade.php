@@ -70,8 +70,8 @@
   <div class="card-pad" style="padding-bottom:0;">
     <h3 style="font-size:17px;">Resultado detalhado por aluno</h3>
   </div>
-  <table class="table lista-cel">
-    <thead><tr><th>Aluno</th><th>Nota</th><th>Desempenho</th><th>Status</th><th></th></tr></thead>
+  <x-tabela titulo="Desempenho dos alunos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Desempenho dos alunos</caption>
+    <thead><tr><th scope="col">Aluno</th><th scope="col">Nota</th><th scope="col">Desempenho</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
     <tbody>
       @forelse($alunos as $a)
         @php
@@ -79,33 +79,33 @@
           $cor = $pct >= 70 ? 'var(--success)' : ($pct >= 50 ? 'var(--warn-fg)' : 'var(--danger)');
         @endphp
         <tr>
-          <td>
+          <td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor">
             <div class="student-name">
               <span class="av">{{ strtoupper(implode('', array_map(fn($p) => $p[0], array_slice(explode(' ', $a['aluno_nome']), 0, 2)))) }}</span>
               <b>{{ $a['aluno_nome'] }}</b>
             </div>
-          </td>
-          <td class="num"><b>{{ number_format($a['nota_final'], 1, ',', '.') }}</b></td>
-          <td>
+          </div></td>
+          <td class="num" data-rotulo="Nota"><div class="tabela-valor"><b>{{ number_format($a['nota_final'], 1, ',', '.') }}</b></div></td>
+          <td data-rotulo="Desempenho"><div class="tabela-valor">
             <div style="display:flex;align-items:center;">
               <span class="mini-bar"><div style="width:{{ $pct }}%;background:{{ $cor }};"></div></span>
               <span>{{ $pct }}%</span>
             </div>
-          </td>
-          <td>
+          </div></td>
+          <td data-rotulo="Status"><div class="tabela-valor">
             <span class="badge {{ $a['status_aprovacao'] === 'aprovado' ? 'badge-success' : 'badge-warn' }} badge-dot">
               {{ $a['status_aprovacao'] === 'aprovado' ? 'Aprovado' : 'Recuperação' }}
             </span>
-          </td>
-          <td style="text-align:right;">
+          </div></td>
+          <td style="text-align:right;" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
             <a href="{{ route('resultados.show', [$a['aluno_id'], $prova['id']]) }}?from=rel-turma&turma={{ $turma['id'] }}" class="btn btn-result btn-sm">Ver detalhes</a>
-          </td>
+          </div></td>
         </tr>
       @empty
         <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Nenhum resultado disponível ainda.</td></tr>
       @endforelse
     </tbody>
-  </table>
+  </table></x-tabela>
 </div>
 
 <div style="height:48px"></div>

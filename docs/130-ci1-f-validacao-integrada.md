@@ -56,8 +56,13 @@ O responsável ampliou o trabalho para padronizar todas as tabelas/cards e prese
 |---|---|
 | H1 | Homologação isolada e recuperação completa validadas |
 | CI1-A–E | Integrados e publicados anteriormente |
-| CI1-F | Técnica e UI aprovadas; publicação do head final em homologação após CI |
+| CI1-F | PR160 integrado; homologação publicada em8851e9d4, cinco checks aprovados, backup e dados acadêmicos idênticos |
 | CP1 | Disponível conforme perfil |
 | TBL1-A–D | Auditoria/plano definidos; implementação separada, ações preservadas |
 | ID1/VI1/DC1/CP2/MT1/TR1/TE1/PA1/UX1 | Planejados, sem antecipar implementação |
 | Produção | Preservada; promoção exige decisão explícita |
+
+
+## Publicação confirmada em03/11/2026
+
+CI41733544224 do head97beefd aprovado nos cinco jobs. PR160 integrado em8851e9d41d90f59318845db6dd0deb331f195630; diff apps entre o conteúdo aprovado e o merge vazio. Publicação somente naVM120, faseHOMOLOGACAO-CI1-F, com deploy.py atual previamente ensaiado no clone isolado. ArchiveSHA256076f9b10745302d8c3bb8605df983904cca38255f6656aafe3051f30681dcbb4. Recibo protegido no servidor registra backup próprio, comparação das nove tabelas acadêmicas idêntica e produção não alterada. BrowserChrome: sessão existente, escolha do vínculo e painel/provas abriram com rodapé8851e9d4. Nenhuma migration nova. Evidência visual ci1-f-homologacao-publicada.png fora doGit.

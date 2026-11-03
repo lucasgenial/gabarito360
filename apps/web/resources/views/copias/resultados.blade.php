@@ -14,12 +14,12 @@
 <form method="POST" action="{{ route('copias.resultados.previa') }}" class="card card-pad" style="margin-top:20px;">
   @csrf<input type="hidden" name="_ctx" value="{{ $ctx }}"><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   <p>Selecione de 1 a 20 resultados desta página. Trocar a página ou o espaço limpa a seleção. A prévia verificará se os cartões e suas respostas estão finalizados.</p>
-  <div style="overflow-x:auto;"><table class="table"><caption>{{ $lista['total'] }} resultado(s) neste espaço</caption>
+  <div style="overflow-x:auto;"><x-tabela titulo="Selecionar resultados" modo="selecao"><table class="tabela-padrao table"><caption>{{ $lista['total'] }} resultado(s) neste espaço</caption>
     <thead><tr><th scope="col">Selecionar</th><th scope="col">Aluno</th><th scope="col">Matrícula</th><th scope="col">Prova</th><th scope="col">Turma</th><th scope="col">Nota registrada</th></tr></thead>
-    <tbody>@forelse($lista['data'] as $r)<tr><td><input type="checkbox" id="nota-{{ $r['id'] }}" name="notas[]" value="{{ $r['id'] }}" aria-label="Selecionar resultado de {{ $r['aluno'] }} na prova {{ $r['prova'] }}"></td>
-      <td><label for="nota-{{ $r['id'] }}">{{ $r['aluno'] }}</label></td><td>{{ $r['matricula'] }}</td><td>{{ $r['prova'] }}</td><td>{{ $r['turma'] }}</td><td>{{ $r['nota_final'] }}</td></tr>
+    <tbody>@forelse($lista['data'] as $r)<tr><td class="tabela-selecionar" data-rotulo="Selecionar"><div class="tabela-valor"><input type="checkbox" id="nota-{{ $r['id'] }}" name="notas[]" value="{{ $r['id'] }}" aria-label="Selecionar resultado de {{ $r['aluno'] }} na prova {{ $r['prova'] }}"></div></td>
+      <td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><label for="nota-{{ $r['id'] }}">{{ $r['aluno'] }}</label></div></td><td data-rotulo="Matrícula"><div class="tabela-valor">{{ $r['matricula'] }}</div></td><td data-rotulo="Prova"><div class="tabela-valor">{{ $r['prova'] }}</div></td><td data-rotulo="Turma"><div class="tabela-valor">{{ $r['turma'] }}</div></td><td data-rotulo="Nota registrada"><div class="tabela-valor">{{ $r['nota_final'] }}</div></td></tr>
     @empty<tr><td colspan="6">Nenhum resultado disponível.</td></tr>@endforelse</tbody>
-  </table></div>
+  </table></x-tabela></div>
   <div class="field"><label for="tipo_destino">Tipo de destino para simulação</label><select class="select" id="tipo_destino" name="tipo_destino" required>
     <option value="">Selecione o tipo</option><option value="pessoal">Pessoal</option><option value="escola">Escolar</option>
   </select></div><p>Esta escolha não identifica um destinatário real.</p>

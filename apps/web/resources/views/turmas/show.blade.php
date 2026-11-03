@@ -81,37 +81,37 @@
 </div>
 
 <div class="card" style="overflow:hidden;">
-  <table class="table lista-cel" id="alunos-table">
+  <x-tabela titulo="Alunos da turma" modo="lista"><table class="tabela-padrao table " id="alunos-table"><caption class="sr-only">Alunos da turma</caption>
     <thead>
       <tr>
-        <th>Aluno</th>
-        <th>Matrícula</th>
-        <th>Média geral</th>
-        <th>Provas</th>
-        <th>Status</th>
-        <th></th>
+        <th scope="col">Aluno</th>
+        <th scope="col">Matrícula</th>
+        <th scope="col">Média geral</th>
+        <th scope="col">Provas</th>
+        <th scope="col">Status</th>
+        <th scope="col">Ações</th>
       </tr>
     </thead>
     <tbody id="alunos-tbody">
       @forelse($turma['alunos'] ?? [] as $a)
         <tr data-nome="{{ strtolower($a['nome']) }}">
-          <td>
+          <td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor">
             <div class="student-name">
               <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id']" tamanho="sm" />
               <strong>{{ $a['nome'] }}</strong>
             </div>
-          </td>
-          <td style="font-family:var(--font-mono);">{{ $a['matricula'] ?? '—' }}</td>
-          <td style="font-family:var(--font-mono);">{{ ($a['media_geral'] ?? null) !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</td>
-          <td style="font-family:var(--font-mono);">{{ $a['total_provas'] ?? 0 }}</td>
-          <td>
+          </div></td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Matrícula"><div class="tabela-valor">{{ $a['matricula'] ?? '—' }}</div></td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Média geral"><div class="tabela-valor">{{ ($a['media_geral'] ?? null) !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</div></td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Provas"><div class="tabela-valor">{{ $a['total_provas'] ?? 0 }}</div></td>
+          <td data-rotulo="Status"><div class="tabela-valor">
             @if($a['ativo'] ?? true)
               <span class="badge badge-success badge-dot">Ativo</span>
             @else
               <span class="badge badge-danger badge-dot">Inativo</span>
             @endif
-          </td>
-          <td><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a></td>
+          </div></td>
+          <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a></div></td>
         </tr>
       @empty
         <tr id="empty-row">
@@ -123,7 +123,7 @@
         </tr>
       @endforelse
     </tbody>
-  </table>
+  </table></x-tabela>
   <div id="no-results" style="display:none;padding:32px;text-align:center;color:var(--muted);font-size:14px;">
     Nenhum aluno corresponde à busca.
   </div>
@@ -141,15 +141,15 @@
 
 <div class="card" style="overflow:hidden;margin-bottom:24px;">
   @if(count($turma['provas'] ?? []) > 0)
-  <table class="table lista-cel">
+  <x-tabela titulo="Provas da turma" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Provas da turma</caption>
     <thead>
       <tr>
-        <th>Prova</th>
-        <th>Disciplina</th>
-        <th>Aplicação</th>
-        <th>Média</th>
-        <th>Status</th>
-        <th></th>
+        <th scope="col">Prova</th>
+        <th scope="col">Disciplina</th>
+        <th scope="col">Aplicação</th>
+        <th scope="col">Média</th>
+        <th scope="col">Status</th>
+        <th scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -164,12 +164,12 @@
       @foreach($turma['provas'] as $p)
         @php $sc = $statusCfg[$p['status']] ?? ['cls'=>'badge-info','label'=>$p['status']]; @endphp
         <tr>
-          <td><strong>{{ $p['titulo'] }}</strong></td>
-          <td>{{ $p['disciplina'] }}</td>
-          <td>{{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}</td>
-          <td style="font-family:var(--font-mono);">{{ $p['media'] !== null ? number_format($p['media'], 1, ',', '') : '—' }}</td>
-          <td><span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span></td>
-          <td>
+          <td class="tabela-principal" data-rotulo="Prova"><div class="tabela-valor"><strong>{{ $p['titulo'] }}</strong></div></td>
+          <td data-rotulo="Disciplina"><div class="tabela-valor">{{ $p['disciplina'] }}</div></td>
+          <td data-rotulo="Aplicação"><div class="tabela-valor">{{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}</div></td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Média"><div class="tabela-valor">{{ $p['media'] !== null ? number_format($p['media'], 1, ',', '') : '—' }}</div></td>
+          <td data-rotulo="Status"><div class="tabela-valor"><span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span></div></td>
+          <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
             @if($p['status'] === 'em_correcao')
               <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary">Acompanhar</a>
             @elseif($p['status'] === 'corrigida')
@@ -177,11 +177,11 @@
             @else
               <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
             @endif
-          </td>
+          </div></td>
         </tr>
       @endforeach
     </tbody>
-  </table>
+  </table></x-tabela>
   @else
   <div style="text-align:center;padding:48px 20px;color:var(--muted);">
     <div class="icone-grande"><x-icone nome="prova" /></div>
@@ -221,34 +221,34 @@
   </form>
 
   @if(count($professores ?? []) > 0)
-    <table class="table lista-cel" style="margin-top:0;">
+    <x-tabela titulo="Professores da turma" modo="lista"><table class="tabela-padrao table " style="margin-top:0;"><caption class="sr-only">Professores da turma</caption>
       <thead>
         <tr>
-          <th>Professor(a)</th>
-          <th>E-mail</th>
-          <th>Status</th>
-          <th></th>
+          <th scope="col">Professor(a)</th>
+          <th scope="col">E-mail</th>
+          <th scope="col">Status</th>
+          <th scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
         @foreach($professores as $p)
           @php $ini = collect(explode(' ', $p['nome']))->filter()->map(fn($x) => mb_strtoupper(mb_substr($x,0,1)))->take(2)->implode(''); @endphp
           <tr>
-            <td>
+            <td class="tabela-principal" data-rotulo="Professor(a)"><div class="tabela-valor">
               <div class="student-name">
                 <div class="student-av">{{ $ini }}</div>
                 <strong>{{ $p['nome'] }}</strong>
               </div>
-            </td>
-            <td>{{ $p['email'] }}</td>
-            <td>
+            </div></td>
+            <td data-rotulo="E-mail"><div class="tabela-valor">{{ $p['email'] }}</div></td>
+            <td data-rotulo="Status"><div class="tabela-valor">
               @if($p['ativo'] ?? true)
                 <span class="badge badge-success badge-dot">Ativo</span>
               @else
                 <span class="badge badge-danger badge-dot">Inativo</span>
               @endif
-            </td>
-            <td style="text-align:right;">
+            </div></td>
+            <td style="text-align:right;" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
               <form method="POST"
                     action="{{ route('turmas.professores.destroy', array_filter(['id' => $turma['id'], 'uid' => $p['id'], 'vinculo_id' => $p['vinculo_id'] ?? null])) }}"
                     onsubmit="return confirm('Desvincular {{ $p['nome'] }} desta turma?')">
@@ -257,11 +257,11 @@
                 <button type="submit" class="btn btn-sm btn-ghost"
                         style="color:var(--danger);border-color:var(--danger);">Desvincular</button>
               </form>
-            </td>
+            </div></td>
           </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
   @else
     <div style="text-align:center;padding:24px 20px;color:var(--muted);">
       <div class="icone-grande"><x-icone nome="turma" /></div>

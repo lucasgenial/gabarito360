@@ -12,6 +12,7 @@
 <meta name="g360-contexto" content="{{ \App\Support\ContextoWeb::id() }}">
 <script src="{{ asset('js/contexto-aba.js') }}?v={{ @filemtime(public_path('js/contexto-aba.js')) }}"></script>
 @endif
+<link rel="stylesheet" href="{{ asset('css/tabelas.css') }}?v={{ @filemtime(public_path('css/tabelas.css')) }}" />
 @stack('styles')
 {{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
 <script>try { if (localStorage.getItem('g360-menu') === 'recolhido') document.documentElement.classList.add('menu-recolhido'); } catch (e) {}</script>
@@ -156,6 +157,7 @@ document.getElementById('menu-recolher').addEventListener('click', function () {
 </script>
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
 <script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
+<script src="{{ asset('js/tabelas.js') }}?v={{ @filemtime(public_path('js/tabelas.js')) }}"></script>
 @stack('scripts')
 </body>
 </html>

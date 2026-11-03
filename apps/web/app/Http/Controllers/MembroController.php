@@ -44,6 +44,8 @@ class MembroController extends Controller
         $agrupados = collect($usuarios)->groupBy('perfil');
 
         return view('membros.index', [
+            'erroLista' => !$resp->successful(),
+            'haFiltros' => collect(['busca', 'perfil'])->contains(fn (string $campo) => $request->filled($campo)),
             'agrupados'  => $agrupados,
             'totais'     => $totais,
             'perfis'     => self::PERFIS,

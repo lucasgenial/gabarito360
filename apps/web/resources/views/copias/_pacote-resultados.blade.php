@@ -6,9 +6,9 @@
     <dt>Nota armazenada</dt><dd>{{ $r['dados']['nota_final'] }}</dd><dt>Acertos armazenados</dt><dd>{{ $r['dados']['acertos'] }} de {{ $r['dados']['total_questoes'] }}</dd>
     <dt>Situação armazenada</dt><dd>{{ $r['dados']['status_aprovacao']==='aprovado'?'Aprovado':'Recuperação' }}</dd>
     <dt>Língua</dt><dd>{{ ['ING'=>'Inglês','ESP'=>'Espanhol'][$r['dados']['lingua']??''] ?? 'Não informada' }}</dd></dl>
-  <details><summary>Conferir respostas incluídas</summary><table class="table"><thead><tr><th scope="col">Questão</th><th scope="col">Resposta</th></tr></thead>
-    <tbody>@foreach($r['respostas'] as $q)<tr><td>{{ $q['numero_questao'] }}</td><td>{{ $q['alternativa'] ?? 'Em branco' }}</td></tr>@endforeach</tbody>
-  </table></details>
+  <details><summary>Conferir respostas incluídas</summary><x-tabela titulo="Conferência das respostas" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Conferência das respostas</caption><thead><tr><th scope="col">Questão</th><th scope="col">Resposta</th></tr></thead>
+    <tbody>@foreach($r['respostas'] as $q)<tr><td class="tabela-principal" data-rotulo="Questão"><div class="tabela-valor">{{ $q['numero_questao'] }}</div></td><td data-rotulo="Resposta"><div class="tabela-valor">{{ $q['alternativa'] ?? 'Em branco' }}</div></td></tr>@endforeach</tbody>
+  </table></x-tabela></details>
 </section>
 @endforeach
 <section class="card card-pad" style="margin-top:20px;">

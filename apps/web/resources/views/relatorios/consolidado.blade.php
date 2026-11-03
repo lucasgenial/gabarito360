@@ -62,14 +62,14 @@
       :dados="['categorias' => $listaA->map(fn ($a) => \Illuminate\Support\Str::limit($a['disciplina'], 18))->values(), 'formato' => 'nota', 'maximo' => 10, 'rotulos' => true,
                'series' => [['nome' => 'Média', 'valores' => $listaA->pluck('media'),
                              'cores' => $listaA->map(fn ($a) => $a['media'] >= 6 ? '--serie-1' : '--danger')->values()]]]">
-      <table class="table">
-        <thead><tr><th>Área</th><th>Média</th><th>Aprovação</th><th>Notas</th></tr></thead>
+      <x-tabela titulo="Resultados por área" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Resultados por área</caption>
+        <thead><tr><th scope="col">Área</th><th scope="col">Média</th><th scope="col">Aprovação</th><th scope="col">Notas</th></tr></thead>
         <tbody>
           @foreach($areas as $a)
-            <tr><td>{{ $a['disciplina'] }}</td><td class="num">{{ $fmt($a['media']) }}</td><td class="num">{{ $a['aprovacao_pct'] }}%</td><td class="num">{{ $a['notas'] }}</td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Área"><div class="tabela-valor">{{ $a['disciplina'] }}</div></td><td class="num" data-rotulo="Média"><div class="tabela-valor">{{ $fmt($a['media']) }}</div></td><td class="num" data-rotulo="Aprovação"><div class="tabela-valor">{{ $a['aprovacao_pct'] }}%</div></td><td class="num" data-rotulo="Notas"><div class="tabela-valor">{{ $a['notas'] }}</div></td></tr>
           @endforeach
         </tbody>
-      </table>
+      </table></x-tabela>
     </x-grafico>
     <p class="field-help">Em vermelho, média abaixo de 6.</p>
   @else
@@ -82,19 +82,19 @@
   <h3 style="font-size:17px;margin-bottom:6px;">Comparativo entre {{ $grupo === 'turma' ? 'turmas' : 'escolas' }}</h3>
   @php $disciplinas = collect($areas)->pluck('disciplina'); @endphp
   <div class="quadro-cel" style="overflow-x:auto;">
-    <table class="tab">
+    <x-tabela titulo="Comparação de grupos" modo="matriz"><table class="tabela-padrao tabela-matriz tab"><caption class="sr-only">Comparação de grupos</caption>
       <thead>
         <tr>
-          <th>#</th><th class="esq fixa">{{ $grupo === 'turma' ? 'Turma' : 'Escola' }}</th>
-          @foreach($disciplinas as $d)<th>{{ \Illuminate\Support\Str::limit($d, 14) }}</th>@endforeach
-          <th>Média</th><th>Aprov.</th><th>Alunos</th>
+          <th scope="col">#</th><th scope="col" class="esq fixa">{{ $grupo === 'turma' ? 'Turma' : 'Escola' }}</th>
+          @foreach($disciplinas as $d)<th scope="col">{{ $d }}</th>@endforeach
+          <th scope="col">Média</th><th scope="col">Aprov.</th><th scope="col">Alunos</th>
         </tr>
       </thead>
       <tbody>
         @foreach($grupos as $i => $g)
           <tr>
-            <td>{{ $g['media'] !== null ? ($i + 1) . 'º' : '—' }}</td>
-            <td class="esq fixa">
+            <td data-rotulo="Posição">{{ $g['media'] !== null ? ($i + 1) . 'º' : '—' }}</td>
+            <td class="tabela-principal esq fixa" data-rotulo="{{ $grupo === 'turma' ? 'Turma' : 'Escola' }}">
               @if($grupo === 'turma')
                 <a href="{{ route('relatorios.turma', $g['id']) }}" style="color:inherit;"><b>{{ $g['nome'] }}</b></a>
               @else
@@ -103,15 +103,15 @@
             </td>
             @foreach($disciplinas as $d)
               @php $v = $g['por_area'][$d] ?? null; @endphp
-              <td>@if($v !== null)<span class="m {{ $v >= 6 ? 'ok' : 'baixa' }}">{{ $fmt($v) }}</span>@else<span style="color:var(--muted);">—</span>@endif</td>
+              <td data-rotulo="{{ $d }}">@if($v !== null)<span class="m {{ $v >= 6 ? 'ok' : 'baixa' }}">{{ $fmt($v) }}</span>@else<span style="color:var(--muted);">—</span>@endif</td>
             @endforeach
-            <td><b>{{ $fmt($g['media']) }}</b></td>
-            <td>{{ $g['aprovacao_pct'] !== null ? $g['aprovacao_pct'] . '%' : '—' }}</td>
-            <td>{{ $g['alunos'] }}</td>
+            <td data-rotulo="Média"><b>{{ $fmt($g['media']) }}</b></td>
+            <td data-rotulo="Aprovação">{{ $g['aprovacao_pct'] !== null ? $g['aprovacao_pct'] . '%' : '—' }}</td>
+            <td data-rotulo="Alunos">{{ $g['alunos'] }}</td>
           </tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
   </div>
   <p class="no-print" style="font-size:12px;color:var(--muted);margin-top:8px;">Toque no nome para abrir o relatório {{ $grupo === 'turma' ? 'da turma' : 'da escola' }}.</p>
 </div>

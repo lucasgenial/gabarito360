@@ -20,6 +20,8 @@ class AlunoController extends Controller
         $turmas = $this->api->get('/v1/turmas')->json('data.turmas') ?? [];
 
         return view('alunos.index', [
+            'erroLista' => !$resp->successful(),
+            'haFiltros' => collect(['busca', 'turma_id', 'ativo'])->contains(fn (string $campo) => $request->filled($campo)),
             'alunos'   => $alunos,
             'kpis'     => $kpis,
             'turmas'   => $turmas,

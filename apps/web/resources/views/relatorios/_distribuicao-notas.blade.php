@@ -26,14 +26,14 @@
   <x-grafico descricao="Quantidade de alunos por faixa de nota" :altura="230"
     :dados="['categorias' => $rotulos, 'inteiros' => true, 'rotulos' => true, 'intervalo' => 0,
              'series' => [['nome' => 'Alunos', 'valores' => $faixas, 'cores' => $cores]]]">
-    <table class="table">
-      <thead><tr><th>Faixa de nota</th><th>Alunos</th></tr></thead>
+    <x-tabela titulo="Distribuição das notas" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Distribuição das notas</caption>
+      <thead><tr><th scope="col">Faixa de nota</th><th scope="col">Alunos</th></tr></thead>
       <tbody>
         @foreach($faixas as $i => $qtd)
-          <tr><td>{{ $rotulos[$i] }}</td><td class="num">{{ $qtd }}</td></tr>
+          <tr><td class="tabela-principal" data-rotulo="Faixa de nota"><div class="tabela-valor">{{ $rotulos[$i] }}</div></td><td class="num" data-rotulo="Alunos"><div class="tabela-valor">{{ $qtd }}</div></td></tr>
         @endforeach
       </tbody>
-    </table>
+    </table></x-tabela>
   </x-grafico>
   <p class="field-help">Alunos por faixa de nota. Em vermelho, abaixo de 60% da nota máxima.</p>
 @else

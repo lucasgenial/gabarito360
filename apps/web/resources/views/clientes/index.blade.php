@@ -17,11 +17,11 @@
   <a class="btn btn-ghost" href="{{ route('clientes.index') }}">Limpar</a>
 </form>
 <div class="card card-pad" style="margin-top:20px;overflow-x:auto;">
-<table class="table"><thead><tr><th>Cliente</th><th>Tipo</th><th>Modalidade</th><th>Situação</th><th></th></tr></thead><tbody>
+<x-tabela titulo="Clientes" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Clientes</caption><thead><tr><th scope="col">Cliente</th><th scope="col">Tipo</th><th scope="col">Modalidade</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead><tbody>
 @forelse($lista['data'] as $c)
-<tr><td>{{ $c['nome'] }}</td><td>{{ $tipos[$c['tipo']] ?? $c['tipo'] }}</td><td>{{ $modalidades[$c['modalidade']] ?? $c['modalidade'] }}</td><td>{{ ucfirst($c['situacao']) }}</td><td><a class="btn btn-secondary" href="{{ route('clientes.show',$c['id']) }}">Ver cadastro</a></td></tr>
+<tr><td class="tabela-principal" data-rotulo="Cliente"><div class="tabela-valor">{{ $c['nome'] }}</div></td><td data-rotulo="Tipo"><div class="tabela-valor">{{ $tipos[$c['tipo']] ?? $c['tipo'] }}</div></td><td data-rotulo="Modalidade"><div class="tabela-valor">{{ $modalidades[$c['modalidade']] ?? $c['modalidade'] }}</div></td><td data-rotulo="Situação"><div class="tabela-valor">{{ ucfirst($c['situacao']) }}</div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><a class="btn btn-secondary" href="{{ route('clientes.show',$c['id']) }}">Ver cadastro</a></div></td></tr>
 @empty <tr><td colspan="5">Nenhum cliente encontrado.</td></tr> @endforelse
-</tbody></table>
+</tbody></table></x-tabela>
 <nav aria-label="Paginação dos clientes" style="margin-top:16px;">
 @if($lista['current_page'] > 1)<a class="btn btn-secondary" href="{{ route('clientes.index', array_merge($filtros,['page'=>$lista['current_page']-1])) }}">Anterior</a>@endif
 <span>Página {{ $lista['current_page'] }} de {{ $lista['last_page'] }}</span>

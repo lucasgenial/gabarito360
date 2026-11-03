@@ -44,13 +44,13 @@
   <p class="copias-nota">O código identifica o destino; a referência identifica a solicitação criada depois. São informações diferentes. Nenhuma mensagem é enviada automaticamente.</p>
   <p>Se você administra os dois espaços, pode realizar os dois papéis: use <strong>Trocar vínculo</strong> para atuar em cada um. As autorizações continuam separadas.</p>
   <details><summary>Quem tem autonomia para autorizar?</summary>
-    <div style="overflow-x:auto"><table class="table"><thead><tr><th scope="col">Perfil</th><th scope="col">Alcance nesta versão</th></tr></thead><tbody>
-      <tr><td>Administrador da Rede</td><td>Escolas da própria rede, com permissão vigente.</td></tr>
-      <tr><td>Diretor Escolar</td><td>Somente a própria escola, com permissão vigente.</td></tr>
-      <tr><td>Professor autônomo</td><td>Somente o espaço pessoal do qual é proprietário.</td></tr>
-      <tr><td>Professor da escola, Coordenador e Diretor de Núcleo</td><td>Não autorizam esta operação nesta versão. Procure o diretor da escola ou administrador da rede.</td></tr>
-      <tr><td>Equipe interna: Desenvolvedor, Suporte e Financeiro</td><td>O acesso interno não concede autorização para copiar dados escolares.</td></tr>
-    </tbody></table></div>
+    <div style="overflow-x:auto"><x-tabela titulo="Perfis e alcance" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Perfis e alcance</caption><thead><tr><th scope="col">Perfil</th><th scope="col">Alcance nesta versão</th></tr></thead><tbody>
+      <tr><td class="tabela-principal" data-rotulo="Perfil"><div class="tabela-valor">Administrador da Rede</div></td><td data-rotulo="Alcance nesta versão"><div class="tabela-valor">Escolas da própria rede, com permissão vigente.</div></td></tr>
+      <tr><td class="tabela-principal" data-rotulo="Perfil"><div class="tabela-valor">Diretor Escolar</div></td><td data-rotulo="Alcance nesta versão"><div class="tabela-valor">Somente a própria escola, com permissão vigente.</div></td></tr>
+      <tr><td class="tabela-principal" data-rotulo="Perfil"><div class="tabela-valor">Professor autônomo</div></td><td data-rotulo="Alcance nesta versão"><div class="tabela-valor">Somente o espaço pessoal do qual é proprietário.</div></td></tr>
+      <tr><td class="tabela-principal" data-rotulo="Perfil"><div class="tabela-valor">Professor da escola, Coordenador e Diretor de Núcleo</div></td><td data-rotulo="Alcance nesta versão"><div class="tabela-valor">Não autorizam esta operação nesta versão. Procure o diretor da escola ou administrador da rede.</div></td></tr>
+      <tr><td class="tabela-principal" data-rotulo="Perfil"><div class="tabela-valor">Equipe interna: Desenvolvedor, Suporte e Financeiro</div></td><td data-rotulo="Alcance nesta versão"><div class="tabela-valor">O acesso interno não concede autorização para copiar dados escolares.</div></td></tr>
+    </tbody></table></x-tabela></div>
     <p>Ter acesso a uma prova ou turma não concede, por si só, autorização para enviá-la a outro espaço. Origem e destino precisam de decisões válidas; permissões retiradas ou vínculos vencidos bloqueiam a operação.</p>
   </details>
 </section>
