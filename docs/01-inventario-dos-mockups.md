@@ -863,3 +863,6 @@ Autorização explícita após PR #94, T1/V2 e telas de equipe dos itens 26–28
 ### T3-B — variante pessoal dos cadastros
 
 Autorizada após PR #96 em 01/11/2026 (docs/64). Reutiliza `alunos/create`, `alunos/show`, `turmas/index`, `turmas/show` e `provas/create`: remove campos institucionais e dados excessivos no contexto pessoal, preservando layout/tokens e avatar. A API continua responsável pela autorização. Acesso pessoal desligado por padrão até T3-C.
+
+### CP1 — aprovação posterior em03/11/2026
+Ação Copiar na lista de provas abre modal com explicação e novo nome; sem página dedicada. Confirmação cria rascunho, com procedência no detalhe. Cadastro de prova acrescenta Formato da avaliação (Gabarito e cartão-resposta). Aprovação explícita e refinamento posterior na conversa, contrato doc118; futura ferramenta de enunciados/questões não incluída.
