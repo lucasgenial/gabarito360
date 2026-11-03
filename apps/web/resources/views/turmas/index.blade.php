@@ -42,7 +42,7 @@
   <input class="input" type="number" name="ano_letivo" placeholder="Ano letivo"
          value="{{ $ano_letivo }}" style="width:130px;" min="2020" max="2099" />
   <button type="submit" class="btn btn-secondary">Filtrar</button>
-  @if($busca || $escola_id || $ano_letivo)
+  @if($haFiltros)
     <a href="{{ route('turmas.index') }}" class="btn btn-ghost">Limpar</a>
   @endif
 </form>
@@ -116,7 +116,7 @@
           <td colspan="{{ (\App\Support\Acesso::pessoal() || \App\Support\Acesso::perfil() === 'secretario_escolar') ? 8 : 9 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="escola" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma encontrada</div>
-            <p>Crie a primeira turma usando o botão "+ Nova turma".</p>
+            <p>@if($haFiltros) Ajuste ou limpe os filtros para encontrar outros registros. @else Crie a primeira turma usando o botão "+ Nova turma". @endif</p>
           </td>
         </tr>
       @endforelse

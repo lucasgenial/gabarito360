@@ -66,7 +66,7 @@
     @endforeach
   </select>
   <button type="submit" class="btn btn-secondary">Filtrar</button>
-  @if($filtroBusc || $filtroPerf)
+  @if($haFiltros)
     <a href="{{ route('membros.index') }}" class="btn btn-ghost">Limpar</a>
   @endif
 </form>
@@ -77,6 +77,7 @@
 @elseif($agrupados->isEmpty())
   <div style="text-align:center;padding:40px;color:var(--muted);">
     Nenhum membro encontrado.
+    @if($haFiltros)<p>Ajuste ou limpe os filtros para encontrar outros registros.</p>@endif
   </div>
 @else
   @foreach($perfis as $perfilKey => $perfilCfg)

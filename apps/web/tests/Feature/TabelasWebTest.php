@@ -25,6 +25,20 @@ class TabelasWebTest extends TestCase
         }
     }
 
+    public function test_filtro_sem_resultado_nao_sugere_cadastrar_primeiro_registro(): void
+    {
+        Http::fake(['*'=>Http::response(['data'=>['alunos'=>[],'turmas'=>[],'provas'=>[],
+            'usuarios'=>[],'totais'=>[],'kpis'=>[]]])]);
+        foreach (['/alunos?busca=termo-sem-resultado','/turmas?busca=termo-sem-resultado',
+            '/provas?busca=termo-sem-resultado','/membros?busca=termo-sem-resultado',
+            '/alunos?ativo=0','/turmas?ativo=0'] as $url) {
+            $this->get($url)->assertOk()->assertSee('Limpar')
+                ->assertSee('Ajuste ou limpe os filtros')
+                ->assertDontSee('Cadastre o primeiro aluno')->assertDontSee('Crie a primeira prova')
+                ->assertDontSee('Crie a primeira turma');
+        }
+    }
+
     public function test_todos_alunos_e_acoes_estao_no_html_sem_javascript_e_escapados(): void
     {
         $alunos=[];
