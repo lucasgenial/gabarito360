@@ -510,3 +510,6 @@ Migration000011 adiciona pedido_exportacao_artefatos (UUID, concessão/versão, 
 
 ### CI1 — sigla institucional opcional
 Migration 2026_11_03_000002_adicionar_sigla_escolas acrescenta escolas.sigla VARCHAR(40) nullable, sem unicidade ou mudança de chaves/escopos. Nome completo/INEP e registros acadêmicos permanecem independentes da sigla. Sem preenchimento automático por iniciais e sem migration executada no servidor. Estrutura nacional futura e proveniência no doc119.
+
+### CI1-B2 — staging público retomável
+catalogo_geografias mantém snapshot IBGE versionado/imutável, separado dos locks do cursor. catalogo_importacoes identifica ingestão por conteúdo/schema/geografia e possui manifesto, checkpoint e lease; catalogo_observacoes guarda payload público mínimo e SHA-256, com unicidade por código e ordem na carga. Triggers recusam UPDATE/DELETE de geografia/observações, inclusive antes da validação. Estado validado não significa publicado. Migration 2026_11_03_000003 somente aditiva, sem execução no servidor. Ver doc120.
