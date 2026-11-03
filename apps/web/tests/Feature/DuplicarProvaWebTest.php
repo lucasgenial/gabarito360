@@ -9,6 +9,7 @@ class DuplicarProvaWebTest extends TestCase
     private function preparar(bool $elegivel=true): void
     {
         config(['services.api.base_url'=>'http://api.test/api']);
+        config(['release.fase'=>'INICIAL-V1-T5','release.sha'=>'a90fbf51-teste-visual']);
         $this->withSession(['auth_token'=>'token-ficticio','auth_nome'=>'Professor','auth_perfil'=>'professor','auth_permissoes'=>['prova.ver','prova.criar','prova.duplicar_propria','gabarito.ver']]);
         Http::preventStrayRequests();
         Http::fake(['*/v1/provas/1'=>Http::response(['data'=>['id'=>1,'titulo'=>'Matemática <script>','disciplina'=>'Matemática','serie'=>'1º ano','pode_copiar'=>$elegivel]])]);
@@ -17,7 +18,8 @@ class DuplicarProvaWebTest extends TestCase
     public function test_formulario_explica_copia_escapa_origem_e_preserva_intencao(): void
     {
         $this->preparar();
-        $r=$this->get('/provas/1/copiar')->assertOk()->assertSee('Criar cópia em rascunho')->assertSee('não serão copiados')->assertSee('Matemática &lt;script&gt;',false);
+        $r=$this->get('/provas/1/copiar')->assertOk()->assertSee('Criar cópia em rascunho')->assertSee('não serão copiados')->assertSee('Matemática &lt;script&gt;',false)
+            ->assertSee('aria-label="Versão do software"',false)->assertSee('Versão de testes: INICIAL-V1-T5 · a90fbf51');
         $this->assertStringContainsString('name="chave"',$r->getContent());
         if (getenv('G360_CP1_PREVIEW_DIR')) {
             file_put_contents(getenv('G360_CP1_PREVIEW_DIR').'/copiar.html',$r->getContent());
@@ -45,5 +47,13 @@ class DuplicarProvaWebTest extends TestCase
     {
         $this->preparar(false);
         $this->get('/provas/1/copiar')->assertNotFound();
+    }
+
+    public function test_nova_avaliacao_mostra_formato_suportado_sem_prometer_editor(): void
+    {
+        $this->preparar();
+        Http::fake(['*/v1/turmas*'=>Http::response(['data'=>['turmas'=>[]]]),'*/v1/escolas*'=>Http::response(['data'=>['escolas'=>[]]])]);
+        $r=$this->get('/provas/nova')->assertOk()->assertSee('Formato da avaliação')->assertSee('Gabarito e cartão-resposta')->assertSee('name="formato_avaliacao"',false);
+        if (getenv('G360_CP1_PREVIEW_DIR')) file_put_contents(getenv('G360_CP1_PREVIEW_DIR').'/nova.html',$r->getContent());
     }
 }
