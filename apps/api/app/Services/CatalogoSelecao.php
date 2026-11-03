@@ -12,7 +12,7 @@ class CatalogoSelecao
     public function edicoes(): array
     {
         $r=DB::table('catalogo_fontes as f')->join('catalogo_publicacoes as p','p.id','=','f.publicacao_id')
-            ->where('p.estado','publicada')->orderBy('f.nome')->get(['p.id','p.fonte','p.ano','p.total','p.geografia_id'])->all();
+            ->where('p.estado','publicada')->orderByRaw("CASE f.nome WHEN 'basica' THEN 0 WHEN 'superior' THEN 1 ELSE 2 END")->get(['p.id','p.fonte','p.ano','p.total','p.geografia_id'])->all();
         abort_unless($r,503,'O catálogo está temporariamente indisponível. Tente novamente.');
         return $r;
     }
@@ -52,7 +52,7 @@ class CatalogoSelecao
     {
         $unidade=strtolower($unidade);
         $ids=array_column($this->edicoes(),'id');
-        $e=DB::table('catalogo_entradas as e')->join('catalogo_publicacoes as p','p.id','=','e.publicacao_id')
+        $e=app(ConsultarCatalogoInstituicoes::class)->vigentes()
             ->join('catalogo_municipios as m',fn($j)=>$j->on('m.geografia_id','=','e.geografia_id')->on('m.codigo_ibge','=','e.municipio_ibge'))
             ->whereIn('p.id',$ids)->where('e.unidade_id',$unidade)
             ->select('e.*','m.nome as municipio_nome','p.id as edicao_id','p.fonte','p.ano')->first();
@@ -65,7 +65,7 @@ class CatalogoSelecao
         $r=[];
         foreach(['unidade_id','instituicao_id','nome','sigla','namespace','codigo','tipo','natureza','dependencia','situacao_fonte','uf','municipio_ibge','municipio_nome','edicao_id','ano','fonte'] as $k) $r[$k]=$e->$k;
         $r['elegivel']=$this->elegivel($e);
-        $r['situacao_rotulo']=match($e->situacao_fonte){'1'=>'Em atividade na fonte','2'=>'Paralisada','3'=>'Extinta','4'=>'Extinta em anos anteriores',default=>'Situação não informada na fonte'};
+        $r['situacao_rotulo']=$e->fonte==='manual' ? match($e->situacao_fonte){'1'=>'Ativa no cadastro da plataforma','2'=>'Paralisada no cadastro da plataforma',default=>'Inativa no cadastro da plataforma'} : match($e->situacao_fonte){'1'=>'Em atividade na fonte','2'=>'Paralisada','3'=>'Extinta','4'=>'Extinta em anos anteriores',default=>'Situação não informada na fonte'};
         return $r;
     }
 

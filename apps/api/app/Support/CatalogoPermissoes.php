@@ -15,7 +15,7 @@ class CatalogoPermissoes
 
     /** T3: política pessoal independente, sem herdar poderes institucionais do professor. */
     public const AUTONOMO = [
-        'catalogo.consultar', 'catalogo.referencia_pessoal.gerir',
+        'catalogo.consultar', 'catalogo.referencia_pessoal.gerir', 'catalogo.solicitar',
         'prova.duplicar_propria',
         'pedido.exportacao.autorizar',
         'copia.autorizar_origem', 'copia.autorizar_destino',
@@ -34,6 +34,8 @@ class CatalogoPermissoes
     ];
 
     public const LISTA = [
+        ['catalogo.solicitar', 'catalogo', 'Solicitar cadastro no próprio espaço pessoal', '--------'],
+        ['catalogo.manter_escopo', 'catalogo', 'Manter unidades com autoridade institucional comprovada', '-vvv----'],
         ['catalogo.consultar', 'catalogo', 'Consultar referências públicas institucionais', '--------'],
         ['catalogo.referencia_pessoal.gerir', 'catalogo', 'Organizar instituições declaradas no próprio espaço pessoal', '--------'],
         ['prova.duplicar_propria', 'provas', 'Copiar a própria prova como rascunho independente', '-----v--'],

@@ -27,7 +27,7 @@
     var contexto = new URL(location.href).searchParams.get('_ctx');
     if (contexto) url.searchParams.set('_ctx', contexto);
     try {
-      var resposta = await fetch(url, {headers: {'Accept': 'application/json'}, credentials: 'same-origin'});
+      var resposta = await fetch(url, {headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}, credentials: 'same-origin'});
       if (!resposta.ok) throw new Error('indisponivel');
       var dados = await resposta.json();
       if (seq !== sequencia) return;

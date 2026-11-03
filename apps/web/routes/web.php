@@ -62,6 +62,22 @@ Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController:
 
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
+    $atendimento=\App\Http\Controllers\CatalogoAtendimentoController::class;
+    Route::prefix('instituicoes/solicitacoes')->name('catalogo-pedidos.')->group(function()use($atendimento){
+        Route::get('',[$atendimento,'index'])->name('index');Route::get('nova',[$atendimento,'novo'])->name('novo');Route::post('',[$atendimento,'enviar'])->name('enviar');
+        Route::get('municipios',[$atendimento,'municipios'])->name('municipios');Route::get('{id}',[$atendimento,'show'])->whereUuid('id')->name('show');Route::post('{id}/acoes',[$atendimento,'enviar'])->whereUuid('id')->name('acao');
+    });
+    Route::prefix('catalogo/atendimento')->name('catalogo-atendimento.')->group(function()use($atendimento){
+        Route::get('',[$atendimento,'index'])->name('index');Route::get('novo',[$atendimento,'novo'])->name('novo');Route::post('instituicoes',[$atendimento,'enviar'])->name('cadastrar');
+        Route::get('buscar',[$atendimento,'buscar'])->name('buscar');Route::get('municipios',[$atendimento,'municipios'])->name('municipios');
+        Route::get('instituicoes/{unidade}',[$atendimento,'editar'])->whereUuid('unidade')->name('editar');Route::post('instituicoes/{unidade}',[$atendimento,'gravar'])->whereUuid('unidade')->name('gravar');
+        Route::get('autoridades/{unidade}',[$atendimento,'autoridades'])->whereUuid('unidade')->name('autoridades');Route::post('autoridades',[$atendimento,'enviar'])->name('autorizar');
+        Route::get('{id}',[$atendimento,'show'])->whereUuid('id')->name('show');Route::post('{id}/acoes',[$atendimento,'enviar'])->whereUuid('id')->name('acao');
+    });
+    Route::prefix('catalogo/gestao')->name('catalogo-gestao.')->group(function()use($atendimento){
+        Route::get('',[$atendimento,'index'])->name('index');Route::get('municipios',[$atendimento,'municipios'])->name('municipios');
+        Route::get('instituicoes/{unidade}',[$atendimento,'editar'])->whereUuid('unidade')->name('editar');Route::post('instituicoes/{unidade}',[$atendimento,'gravar'])->whereUuid('unidade')->name('gravar');
+    });
     $instituicoes=\App\Http\Controllers\InstituicoesPessoaisController::class;
     Route::get('/minhas-instituicoes',[$instituicoes,'index'])->name('instituicoes.index');
     Route::get('/minhas-instituicoes/buscar',[$instituicoes,'buscar'])->name('instituicoes.buscar');

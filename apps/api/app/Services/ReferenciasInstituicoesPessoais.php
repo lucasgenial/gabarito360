@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class ReferenciasInstituicoesPessoais
 {
-    public function contexto(Usuario $u, bool $gravar=false): object
+    public function contexto(Usuario $u, bool $gravar=false, string $capacidade='catalogo.referencia_pessoal.gerir'): object
     {
         abort_unless(config('catalogo.interface_ativa')===true,503,'Catálogo temporariamente indisponível.');
         abort_unless(ContextoVinculo::presente($u),403);
@@ -21,11 +21,11 @@ class ReferenciasInstituicoesPessoais
             abort_unless($e && $e->tipo==='pessoal' && $e->situacao==='ativo' && (int)$e->usuario_proprietario_id===(int)$u->id,403);
             abort_unless(DB::table('clientes')->where('id',$e->cliente_id)->where('situacao','ativo')->lockForUpdate()->first(),403);
             DB::table('vinculo_permissoes')->where('vinculo_id',$registro->id)->lockForUpdate()->get();
-            DB::table('perfil_permissoes')->where('perfil',$registro->perfil)->whereIn('permissao',['catalogo.consultar','catalogo.referencia_pessoal.gerir'])->lockForUpdate()->get();
+            DB::table('perfil_permissoes')->where('perfil',$registro->perfil)->whereIn('permissao',['catalogo.consultar',$capacidade])->lockForUpdate()->get();
         }
         $v=ContextoVinculo::resolver($u);
         abort_unless($v->perfil==='professor_autonomo' && $v->espaco->tipo==='pessoal' && (int)$v->espaco->usuario_proprietario_id===(int)$u->id
-            && Permissao::pode($u,'catalogo.consultar') && (!$gravar || Permissao::pode($u,'catalogo.referencia_pessoal.gerir')),403);
+            && Permissao::pode($u,'catalogo.consultar') && (!$gravar || Permissao::pode($u,$capacidade)),403);
         return $v;
     }
 
@@ -36,7 +36,7 @@ class ReferenciasInstituicoesPessoais
             ->orderByDesc('created_at')->orderBy('id')->paginate(20,['*'],'page',$page);
         // O catálogo pode estar sem edição corrente; o histórico pessoal continua legível.
         $vigentes=DB::table('catalogo_fontes')->whereNotNull('publicacao_id')->pluck('publicacao_id')->all();
-        $atuais=DB::table('catalogo_entradas')->whereIn('publicacao_id',$vigentes)->whereIn('unidade_id',array_column($p->items(),'unidade_id'))->get()->keyBy('unidade_id');
+        $atuais=app(ConsultarCatalogoInstituicoes::class)->vigentes()->whereIn('e.unidade_id',array_column($p->items(),'unidade_id'))->select('e.*')->get()->keyBy('unidade_id');
         $entradas=DB::table('catalogo_entradas as e')->join('catalogo_publicacoes as p','p.id','=','e.publicacao_id')
             ->join('catalogo_municipios as m',fn($j)=>$j->on('m.geografia_id','=','e.geografia_id')->on('m.codigo_ibge','=','e.municipio_ibge'))
             ->whereIn('e.id',array_column($p->items(),'entrada_id'))->select('e.*','p.id as edicao_id','p.fonte','p.ano','m.nome as municipio_nome')->get()->keyBy('id');
@@ -54,9 +54,10 @@ class ReferenciasInstituicoesPessoais
         $p=DB::table('catalogo_publicacoes')->where('id',$edicao)->where('estado','publicada')->first();
         abort_unless($p,409,'A edição mudou. Busque e confira a instituição novamente.');
         return DB::transaction(function()use($u,$unidade,$edicao,$p){
-            $f=DB::table('catalogo_fontes')->where('nome',$p->fonte)->sharedLock()->first();
+            $fontes=DB::table('catalogo_fontes')->orderBy('nome')->sharedLock()->get()->keyBy('nome');$f=$fontes[$p->fonte]??null;
             abort_unless($f && $f->publicacao_id===$edicao,409,'A edição mudou. Busque e confira a instituição novamente.');
             $v=$this->contexto($u,true);
+            abort_unless(app(CatalogoSelecao::class)->entrada($unidade)->edicao_id===$edicao,409,'A referência foi revisada. Confira novamente.');
             $e=DB::table('catalogo_entradas')->where('unidade_id',$unidade)->where('publicacao_id',$edicao)->first();
             abort_unless($e,404,'Referência não encontrada.');
             abort_unless(app(CatalogoSelecao::class)->elegivel($e),422,'A situação da referência não permite uma nova seleção.');
