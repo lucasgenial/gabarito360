@@ -21,3 +21,11 @@ Revisor independente: agente product_design_review. **Versão inicial REPROVADA;
 ## Gate de saída
 
 A interface CI1-E não está aprovada até o especialista inspecionar a nova renderização, apontar a resolução das pendências e emitir parecer final explícito, ou o usuário aprovar a versão concreta. Sem merge da UI reprovada. A nova homologação isolada foi autorizada posteriormente no127: todas as entregas passam por ela. Publicação em produção somente por decisão explícita do responsável, mesmo após aprovação de design/CI/homologação. CI1-F continua separado.
+
+## Parecer final recebido
+
+Revisor product_design_review, sem participação na implementação: **UI/UX CI1-E APROVADA no commit a3ad1b7**, após inspeção do código e das capturas atuais1440/2560 e390. Nenhum bloqueio restante no escopo auditado. Resolvidos grupos verticais, opcionais, identidade/situação, próximo passo/complemento, recuperação de422, foco/valores preservados e CTA móvel acessível por teclado. Correspondência exige motivo e confirmação explícita; autoridade usa dados completos da unidade/escolas retornadas, sem ação preselecionada.
+
+Capturas privadas fora do Git em operacao-20261102, prefixo ci1-e: form-desktop/mobile/2560, erro-desktop/mobile, cta-mobile, complemento-desktop/mobile, busca-desktop, correspondencia-desktop, filtro-erro-desktop, autoridade-desktop/mobile e atendimento-2560. As duas capturas de correspondência/filtro foram refeitas com clip explícito no viewport e reabertas pelo revisor, sem edição dos pixels, para corrigir escala incorreta da ferramenta de captura.
+
+Melhoria menor para backlog: estado atual da autoridade em texto separado da option truncada no celular. O parecer não é certificação completa de acessibilidade, não substitui testes/CI/homologação e não autoriza produção. Publicação e recuperação registradas no129.
