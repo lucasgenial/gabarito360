@@ -68,3 +68,5 @@ L4-B3 integrado no PR #142, com cinco checks aprovados. L4-C foi dividido em C1 
 L4-C1 integrado no PR #143 com cinco checks aprovados. O detalhamento de C2 está no doc. 108: vinculação do sujeito em implementação; concessão de exportação depende da definição dos perfis aprovadores. Não marcar C2 completo enquanto essa concessão não estiver implementada e validada.
 
 C2: vinculação integrada no PR144. Escolha dos aprovadores resolvida pelo usuário: somente Administrador da Rede ou proprietário pessoal. Implementação complementar de concessão/revogação e revalidação em doc109; geração de arquivos permanece C3 e entrega C4. Deploy continua reservado ao L4 completo.
+
+C2 integrado no PR145 com cinco checks aprovados. C3: planejamento revisto em doc110, geração síncrona do cadastro mínimo, armazenamento cifrado transacional, idempotência e revalidação final. C4 continua responsável por consulta/download autenticados; C5 por interface/ensaio. Sem deploy até fechar L4 inteiro.
