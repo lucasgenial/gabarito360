@@ -223,3 +223,7 @@ L4-B2 mantém a mesma atribuição de B1: somente o responsável vigente registr
 ## L4-C2 — aprovação de exportação (02/11/2026)
 
 Aprovado pelo responsável do produto: pedido.exportacao.autorizar é padrão somente de Administrador da Rede e professor_autonomo proprietário do espaço pessoal. Exige contexto explícito e escopo vigente; não é extra dos demais perfis. Suporte, Desenvolvedor, Financeiro e Diretor Escolar não aprovam exportações. Retirada no vínculo é respeitada. Operação permanece atrás de flag desligada, até publicação do L4 completo. Contrato: doc109.
+
+### CI1-D — referências no espaço pessoal (03/11/2026)
+
+catalogo.consultar e catalogo.referencia_pessoal.gerir são padrões somente do professor_autonomo nesta entrega, sem extras na matriz institucional. Exigem contexto pessoal vigente do proprietário e respeitam retiradas. Selecionar referência pública não concede escola.criar, vínculo profissional, acesso escolar ou poder de manutenção cadastral. Habilitação da interface continua desligada por padrão até o gate de publicação L4; poderes de suporte/gestores são tratados separadamente no CI1-E. Contrato124.
