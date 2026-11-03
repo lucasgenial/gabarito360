@@ -32,6 +32,12 @@ class CopiasWebTest extends TestCase
         $r->assertOk()->assertSee('Histórico de resultados')->assertSee('Publicado; confirmação dos registros pendente')
             ->assertSee('20 de 20')->assertSee('Atualizar acompanhamento')->assertSee('name="_ctx"',false)->assertSee($ctx)
             ->assertDontSee('<script>segredo</script>',false)->assertSee('&lt;script&gt;',false)->assertDontSee('Autorizar transferência');
+        $r->assertSee('Enviar uma cópia')->assertSee('Receber uma cópia')->assertSee('O original permanece')
+            ->assertSee('Não há sincronização')->assertSee('Quem recebe gera o código.')
+            ->assertSee('Trocar vínculo')->assertSee('Quem tem autonomia para autorizar?')
+            ->assertSee(route('copias.material.receber',['_ctx'=>$ctx]),false)
+            ->assertSee(route('copias.cadastro.receber',['_ctx'=>$ctx]),false)
+            ->assertSee(route('copias.resultado.receber',['_ctx'=>$ctx]),false);
         Http::assertSent(fn($r)=>str_contains($r->url(),'/v1/copias') && $r['lado']==='origem' && $r['espaco_id']==5 && !isset($r['_ctx']));
         Http::assertNotSent(fn($r)=>$r->method()!=='GET');
     }
