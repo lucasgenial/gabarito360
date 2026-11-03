@@ -41,8 +41,19 @@ Testar mínima projeção, paginação/limites/acentos/SQLliteral, UF/município
 
 D1–D3 implementados. API com nove testes/96 asserções em MariaDB; recorte SQLite29/276 inclui B3 e perfis (sobreposto). Web recorte final5/51 inclui integração pessoal (sobreposto ao4/34 inicial). JavaScript: dois testes de mudança rápida de UF/resposta atrasada e falha de rede, incluindo descarte de resultados antigos. Verificador de29scripts, zero erros. Migration000006 executada apenas em bancos de teste locais; nenhum SSH ou deploy no servidor. Ensaio real de processos concorrentes e CI são registrados ao concluir.
 
-Conferência visual local D4 pendente: o controle do Chrome foi interrompido pela ferramenta por não conseguir confirmar a URL atual no Windows com segurança. Não foram feitas novas tentativas após esse bloqueio, nem alteradas configurações do navegador. O roteador fictício de homologação está foraGit em operacao-20261102/ci1-d-preview.php; seu servidor foi encerrado. Esse roteador não acessa o banco/API operacional. Não declarar o CI1-D totalmente encerrado antes de retomar essa conferência, mesmo se o código for integrado sob flag desligada. CI1-E/F e o deploy continuam pendentes.
+Conferência visual D4 concluída em03/11/2026 no Chrome Lucas, após retomada do controle em novo turno. Homologação local com API estritamente fictícia e sem banco/API operacional: estado vazio, busca UF/município/tipo, identificação escola versus sede IES, fonte/ano/dependência, limpeza de município/resultados ao trocar UF, confirmação inicialmente desmarcada, inclusão, arquivamento com histórico e reconfirmação. Conferidos desktop e viewport390×844; confirmação sem overflow horizontal (conteúdo e área útil375px). Capturas foraGit em operacao-20261102/ci1-d-desktop.jpg e ci1-d-mobile.jpg. Viewport restaurado ao terminar. O roteador é infraestrutura local de teste, não parte da aplicação. Essa conferência não substitui o ensaio integrado nacional CI1-F.
 
 Ensaio multiprocessos MariaDB concluído:1teste/13asserções,121,34s incluindo boot/migrations/workers no ambiente local. Dois processos PHP reais aguardam lock do proprietário, confirmam simultaneamente e retornam a mesma referência, com exatamente1evento. Revogação confirmada antes da liberação do lock faz terceiro processo recusar403, sem novo evento. Isso cobre escrita concorrente dirigida, não substitui o gate F de20consultas/desempenho/recuperação integrada. Casos D incluídos no job MariaDB e testes do encadeamento de municípios no job telas.
 
 Revisão final: UUIDs recebidos são normalizados antes das consultas/gravações, evitando associação aparentemente histórica por collation diferente entre bancos. Novo caso UUID maiúsculo/canônico passou em SQLite1/11; casos web finais5/41 incluem acesso somente de consulta sem oferta de gravação e dependência administrativa explícita na identificação. Esses recortes se sobrepõem aos anteriores; CI completo valida o head final.
+
+CI do código6b7cb54: execução41673543048, todos os cinco jobs aprovados (API, web, telas, MariaDB e recuperação). O registro documental posterior requer conferir seu próprio head antes do merge do PR157. CI1-E e CI1-F permanecem pendentes; nenhuma publicação, migration ou carga no servidor.
+
+| Parte | Situação |
+|---|---|
+| CI1-A/B/C | Concluídos no código; dados nacionais ensaiados localmente |
+| CI1-D1/D2/D3 | Implementados e testados |
+| CI1-D4 | Testes técnicos, concorrência dirigida e visual local concluídos; integração após CI do head final |
+| CI1-E | Pendente: solicitações privadas e manutenção autorizada |
+| CI1-F | Pendente: validação integrada nacional e recuperação |
+| Deploy | Somente após fechamento e validação do L4 completo |
