@@ -69,8 +69,20 @@ class SolicitacoesCatalogoWebTest extends TestCase
         [$ctx,$me]=$this->preparar();
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'Confira os dados','errors'=>['site'=>['Informe HTTPS.']]],422));
         $this->from('/instituicoes/solicitacoes/nova?_ctx='.$ctx)->post('/instituicoes/solicitacoes',['_ctx'=>$ctx,'chave'=>self::ED,'cadastro'=>['nome'=>'Instituição fictícia','site'=>'http://example.test']])->assertRedirect()->assertSessionHasErrors('cadastro.site')->assertSessionHasInput('cadastro.nome','Instituição fictícia');
+    }
+    public function test_site_da_autoridade_mantem_erro_na_raiz(): void {
         [$ctx,$me]=$this->preparar('suporte');
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'Confira os dados','errors'=>['site'=>['Informe HTTPS.']]],422));
         $this->post('/catalogo/atendimento/autoridades',['_ctx'=>$ctx,'site'=>'http://example.test'])->assertRedirect()->assertSessionHasErrors('site');
+    }
+    public function test_filtros_invalidos_voltam_a_busca_com_valores_e_erros(): void {
+        [$ctx,$me]=$this->preparar('suporte');
+        Http::fake(function($r)use($me){
+            if(str_ends_with($r->url(),'/auth/me'))return Http::response(['data'=>$me]);
+            if(str_contains($r->url(),'/catalogo?'))return Http::response(['errors'=>['codigo'=>['Código incompatível com a fonte.']]],422);
+            return Http::response(['data'=>['ufs'=>[['sigla'=>'BA','nome'=>'Bahia']]]]);
+        });
+        $this->get('/catalogo/atendimento/buscar?_ctx='.$ctx.'&tipo=escola')->assertStatus(422)->assertSee('Consultar catálogo institucional')->assertSee('Código incompatível com a fonte.')->assertSee('name="tipo"',false);
+        $this->get('/catalogo/atendimento/buscar?_ctx='.$ctx.'&namespace=inep_escola&codigo=ABC')->assertStatus(422)->assertSee('value="ABC"',false)->assertSee('aria-invalid="true"',false);
     }
 }

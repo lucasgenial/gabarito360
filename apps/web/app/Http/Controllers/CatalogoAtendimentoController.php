@@ -51,8 +51,18 @@ final class CatalogoAtendimentoController extends Controller
         $modo=$this->autorizar($r);abort_unless($modo==='atendimento',403);
         $f=array_filter($r->only(['uf','tipo','busca','namespace','codigo','page']),fn($v)=>$v!==null && $v!=='');
         $v=$r->validate(['solicitacao'=>'nullable|uuid']);$pedido=!empty($v['solicitacao'])?$this->get('atendimento/'.$v['solicitacao']):null;
-        $opcoes=$this->get('atendimento/opcoes');$dados=$f?$this->get('atendimento/catalogo',$f):null;
-        return view('catalogo-atendimento.buscar',compact('modo','f','pedido','opcoes','dados'));
+        $opcoes=$this->get('atendimento/opcoes');$dados=null;$status=200;$errors=session('errors',new \Illuminate\Support\ViewErrorBag());
+        if($f) {
+            try{$resposta=$this->api->get('/v1/catalogo/atendimento/catalogo',$f);}catch(ConnectionException){abort(503,'Não foi possível consultar. Tente novamente.');}
+            if($resposta->status()===422) {
+                $status=422;$errors=new \Illuminate\Support\ViewErrorBag();
+                $errors->put('default',new \Illuminate\Support\MessageBag($resposta->json('errors')?:['busca'=>['Confira os filtros e tente novamente.']]));
+            }else{
+                abort_unless($resposta->successful(),in_array($resposta->status(),[403,404],true)?$resposta->status():503,'Não foi possível consultar. Tente novamente.');
+                $dados=$resposta->json('data');
+            }
+        }
+        return response()->view('catalogo-atendimento.buscar',compact('modo','f','pedido','opcoes','dados','errors'),$status);
     }
     public function autoridades(Request $r,string $unidade)
     {
