@@ -1266,7 +1266,7 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .cp1-formulario { display:flex; flex-direction:column; gap:20px; }
 .cp1-acoes { display:flex; gap:12px; flex-wrap:wrap; padding-top:8px; }
 .com-release .app-corpo > .container { padding-bottom:64px; }
-.app-footer { position:fixed; left:0; right:0; bottom:0; z-index:60; height:44px; display:flex; align-items:center; padding:8px var(--margem); background:var(--surface); border-top:1px solid var(--border-soft); color:var(--muted); font-size:12px; }
+.app-footer { position:fixed; left:0; right:0; bottom:0; z-index:60; height:44px; display:flex; align-items:center; padding:8px var(--margem); background:var(--bg); border-top:1px solid var(--border-soft); color:var(--muted); font-size:12px; }
 .com-release .barra-salvar { bottom:44px !important; }
 .com-release:has(.barra-salvar) .app-corpo > .container { padding-bottom:140px; }
 @media (min-width:1024px) { .app-footer { left:232px; } .menu-recolhido .app-footer { left:68px; } }
