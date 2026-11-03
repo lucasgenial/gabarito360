@@ -20,6 +20,9 @@
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ implode(' · ', $prova['turmas'] ?? []) }}{{ $prova['data_aplicacao'] ? ' · aplicada em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }} · {{ $kpis['cartoes_lidos'] }}/{{ $kpis['cartoes_total'] }} cartões corrigidos</p>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
+    @if(count($alunos) && \App\Support\Acesso::pode('resultado.compartilhar'))
+      <a class="btn btn-primary no-print" href="{{ route('resultados.lote', $prova['id']) }}">Baixar resultados dos alunos (PDF)</a>
+    @endif
     <button class="btn btn-secondary no-print" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir / PDF</button>
     <span class="badge {{ $prova['status'] === 'corrigida' ? 'badge-success' : 'badge-info' }} badge-dot">
       {{ ['rascunho'=>'Rascunho','publicada'=>'Publicada','em_correcao'=>'Em correção','corrigida'=>'Corrigida'][$prova['status']] ?? $prova['status'] }}
@@ -68,6 +71,7 @@
 <div class="card" style="margin-top:20px;overflow:hidden;">
   <div class="card-pad" style="padding-bottom:0;">
     <h3 style="font-size:17px;">Resultado por aluno</h3>
+    <p class="page-sub no-print">O PDF em lote reúne os resultados disponíveis, com uma página por aluno e o mesmo modelo individual. Alunos ainda sem resultado não entram no arquivo.</p>
   </div>
   <table class="table lista-cel">
     <thead><tr><th>Aluno</th><th>Turma</th><th>Nota</th><th>Status</th><th></th></tr></thead>

@@ -207,6 +207,7 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/cartoes/{id}/revisar',              [CorrecaoController::class, 'revisar'])->name('cartoes.revisar');
 
     // Resultados e relatórios (MP-022)
+    Route::get('/provas/{provaId}/resultados/pdf', [ResultadoController::class, 'lote'])->name('resultados.lote');
     Route::get('/resultados/{alunoId}/{provaId}', [ResultadoController::class, 'show'])->name('resultados.show');
     Route::get('/resultados/{alunoId}/{provaId}/pdf', [ResultadoController::class, 'pdf'])->name('resultados.pdf');
     Route::get('/relatorios/prova/{id}', [RelatorioController::class, 'prova'])->name('relatorios.prova');
