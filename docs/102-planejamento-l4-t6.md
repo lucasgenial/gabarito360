@@ -72,3 +72,7 @@ C2: vinculação integrada no PR144. Escolha dos aprovadores resolvida pelo usu�
 C2 integrado no PR145 com cinco checks aprovados. C3: planejamento revisto em doc110, geração síncrona do cadastro mínimo, armazenamento cifrado transacional, idempotência e revalidação final. C4 continua responsável por consulta/download autenticados; C5 por interface/ensaio. Sem deploy até fechar L4 inteiro.
 
 C3 integrado no PR146 com cinco checks aprovados. C4 planejado em doc111: consulta mínima e download autenticado, integridade/manifesto, expiração e auditoria antes da entrega. Interface e ensaio integrado permanecem C5. Sem deploy até fechar L4 completo.
+
+## Replanejamento de03/11/2026 — orientação posterior do produto
+
+A solicitação posterior distinguiu duplicação pedagógica de prova, movimentação de matrícula e transferência institucional de dados. As regras incompatíveis deste documento (nome/posicionamento T5, capacidades de escola, restrições do CPF pessoal e identificação por espaço) devem ser revistas pelo [plano integrado115](115-replanejamento-provas-identidade-transferencias.md). O histórico deste documento descreve o que foi decidido/implementado antes; não é autorização para publicar a política antiga como se atendesse ao pedido novo. Plano115 é desenho para implementação, sem migration ou deploy nesta entrega. L4-D/E e o gate de publicação devem ser conciliados com as novas dependências.
