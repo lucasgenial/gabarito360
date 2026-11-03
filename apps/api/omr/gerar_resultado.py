@@ -46,10 +46,13 @@ def caber(c, txt, fonte, tam, larg):
     c.setFont(fonte, tam)
 
 
-def gerar(d):
-    c = canvas.Canvas(d["saida"], pagesize=A4)
+def gerar(d, c=None):
+    individual = c is None
+    if individual:
+        c = canvas.Canvas(d["saida"], pagesize=A4)
     aluno, nota, folha = d["aluno"], d["nota"], d["folha"]
-    c.setTitle(f"Resultado — {aluno['nome']} — {d['disciplina']}")
+    if individual:
+        c.setTitle(f"Resultado — {aluno['nome']} — {d['disciplina']}")
     m = 16 * mm
     y = H - 16 * mm
 
@@ -179,13 +182,27 @@ def gerar(d):
     c.setFillColor(GRAY3)
     c.drawCentredString(W / 2, 12 * mm, "Feito com Gabarito360 · gabarito360.com.br")
     c.showPage()
+    if individual:
+        c.save()
+        return {"ok": True, "arquivo": d["saida"]}
+
+
+def gerar_lote(d):
+    resultados = d["resultados"]
+    if not resultados or len(resultados) > 500:
+        raise ValueError("O lote deve conter de 1 a 500 resultados.")
+    c = canvas.Canvas(d["saida"], pagesize=A4)
+    c.setTitle("Resultados dos alunos — Gabarito360")
+    for resultado in resultados:
+        gerar(resultado, c)
     c.save()
-    return {"ok": True, "arquivo": d["saida"]}
+    return {"ok": True, "arquivo": d["saida"], "total": len(resultados)}
 
 
 if __name__ == "__main__":
     try:
-        r = gerar(json.load(sys.stdin))
+        dados = json.load(sys.stdin)
+        r = gerar_lote(dados) if "resultados" in dados else gerar(dados)
     except Exception as e:  # nunca deixa o PHP sem JSON
         r = {"ok": False, "erro": f"{type(e).__name__}: {e}"}
     print(json.dumps(r, ensure_ascii=False))
