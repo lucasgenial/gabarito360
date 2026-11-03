@@ -80,6 +80,12 @@
         <input class="input" id="nome" name="nome" maxlength="200" required value="{{ $val('nome') }}">
         @error('nome')<div class="erro-campo">{{ $message }}</div>@enderror
       </div>
+      <div class="field">
+        <label for="sigla">Sigla (opcional)</label>
+        <input class="input" id="sigla" name="sigla" maxlength="40" value="{{ $val('sigla') }}" aria-describedby="sigla-ajuda">
+        <div class="field-help" id="sigla-ajuda">Informe a sigla utilizada pela instituição. O nome completo será mantido.</div>
+        @error('sigla')<div class="erro-campo">{{ $message }}</div>@enderror
+      </div>
       @if($gestor)
         <div class="field">
           <label for="nucleo_id">Núcleo (NTE) *</label>

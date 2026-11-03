@@ -507,3 +507,6 @@ Pedidos ganham ciclo_verificacao e resposta_referencia cifrada. A tabela pedido_
 ### L4-C3 — artefatos privados
 
 Migration000011 adiciona pedido_exportacao_artefatos (UUID, concessão/versão, acesso/versão, chave, estado, ciphertext, SHA-256 do ciphertext, expiração e datas) e pedido_exportacao_artefato_eventos (artefato, ator, ação e instante). FKs restritivas preservam histórico; índices únicos para concessão e acesso/versão/chave. Documento e manifesto cifrados; sem nomes/matrículas em colunas de metadados. Prazo DATETIME e ausência de rollback destrutivo. Não aplicada no servidor.
+
+### CI1 — sigla institucional opcional
+Migration 2026_11_03_000002_adicionar_sigla_escolas acrescenta escolas.sigla VARCHAR(40) nullable, sem unicidade ou mudança de chaves/escopos. Nome completo/INEP e registros acadêmicos permanecem independentes da sigla. Sem preenchimento automático por iniciais e sem migration executada no servidor. Estrutura nacional futura e proveniência no doc119.
