@@ -1,0 +1,259 @@
+{
+  "ambiente": "clone9120 isolado,2vCPU/4GiB",
+  "consultas_antes": {
+    "conexoes_distintas_coexistentes": 20,
+    "trabalhadores": 20,
+    "erros": 0,
+    "pico_memoria_por_processo_bytes": 23068672,
+    "duracao_s": 88.28,
+    "casos": {
+      "codigo": {
+        "amostras": 100,
+        "p50_ms": 37.64,
+        "p95_ms": 61.09,
+        "max_ms": 81,
+        "limite_p95_ms": 1000,
+        "primeira_passagem_max_ms": 618.61,
+        "meta_atendida": true
+      },
+      "municipio_tipo": {
+        "amostras": 100,
+        "p50_ms": 110.31,
+        "p95_ms": 178.44,
+        "max_ms": 302.23,
+        "limite_p95_ms": 2000,
+        "primeira_passagem_max_ms": 363.25,
+        "meta_atendida": true
+      },
+      "universidades": {
+        "amostras": 100,
+        "p50_ms": 186.83,
+        "p95_ms": 242.15,
+        "max_ms": 369.96,
+        "limite_p95_ms": 3000,
+        "primeira_passagem_max_ms": 279.51,
+        "meta_atendida": true
+      },
+      "sigla": {
+        "amostras": 100,
+        "p50_ms": 5091.77,
+        "p95_ms": 5276.07,
+        "max_ms": 5350.11,
+        "limite_p95_ms": 5000,
+        "primeira_passagem_max_ms": 5867.07,
+        "meta_atendida": false
+      },
+      "nome": {
+        "amostras": 100,
+        "p50_ms": 5627.92,
+        "p95_ms": 7323.47,
+        "max_ms": 7416.19,
+        "limite_p95_ms": 5000,
+        "primeira_passagem_max_ms": 6574.79,
+        "meta_atendida": false
+      }
+    },
+    "aprovado": false
+  },
+  "consultas_depois": {
+    "conexoes_distintas_coexistentes": 20,
+    "trabalhadores": 20,
+    "erros": 0,
+    "pico_memoria_por_processo_bytes": 23068672,
+    "duracao_s": 25.19,
+    "casos": {
+      "codigo": {
+        "amostras": 100,
+        "p50_ms": 33.42,
+        "p95_ms": 55.38,
+        "max_ms": 67.43,
+        "limite_p95_ms": 1000,
+        "primeira_passagem_max_ms": 383.9,
+        "meta_atendida": true
+      },
+      "municipio_tipo": {
+        "amostras": 100,
+        "p50_ms": 59.2,
+        "p95_ms": 82.1,
+        "max_ms": 93.1,
+        "limite_p95_ms": 2000,
+        "primeira_passagem_max_ms": 118.32,
+        "meta_atendida": true
+      },
+      "universidades": {
+        "amostras": 100,
+        "p50_ms": 198.33,
+        "p95_ms": 225.97,
+        "max_ms": 270.38,
+        "limite_p95_ms": 3000,
+        "primeira_passagem_max_ms": 237.96,
+        "meta_atendida": true
+      },
+      "sigla": {
+        "amostras": 100,
+        "p50_ms": 1154.83,
+        "p95_ms": 1198.61,
+        "max_ms": 1216.36,
+        "limite_p95_ms": 5000,
+        "primeira_passagem_max_ms": 1193.81,
+        "meta_atendida": true
+      },
+      "nome": {
+        "amostras": 100,
+        "p50_ms": 1689.11,
+        "p95_ms": 1858.82,
+        "max_ms": 1953.17,
+        "limite_p95_ms": 5000,
+        "primeira_passagem_max_ms": 1538.59,
+        "meta_atendida": true
+      }
+    },
+    "aprovado": true
+  },
+  "consultas_com_manual": {
+    "conexoes_distintas_coexistentes": 20,
+    "trabalhadores": 20,
+    "erros": 0,
+    "pico_memoria_por_processo_bytes": 23068672,
+    "duracao_s": 31.02,
+    "casos": {
+      "codigo": {
+        "amostras": 100,
+        "p50_ms": 49.09,
+        "p95_ms": 68.58,
+        "max_ms": 78.23,
+        "limite_p95_ms": 1000,
+        "primeira_passagem_max_ms": 480.84,
+        "meta_atendida": true
+      },
+      "municipio_tipo": {
+        "amostras": 100,
+        "p50_ms": 83.57,
+        "p95_ms": 112.79,
+        "max_ms": 125.08,
+        "limite_p95_ms": 2000,
+        "primeira_passagem_max_ms": 200.1,
+        "meta_atendida": true
+      },
+      "universidades": {
+        "amostras": 100,
+        "p50_ms": 204.3,
+        "p95_ms": 235.92,
+        "max_ms": 306.45,
+        "limite_p95_ms": 3000,
+        "primeira_passagem_max_ms": 449.06,
+        "meta_atendida": true
+      },
+      "sigla": {
+        "amostras": 100,
+        "p50_ms": 1421.51,
+        "p95_ms": 1730.97,
+        "max_ms": 1778.92,
+        "limite_p95_ms": 5000,
+        "primeira_passagem_max_ms": 1888.16,
+        "meta_atendida": true
+      },
+      "nome": {
+        "amostras": 100,
+        "p50_ms": 1767.55,
+        "p95_ms": 2017.99,
+        "max_ms": 2107.86,
+        "limite_p95_ms": 5000,
+        "primeira_passagem_max_ms": 1823.2,
+        "meta_atendida": true
+      }
+    },
+    "aprovado": true
+  },
+  "atualizacao": {
+    "clone": 9120,
+    "total_oficial": 214192,
+    "ids_preservados": true,
+    "pausa_staging_cursor": 5000,
+    "pausa_publicacao_cursor": 5000,
+    "edicao_anterior_preservada": true,
+    "override_preservado": true,
+    "snapshot_pessoal_preservado": true,
+    "ano_anterior_recusado": true,
+    "repeticao_antiga_nao_reativa": true,
+    "academico_identico": true,
+    "tabelas_academicas": 9,
+    "duracao_s": 261.5,
+    "pico_memoria_bytes": 186662912,
+    "fonte_derivada_ficticia": true
+  },
+  "servico_sha256": "6f66f1574c19990694af6befe0d2730dfccca11ced1ccc53037480d4654efe06",
+  "fluxo_http": {
+    "situacao": "em_analise",
+    "versao": 4,
+    "acoes": [
+      "enviada",
+      "analisar",
+      "pedir_complemento",
+      "complementar"
+    ],
+    "avisos": 4,
+    "academico_identico_apos_fluxo": true,
+    "isolamento": {
+      "clone": 9120,
+      "login_real_duas_identidades": true,
+      "criacao_pelo_formulario": true,
+      "protocolo_unico": true,
+      "proprietario_detalhe": 200,
+      "outro_proprietario_detalhe": 404,
+      "outra_lista_vazia": true,
+      "outro_pessoal_fila_interna": 403,
+      "suporte_alunos": 403,
+      "suporte_atendimento": 200,
+      "referencias_pessoais_isoladas": true
+    }
+  },
+  "medidas_layout": [
+    {
+      "documento": 2560,
+      "formulario": {
+        "right": 2490,
+        "width": 2130,
+        "x": 360
+      },
+      "main": {
+        "width": 2270,
+        "x": 290
+      },
+      "tela": "busca2560",
+      "viewport": 2560,
+      "zoom": "1.25"
+    },
+    {
+      "botao_bottom": 429.484375,
+      "documento": 390,
+      "foco": "Buscar instituições",
+      "rodape_top": 740,
+      "tela": "busca390",
+      "viewport": 390
+    },
+    {
+      "botao_bottom": 405.578125,
+      "documento": 390,
+      "foco": "Enviar complementação",
+      "rodape_top": 740,
+      "tela": "formulario390",
+      "viewport": 390
+    },
+    {
+      "altura_documento": 1440,
+      "altura_main": 1359,
+      "altura_viewport": 1440,
+      "documento": 2560,
+      "tela": "curta2560",
+      "viewport": 2560
+    },
+    {
+      "altura_documento": 844,
+      "altura_viewport": 844,
+      "documento": 390,
+      "tela": "curta390",
+      "viewport": 390
+    }
+  ]
+}

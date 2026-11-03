@@ -1,0 +1,61 @@
+.tela-instituicoes-busca [hidden]{display:none!important}
+.busca-formulario{width:100%;margin-top:24px;padding:0 28px 24px}
+.busca-percurso{display:flex;gap:28px;border-bottom:1px solid var(--border-soft);margin-bottom:24px}
+.busca-percurso a{display:flex;align-items:center;min-height:56px;padding:14px 0;border-bottom:3px solid transparent;color:var(--muted);font-weight:600;text-decoration:none}
+.busca-percurso a[aria-current=page]{border-color:var(--accent);color:var(--accent)}
+.busca-percurso a:hover{color:var(--accent)}
+.busca-campo{min-width:0}
+.busca-campo label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
+.busca-campo .input,.busca-campo .select{width:100%;min-width:0;min-height:46px;font-size:16px}
+.busca-nome .input{min-height:52px}
+.busca-nome{margin-bottom:22px}
+.busca-campos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px 24px}
+.busca-localizacao{grid-template-columns:minmax(160px,.5fr) minmax(0,1fr)}
+.busca-campo-inteiro{grid-column:1/-1}
+.busca-ajuda,.busca-origem{color:var(--muted);font-size:14px;line-height:1.5;margin-top:7px}
+.busca-refinamento{border-top:1px solid var(--border-soft);padding-top:18px;margin-top:20px}
+.busca-refinamento>summary,.busca-sobre>summary,.busca-municipios>summary{cursor:pointer;font-weight:600;padding:4px 0;min-height:36px;color:var(--accent)}
+.busca-refinamento[open]>summary{margin-bottom:18px}
+.busca-municipios{margin-top:10px}
+.busca-municipios label{margin-top:12px}
+.busca-municipio-linha{display:flex;align-items:flex-start;gap:12px}
+.busca-municipio-linha .input{flex:1;min-width:0}
+.busca-municipio-linha .btn{min-height:46px}
+.busca-municipio-paginas{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.busca-acoes{display:flex;gap:12px;align-items:center;border-top:1px solid var(--border-soft);padding-top:24px;margin-top:20px}
+.busca-acoes .btn{min-height:46px}
+.busca-sobre{margin-top:18px}
+.busca-sobre p{color:var(--muted);line-height:1.6;max-width:80ch;margin-top:8px}
+.busca-resultados{margin-top:28px}
+.busca-resultados>h2{font-size:20px;margin-bottom:18px}
+.busca-lista{display:grid;gap:14px}
+.busca-resultado{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px;width:100%}
+.busca-resultado-conteudo{min-width:0;overflow-wrap:anywhere}
+.busca-resultado h3{font-size:19px;line-height:1.4;margin-bottom:6px}
+.busca-resultado>.btn{flex-shrink:0;min-height:44px}
+.busca-resultado .busca-origem{font-size:13px}
+.busca-inicio{padding:24px 0;margin-top:24px;border-top:1px solid var(--border-soft)}
+.busca-inicio h2{font-size:18px;margin-bottom:8px}
+.busca-inicio p,.busca-vazio p{color:var(--muted);line-height:1.6}
+.busca-vazio{padding:28px}
+.busca-vazio h3{font-size:20px;margin-bottom:10px}
+.busca-vazio p{margin-bottom:14px;max-width:76ch}
+.busca-erros{margin-top:22px;padding:18px 24px;background:var(--danger-light);color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius-md)}
+.busca-erros h2{font-size:18px;margin-bottom:8px}
+.busca-erros ul{padding-left:20px}
+.busca-erro-campo{font-size:14px;line-height:1.5;color:var(--danger);margin-top:7px}
+.tela-instituicoes-busca [aria-invalid=true]{border-color:var(--danger)}
+.tela-instituicoes-busca a:focus-visible,.tela-instituicoes-busca button:focus-visible,.tela-instituicoes-busca summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:700px){
+  .busca-formulario{padding:0 18px 20px;margin-top:20px}
+  .busca-percurso{gap:20px}
+  .busca-percurso a{font-size:14px;line-height:1.4;min-height:60px;flex:1}
+  .busca-campos{grid-template-columns:minmax(0,1fr);gap:18px}
+  .busca-acoes{flex-wrap:wrap}
+  .busca-acoes .btn-primary{width:100%}
+  .busca-acoes .btn-ghost{margin-inline:auto}
+  .busca-resultado{flex-direction:column;align-items:stretch;padding:20px;gap:18px}
+  .busca-resultado>.btn{text-align:center;white-space:normal}
+  .busca-resultado h3{font-size:18px}
+  .busca-vazio{padding:20px}
+}

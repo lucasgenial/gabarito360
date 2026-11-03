@@ -282,17 +282,19 @@ img { max-width: 100%; display: block; }
 @media (min-width: 3200px) { :root { --escala: 1.5; } }
 
 /* Área logada: conteúdo na tela toda (decisão 2) */
-.area-logada { zoom: var(--escala); }
+.area-logada { zoom:var(--escala); padding-bottom:0; }
 .area-logada .container { max-width: none; padding-left: var(--margem); padding-right: var(--margem); }
 /* vh não acompanha o zoom: modais e fotos continuam cabendo na tela */
 .area-logada .modal, .area-logada .g360-modal .caixa { max-height: calc(90vh / var(--escala)) !important; }
 .area-logada .foto-img { max-height: calc(78vh / var(--escala)); }
-/* Coluna de leitura: formulários e textos não acompanham a tela toda */
-.coluna-leitura { max-width: 960px; margin-left: auto; margin-right: auto; }
+/* Superfícies de trabalho ocupam a área útil; limites de leitura ficam no texto. */
+.area-logada .coluna-leitura { width:100%; max-width:none; margin-left:0; margin-right:0; }
 
 /* ---------- Casca da área logada: menu lateral + corpo (docs/23, L2) ---------- */
-.app-casca { display: flex; align-items: flex-start; }
-.app-corpo { flex: 1; min-width: 0; }
+.app-casca { display:flex; align-items:stretch; min-height:calc(100dvh / var(--escala)); }
+.app-corpo { flex:1; min-width:0; display:flex; flex-direction:column; }
+.app-corpo > .app-header { flex-shrink:0; }
+.app-conteudo { flex:1; width:100%; min-width:0; padding-bottom:24px; }
 .app-lateral { display: none; }
 .lateral-rotulo { white-space: nowrap; }
 @media (min-width: 1024px) {
@@ -1271,6 +1273,10 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .com-release:has(.barra-salvar) .app-corpo > .container { padding-bottom:140px; }
 @media (min-width:1024px) { .app-footer { left:232px; } .menu-recolhido .app-footer { left:68px; } }
 @media (max-width:1023px) {
+  .area-logada:has(.nav-inferior) .app-conteudo { padding-bottom:calc(84px + env(safe-area-inset-bottom)); }
+  .area-logada.com-release:has(.nav-inferior) .app-conteudo { padding-bottom:calc(128px + env(safe-area-inset-bottom)); }
+  .area-logada:has(.nav-inferior):has(.barra-salvar) .app-conteudo { padding-bottom:calc(164px + env(safe-area-inset-bottom)); }
+  .area-logada.com-release:has(.nav-inferior):has(.barra-salvar) .app-conteudo { padding-bottom:calc(208px + env(safe-area-inset-bottom)); }
   .area-logada:has(.nav-inferior) .app-footer { bottom:calc(60px + env(safe-area-inset-bottom)); }
   .com-release:has(.nav-inferior) .barra-salvar { bottom:calc(104px + env(safe-area-inset-bottom)) !important; }
 }

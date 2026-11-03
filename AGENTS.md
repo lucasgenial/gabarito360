@@ -11,6 +11,10 @@ Regra solicitada pelo responsável em03/11/2026: toda alteração que afete inte
 - Se a revisão reprovar, corrigir e reenviar. Não apresentar testes de código como aprovação de design nem reutilizar uma aprovação de outra tela ou versão. A aprovação da conferência CI1-D não aprova o novo formulário CI1-E.
 - A aprovação do especialista é de qualidade de design. Não substitui autorizações do usuário para publicação, acesso sensível ou outras ações que dependam delas.
 
+## Área útil e composição das telas
+
+Decisão explícita do responsável em03/11/2026: as telas da aplicação devem ocupar toda a área útil do viewport, em largura e altura, descontando menu, cabeçalho, rodapé e navegação móvel. Usar o layout compartilhado e superfícies de trabalho com largura100%; não introduzir max-width fixo em painéis, formulários principais ou listas que deixe uma faixa vazia na tela ampla. Margens responsivas e limites de leitura de parágrafos são permitidos; controles, diálogos e imagens mantêm limites próprios quando necessários. Grupos de trabalho seguem empilhados, com campos responsivos dentro deles. Validar desktop amplo, menu recolhido e celular sem overflow nem ações encobertas por rodapé. Toda mudança visual continua sujeita à aprovação independente acima.
+
 ## Continuidade e publicação
 
 Revisar o planejamento antes de implementar cada etapa e apresentar a tabela atualizada ao finalizar. Prosseguir autonomamente pelas subdivisões internas autorizadas. Usar terminal para Git/GitHub e preferir o Chrome do usuário para testes visuais do aplicativo.

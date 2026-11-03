@@ -21,7 +21,7 @@
   </tr>@endforeach</tbody></table></div>
   @endif
 @else
-<section class="card card-pad" style="margin-top:24px;max-width:1120px;">
+<section class="card card-pad" style="margin-top:24px;">
 <h2 style="font-size:20px;margin-bottom:8px;">{{ $modo==='gestao'?'Manutenção ainda não liberada':(request('situacao')?'Nenhuma solicitação neste filtro':'Nenhuma solicitação enviada') }}</h2>
 <p class="page-sub">{{ $modo==='gestao'?'Fale com o suporte para conferir o cadastro e a instituição responsável. Após a liberação, suas unidades aparecerão aqui para manutenção.':(request('situacao')?'Escolha outra situação ou consulte todas as solicitações.':'Os pedidos aparecerão aqui com o nome da instituição, a situação e as respostas da equipe.') }}</p>
 @if($modo==='gestao')<p style="margin-top:16px;"><a href="{{ route('leads.index') }}">Falar com o suporte</a></p>@endif

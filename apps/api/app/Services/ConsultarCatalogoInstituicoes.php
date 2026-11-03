@@ -23,10 +23,15 @@ class ConsultarCatalogoInstituicoes
 
     private function edicoes(array $ids): Builder
     {
+        // Fixar também a edição manual no mesmo conjunto: não procurar suas publicações
+        // em uma subconsulta correlacionada para cada uma das entradas nacionais.
+        $manuais = DB::table('catalogo_publicacoes')->whereIn('id',$ids)->where('fonte','manual')
+            ->where('estado','publicada')->pluck('id')->all();
         return DB::table('catalogo_publicacoes as p')->join('catalogo_entradas as e','e.publicacao_id','=','p.id')
             ->whereIn('p.id',$ids)->where('p.estado','publicada')
-            ->where(fn($q)=>$q->where('p.fonte','manual')->orWhereNotExists(fn($m)=>$m->selectRaw('1')->from('catalogo_entradas as ajuste')
-                ->join('catalogo_publicacoes as pm','pm.id','=','ajuste.publicacao_id')->whereIn('pm.id',$ids)->where('pm.fonte','manual')->where('pm.estado','publicada')->whereColumn('ajuste.unidade_id','e.unidade_id')));
+            ->when($manuais,fn($q)=>$q->where(fn($q)=>$q->where('p.fonte','manual')->orWhereNotExists(fn($m)=>$m
+                ->selectRaw('1')->from('catalogo_entradas as ajuste')->whereIn('ajuste.publicacao_id',$manuais)
+                ->whereColumn('ajuste.unidade_id','e.unidade_id'))));
     }
 
     public function buscar(array $filtros, ?array $edicoesFixadas = null): LengthAwarePaginator

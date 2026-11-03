@@ -93,6 +93,29 @@ class SolicitacoesCatalogoTest extends TestCase
         $this->postJson('/api/v1/catalogo/referencias-pessoais',['unidade_id'=>$e['unidade_id'],'edicao_id'=>$e['edicao_id'],'confirmacao'=>true])->assertConflict();
         $this->promover($e['edicao_id']);$this->assertSame('Nome revisado manualmente',app(CatalogoSelecao::class)->entrada($e['unidade_id'])->nome);
     }
+    public function test_edicao_manual_fixada_entre_contagem_e_pagina_sem_ressuscitar_edicoes_antigas(): void {
+        $consulta=app(\App\Services\ConsultarCatalogoInstituicoes::class);
+        $base=$consulta->buscar(['uf'=>'BA'])->items()[0];
+        $dados=['cadastro'=>['nome'=>'Primeira revisão manual','tipo'=>'escola','namespace'=>'inep_escola','codigo'=>$base->codigo,
+            'uf'=>'BA','municipio_ibge'=>'2900001','dependencia'=>'estadual','site'=>'https://example.test/evidencia'],
+            'situacao'=>'1','motivo'=>'Conferência fictícia de revisão','conferencia'=>true];
+        $primeira=app(ManutencaoCatalogo::class)->gravar($this->ator(3),$dados,$base->unidade_id,$base->edicao_id);
+        $trocou=false;$segunda=null;
+        DB::listen(function($q)use(&$trocou,&$segunda,$dados,$base,$primeira){
+            if(!$trocou && str_starts_with(strtolower($q->sql),'select') && str_contains($q->sql,'aggregate') && str_contains($q->sql,'catalogo_entradas')){
+                $trocou=true;$dados['cadastro']['nome']='Segunda revisão manual';
+                $segunda=app(ManutencaoCatalogo::class)->gravar($this->ator(3),$dados,$base->unidade_id,$primeira['edicao_id']);
+            }
+        });
+        $pagina=$consulta->buscar(['uf'=>'BA']);
+        $this->assertTrue($trocou);$this->assertSame(1,$pagina->total());
+        $this->assertSame('Primeira revisão manual',$pagina->items()[0]->nome);
+        $this->assertSame($primeira['edicao_id'],$pagina->items()[0]->edicao_id);
+        $atual=$consulta->buscar(['uf'=>'BA']);$this->assertSame(1,$atual->total());
+        $this->assertSame('Segunda revisão manual',$atual->items()[0]->nome);
+        $this->assertSame($segunda['edicao_id'],$atual->items()[0]->edicao_id);
+        $this->assertSame(3,DB::table('catalogo_entradas')->where('unidade_id',$base->unidade_id)->count());
+    }
     public function test_falha_no_aviso_reverte_decisao_evento_e_cadastro_manual(): void {
         $id=$this->criar();$this->analisar($id);$antes=DB::table('catalogo_entradas')->count();$umaVez=false;
         DB::listen(function($q)use(&$umaVez){if(!$umaVez && str_starts_with(strtolower($q->sql),'insert') && str_contains($q->sql,'catalogo_solicitacao_avisos')){$umaVez=true;throw new \RuntimeException('Falha fictícia no aviso');}});

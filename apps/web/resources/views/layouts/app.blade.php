@@ -90,7 +90,7 @@
 </header>
 
 {{-- Conteúdo principal --}}
-<div class="container">
+<main class="container app-conteudo" id="conteudo-principal">
   {{-- Breadcrumb --}}
   @hasSection('breadcrumb')
   <div class="breadcrumb">
@@ -100,10 +100,10 @@
 
   {{-- Conteúdo --}}
   @yield('content')
+</main>
   @if(config('release.sha'))
   <footer class="app-footer" aria-label="Versão do software">Versão de testes: {{ config('release.fase') }} · {{ substr(config('release.sha'),0,8) }}</footer>
   @endif
-</div>
 
 </div>{{-- .app-corpo --}}
 </div>{{-- .app-casca --}}

@@ -3,6 +3,8 @@ import os,pathlib,subprocess,hashlib,gzip,json,re,sys,tarfile,shutil,datetime,fc
 assert os.geteuid()==0 and pathlib.Path('/etc/hostname').read_text().strip()=='g360-homologa'
 os.umask(0o027)
 sha,arquivo,checksum=sys.argv[1:4]
+fase=sys.argv[4] if len(sys.argv)>4 else 'HOMOLOGACAO'
+assert re.fullmatch('[A-Z0-9][A-Z0-9_-]{0,79}',fase),'Identificação da fase inválida.'
 assert re.fullmatch('[a-f0-9]{40}',sha) and re.fullmatch('[a-f0-9]{64}',checksum)
 arquivo=pathlib.Path(arquivo);assert arquivo.is_file();assert hashlib.file_digest(arquivo.open('rb'),'sha256').hexdigest()==checksum
 BASE=pathlib.Path('/srv/gabarito360');lock=os.open(BASE/'.deploy-homologa.lock',os.O_CREAT|os.O_RDWR,0o600);fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB);anterior=(BASE/'current').resolve();release=BASE/'releases'/sha
@@ -70,7 +72,7 @@ for app in ['api','web']:
   lines.append(line)
  lines.extend(k+'='+v for k,v in changes.items());p.write_text('\n'.join(lines)+'\n');p.chmod(0o640)
  rel=BASE/'shared'/app/'storage/app/release.json';shutil.copy2(rel,recibo/(app+'-release-anterior.json'))
- rel.write_text(json.dumps({'sha':sha,'fase':'HOMOLOGACAO-CI1-E'}));rel.chmod(0o640)
+ rel.write_text(json.dumps({'sha':sha,'fase':fase}));rel.chmod(0o640)
  run(['chown','www-data:www-data',str(rel),str(p)])
  run(['runuser','-u','www-data','--','php','artisan','config:cache'],cwd=release/'apps'/app)
  run(['runuser','-u','www-data','--','php','artisan','view:cache'],cwd=release/'apps'/app)
