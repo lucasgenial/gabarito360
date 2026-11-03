@@ -406,3 +406,6 @@ DuplicarProva copia por lista positiva configuração e gabarito no mesmo espaç
 
 ### CI1 — catálogo nacional e sigla
 LeitorInstituicoes usa adaptadores explícitos básica2025-V2 e superior2024, leitura CSV streaming e conciliação com geografia IBGE local. g360:catalogo-validar não usa banco: confere checksum, esquema, identidade, geografia, duplicidade e cobertura nacional, emitindo manifesto. É validação de entrada, ainda sem staging/promoção/API de catálogo. Sede administrativa de IES não é convertida em campus. Contrato, fronteiras e próximas partes no doc119.
+
+### CI1-B2 — preparação transacional, sem promoção
+ManifestoCatalogo compartilha a validação pura entre comandos e calcula digest ordenado das observações normalizadas. PrepararCatalogoInstituicoes usa lease por token/prazo sob lock e transações curtas por lote; checkpoint e inserções avançam juntos. Retomada revalida fonte/geografia, preserva observações e confere digest persistido por paginação de chave antes de validar. Snapshot/cursor não concedem acesso nem alteram tabelas operacionais. Estados parciais não são publicados; promoção e consulta ficam para CI1-B3..F. Ver doc120.
