@@ -109,7 +109,7 @@ Auditoria: solicitante real, aprovadores por lado, executor humano e técnico di
 
 ## 10. PA — professor autônomo e continuidade
 
-Nome técnico atual: professor_autonomo; rótulo de interface proposto Professor independente (padronizar apresentação sem renomear enum/FKs de uma vez). Contratação pessoal mantém conta única e espaço próprio. Cadastrar escolas de atuação como referências organizacionais do espaço pessoal, não criar instituições oficiais nem afirmar vínculo institucional sem convite aceito. Poder agrupar turmas e disciplinas por escola declarada; nomes iguais não conciliam instituições.
+Nome técnico atual: professor_autonomo; rótulo de interface proposto Professor independente (padronizar apresentação sem renomear enum/FKs de uma vez). Contratação pessoal mantém conta única e espaço próprio. Conforme a orientação posterior detalhada no [plano116](116-catalogo-nacional-instituicoes.md), selecionar instituições de um catálogo nacional canônico, com filtros por UF/município e fontes INEP/MEC/IBGE; ausências geram solicitação privada somente para Suporte/Desenvolvimento. A seleção cria referência de atuação no espaço pessoal, não instituição oficial nova nem vínculo institucional confirmado. Agrupar turmas e disciplinas por essa referência; nomes iguais não conciliam instituições. Gestão institucional mantém somente seus próprios cadastros e não recebe pedidos pessoais.
 
 CPF de aluno pessoal opcional, protegido quando necessário e verificado; revisar formalmente as constraints/termos de T3 que o proíbem antes de habilitar gravação. Pessoal continua com formulário mínimo e sem importação silenciosa de campos completos da escola. Posse dos dados pelo professor não implica poder irrestrito sobre histórico de terceiros.
 
@@ -132,6 +132,7 @@ Cada linha é um pacote de nível1; letras/números internos são organização 
 | Pacote | Divisões internas | Entrega e critério de saída |
 |---|---|---|
 | R0 — reconciliação | R0-A inventário; R0-B decisões e migração | Mapear lacunas/fluxos T5, riscos de CPF e históricos; plano rastreável sem apagar legado |
+| CI1 — catálogo nacional | CI1-A contrato; B geografia/básica; C superior; D seleção; E solicitações/gestão; F ensaio | Reaproveitar integração ECOAR/G360, seleção nacional e pedidos privados ao suporte; ver plano116 |
 | ID1 — identidade | ID1-A esquema/proteção; B busca; C conciliação; D backfill | Pessoa única, CPF protegido, provisórios e ausência de enumeração; testes concorrentes/isolamento |
 | VI1 — vínculos e convites | VI1-A CPF-primeiro; B agenda/aceite; C notificações | Mesma conta, convite aceito/recusado, início futuro sem acesso antecipado; outros vínculos preservados |
 | DC1 — disciplinas e lotação | DC1-A referência; B catálogo local; C turma-componente; D docente/vigência | Coordenador organiza escola; selects filtrados e histórico de responsabilidade preservado |
@@ -140,12 +141,14 @@ Cada linha é um pacote de nível1; letras/números internos são organização 
 | MT1 — enturmação histórica | MT1-A matrícula; B intervalos; C relatórios/PDF/OMR | MudançaA→B mantém notas antigas na turma de aplicação e aluno aparece na atual |
 | TR1 — controle institucional | TR1-A capacidades; B delegação; C auditoria imutável; D notificações | Gestão superior e execução por caso, escola confirma cessão, sem acesso interno genérico |
 | TE1 — aluno entre escolas | TE1-A ingresso; B cessão/corte; C snapshot/conciliar; D receber/retificar | Origem conserva passado, destino recebe histórico autorizado e produz fatos novos isolados |
-| PA1 — independente e integração | PA1-A escolas declaradas; B mínimo/CPF; C conciliação; D continuidade | Identidade e histórico admitido preservados, sem cópia irrestrita ao encerrar escola |
+| PA1 — independente e integração | PA1-A referências ao catálogo CI1; B mínimo/CPF; C conciliação; D continuidade | Seleção de instituição não cria acesso escolar; identidade e histórico admitido preservados, sem cópia irrestrita ao encerrar escola |
 | UX1 — módulo Transferências | UX1-A acompanhamento; B Transferir; C Receber; D notificações | Primeira página com tabela e até duas ações; percurso por tipo e responsabilidades claras |
 | L4/T6 — reconciliação final | Retenção/preservação, recuperação e encerramento | Rever D/E/T6 sobre pessoa/matrículas e recibos; não eliminar histórico por perda de vínculo |
 | REL — publicação validada | Backup/restauração; pausa; migração; smoke; comparação | Gabaritos e históricos preservados, políticas novas íntegras e evidências de antes/depois |
 
 Dependências: R0 precede tudo; ID1 precede busca global/VI1/TE1/PA1; DC1 precede seleção docente definitiva CP2; CP1 pode avançar em paralelo com ID1 após R0 por não exigir transferência global; MT1 precede TE1; TR1 precede execução TE1/transferências institucionais; UX1 acompanha contratos TR1/TE1, não os antecipa. L4 concluído isoladamente não comprova que estas novas funções estão prontas.
+
+Complemento116: busca global acima refere-se à identidade pessoal. Importação/consulta pública institucional CI1 não depende de ID1; R0 precede CI1, que precede PA1-A e conciliação institucional TE1. Não expor escola.criar ao professor para habilitar pesquisa; catálogo não é contratação nem jurisdição. CP1 continua independente de CI1 após R0.
 
 ## 13. Cenários de aceite obrigatórios
 
