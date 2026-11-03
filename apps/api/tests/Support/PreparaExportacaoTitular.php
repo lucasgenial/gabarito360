@@ -11,6 +11,10 @@ trait PreparaExportacaoTitular
     protected function setUp(): void
     {
         parent::setUp();
+        $this->prepararDadosExportacao();
+    }
+    protected function prepararDadosExportacao(): void
+    {
         config(['espacos.ativo'=>true,'espacos.pessoal'=>true,'vinculos.obrigatorio'=>true,
             'acessos_internos.ativo'=>true,'pedidos_titulares.ativo'=>true,'pedidos_titulares.autorizacoes_exportacao'=>true]);
         foreach (range(1,8) as $id) Usuario::forceCreate(['id'=>$id,'nome'=>'Pessoa fictícia','perfil'=>'admin_rede',
