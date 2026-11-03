@@ -2,7 +2,7 @@
 @section('title','Minhas instituições')
 @section('breadcrumb')<a href="{{ route('painel') }}">Início</a><span class="sep">/</span><span>Minhas instituições</span>@endsection
 @section('content')
-<x-pagina titulo="Minhas instituições"><x-slot:sub>Referências de atuação no seu espaço pessoal.</x-slot:sub><a class="btn btn-primary" href="{{ route('instituicoes.buscar') }}">Adicionar instituição</a></x-pagina>
+<x-pagina titulo="Minhas instituições"><x-slot:sub>Referências de atuação no seu espaço pessoal.</x-slot:sub><a class="btn btn-primary" href="{{ route('instituicoes.buscar') }}">{{ \App\Support\Acesso::pode('catalogo.referencia_pessoal.gerir')?'Adicionar instituição':'Consultar catálogo' }}</a></x-pagina>
 <p style="margin:20px 0;">Use esta lista para registrar as instituições em que você atua. Adicionar uma instituição não confirma vínculo profissional e não libera acesso ao ambiente ou aos dados da escola.</p>
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif

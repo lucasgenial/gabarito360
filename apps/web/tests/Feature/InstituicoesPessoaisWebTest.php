@@ -55,4 +55,10 @@ class InstituicoesPessoaisWebTest extends TestCase
         [$ctx,$me]=$this->preparar();Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'Edição mudou'],409));
         $this->post('/minhas-instituicoes',['_ctx'=>$ctx,'unidade_id'=>self::UNIDADE,'edicao_id'=>self::EDICAO,'confirmacao'=>1])->assertRedirect()->assertSessionHas('erro','O catálogo mudou. Busque e confira novamente.');
     }
+    public function test_somente_consulta_nao_oferece_acao_de_gravacao(): void {
+        [$ctx,$me]=$this->preparar();$me['permissoes']=['catalogo.consultar'];
+        Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:(str_contains($r->url(),'/instituicoes/')?$this->e():['itens'=>[],'paginacao'=>['atual'=>1,'ultima'=>1,'por_pagina'=>20,'total'=>0]])]));
+        $this->get('/minhas-instituicoes?_ctx='.$ctx)->assertOk()->assertSee('Consultar catálogo')->assertDontSee('Adicionar instituição');
+        $this->get('/minhas-instituicoes/conferir/'.self::UNIDADE.'?_ctx='.$ctx.'&edicao_id='.self::EDICAO)->assertOk()->assertSee('Dependência administrativa: Estadual')->assertSee('Seu acesso permite consultar')->assertDontSee('name="confirmacao"',false);
+    }
 }
