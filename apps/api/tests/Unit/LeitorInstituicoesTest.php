@@ -79,4 +79,25 @@ class LeitorInstituicoesTest extends TestCase
         self::assertSame('BA', $geo['municipios']['2925303']['uf']);
         self::assertSame(29, $geo['municipios']['2925303']['uf_codigo']);
     }
+
+    public function test_decodifica_apenas_campos_publicos_sem_incorporar_colunas_extras(): void
+    {
+        $cabecalho = implode(';',array_merge(LeitorInstituicoes::COLUNAS['basica'],['COLUNA_NAO_UTILIZADA']));
+        $dados = "2025;29428254;Escola São José;BA;29;2925303;Porto Seguro;2;1;CONTEUDO_FICTICIO_EXCLUIDO\n";
+        $arquivo = $this->arquivo(mb_convert_encoding($cabecalho."\n".$dados,'Windows-1252','UTF-8'));
+        $leitor = new LeitorInstituicoes(['2925303'=>['nome'=>'Porto Seguro','uf'=>'BA','uf_codigo'=>29]]);
+        $r = iterator_to_array($leitor->ler($arquivo,'basica',2025))[0];
+        self::assertSame('Escola São José',$r['nome']);
+        self::assertArrayNotHasKey('COLUNA_NAO_UTILIZADA',$r);
+        self::assertStringNotContainsString('CONTEUDO_FICTICIO_EXCLUIDO',\App\Support\Catalogo\ManifestoCatalogo::payload($r));
+    }
+
+    public function test_geografia_recusa_sigla_inventada_mesmo_com_codigo_existente(): void
+    {
+        $ufs = $this->arquivo(json_encode([['id'=>29,'sigla'=>'XX']]));
+        $municipios = $this->arquivo('[]');
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('UF duplicada ou inválida');
+        LeitorInstituicoes::geografia($ufs,$municipios);
+    }
 }
