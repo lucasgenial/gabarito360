@@ -27,9 +27,6 @@
   <a class="brand" href="{{ route('painel') }}">
     <span class="logo">G360</span> <span class="lateral-rotulo">Gabarito360</span>
   </a>
-  @if($vinculoAtual)
-    <div class="contexto-lateral"><x-contexto-ativo :contexto="$vinculoAtual" :interativo="true" /></div>
-  @endif
   <nav class="lateral-menu">
     @foreach(\App\Support\Acesso::menu() as $item)
       <a href="{{ $item['url'] }}" title="{{ $item['curto'] }}" @class(['active' => $item['ativo']]) @if($item['ativo']) aria-current="page" @endif>
@@ -56,9 +53,10 @@
         $nomeContexto = \App\Support\Acesso::interno() ? 'Equipe Gabarito360' : $vinculoAtual['espaco']['nome'];
         $trocaContexto = \App\Support\Acesso::interno() ? 'Trocar acesso' : 'Trocar vínculo';
       @endphp
-      <a class="contexto-trocar-mobile" href="{{ route('vinculos.index', ['trocar' => 1]) }}" data-sem-contexto
+      <a class="contexto-trocar" href="{{ route('vinculos.index', ['trocar' => 1]) }}" data-sem-contexto
          aria-label="{{ $nomeContexto }}. {{ \App\Support\Acesso::rotulo() }}. {{ $trocaContexto }}" title="{{ $trocaContexto }} — {{ $nomeContexto }}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3"/></svg>
+        <span class="contexto-trocar-texto">{{ $trocaContexto }}</span>
       </a>
     @endif
     <div class="header-right">
@@ -102,8 +100,7 @@
 {{-- Conteúdo principal --}}
 <main class="container app-conteudo" id="conteudo-principal">
   @if($vinculoAtual)
-    <div class="contexto-conteudo contexto-conteudo-desktop"><x-contexto-ativo :contexto="$vinculoAtual" :interativo="true" /></div>
-    <div class="contexto-conteudo contexto-conteudo-mobile"><x-contexto-ativo :contexto="$vinculoAtual" /></div>
+    <div class="contexto-conteudo"><x-contexto-ativo :contexto="$vinculoAtual" /></div>
   @endif
   {{-- Breadcrumb --}}
   @hasSection('breadcrumb')
