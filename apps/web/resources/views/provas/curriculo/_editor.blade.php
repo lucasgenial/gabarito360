@@ -1,4 +1,4 @@
-<div class="pc-editor" data-curriculo-editor data-pronto="{{ $pronto?'1':'0' }}" aria-busy="false">
+<div class="pc-editor" data-curriculo-editor data-pronto="{{ $pronto?'1':'0' }}" data-falha="{{ $falha?'1':'0' }}" aria-busy="false">
   <input type="hidden" name="curriculo_versao" value="{{ $f['curriculo_versao'] }}">
   @if($conflito)
   <x-aviso tipo="erro"><strong>A configuração foi alterada.</strong> Seu preenchimento foi preservado. Atualize o estado e revise antes de confirmar.
@@ -39,7 +39,7 @@
       <button type="submit" class="btn btn-secondary" name="acao" value="adicionar" data-curriculo-intencao formnovalidate formaction="{{ $p?route('provas.curriculo.preparar',$p['id']):route('provas.preparar') }}" @disabled($falha || !$f['turma_ids'])>Adicionar à prova</button>
       <button type="submit" class="btn btn-ghost" name="acao" value="opcoes" data-curriculo-intencao formnovalidate formaction="{{ $p?route('provas.curriculo.preparar',$p['id']):route('provas.preparar') }}">Atualizar opções</button>
     </div>
-    <p class="pc-feedback" data-curriculo-status role="status" aria-live="polite">@if(!$f['turma_ids'])Selecione as turmas para consultar as disciplinas.@elseif(!$falha && !$o['opcoes'])Nenhuma disciplina comum às turmas. Confira os componentes e as atribuições com a coordenação.@endif</p>
+    <p class="pc-feedback" data-curriculo-status role="status" aria-live="polite">@if($falha)Não foi possível conferir as opções. Use Atualizar opções para tentar novamente.@elseif(!$f['turma_ids'])Selecione as turmas para consultar as disciplinas.@elseif(!$o['opcoes'])Nenhuma disciplina comum às turmas. Confira os componentes e as atribuições com a coordenação.@endif</p>
     @include('provas.curriculo._erro',['campo'=>'disciplina_ids'])
     @foreach([true,false] as $elegivel)
       @php($linhas=collect($o['selecionadas'])->filter(fn($d)=>(bool)$d['elegivel']===$elegivel))
