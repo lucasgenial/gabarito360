@@ -41,7 +41,27 @@ final class GestaoDisciplinas
     {
         $d = $this->disciplinas($u)->where('d.id', $id)->first();
         abort_unless($d, 404, 'Disciplina não encontrada.');
+        $d->areas = $this->areasDaDisciplina((int) $d->espaco_id, (int) $d->id);
         return $d;
+    }
+
+    public function areasDaDisciplina(int $espaco, int $disciplina): array
+    {
+        return DB::table('disciplina_areas as da')->join('areas_conhecimento as a', function ($j) {
+            $j->on('a.id', '=', 'da.area_id')->on('a.espaco_id', '=', 'da.espaco_id');
+        })->where('da.espaco_id', $espaco)->where('da.disciplina_id', $disciplina)
+            ->orderBy('a.nome')->orderBy('a.id')->get(['a.id', 'a.nome', 'a.sigla', 'a.ativo'])->all();
+    }
+
+    public function areasDisponiveis(Usuario $u, ?int $disciplina = null): array
+    {
+        $v = $this->contexto($u, true);
+        if ($disciplina) $this->disciplina($u, $disciplina);
+        return DB::table('areas_conhecimento as a')->where('a.espaco_id', $v->espaco_id)
+            ->where(function ($q) use ($disciplina, $v) {
+                $q->where('a.ativo', true);
+                if ($disciplina) $q->orWhereIn('a.id', DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('disciplina_id', $disciplina)->select('area_id'));
+            })->orderBy('a.nome')->orderBy('a.id')->get(['a.id', 'a.nome', 'a.sigla', 'a.ativo'])->all();
     }
 
     /** Somente vínculos Professor vigentes; nunca serializar a conta ou documento. */
@@ -83,6 +103,15 @@ final class GestaoDisciplinas
             $this->campo(mb_strlen($chave) <= 100, 'nome', 'Use um nome mais curto: a forma de busca dos símbolos informados excede o limite.');
             // Serializa nomes da escola, inclusive criação concorrente da mesma referência.
             DB::table('espacos')->where('id', $v->espaco_id)->lockForUpdate()->first();
+            $areasAntes = $antes ? $this->areasDaDisciplina((int) $v->espaco_id, $id) : [];
+            $areasIds = array_key_exists('area_ids', $dados) ? array_map('intval', $dados['area_ids']) : null;
+            if ($areasIds !== null) {
+                sort($areasIds);
+                $areas = DB::table('areas_conhecimento')->where('espaco_id', $v->espaco_id)->whereIn('id', $areasIds)->orderBy('id')->lockForUpdate()->get();
+                $this->campo($areas->count() === count($areasIds), 'area_ids', 'Escolha somente áreas disponíveis nesta escola.');
+                $anteriores = array_map(fn ($a) => (int) $a->id, $areasAntes);
+                $this->campo(!$areas->contains(fn ($a) => !$a->ativo && !in_array((int) $a->id, $anteriores, true)), 'area_ids', 'Uma área foi inativada. Atualize a seleção antes de salvar.');
+            }
             $this->campo(!DB::table('disciplinas')->where('espaco_id', $v->espaco_id)->where('nome_chave', $chave)->when($id, fn ($q) => $q->where('id', '!=', $id))->exists(), 'nome', 'Esta disciplina já está no catálogo da escola.');
             $ref = $antes?->referencia ?? ($dados['referencia'] ?? null);
             if (!$antes && $ref) abort_unless(collect(ReferenciasDisciplinas::todas())->contains('chave', $ref), 422, 'Referência não encontrada.');
@@ -93,7 +122,14 @@ final class GestaoDisciplinas
                 'versao' => ($antes?->versao ?? 0) + 1, 'updated_at' => now()];
             if ($antes) DB::table('disciplinas')->where('id', $id)->update($valores);
             else $id = DB::table('disciplinas')->insertGetId($valores + ['espaco_id' => $v->espaco_id, 'created_at' => now()]);
+            if ($areasIds !== null) {
+                DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('disciplina_id', $id)->whereNotIn('area_id', $areasIds)->delete();
+                $anteriores = array_map(fn ($a) => (int) $a->id, $areasAntes);
+                foreach (array_diff($areasIds, $anteriores) as $area) DB::table('disciplina_areas')->insert(['espaco_id' => $v->espaco_id, 'disciplina_id' => $id, 'area_id' => $area]);
+            }
             $depois = DB::table('disciplinas')->find($id);
+            if ($antes) $antes->areas = $areasAntes;
+            $depois->areas = $this->areasDaDisciplina((int) $v->espaco_id, $id);
             $this->evento($v, 'disciplina', $id, $antes ? 'atualizada' : 'criada', $antes, $depois);
             return $depois;
         }, 3);
@@ -283,7 +319,8 @@ final class GestaoDisciplinas
         if (!$valido) throw ValidationException::withMessages([$campo => $mensagem]);
     }
 
-    private function evento(object $v, string $entidade, int $id, string $acao, ?object $antes, object $depois): void
+    /** Auditoria interna compartilhada com o catálogo de áreas, sempre sob a transação autorizada. */
+    public function evento(object $v, string $entidade, int $id, string $acao, ?object $antes, object $depois): void
     {
         $limpar = function (?object $r): ?string { if (!$r) return null; $a = (array) $r; unset($a['chave'], $a['pedido_hash']); return json_encode($a, JSON_THROW_ON_ERROR); };
         DB::table('disciplina_eventos')->insert(['referencia' => (string) Str::uuid(), 'espaco_id' => $v->espaco_id, 'ator_vinculo_id' => $v->id,

@@ -15,7 +15,9 @@ class DisciplinaController extends Controller
     public function opcoes(Request $r): JsonResponse
     {
         $this->gestao->contexto($r->user()); $gerir = $this->gestao->gerir($r->user());
-        return ApiResponse::success(['referencias' => ReferenciasDisciplinas::todas(), 'gerir' => $gerir]);
+        $d = $r->validate(['disciplina_id' => 'nullable|integer|min:1']);
+        return ApiResponse::success(['referencias' => ReferenciasDisciplinas::todas(), 'gerir' => $gerir,
+            'areas' => $gerir ? $this->gestao->areasDisponiveis($r->user(), $d['disciplina_id'] ?? null) : []]);
     }
 
     public function professores(Request $r): JsonResponse
@@ -34,6 +36,14 @@ class DisciplinaController extends Controller
         if ($busca = trim($dados['busca'] ?? '')) $q->where(fn ($q) => $q->where('d.nome', 'like', '%'.$busca.'%')->orWhere('d.sigla', 'like', '%'.$busca.'%'));
         if ($r->filled('ativo')) $q->where('d.ativo', (bool) $dados['ativo']);
         $p = $q->orderBy('d.nome')->orderBy('d.id')->paginate(20);
+        $v = $this->gestao->contexto($r->user());
+        $areas = \Illuminate\Support\Facades\DB::table('disciplina_areas as da')->join('areas_conhecimento as a', function ($j) {
+            $j->on('a.id', '=', 'da.area_id')->on('a.espaco_id', '=', 'da.espaco_id');
+        })->where('da.espaco_id', $v->espaco_id)->whereIn('da.disciplina_id', $p->getCollection()->pluck('id'))
+            ->orderBy('a.nome')->orderBy('a.id')->get(['da.disciplina_id', 'a.id', 'a.nome', 'a.sigla', 'a.ativo'])->groupBy('disciplina_id');
+        $p->getCollection()->transform(function ($d) use ($areas) {
+            $d->areas = ($areas->get($d->id) ?? collect())->map(function ($a) { $c = clone $a; unset($c->disciplina_id); return $c; })->all(); return $d;
+        });
         return ApiResponse::success(['disciplinas' => $p->items(), 'gerir' => $this->gestao->gerir($r->user())],
             ['pagina' => $p->currentPage(), 'paginas' => $p->lastPage(), 'total' => $p->total(), 'por_pagina' => $p->perPage()]);
     }
@@ -110,6 +120,7 @@ class DisciplinaController extends Controller
     private function validarDisciplina(Request $r, bool $editar = false): array
     {
         return $r->validate(['nome' => 'required|string|max:100', 'sigla' => 'nullable|string|max:20', 'ativo' => 'required|boolean',
+            'area_ids' => 'sometimes|array|max:200', 'area_ids.*' => 'required|integer|min:1|distinct',
             'referencia' => $editar ? 'prohibited' : 'nullable|string|max:50', 'versao' => ($editar ? 'required' : 'prohibited').'|integer|min:1',
             'espaco_id' => 'prohibited', 'escola_id' => 'prohibited']);
     }

@@ -56,6 +56,11 @@ Route::prefix('v1')->group(function () {
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
         $dc=\App\Http\Controllers\Api\DisciplinaController::class;
+        $ac=\App\Http\Controllers\Api\AreaConhecimentoController::class;
+        Route::prefix('areas-conhecimento')->middleware('throttle:60,1')->group(function () use ($ac) {
+            Route::get('', [$ac,'index']); Route::post('', [$ac,'store']);
+            Route::get('{id}', [$ac,'show'])->whereNumber('id'); Route::put('{id}', [$ac,'update'])->whereNumber('id');
+        });
         Route::prefix('disciplinas')->middleware('throttle:60,1')->group(function () use ($dc) {
             Route::get('opcoes', [$dc,'opcoes']); Route::get('professores', [$dc,'professores']); Route::get('', [$dc,'index']); Route::post('', [$dc,'store']);
             Route::get('{id}', [$dc,'show'])->whereNumber('id'); Route::put('{id}', [$dc,'update'])->whereNumber('id');
