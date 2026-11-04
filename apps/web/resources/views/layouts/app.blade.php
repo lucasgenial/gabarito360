@@ -56,7 +56,6 @@
       <a class="contexto-trocar" href="{{ route('vinculos.index', ['trocar' => 1]) }}" data-sem-contexto
          aria-label="{{ $nomeContexto }}. {{ \App\Support\Acesso::rotulo() }}. {{ $trocaContexto }}" title="{{ $trocaContexto }} — {{ $nomeContexto }}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3"/></svg>
-        <span class="contexto-trocar-texto">{{ $trocaContexto }}</span>
       </a>
     @endif
     <div class="header-right">
