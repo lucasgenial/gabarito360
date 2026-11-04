@@ -63,7 +63,7 @@ Bibliotecário, serviços gerais, portaria, transporte e alimentação podem con
 |---|---|---|
 | Correção de autoria e Meu espaço | Isolamento docente, autoria contextual e troca de vínculo em modal | PR162 integrado; publicação/validação da homologação registrada no próprio PR. |
 | PF1-A — inventário | Conferir catálogo real, funções ausentes e consumidores incompletos | Proposta documentada aqui. Nenhum novo acesso habilitado. |
-| PF1-B — contrato dos prioritários | Vice-diretor; revisão do Secretário escolar; Auxiliar de secretaria; hierarquia de gestão | Próxima definição de produto. Matriz precisa ser aprovada antes de semear/habilitar. |
+| PF1-B — contrato dos prioritários | Vice-diretor; revisão do Secretário escolar; Auxiliar de secretaria; hierarquia de gestão | Matriz concreta e critérios preparados no [doc134](134-pf1-b-matriz-perfis-prioritarios.md); aguarda aprovação de produto antes de semear/habilitar. |
 | PF1-C — implementação e verificação | Contexto, API, telas, auditoria, testes e migração de cada perfil aprovado | Planejada; sem substituição improvisada por perfil mais poderoso. |
 | ID1 — identidade | Unicidade pessoal, proteção e conciliação | Mantida como próxima etapa estrutural do plano115; não iniciada por este documento. |
 | VI1 — vínculos e convites | CPF-primeiro, aceite, agenda, notificações e múltiplas funções | Incorpora o catálogo aprovado; Secretário de Educação requer contrato contextual próprio. |
