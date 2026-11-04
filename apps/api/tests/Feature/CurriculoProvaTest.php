@@ -83,6 +83,8 @@ class CurriculoProvaTest extends TestCase
     {
         [$m,$f]=$this->preparar();
         DB::table('disciplinas')->insert(['id'=>90,'espaco_id'=>6,'nome'=>'Nome estrangeiro secreto','nome_chave'=>'secreta']);
+        $this->postJson('/api/v1/provas/opcoes-disciplinas',['turma_ids'=>[1,3]])->assertOk()->assertJsonCount(2,'data.opcoes');
+        $this->assertDatabaseCount('prova_curriculos',0);
         $this->entrarComo(2,3);
         $this->getJson('/api/v1/provas/opcoes-disciplinas?'.http_build_query(['turma_ids'=>[1,3],'rascunho_ids'=>[$m,$f,90]]))->assertOk()
             ->assertJsonCount(1,'data.opcoes')->assertJsonCount(3,'data.selecionadas')->assertJsonPath('data.selecionadas.0.elegivel',true)
@@ -126,6 +128,7 @@ class CurriculoProvaTest extends TestCase
         $this->assertDatabaseCount('prova_area_vinculos',0);
         $this->assertNotNull(DB::table('prova_curriculos')->where('prova_id',$id)->value('publicado_em'));
         $this->putJson("/api/v1/provas/$id",['status'=>'rascunho'])->assertOk();
+        $this->getJson("/api/v1/provas/$id")->assertOk()->assertJsonPath('data.organizacao_curricular.editavel',false);
         $this->putJson("/api/v1/provas/$id",['disciplina_ids'=>[$f],'turma_ids'=>[1,3],'curriculo_versao'=>1])->assertUnprocessable();
         $this->deleteJson("/api/v1/provas/$id")->assertConflict();
         $this->assertDatabaseHas('prova_disciplinas',['prova_id'=>$id,'disciplina_id'=>$m]);

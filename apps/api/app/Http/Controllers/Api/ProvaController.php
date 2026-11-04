@@ -231,6 +231,14 @@ class ProvaController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
+        // Mantém turmas, currículo e estado de preservação no mesmo retrato de leitura.
+        return CurriculoProva::aplicavel($request->user())
+            ? DB::transaction(fn()=>$this->detalhar($request,$id))
+            : $this->detalhar($request,$id);
+    }
+
+    private function detalhar(Request $request, int $id): JsonResponse
+    {
         $consulta = new ConsultasPedagogicas($request->user());
         $prova = Escopo::provas($request->user())->with(['escola:id,nome', 'autor:id,nome'])->find($id);
 
@@ -247,6 +255,7 @@ class ProvaController extends Controller
             ->get();
 
         return ApiResponse::success(array_merge($prova->toArray(), [
+            'organizacao_curricular'=>CurriculoProva::aplicavel($request->user())?app(CurriculoProva::class)->estado($prova):null,
             'curriculo'=>config('disciplinas.ativo')?(app(CurriculoProva::class)->resumos($request->user(),[$prova->id])[$prova->id]??null):null,
             'criado_por_nome' => $prova->autor?->nome,
             'pode_editar' => Escopo::podeEditarProva($request->user(),$prova),

@@ -121,6 +121,16 @@ final class CurriculoProva
         if (self::aplicavel($u)) DB::table('prova_curriculos')->where('espaco_id',$p->espaco_id)->where('prova_id',$p->id)->whereNull('publicado_em')->update(['publicado_em'=>now()]);
     }
 
+    /** A interface não deve oferecer reclassificação ao reabrir uma prova já aplicada. */
+    public function estado(Prova $p): array
+    {
+        $c=DB::table('prova_curriculos')->where('espaco_id',$p->espaco_id)->where('prova_id',$p->id)->first();
+        $preservado=$p->status!=='rascunho' || $c?->publicado_em
+            || DB::table('gabaritos')->where('prova_id',$p->id)->whereNotNull('publicado_em')->exists()
+            || DB::table('cartoes')->where('prova_id',$p->id)->exists() || DB::table('notas')->where('prova_id',$p->id)->exists();
+        return ['configurado'=>(bool)$c,'editavel'=>!$preservado,'bloqueio'=>$preservado?'Classificação preservada após a publicação ou aplicação.':null];
+    }
+
     /** Consultas por lote, sem acrescentar uma consulta por prova à listagem. */
     public function resumos(Usuario $u, array $ids): array
     {
