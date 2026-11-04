@@ -11,7 +11,7 @@
     <div class="field"><label for="area-sigla">Sigla <span class="field-help">(opcional)</span></label><input class="input" id="area-sigla" name="sigla" maxlength="20" value="{{ old('sigla',$area['sigla']??'') }}" @error('sigla') aria-invalid="true" aria-describedby="dc1-erro-sigla" @enderror>@include('disciplinas._erro',['campo'=>'sigla'])</div>
     <div class="field"><label for="area-ativo">Situação</label><select class="select" id="area-ativo" name="ativo" aria-describedby="area-situacao-ajuda{{ $errors->has('ativo')?' dc1-erro-ativo':'' }}" @error('ativo') aria-invalid="true" @enderror><option value="1" @selected((string)old('ativo',$area['ativo']??1)==='1')>Ativa</option><option value="0" @selected((string)old('ativo',$area['ativo']??1)==='0')>Inativa</option></select>@include('disciplinas._erro',['campo'=>'ativo'])<p class="field-help" id="area-situacao-ajuda">Inativar impede novas associações. Disciplinas e vínculos existentes são preservados.</p></div>
   </div>
-  @include('disciplinas.areas._disciplinas')
+  @unless($area)<p class="field-help">Após adicionar a área, você poderá vincular disciplinas.</p>@endunless
   <div class="dc1-acoes"><button class="btn btn-primary" type="submit" @disabled(session('conflito_dc1'))>{{ $area?'Salvar alterações':'Adicionar área' }}</button><a class="btn btn-ghost" href="{{ $area?route('areas.show',['id'=>$area['id']]+$retorno):route('areas.index',$retorno) }}">Cancelar</a></div>
 </form>
 @endsection

@@ -112,7 +112,7 @@ class DisciplinasWebTest extends TestCase
         $this->get('/disciplinas/1?_ctx='.$ctx)->assertOk()->assertSee('Áreas do conhecimento:')->assertSee('Área preservada')->assertSee('(inativa)');
     }
 
-    public function test_area_seleciona_todo_catalogo_e_envia_retirada_explicita_com_erro_no_grupo(): void
+    public function test_cadastro_da_area_separa_identificacao_da_vinculacao_e_nao_duplica_cancelar(): void
     {
         [$ctx,$me]=$this->preparar(); $falhar=false;
         $disciplina=$this->disciplina();
@@ -121,7 +121,7 @@ class DisciplinasWebTest extends TestCase
             return Http::response(['data'=>['disciplinas'=>[$disciplina]]]);
         });
         $url='/areas-conhecimento/nova?_ctx='.$ctx;
-        $html=$this->get($url)->assertOk()->assertSee('Disciplinas desta área')->assertSee('name="disciplina_ids[]"',false)->assertSee('name="disciplina_versoes[1]"',false)->getContent();
+        $html=$this->get($url)->assertOk()->assertSee('Após adicionar a área')->assertDontSee('name="disciplina_ids[]"',false)->getContent();
         $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
         $this->assertSame(0,$xp->query('//div[contains(@class,"g-pagina")]//a[normalize-space(.)="Cancelar"]')->length);
         $this->assertSame(1,$xp->query('//form//a[normalize-space(.)="Cancelar"]')->length);
@@ -129,7 +129,7 @@ class DisciplinasWebTest extends TestCase
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['disciplina_ids']===[]);
         $falhar=true;
         $this->from($url)->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'Área','ativo'=>'1','disciplinas_selecao'=>'1','disciplina_ids'=>[1],'disciplina_versoes'=>[1=>2]])->assertRedirect();
-        $this->get($url)->assertOk()->assertSee('dc1-erro-disciplina_ids')->assertSee('Seleção inválida.')->assertSee('value="1" checked',false);
+        $this->get($url)->assertOk()->assertSee('Seleção inválida.')->assertDontSee('name="disciplina_ids[]"',false);
     }
 
     public function test_catalogo_de_areas_paginado_e_somente_leitura(): void
@@ -158,7 +158,7 @@ class DisciplinasWebTest extends TestCase
     public function test_detalhe_da_area_prioriza_tabela_e_nao_repete_card_de_metadados(): void
     {
         [$ctx,$me]=$this->preparar();
-        $this->fake($me,fn()=>Http::response(['data'=>['area'=>['id'=>8,'nome'=>'Matemática e raciocínio','sigla'=>'MR','ativo'=>true,'disciplinas'=>[$this->disciplina()]],'gerir'=>true]]));
+        $this->fake($me,fn($r,$p)=>Http::response(['data'=>str_ends_with($p,'opcoes')?['disciplinas'=>[]]:['area'=>['id'=>8,'nome'=>'Matemática e raciocínio','sigla'=>'MR','ativo'=>true,'versao'=>1,'disciplinas'=>[$this->disciplina()]],'gerir'=>true]]));
         $this->get('/areas-conhecimento/8?_ctx='.$ctx)->assertOk()->assertSee('Sigla: MR')->assertSee('Disciplinas desta área')
             ->assertSee('data-colecao-completa="true"',false)->assertDontSee('aria-label="Dados da área"',false)->assertDontSee('sobre organização desta área');
     }
@@ -176,8 +176,38 @@ class DisciplinasWebTest extends TestCase
         $this->get($url.'&rever=1')->assertRedirect($url);
         $html=$this->get($url)->assertOk()->assertSee('value="MR5"',false)->assertDontSee('Atualizar estado e manter preenchimento')->getContent();
         $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
-        $this->assertSame(5,$xp->query('//input[@name="disciplina_ids[]"][@checked]')->length);
+        $this->assertSame(0,$xp->query('//input[@name="disciplina_ids[]"]')->length);
         $this->assertSame(1,$xp->query('//input[@name="versao"][@value="2"]')->length);
+    }
+
+    public function test_tabela_de_vinculos_tem_duas_colunas_datas_e_acoes_somente_em_periodo_ativo(): void
+    {
+        [$ctx,$me]=$this->preparar();
+        $p=['id'=>41,'disciplina_id'=>1,'nome'=>'Matemática','sigla'=>'MAT','ativo'=>true,'disciplina_ativa'=>true,'disciplina_versao'=>2,'versao'=>1,'vinculado_em'=>'2026-11-04 15:00:00','desvinculado_em'=>null];
+        $e=array_replace($p,['id'=>40,'ativo'=>false,'vinculado_em'=>'2025-11-15 15:00:00','desvinculado_em'=>'2026-11-04 14:00:00']);
+        $this->fake($me,fn($r,$url)=>Http::response(['data'=>str_ends_with($url,'opcoes')?['disciplinas'=>[['id'=>1,'nome'=>'Matemática','sigla'=>'MAT','ativo'=>true,'versao'=>2],['id'=>2,'nome'=>'Português','sigla'=>null,'ativo'=>true,'versao'=>1]]]:['area'=>['id'=>8,'nome'=>'Área','sigla'=>null,'ativo'=>true,'versao'=>3,'vinculos'=>[$p,$e]],'gerir'=>true]]));
+        $html=$this->get('/areas-conhecimento/8?_ctx='.$ctx)->assertOk()->assertSee('Nome/dados')->assertSee('Data da vinculação:')->assertSee('Data da desvinculação:')->assertSee('04/11/2026 · 12:00')->assertSee('Vínculo encerrado')->getContent();
+        $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
+        $this->assertSame(2,$xp->query('//table//th')->length);
+        $this->assertSame(1,$xp->query('//table//button[@type="submit"]')->length);
+        $this->assertSame(1,$xp->query('//select[@name="disciplina_selecao"]/option[@value="2:1"]')->length);
+        $this->assertSame(0,$xp->query('//select[@name="disciplina_selecao"]/option[@value="1:2"]')->length);
+        $this->assertSame(1,$xp->query('//table[contains(@class,"tabela-compacta")]')->length);
+    }
+
+    public function test_vincular_envia_versoes_e_desvincular_mostra_confirmacao_so_quando_api_exige(): void
+    {
+        [$ctx,$me]=$this->preparar(); $confirmar=false;
+        $p=['id'=>41,'disciplina_id'=>1,'nome'=>'Matemática','sigla'=>'MAT','ativo'=>true,'disciplina_ativa'=>true,'disciplina_versao'=>2,'versao'=>1,'vinculado_em'=>null,'desvinculado_em'=>null];
+        $this->fake($me,function($r,$url) use (&$confirmar,$p) {
+            if($r->method()==='POST') return $confirmar?Http::response(['codigo'=>'confirmacao_desvinculacao','data'=>['confirmacao'=>'confirmacao-ficticia','provas'=>2]],409):Http::response(['data'=>[]]);
+            return Http::response(['data'=>str_ends_with($url,'opcoes')?['disciplinas'=>[]]:['area'=>['id'=>8,'nome'=>'Área','sigla'=>null,'ativo'=>true,'versao'=>3,'vinculos'=>[$p]],'gerir'=>true]]);
+        });
+        $this->post('/areas-conhecimento/8/vinculos?_ctx='.$ctx,['disciplina_selecao'=>'2:3','versao'=>2])->assertRedirect(route('areas.show',['id'=>8,'_ctx'=>$ctx]));
+        Http::assertSent(fn($r)=>$r->method()==='POST' && $r['disciplina_id']===2 && $r['disciplina_versao']===3);
+        $confirmar=true;
+        $this->post('/areas-conhecimento/8/desvincular?_ctx='.$ctx,['disciplina_id'=>1,'disciplina_versao'=>2,'versao'=>3,'vinculo_id'=>41])->assertRedirect();
+        $this->get('/areas-conhecimento/8?_ctx='.$ctx)->assertOk()->assertSee('data-dc1-confirmacao-area',false)->assertSee('As provas, os gabaritos, as notas')->assertSee('name="confirmacao"',false)->assertSee('Não registrada');
     }
 
     public function test_erro_local_de_validacao_tambem_ignora_historico_de_outra_aba(): void

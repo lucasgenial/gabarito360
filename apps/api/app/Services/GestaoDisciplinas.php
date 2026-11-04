@@ -129,8 +129,8 @@ final class GestaoDisciplinas
                 foreach ($mudaram as $area) {
                     $areaAntes = DB::table('areas_conhecimento')->where('espaco_id', $v->espaco_id)->where('id', $area)->lockForUpdate()->first();
                     $areaAntes->disciplina_ids = DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('area_id', $area)->orderBy('disciplina_id')->pluck('disciplina_id')->all();
-                    if (in_array($area, $areasIds, true)) DB::table('disciplina_areas')->insert(['espaco_id' => $v->espaco_id, 'disciplina_id' => $id, 'area_id' => $area]);
-                    else DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('disciplina_id', $id)->where('area_id', $area)->delete();
+                    if (in_array($area, $areasIds, true)) PeriodosAreaDisciplina::abrir((int)$v->espaco_id,(int)$area,$id);
+                    else PeriodosAreaDisciplina::encerrar((int)$v->espaco_id,(int)$area,$id,(int)$v->id);
                     DB::table('areas_conhecimento')->where('id', $area)->update(['versao' => $areaAntes->versao + 1, 'updated_at' => now()]);
                     $areaDepois = DB::table('areas_conhecimento')->find($area);
                     $areaDepois->disciplina_ids = DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('area_id', $area)->orderBy('disciplina_id')->pluck('disciplina_id')->all();

@@ -36,6 +36,17 @@ class AreaConhecimentoController extends Controller
     public function store(Request $r): JsonResponse { return $this->salvar($r); }
     public function update(Request $r, int $id): JsonResponse { return $this->salvar($r, $id); }
 
+    public function vincular(Request $r, int $id): JsonResponse { return $this->vinculo($r,$id); }
+    public function desvincular(Request $r, int $id): JsonResponse { return $this->vinculo($r,$id,true); }
+
+    private function vinculo(Request $r, int $id, bool $encerrar = false): JsonResponse
+    {
+        $this->disciplinas->contexto($r->user(),true);
+        $d = $r->validate(['disciplina_id'=>'required|integer|min:1','disciplina_versao'=>'required|integer|min:1','versao'=>'required|integer|min:1',
+            'vinculo_id'=>($encerrar?'required':'prohibited').'|integer|min:1','confirmacao'=>($encerrar?'nullable':'prohibited').'|string|max:4096']);
+        return ApiResponse::success($this->areas->alterarVinculo($r->user(),$id,$d,$encerrar));
+    }
+
     private function salvar(Request $r, ?int $id = null): JsonResponse
     {
         $this->disciplinas->contexto($r->user(), true);

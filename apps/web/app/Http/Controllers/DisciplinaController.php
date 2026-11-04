@@ -153,6 +153,7 @@ class DisciplinaController extends Controller
         return match ($r->route()->getName()) {
             'areas.store' => route('areas.create', $retorno),
             'areas.update' => route('areas.edit', ['id'=>$p['id']] + $retorno),
+            'areas.vincular', 'areas.desvincular' => route('areas.show', ['id'=>$p['id']] + $retorno),
             'disciplinas.store' => route('disciplinas.create', $origem + $retorno),
             'disciplinas.update' => route('disciplinas.edit', ['id'=>$p['id']] + $retorno),
             'disciplinas.indicar' => route('disciplinas.show', ['id'=>$p['id']] + $retorno),

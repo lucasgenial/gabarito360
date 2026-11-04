@@ -23,7 +23,42 @@ final class GestaoAreasConhecimento
         $a = $this->consultar($u)->where('id', $id)->first();
         abort_unless($a, 404, 'Área não encontrada.');
         $a->disciplinas = $this->disciplinasDaArea($u, $id);
+        $a->vinculos = $this->historico($u, $id);
         return $a;
+    }
+
+    public function historico(Usuario $u, int $area): array
+    {
+        $v = $this->disciplinas->contexto($u);
+        return DB::table('disciplina_area_vinculos as p')->join('disciplinas as d', function ($j) {
+            $j->on('d.id','=','p.disciplina_id')->on('d.espaco_id','=','p.espaco_id');
+        })->where('p.espaco_id',$v->espaco_id)->where('p.area_id',$area)
+            ->whereIn('d.id',$this->disciplinas->disciplinas($u)->select('d.id'))
+            ->orderByDesc('p.ativo')->orderBy('d.nome')->orderByDesc('p.id')
+            ->get(['p.id','p.disciplina_id','p.ativo','p.versao','p.vinculado_em','p.desvinculado_em','d.nome','d.sigla','d.ativo as disciplina_ativa','d.versao as disciplina_versao'])->all();
+    }
+
+    public function alterarVinculo(Usuario $u, int $area, array $dados, bool $encerrar = false): object
+    {
+        return DB::transaction(function () use ($u,$area,$dados,$encerrar) {
+            DB::table('usuario_vinculos')->where('id',$u->vinculoContextoId())->lockForUpdate()->first();
+            $v = $this->disciplinas->contexto($u,true);
+            DB::table('espacos')->where('id',$v->espaco_id)->lockForUpdate()->first();
+            $a = $this->area($u,$area);
+            abort_unless((int)$a->versao === (int)$dados['versao'],409,'A área mudou. Atualize a tabela antes de continuar.');
+            $d = $this->disciplinas->disciplina($u,(int)$dados['disciplina_id']);
+            abort_unless((int)$d->versao === (int)$dados['disciplina_versao'],409,'A disciplina mudou. Atualize a tabela antes de continuar.');
+            $ids = array_map(fn($d)=>(int)$d->id,$a->disciplinas);
+            if ($encerrar) {
+                $p = DB::table('disciplina_areas')->where(['espaco_id'=>$v->espaco_id,'area_id'=>$area,'disciplina_id'=>$d->id])->first();
+                abort_unless($p && (int)$p->vinculo_id === (int)$dados['vinculo_id'],409,'O vínculo mudou. Atualize a tabela.');
+                $ids = array_values(array_diff($ids,[(int)$d->id]));
+            } else {
+                abort_if(in_array((int)$d->id,$ids,true),409,'A disciplina já está vinculada.');
+                $ids[] = (int)$d->id;
+            }
+            return $this->salvar($u,['nome'=>$a->nome,'sigla'=>$a->sigla,'ativo'=>(bool)$a->ativo,'versao'=>$a->versao,'disciplina_ids'=>$ids],$area,$dados['confirmacao']??null);
+        },3);
     }
 
     public function disciplinasDaArea(Usuario $u, int $id): array
@@ -45,9 +80,9 @@ final class GestaoAreasConhecimento
         })->orderBy('d.nome')->orderBy('d.id')->get(['d.id', 'd.nome', 'd.sigla', 'd.ativo', 'd.versao'])->all();
     }
 
-    public function salvar(Usuario $u, array $dados, ?int $id = null): object
+    public function salvar(Usuario $u, array $dados, ?int $id = null, ?string $confirmacao = null): object
     {
-        return DB::transaction(function () use ($u, $dados, $id) {
+        return DB::transaction(function () use ($u, $dados, $id, $confirmacao) {
             DB::table('usuario_vinculos')->where('id', $u->vinculoContextoId())->lockForUpdate()->first();
             $v = $this->disciplinas->contexto($u, true);
             // Mesma trava do catálogo de disciplinas: serializa nome e associação/inativação.
@@ -86,9 +121,8 @@ final class GestaoAreasConhecimento
             foreach ($alteradas as $d) {
                 $anterior = clone $disciplinas[$d];
                 $anterior->areas = $this->disciplinas->areasDaDisciplina((int) $v->espaco_id, (int) $d);
-                $relacao = DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('area_id', $id)->where('disciplina_id', $d);
-                if (in_array($d, $ids, true)) DB::table('disciplina_areas')->insert(['espaco_id' => $v->espaco_id, 'area_id' => $id, 'disciplina_id' => $d]);
-                else $relacao->delete();
+                if (in_array($d, $ids, true)) PeriodosAreaDisciplina::abrir((int)$v->espaco_id,$id,(int)$d);
+                else PeriodosAreaDisciplina::encerrar((int)$v->espaco_id,$id,(int)$d,(int)$v->id,$confirmacao);
                 DB::table('disciplinas')->where('id', $d)->update(['versao' => $anterior->versao + 1, 'updated_at' => now()]);
                 $atual = DB::table('disciplinas')->find($d);
                 $atual->areas = $this->disciplinas->areasDaDisciplina((int) $v->espaco_id, (int) $d);

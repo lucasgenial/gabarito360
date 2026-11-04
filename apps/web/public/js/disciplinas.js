@@ -1,5 +1,31 @@
 // Preserva somente campos não sensíveis do formulário ao conferir os pré-requisitos.
 document.querySelector('.dc1-stack [aria-invalid="true"]')?.focus();
+document.querySelector('[data-dc1-foco]')?.focus();
+
+// A API decide se houve uso conjunto. Sem JavaScript, o diálogo permanece aberto na página.
+(() => {
+  const dialog = document.querySelector('[data-dc1-confirmacao-area]');
+  if (!dialog || typeof dialog.showModal !== 'function') return;
+  const origem = document.getElementById(dialog.dataset.dc1Origem);
+  dialog.removeAttribute('open');
+  dialog.showModal();
+  dialog.querySelector('[data-dc1-cancelar-area]')?.focus();
+  dialog.querySelector('[data-dc1-cancelar-area]')?.addEventListener('click', event => {
+    event.preventDefault(); dialog.close();
+  });
+  dialog.addEventListener('close', () => origem?.focus());
+})();
+document.querySelectorAll('form[data-dc1-envio]').forEach(form => {
+  form.addEventListener('submit', event => {
+    if (form.dataset.enviando === 'true') { event.preventDefault(); return; }
+    form.dataset.enviando = 'true';
+    if (event.submitter) event.submitter.disabled = true;
+  });
+});
+window.addEventListener('pageshow', () => document.querySelectorAll('form[data-dc1-envio]').forEach(form => {
+  delete form.dataset.enviando;
+  form.querySelectorAll('button[type="submit"]').forEach(button => { button.disabled = false; });
+}));
 document.querySelectorAll('[data-dc1-retorno]').forEach(link => {
   link.addEventListener('click', () => {
     const form = document.getElementById('dc1-atribuicao');

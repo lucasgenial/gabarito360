@@ -71,6 +71,8 @@ Route::middleware('autenticado')->group(function () {
     Route::get('areas-conhecimento/{id}',[$ac,'show'])->whereNumber('id')->name('areas.show');
     Route::get('areas-conhecimento/{id}/editar',[$ac,'edit'])->whereNumber('id')->name('areas.edit');
     Route::put('areas-conhecimento/{id}',[$ac,'update'])->whereNumber('id')->name('areas.update');
+    Route::post('areas-conhecimento/{id}/vinculos',[$ac,'vincular'])->whereNumber('id')->name('areas.vincular');
+    Route::post('areas-conhecimento/{id}/desvincular',[$ac,'desvincular'])->whereNumber('id')->name('areas.desvincular');
     Route::get('disciplinas/nova',[$dc,'create'])->name('disciplinas.create');
     Route::post('disciplinas',[$dc,'store'])->name('disciplinas.store');
     Route::get('disciplinas/{id}',[$dc,'show'])->whereNumber('id')->name('disciplinas.show');

@@ -1,5 +1,5 @@
 @props(['titulo', 'completa' => false, 'modo' => 'lista'])
-@php($completa = $completa && in_array($modo,['lista','selecao'],true))
+@php($completa = $completa && in_array($modo,['lista','selecao','compacta'],true))
 {{-- Uma só árvore mantém formulários, contexto e permissões na tabela e nos cards. --}}
 <div {{ $attributes->class(['tabela-conjunto'])->merge(['data-tabela' => '', 'data-modo' => $modo, 'data-colecao-completa' => $completa ? 'true' : 'false']) }}>
   @if($completa)
