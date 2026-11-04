@@ -31,7 +31,9 @@
         || novo.querySelector('#pc-nova-disciplina') || novo.querySelector('button[value=opcoes]');
       destino?.focus({preventScroll:acao !== 'rever'});
       const novoStatus = novo.querySelector('[data-curriculo-status]');
-      if (novoStatus && !novoStatus.textContent.trim()) novoStatus.textContent = acao === 'adicionar' ? 'Disciplina adicionada à seleção.' : acao.startsWith('remover:') ? 'Disciplina removida da seleção.' : 'Opções conferidas.';
+      if (novoStatus && !novoStatus.textContent.trim()) novoStatus.textContent = !resposta.ok || novo.dataset.falha === '1'
+        ? 'Não foi possível conferir as opções. Use Atualizar opções para tentar novamente.'
+        : acao === 'adicionar' ? 'Disciplina adicionada à seleção.' : acao.startsWith('remover:') ? 'Disciplina removida da seleção.' : 'Opções conferidas.';
     } catch (erro) {
       if (ordem !== sequencia || (erro.name === 'AbortError' && !esgotado)) return;
       editor.setAttribute('aria-busy', 'false');

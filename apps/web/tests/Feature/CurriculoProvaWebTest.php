@@ -70,7 +70,7 @@ class CurriculoProvaWebTest extends TestCase
         $ctx=$this->preparar();$url='/provas/preparar?_ctx='.$ctx;
         $d=['acao'=>'opcoes','turma_ids'=>[1,3],'disciplina_ids'=>[2],'titulo'=>'Preenchido'];
         $this->post($url,$d)->assertOk()->assertSee('Precisam de revisão')->assertSee('Confira as atribuições')->assertSee('name="disciplina_ids[]" value="2"',false);
-        $this->falha=true;$this->post($url,$d)->assertOk()->assertSee('Não foi possível conferir as opções')->assertSee('name="disciplina_ids[]" value="2"',false)->assertSee('value="Preenchido"',false);
+        $this->falha=true;$this->post($url,$d)->assertOk()->assertSee('Não foi possível conferir as opções')->assertSee('data-falha="1"',false)->assertSee('name="disciplina_ids[]" value="2"',false)->assertSee('value="Preenchido"',false);
         $this->falha=false;$this->post($url,array_replace($d,['acao'=>'remover:2']))->assertOk()->assertDontSee('name="disciplina_ids[]" value="2"',false)->assertSee('Nenhuma disciplina adicionada');
         $this->nenhumaGravacao();
     }
