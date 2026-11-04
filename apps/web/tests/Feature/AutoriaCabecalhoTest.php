@@ -31,9 +31,13 @@ class AutoriaCabecalhoTest extends TestCase
                 ->assertSee('aria-expanded="false"',false)->assertSee('id="user-menu" hidden',false)
                 ->assertDontSee('badge badge-info badge-dot',false)->assertSee('type="submit" class="logout"',false);
             $this->assertSame(1,substr_count($r->getContent(),'class="contexto-ativo"'));
+            $r->assertSee('<details class="contexto-ativo">',false)->assertSee('Meu espaço')->assertSee('Meu perfil');
+            $doc=new \DOMDocument(); @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$r->getContent());
+            $resumo=(new \DOMXPath($doc))->query('//summary[@class="contexto-resumo"]')->item(0);
+            $this->assertSame('Meu espaço',trim(preg_replace('/\s+/u',' ',$resumo->textContent)));
             $r->assertDontSee('contexto-lateral',false)->assertSee('class="contexto-trocar"',false);
             if ($tipo==='interno') $r->assertSee('Equipe Gabarito360')->assertDontSee('Instituição fictícia com nome longo');
-            if ($tipo==='pessoal') $r->assertSee('Meu espaço pessoal');
+            if ($tipo==='pessoal') $r->assertSee('Tipo de espaço')->assertSee('Pessoal')->assertDontSee('Minha escola');
         }
     }
 

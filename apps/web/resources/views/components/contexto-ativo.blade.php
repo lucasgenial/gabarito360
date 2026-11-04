@@ -1,14 +1,20 @@
 @props(['contexto'])
 @php
   $interno = \App\Support\Acesso::interno();
-  $nome = $interno ? 'Equipe Gabarito360' : $contexto['espaco']['nome'];
-  $rotulo = $interno ? 'Acesso interno' : match($contexto['espaco']['tipo'] ?? '') {
+  $pessoal = ($contexto['espaco']['tipo'] ?? '') === 'pessoal';
+  $nome = $interno ? 'Equipe Gabarito360' : ($pessoal ? 'Pessoal' : $contexto['espaco']['nome']);
+  $rotulo = $interno ? 'Área de acesso' : match($contexto['espaco']['tipo'] ?? '') {
     'escola'=>'Minha escola', 'rede'=>'Minha rede', 'nucleo'=>'Meu núcleo',
-    'secretaria'=>'Minha secretaria', 'pessoal'=>'Meu espaço pessoal', default=>'Meu espaço',
+    'secretaria'=>'Minha secretaria', 'pessoal'=>'Tipo de espaço', default=>'Espaço ativo',
   };
 @endphp
-<div class="contexto-ativo" aria-label="Contexto ativo">
-  @if($nome !== $rotulo)<span class="contexto-ativo-rotulo">{{ $rotulo }}</span>@endif
-  <strong class="contexto-ativo-nome">{{ $nome }}</strong>
-  <span class="contexto-ativo-perfil">Meu perfil: <strong>{{ \App\Support\Acesso::rotulo() }}</strong></span>
-</div>
+<details class="contexto-ativo">
+  <summary class="contexto-resumo">
+    <span class="contexto-resumo-titulo">Meu espaço</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+  </summary>
+  <dl class="contexto-dados">
+    <div><dt>{{ $rotulo }}</dt><dd>{{ $nome }}</dd></div>
+    <div><dt>Meu perfil</dt><dd>{{ \App\Support\Acesso::rotulo() }}</dd></div>
+  </dl>
+</details>
