@@ -162,4 +162,28 @@ class DisciplinasWebTest extends TestCase
         $this->get('/areas-conhecimento/8?_ctx='.$ctx)->assertOk()->assertSee('Sigla: MR')->assertSee('Disciplinas desta área')
             ->assertSee('data-colecao-completa="true"',false)->assertDontSee('aria-label="Dados da área"',false)->assertDontSee('sobre organização desta área');
     }
+
+    public function test_conflito_sem_referrer_volta_ao_formulario_correto_mesmo_apos_outra_aba(): void
+    {
+        [$ctx,$me]=$this->preparar();
+        $disciplinas=[]; for($i=1;$i<=5;$i++) $disciplinas[]=['id'=>$i,'nome'=>'Disciplina '.$i,'sigla'=>null,'ativo'=>true,'versao'=>2];
+        $this->fake($me,fn($r,$p)=>$r->method()==='PUT'?Http::response(['message'=>'Uma disciplina mudou.'],409):Http::response(['data'=>str_ends_with($p,'opcoes')?['disciplinas'=>$disciplinas]:['area'=>['id'=>8,'nome'=>'Área','sigla'=>'MR','ativo'=>true,'versao'=>2,'disciplinas'=>$disciplinas],'gerir'=>true]]));
+        $url=route('areas.edit',['id'=>8,'_ctx'=>$ctx]);
+        $this->withSession(['_previous'=>['url'=>url('/disciplinas/99/editar?_ctx='.$ctx)]])->withHeaders(['Referer'=>'']);
+        $this->put('/areas-conhecimento/8?_ctx='.$ctx,['nome'=>'Área','sigla'=>'MR5','ativo'=>'1','versao'=>1,'disciplina_ids'=>[1,2,3,4,5],'disciplina_versoes'=>[1=>1,2=>1,3=>1,4=>1,5=>1],'disciplinas_selecao'=>1])
+            ->assertRedirect($url)->assertSessionHas('conflito_dc1',true);
+        $this->get($url)->assertOk()->assertSee('value="MR5"',false)->assertSee('Atualizar estado e manter preenchimento');
+        $this->get($url.'&rever=1')->assertRedirect($url);
+        $html=$this->get($url)->assertOk()->assertSee('value="MR5"',false)->assertDontSee('Atualizar estado e manter preenchimento')->getContent();
+        $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
+        $this->assertSame(5,$xp->query('//input[@name="disciplina_ids[]"][@checked]')->length);
+        $this->assertSame(1,$xp->query('//input[@name="versao"][@value="2"]')->length);
+    }
+
+    public function test_erro_local_de_validacao_tambem_ignora_historico_de_outra_aba(): void
+    {
+        [$ctx,$me]=$this->preparar();$this->fake($me,fn()=>Http::response(['data'=>[]]));
+        $this->withSession(['_previous'=>['url'=>url('/disciplinas/99/editar?_ctx='.$ctx)]])->withHeaders(['Referer'=>'']);
+        $this->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'','ativo'=>1])->assertRedirect(route('areas.create',['_ctx'=>$ctx]))->assertSessionHasErrors('nome');
+    }
 }
