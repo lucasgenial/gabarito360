@@ -64,8 +64,7 @@ class DisciplinaController extends Controller
     {
         if ($resposta = $this->rever($r)) return $resposta;
         $this->autorizar(true); $d = $this->ler('disciplinas/'.$id)['dados']; abort_unless($d['gerir'], 403);
-        $op = $this->ler('disciplinas/opcoes', ['disciplina_id' => $id])['dados'];
-        return view('disciplinas.form', ['disciplina' => $d['disciplina'], 'retorno' => $this->retorno($r), 'f' => [], 'referencias' => [], 'selecionada' => null, 'areas' => $op['areas'] ?? []]);
+        return view('disciplinas.form', ['disciplina' => $d['disciplina'], 'retorno' => $this->retorno($r), 'f' => [], 'referencias' => [], 'selecionada' => null]);
     }
 
     public function show(Request $r, int $id)
@@ -151,7 +150,7 @@ class DisciplinaController extends Controller
         if ($resp) abort_if(in_array($resp->status(), [403, 404], true), $resp->status());
         if ($resp?->status() === 409) {
             $url = parse_url(url()->previous());
-            if (($url['host'] ?? $r->getHost()) === $r->getHost()) session()->put($this->chaveRascunho($url['path'] ?? '/'), $r->only('nome','sigla','ativo','area_ids','area_selecao','vinculo_id','inicio_em','fim_em','papel'));
+            if (($url['host'] ?? $r->getHost()) === $r->getHost()) session()->put($this->chaveRascunho($url['path'] ?? '/'), $r->only('nome','sigla','ativo','area_ids','area_selecao','disciplina_ids','disciplinas_selecao','vinculo_id','inicio_em','fim_em','papel'));
         }
         return back()->withInput()->withErrors($resp?->json('errors') ?? [])->with('conflito_dc1', $resp?->status() === 409)
             ->with('erro', $resp && in_array($resp->status(), [409,422], true) ? $resp->json('message') : 'Não foi possível confirmar a operação. Atualize os dados antes de tentar novamente.');

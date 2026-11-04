@@ -27,6 +27,12 @@ class AreaConhecimentoController extends Controller
         return ApiResponse::success(['area' => $this->areas->area($r->user(), $id), 'gerir' => $this->disciplinas->gerir($r->user())]);
     }
 
+    public function opcoes(Request $r): JsonResponse
+    {
+        $d = $r->validate(['area_id' => 'nullable|integer|min:1', 'rascunho_ids' => 'sometimes|array|max:200', 'rascunho_ids.*' => 'integer|min:1|distinct']);
+        return ApiResponse::success(['disciplinas' => $this->areas->opcoes($r->user(), $d['area_id'] ?? null, $d['rascunho_ids'] ?? [])]);
+    }
+
     public function store(Request $r): JsonResponse { return $this->salvar($r); }
     public function update(Request $r, int $id): JsonResponse { return $this->salvar($r, $id); }
 
@@ -34,6 +40,8 @@ class AreaConhecimentoController extends Controller
     {
         $this->disciplinas->contexto($r->user(), true);
         $d = $r->validate(['nome' => 'required|string|max:100', 'sigla' => 'nullable|string|max:20', 'ativo' => 'required|boolean',
+            'disciplina_ids' => 'sometimes|array|max:200', 'disciplina_ids.*' => 'required|integer|min:1|distinct',
+            'disciplina_versoes' => 'required_with:disciplina_ids|array|max:5000', 'disciplina_versoes.*' => 'required|integer|min:1',
             'versao' => ($id ? 'required' : 'prohibited').'|integer|min:1', 'espaco_id' => 'prohibited', 'escola_id' => 'prohibited']);
         return ApiResponse::success($this->areas->salvar($r->user(), $d, $id), null, $id ? 200 : 201);
     }

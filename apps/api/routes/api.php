@@ -58,6 +58,7 @@ Route::prefix('v1')->group(function () {
         $dc=\App\Http\Controllers\Api\DisciplinaController::class;
         $ac=\App\Http\Controllers\Api\AreaConhecimentoController::class;
         Route::prefix('areas-conhecimento')->middleware('throttle:60,1')->group(function () use ($ac) {
+            Route::get('opcoes', [$ac,'opcoes']);
             Route::get('', [$ac,'index']); Route::post('', [$ac,'store']);
             Route::get('{id}', [$ac,'show'])->whereNumber('id'); Route::put('{id}', [$ac,'update'])->whereNumber('id');
         });
