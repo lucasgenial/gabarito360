@@ -161,4 +161,12 @@ class DisciplinasTest extends TestCase
         $this->postJson("/api/v1/turmas/1/disciplinas/$c/situacao", ['ativo'=>false,'versao'=>4])->assertUnprocessable();
         $this->assertDatabaseCount('turma_disciplinas',1);
     }
+
+    public function test_nome_em_branco_e_expansao_de_busca_sao_erros_de_campo_sem_500(): void
+    {
+        foreach (['   ',str_repeat('ß',100)] as $nome) {
+            $this->postJson('/api/v1/disciplinas',['nome'=>$nome,'ativo'=>true])->assertUnprocessable()->assertJsonValidationErrors('nome');
+        }
+        $this->assertDatabaseCount('disciplinas',0);
+    }
 }

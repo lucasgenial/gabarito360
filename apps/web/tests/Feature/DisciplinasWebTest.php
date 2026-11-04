@@ -89,4 +89,14 @@ class DisciplinasWebTest extends TestCase
         [$ctx, $me] = $this->preparar(); $this->fake($me, fn () => Http::response(['message' => 'SEGREDO-DB'], 500));
         $this->get('/disciplinas?_ctx='.$ctx)->assertStatus(503)->assertDontSee('SEGREDO-DB')->assertDontSee('Nenhuma disciplina por aqui');
     }
+
+    public function test_confirmacao_da_atribuicao_e_dialogo_com_acao_alvo_e_consequencia(): void
+    {
+        [$ctx,$me]=$this->preparar();$c=$this->componente();
+        $c['atribuicoes']=[['id'=>4,'nome'=>'Professor fictício','vinculo_vigente'=>true,'inicio_em'=>'2099-01-01','fim_em'=>null,'papel'=>'titular','estado_periodo'=>'Programada','versao'=>1]];
+        $this->fake($me,fn($r,$p)=>Http::response(['data'=>str_ends_with($p,'/disciplinas/1')?['componente'=>$c,'gerir'=>true,'atribuir'=>true,'elegiveis'=>[],'indicacoes'=>[]]:['turma'=>$this->turma()]]));
+        $this->get('/turmas/1/disciplinas/1?_ctx='.$ctx)->assertOk()->assertSee('<dialog',false)->assertSee('aria-labelledby="dc1-confirmacao-titulo"',false)
+            ->assertSee('data-dc1-verbo="Cancelar atribuição"',false)->assertSee('Cancelar atribuição de Professor fictício em Matemática')
+            ->assertSee('A atribuição programada será cancelada. O histórico será preservado.')->assertDontSee('onsubmit="return confirm(',false);
+    }
 }

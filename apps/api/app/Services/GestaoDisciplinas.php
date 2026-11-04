@@ -7,6 +7,7 @@ use App\Support\{ContextoVinculo, Escopo, GruposFuncionais, Permissao, Referenci
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 /** DC1 não concede vínculo, turma ou acesso a prova; organiza responsabilidades locais. */
 final class GestaoDisciplinas
@@ -77,11 +78,12 @@ final class GestaoDisciplinas
             $antes = $id ? $this->travarDisciplina($v, $id) : null;
             if ($antes) $this->versao($antes, $dados['versao']);
             $nome = preg_replace('/\s+/u', ' ', trim($dados['nome']));
-            abort_if($nome === '', 422, 'Informe o nome da disciplina.');
+            $this->campo($nome !== '', 'nome', 'Informe o nome da disciplina.');
             $chave = Str::lower(Str::ascii($nome));
+            $this->campo(mb_strlen($chave) <= 100, 'nome', 'Use um nome mais curto: a forma de busca dos símbolos informados excede o limite.');
             // Serializa nomes da escola, inclusive criação concorrente da mesma referência.
             DB::table('espacos')->where('id', $v->espaco_id)->lockForUpdate()->first();
-            abort_if(DB::table('disciplinas')->where('espaco_id', $v->espaco_id)->where('nome_chave', $chave)->when($id, fn ($q) => $q->where('id', '!=', $id))->exists(), 422, 'Esta disciplina já está no catálogo da escola.');
+            $this->campo(!DB::table('disciplinas')->where('espaco_id', $v->espaco_id)->where('nome_chave', $chave)->when($id, fn ($q) => $q->where('id', '!=', $id))->exists(), 'nome', 'Esta disciplina já está no catálogo da escola.');
             $ref = $antes?->referencia ?? ($dados['referencia'] ?? null);
             if (!$antes && $ref) abort_unless(collect(ReferenciasDisciplinas::todas())->contains('chave', $ref), 422, 'Referência não encontrada.');
             $ativo = (bool) ($dados['ativo'] ?? true);
@@ -185,20 +187,20 @@ final class GestaoDisciplinas
             $this->versao($c, $dados['versao']); $t = $this->turma($u, $turma);
             abort_unless($d->ativo && $t->ativo && $c->ativo, 422, 'Turma, catálogo e disciplina da turma precisam estar ativos.');
             $p = $this->travarProfessor($v, $pedido['vinculo_id']);
-            abort_unless(DB::table('disciplina_professores')->where('espaco_id', $v->espaco_id)->where('disciplina_id', $d->id)->where('vinculo_id', $p->id)->where('ativo', true)->exists(), 422, 'Adicione o professor à disciplina antes de atribuí-lo.');
-            abort_unless(DB::table('vinculo_turmas')->where('espaco_id', $v->espaco_id)->where('turma_id', $turma)->where('vinculo_id', $p->id)->exists(), 422, 'O professor precisa de acesso a esta turma.');
-            $hoje = $this->hoje(); abort_if($pedido['inicio_em'] < $hoje, 422, 'O início não pode ser anterior a hoje.');
-            abort_if($pedido['fim_em'] && $pedido['fim_em'] <= $pedido['inicio_em'], 422, 'O fim deve ser posterior ao início.');
+            $this->campo(DB::table('disciplina_professores')->where('espaco_id', $v->espaco_id)->where('disciplina_id', $d->id)->where('vinculo_id', $p->id)->where('ativo', true)->exists(), 'vinculo_id', 'Adicione o professor à disciplina antes de atribuí-lo.');
+            $this->campo(DB::table('vinculo_turmas')->where('espaco_id', $v->espaco_id)->where('turma_id', $turma)->where('vinculo_id', $p->id)->exists(), 'vinculo_id', 'O professor precisa de acesso a esta turma.');
+            $hoje = $this->hoje(); $this->campo($pedido['inicio_em'] >= $hoje, 'inicio_em', 'O início não pode ser anterior a hoje.');
+            $this->campo(!$pedido['fim_em'] || $pedido['fim_em'] > $pedido['inicio_em'], 'fim_em', 'O fim deve ser posterior ao início.');
             // Atribuição futura nunca ultrapassa o vínculo já conhecido.
             if ($p->fim_em) {
                 $limite = \Carbon\CarbonImmutable::parse($p->fim_em, 'UTC')->setTimezone('America/Sao_Paulo')->format('Y-m-d');
-                abort_if(!$pedido['fim_em'] || $pedido['fim_em'] > $limite || $pedido['inicio_em'] >= $limite, 422, 'O período deve caber na vigência do vínculo do professor.');
+                $this->campo($pedido['fim_em'] && $pedido['fim_em'] <= $limite && $pedido['inicio_em'] < $limite, 'fim_em', 'O período deve caber na vigência do vínculo do professor.');
             }
             $sobrepostas = DB::table('docente_atribuicoes')->where('turma_disciplina_id', $c->id)->where('situacao', '!=', 'cancelada')
                 ->where(fn ($q) => $q->whereNull('fim_em')->orWhere('fim_em', '>', $pedido['inicio_em']));
             if ($pedido['fim_em']) $sobrepostas->where('inicio_em', '<', $pedido['fim_em']);
-            abort_if((clone $sobrepostas)->where('vinculo_id', $p->id)->exists(), 422, 'Este professor já possui uma atribuição neste período.');
-            abort_if($pedido['papel'] === 'titular' && $sobrepostas->exists(), 422, 'Há outro professor neste período. Escolha codocência ou substituição, ou encerre a atribuição anterior.');
+            $this->campo(!(clone $sobrepostas)->where('vinculo_id', $p->id)->exists(), 'inicio_em', 'Este professor já possui uma atribuição neste período.');
+            $this->campo($pedido['papel'] !== 'titular' || !$sobrepostas->exists(), 'papel', 'Há outro professor neste período. Escolha codocência ou substituição, ou encerre a atribuição anterior.');
             $id = DB::table('docente_atribuicoes')->insertGetId($pedido + ['espaco_id' => $v->espaco_id, 'ator_vinculo_id' => $v->id, 'chave' => $dados['chave'], 'pedido_hash' => $hash, 'situacao' => 'ativa', 'versao' => 1, 'created_at' => now(), 'updated_at' => now()]);
             DB::table('turma_disciplinas')->where('id', $c->id)->increment('versao');
             $depois = DB::table('docente_atribuicoes')->find($id); $this->evento($v, 'atribuicao', $id, 'criada', null, $depois); return $depois;
@@ -258,7 +260,7 @@ final class GestaoDisciplinas
         $p = DB::table('usuario_vinculos')->where('espaco_id', $v->espaco_id)->where('id', $id)->where('perfil', 'professor')->lockForUpdate()->first();
         abort_unless($p, 404, 'Professor não encontrado nesta escola.');
         if ($vigente) {
-            abort_unless($p->situacao === 'ativo' && $p->inicio_em <= now() && (!$p->fim_em || $p->fim_em > now()) && DB::table('usuarios')->where('id', $p->usuario_id)->where('ativo', true)->exists(), 422, 'O vínculo Professor não está vigente.');
+            $this->campo($p->situacao === 'ativo' && $p->inicio_em <= now() && (!$p->fim_em || $p->fim_em > now()) && DB::table('usuarios')->where('id', $p->usuario_id)->where('ativo', true)->exists(), 'vinculo_id', 'O vínculo Professor não está vigente.');
             GruposFuncionais::conferir((int) $p->usuario_id, (int) $p->espaco_id, 'professor', now(), $p->fim_em, (int) $p->id);
         }
         return $p;
@@ -275,6 +277,11 @@ final class GestaoDisciplinas
     }
 
     private function hoje(): string { return now('America/Sao_Paulo')->toDateString(); }
+
+    private function campo(bool $valido, string $campo, string $mensagem): void
+    {
+        if (!$valido) throw ValidationException::withMessages([$campo => $mensagem]);
+    }
 
     private function evento(object $v, string $entidade, int $id, string $acao, ?object $antes, object $depois): void
     {

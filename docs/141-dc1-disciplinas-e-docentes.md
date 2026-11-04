@@ -32,6 +32,8 @@ O fechamento é do DC1 completo. Subdivisões internas não geram pedidos de aut
 
 ## Evidências em andamento
 
+Revisão de continuidade: especialista aprovou previamente a substituição dos confirmadores nativos introduzidos noDC1 por um diálogo HTML compartilhado, restrito às novas ações. Título identifica ação/alvo; Cancelar recebe foco inicial; Esc/Cancelar retornam foco e não gravam; confirmação envia o formulário original com versão/contexto/CSRF e impede duplicação. Mensagens de regra de negócio precisam ser associadas aos campos e preservar o preenchimento. Esses ajustes exigem capturas atuais e nova revisão final; não alteram confirmações legadas nem autorizam publicação.
+
 Backend inicial validado em SQLite e MariaDB:7 testes/82 asserções. Após acrescentar a situação independente por turma:8 testes/92 asserções em SQLite. Interface:6 testes/58 asserções, incluindo isolamento por contexto e recuperação explícita de versão409 preservando o rascunho. Chrome com fonte e API reais em banco SQLite local fictício confirmou indicação, acesso à turma separado e retorno com professor, papel e datas preservados. Celular390px sem overflow, ação de card44px. Capturas/revisão visual final, CI completo e ensaio de recuperação ainda pendentes; não confundir essas evidências parciais com fechamento ou autorização de produção.
 
 A preparação local usa contas fictícias e rotas de bootstrap somente fora do repositório. Não entram em Git nem em artefato de release. A ativação no deploy isolado é explícita somente nas fases `ENSAIO-DC1`/`HOMOLOGACAO-DC1`; as demais releases preservam sua configuração. `IDENTIDADE_PROVISORIOS_ATIVOS` permanece falso.
