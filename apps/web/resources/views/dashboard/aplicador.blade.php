@@ -45,7 +45,7 @@
   <div class="card-pad" style="padding-bottom:0;">
     <h3 style="font-size:18px;">Provas para enviar cartões</h3>
   </div>
-  <x-tabela titulo="Provas para aplicação" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Provas para aplicação</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Provas para aplicação" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Provas para aplicação</caption>
     <thead>
       <tr>
         <th scope="col">Prova</th>

@@ -12,7 +12,7 @@
   </select></div><button class="btn btn-secondary" type="submit">Ver turmas</button>
 </form>
 <section class="card card-pad" style="margin-top:20px;overflow-x:auto;">
-  <x-tabela titulo="Turmas disponíveis" modo="lista"><table class="tabela-padrao table"><caption>{{ $dados['turmas']['total'] }} turma(s) neste espaço</caption>
+  <x-tabela :integrada="true" titulo="Turmas disponíveis" modo="lista"><table class="tabela-padrao table"><caption>{{ $dados['turmas']['total'] }} turma(s) neste espaço</caption>
     <thead><tr><th scope="col">Turma</th><th scope="col">Série</th><th scope="col">Ano</th><th scope="col">Consultar</th></tr></thead>
     <tbody>@forelse($dados['turmas']['data'] as $t)<tr><td class="tabela-principal" data-rotulo="Turma"><div class="tabela-valor">{{ $t['nome'] }}</div></td><td data-rotulo="Série"><div class="tabela-valor">{{ $t['serie'] }}</div></td><td data-rotulo="Ano"><div class="tabela-valor">{{ $t['ano_letivo'] }}</div></td>
       <td class="tabela-acoes" data-rotulo="Consultar"><div class="tabela-valor"><a href="{{ route('copias.cadastros',$f+['turma_id'=>$t['id'],'page'=>$dados['turmas']['current_page']]) }}" aria-label="Abrir turma {{ $t['nome'] }}">Abrir turma</a></div></td></tr>
@@ -30,7 +30,7 @@
   <h2>{{ $dados['turma']['nome'] }}</h2>
   <p><label><input type="checkbox" name="turmas[]" value="{{ $dados['turma']['id'] }}" required> Incluir esta turma na prévia.</label></p>
   <p>Marque somente os alunos que deseja incluir. A turma precisa ser confirmada mesmo quando houver alunos selecionados. Também é possível conferir apenas a turma.</p>
-  <div style="overflow-x:auto;"><x-tabela titulo="Selecionar alunos" modo="selecao"><table class="tabela-padrao table"><caption>{{ $dados['alunos']['total'] }} aluno(s) nesta turma</caption>
+  <div style="overflow-x:auto;"><x-tabela :integrada="true" titulo="Selecionar alunos" modo="selecao"><table class="tabela-padrao table"><caption>{{ $dados['alunos']['total'] }} aluno(s) nesta turma</caption>
     <thead><tr><th scope="col">Selecionar</th><th scope="col">Aluno</th><th scope="col">Matrícula</th></tr></thead>
     <tbody>@forelse($dados['alunos']['data'] as $a)<tr><td class="tabela-selecionar" data-rotulo="Selecionar"><div class="tabela-valor"><input type="checkbox" id="aluno-{{ $a['id'] }}" name="alunos[]" value="{{ $a['id'] }}" aria-label="Selecionar {{ $a['nome'] }}"></div></td>
       <td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><label for="aluno-{{ $a['id'] }}">{{ $a['nome'] }}</label></div></td><td data-rotulo="Matrícula"><div class="tabela-valor">{{ $a['matricula'] }}</div></td></tr>

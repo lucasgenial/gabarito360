@@ -73,7 +73,7 @@
     <h3 style="font-size:17px;">Resultado por aluno</h3>
     <p class="page-sub no-print">O PDF em lote reúne os resultados disponíveis, com uma página por aluno e o mesmo modelo individual. Alunos ainda sem resultado não entram no arquivo.</p>
   </div>
-  <x-tabela titulo="Resultados dos alunos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Resultados dos alunos</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Resultados dos alunos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Resultados dos alunos</caption>
     <thead><tr><th scope="col">Aluno</th><th scope="col">Turma</th><th scope="col">Nota</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
     <tbody>
       @forelse($alunos as $a)

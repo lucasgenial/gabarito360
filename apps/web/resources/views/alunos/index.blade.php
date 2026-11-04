@@ -21,14 +21,15 @@
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 
+<section class="card card-pad tabela-lista-principal tabela-principal-integrada">
 {{-- Filtros --}}
-<form method="GET" class="filtros-cel" action="{{ route('alunos.index') }}" style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:flex-end;">
+<form method="GET" class="filtros-cel tabela-filtros-principal" action="{{ route('alunos.index') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
   <div style="position:relative;flex:1;min-width:200px;">
     <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="input" type="search" name="busca" placeholder="Buscar aluno por nome ou matrícula…"
+    <input class="input" type="search" name="busca" aria-label="Buscar aluno por nome ou matrícula" placeholder="Buscar aluno por nome ou matrícula…"
            value="{{ $busca }}" style="padding-left:36px;" />
   </div>
-  <select class="select" name="turma_id" style="min-width:180px;">
+  <select class="select" name="turma_id" aria-label="Filtrar por turma" style="min-width:180px;">
     <option value="">Todas as turmas</option>
     @foreach($turmas as $t)
       <option value="{{ $t['id'] }}" {{ $turma_id == $t['id'] ? 'selected' : '' }}>{{ $t['nome'] }} — {{ $t['serie'] }}</option>
@@ -44,8 +45,7 @@
 @if($erroLista)
 <x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
 @else
-<div class="card tabela-superficie" style="margin-top:18px;overflow:hidden;">
-  <x-tabela titulo="Alunos" :completa="true">
+  <x-tabela :integrada="true" titulo="Alunos" :completa="true">
 <table class="table tabela-padrao">
     <caption class="sr-only">Alunos</caption>
     <thead>
@@ -93,8 +93,8 @@
     </tbody>
   </table>
 </x-tabela>
-</div>
 @endif
+</section>
 
 <div style="height:48px;"></div>
 @endsection

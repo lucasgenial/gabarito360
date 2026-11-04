@@ -24,22 +24,23 @@
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
+<section class="card card-pad tabela-lista-principal tabela-principal-integrada">
 {{-- Filtros --}}
-<form method="GET" class="filtros-cel" action="{{ route('turmas.index') }}" style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:flex-end;">
+<form method="GET" class="filtros-cel tabela-filtros-principal" action="{{ route('turmas.index') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
   <div style="position:relative;flex:1;min-width:200px;">
     <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="input" type="search" name="busca" placeholder="Buscar turma por nome…"
+    <input class="input" type="search" name="busca" aria-label="Buscar turma por nome" placeholder="Buscar turma por nome…"
            value="{{ $busca }}" style="padding-left:36px;" />
   </div>
 @unless(\App\Support\Acesso::pessoal())
-  <select class="select" name="escola_id" style="min-width:180px;">
+  <select class="select" name="escola_id" aria-label="Filtrar por escola" style="min-width:180px;">
     <option value="">Todas as escolas</option>
     @foreach($escolas as $e)
       <option value="{{ $e['id'] }}" {{ $escola_id == $e['id'] ? 'selected' : '' }}>{{ $e['nome'] }}</option>
     @endforeach
   </select>
 @endunless
-  <input class="input" type="number" name="ano_letivo" placeholder="Ano letivo"
+  <input class="input" type="number" name="ano_letivo" aria-label="Filtrar por ano letivo" placeholder="Ano letivo"
          value="{{ $ano_letivo }}" style="width:130px;" min="2020" max="2099" />
   <button type="submit" class="btn btn-secondary">Filtrar</button>
   @if($haFiltros)
@@ -51,8 +52,7 @@
 @if($erroLista)
 <x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
 @else
-<div class="card tabela-superficie" style="margin-top:18px;overflow:hidden;">
-  <x-tabela titulo="Turmas" :completa="true">
+  <x-tabela :integrada="true" titulo="Turmas" :completa="true">
 <table class="table tabela-padrao" id="turmas-table">
     <caption class="sr-only">Turmas</caption>
     <thead>
@@ -123,8 +123,8 @@
     </tbody>
   </table>
 </x-tabela>
-</div>
 @endif
+</section>
 
 {{-- Modal: criar turma --}}
 @pode('turma.gerir')

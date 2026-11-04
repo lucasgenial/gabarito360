@@ -92,7 +92,7 @@
     </label>
   </div>
   <div class="quadro-wrap quadro-cel">
-    <x-tabela titulo="Correções por aluno e prova" modo="matriz"><table class="tabela-padrao tabela-matriz quadro"><caption class="sr-only">Correções por aluno e prova</caption>
+    <x-tabela :integrada="true" titulo="Correções por aluno e prova" modo="matriz"><table class="tabela-padrao tabela-matriz quadro"><caption class="sr-only">Correções por aluno e prova</caption>
       <thead>
         <tr>
           <th scope="col" class="aluno"><span>Aluno</span></th>

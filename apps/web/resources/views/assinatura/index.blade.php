@@ -175,7 +175,7 @@
       @if(empty($assinatura['historico_pagamentos']))
         <p style="color:var(--color-secondary-06);font-size:.875rem">Nenhum pagamento registrado ainda.</p>
       @else
-        <x-tabela titulo="Pagamentos" modo="lista"><table class="tabela-padrao historico-table "><caption class="sr-only">Pagamentos</caption>
+        <x-tabela :integrada="true" titulo="Pagamentos" modo="lista"><table class="tabela-padrao historico-table "><caption class="sr-only">Pagamentos</caption>
           <thead>
             <tr>
               <th scope="col">Data</th>

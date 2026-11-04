@@ -62,7 +62,7 @@
   <div class="card-pad" style="padding-bottom:0;">
     <h3 style="font-size:18px;">Redes</h3>
   </div>
-  <x-tabela titulo="Redes da secretaria" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Redes da secretaria</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Redes da secretaria" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Redes da secretaria</caption>
     <thead>
       <tr>
         <th scope="col">Rede</th>

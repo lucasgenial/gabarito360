@@ -83,7 +83,7 @@
 </div>
 
 <div class="card" style="overflow:hidden;">
-  <x-tabela titulo="Alunos da turma" modo="lista"><table class="tabela-padrao table " id="alunos-table"><caption class="sr-only">Alunos da turma</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Alunos da turma" modo="lista"><table class="tabela-padrao table " id="alunos-table"><caption class="sr-only">Alunos da turma</caption>
     <thead>
       <tr>
         <th scope="col">Aluno</th>
@@ -143,7 +143,7 @@
 
 <div class="card" style="overflow:hidden;margin-bottom:24px;">
   @if(count($turma['provas'] ?? []) > 0)
-  <x-tabela titulo="Provas da turma" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Provas da turma</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Provas da turma" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Provas da turma</caption>
     <thead>
       <tr>
         <th scope="col">Prova</th>
@@ -226,7 +226,7 @@
   @endpode
 
   @if(count($professores ?? []) > 0)
-    <x-tabela titulo="Professores da turma" modo="lista"><table class="tabela-padrao table " style="margin-top:0;"><caption class="sr-only">Professores da turma</caption>
+    <x-tabela :integrada="true" titulo="Professores da turma" modo="lista"><table class="tabela-padrao table " style="margin-top:0;"><caption class="sr-only">Professores da turma</caption>
       <thead>
         <tr>
           <th scope="col">Professor(a)</th>

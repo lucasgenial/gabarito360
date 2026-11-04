@@ -74,7 +74,7 @@
           <h2 style="font-size:16px;font-weight:700;">{{ $perfilCfg['label'] }}</h2>
           <span class="badge {{ $perfilCfg['badge'] }}">{{ $membros->count() }} {{ $membros->count() === 1 ? 'membro' : 'membros' }}</span>
         </div>
-        <x-tabela titulo="Equipe" :completa="true">
+        <x-tabela :integrada="true" titulo="Equipe" :completa="true">
 <table class="table tabela-padrao">
           <caption class="sr-only">Equipe</caption>
     <thead>

@@ -17,7 +17,7 @@
 <form method="POST" action="{{ route('copias.materiais.previa') }}" class="card card-pad" style="margin-top:20px;">
   @csrf<input type="hidden" name="_ctx" value="{{ $ctx }}"><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   <p>A seleção usa apenas os itens desta página. Trocar a página ou o espaço inicia uma nova seleção.</p>
-  <div style="overflow-x:auto;"><x-tabela titulo="Selecionar provas" modo="selecao"><table class="tabela-padrao table"><caption style="text-align:left;">{{ $lista['total'] }} prova(s) disponíveis neste espaço</caption>
+  <div style="overflow-x:auto;"><x-tabela :integrada="true" titulo="Selecionar provas" modo="selecao"><table class="tabela-padrao table"><caption style="text-align:left;">{{ $lista['total'] }} prova(s) disponíveis neste espaço</caption>
     <thead><tr><th scope="col">Selecionar</th><th scope="col">Prova</th><th scope="col">Disciplina</th><th scope="col">Série</th><th scope="col">Questões</th></tr></thead>
     <tbody>@forelse($lista['data'] as $p)<tr>
       <td class="tabela-selecionar" data-rotulo="Selecionar"><div class="tabela-valor"><input type="checkbox" id="prova-{{ $p['id'] }}" name="provas[]" value="{{ $p['id'] }}" aria-label="Selecionar {{ $p['titulo'] }}"></div></td>

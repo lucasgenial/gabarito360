@@ -29,7 +29,7 @@
 <section class="card card-pad" style="margin-top:20px;overflow-x:auto;">
 <h2>Espaços do cliente</h2>
 <p>{{ $espacos['total'] }} espaço(s). Vínculos agrupados pela situação cadastral.</p>
-<x-tabela titulo="Espaços do cliente" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Espaços do cliente</caption><thead><tr><th scope="col">Espaço</th><th scope="col">Tipo</th><th scope="col">Situação</th><th scope="col">Vínculos</th></tr></thead><tbody>
+<x-tabela :integrada="true" titulo="Espaços do cliente" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Espaços do cliente</caption><thead><tr><th scope="col">Espaço</th><th scope="col">Tipo</th><th scope="col">Situação</th><th scope="col">Vínculos</th></tr></thead><tbody>
 @forelse($espacos['data'] as $e)
 <tr><td class="tabela-principal" data-rotulo="Espaço"><div class="tabela-valor">{{ $e['nome'] }}</div></td><td data-rotulo="Tipo"><div class="tabela-valor">{{ ucfirst($e['tipo']) }}</div></td><td data-rotulo="Situação"><div class="tabela-valor">{{ ucfirst($e['situacao']) }}</div></td><td data-rotulo="Vínculos"><div class="tabela-valor">@forelse($e['vinculos'] as $situacao=>$total)<span>{{ ucfirst($situacao) }}: {{ $total }} </span>@empty Nenhum @endforelse</div></td></tr>
 @empty <tr><td colspan="4">Nenhum espaço associado a este cliente.</td></tr> @endforelse

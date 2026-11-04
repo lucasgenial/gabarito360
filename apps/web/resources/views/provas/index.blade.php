@@ -22,20 +22,21 @@
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
+<section class="card card-pad tabela-lista-principal tabela-principal-integrada">
 {{-- Filtros --}}
-<form method="GET" class="filtros-cel" action="{{ route('provas.index') }}" style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;align-items:flex-end;">
+<form method="GET" class="filtros-cel tabela-filtros-principal" action="{{ route('provas.index') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
   <div style="position:relative;flex:1;min-width:220px;">
     <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="input" type="search" name="busca" placeholder="Buscar prova por título…"
+    <input class="input" type="search" name="busca" aria-label="Buscar prova por título" placeholder="Buscar prova por título…"
            value="{{ $busca }}" style="padding-left:36px;" />
   </div>
-  <select class="select" name="disciplina" style="min-width:160px;">
+  <select class="select" name="disciplina" aria-label="Filtrar por disciplina" style="min-width:160px;">
     <option value="">Todas as disciplinas</option>
     @foreach(['Matemática','Português','Ciências','História','Geografia','Inglês','Ed. Física','Arte'] as $d)
       <option value="{{ $d }}" {{ $disciplina === $d ? 'selected' : '' }}>{{ $d }}</option>
     @endforeach
   </select>
-  <select class="select" name="status" style="min-width:150px;">
+  <select class="select" name="status" aria-label="Filtrar por situação da prova" style="min-width:150px;">
     <option value="">Todos os status</option>
     <option value="rascunho"    {{ $status==='rascunho'    ? 'selected' : '' }}>Rascunho</option>
     <option value="publicada"   {{ $status==='publicada'   ? 'selected' : '' }}>Publicada</option>
@@ -52,8 +53,7 @@
 @if($erroLista)
 <x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
 @else
-<div class="card tabela-superficie" style="margin-top:18px;overflow:hidden;">
-  <x-tabela titulo="Provas e gabaritos" :completa="true">
+  <x-tabela :integrada="true" titulo="Provas e gabaritos" :completa="true">
 <table class="table tabela-padrao">
     <caption class="sr-only">Provas e gabaritos</caption>
     <thead>
@@ -166,8 +166,8 @@
     </tbody>
   </table>
 </x-tabela>
-</div>
 @endif
+</section>
 
 <div style="height:48px;"></div>
 @include('provas._modal-copiar')
