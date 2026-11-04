@@ -3,7 +3,7 @@
 <section class="dc1-stack" id="disciplinas" aria-labelledby="turma-disciplinas-titulo">
 <div class="dc1-secao"><h2 id="turma-disciplinas-titulo">Disciplinas e professores</h2>@if($dc1Dados['gerir']??false)<a class="btn btn-secondary" href="{{ route('disciplinas.index',['retorno_turma'=>$turma['id']]) }}">Adicionar disciplina à turma</a>@endif</div>
 @if($dc1Erro)<x-aviso tipo="erro">Não foi possível carregar a organização das disciplinas. Atualize a página antes de fazer alterações.</x-aviso>@else
-<div class="card"><x-tabela titulo="Disciplinas desta turma"><table class="tabela-padrao"><caption class="sr-only">Disciplinas e professores da turma</caption><thead><tr><th scope="col">Disciplina</th><th scope="col">Professores</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead><tbody>
+<div class="card"><x-tabela :interna="true" :integrada="true" titulo="Disciplinas desta turma"><table class="tabela-padrao"><caption class="sr-only">Disciplinas e professores da turma</caption><thead><tr><th scope="col">Disciplina</th><th scope="col">Professores</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead><tbody>
 @forelse($dc1Dados['componentes'] as $comp)
 @php($emCurso=collect($comp['atribuicoes'])->where('estado_periodo','Em curso'))
 @php($programadas=collect($comp['atribuicoes'])->where('estado_periodo','Programada'))

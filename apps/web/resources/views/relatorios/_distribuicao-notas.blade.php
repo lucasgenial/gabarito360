@@ -26,7 +26,7 @@
   <x-grafico descricao="Quantidade de alunos por faixa de nota" :altura="230"
     :dados="['categorias' => $rotulos, 'inteiros' => true, 'rotulos' => true, 'intervalo' => 0,
              'series' => [['nome' => 'Alunos', 'valores' => $faixas, 'cores' => $cores]]]">
-    <x-tabela titulo="Distribuição das notas" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Distribuição das notas</caption>
+    <x-tabela :integrada="true" titulo="Distribuição das notas" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Distribuição das notas</caption>
       <thead><tr><th scope="col">Faixa de nota</th><th scope="col">Alunos</th></tr></thead>
       <tbody>
         @foreach($faixas as $i => $qtd)

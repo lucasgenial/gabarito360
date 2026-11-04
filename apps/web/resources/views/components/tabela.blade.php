@@ -1,7 +1,8 @@
-@props(['titulo', 'completa' => false, 'modo' => 'lista'])
+@props(['titulo', 'completa' => false, 'modo' => 'lista', 'integrada' => true, 'interna' => false])
 @php($completa = $completa && in_array($modo,['lista','selecao','compacta'],true))
 {{-- Uma só árvore mantém formulários, contexto e permissões na tabela e nos cards. --}}
-<div {{ $attributes->class(['tabela-conjunto'])->merge(['data-tabela' => '', 'data-modo' => $modo, 'data-colecao-completa' => $completa ? 'true' : 'false']) }}>
+@if($interna)<div class="tabela-conteudo">@endif
+<div {{ $attributes->class(['tabela-conjunto', 'tabela-integrada' => $integrada])->merge(['data-tabela' => '', 'data-modo' => $modo, 'data-colecao-completa' => $completa ? 'true' : 'false']) }}>
   @if($completa)
   @if($modo === 'selecao')
   <div class="tabela-filtros-selecao no-print" data-tabela-filtros-selecao hidden>
@@ -38,3 +39,4 @@
   </div>
   @endif
 </div>
+@if($interna)</div>@endif

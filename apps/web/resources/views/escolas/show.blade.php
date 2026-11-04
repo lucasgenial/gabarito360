@@ -224,7 +224,7 @@
           <h3 style="margin:0;">Turmas cadastradas</h3>
           <button class="btn btn-sm btn-secondary" onclick="document.getElementById('tab-btn-turmas').click()">Ver todas</button>
         </div>
-        <x-tabela titulo="Turmas da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Turmas da escola</caption>
+        <x-tabela :integrada="true" titulo="Turmas da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Turmas da escola</caption>
           <thead>
             <tr>
               <th scope="col">Turma</th>
@@ -331,7 +331,7 @@
       <a href="{{ route('turmas.index') }}" class="btn btn-sm btn-primary">+ Nova turma</a>
     </div>
     @if(count($escola['turmas'] ?? []) > 0)
-    <x-tabela titulo="Turmas por ano" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Turmas por ano</caption>
+    <x-tabela :integrada="true" titulo="Turmas por ano" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Turmas por ano</caption>
       <thead>
         <tr>
           <th scope="col">Turma</th>
@@ -377,7 +377,7 @@
       <a href="{{ route('provas.create') }}" class="btn btn-sm btn-primary">+ Nova prova</a>
     </div>
     @if(count($escola['provas'] ?? []) > 0)
-    <x-tabela titulo="Provas da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Provas da escola</caption>
+    <x-tabela :integrada="true" titulo="Provas da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Provas da escola</caption>
       <thead>
         <tr>
           <th scope="col">Prova</th>
@@ -440,7 +440,7 @@
       <a href="{{ route('alunos.create') }}" class="btn btn-sm btn-primary">+ Cadastrar</a>
     </div>
     @if(count($escola['alunos'] ?? []) > 0)
-    <x-tabela titulo="Alunos da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Alunos da escola</caption>
+    <x-tabela :integrada="true" titulo="Alunos da escola" modo="lista"><table class="tabela-padrao data-table "><caption class="sr-only">Alunos da escola</caption>
       <thead>
         <tr>
           <th scope="col">Aluno</th>

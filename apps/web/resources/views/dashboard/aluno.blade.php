@@ -157,7 +157,7 @@
       <h2 class="section-title" style="margin-bottom:0;">Minhas notas</h2>
       <span class="badge badge-muted">{{ $bimAtual }}º bimestre</span>
     </div>
-    <x-tabela titulo="Resultados por disciplina" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Resultados por disciplina</caption>
+    <x-tabela :integrada="true" titulo="Resultados por disciplina" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Resultados por disciplina</caption>
       <thead>
         <tr>
           <th scope="col">Disciplina</th>

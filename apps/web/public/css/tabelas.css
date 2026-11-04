@@ -1,5 +1,28 @@
 /* TBL1: tokens da aplicação, uma única árvore para consulta e ações. */
 .tabela-conjunto { width:100%; min-width:0; }
+.tabela-conteudo { width:100%; min-width:0; padding:24px; }
+.tabela-lista-principal { margin-top:20px; }
+.tabela-filtros-principal { margin:0 0 20px; }
+.tabela-integrada { border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; }
+.tabela-integrada .sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.tabela-integrada :is(.tabela-controles,.tabela-rodape) { margin:0; padding:12px 16px; }
+.tabela-integrada td[data-rotulo="Ações"] :is(a,button) { min-height:44px; }
+@media screen and (max-width:720px) {
+  .tabela-conteudo { padding:16px; }
+  .tabela-lista-principal.card-pad { padding:16px; }
+  .tabela-filtros-principal :is(.btn,input,select) { min-height:44px; }
+  .tabela-integrada:is([data-modo="lista"],[data-modo="selecao"]) { border:0; border-radius:0; overflow:visible; }
+  .tabela-integrada:is([data-modo="lista"],[data-modo="selecao"]) :is(.tabela-controles,.tabela-rodape) { padding:12px 0; }
+  .tabela-integrada .tabela-rodape nav { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:8px; }
+  .tabela-integrada .tabela-rodape .btn { min-height:44px; min-width:0; padding:10px 8px; font-size:13px; }
+  .tabela-integrada [data-tabela-pagina] { white-space:nowrap; }
+  .tabela-integrada .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) tbody tr:first-child { margin-top:0; }
+  .tabela-integrada .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) tbody tr:last-child { margin-bottom:0; }
+}
+@media print {
+  .tabela-conteudo { padding:0; }
+  .tabela-integrada { border:0; border-radius:0; overflow:visible; }
+}
 .tabela-padrao caption.sr-only { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .tabela-controles, .tabela-rodape { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; padding:16px; background:var(--surface); }
 .tabela-controles { border-bottom:1px solid var(--border-soft); }
@@ -58,7 +81,6 @@ table.tabela-padrao { width:100%; border-collapse:collapse; color:var(--fg); fon
   .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td[colspan] .icone-grande { margin-left:auto; margin-right:auto; }
   .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-acoes { display:block !important; text-align:left !important; padding:12px 0 !important; }
   .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-acoes::before { display:block; margin-bottom:6px; }
-  .card.tabela-superficie { background:transparent; border:0; box-shadow:none; overflow:visible !important; }
 }
 @media print {
   .tabela-conjunto .no-print { display:none !important; }
