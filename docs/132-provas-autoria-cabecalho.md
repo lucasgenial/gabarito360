@@ -26,7 +26,7 @@ Escape/Fechar retornam foco ao ícone. A solicitação tem AbortController e lim
 | A — escopo por autoria | Dois professores na mesma turma não compartilham provas; institucionais exigem turma atribuída; coordenação/direção mantêm visão da escola | Implementado e testado |
 | B — Criada por | Nome escapado em lista/card/detalhe; conta não serializada | Implementado e testado |
 | C — contexto compartilhado | Meu espaço recolhível, duas colunas, troca por ícone, temas e teclado | Aprovado em revisão independente |
-| D — integração e homologação | CI final, backup, comparação acadêmica e conciliação explícita do legado; produção inalterada | Aguardando CI/publicação |
+| D — integração e homologação | CI final, backup, comparação acadêmica e conciliação explícita do legado; produção inalterada | Concluído; PR162, homologação6305b63f |
 | ID1 — identidade | Próxima etapa principal, fora deste pacote | Planejada |
 
 Migration aditiva: perfil_criacao registra a função usada na criação e não acompanha mudanças futuras do perfil da pessoa; não é aceito do formulário. Não inferir essa função histórica para todo o legado. As quatro provas existentes confirmadas pelo responsável como criadas pela coordenação serão conciliadas explicitamente, com recibo e conferência do autor, sem trocar criado_por. O comparador do deploy desconsidera somente essa coluna nova ao confrontar os conteúdos acadêmicos anteriores; todos os campos anteriores e todas as nove tabelas continuam comparados. Publicar o pacote concluído somente na homologação. Promoção da produção continua dependente de decisão expressa posterior.
@@ -40,3 +40,13 @@ O revisor independente de UI/UX e Product Design aprovou explicitamente a config
 As prévias usam dados fictícios fora do repositório; integração e contexto por aba são conferidos separadamente. Nenhum stub de API ou JavaScript de preview integra esta entrega.
 
 Revisão adicional independente do modal aprovada após corrigir espera indefinida e foco: desktop/320px, tema escuro com modal aberto, vínculo único sem ícone, erro de seleção e limite20s. Ensaio no Chrome com resposta local simulada de22s confirmou mensagem de confirmação incerta, foco em troca-contexto-erro, Fechar reabilitado e aria-busy removido. Esta aprovação adicional resolve os bloqueios do modal e preserva o parecer da autoria/rascunho.
+
+## Encerramento da entrega
+
+PR162 integrado em6305b63fbc8ce8ddf78c1f26ff74fb7d4a930ab6. Os cinco checks do head ac1e052 passaram no run41753466094, incluindo a suíte MariaDB. Ensaio da release e da conciliação realizado no clone VM9120 com rede desconectada e firewall de isolamento; os nove conteúdos acadêmicos anteriores permaneceram idênticos. Clone desligado ao concluir.
+
+Release6305b63f publicada somente na VM120, fase HOMOLOGACAO-AUTORIA. Backup SQL, arquivos e configuração próprios concluídos; migration aditiva executada. Conciliação das quatro provas institucionais confirmou autor e vínculo, preencheu somente perfil_criacao e preservou todos os campos acadêmicos anteriores. Recibos protegidos no servidor. Nginx, PHP-FPM, MariaDB e worker ativos; integração web/API validada pelo deploy.
+
+Conferência de leitura com vínculos reais: Professor vê as quatro provas institucionais de suas turmas, com zero provas editáveis; Coordenador vê as quatro e mantém suas operações de gestão. No Chrome da homologação foram conferidos Criada por: Lucas Matos, Meu espaço inicialmente fechado, Minha escola/Meu perfil em duas colunas ao abrir, ausência do ícone para esta identidade sem acesso alternativo, tabela/cards em320px e ausência de overflow horizontal. Capturas atuais fora do Git: autoria-homologa-publicada-6305b63.png e autoria-homologa-mobile-6305b63.png. O modal com múltiplos vínculos teve seus estados e timeout conferidos na prévia fictícia, testes automatizados e revisão independente; não se criaram vínculos reais para produzir uma captura.
+
+Produção não foi alterada. ID1 não foi iniciado. A pedido do responsável, o inventário ampliado e as propostas de vice-direção e demais funções foram separados no [planejamento133](133-planejamento-perfis-institucionais.md); não habilitam novos acessos nesta release.
