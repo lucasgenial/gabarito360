@@ -13,3 +13,50 @@ document.querySelectorAll('[data-dc1-retorno]').forEach(link => {
     link.href = url.toString();
   });
 });
+
+// Somente as novas ações DC1 usam este diálogo. A API continua autorizando cada POST.
+(() => {
+  const dialog = document.getElementById('dc1-confirmacao');
+  if (!dialog || typeof dialog.showModal !== 'function') return;
+  const titulo = dialog.querySelector('#dc1-confirmacao-titulo');
+  const texto = dialog.querySelector('#dc1-confirmacao-texto');
+  const confirmar = dialog.querySelector('[data-dc1-confirmar-envio]');
+  const cancelar = dialog.querySelector('[data-dc1-cancelar]');
+  const aprovados = new WeakSet();
+  let enviando = new WeakSet(), pendente = null, acionador = null, confirmado = false;
+  document.addEventListener('submit', event => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || !form.matches('[data-dc1-confirmar]')) return;
+    if (enviando.has(form)) { event.preventDefault(); return; }
+    if (aprovados.has(form)) {
+      aprovados.delete(form); enviando.add(form);
+      if (event.submitter) { event.submitter.disabled = true; event.submitter.dataset.dc1Enviando = 'true'; }
+      return;
+    }
+    event.preventDefault();
+    if (dialog.open) return;
+    pendente = form; acionador = event.submitter; confirmado = false;
+    titulo.textContent = form.dataset.dc1Titulo;
+    texto.textContent = form.dataset.dc1Confirmar;
+    confirmar.textContent = form.dataset.dc1Verbo;
+    confirmar.disabled = false;
+    dialog.showModal(); cancelar.focus();
+  });
+  confirmar.addEventListener('click', () => {
+    if (!pendente || confirmar.disabled) return;
+    const form = pendente, botao = acionador;
+    confirmar.disabled = true; confirmado = true;
+    aprovados.add(form); dialog.close();
+    form.requestSubmit(botao);
+  });
+  cancelar.addEventListener('click', () => dialog.close());
+  dialog.querySelector('[data-dc1-fechar]').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => {
+    if (!confirmado && acionador?.isConnected) acionador.focus();
+    pendente = null; acionador = null; confirmado = false;
+  });
+  window.addEventListener('pageshow', () => {
+    enviando = new WeakSet();
+    document.querySelectorAll('[data-dc1-enviando]').forEach(botao => { botao.disabled = false; delete botao.dataset.dc1Enviando; });
+  });
+})();
