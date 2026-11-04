@@ -24,6 +24,7 @@ class ConviteVinculo
             // Não retorna dados nem distingue conta ausente, inativa ou papel já existente.
             $alvo = Usuario::porEmail($email)->where('ativo', true)->lockForUpdate()->first();
             if (!$alvo || (int) $alvo->id === (int) $gestor->id) return null;
+            \App\Support\GruposFuncionais::conferir((int)$alvo->id,$espaco,$perfil);
             $v = DB::table('usuario_vinculos')->where('usuario_id', $alvo->id)->where('espaco_id', $espaco)->where('perfil', $perfil)->lockForUpdate()->first();
             if ($v && $v->situacao !== 'convidado') return null;
             // Primeiro acesso ainda usa ContaUsuario; não misturar dois tipos de aceite.
@@ -59,6 +60,7 @@ class ConviteVinculo
             $v = DB::table('usuario_vinculos')->where('id', $c->vinculo_id)->where('usuario_id', $titular->id)->lockForUpdate()->first();
             abort_unless($v && $v->situacao === 'convidado' && $v->inicio_em <= now() && (!$v->fim_em || $v->fim_em > now()), 422, 'Convite inválido ou expirado.');
             if ($aceitar) {
+                \App\Support\GruposFuncionais::conferir((int)$titular->id,(int)$v->espaco_id,$v->perfil,$v->inicio_em,$v->fim_em,(int)$v->id);
                 $emissor = Usuario::whereKey($c->convidado_por)->lockForUpdate()->first();
                 DB::table('usuario_vinculos')->where('id', $c->convidado_por_vinculo_id)->lockForUpdate()->first();
                 abort_unless($emissor, 422, 'Convite indisponível.');

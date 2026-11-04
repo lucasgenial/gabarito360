@@ -25,7 +25,7 @@ class Permissao
         // Contextos explícitos são revalidados; não reutilizam o cache global legado por pessoa.
         if (ContextoVinculo::presente($u)) return ContextoVinculo::permissoes($u);
         // Estes perfis exigem vínculo explícito, mesmo que recebam extras no cadastro legado.
-        if (in_array($u->perfil, ['professor_autonomo', 'secretario_escolar'], true)) return [];
+        if (in_array($u->perfil, ['professor_autonomo', 'secretario_escolar', 'vice_dir_escolar', 'auxiliar_secretaria'], true)) return [];
         if (isset(self::$cache[$u->id])) {
             return self::$cache[$u->id];
         }

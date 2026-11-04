@@ -9,6 +9,8 @@ use Illuminate\View\View;
 class MembroController extends Controller
 {
     private const PERFIS = [
+        'vice_dir_escolar' => ['label' => 'Vice-diretor escolar', 'badge' => 'badge-purple', 'ini' => 'VD'],
+        'auxiliar_secretaria' => ['label' => 'Auxiliar de secretaria', 'badge' => 'badge-info', 'ini' => 'AS'],
         'secretario_escolar' => ['label' => 'Secretário Escolar', 'badge' => 'badge-info', 'ini' => 'S'],
         'admin_rede'  => ['label' => 'Administrador da Rede', 'badge' => 'badge-info',    'ini' => 'A'],
         'dir_nucleo'  => ['label' => 'Diretor de Núcleo',     'badge' => 'badge-warn',    'ini' => 'N'],
@@ -163,6 +165,11 @@ class MembroController extends Controller
 
         return redirect()->route('membros.index')
             ->with('sucesso', 'Membro atualizado.');
+    }
+
+    public function encerrar(int $id) {
+        $r=$this->api->post('/v1/usuarios/'.$id.'/encerrar-vinculo',$this->alvo());
+        return back()->with($r->successful()?'sucesso':'erro',$r->successful()?'Vínculo encerrado. O histórico foi preservado.':($r->json('message')??'Não foi possível encerrar o vínculo.'));
     }
 
     public function toggle(int $id)

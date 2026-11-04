@@ -143,10 +143,17 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/acessos-internos', [\App\Http\Controllers\AcessoInternoController::class,'store'])->name('internos.store');
     Route::put('/acessos-internos/{id}', [\App\Http\Controllers\AcessoInternoController::class,'update'])->whereNumber('id')->name('internos.update');
 
+    Route::get('/configuracoes/usuarios',[\App\Http\Controllers\ExcecaoFuncionalController::class,'index'])->name('funcoes.index');
+    Route::post('/configuracoes/usuarios/consultar',[\App\Http\Controllers\ExcecaoFuncionalController::class,'consultar'])->name('funcoes.consultar');
+    Route::post('/configuracoes/usuarios',[\App\Http\Controllers\ExcecaoFuncionalController::class,'salvar'])->name('funcoes.salvar');
+    Route::post('/membros/{id}/encerrar-vinculo',[\App\Http\Controllers\MembroController::class,'encerrar'])->name('membros.encerrar');
     // Meu perfil (MP-024)
     Route::view('/referencia-visual', 'referencia.index')->name('referencia');
     Route::get('/trocar-senha',  [PerfilController::class, 'formTrocarSenha'])->name('trocar-senha');
     Route::put('/trocar-senha',  [PerfilController::class, 'trocarSenha'])->name('trocar-senha.store');
+    Route::post('/perfil/imagem',[PerfilController::class,'imagem'])->name('perfil.imagem');
+    Route::get('/perfil/foto',[PerfilController::class,'foto'])->name('perfil.foto');
+    Route::get('/usuarios/{id}/foto',[PerfilController::class,'fotoUsuario'])->whereNumber('id')->name('usuarios.foto');
     Route::get('/perfil',        [PerfilController::class, 'show'])->name('perfil');
     Route::put('/perfil',        [PerfilController::class, 'update'])->name('perfil.update');
     Route::put('/perfil/senha',  [PerfilController::class, 'senha'])->name('perfil.senha');
@@ -187,6 +194,8 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/escolas/{id}/logo',  [EscolaController::class, 'enviarLogo'])->name('escolas.logo.enviar');
 
     // Alunos (MP-017)
+    Route::post('/alunos/{id}/imagem', [AlunoController::class, 'imagem'])->whereNumber('id')->name('alunos.imagem');
+    Route::get('/alunos/{id}/foto', [AlunoController::class, 'foto'])->whereNumber('id')->name('alunos.foto');
     Route::get('/alunos',              [AlunoController::class, 'index'])->name('alunos.index');
     Route::get('/alunos/novo',         [AlunoController::class, 'create'])->name('alunos.create');
     Route::post('/alunos',             [AlunoController::class, 'store'])->name('alunos.store');

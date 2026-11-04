@@ -16,10 +16,10 @@ final class EspacoPessoal
         return $v->espaco->tipo === 'pessoal' ? (int) $v->espaco_id : null;
     }
 
-    public static function validarAluno(Request $r): bool
+    public static function validarAluno(Request $r, bool $aceitarRetrato = false): bool
     {
         if (!self::doAtor($r->user())) return false;
-        $r->validate(array_fill_keys(self::VEDADOS, 'prohibited'));
+        $r->validate(array_fill_keys($aceitarRetrato ? array_diff(self::VEDADOS, ['foto']) : self::VEDADOS, 'prohibited'));
         return true;
     }
 

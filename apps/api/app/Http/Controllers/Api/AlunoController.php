@@ -54,7 +54,8 @@ class AlunoController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $pessoal = EspacoPessoal::validarAluno($request);
+        $pessoal = EspacoPessoal::validarAluno($request, true);
+        if ($request->has('ativo') && !$request->boolean('ativo')) abort_unless(\App\Support\Permissao::pode($request->user(), 'aluno.desativar'), 403);
         $request->validate(['turma_id' => 'required|integer']);
         $turma = Escopo::turmas($request->user())->findOrFail((int) $request->input('turma_id'));
         $espaco = Espacos::ativo() ? (int) $turma->espaco_id : null;
@@ -68,14 +69,22 @@ class AlunoController extends Controller
             'genero'          => 'sometimes|in:M,F,O|nullable',
             'nome_responsavel'=> 'sometimes|string|max:200|nullable',
             'ativo'           => 'sometimes|boolean',
-            'foto'            => 'prohibited',
+            'foto'            => 'nullable|'.\App\Services\ImagemPerfil::REGRA,
             'foto_path'       => 'prohibited',
         ]);
 
-        $aluno = new Aluno($pessoal ? EspacoPessoal::dadosMinimos($data) : $data);
-        if (Espacos::ativo()) $aluno->forceFill(Espacos::autoria((int) $turma->espaco_id, $request->user()));
-        if ($pessoal) $aluno->forceFill(['espaco_tipo'=>'pessoal']);
-        $aluno->save();
+        $foto = $request->hasFile('foto') ? app(\App\Services\ImagemPerfil::class)->guardar($request->file('foto'), 'alunos/fotos') : null;
+        unset($data['foto']);
+        try {
+            $aluno = \Illuminate\Support\Facades\DB::transaction(function () use ($data,$pessoal,$turma,$request,$foto) {
+                $aluno = new Aluno($pessoal ? EspacoPessoal::dadosMinimos($data) : $data);
+                if (Espacos::ativo()) $aluno->forceFill(Espacos::autoria((int) $turma->espaco_id, $request->user()));
+                if ($pessoal) $aluno->forceFill(['espaco_tipo'=>'pessoal']);
+                if ($foto) $aluno->forceFill(['foto_path'=>$foto,'avatar_id'=>null]);
+                $aluno->save();
+                return $aluno;
+            });
+        } catch (\Throwable $e) { if ($foto) \Illuminate\Support\Facades\Storage::disk('local')->delete($foto); throw $e; }
 
         return ApiResponse::success($aluno->load('turma:id,nome,serie'), null, 201);
     }
@@ -105,6 +114,7 @@ class AlunoController extends Controller
             return ApiResponse::notFound('Aluno não encontrado.');
         }
 
+        if ($request->has('ativo') && $request->boolean('ativo') !== (bool) $aluno->ativo) abort_unless(\App\Support\Permissao::pode($request->user(), 'aluno.desativar'), 403);
         $data = $request->validate([
             'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'sometimes|integer|exists:turmas,id',

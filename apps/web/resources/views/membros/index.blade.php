@@ -11,22 +11,8 @@
 @section('content')
 
 @php
-  $perfilLabels = [
-    'admin_rede'  => 'Administrador da Rede',
-    'dir_nucleo'  => 'Diretor de Núcleo',
-    'dir_escolar' => 'Diretor Escolar',
-    'coordenador' => 'Coordenador Pedagógico',
-    'professor'   => 'Professor',
-    'aluno'       => 'Aluno',
-  ];
-  $badgeMap = [
-    'admin_rede'  => 'badge-info',
-    'dir_nucleo'  => 'badge-warn',
-    'dir_escolar' => 'badge-purple',
-    'coordenador' => 'badge-amber',
-    'professor'   => 'badge-info',
-    'aluno'       => 'badge-success',
-  ];
+  $perfilLabels = collect($perfis)->mapWithKeys(fn($cfg,$key)=>[$key=>$cfg['label']])->all();
+  $badgeMap = collect($perfis)->mapWithKeys(fn($cfg,$key)=>[$key=>$cfg['badge']])->all();
 @endphp
 
 <x-pagina titulo="Equipe">
@@ -46,7 +32,7 @@
     <div class="kpi-card-role">
       <div class="row-between">
         <div class="kpi-role">{{ $perfilLabels[$pf] }}</div>
-        <span class="badge {{ $badgeMap[$pf] }}">{{ $pf }}</span>
+        <span class="badge {{ $badgeMap[$pf] }}">{{ $perfilLabels[$pf] }}</span>
       </div>
       <div class="kpi-num">{{ $totais[$pf] ?? 0 }}</div>
       <div class="kpi-meta">{{ ($totais[$pf] ?? 0) === 1 ? 'membro' : 'membros' }}</div>
@@ -108,7 +94,7 @@
               <tr>
                 <td data-valor-ordem="{{ $m['nome'] }}" data-rotulo="Membro" class="tabela-principal"><div class="tabela-valor">
                   <div class="member-cell">
-                    <div class="member-avatar">{{ $ini }}</div>
+                    <x-avatar-usuario :nome="$m['nome']" :usuario-id="$m['id']" :avatar-id="$m['avatar_id']??null" :tem-foto="$m['tem_foto']??false" :versao="$m['imagem_versao']??1" tamanho="sm" />
                     <div>
                       <div class="member-name">{{ $m['nome'] }}</div>
                       @if(isset($m['vinculo_id']))<small>{{ $m['espaco_nome'] ?? '' }} · Vínculo #{{ $m['vinculo_id'] }}</small>@endif
@@ -128,15 +114,20 @@
                 </div></td>
                 <td data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
                   <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    @if(\App\Support\Acesso::pode('usuario.gerir') && in_array($perfilKey, \App\Support\Acesso::perfisGeridos(), true))
                     <a href="{{ route('membros.edit', array_filter(['id' => $m['id'], 'vinculo_id' => $m['vinculo_id'] ?? null])) }}" class="btn btn-secondary btn-sm">Editar</a>
+                    @endif
                     <a href="{{ route('membros.permissoes', array_filter(['id' => $m['id'], 'vinculo_id' => $m['vinculo_id'] ?? null])) }}" class="btn btn-ghost btn-sm">Permissões</a>
-                    @if(!isset($m['situacao']) || in_array($m['situacao'], ['ativo', 'suspenso']))
+                    @if(\App\Support\Acesso::pode('usuario.gerir') && in_array($perfilKey, \App\Support\Acesso::perfisGeridos(), true) && (!isset($m['situacao']) || in_array($m['situacao'], ['ativo', 'suspenso'])))
                     <form method="POST" action="{{ route('membros.toggle', array_filter(['id' => $m['id'], 'vinculo_id' => $m['vinculo_id'] ?? null])) }}" style="display:inline;">
                       @csrf
                       <button type="submit" class="btn btn-ghost btn-sm">
                         {{ isset($m['situacao']) ? ($m['situacao'] === 'ativo' ? 'Suspender vínculo' : 'Reativar vínculo') : ($m['ativo'] ? 'Desativar' : 'Ativar') }}
                       </button>
                     </form>
+                    @endif
+                    @if(isset($m['situacao']) && in_array($m['situacao'],['ativo','suspenso','convidado'],true) && \App\Support\Acesso::pode('usuario.gerir') && in_array($perfilKey,\App\Support\Acesso::perfisGeridos(),true))
+                    <form method="POST" action="{{ route('membros.encerrar',['id'=>$m['id'],'vinculo_id'=>$m['vinculo_id']]) }}" onsubmit="return confirm('Encerrar este vínculo? O acesso será retirado e o histórico preservado.')">@csrf<button class="btn btn-ghost btn-sm" type="submit">Encerrar vínculo</button></form>
                     @endif
                   </div>
                 </div></td>

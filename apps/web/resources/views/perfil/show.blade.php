@@ -13,6 +13,8 @@
 
 @php
   $perfilLabels = [
+        'vice_dir_escolar' => 'Vice-diretor escolar',
+        'auxiliar_secretaria' => 'Auxiliar de secretaria',
         'secretario_escolar' => 'Secretário Escolar',
     'desenvolvedor' => 'Desenvolvedor',
     'suporte' => 'Suporte',
@@ -36,7 +38,7 @@
 
 <div class="profile-layout">
   <div class="profile-card">
-    <div class="avatar-lg">{{ $iniciais }}</div>
+    <button class="imagem-perfil-abrir" type="button" data-abrir-imagem aria-label="Alterar foto ou avatar" title="Alterar foto ou avatar"><x-avatar-usuario :nome="$usuario['nome']" :avatar-id="$usuario['avatar_id']??null" :tem-foto="$usuario['tem_foto']??false" :versao="$usuario['imagem_versao']??1" :proprio="true" tamanho="xl" /></button><p class="field-help">Clique na imagem para escolher avatar ou foto.</p>
     <div class="profile-name">{{ $usuario['nome'] }}</div>
     <div class="profile-role">{{ $perfilLabels[$usuario['perfil']] ?? $usuario['perfil'] }}</div>
     <div class="profile-institution">

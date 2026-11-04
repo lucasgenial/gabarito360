@@ -13,6 +13,7 @@ class DashboardController extends Controller
         'admin_rede'  => 'dashboard.admin',
         'dir_nucleo'  => 'dashboard.diretor-nucleo',
         'dir_escolar' => 'dashboard.diretor-escolar',
+        'vice_dir_escolar' => 'dashboard.diretor-escolar',
         'coordenador' => 'dashboard.coordenador',
         'professor'   => 'dashboard.professor',
         'professor_autonomo' => 'dashboard.professor',
@@ -24,7 +25,7 @@ class DashboardController extends Controller
 
     public function index(Request $request): View
     {
-        if (\App\Support\Acesso::perfil() === 'secretario_escolar') return view('dashboard.secretario-escolar');
+        if (\App\Support\Acesso::administrativo()) return view('dashboard.secretario-escolar');
         if (\App\Support\Acesso::interno()) return view('dashboard.interno');
         $contexto = $request->validate(['escola_id' => 'sometimes|integer|min:1', 'nucleo_id' => 'sometimes|integer|min:1', 'aluno_id' => 'sometimes|integer|min:1', 'secretaria_id' => 'sometimes|integer|min:1']);
         $perfil = \App\Support\Acesso::perfil();
@@ -34,7 +35,7 @@ class DashboardController extends Controller
             'secretario_educacao' => $this->dadosSecretaria($contexto),
             'admin_rede'  => $this->dadosAdmin($contexto),
             'dir_nucleo'  => $this->dadosDirNucleo($contexto),
-            'dir_escolar' => $this->dadosDirEscolar($contexto),
+            'dir_escolar', 'vice_dir_escolar' => $this->dadosDirEscolar($contexto),
             'coordenador' => $this->dadosCoordenador($contexto),
             'professor', 'professor_autonomo' => $this->dadosProfessor($contexto),
             'aplicador'   => $this->dadosAplicador($contexto),

@@ -83,7 +83,7 @@ class UsuarioController extends Controller
             'nome'                   => 'required|string|max:200',
             'email'                  => ['required', 'email', new \App\Rules\UnicoProtegido('usuarios', 'email')],
             'cpf'                    => ['required', 'string', 'regex:/^\d{11}$/', new \App\Rules\UnicoProtegido('usuarios', 'cpf')],
-            'perfil'                 => ['required', Rule::in(['secretario_escolar','secretario_educacao','admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aplicador','aluno'])],
+            'perfil'                 => ['required', Rule::in(['vice_dir_escolar', 'auxiliar_secretaria', 'secretario_escolar','secretario_educacao','admin_rede','dir_nucleo','dir_escolar','coordenador','professor','aplicador','aluno'])],
             'ativo'                  => 'sometimes|boolean',
             'data_nascimento'        => 'sometimes|date|nullable',
             'telefone'               => 'sometimes|string|max:20|nullable',
@@ -102,7 +102,7 @@ class UsuarioController extends Controller
             'cpf.unique'   => 'CPF já cadastrado.',
         ]);
 
-        if ($data['perfil'] === 'secretario_escolar' && !ContextoVinculo::presente($gestor)) return ApiResponse::error('Secretário Escolar exige vínculo de escola.', [], 422);
+        if (in_array($data['perfil'], ['secretario_escolar', 'vice_dir_escolar', 'auxiliar_secretaria'], true) && !ContextoVinculo::presente($gestor)) return ApiResponse::error('Este perfil exige vínculo de escola.', [], 422);
 
         if (Espacos::ativo() && $data['perfil'] === 'admin_rede') return ApiResponse::error('Novo administrador exige atribuição explícita por vínculo.', [], 422);
 

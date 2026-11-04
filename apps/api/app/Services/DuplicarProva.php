@@ -23,7 +23,7 @@ class DuplicarProva
         if (!Espacos::ativo() || !ContextoVinculo::presente($ator)) return false;
         $v = ContextoVinculo::resolver($ator);
         if (!in_array($v->perfil, ['professor','professor_autonomo'], true)
-            || in_array($prova->perfil_criacao, ['coordenador','dir_escolar'], true)
+            || in_array($prova->perfil_criacao, \App\Support\PerfisEscolares::INSTITUCIONAIS, true)
             || $prova->formato_avaliacao !== 'gabarito'
             || (int)$prova->criado_por !== (int)$ator->id || (int)$prova->espaco_id !== (int)$v->espaco_id) return false;
         if (array_diff(['prova.duplicar_propria','prova.ver','prova.criar','prova.editar','gabarito.ver','gabarito.editar'],Permissao::efetivas($ator))) return false;

@@ -19,6 +19,7 @@
   <x-slot:sub>Preencha os dados básicos para matricular o aluno no sistema.</x-slot:sub>
 </x-pagina>
 
+@if(old('imagem_preparada')==='foto')<x-aviso tipo="atencao">Os dados preenchidos foram mantidos. Por segurança do navegador, escolha a foto novamente antes de salvar.</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 @if($errors->any())
   <div style="background:var(--danger-light);color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;margin-top:16px;">
@@ -30,17 +31,18 @@
   </div>
 @endif
 
-<form method="POST" action="{{ route('alunos.store') }}" class="form-container">
+<form method="POST" action="{{ route('alunos.store') }}" class="form-container" id="cadastro-aluno" enctype="multipart/form-data">
   @csrf
 
   {{-- Card lateral de preview --}}
   <aside class="identity-card">
-    <x-seletor-avatar :nome="old('nome', '')" />
+    <button type="button" class="imagem-perfil-abrir" data-abrir-imagem-aluno aria-label="Escolher imagem do aluno"><span data-imagem-aluno data-tamanho="lg" data-iniciais="?"><x-avatar :nome="old('nome','')" :avatar-id="old('avatar_id')" tamanho="lg" id="preview-avatar" /></span></button>
+    <input type="hidden" name="imagem_preparada" value=""><input type="hidden" name="avatar_id" value="{{ old('avatar_id') }}"><input type="file" name="foto" hidden accept="image/jpeg,image/png,image/webp">
     <div style="margin-bottom:20px;">
       <h3 id="preview-nome" style="font-size:16px;font-weight:700;color:var(--fg);margin-bottom:4px;">Novo Aluno</h3>
       <p id="preview-turma" style="font-size:13px;color:var(--muted);">Série / Turma</p>
     </div>
-    <p style="font-size:12px;color:var(--muted);line-height:1.5;">Escolha uma imagem da galeria ou mantenha as iniciais.</p>
+    <p id="imagem-aluno-rascunho" role="status" style="font-size:12px;color:var(--muted);line-height:1.5;">Clique na imagem para escolher avatar, tirar foto ou enviar um arquivo.</p>
   </aside>
 
   {{-- Formulário principal --}}
@@ -120,6 +122,7 @@
   </div>
 </form>
 
+@include('alunos._imagem')
 <div style="height:48px;"></div>
 @endsection
 
@@ -134,7 +137,7 @@ function atualizarPreview() {
     ? nome.trim().split(/\s+/u).filter(Boolean).map(function(p){ return Array.from(p)[0].toLocaleUpperCase('pt-BR'); }).slice(0,2).join('')
     : '?';
 
-  document.querySelector('#preview-avatar .avatar-iniciais').textContent = ini;
+  var area=document.querySelector('[data-imagem-aluno]');area.dataset.iniciais=ini;var letras=area.querySelector('.avatar-iniciais');if(letras)letras.textContent=ini;
   document.getElementById('preview-nome').textContent   = nome || 'Novo Aluno';
   document.getElementById('preview-turma').textContent  = (opt && opt.value) ? opt.dataset.label : 'Série / Turma';
 }

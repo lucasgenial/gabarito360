@@ -51,11 +51,16 @@ with (recibo/'banco-antes.sql.gz').open('wb') as dest:
  assert proc.wait()==0,'Backup próprio falhou.'
 for app in ['api','web']:
  with tarfile.open(recibo/(app+'-arquivos-antes.tar.gz'),'w:gz') as tf:tf.add(BASE/'shared'/app/'storage/app',arcname='app')
-manifest_php="""require 'vendor/autoload.php';$a=require 'bootstrap/app.php';$a->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();$r=[];foreach(['alunos','turmas','provas','prova_turmas','gabaritos','gabarito_questoes','cartoes','cartao_respostas','notas'] as $t){$rows=Illuminate\\Support\\Facades\\DB::table($t)->get()->map(function($v)use($t){$v=(array)$v;if($t==='provas')unset($v['perfil_criacao']);ksort($v);return json_encode($v,JSON_THROW_ON_ERROR);})->all();sort($rows,SORT_STRING);$r[$t]=['total'=>count($rows),'sha256'=>hash('sha256',implode("\\n",$rows))];}echo json_encode($r,JSON_THROW_ON_ERROR);"""
-colunas_provas=run(['php','-r',"require 'vendor/autoload.php';$a=require 'bootstrap/app.php';$a->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();echo json_encode(Illuminate\\Support\\Facades\\Schema::getColumnListing('provas'));"],cwd=anterior/'apps/api')
-if 'perfil_criacao' in json.loads(colunas_provas):
- manifest_php=manifest_php.replace("if($t==='provas')unset($v['perfil_criacao']);",'')
-(recibo/'provas-colunas-antes.json').write_text(colunas_provas)
+# Comparar todos os campos preexistentes; somente adições explicitamente previstas
+# podem ser omitidas do primeiro manifesto. Depois de existentes, também são protegidas.
+bootstrap_php="require 'vendor/autoload.php';$a=require 'bootstrap/app.php';$a->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();"
+tabelas=['alunos','turmas','provas','prova_turmas','gabaritos','gabarito_questoes','cartoes','cartao_respostas','notas']
+colunas_php=bootstrap_php+"$r=[];foreach("+json.dumps(tabelas)+" as $t)$r[$t]=Illuminate\\Support\\Facades\\Schema::getColumnListing($t);echo json_encode($r);"
+colunas_antes=json.loads(run(['php','-r',colunas_php],cwd=anterior/'apps/api'))
+(recibo/'academico-colunas-antes.json').write_text(json.dumps(colunas_antes))
+adicoes_permitidas={'alunos':{'imagem_versao'},'provas':{'perfil_criacao'}}
+ignorar={t:sorted(adicoes_permitidas.get(t,set())-set(colunas_antes[t])) for t in tabelas}
+manifest_php=bootstrap_php+"$ignorar=json_decode('"+json.dumps(ignorar)+"',true);$r=[];foreach("+json.dumps(tabelas)+" as $t){$rows=Illuminate\\Support\\Facades\\DB::table($t)->get()->map(function($v)use($t,$ignorar){$v=(array)$v;foreach($ignorar[$t] as $c)unset($v[$c]);ksort($v);return json_encode($v,JSON_THROW_ON_ERROR);})->all();sort($rows,SORT_STRING);$r[$t]=['total'=>count($rows),'sha256'=>hash('sha256',implode(chr(10),$rows))];}echo json_encode($r,JSON_THROW_ON_ERROR);"
 antes=run(['php','-r',manifest_php],cwd=anterior/'apps/api');(recibo/'academico-antes.json').write_text(antes)
 env={**os.environ,'APP_CONFIG_CACHE':str(recibo/'config-migration.php'),'DB_USERNAME':'root','DB_PASSWORD':'','DB_HOST':'localhost','DB_SOCKET':'/run/mysqld/mysqld.sock'}
 (recibo/'migrations.log').write_text(run(['php','artisan','migrate','--force'],cwd=release/'apps/api',env=env))
@@ -81,6 +86,11 @@ for app in ['api','web']:
  run(['runuser','-u','www-data','--','php','artisan','config:cache'],cwd=release/'apps'/app)
  run(['runuser','-u','www-data','--','php','artisan','view:cache'],cwd=release/'apps'/app)
  for f in (release/'apps'/app/'bootstrap/cache').glob('*.php'):f.chmod(0o640)
+colunas_depois=json.loads(run(['php','-r',colunas_php],cwd=release/'apps/api'))
+for tabela in tabelas:
+ assert set(colunas_antes[tabela])<=set(colunas_depois[tabela]),'Coluna acadêmica removida; não abrir.'
+ assert set(colunas_depois[tabela])-set(colunas_antes[tabela])<=adicoes_permitidas.get(tabela,set()),'Adição acadêmica não prevista; não abrir.'
+(recibo/'academico-colunas-depois.json').write_text(json.dumps(colunas_depois))
 depois=run(['php','-r',manifest_php],cwd=release/'apps/api');assert json.loads(antes)==json.loads(depois),'Conteúdo acadêmico divergente; não abrir.'
 (recibo/'academico-depois.json').write_text(depois)
 nextlink=BASE/'next';assert not nextlink.exists();nextlink.symlink_to(release,target_is_directory=True);os.replace(nextlink,BASE/'current')

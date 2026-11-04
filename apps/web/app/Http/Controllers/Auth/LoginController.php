@@ -46,6 +46,7 @@ class LoginController extends Controller
             'auth_internos' => $data['selecionar_acesso_interno'] ?? false,
             'auth_perfil'  => $data['perfil'],
             'auth_nome'    => $data['nome'],
+            'auth_avatar_id'=>$data['avatar_id']??null,'auth_tem_foto'=>$data['tem_foto']??false,'auth_imagem_versao'=>$data['imagem_versao']??1,
             'auth_email'   => $data['email'],
             'auth_titular' => $data['eh_titular'] ?? false,
             'auth_permissoes' => $data['permissoes'] ?? null,

@@ -31,16 +31,16 @@
 <x-pagina titulo="{{ $u['nome'] }}">
   <x-slot:sub>@if(isset($u['vinculo_id']))Vínculo #{{ $u['vinculo_id'] }} · @endif{{ $perfis[$u['perfil']]['label'] ?? $u['perfil'] }} · {{ count($dados['efetivas']) }} permissões efetivas</x-slot:sub>
     <a class="btn btn-ghost" href="{{ route('membros.perfis') }}">O que cada perfil pode</a>
-    <a class="btn btn-secondary" href="{{ route('membros.edit', array_filter(['id' => $u['id'], 'vinculo_id' => $u['vinculo_id'] ?? null])) }}">Dados do membro</a>
+    @if(\App\Support\Acesso::pode('usuario.gerir') && in_array($u['perfil'],\App\Support\Acesso::perfisGeridos(),true) && (int)$u['id']!==(int)session('auth_id'))<a class="btn btn-secondary" href="{{ route('membros.edit', array_filter(['id' => $u['id'], 'vinculo_id' => $u['vinculo_id'] ?? null])) }}">Dados do membro</a>@endif
 </x-pagina>
 
 @if(session('sucesso'))<div class="card card-pad" style="margin-top:12px;border-color:var(--success);color:var(--success);font-weight:600;">{{ session('sucesso') }}</div>@endif
 @if(session('erro'))<div class="card card-pad" style="margin-top:12px;border-color:var(--danger);color:var(--danger);font-weight:600;">{{ session('erro') }}</div>@endif
 
 <div class="card card-pad" style="margin-top:12px;font-size:13px;color:var(--muted);">
-  <b style="color:var(--fg);">Como funciona:</b> as permissões <b>padrão</b> vêm com o perfil — marque <b>Retirar</b> para tirar uma delas desta pessoa.
+  @if($editavel)<b style="color:var(--fg);">Como funciona:</b> as permissões <b>padrão</b> vêm com o perfil — marque <b>Retirar</b> para tirar uma delas desta pessoa.
   As <b>extras</b> não vêm com o perfil — marque <b>Conceder</b> (opcionalmente até uma data). Você só altera o que também pode fazer.
-  @unless($editavel)<br><b>Você pode apenas ver as permissões deste membro.</b>@endunless
+  @else<b>Você pode apenas ver as permissões deste membro.</b> As permissões padrão vêm com o perfil; as extras dependem de concessão. Consulte abaixo o que está ativo e o histórico, sem alterar o vínculo.@endif
 </div>
 
 <form method="POST" action="{{ route('membros.permissoes.salvar', array_filter(['id' => $u['id'], 'vinculo_id' => $u['vinculo_id'] ?? null])) }}">

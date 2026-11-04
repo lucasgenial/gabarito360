@@ -8,6 +8,10 @@ class Aluno extends Model
 {
     protected $hidden = ['cpf_hash', 'foto_path'];
 
+    protected $appends = ['tem_foto'];
+
+    public function getTemFotoAttribute(): bool { return !empty($this->attributes['foto_path']); }
+
     protected $table = 'alunos';
 
     protected $fillable = [
@@ -16,6 +20,7 @@ class Aluno extends Model
 
     protected $casts = [
         'avatar_id' => 'integer',
+        'imagem_versao' => 'integer',
         'cpf' => \App\Casts\DadoProtegido::class . ':1',
         'ativo' => 'boolean',
     ];

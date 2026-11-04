@@ -47,7 +47,7 @@ class GestaoVinculos
             ->whereColumn('vt.vinculo_id', 'v.id')->whereColumn('vt.espaco_id', 'v.espaco_id')
             ->whereColumn('t.espaco_id', 'v.espaco_id')->whereColumn('t.escola_id', 'ev.escola_id')->where('t.id', $turma));
         return Usuario::query()->joinSub($q->select('v.id as vinculo_id', 'v.usuario_id', 'v.perfil as perfil_vinculo', 'v.situacao', 'v.inicio_em', 'v.fim_em', 'v.espaco_id', 'ev.escola_id', 'ev.nome as espaco_nome'), 'contextual', 'contextual.usuario_id', '=', 'usuarios.id')
-            ->select('usuarios.id', 'usuarios.nome', 'usuarios.email', 'usuarios.ultimo_acesso', 'contextual.vinculo_id',
+            ->select('usuarios.id', 'usuarios.nome', 'usuarios.email', 'usuarios.avatar_id', 'usuarios.foto_path', 'usuarios.imagem_versao', 'usuarios.ultimo_acesso', 'contextual.vinculo_id',
                 'contextual.perfil_vinculo as perfil', 'contextual.situacao', 'contextual.espaco_id', 'contextual.escola_id', 'contextual.espaco_nome', 'contextual.inicio_em as created_at')
             ->selectRaw("CASE WHEN usuarios.ativo = 1 AND contextual.situacao = 'ativo' AND contextual.inicio_em <= ? AND (contextual.fim_em IS NULL OR contextual.fim_em > ?) THEN 1 ELSE 0 END AS ativo", [now(), now()]);
     }
