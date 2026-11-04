@@ -18,6 +18,7 @@
     @endif
   <x-slot:sub>{{ $prova['disciplina'] }} · {{ $prova['serie'] }} · {{ $prova['num_questoes'] }} questões</x-slot:sub>
     @if($prova['status'] === 'rascunho')
+      @if($prova['pode_editar'] ?? true)
       @pode('prova.editar')
       <button class="btn btn-secondary" onclick="abrirModal()">Editar</button>
       <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" class="btn btn-primary">Editar gabarito →</a>
@@ -28,8 +29,9 @@
         <button type="submit" class="btn btn-ghost" style="color:var(--danger);">Excluir</button>
       </form>
       @endpode
+      @endif
     @elseif($prova['status'] === 'publicada')
-      @pode('prova.editar')<button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>@endpode
+      @if($prova['pode_editar'] ?? true) @pode('prova.editar')<button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>@endpode @endif
       <a href="{{ route('provas.gabarito.show', $prova['id']) }}" class="btn btn-secondary">Ver gabarito</a>
       <a href="{{ route('correcao.show', $prova['id']) }}" class="btn btn-primary">Acompanhar correção →</a>
     @elseif($prova['status'] === 'em_correcao')
@@ -60,7 +62,7 @@
 {{-- Status --}}
 @php
   $statusInfo = [
-    'rascunho'    => ['info', 'Rascunho', 'Publique a prova quando o gabarito estiver pronto.'],
+    'rascunho'    => ['info', 'Rascunho', ($prova['pode_editar'] ?? true) ? 'Publique a prova quando o gabarito estiver pronto.' : 'Aguardando configuração e publicação pela coordenação ou direção.'],
     'publicada'   => ['sucesso', 'Publicada', 'Aguardando a aplicação e o envio dos cartões-resposta.'],
     'em_correcao' => ['atencao', 'Em correção', 'Os cartões-resposta estão sendo processados.'],
     'corrigida'   => ['sucesso', 'Corrigida', 'Resultados disponíveis no relatório.'],
@@ -74,6 +76,10 @@
   {{-- Dados da prova --}}
   <div class="card card-pad">
     <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;">Dados da prova</h3>
+    <div class="info-row">
+      <span class="lbl">Criada por</span>
+      <span>{{ $prova['criado_por_nome'] ?? 'Autoria não registrada' }}</span>
+    </div>
     <div class="info-row">
       <span class="lbl">Título</span>
       <span>{{ $prova['titulo'] }}</span>
@@ -151,7 +157,9 @@
       @else
         <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">
           Nenhuma turma vinculada.<br>
+          @if($prova['pode_editar'] ?? true) @pode('prova.editar')
           <button class="btn btn-sm btn-ghost" style="margin-top:8px;" onclick="abrirModal()">Adicionar turmas</button>
+          @endpode @endif
         </div>
       @endif
     </div>
@@ -163,8 +171,12 @@
       <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--fg-2);">
         @if($prova['status'] === 'rascunho')
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">1</span> Verifique os dados da prova</div>
+          @if($prova['pode_editar'] ?? true)
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">2</span> <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" style="color:var(--accent);">Configure o gabarito</a></div>
-          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">3</span> Publique o gabarito</div>
+          @else
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">2</span> Aguarde a configuração do gabarito pela coordenação ou direção.</div>
+          @endif
+          <div style="display:flex;align-items:center;gap:8px;"><span class="passo">3</span> {{ ($prova['pode_editar'] ?? true) ? 'Publique o gabarito' : 'Publicação pela coordenação ou direção' }}</div>
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">4</span> Aplique a prova nas turmas</div>
           <div style="display:flex;align-items:center;gap:8px;"><span class="passo">5</span> Lance os cartões-resposta</div>
         @else

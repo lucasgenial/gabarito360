@@ -105,7 +105,7 @@ class ProvaController extends Controller
             $query->where('status', $status);
         }
 
-        $provas = $query->with('escola:id,nome')
+        $provas = $query->with(['escola:id,nome', 'autor:id,nome'])
             ->orderByDesc('created_at')
             ->get()
             ->map(function (Prova $p) use ($consulta) {
@@ -118,6 +118,8 @@ class ProvaController extends Controller
                     ->get(['turmas.id', 'turmas.nome']);
 
                 return array_merge($p->toArray(), [
+                    'criado_por_nome' => $p->autor?->nome,
+                    'pode_editar' => Escopo::podeEditarProva($consulta->ator,$p),
                     'pode_copiar' => \App\Services\DuplicarProva::elegivel($consulta->ator,$p),
                     'escola_nome'  => $p->escola?->nome,
                     'turmas'       => $turmasLista->pluck('nome')->all(),
@@ -180,6 +182,7 @@ class ProvaController extends Controller
 
         $prova = DB::transaction(function () use ($data, $usuario, $turmaIds, $pessoal) {
             $prova = new Prova($data);
+            $prova->forceFill(['perfil_criacao'=>$usuario->perfil]);
             if (Espacos::ativo()) $prova->forceFill(Espacos::autoria($pessoal ?? Espacos::daEscola($usuario, (int) $data['escola_id']), $usuario));
             if ($pessoal) $prova->forceFill(['escola_id'=>null, 'espaco_tipo'=>'pessoal']);
             $prova->save();
@@ -197,7 +200,7 @@ class ProvaController extends Controller
     public function show(Request $request, int $id): JsonResponse
     {
         $consulta = new ConsultasPedagogicas($request->user());
-        $prova = Escopo::provas($request->user())->with('escola:id,nome')->find($id);
+        $prova = Escopo::provas($request->user())->with(['escola:id,nome', 'autor:id,nome'])->find($id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
@@ -212,6 +215,8 @@ class ProvaController extends Controller
             ->get();
 
         return ApiResponse::success(array_merge($prova->toArray(), [
+            'criado_por_nome' => $prova->autor?->nome,
+            'pode_editar' => Escopo::podeEditarProva($request->user(),$prova),
             'pode_copiar' => \App\Services\DuplicarProva::elegivel($request->user(),$prova),
             'procedencia' => $this->procedencia($request, $prova),
             'escola_nome' => $prova->escola?->nome,
@@ -221,7 +226,7 @@ class ProvaController extends Controller
 
     public function update(Request $request, int $id): JsonResponse
     {
-        $prova = Escopo::prova($request->user(), $id);
+        $prova = Escopo::provaEditavel($request->user(), $id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
@@ -273,7 +278,7 @@ class ProvaController extends Controller
 
     public function publicar(Request $request, int $id): JsonResponse
     {
-        $prova = Escopo::prova($request->user(), $id);
+        $prova = Escopo::provaEditavel($request->user(), $id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
@@ -293,7 +298,7 @@ class ProvaController extends Controller
 
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $prova = Escopo::prova($request->user(), $id);
+        $prova = Escopo::provaEditavel($request->user(), $id);
 
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');

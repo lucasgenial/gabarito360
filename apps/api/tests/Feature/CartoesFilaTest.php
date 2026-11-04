@@ -366,6 +366,8 @@ class CartoesFilaTest extends TestCase
         ]);
         $this->prova->update(['criado_por' => $u->id]);
         $destino = $this->novaProva($this->prova->escola_id);
+        // Destino institucional visível somente enquanto a turma está atribuída.
+        $destino->forceFill(['perfil_criacao'=>'coordenador'])->save();
         Sanctum::actingAs($u);
         $e = $this->enviar();
         $this->job($e)->handle($this->driver(['prova_id' => $destino->id, 'aluno_id' => $this->aluno]), app(ImagensCartao::class));
