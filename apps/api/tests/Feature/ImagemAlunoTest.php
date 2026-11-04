@@ -7,6 +7,14 @@ use Laravel\Sanctum\Sanctum;
 
 class ImagemAlunoTest extends SecretarioEscolarTest
 {
+    public function test_limites_de_imagem_do_aluno_e_da_conta_sao_separados_e_preservados(): void
+    {
+        Sanctum::actingAs(Usuario::find(2)->noVinculo(4));
+        for($i=0;$i<10;$i++)$this->postJson('/api/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>8])->assertOk();
+        for($i=0;$i<10;$i++)$this->postJson('/api/v1/alunos/1/imagem',['tipo'=>'avatar','avatar_id'=>9])->assertOk();
+        $this->postJson('/api/v1/alunos/1/imagem',['tipo'=>'avatar','avatar_id'=>10])->assertStatus(429)->assertHeader('Retry-After');
+        $this->postJson('/api/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>10])->assertStatus(429);
+    }
     public function test_retrato_privado_exige_permissao_e_escopo_e_preserva_cadastro(): void
     {
         Storage::fake('local');Sanctum::actingAs(Usuario::find(2)->noVinculo(4));
