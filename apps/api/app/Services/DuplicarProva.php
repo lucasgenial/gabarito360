@@ -48,7 +48,7 @@ class DuplicarProva
             if ($gabarito) ContextoCorrecao::exigirFilhos('gabarito_questoes','gabarito_id',$gabarito->id,$origem->espaco_id);
             $campos = $origem->only(['formato_avaliacao','escola_id','disciplina','serie','num_questoes','num_alternativas','nota_maxima','tipo_pontuacao','anular_se_todas','opcao_lingua','gerar_cartao_pdf']);
             $nova = new Prova($campos + ['titulo'=>$titulo,'status'=>'rascunho','criado_por'=>$ator->id]);
-            $nova->forceFill(['perfil_criacao'=>$ator->perfil]);
+            $nova->forceFill(\App\Support\AutoriaProva::capturar($ator));
             $nova->forceFill(Espacos::autoria((int)$origem->espaco_id,$ator)+['espaco_tipo'=>$origem->espaco_tipo]);
             $nova->save();
             if ($gabarito) {

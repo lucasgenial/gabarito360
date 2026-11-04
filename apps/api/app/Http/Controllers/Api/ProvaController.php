@@ -182,7 +182,7 @@ class ProvaController extends Controller
 
         $prova = DB::transaction(function () use ($data, $usuario, $turmaIds, $pessoal) {
             $prova = new Prova($data);
-            $prova->forceFill(['perfil_criacao'=>$usuario->perfil]);
+            $prova->forceFill(\App\Support\AutoriaProva::capturar($usuario));
             if (Espacos::ativo()) $prova->forceFill(Espacos::autoria($pessoal ?? Espacos::daEscola($usuario, (int) $data['escola_id']), $usuario));
             if ($pessoal) $prova->forceFill(['escola_id'=>null, 'espaco_tipo'=>'pessoal']);
             $prova->save();
