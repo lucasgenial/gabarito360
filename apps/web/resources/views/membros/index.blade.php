@@ -94,7 +94,7 @@
               <tr>
                 <td data-valor-ordem="{{ $m['nome'] }}" data-rotulo="Membro" class="tabela-principal"><div class="tabela-valor">
                   <div class="member-cell">
-                    <div class="member-avatar">{{ $ini }}</div>
+                    <x-avatar-usuario :nome="$m['nome']" :usuario-id="$m['id']" :avatar-id="$m['avatar_id']??null" :tem-foto="$m['tem_foto']??false" :versao="$m['imagem_versao']??1" tamanho="sm" />
                     <div>
                       <div class="member-name">{{ $m['nome'] }}</div>
                       @if(isset($m['vinculo_id']))<small>{{ $m['espaco_nome'] ?? '' }} · Vínculo #{{ $m['vinculo_id'] }}</small>@endif
@@ -125,6 +125,9 @@
                         {{ isset($m['situacao']) ? ($m['situacao'] === 'ativo' ? 'Suspender vínculo' : 'Reativar vínculo') : ($m['ativo'] ? 'Desativar' : 'Ativar') }}
                       </button>
                     </form>
+                    @endif
+                    @if(isset($m['situacao']) && in_array($m['situacao'],['ativo','suspenso','convidado'],true) && \App\Support\Acesso::pode('usuario.gerir') && in_array($perfilKey,\App\Support\Acesso::perfisGeridos(),true))
+                    <form method="POST" action="{{ route('membros.encerrar',['id'=>$m['id'],'vinculo_id'=>$m['vinculo_id']]) }}" onsubmit="return confirm('Encerrar este vínculo? O acesso será retirado e o histórico preservado.')">@csrf<button class="btn btn-ghost btn-sm" type="submit">Encerrar vínculo</button></form>
                     @endif
                   </div>
                 </div></td>

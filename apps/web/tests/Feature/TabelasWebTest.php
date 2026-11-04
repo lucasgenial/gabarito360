@@ -68,7 +68,8 @@ class TabelasWebTest extends TestCase
         $this->assertSame(3,$xp->query('//td[@data-rotulo="Ações"]//a[contains(@href,"/editar")]')->length);
         $this->assertSame(3,$xp->query('//td[@data-rotulo="Ações"]//a[contains(@href,"/permissoes")]')->length);
         $forms=$xp->query('//td[@data-rotulo="Ações"]//form[@method="POST"]');
-        $this->assertSame(2,$forms->length);
+        $this->assertSame(4,$forms->length);
+        $this->assertSame(2,$xp->query('//td[@data-rotulo="Ações"]//form[contains(@action,"/encerrar-vinculo")]')->length);
         foreach ($forms as $form) {
             $this->assertSame(1,$xp->query('.//input[@name="_token"]',$form)->length);
             $this->assertStringContainsString('vinculo_id=',$form->getAttribute('action'));

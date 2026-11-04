@@ -129,4 +129,15 @@ class Pf1PerfisEscolaresTest extends SecretarioEscolarTest
         DB::table('usuario_vinculos')->where('id',10)->update(['inicio_em'=>now()->subDay(),'fim_em'=>now()->subSecond()]);
         $this->getJson('/api/v1/provas')->assertForbidden();
     }
+
+    public function test_nova_conta_dos_perfis_e_convidada_sem_promocao_automatica():void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        Sanctum::actingAs(Usuario::find(1)->noVinculo(1));
+        foreach(['vice_dir_escolar','auxiliar_secretaria'] as $i=>$p){
+            $id=$this->postJson('/api/v1/usuarios',['nome'=>'Pessoa de teste','email'=>'novo'.$i.'@example.test','cpf'=>'0000000008'.$i,'perfil'=>$p,'escola_id'=>1])->assertCreated()->json('data.id');
+            $this->assertDatabaseHas('usuario_vinculos',['usuario_id'=>$id,'perfil'=>$p,'situacao'=>'convidado','espaco_id'=>5]);
+            $this->assertSame([],Permissao::efetivas(Usuario::find($id)));
+        }
+    }
 }

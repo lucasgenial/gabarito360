@@ -91,3 +91,10 @@ Testes obrigatórios: funções diferentes da mesma pessoa na mesma escola; vín
 | ID1/VI1/DC1 e demais etapas115 | Sequência estrutural preservada; implantação dos prioritários deve ser explicitamente priorizada sem fingir que conclui identidade/lotação. |
 
 O único gate de produto para iniciar PF1-C é a aprovação desta matriz, incluindo o padrão de acompanhamento do Vice-diretor e as operações extras mediante concessão. As subdivisões C1–C5 são trabalho interno e não exigem novas autorizações de continuidade. Uma eventual promoção para produção permanece uma decisão separada.
+
+
+## Complemento do responsável — grupos funcionais e imagem
+
+Confirmado em03/11/2026: funções administrativas (Secretário/Auxiliar) não se acumulam com Professor, Coordenação, Direção/Vice-direção ou Aplicador na mesma instituição. Vínculo encerrado não impede nova contratação de outro grupo; o histórico é preservado sem manter o acesso antigo. Escolas distintas são independentes. Acumulação excepcional exige referência de chamado e liberação individual por usuário/instituição, feita por Suporte/Desenvolvedor, com motivo, versão e auditoria imutável. A liberação não cria vínculo nem une permissões. Este complemento substitui orientações anteriores que admitiam acumulação administrativa sem exceção.
+
+O responsável também autorizou foto de perfil e escolha de avatar para usuários/professores. A imagem é editada pelo próprio titular, com galeria existente ou upload limitado/reprocessado e armazenamento privado. Não altera identidade, papéis ou permissões. Evidências e testes dessas duas extensões integram o fechamento de PF1-C antes de publicar somente na homologação.

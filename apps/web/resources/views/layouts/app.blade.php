@@ -70,7 +70,7 @@
       <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
       <div class="user-menu-container">
         <button type="button" class="avatar" id="user-menu-trigger" aria-label="Abrir opções da conta" aria-expanded="false" aria-controls="user-menu">
-          {{ strtoupper(substr(session('auth_nome', 'U'), 0, 2)) }}
+          <x-avatar-usuario :nome="session('auth_nome','Usuário')" :avatar-id="session('auth_avatar_id')" :tem-foto="session('auth_tem_foto',false)" :versao="session('auth_imagem_versao',1)" :proprio="true" tamanho="sm" />
         </button>
         <div class="user-menu" id="user-menu" hidden>
           <div class="user-menu-header">

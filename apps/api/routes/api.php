@@ -141,6 +141,8 @@ Route::prefix('v1')->group(function () {
             Route::get('vinculos', [\App\Http\Controllers\Api\SelecaoVinculoController::class, 'index'])->middleware('throttle:30,1');
             Route::post('vinculos/selecionar', [\App\Http\Controllers\Api\SelecaoVinculoController::class, 'selecionar'])->middleware('throttle:20,1');
             Route::post('logout', [AuthController::class, 'logout']);
+            Route::post('imagem', [\App\Http\Controllers\Api\ImagemUsuarioController::class,'salvar'])->middleware('throttle:10,1');
+            Route::get('foto', [\App\Http\Controllers\Api\ImagemUsuarioController::class,'propria']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::post('email', [AuthController::class, 'trocarEmail'])->middleware('throttle:5,1');
             Route::put('me',     [AuthController::class, 'update']);
@@ -256,7 +258,12 @@ Route::prefix('v1')->group(function () {
 
         Route::get('usuarios/convites-vinculo/opcoes', [ConviteVinculoController::class, 'opcoes'])->middleware('permissao:usuario.gerir');
         Route::post('usuarios/convites-vinculo', [ConviteVinculoController::class, 'store'])->middleware(['permissao:usuario.gerir', 'throttle:10,1']);
+        Route::get('usuarios/{id}/foto',[\App\Http\Controllers\Api\ImagemUsuarioController::class,'mostrar'])->whereNumber('id');
+        Route::get('configuracoes/funcoes/opcoes',[\App\Http\Controllers\Api\ExcecaoFuncionalController::class,'opcoes']);
+        Route::post('configuracoes/funcoes/consultar',[\App\Http\Controllers\Api\ExcecaoFuncionalController::class,'consultar'])->middleware('throttle:10,1');
+        Route::post('configuracoes/funcoes',[\App\Http\Controllers\Api\ExcecaoFuncionalController::class,'salvar'])->middleware('throttle:10,1');
         Route::prefix('usuarios')->group(function () {
+            Route::post('{id}/encerrar-vinculo',[\App\Http\Controllers\Api\GestaoVinculoController::class,'encerrar'])->middleware('permissao:usuario.gerir');
             Route::get('/',          [UsuarioController::class, 'index'])->middleware('permissao:usuario.ver');
             // Quem cadastra quem e em qual escopo: App\Support\Cadastro (docs/21, etapa 0)
             Route::post('/',         [UsuarioController::class, 'store'])->middleware('permissao:usuario.gerir');

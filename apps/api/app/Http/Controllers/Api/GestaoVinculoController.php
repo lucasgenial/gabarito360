@@ -45,6 +45,7 @@ class GestaoVinculoController extends Controller
             'escola_id' => 'sometimes|integer|min:1']);
         // Perfil é validado pelo catálogo completo abaixo, sem aceitar mudanças de espaço.
         return DB::transaction(function () use ($r, $id, $data) {
+            Usuario::whereKey($id)->lockForUpdate()->firstOrFail();
             $v = GestaoVinculos::alvo($r, $id, lock: true);
             $e = DB::table('espacos')->find($v->espaco_id);
             abort_if($r->has('escola_id') && (int) $data['escola_id'] !== (int) $e->escola_id, 422, 'Transferência exige outro vínculo.');
@@ -57,6 +58,7 @@ class GestaoVinculoController extends Controller
     public function toggle(Request $r, int $id)
     {
         return DB::transaction(function () use ($r, $id) {
+            Usuario::whereKey($id)->lockForUpdate()->firstOrFail();
             $v = GestaoVinculos::alvo($r, $id, lock: true);
             $ativo = $v->situacao !== 'ativo';
             $this->situacao($v, $r, $ativo);
@@ -64,10 +66,21 @@ class GestaoVinculoController extends Controller
         });
     }
 
+    public function encerrar(Request $r,int $id) {
+        return DB::transaction(function()use($r,$id){
+            Usuario::whereKey($id)->lockForUpdate()->firstOrFail();$v=GestaoVinculos::alvo($r,$id,lock:true);
+            abort_unless(in_array($v->situacao,['ativo','suspenso','convidado'],true),422,'Vínculo já encerrado.');
+            DB::table('usuario_vinculos')->where('id',$v->id)->update(['situacao'=>'encerrado','fim_em'=>now()]);
+            GestaoVinculos::evento($v,$r->user(),'encerrado','encerramento_funcional');
+            return ApiResponse::success(['mensagem'=>'Vínculo encerrado. O histórico foi preservado.']);
+        });
+    }
+
     private function situacao(object $v, Request $r, bool $ativo): void
     {
         abort_unless(in_array($v->situacao, ['ativo', 'suspenso'], true), 422, 'Vínculo não pode ser reativado por esta operação.');
         abort_if($ativo && ($v->inicio_em > now() || ($v->fim_em && $v->fim_em <= now())), 422, 'Vigência do vínculo não permite ativação.');
+        if ($ativo) \App\Support\GruposFuncionais::conferir((int)$v->usuario_id,(int)$v->espaco_id,$v->perfil,now(),$v->fim_em,(int)$v->id);
         $situacao = $ativo ? 'ativo' : 'suspenso';
         if ($v->situacao === $situacao) return;
         DB::table('usuario_vinculos')->where('id', $v->id)->update(['situacao' => $situacao]);
@@ -109,6 +122,7 @@ class GestaoVinculoController extends Controller
         $data = $r->validate(['itens' => 'required|array|min:1', 'itens.*.permissao' => 'required|string|distinct|exists:permissoes,chave',
             'itens.*.estado' => ['required', Rule::in(['padrao', 'conceder', 'retirar'])], 'itens.*.valida_ate' => 'sometimes|nullable|date|after_or_equal:today']);
         DB::transaction(function () use ($r, $id, $data) {
+            Usuario::whereKey($id)->lockForUpdate()->firstOrFail();
             $v = GestaoVinculos::alvo($r, $id, lock: true);
             $alvo = Usuario::findOrFail($id);
             $alvo->perfil = $v->perfil;

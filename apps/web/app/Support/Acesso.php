@@ -33,6 +33,7 @@ class Acesso
      * exige na tela de destino — assim nenhum item leva a 403 (docs/21, etapa 4).
      */
     private const ITENS = [
+        'funcoes' => ['Configurações de usuários','Usuários','equipe','funcoes.index',['funcoes.*'],['usuario.excecao_funcional.gerir']],
         'catalogo_pedidos' => ['Minhas solicitações', 'Solicitações', 'escola', 'catalogo-pedidos.index', ['catalogo-pedidos.*'], ['catalogo.solicitar']],
         'catalogo_atendimento' => ['Cadastro de instituições', 'Instituições', 'escola', 'catalogo-atendimento.index', ['catalogo-atendimento.*'], ['catalogo.solicitacao.analisar']],
         'catalogo_gestao' => ['Cadastro institucional', 'Instituição', 'escola', 'catalogo-gestao.index', ['catalogo-gestao.*'], ['catalogo.manter_escopo']],
@@ -60,7 +61,7 @@ class Acesso
     ];
 
     /** Ordem do menu lateral. */
-    private const ORDEM = ['painel', 'clientes', 'internos', 'catalogo_atendimento', 'pedidos', 'exportacoes', 'provas', 'corrigir', 'turmas', 'instituicoes', 'catalogo_pedidos', 'catalogo_gestao', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
+    private const ORDEM = ['painel', 'funcoes', 'clientes', 'internos', 'catalogo_atendimento', 'pedidos', 'exportacoes', 'provas', 'corrigir', 'turmas', 'instituicoes', 'catalogo_pedidos', 'catalogo_gestao', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
 
     /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
     private const PRINCIPAIS = [

@@ -21,6 +21,19 @@ class PerfilController extends Controller
         return view('perfil.show', ['usuario' => $resp->json('data')]);
     }
 
+    public function imagem(Request $r) {
+        $d=$r->validate(['tipo'=>'required|in:avatar,foto','avatar_id'=>'nullable|integer|between:1,36','foto'=>'required_if:tipo,foto|file|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4096,max_height=4096']);
+        try {$resp=$r->input('tipo')==='foto'?$this->api->postFile('/v1/auth/imagem','foto',$r->file('foto'),['tipo'=>'foto']):$this->api->post('/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>$r->input('avatar_id')]);}
+        catch(\Illuminate\Http\Client\ConnectionException){return back()->with('erro','Não foi possível confirmar a atualização. Atualize a página.');}
+        return back()->with($resp->successful()?'sucesso':'erro',$resp->successful()?'Imagem de perfil atualizada.':($resp->json('message')??'Não foi possível atualizar a imagem.'));
+    }
+    public function foto(){return $this->arquivo('/v1/auth/foto');}
+    public function fotoUsuario(int $id){return $this->arquivo('/v1/usuarios/'.$id.'/foto');}
+    private function arquivo(string $path){
+        $r=$this->api->getArquivo($path);abort_unless($r->successful(),$r->status()===403?403:404);
+        return response($r->body())->header('Content-Type','image/webp')->header('Cache-Control','private, no-store')->header('X-Content-Type-Options','nosniff');
+    }
+
     public function update(Request $request)
     {
         $request->validate(['nome' => 'required|string|max:200']);

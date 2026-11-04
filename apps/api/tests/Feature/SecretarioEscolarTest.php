@@ -34,6 +34,7 @@ class SecretarioEscolarTest extends TestCase
                 'titulo' => 'Prova', 'disciplina' => 'Teste', 'serie' => '3', 'num_questoes' => 1, 'num_alternativas' => 4]);
             DB::table('prova_turmas')->insert(['prova_id' => $id, 'turma_id' => $id, 'espaco_id' => $id + 4]);
         }
+        DB::table('usuario_funcoes_excecoes')->insert(['usuario_id'=>2,'espaco_id'=>5,'permitir'=>true,'versao'=>1,'chamado'=>'FIXTURE-SECRETARIA','motivo'=>'Exceção explícita em fixture de regressão','definida_por'=>1]);
         $this->vinculo(1, 1, 5, 'dir_escolar');
         $this->vinculo(2, 1, 6, 'professor');
         $this->vinculo(3, 2, 5, 'professor');

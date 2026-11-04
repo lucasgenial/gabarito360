@@ -167,6 +167,11 @@ class MembroController extends Controller
             ->with('sucesso', 'Membro atualizado.');
     }
 
+    public function encerrar(int $id) {
+        $r=$this->api->post('/v1/usuarios/'.$id.'/encerrar-vinculo',$this->alvo());
+        return back()->with($r->successful()?'sucesso':'erro',$r->successful()?'Vínculo encerrado. O histórico foi preservado.':($r->json('message')??'Não foi possível encerrar o vínculo.'));
+    }
+
     public function toggle(int $id)
     {
         $resp = $this->api->post("/v1/usuarios/{$id}/toggle", $this->alvo());

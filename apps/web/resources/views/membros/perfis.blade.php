@@ -28,9 +28,9 @@
 <h1 class="page-title" style="margin-top:12px;">O que cada perfil pode</h1>
 <p class="page-sub">Permissões que vêm com cada perfil (padrão) e as que podem ser concedidas a uma pessoa (extras). Fonte: catálogo oficial (docs/03).</p>
 
-<div class="chips" role="tablist">
+<div class="chips" role="group" aria-label="Escolher perfil">
   @foreach($ordem as $p)@if(isset($porPerf[$p]))
-    <button type="button" data-perfil="{{ $p }}" class="{{ $loop->first ? 'ativo' : '' }}">{{ $perfis[$p]['label'] ?? $p }}</button>
+    <button type="button" aria-pressed="{{ $loop->first ? 'true' : 'false' }}" data-perfil="{{ $p }}" class="{{ $loop->first ? 'ativo' : '' }}">{{ $perfis[$p]['label'] ?? $p }}</button>
   @endif @endforeach
 </div>
 
@@ -39,13 +39,13 @@
   <div class="perfil-bloco {{ $loop->first ? 'ativo' : '' }}" id="perfil-{{ $p }}">
     @if($p === 'vice_dir_escolar')<x-aviso>Acompanha a escola. As ações de gestão dependem de concessão específica.</x-aviso>@endif
     @if($p === 'auxiliar_secretaria')<x-aviso>Cadastros de alunos e consulta administrativa, sem acesso a notas e resultados.</x-aviso>@endif
-    @if($p === 'secretario_escolar')<x-aviso>A importação por planilha ainda não está disponível.</x-aviso>@endif
+    @if(in_array($p, ['secretario_escolar', 'vice_dir_escolar'], true))<x-aviso>A importação por planilha ainda não está disponível.</x-aviso>@endif
     <div class="card card-pad" style="margin-top:12px;font-size:14px;">
       <b>Pode gerir:</b>
       @if($p === 'vice_dir_escolar')<span>Somente após receber a permissão de gestão da equipe:</span>@endif
       {{ !empty($cadastra[$p]) ? collect($cadastra[$p])->map(fn ($x) => $perfis[$x]['label'] ?? $x)->implode(', ') : 'ninguém' }}
     </div>
-    <div class="duas-col" style="margin-top:12px;">
+    <div class="perfis-pilhas" style="margin-top:12px;">
       <div class="card card-pad">
         <h3 style="font-size:16px;color:var(--success);">Padrão do perfil ({{ count($g['padrao']) }})</h3>
         @foreach($modulos as $mod => $rot)
@@ -53,7 +53,7 @@
           @if($ch->isNotEmpty())
             <div class="eyebrow" style="margin-top:10px;">{{ $rot }}</div>
             <ul class="lista-perm" style="list-style:none;padding:0;margin:4px 0 0;">
-              @foreach($ch as $c)<li><span>{{ $descr[$c]['descricao'] ?? $c }}</span><code style="font-size:11px;color:var(--muted);">{{ $c }}</code></li>@endforeach
+              @foreach($ch as $c)<li><span>{{ in_array($p,['vice_dir_escolar','auxiliar_secretaria'],true) && in_array($c,['turma.ver','aluno.ver'],true) ? ($c==='turma.ver'?'Consultar turmas da escola':'Consultar alunos da escola') : ($descr[$c]['descricao'] ?? $c) }}</span><code style="font-size:11px;color:var(--muted);">{{ $c }}</code></li>@endforeach
             </ul>
           @endif
         @endforeach
@@ -61,7 +61,7 @@
       <div class="card card-pad">
         <h3 style="font-size:16px;color:var(--accent);">Pode receber como extra ({{ count($g['extra']) }})</h3>
         @forelse($g['extra'] as $c)
-          <ul class="lista-perm" style="list-style:none;padding:0;margin:4px 0 0;"><li><span>{{ $descr[$c]['descricao'] ?? $c }}</span><code style="font-size:11px;color:var(--muted);">{{ $c }}</code></li></ul>
+          <ul class="lista-perm" style="list-style:none;padding:0;margin:4px 0 0;"><li><span>{{ in_array($p,['vice_dir_escolar','auxiliar_secretaria'],true) && in_array($c,['turma.ver','aluno.ver'],true) ? ($c==='turma.ver'?'Consultar turmas da escola':'Consultar alunos da escola') : ($descr[$c]['descricao'] ?? $c) }}</span><code style="font-size:11px;color:var(--muted);">{{ $c }}</code></li></ul>
         @empty
           <p class="field-help">Nenhuma extra para este perfil.</p>
         @endforelse
@@ -76,7 +76,7 @@
 <script>
 document.querySelectorAll('.chips button').forEach(function (b) {
   b.addEventListener('click', function () {
-    document.querySelectorAll('.chips button').forEach(function (x) { x.classList.toggle('ativo', x === b); });
+    document.querySelectorAll('.chips button').forEach(function (x) { x.classList.toggle('ativo', x === b); x.setAttribute('aria-pressed',x===b?'true':'false'); });
     document.querySelectorAll('.perfil-bloco').forEach(function (x) { x.classList.toggle('ativo', x.id === 'perfil-' + b.dataset.perfil); });
   });
 });
