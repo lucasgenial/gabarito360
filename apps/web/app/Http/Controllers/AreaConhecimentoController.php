@@ -47,11 +47,11 @@ class AreaConhecimentoController extends DisciplinaController
     {
         $this->autorizar(true); $retorno = $this->retorno($r);
         if ($r->boolean('disciplinas_selecao')) $r->merge(['disciplina_ids' => $r->input('disciplina_ids', [])]);
-        $d = $r->validate(['nome' => 'required|string|max:100', 'sigla' => 'nullable|string|max:20', 'ativo' => 'required|in:0,1', 'versao' => $id ? 'required|integer|min:1' : 'prohibited']);
-        $d += $r->validate(['disciplina_ids' => 'sometimes|array|max:200', 'disciplina_ids.*' => 'required|integer|min:1|distinct',
+        $d = $this->validarFormulario($r, ['nome' => 'required|string|max:100', 'sigla' => 'nullable|string|max:20', 'ativo' => 'required|in:0,1', 'versao' => $id ? 'required|integer|min:1' : 'prohibited']);
+        $d += $this->validarFormulario($r, ['disciplina_ids' => 'sometimes|array|max:200', 'disciplina_ids.*' => 'required|integer|min:1|distinct',
             'disciplina_versoes' => 'required_with:disciplina_ids|array|max:5000', 'disciplina_versoes.*' => 'required|integer|min:1']);
         $resp = $this->escrever($id ? 'put' : 'post', 'areas-conhecimento'.($id ? '/'.$id : ''), $d);
-        if (!$resp || $resp->failed()) return $this->erro($r, $resp);
+        if (!$resp || $resp->failed()) return $this->erro($r, $resp, $retorno);
         return redirect()->route('areas.show', ['id' => $resp->json('data.id')] + $retorno)->with('sucesso', $id ? 'Área atualizada.' : 'Área adicionada à escola.');
     }
 }
