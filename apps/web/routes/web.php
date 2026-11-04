@@ -237,6 +237,10 @@ Route::middleware('autenticado')->group(function () {
     // Provas (MP-019)
     Route::get('/provas',             [ProvaController::class, 'index'])->name('provas.index');
     Route::get('/provas/nova',        [ProvaController::class, 'create'])->name('provas.create');
+    Route::post('/provas/preparar', [\App\Http\Controllers\CurriculoProvaController::class,'preparar'])->name('provas.preparar');
+    Route::get('/provas/{id}/curriculo', [\App\Http\Controllers\CurriculoProvaController::class,'editar'])->name('provas.curriculo.edit');
+    Route::post('/provas/{id}/curriculo/preparar', [\App\Http\Controllers\CurriculoProvaController::class,'preparar'])->name('provas.curriculo.preparar');
+    Route::post('/provas/{id}/curriculo', [\App\Http\Controllers\CurriculoProvaController::class,'salvar'])->name('provas.curriculo.salvar');
     Route::post('/provas/{id}/copiar', [ProvaController::class, 'copiar'])->name('provas.copiar.store');
     Route::post('/provas',            [ProvaController::class, 'store'])->name('provas.store');
     Route::get('/provas/{id}',        [ProvaController::class, 'show'])->name('provas.show');

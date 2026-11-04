@@ -85,8 +85,8 @@
       <span>{{ $prova['titulo'] }}</span>
     </div>
     <div class="info-row">
-      <span class="lbl">Disciplina</span>
-      <span>{{ $prova['disciplina'] }}</span>
+      <span class="lbl">{{ ($curricular??false)?'Disciplinas':'Disciplina' }}</span>
+      <span>{{ ($curricular??false) && !empty($prova['curriculo'])?collect($prova['curriculo']['disciplinas'])->pluck('nome')->join(', '):$prova['disciplina'] }}</span>
     </div>
     <div class="info-row">
       <span class="lbl">Série / Ano</span>
@@ -127,6 +127,7 @@
       <span class="lbl">Anular se todas</span>
       <span>{{ $prova['anular_se_todas'] ? 'Sim' : 'Não' }}</span>
     </div>
+    @include('provas.curriculo._resumo')
   </div>
 
   {{-- Turmas e próximas etapas --}}
@@ -191,37 +192,43 @@
 </div>
 
 {{-- Modal de edição rápida --}}
+@php $editarFalhou=(bool)session('edicao_prova_erro'); @endphp
 <div class="modal-backdrop" id="modal-editar" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editar-prova-titulo" tabindex="-1">
     <div class="modal-head">
-      <h2>Editar prova</h2>
-      <button type="button" class="modal-close" onclick="fecharModal()">&times;</button>
+      <h2 id="editar-prova-titulo">Editar dados da prova</h2>
+      <button type="button" class="modal-close" onclick="fecharModal()" aria-label="Fechar edição">&times;</button>
     </div>
     <form method="POST" action="{{ route('provas.update', $prova['id']) }}">
       @csrf
+      @if($curricular??false)<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">@endif
       @method('PUT')
       <div class="modal-body">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        @if($editarFalhou && $errors->any())<x-aviso tipo="erro"><ul>@foreach($errors->all() as $erro)<li>{{ $erro }}</li>@endforeach</ul></x-aviso>@endif
+        <div class="form-grid-2" style="gap:14px;">
           <div class="field" style="grid-column:1/-1">
-            <label>Título *</label>
-            <input class="input" type="text" name="titulo" required value="{{ $prova['titulo'] }}" />
+            <label for="editar-titulo">Título *</label>
+            <input class="input" id="editar-titulo" type="text" name="titulo" required maxlength="255" value="{{ $editarFalhou?old('titulo',$prova['titulo']):$prova['titulo'] }}" />
+          </div>
+          @unless($curricular??false)
+          <div class="field">
+            <label for="editar-disciplina">Disciplina *</label>
+            <input class="input" id="editar-disciplina" type="text" name="disciplina" required value="{{ $editarFalhou?old('disciplina',$prova['disciplina']):$prova['disciplina'] }}" />
+          </div>
+          @endunless
+          <div class="field">
+            <label for="editar-serie">Série *</label>
+            <input class="input" id="editar-serie" type="text" name="serie" required maxlength="50" value="{{ $editarFalhou?old('serie',$prova['serie']):$prova['serie'] }}" />
           </div>
           <div class="field">
-            <label>Disciplina *</label>
-            <input class="input" type="text" name="disciplina" required value="{{ $prova['disciplina'] }}" />
+            <label for="editar-data">Data de aplicação</label>
+            <input class="input" id="editar-data" type="date" name="data_aplicacao" value="{{ $editarFalhou?old('data_aplicacao',$prova['data_aplicacao']??''):($prova['data_aplicacao']??'') }}" />
           </div>
           <div class="field">
-            <label>Série *</label>
-            <input class="input" type="text" name="serie" required value="{{ $prova['serie'] }}" />
+            <label for="editar-nota">Nota máxima</label>
+            <input class="input num" id="editar-nota" type="number" name="nota_maxima" step="0.5" min="0.5" max="100" value="{{ $editarFalhou?old('nota_maxima',$prova['nota_maxima']):$prova['nota_maxima'] }}" />
           </div>
-          <div class="field">
-            <label>Data de aplicação</label>
-            <input class="input" type="date" name="data_aplicacao" value="{{ $prova['data_aplicacao'] ?? '' }}" />
-          </div>
-          <div class="field">
-            <label>Nota máxima</label>
-            <input class="input num" type="number" name="nota_maxima" step="0.5" value="{{ $prova['nota_maxima'] }}" />
-          </div>
+          @unless($curricular??false)
           <div class="field" style="grid-column:1/-1">
             <label>Turmas</label>
             <div style="display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;border:1px solid var(--border-soft);border-radius:var(--radius-sm);padding:10px;">
@@ -234,6 +241,7 @@
               @endforeach
             </div>
           </div>
+          @endunless
         </div>
       </div>
       <div class="modal-foot">
@@ -250,9 +258,19 @@
 @push('scripts')
 <script>
 var modal = document.getElementById('modal-editar');
-function abrirModal() { modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
-function fecharModal() { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+var focoAnterior;
+function abrirModal() { focoAnterior=document.activeElement;modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';modal.querySelector('input:not([type=hidden])')?.focus(); }
+function fecharModal() { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow='';focoAnterior?.focus(); }
 modal.addEventListener('click', function(e){ if(e.target===modal) fecharModal(); });
-document.addEventListener('keydown', function(e){ if(e.key==='Escape') fecharModal(); });
+document.addEventListener('keydown', function(e){
+  if(!modal.classList.contains('open'))return;
+  if(e.key==='Escape'){e.preventDefault();fecharModal();return;}
+  if(e.key!=='Tab')return;
+  var itens=Array.from(modal.querySelectorAll('button,a[href],input:not([type=hidden]),select,textarea')).filter(function(el){return !el.disabled && el.getClientRects().length;});
+  var primeiro=itens[0],ultimo=itens[itens.length-1];
+  if(e.shiftKey && document.activeElement===primeiro){e.preventDefault();ultimo?.focus();}
+  else if(!e.shiftKey && document.activeElement===ultimo){e.preventDefault();primeiro?.focus();}
+});
+@if($editarFalhou) abrirModal(); @endif
 </script>
 @endpush
