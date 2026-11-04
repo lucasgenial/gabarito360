@@ -62,6 +62,19 @@ Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController:
 
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
+    $dc=\App\Http\Controllers\DisciplinaController::class;
+    Route::get('disciplinas',[$dc,'index'])->name('disciplinas.index');
+    Route::get('disciplinas/nova',[$dc,'create'])->name('disciplinas.create');
+    Route::post('disciplinas',[$dc,'store'])->name('disciplinas.store');
+    Route::get('disciplinas/{id}',[$dc,'show'])->whereNumber('id')->name('disciplinas.show');
+    Route::get('disciplinas/{id}/editar',[$dc,'edit'])->whereNumber('id')->name('disciplinas.edit');
+    Route::put('disciplinas/{id}',[$dc,'update'])->whereNumber('id')->name('disciplinas.update');
+    Route::post('disciplinas/{id}/professores',[$dc,'indicar'])->whereNumber('id')->name('disciplinas.indicar');
+    Route::post('turmas/{turma}/disciplinas',[$dc,'adicionar'])->whereNumber('turma')->name('disciplinas.adicionar');
+    Route::get('turmas/{turma}/disciplinas/{componente}',[$dc,'componente'])->whereNumber('turma')->whereNumber('componente')->name('disciplinas.componente');
+    Route::post('turmas/{turma}/disciplinas/{componente}/atribuicoes',[$dc,'atribuir'])->whereNumber('turma')->whereNumber('componente')->name('disciplinas.atribuir');
+    Route::post('turmas/{turma}/disciplinas/{componente}/situacao',[$dc,'situacao'])->whereNumber('turma')->whereNumber('componente')->name('disciplinas.situacao');
+    Route::post('turmas/{turma}/disciplinas/{componente}/atribuicoes/{atribuicao}/encerrar',[$dc,'encerrar'])->whereNumber('turma')->whereNumber('componente')->whereNumber('atribuicao')->name('disciplinas.encerrar');
     $atendimento=\App\Http\Controllers\CatalogoAtendimentoController::class;
     Route::prefix('instituicoes/solicitacoes')->name('catalogo-pedidos.')->group(function()use($atendimento){
         Route::get('',[$atendimento,'index'])->name('index');Route::get('nova',[$atendimento,'novo'])->name('novo');Route::post('',[$atendimento,'enviar'])->name('enviar');

@@ -1,0 +1,30 @@
+@extends('layouts.app')
+@section('title',$dados['disciplina']['nome'])
+@section('breadcrumb')<a href="{{ route('disciplinas.index',$retorno) }}">Disciplinas</a><span class="sep">/</span><span>{{ $dados['disciplina']['nome'] }}</span>@endsection
+@section('content')
+@php($d=$dados['disciplina'])
+<x-pagina :titulo="$d['nome']"><x-slot:sub>Disciplina do catálogo da escola.</x-slot:sub>
+@include('disciplinas._voltar')
+@if($dados['gerir'])<a class="btn btn-secondary" href="{{ route('disciplinas.edit',['id'=>$d['id']]+$retorno) }}">Editar disciplina</a>@endif
+@if($dados['gerir'] && $d['ativo'] && !empty($retorno['retorno_turma']) && empty($retorno['retorno_componente']))<form method="POST" action="{{ route('disciplinas.adicionar',$retorno['retorno_turma']) }}">@csrf<input type="hidden" name="disciplina_id" value="{{ $d['id'] }}"><button class="btn btn-primary" type="submit">Adicionar à turma</button></form>@endif
+</x-pagina>
+@include('disciplinas._base')
+<div class="dc1-stack">
+<section class="card card-pad" aria-label="Dados da disciplina"><dl class="dc1-meta"><div><dt>Sigla</dt><dd>{{ $d['sigla']?:'Não informada' }}</dd></div><div><dt>Origem</dt><dd>{{ $d['referencia']?'Referência nacional':'Própria da escola' }}</dd></div><div><dt>Situação</dt><dd><span class="badge {{ $d['ativo']?'badge-success':'badge-info' }}">{{ $d['ativo']?'Ativa':'Inativa' }}</span></dd></div></dl></section>
+<section class="card" aria-labelledby="professores-disciplina"><div class="card-pad"><h2 id="professores-disciplina">{{ \App\Support\Acesso::perfil()==='professor'?'Minha indicação nesta disciplina':'Professores da disciplina' }}</h2><p class="dc1-texto">A indicação organiza as atribuições docentes. Ela não certifica formação nem concede acesso a turmas ou provas.</p></div>
+<x-tabela titulo="Professores indicados nesta disciplina"><table class="tabela-padrao"><caption class="sr-only">Professores da disciplina</caption><thead><tr><th scope="col">Professor</th><th scope="col">Indicação</th><th scope="col">Vínculo</th>@if($dados['gerir'])<th scope="col">Ações</th>@endif</tr></thead><tbody>
+@forelse($dados['professores'] as $p)<tr><td class="tabela-principal" data-rotulo="Professor"><div class="tabela-valor">{{ $p['nome'] }}</div></td><td data-rotulo="Indicação">{{ $p['ativo']?'Ativa':'Retirada' }}</td><td data-rotulo="Vínculo">{{ $p['vinculo_rotulo'] }}</td>@if($dados['gerir'])<td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">@if($p['ativo'])<form method="POST" action="{{ route('disciplinas.indicar',$d['id']) }}" onsubmit="return confirm('Retirar esta indicação? Atribuições abertas precisam ser encerradas ou canceladas antes.');">@csrf<input type="hidden" name="vinculo_id" value="{{ $p['vinculo_id'] }}"><input type="hidden" name="versao" value="{{ $p['versao'] }}"><input type="hidden" name="ativo" value="0"><button class="btn btn-ghost btn-sm" type="submit" @disabled(session('conflito_dc1'))>Retirar indicação<span class="sr-only"> de {{ $p['nome'] }}</span></button></form>@else<span>Histórico preservado</span>@endif</div></td>@endif</tr>
+@empty<tr><td colspan="{{ $dados['gerir']?4:3 }}"><div class="dc1-vazio"><h3>Nenhum professor indicado</h3><p>{{ $dados['gerir']?'Busque abaixo um professor com vínculo aceito e vigente na escola.':'A coordenação organiza as indicações desta disciplina.' }}</p></div></td></tr>@endforelse
+</tbody></table></x-tabela></section>
+@if($dados['gerir'] && $d['ativo'])
+<section class="card" aria-labelledby="adicionar-professor"><div class="card-pad"><h2 id="adicionar-professor">Adicionar professor à disciplina</h2><p class="dc1-texto">Somente vínculos Professor aceitos e vigentes nesta escola. O acesso a cada turma é gerido separadamente.</p><form method="GET" action="{{ route('disciplinas.show',$d['id']) }}" class="dc1-acoes">@include('disciplinas._retorno')<div class="field"><label for="professor-busca">Buscar professor pelo nome</label><input id="professor-busca" class="input" type="search" name="busca" maxlength="100" value="{{ $f['busca']??'' }}"></div><button class="btn btn-secondary" type="submit">Buscar</button>@if(!empty($f['busca']))<a class="btn btn-ghost" href="{{ route('disciplinas.show',['id'=>$d['id']]+$retorno) }}">Limpar</a>@endif</form></div>
+<x-tabela titulo="Professores disponíveis para indicação"><table class="tabela-padrao"><caption class="sr-only">Resultado da busca de professores</caption><thead><tr><th scope="col">Professor</th><th scope="col">Ações</th></tr></thead><tbody>
+@forelse($candidatos as $p)
+@php($indicacao=collect($dados['professores'])->firstWhere('vinculo_id',$p['vinculo_id']))
+<tr><td class="tabela-principal" data-rotulo="Professor"><div class="tabela-valor">{{ $p['nome'] }}</div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">@if($indicacao && $indicacao['ativo'])<span class="badge badge-info">Já indicado</span>@else<form method="POST" action="{{ route('disciplinas.indicar',$d['id']) }}">@csrf<input type="hidden" name="vinculo_id" value="{{ $p['vinculo_id'] }}"><input type="hidden" name="ativo" value="1">@if($indicacao)<input type="hidden" name="versao" value="{{ $indicacao['versao'] }}">@endif<button class="btn btn-secondary btn-sm" type="submit" @disabled(session('conflito_dc1'))>{{ $indicacao?'Reativar indicação':'Adicionar à disciplina' }}<span class="sr-only">: {{ $p['nome'] }}</span></button></form>@endif</div></td></tr>
+@empty<tr><td colspan="2"><div class="dc1-vazio"><h3>{{ !empty($f['busca'])?'Nenhum professor encontrado nesta busca':'Nenhum vínculo Professor disponível' }}</h3><p>{{ !empty($f['busca'])?'Confira o nome ou limpe a busca.':'Confira o aceite, a situação e a vigência do vínculo na equipe da escola.' }}</p>@if(\App\Support\Acesso::pode('usuario.ver'))<a class="btn btn-secondary" href="{{ route('membros.index') }}">Consultar equipe</a>@endif</div></td></tr>@endforelse
+</tbody></table></x-tabela><div class="card-pad">@include('disciplinas._paginas',['rota'=>'disciplinas.show','parametros'=>['id'=>$d['id']]+$f+$retorno,'rotulo'=>'Páginas da busca de professores'])</div>
+</section>
+@endif
+</div>
+@endsection
