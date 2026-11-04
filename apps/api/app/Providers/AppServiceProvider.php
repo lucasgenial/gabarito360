@@ -29,6 +29,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Limites numéricos compartilham a assinatura do usuário entre rotas.
+        // Navegar/consultar vínculos não deve consumir a cota de salvar imagem.
+        \Illuminate\Support\Facades\RateLimiter::for('imagem-perfil',function(\Illuminate\Http\Request $r){
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(10)
+                ->by(($r->user()?->id??$r->ip()).'|'.$r->route()->uri());
+        });
         \Illuminate\Support\Facades\RateLimiter::for('catalogo-operacao',function(\Illuminate\Http\Request $r){
             $limite=$r->isMethod('GET')?60:($r->is('api/v1/catalogo/minhas-solicitacoes')?5:10);
             return \Illuminate\Cache\RateLimiting\Limit::perMinute($limite)->by(($r->user()?->id??$r->ip()).'|'.$r->route()->uri().'|'.$r->method());
