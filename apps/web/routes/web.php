@@ -64,6 +64,13 @@ Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController:
 Route::middleware('autenticado')->group(function () {
     $dc=\App\Http\Controllers\DisciplinaController::class;
     Route::get('disciplinas',[$dc,'index'])->name('disciplinas.index');
+    $ac=\App\Http\Controllers\AreaConhecimentoController::class;
+    Route::get('areas-conhecimento',[$ac,'index'])->name('areas.index');
+    Route::get('areas-conhecimento/nova',[$ac,'create'])->name('areas.create');
+    Route::post('areas-conhecimento',[$ac,'store'])->name('areas.store');
+    Route::get('areas-conhecimento/{id}',[$ac,'show'])->whereNumber('id')->name('areas.show');
+    Route::get('areas-conhecimento/{id}/editar',[$ac,'edit'])->whereNumber('id')->name('areas.edit');
+    Route::put('areas-conhecimento/{id}',[$ac,'update'])->whereNumber('id')->name('areas.update');
     Route::get('disciplinas/nova',[$dc,'create'])->name('disciplinas.create');
     Route::post('disciplinas',[$dc,'store'])->name('disciplinas.store');
     Route::get('disciplinas/{id}',[$dc,'show'])->whereNumber('id')->name('disciplinas.show');

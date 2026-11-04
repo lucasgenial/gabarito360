@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class DisciplinaController extends Controller
 {
-    public function __construct(private ApiClient $api) {}
+    public function __construct(protected ApiClient $api) {}
 
-    private function autorizar(bool $gerir = false): void
+    protected function autorizar(bool $gerir = false): void
     {
         abort_unless(config('disciplinas.ativo'), 404);
         abort_unless(session('auth_vinculos') && (ContextoWeb::atual()['espaco']['tipo'] ?? '') === 'escola'
@@ -19,7 +19,7 @@ class DisciplinaController extends Controller
         if ($gerir) abort_unless(Acesso::perfil() === 'coordenador' && Acesso::pode('disciplina.gerir'), 403);
     }
 
-    private function ler(string $path, array $query = []): array
+    protected function ler(string $path, array $query = []): array
     {
         try { $r = $this->api->get('/v1/'.$path, $query); }
         catch (ConnectionException) { abort(503, 'Não foi possível consultar as disciplinas. Tente novamente.'); }
@@ -27,7 +27,7 @@ class DisciplinaController extends Controller
         return ['dados' => $r->json('data'), 'meta' => $r->json('meta') ?? []];
     }
 
-    private function retorno(Request $r): array
+    protected function retorno(Request $r): array
     {
         $d = $r->validate(['retorno_turma' => 'nullable|integer|min:1', 'retorno_componente' => 'nullable|integer|min:1',
             'rascunho_inicio' => 'nullable|date_format:Y-m-d', 'rascunho_fim' => 'nullable|date_format:Y-m-d', 'rascunho_papel' => 'nullable|in:titular,codocencia,substituicao', 'rascunho_vinculo' => 'nullable|integer|min:1', 'rascunho_chave' => 'nullable|uuid']);
@@ -57,14 +57,15 @@ class DisciplinaController extends Controller
         $referencias = collect($op['referencias']); $selecionada = $referencias->firstWhere('chave', $f['referencia'] ?? '');
         abort_if(!empty($f['referencia']) && !$selecionada, 404);
         if ($busca = trim($f['busca'] ?? '')) $referencias = $referencias->filter(fn ($i) => str_contains(\Illuminate\Support\Str::lower(\Illuminate\Support\Str::ascii($i['nome'])), \Illuminate\Support\Str::lower(\Illuminate\Support\Str::ascii($busca))));
-        return view('disciplinas.form', ['disciplina' => null, 'f' => $f, 'referencias' => $referencias->all(), 'selecionada' => $selecionada, 'retorno' => $retorno]);
+        return view('disciplinas.form', ['disciplina' => null, 'f' => $f, 'referencias' => $referencias->all(), 'selecionada' => $selecionada, 'retorno' => $retorno, 'areas' => $op['areas'] ?? []]);
     }
 
     public function edit(Request $r, int $id)
     {
         if ($resposta = $this->rever($r)) return $resposta;
         $this->autorizar(true); $d = $this->ler('disciplinas/'.$id)['dados']; abort_unless($d['gerir'], 403);
-        return view('disciplinas.form', ['disciplina' => $d['disciplina'], 'retorno' => $this->retorno($r), 'f' => [], 'referencias' => [], 'selecionada' => null]);
+        $op = $this->ler('disciplinas/opcoes', ['disciplina_id' => $id])['dados'];
+        return view('disciplinas.form', ['disciplina' => $d['disciplina'], 'retorno' => $this->retorno($r), 'f' => [], 'referencias' => [], 'selecionada' => null, 'areas' => $op['areas'] ?? []]);
     }
 
     public function show(Request $r, int $id)
@@ -82,7 +83,9 @@ class DisciplinaController extends Controller
     private function salvar(Request $r, ?int $id = null)
     {
         $this->autorizar(true); $retorno = $this->retorno($r);
+        if ($r->boolean('area_selecao')) $r->merge(['area_ids' => $r->input('area_ids', [])]);
         $d = $r->validate(['nome' => 'required|string|max:100', 'sigla' => 'nullable|string|max:20', 'ativo' => 'required|in:0,1', 'referencia' => ($id ? 'prohibited' : 'nullable|string|max:50'), 'versao' => ($id ? 'required|integer|min:1' : 'prohibited')]);
+        $d += $r->validate(['area_ids' => 'sometimes|array|max:200', 'area_ids.*' => 'required|integer|min:1|distinct']);
         $resp = $this->escrever($id ? 'put' : 'post', 'disciplinas'.($id ? '/'.$id : ''), $d);
         if (!$resp || $resp->failed()) return $this->erro($r, $resp);
         return redirect()->route('disciplinas.show', ['id' => $resp->json('data.id')] + $retorno)->with('sucesso', $id ? 'Disciplina atualizada.' : 'Disciplina adicionada à escola.');
@@ -137,18 +140,18 @@ class DisciplinaController extends Controller
         return back()->with('sucesso', $d['acao'] === 'cancelar' ? 'Atribuição futura cancelada.' : 'Atribuição encerrada a partir de hoje.');
     }
 
-    private function escrever(string $metodo, string $path, array $dados)
+    protected function escrever(string $metodo, string $path, array $dados)
     {
         try { return $this->api->$metodo('/v1/'.$path, $dados); }
         catch (ConnectionException) { return null; }
     }
 
-    private function erro(Request $r, $resp)
+    protected function erro(Request $r, $resp)
     {
         if ($resp) abort_if(in_array($resp->status(), [403, 404], true), $resp->status());
         if ($resp?->status() === 409) {
             $url = parse_url(url()->previous());
-            if (($url['host'] ?? $r->getHost()) === $r->getHost()) session()->put($this->chaveRascunho($url['path'] ?? '/'), $r->only('nome','sigla','ativo','vinculo_id','inicio_em','fim_em','papel'));
+            if (($url['host'] ?? $r->getHost()) === $r->getHost()) session()->put($this->chaveRascunho($url['path'] ?? '/'), $r->only('nome','sigla','ativo','area_ids','area_selecao','vinculo_id','inicio_em','fim_em','papel'));
         }
         return back()->withInput()->withErrors($resp?->json('errors') ?? [])->with('conflito_dc1', $resp?->status() === 409)
             ->with('erro', $resp && in_array($resp->status(), [409,422], true) ? $resp->json('message') : 'Não foi possível confirmar a operação. Atualize os dados antes de tentar novamente.');
@@ -159,7 +162,7 @@ class DisciplinaController extends Controller
         return 'dc1_rascunho_'.hash('sha256', (ContextoWeb::id() ?? '').'|'.$path);
     }
 
-    private function rever(Request $r)
+    protected function rever(Request $r)
     {
         if (!$r->boolean('rever')) return null;
         $this->autorizar(true);

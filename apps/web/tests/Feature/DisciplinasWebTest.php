@@ -99,4 +99,38 @@ class DisciplinasWebTest extends TestCase
             ->assertSee('data-dc1-verbo="Cancelar atribuição"',false)->assertSee('Cancelar atribuição de Professor fictício em Matemática')
             ->assertSee('A atribuição programada será cancelada. O histórico será preservado.')->assertDontSee('onsubmit="return confirm(',false);
     }
+
+    public function test_areas_multiplas_inativas_e_referencia_sao_distintas_no_formulario(): void
+    {
+        [$ctx,$me]=$this->preparar(); $d=$this->disciplina();
+        $areas=[['id'=>11,'nome'=>'Área própria','sigla'=>null,'ativo'=>true],['id'=>12,'nome'=>'Área preservada','sigla'=>'AP','ativo'=>false]];
+        $d['areas']=$areas;
+        $this->fake($me,fn($r,$p)=>Http::response(['data'=>str_ends_with($p,'opcoes')?['gerir'=>true,'referencias'=>[],'areas'=>$areas]:['disciplina'=>$d,'professores'=>[],'gerir'=>true]]));
+        $this->get('/disciplinas/1/editar?_ctx='.$ctx)->assertOk()->assertSee('Você pode escolher mais de uma.')->assertSee('name="area_ids[]"',false)
+            ->assertSee('id="disciplina-area-11" name="area_ids[]" value="11" checked',false)->assertSee('Inativa')->assertSee('Salve este formulário antes de sair.');
+        $this->get('/disciplinas/1?_ctx='.$ctx)->assertOk()->assertSee('Áreas do conhecimento:')->assertSee('Área preservada')->assertSee('(inativa)');
+    }
+
+    public function test_desmarcar_todas_envia_lista_vazia_explicitamente_e_erro_do_grupo_tem_descricao(): void
+    {
+        [$ctx,$me]=$this->preparar(); $falhar=false;
+        $this->fake($me,function($r) use (&$falhar) {
+            if ($r->method()==='POST') return $falhar?Http::response(['message'=>'Seleção inválida.','errors'=>['area_ids.0'=>['Seleção inválida.']]],422):Http::response(['data'=>['id'=>4]],201);
+            return Http::response(['data'=>['gerir'=>true,'referencias'=>[],'areas'=>[]]]);
+        });
+        $this->post('/disciplinas?_ctx='.$ctx,['nome'=>'Matemática','ativo'=>'1','area_selecao'=>'1'])->assertRedirect();
+        Http::assertSent(fn($r)=>$r->method()==='POST' && $r['area_ids']===[]);
+        $falhar=true;
+        $this->from('/disciplinas/nova?_ctx='.$ctx.'&origem=propria')->post('/disciplinas?_ctx='.$ctx,['nome'=>'Matemática','ativo'=>'1','area_selecao'=>'1','area_ids'=>[999]])->assertRedirect();
+        $this->get('/disciplinas/nova?_ctx='.$ctx.'&origem=propria')->assertOk()->assertSee('dc1-erro-area_ids')->assertSee('Seleção inválida.');
+    }
+
+    public function test_catalogo_de_areas_paginado_e_somente_leitura(): void
+    {
+        [$ctx,$me]=$this->preparar('professor');
+        $this->fake($me,fn()=>Http::response(['data'=>['areas'=>[['id'=>8,'nome'=>'Tecnologia <teste>','sigla'=>null,'ativo'=>true]],'gerir'=>false],'meta'=>['pagina'=>1,'paginas'=>2,'total'=>21]]));
+        $this->get('/areas-conhecimento?_ctx='.$ctx)->assertOk()->assertSee('Tecnologia &lt;teste&gt;',false)->assertSee('Próxima')->assertDontSee('Adicionar área')->assertDontSee('Editar');
+        $this->get('/areas-conhecimento/nova?_ctx='.$ctx)->assertForbidden();
+        $this->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'Invasão','ativo'=>1])->assertForbidden();
+    }
 }
