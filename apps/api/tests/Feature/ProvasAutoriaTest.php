@@ -159,4 +159,38 @@ class ProvasAutoriaTest extends TestCase
         $this->chamar($diretor,'GET','provas/4')->assertNotFound();
         $this->assertDatabaseHas('usuarios',['id'=>1,'perfil'=>'professor']);
     }
+
+    public function test_criacao_real_com_professor_e_coordenador_guarda_contextos_distintos(): void
+    {
+        DB::table('usuario_vinculos')->insert(['id'=>4,'usuario_id'=>1,'espaco_id'=>5,'perfil'=>'coordenador','situacao'=>'ativo','inicio_em'=>now()->subDay()]);
+        $professor=$this->token(1);
+        $identidade=Usuario::findOrFail(1)->createToken('identidade')->plainTextToken;
+        $coordenador=$this->chamar($identidade,'POST','auth/vinculos/selecionar',['vinculo_id'=>4])->assertCreated()->json('data.token');
+        $dados=['escola_id'=>1,'titulo'=>'Mesmo autor em funções diferentes','disciplina'=>'Matemática','serie'=>'1','num_questoes'=>1,'num_alternativas'=>4,'turma_ids'=>[1]];
+        $particular=$this->chamar($professor,'POST','provas',$dados+['perfil_criacao'=>'coordenador','vinculo_criacao_id'=>4,'autoria_origem'=>'forjada'])->assertCreated()->json('data.id');
+        $institucional=$this->chamar($coordenador,'POST','provas',$dados+['perfil_criacao'=>'professor','vinculo_criacao_id'=>1])->assertCreated()->json('data.id');
+        $this->assertDatabaseHas('provas',['id'=>$particular,'criado_por'=>1,'perfil_criacao'=>'professor','vinculo_criacao_id'=>1,'autoria_origem'=>'registrada']);
+        $this->assertDatabaseHas('provas',['id'=>$institucional,'criado_por'=>1,'perfil_criacao'=>'coordenador','vinculo_criacao_id'=>4,'autoria_origem'=>'registrada']);
+        $this->chamar($professor,'GET',"provas/$particular")->assertOk()->assertJsonPath('data.pode_editar',true);
+        $this->chamar($professor,'GET',"provas/$institucional")->assertOk()->assertJsonPath('data.pode_editar',false)->assertJsonPath('data.pode_copiar',false);
+        $this->chamar($professor,'PUT',"provas/$particular",['titulo'=>'Título revisto','perfil_criacao'=>'coordenador','vinculo_criacao_id'=>4,'autoria_origem'=>null])->assertOk();
+        $this->assertDatabaseHas('provas',['id'=>$particular,'perfil_criacao'=>'professor','vinculo_criacao_id'=>1,'autoria_origem'=>'registrada']);
+        // Trocar a função da conta e do vínculo não transforma a origem das provas anteriores.
+        DB::table('usuarios')->where('id',1)->update(['perfil'=>'coordenador']);
+        DB::table('usuario_vinculos')->where('id',1)->update(['perfil'=>'dir_escolar','versao_autorizacao'=>2]);
+        $colega=$this->token(2);
+        $this->chamar($colega,'GET',"provas/$particular")->assertNotFound();
+        $this->chamar($colega,'GET',"provas/$institucional")->assertOk()->assertJsonPath('data.perfil_criacao','coordenador');
+        $this->assertDatabaseHas('provas',['id'=>$particular,'perfil_criacao'=>'professor','vinculo_criacao_id'=>1]);
+    }
+
+    public function test_banco_recusa_reescrever_autoria_capturada_sem_bloquear_edicao_de_titulo(): void
+    {
+        $professor=$this->token(1);
+        $id=$this->chamar($professor,'POST','provas',['escola_id'=>1,'titulo'=>'Origem preservada','disciplina'=>'Matemática','serie'=>'1','num_questoes'=>1,'num_alternativas'=>4])->assertCreated()->json('data.id');
+        DB::table('provas')->where('id',$id)->update(['titulo'=>'Revisão permitida']);
+        $this->assertDatabaseHas('provas',['id'=>$id,'titulo'=>'Revisão permitida']);
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        DB::table('provas')->where('id',$id)->update(['perfil_criacao'=>'coordenador','autoria_origem'=>null]);
+    }
 }
