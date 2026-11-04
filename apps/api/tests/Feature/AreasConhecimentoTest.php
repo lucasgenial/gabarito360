@@ -38,12 +38,12 @@ class AreasConhecimentoTest extends TestCase
     {
         $a = $this->area();
         $d = $this->postJson('/api/v1/disciplinas', ['nome' => 'Matemática', 'ativo' => true, 'area_ids' => [$a]])->assertCreated()->json('data.id');
-        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome' => 'Raciocínio', 'ativo' => false, 'versao' => 1])->assertOk();
+        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome' => 'Raciocínio', 'ativo' => false, 'versao' => 2])->assertOk();
         $this->getJson("/api/v1/disciplinas/opcoes?disciplina_id=$d")->assertOk()->assertJsonCount(1, 'data.areas');
         $this->getJson('/api/v1/disciplinas/opcoes')->assertOk()->assertJsonCount(0, 'data.areas');
         $this->putJson("/api/v1/disciplinas/$d", ['nome' => 'Matemática', 'ativo' => true, 'versao' => 1, 'area_ids' => [$a]])->assertOk()->assertJsonCount(1, 'data.areas');
         $this->postJson('/api/v1/disciplinas', ['nome' => 'Física', 'ativo' => true, 'area_ids' => [$a]])->assertUnprocessable()->assertJsonValidationErrors('area_ids');
-        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome' => 'Raciocínio', 'ativo' => true, 'versao' => 2])->assertOk();
+        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome' => 'Raciocínio', 'ativo' => true, 'versao' => 3])->assertOk();
         $this->postJson('/api/v1/disciplinas', ['nome' => 'Física', 'ativo' => true, 'area_ids' => [$a]])->assertCreated();
     }
 
@@ -87,5 +87,41 @@ class AreasConhecimentoTest extends TestCase
         DB::table('disciplinas')->insert(['id' => 91, 'espaco_id' => 6, 'nome' => 'Outra', 'nome_chave' => 'outra']);
         $this->expectException(\Illuminate\Database\QueryException::class);
         DB::table('disciplina_areas')->insert(['espaco_id' => 6, 'disciplina_id' => 91, 'area_id' => $a]);
+    }
+
+    public function test_area_recebe_disciplinas_e_as_duas_entradas_invalidam_versoes_concorrentes(): void
+    {
+        $d = $this->postJson('/api/v1/disciplinas', ['nome'=>'Matemática','ativo'=>true])->assertCreated()->json('data.id');
+        $e = $this->postJson('/api/v1/disciplinas', ['nome'=>'Física','ativo'=>true])->assertCreated()->json('data.id');
+        $a = $this->postJson('/api/v1/areas-conhecimento', ['nome'=>'Raciocínio','ativo'=>true,'disciplina_ids'=>[$d,$e],'disciplina_versoes'=>[$d=>1,$e=>1]])->assertCreated()->assertJsonCount(2,'data.disciplinas')->json('data.id');
+        $this->putJson("/api/v1/disciplinas/$d", ['nome'=>'Sobrescrita','ativo'=>true,'versao'=>1,'area_ids'=>[]])->assertConflict();
+        $b = $this->postJson('/api/v1/areas-conhecimento', ['nome'=>'Tecnologia','ativo'=>true,'disciplina_ids'=>[$d],'disciplina_versoes'=>[$d=>2]])->assertCreated()->json('data.id');
+        $this->getJson("/api/v1/disciplinas/$d")->assertOk()->assertJsonCount(2,'data.disciplina.areas');
+        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome'=>'Raciocínio','ativo'=>true,'versao'=>1,'disciplina_ids'=>[$d,$e],'disciplina_versoes'=>[$d=>2,$e=>2]])->assertConflict();
+        $this->putJson("/api/v1/disciplinas/$d", ['nome'=>'Matemática','ativo'=>true,'versao'=>3,'area_ids'=>[]])->assertOk();
+        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome'=>'Raciocínio','ativo'=>true,'versao'=>1,'disciplina_ids'=>[]])->assertConflict();
+        $this->assertDatabaseHas('areas_conhecimento',['id'=>$a,'versao'=>2]);
+        $this->assertDatabaseHas('areas_conhecimento',['id'=>$b,'versao'=>2]);
+        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome'=>'Raciocínio revisto','ativo'=>false,'versao'=>2])->assertOk()->assertJsonCount(1,'data.disciplinas');
+        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome'=>'Raciocínio revisto','ativo'=>false,'versao'=>3,'disciplina_ids'=>[]])->assertOk()->assertJsonCount(0,'data.disciplinas');
+        $this->assertDatabaseCount('disciplinas',2);
+        $this->assertDatabaseCount('disciplina_areas',0);
+    }
+
+    public function test_selecao_da_area_revalida_ativas_escopo_rascunho_e_leitura_do_professor(): void
+    {
+        $d = $this->postJson('/api/v1/disciplinas', ['nome'=>'Matemática','ativo'=>true])->assertCreated()->json('data.id');
+        $a = $this->postJson('/api/v1/areas-conhecimento', ['nome'=>'Raciocínio','ativo'=>true,'disciplina_ids'=>[$d],'disciplina_versoes'=>[$d=>1]])->assertCreated()->json('data.id');
+        $this->putJson("/api/v1/disciplinas/$d", ['nome'=>'Matemática','ativo'=>false,'versao'=>2])->assertOk();
+        $this->getJson("/api/v1/areas-conhecimento/opcoes?area_id=$a")->assertOk()->assertJsonCount(1,'data.disciplinas');
+        $this->getJson('/api/v1/areas-conhecimento/opcoes')->assertOk()->assertJsonCount(0,'data.disciplinas');
+        $this->getJson("/api/v1/areas-conhecimento/opcoes?rascunho_ids[]=$d")->assertOk()->assertJsonCount(1,'data.disciplinas');
+        $this->postJson('/api/v1/areas-conhecimento', ['nome'=>'Bloqueada','ativo'=>true,'disciplina_ids'=>[$d],'disciplina_versoes'=>[$d=>3]])->assertUnprocessable()->assertJsonValidationErrors('disciplina_ids');
+        $this->putJson("/api/v1/areas-conhecimento/$a", ['nome'=>'Raciocínio','ativo'=>true,'versao'=>1,'disciplina_ids'=>[$d],'disciplina_versoes'=>[$d=>3]])->assertOk()->assertJsonCount(1,'data.disciplinas');
+        app('auth')->forgetGuards(); Sanctum::actingAs(Usuario::findOrFail(1)->noVinculo(2));
+        $this->postJson('/api/v1/areas-conhecimento', ['nome'=>'Outra escola','ativo'=>true,'disciplina_ids'=>[$d],'disciplina_versoes'=>[$d=>3]])->assertUnprocessable();
+        app('auth')->forgetGuards(); Sanctum::actingAs(Usuario::findOrFail(2)->noVinculo(3));
+        $this->getJson('/api/v1/areas-conhecimento/opcoes')->assertForbidden();
+        $this->getJson("/api/v1/areas-conhecimento/$a")->assertOk()->assertJsonCount(0,'data.area.disciplinas');
     }
 }

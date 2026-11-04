@@ -95,14 +95,14 @@ final class GestaoDisciplinas
     {
         return DB::transaction(function () use ($u, $dados, $id) {
             $v = $this->travarAtor($u);
+            DB::table('espacos')->where('id', $v->espaco_id)->lockForUpdate()->first();
             $antes = $id ? $this->travarDisciplina($v, $id) : null;
             if ($antes) $this->versao($antes, $dados['versao']);
             $nome = preg_replace('/\s+/u', ' ', trim($dados['nome']));
             $this->campo($nome !== '', 'nome', 'Informe o nome da disciplina.');
             $chave = Str::lower(Str::ascii($nome));
             $this->campo(mb_strlen($chave) <= 100, 'nome', 'Use um nome mais curto: a forma de busca dos símbolos informados excede o limite.');
-            // Serializa nomes da escola, inclusive criação concorrente da mesma referência.
-            DB::table('espacos')->where('id', $v->espaco_id)->lockForUpdate()->first();
+            // A trava do espaço serializa ambas as entradas de organização área↔disciplina.
             $areasAntes = $antes ? $this->areasDaDisciplina((int) $v->espaco_id, $id) : [];
             $areasIds = array_key_exists('area_ids', $dados) ? array_map('intval', $dados['area_ids']) : null;
             if ($areasIds !== null) {
@@ -123,9 +123,19 @@ final class GestaoDisciplinas
             if ($antes) DB::table('disciplinas')->where('id', $id)->update($valores);
             else $id = DB::table('disciplinas')->insertGetId($valores + ['espaco_id' => $v->espaco_id, 'created_at' => now()]);
             if ($areasIds !== null) {
-                DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('disciplina_id', $id)->whereNotIn('area_id', $areasIds)->delete();
                 $anteriores = array_map(fn ($a) => (int) $a->id, $areasAntes);
-                foreach (array_diff($areasIds, $anteriores) as $area) DB::table('disciplina_areas')->insert(['espaco_id' => $v->espaco_id, 'disciplina_id' => $id, 'area_id' => $area]);
+                $mudaram = array_values(array_unique([...array_diff($areasIds, $anteriores), ...array_diff($anteriores, $areasIds)]));
+                sort($mudaram);
+                foreach ($mudaram as $area) {
+                    $areaAntes = DB::table('areas_conhecimento')->where('espaco_id', $v->espaco_id)->where('id', $area)->lockForUpdate()->first();
+                    $areaAntes->disciplina_ids = DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('area_id', $area)->orderBy('disciplina_id')->pluck('disciplina_id')->all();
+                    if (in_array($area, $areasIds, true)) DB::table('disciplina_areas')->insert(['espaco_id' => $v->espaco_id, 'disciplina_id' => $id, 'area_id' => $area]);
+                    else DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('disciplina_id', $id)->where('area_id', $area)->delete();
+                    DB::table('areas_conhecimento')->where('id', $area)->update(['versao' => $areaAntes->versao + 1, 'updated_at' => now()]);
+                    $areaDepois = DB::table('areas_conhecimento')->find($area);
+                    $areaDepois->disciplina_ids = DB::table('disciplina_areas')->where('espaco_id', $v->espaco_id)->where('area_id', $area)->orderBy('disciplina_id')->pluck('disciplina_id')->all();
+                    $this->evento($v, 'area_conhecimento', $area, 'disciplinas_alteradas', $areaAntes, $areaDepois);
+                }
             }
             $depois = DB::table('disciplinas')->find($id);
             if ($antes) $antes->areas = $areasAntes;

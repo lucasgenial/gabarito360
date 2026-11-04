@@ -100,29 +100,36 @@ class DisciplinasWebTest extends TestCase
             ->assertSee('A atribuição programada será cancelada. O histórico será preservado.')->assertDontSee('onsubmit="return confirm(',false);
     }
 
-    public function test_areas_multiplas_inativas_e_referencia_sao_distintas_no_formulario(): void
+    public function test_disciplina_independente_mostra_areas_mas_nao_repete_seletor_ou_cancelar(): void
     {
         [$ctx,$me]=$this->preparar(); $d=$this->disciplina();
-        $areas=[['id'=>11,'nome'=>'Área própria','sigla'=>null,'ativo'=>true],['id'=>12,'nome'=>'Área preservada','sigla'=>'AP','ativo'=>false]];
-        $d['areas']=$areas;
-        $this->fake($me,fn($r,$p)=>Http::response(['data'=>str_ends_with($p,'opcoes')?['gerir'=>true,'referencias'=>[],'areas'=>$areas]:['disciplina'=>$d,'professores'=>[],'gerir'=>true]]));
-        $this->get('/disciplinas/1/editar?_ctx='.$ctx)->assertOk()->assertSee('Você pode escolher mais de uma.')->assertSee('name="area_ids[]"',false)
-            ->assertSee('id="disciplina-area-11" name="area_ids[]" value="11" checked',false)->assertSee('Inativa')->assertSee('Salve este formulário antes de sair.');
+        $d['areas']=[['id'=>11,'nome'=>'Área própria','sigla'=>null,'ativo'=>true],['id'=>12,'nome'=>'Área preservada','sigla'=>'AP','ativo'=>false]];
+        $this->fake($me,fn()=>Http::response(['data'=>['disciplina'=>$d,'professores'=>[],'gerir'=>true]]));
+        $html=$this->get('/disciplinas/1/editar?_ctx='.$ctx)->assertOk()->assertDontSee('name="area_ids[]"',false)->getContent();
+        $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
+        $this->assertSame(0,$xp->query('//div[contains(@class,"g-pagina")]//a[normalize-space(.)="Cancelar"]')->length);
+        $this->assertSame(1,$xp->query('//form//a[normalize-space(.)="Cancelar"]')->length);
         $this->get('/disciplinas/1?_ctx='.$ctx)->assertOk()->assertSee('Áreas do conhecimento:')->assertSee('Área preservada')->assertSee('(inativa)');
     }
 
-    public function test_desmarcar_todas_envia_lista_vazia_explicitamente_e_erro_do_grupo_tem_descricao(): void
+    public function test_area_seleciona_todo_catalogo_e_envia_retirada_explicita_com_erro_no_grupo(): void
     {
         [$ctx,$me]=$this->preparar(); $falhar=false;
-        $this->fake($me,function($r) use (&$falhar) {
-            if ($r->method()==='POST') return $falhar?Http::response(['message'=>'Seleção inválida.','errors'=>['area_ids.0'=>['Seleção inválida.']]],422):Http::response(['data'=>['id'=>4]],201);
-            return Http::response(['data'=>['gerir'=>true,'referencias'=>[],'areas'=>[]]]);
+        $disciplina=$this->disciplina();
+        $this->fake($me,function($r) use (&$falhar,$disciplina) {
+            if ($r->method()==='POST') return $falhar?Http::response(['message'=>'Seleção inválida.','errors'=>['disciplina_ids.0'=>['Seleção inválida.']]],422):Http::response(['data'=>['id'=>4]],201);
+            return Http::response(['data'=>['disciplinas'=>[$disciplina]]]);
         });
-        $this->post('/disciplinas?_ctx='.$ctx,['nome'=>'Matemática','ativo'=>'1','area_selecao'=>'1'])->assertRedirect();
-        Http::assertSent(fn($r)=>$r->method()==='POST' && $r['area_ids']===[]);
+        $url='/areas-conhecimento/nova?_ctx='.$ctx;
+        $html=$this->get($url)->assertOk()->assertSee('Disciplinas desta área')->assertSee('name="disciplina_ids[]"',false)->assertSee('name="disciplina_versoes[1]"',false)->getContent();
+        $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
+        $this->assertSame(0,$xp->query('//div[contains(@class,"g-pagina")]//a[normalize-space(.)="Cancelar"]')->length);
+        $this->assertSame(1,$xp->query('//form//a[normalize-space(.)="Cancelar"]')->length);
+        $this->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'Área','ativo'=>'1','disciplinas_selecao'=>'1'])->assertRedirect();
+        Http::assertSent(fn($r)=>$r->method()==='POST' && $r['disciplina_ids']===[]);
         $falhar=true;
-        $this->from('/disciplinas/nova?_ctx='.$ctx.'&origem=propria')->post('/disciplinas?_ctx='.$ctx,['nome'=>'Matemática','ativo'=>'1','area_selecao'=>'1','area_ids'=>[999]])->assertRedirect();
-        $this->get('/disciplinas/nova?_ctx='.$ctx.'&origem=propria')->assertOk()->assertSee('dc1-erro-area_ids')->assertSee('Seleção inválida.');
+        $this->from($url)->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'Área','ativo'=>'1','disciplinas_selecao'=>'1','disciplina_ids'=>[1],'disciplina_versoes'=>[1=>2]])->assertRedirect();
+        $this->get($url)->assertOk()->assertSee('dc1-erro-disciplina_ids')->assertSee('Seleção inválida.')->assertSee('value="1" checked',false);
     }
 
     public function test_catalogo_de_areas_paginado_e_somente_leitura(): void
@@ -139,12 +146,20 @@ class DisciplinasWebTest extends TestCase
         [$ctx,$me]=$this->preparar();
         $this->fake($me,fn()=>Http::response(['data'=>['gerir'=>true,'referencias'=>[],'areas'=>[]]]));
         $html=$this->get('/disciplinas/nova?_ctx='.$ctx.'&origem=propria')->assertOk()->assertSee('Saiba mais')->assertSee('Saiba menos')
-            ->assertSee('sobre disciplinas próprias')->assertSee('sobre situação da disciplina')->assertSee('sobre áreas do conhecimento')
-            ->assertSee('Nenhuma área cadastrada.')->assertSee('name="nome"',false)->assertSee('Adicionar disciplina')->getContent();
+            ->assertSee('sobre disciplinas próprias')->assertSee('sobre situação da disciplina')
+            ->assertDontSee('name="area_ids[]"',false)->assertSee('name="nome"',false)->assertSee('Adicionar disciplina')->getContent();
         $dom=new \DOMDocument; @$dom->loadHTML('<?xml encoding="UTF-8">'.$html); $xp=new \DOMXPath($dom);
-        $this->assertSame(3,$xp->query('//details[contains(@class,"dc1-orientacao")]')->length);
+        $this->assertSame(2,$xp->query('//details[contains(@class,"dc1-orientacao")]')->length);
         $this->assertSame(0,$xp->query('//details[contains(@class,"dc1-orientacao")][@open]')->length);
         $this->assertSame(0,$xp->query('//details[contains(@class,"dc1-orientacao")]//input')->length);
-        $this->assertSame(3,$xp->query('//details[contains(@class,"dc1-orientacao")]/summary')->length);
+        $this->assertSame(2,$xp->query('//details[contains(@class,"dc1-orientacao")]/summary')->length);
+    }
+
+    public function test_detalhe_da_area_prioriza_tabela_e_nao_repete_card_de_metadados(): void
+    {
+        [$ctx,$me]=$this->preparar();
+        $this->fake($me,fn()=>Http::response(['data'=>['area'=>['id'=>8,'nome'=>'Matemática e raciocínio','sigla'=>'MR','ativo'=>true,'disciplinas'=>[$this->disciplina()]],'gerir'=>true]]));
+        $this->get('/areas-conhecimento/8?_ctx='.$ctx)->assertOk()->assertSee('Sigla: MR')->assertSee('Disciplinas desta área')
+            ->assertSee('data-colecao-completa="true"',false)->assertDontSee('aria-label="Dados da área"',false)->assertDontSee('sobre organização desta área');
     }
 }

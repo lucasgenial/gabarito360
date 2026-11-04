@@ -5,7 +5,6 @@
 <x-pagina :titulo="$disciplina?'Editar disciplina':'Adicionar disciplina'">
   <x-slot:sub>Catálogo da escola.</x-slot:sub>
   @include('disciplinas._voltar')
-  <a class="btn btn-ghost" href="{{ $disciplina?route('disciplinas.show',['id'=>$disciplina['id']]+$retorno):route('disciplinas.index',$retorno) }}">Cancelar</a>
 </x-pagina>
 @include('disciplinas._base')
 <div class="dc1-stack">
@@ -40,7 +39,6 @@
     <div class="field"><label for="disciplina-sigla">Sigla <span class="field-help">(opcional)</span></label><input id="disciplina-sigla" class="input" name="sigla" maxlength="20" value="{{ old('sigla',$disciplina['sigla']??'') }}" placeholder="Ex.: MAT" @error('sigla') aria-invalid="true" aria-describedby="dc1-erro-sigla" @enderror>@include('disciplinas._erro',['campo'=>'sigla'])</div>
     <div class="field"><label for="disciplina-ativo">Situação</label><select id="disciplina-ativo" class="select" name="ativo" @error('ativo') aria-invalid="true" aria-describedby="dc1-erro-ativo" @enderror><option value="1" @selected((string)old('ativo',$disciplina['ativo']??1)==='1')>Ativa</option><option value="0" @selected((string)old('ativo',$disciplina['ativo']??1)==='0')>Inativa</option></select>@include('disciplinas._erro',['campo'=>'ativo'])<p class="field-help">Histórico preservado.</p><x-orientacao assunto="situação da disciplina"><p>Para inativar, encerre ou cancele as atribuições abertas.</p></x-orientacao></div>
   </div>
-  @include('disciplinas._areas')
   <div class="dc1-acoes"><button class="btn btn-primary" type="submit" @disabled(session('conflito_dc1'))>{{ $disciplina?'Salvar alterações':'Adicionar disciplina' }}</button><a class="btn btn-ghost" href="{{ $disciplina?route('disciplinas.show',['id'=>$disciplina['id']]+$retorno):route('disciplinas.index',$retorno) }}">Cancelar</a></div>
 </form>
 @endif
