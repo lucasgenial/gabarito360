@@ -57,7 +57,7 @@ class GabaritoController extends Controller
 
     public function salvar(Request $request, int $provaId): JsonResponse
     {
-        $prova = Escopo::provaComConteudo($request->user(), $provaId);
+        $prova = Escopo::provaEditavel($request->user(), $provaId);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
@@ -125,7 +125,7 @@ class GabaritoController extends Controller
     {
         $usuario = $request->user();
 
-        $prova = Escopo::provaComConteudo($request->user(), $provaId);
+        $prova = Escopo::provaEditavel($request->user(), $provaId);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }

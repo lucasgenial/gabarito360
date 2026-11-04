@@ -51,7 +51,11 @@ with (recibo/'banco-antes.sql.gz').open('wb') as dest:
  assert proc.wait()==0,'Backup próprio falhou.'
 for app in ['api','web']:
  with tarfile.open(recibo/(app+'-arquivos-antes.tar.gz'),'w:gz') as tf:tf.add(BASE/'shared'/app/'storage/app',arcname='app')
-manifest_php="""require 'vendor/autoload.php';$a=require 'bootstrap/app.php';$a->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();$r=[];foreach(['alunos','turmas','provas','prova_turmas','gabaritos','gabarito_questoes','cartoes','cartao_respostas','notas'] as $t){$rows=Illuminate\\Support\\Facades\\DB::table($t)->get()->map(function($v){$v=(array)$v;ksort($v);return json_encode($v,JSON_THROW_ON_ERROR);})->all();sort($rows,SORT_STRING);$r[$t]=['total'=>count($rows),'sha256'=>hash('sha256',implode("\\n",$rows))];}echo json_encode($r,JSON_THROW_ON_ERROR);"""
+manifest_php="""require 'vendor/autoload.php';$a=require 'bootstrap/app.php';$a->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();$r=[];foreach(['alunos','turmas','provas','prova_turmas','gabaritos','gabarito_questoes','cartoes','cartao_respostas','notas'] as $t){$rows=Illuminate\\Support\\Facades\\DB::table($t)->get()->map(function($v)use($t){$v=(array)$v;if($t==='provas')unset($v['perfil_criacao']);ksort($v);return json_encode($v,JSON_THROW_ON_ERROR);})->all();sort($rows,SORT_STRING);$r[$t]=['total'=>count($rows),'sha256'=>hash('sha256',implode("\\n",$rows))];}echo json_encode($r,JSON_THROW_ON_ERROR);"""
+colunas_provas=run(['php','-r',"require 'vendor/autoload.php';$a=require 'bootstrap/app.php';$a->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();echo json_encode(Illuminate\\Support\\Facades\\Schema::getColumnListing('provas'));"],cwd=anterior/'apps/api')
+if 'perfil_criacao' in json.loads(colunas_provas):
+ manifest_php=manifest_php.replace("if($t==='provas')unset($v['perfil_criacao']);",'')
+(recibo/'provas-colunas-antes.json').write_text(colunas_provas)
 antes=run(['php','-r',manifest_php],cwd=anterior/'apps/api');(recibo/'academico-antes.json').write_text(antes)
 env={**os.environ,'APP_CONFIG_CACHE':str(recibo/'config-migration.php'),'DB_USERNAME':'root','DB_PASSWORD':'','DB_HOST':'localhost','DB_SOCKET':'/run/mysqld/mysqld.sock'}
 (recibo/'migrations.log').write_text(run(['php','artisan','migrate','--force'],cwd=release/'apps/api',env=env))

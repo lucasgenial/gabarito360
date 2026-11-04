@@ -24,6 +24,12 @@ class SelecaoResultadosWebTest extends TestCase
     public function test_selecao_contexto_csrf_escape_e_paginacao(): void
     {
         [$ctx,$me]=$this->preparar(); Http::fake(function($r) use($me) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-resultados'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->catalogo()]);
         });
@@ -57,6 +63,12 @@ class SelecaoResultadosWebTest extends TestCase
     public function test_conexao_indisponivel_nao_vira_resultado_vazio(): void
     {
         [$ctx,$me]=$this->preparar(); Http::fake(function($r) use($me) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             if(str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$me]);
             throw new \Illuminate\Http\Client\ConnectionException('ALUNO-PRIVADO');
         });

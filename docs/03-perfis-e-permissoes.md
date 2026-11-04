@@ -1,5 +1,7 @@
 # 03 — Perfis e Permissões (catálogo oficial)
 
+Complemento de autoria confirmado em03/11/2026 (doc132): professor vê as próprias provas e provas institucionais criadas pela coordenação/direção apenas nas turmas atribuídas a ele. Compartilhar turma não libera prova de outro professor. Prova institucional não pode ser copiada nem editada por professor; correção e resultados continuam limitados às suas turmas. Coordenador/diretor escolar mantêm visão de todas as provas e turmas da sua escola. O perfil de criação é registrado e não segue mudanças futuras de função da pessoa.
+
 Complemento CP1 aprovado em03/11/2026: prova.duplicar_propria é padrão somente para professor e professor_autonomo; exige contexto aceito/vigente, autoria própria e as capacidades de prova/gabarito descritas no doc118. Não concede cópia de colega ao coordenador (CP2 posterior), nem transferência institucional. Planos115/116 prevalecem nas orientações posteriores de produto.
 
 > **Versão 2 — 30/10/2026** (etapa 1 do `docs/21-plano-perfis-permissoes-e-telas.md`).

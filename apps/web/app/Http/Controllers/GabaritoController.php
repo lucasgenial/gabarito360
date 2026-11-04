@@ -18,6 +18,7 @@ class GabaritoController extends Controller
         }
 
         $prova      = $resp->json('data');
+        abort_if(($prova['pode_editar'] ?? true) === false,403,'Esta prova é institucional. A edição do gabarito cabe à coordenação ou direção.');
         $gabResp    = $this->api->get("/v1/provas/{$provaId}/gabarito");
         $questoes   = $gabResp->successful() ? ($gabResp->json('data.questoes') ?? []) : [];
         $publicado  = $gabResp->successful() ? (bool) $gabResp->json('data.publicado') : false;

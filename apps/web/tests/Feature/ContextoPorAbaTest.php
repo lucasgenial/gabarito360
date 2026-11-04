@@ -120,7 +120,10 @@ class ContextoPorAbaTest extends TestCase
     public function test_menu_e_topo_usam_contexto_e_logout_usa_identidade(): void
     {
         $id = ContextoWeb::criar($this->dados('contextual'));
-        $this->fingir(['*' => Http::response(['data' => $this->dados('omitido')])]);
+        $this->fingir(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/vinculos') ? [
+            ['id'=>1,'perfil'=>'professor','espaco'=>['id'=>1,'tipo'=>'escola','nome'=>'Escola fictícia']],
+            ['id'=>2,'perfil'=>'professor','espaco'=>['id'=>2,'tipo'=>'escola','nome'=>'Outra escola']],
+        ] : $this->dados('omitido')]));
         $this->get('/referencia-visual?_ctx='.$id)->assertOk()->assertSee('Trocar vínculo')->assertSee('Escola fictícia')->assertDontSee('contextual');
         $this->post('/logout')->assertRedirect('/login')->assertSessionMissing('auth_token');
         Http::assertSent(fn ($r) => str_ends_with($r->url(), '/auth/logout') && $r->hasHeader('Authorization', 'Bearer identidade'));

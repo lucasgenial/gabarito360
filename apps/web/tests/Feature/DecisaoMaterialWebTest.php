@@ -34,6 +34,12 @@ class DecisaoMaterialWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']); $code=str_repeat('b',64);
         Http::fake(function($r) use($me,$code) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-material'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'
                 ?['codigo'=>$code,'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino'=>['nome'=>'Meu espaço']]:$this->catalogo())]);
@@ -48,6 +54,12 @@ class DecisaoMaterialWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar(); $code=str_repeat('b',64); $prev=$this->previa()+['conteudo_digest'=>str_repeat('c',64)];
         Http::fake(function($r) use($me,$prev) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             if(str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$me]);
             return Http::response(['data'=>str_ends_with($r->url(),'/preparar')?['previa'=>$prev,'recebimento'=>[
                 'destino'=>['nome'=>'Destino <script>segredo</script>','tipo'=>'pessoal'],'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino_digest'=>str_repeat('d',64)]]:['lote_id'=>$this->decisao()['lote_id']]]);
@@ -64,7 +76,13 @@ class DecisaoMaterialWebTest extends TestCase
     public function test_revisao_e_duas_aprovacoes_sao_acoes_separadas(): void
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_origem','copia.autorizar_destino']); $d=$this->decisao(); $id=$d['lote_id'];
-        Http::fake(function($r) use($me,&$d) { return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
+        Http::fake(function($r) use($me,&$d) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+ return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
         $this->get('/copias/materiais/lotes/'.$id.'?lado=origem&_ctx='.$ctx)->assertOk()->assertSee('Registrar revisão')->assertDontSee('Autorizar saída')->assertDontSee('<script>segredo</script>',false);
         $this->post('/copias/materiais/lotes/'.$id.'/revisar',['_ctx'=>$ctx,'conteudo_digest'=>$d['conteudo_digest'],'sem_dados_pessoais'=>1])->assertRedirect();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/aprovar'));

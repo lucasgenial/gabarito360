@@ -8,6 +8,14 @@ class Prova extends Model
 {
     protected $table = 'provas';
 
+    // A API projeta somente o nome; não serializar a conta do autor.
+    protected $hidden = ['autor'];
+
+    public function autor()
+    {
+        return $this->belongsTo(Usuario::class, 'criado_por');
+    }
+
     protected $fillable = [
         'formato_avaliacao',
         'escola_id', 'criado_por', 'titulo', 'disciplina', 'serie',

@@ -30,6 +30,12 @@ class SelecaoMaterialWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar();
         Http::fake(function($r) use($me) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-material'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'?$this->previa():$this->catalogo())]);
         });
@@ -58,6 +64,12 @@ class SelecaoMaterialWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar();
         Http::fake(function($r) use($me) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             if (str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$me]);
             throw new \Illuminate\Http\Client\ConnectionException('SEGREDO-CONEXAO');
         });

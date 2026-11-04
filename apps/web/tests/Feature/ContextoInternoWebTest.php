@@ -47,6 +47,12 @@ class ContextoInternoWebTest extends TestCase
     {
         $id = ContextoWeb::criar($this->dados());
         Http::fake(function ($r) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer token-interno-secreto'));
             $this->assertStringEndsWith('/auth/me',$r->url());
             return Http::response(['data'=>$this->dados()]);
@@ -64,6 +70,12 @@ class ContextoInternoWebTest extends TestCase
         $b = ContextoWeb::criar($dev);
         $revogado = false;
         Http::fake(function ($r) use (&$revogado,$dev) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             if ($r->hasHeader('Authorization','Bearer token-dev')) return Http::response(['data'=>$dev]);
             return $revogado ? Http::response([],403) : Http::response(['data'=>$this->dados()]);
         });
