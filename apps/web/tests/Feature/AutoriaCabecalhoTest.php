@@ -2,6 +2,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AutoriaCabecalhoTest extends TestCase
@@ -10,6 +11,10 @@ class AutoriaCabecalhoTest extends TestCase
     {
         parent::setUp();
         $this->withSession(['auth_token'=>'ficticio','auth_nome'=>'Pessoa fictícia', 'auth_vinculos'=>true]);
+        Http::fake(['*/v1/auth/vinculos'=>Http::response(['data'=>[
+            ['id'=>1,'perfil'=>'professor','espaco'=>['id'=>1,'tipo'=>'escola','nome'=>'Escola de teste']],
+            ['id'=>2,'perfil'=>'professor','espaco'=>['id'=>2,'tipo'=>'escola','nome'=>'Outra escola de teste']],
+        ]])]);
         Route::middleware('web')->get('/teste-cabecalho', function () {
             $interno=request('tipo')==='interno';
             $perfil=$interno?'suporte':(request('tipo')==='pessoal'?'professor_autonomo':(request('tipo')==='professor'?'professor':'coordenador'));

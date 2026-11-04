@@ -48,17 +48,18 @@
       <span class="logo">G360</span> <span class="topo-nome">Gabarito360</span>
     </a>
 
-    @if($vinculoAtual)
+    <div class="header-right">
+    @if($vinculoAtual && $opcoesTroca['disponivel'])
       @php
         $nomeContexto = \App\Support\Acesso::interno() ? 'Equipe Gabarito360' : $vinculoAtual['espaco']['nome'];
         $trocaContexto = \App\Support\Acesso::interno() ? 'Trocar acesso' : 'Trocar vínculo';
       @endphp
-      <a class="contexto-trocar" href="{{ route('vinculos.index', ['trocar' => 1]) }}" data-sem-contexto
+      <button type="button" class="contexto-trocar" id="contexto-trocar" hidden aria-haspopup="dialog" aria-controls="troca-contexto-modal" data-alternativa="{{ route('vinculos.index',['trocar'=>1]) }}"
          aria-label="{{ $nomeContexto }}. {{ \App\Support\Acesso::rotulo() }}. {{ $trocaContexto }}" title="{{ $trocaContexto }} — {{ $nomeContexto }}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3"/></svg>
-      </a>
+      </button>
+      <noscript><a class="contexto-trocar" href="{{ route('vinculos.index',['trocar'=>1]) }}" data-sem-contexto aria-label="{{ $trocaContexto }}" title="{{ $trocaContexto }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3"/></svg></a></noscript>
     @endif
-    <div class="header-right">
       @unless($vinculoAtual)
       @hasSection('context-badge')
         @yield('context-badge')
@@ -99,7 +100,7 @@
 {{-- Conteúdo principal --}}
 <main class="container app-conteudo" id="conteudo-principal">
   @if($vinculoAtual)
-    <div class="contexto-conteudo"><x-contexto-ativo :contexto="$vinculoAtual" /></div>
+    <div class="contexto-conteudo"><x-contexto-ativo :contexto="$vinculoAtual" :erro-troca="$opcoesTroca['erro']" /></div>
   @endif
   {{-- Breadcrumb --}}
   @hasSection('breadcrumb')
@@ -165,6 +166,7 @@ document.getElementById('menu-recolher').addEventListener('click', function () {
 });
 </script>
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
+@if($vinculoAtual && $opcoesTroca['disponivel']) @include('layouts._troca-contexto') @endif
 <script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
 <script src="{{ asset('js/tabelas.js') }}?v={{ @filemtime(public_path('js/tabelas.js')) }}"></script>
 @stack('scripts')

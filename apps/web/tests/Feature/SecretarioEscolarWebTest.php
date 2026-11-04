@@ -19,6 +19,12 @@ class SecretarioEscolarWebTest extends TestCase
         $turma=['id'=>1,'nome'=>'Turma fictícia','serie'=>'4','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'escola_nome'=>'Escola fictícia','total_alunos'=>1,
             'alunos'=>[['id'=>1,'nome'=>'Aluno fictício','matricula'=>'A1','ativo'=>true]]];
         Http::fake(function ($r) use ($dados,$turma) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer token-escolar'));
             $path=parse_url($r->url(),PHP_URL_PATH);
             return match ($path) {

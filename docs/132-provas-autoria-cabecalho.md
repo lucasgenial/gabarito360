@@ -10,6 +10,12 @@ Decisão final aprovada pelo usuário: **Meu espaço** é o título do bloco rec
 
 A troca permanece na barra superior por **ícone de44px em todas as resoluções**, sem texto visível. Legenda nativa e nome acessível identificam Trocar vínculo ou Trocar acesso e o contexto ativo. Aplicação pelo layout compartilhado e um único componente. Menu da conta usa botão semântico, estado expandido, Escape e retorno de foco.
 
+O ícone só existe quando a identidade possui alternativa distinta do acesso atual. A lista é obtida no servidor pela identidade, sem reaproveitar o token contextual para enumerar vínculos e sem transmitir tokens à página. Com apenas o acesso atual, nem ícone nem modal são renderizados. Em falha de consulta, não inventar disponibilidade; orientar atualização dentro de Meu espaço.
+
+Ao clicar, abre um modal nativo com nome do espaço, perfil e marcador Atual sem ação. As alternativas têm Entrar explícito; a seleção usa os endpoints existentes e é revalidada pela API. JSON devolve somente URL com novo handle vinculado à sessão, sem token. O handle da outra aba continua válido. CSRF e formulários sem propagação do contexto anterior permanecem. Sem JavaScript, existe alternativa para a página de seleção.
+
+Escape/Fechar retornam foco ao ícone. A solicitação tem AbortController e limite20s; os controles são restaurados no finally e o foco vai para o erro. Falha de rede, resposta inválida ou5xx informa confirmação incerta, sem afirmar que a troca foi recusada. Erros confirmados de seleção permanecem no modal. Não há repetição automática da operação.
+
 
 | Entrega | Critério | Situação ao preparar implementação |
 |---|---|---|
@@ -23,8 +29,10 @@ Migration aditiva: perfil_criacao registra a função usada na criação e não 
 
 ## Validação e parecer
 
-Suíte API local:677 aprovados/24 ignorados por exigirem MariaDB; alvos finais de escopo, consulta, cópia e fila43 testes/455 asserções. O CI acrescenta ProvasAutoriaTest à suíte MariaDB. Web final141 testes/1294 asserções, incluindo resumo com apenas Meu espaço, fechado inicialmente, campos por tipo e ações institucionais ausentes. Sintaxe JavaScript e Python conferida. O head2d733cf passou nos cinco checks antes da última composição visual; a versão final executa seus próprios checks.
+Suíte API local:677 aprovados/24 ignorados por exigirem MariaDB; alvos finais de escopo, consulta, cópia e fila43 testes/455 asserções. O CI acrescenta ProvasAutoriaTest à suíte MariaDB. Web final148 testes/1429 asserções, incluindo vínculo único/múltiplo, interno, CSRF, escape, lookup indisponível, erro de seleção, confirmação incerta e preservação da outra aba sem exposição de tokens. Os mocks dos módulos anteriores agora distinguem explicitamente a consulta de identidade das operações contextuais. Sintaxe JavaScript e Python conferida. Os heads2d733cf e5258826 passaram nos cinco checks antes do último modal; a versão final executa seus próprios checks.
 
 O revisor independente de UI/UX e Product Design aprovou explicitamente a configuração final após reabrir seis capturas atuais: estados aberto/fechado, temas claro/escuro, escola com nome longo em320px e espaço pessoal. Resumo textual sem aparência de botão, duas colunas e nomenclatura adequados; expansão por teclado conferida. Parecer também preserva aprovação da autoria e da orientação do rascunho institucional. Este parecer substitui os desenhos intermediários, não comprova integração API por imagens, não é certificação WCAG integral e não autoriza produção.
 
 As prévias usam dados fictícios fora do repositório; integração e contexto por aba são conferidos separadamente. Nenhum stub de API ou JavaScript de preview integra esta entrega.
+
+Revisão adicional independente do modal aprovada após corrigir espera indefinida e foco: desktop/320px, tema escuro com modal aberto, vínculo único sem ícone, erro de seleção e limite20s. Ensaio no Chrome com resposta local simulada de22s confirmou mensagem de confirmação incerta, foco em troca-contexto-erro, Fechar reabilitado e aria-busy removido. Esta aprovação adicional resolve os bloqueios do modal e preserva o parecer da autoria/rascunho.

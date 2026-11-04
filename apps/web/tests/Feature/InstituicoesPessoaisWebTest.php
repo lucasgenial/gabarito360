@@ -21,6 +21,12 @@ class InstituicoesPessoaisWebTest extends TestCase
     public function test_fluxo_busca_confirmacao_lista_e_contexto_sem_injetar_escopo(): void {
         [$ctx,$me]=$this->preparar();
         Http::fake(function($r)use($me){
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-pessoal'));
             $path=parse_url($r->url(),PHP_URL_PATH);
             $d=match($path){
@@ -41,6 +47,12 @@ class InstituicoesPessoaisWebTest extends TestCase
     public function test_busca_combinada_recupera_422_preservando_valores_sem_enviar_modo_ou_contexto_a_api(): void {
         [$ctx,$me]=$this->preparar();
         Http::fake(function($r)use($me){
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $path=parse_url($r->url(),PHP_URL_PATH);
             if($path==='/api/v1/auth/me')return Http::response(['data'=>$me]);
             if($path==='/api/v1/catalogo/ufs')return Http::response(['data'=>['itens'=>[['sigla'=>'BA','nome'=>'Bahia','codigo_ibge'=>29]]]]);
