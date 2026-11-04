@@ -31,6 +31,12 @@ class PedidosTitularesWebTest extends TestCase
         Http::swap(new \Illuminate\Http\Client\Factory);
         Http::preventStrayRequests();
         Http::fake(function($r) use ($perfil,$post){
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer token-interno'));
             if(str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$this->contexto($perfil)]);
             if($r->method()==='POST') return $post ? $post($r) : Http::response(['data'=>['referencia'=>$this->ref,'situacao'=>'em_verificacao','versao'=>3]]);

@@ -20,6 +20,7 @@
 <body class="area-logada {{ config('release.sha') ? 'com-release' : '' }} @yield('tela')">
 
 <div class="app-casca">
+@php $vinculoAtual = \App\Support\ContextoWeb::atual(); @endphp
 
 {{-- Menu lateral (a partir de 1024 px), montado pelas permissões efetivas (App\Support\Acesso) --}}
 <aside class="app-lateral" aria-label="Menu principal">
@@ -44,26 +45,34 @@
 <header class="app-header {{ \App\Support\ContextoWeb::id() ? 'com-vinculo' : '' }}">
   <div class="container">
     <a class="brand topo-marca" href="{{ route('painel') }}">
-      <span class="logo">G360</span> Gabarito360
+      <span class="logo">G360</span> <span class="topo-nome">Gabarito360</span>
     </a>
 
     <div class="header-right">
-      @if($vinculoAtual = \App\Support\ContextoWeb::atual())
-      <a class="vinculo-topo" href="{{ route('vinculos.index', ['trocar' => 1]) }}" data-sem-contexto>
-        <strong>{{ \App\Support\Acesso::interno() ? 'Equipe interna · Gabarito360' : $vinculoAtual['espaco']['nome'] }}</strong><span>{{ \App\Support\Acesso::rotulo() }} · {{ \App\Support\Acesso::interno() ? 'Trocar acesso' : 'Trocar vínculo' }}</span>
-      </a>
-      @endif
+    @if($vinculoAtual && $opcoesTroca['disponivel'])
+      @php
+        $nomeContexto = \App\Support\Acesso::interno() ? 'Equipe Gabarito360' : $vinculoAtual['espaco']['nome'];
+        $trocaContexto = \App\Support\Acesso::interno() ? 'Trocar acesso' : 'Trocar vínculo';
+      @endphp
+      <button type="button" class="contexto-trocar" id="contexto-trocar" hidden aria-haspopup="dialog" aria-controls="troca-contexto-modal" data-alternativa="{{ route('vinculos.index',['trocar'=>1]) }}"
+         aria-label="{{ $nomeContexto }}. {{ \App\Support\Acesso::rotulo() }}. {{ $trocaContexto }}" title="{{ $trocaContexto }} — {{ $nomeContexto }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3"/></svg>
+      </button>
+      <noscript><a class="contexto-trocar" href="{{ route('vinculos.index',['trocar'=>1]) }}" data-sem-contexto aria-label="{{ $trocaContexto }}" title="{{ $trocaContexto }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3"/></svg></a></noscript>
+    @endif
+      @unless($vinculoAtual)
       @hasSection('context-badge')
         @yield('context-badge')
       @else
         <span class="badge badge-info badge-dot">{{ \App\Support\Acesso::rotulo() }}</span>
       @endif
+      @endunless
       <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
       <div class="user-menu-container">
-        <div class="avatar" id="user-menu-trigger">
+        <button type="button" class="avatar" id="user-menu-trigger" aria-label="Abrir opções da conta" aria-expanded="false" aria-controls="user-menu">
           {{ strtoupper(substr(session('auth_nome', 'U'), 0, 2)) }}
-        </div>
-        <div class="user-menu" id="user-menu">
+        </button>
+        <div class="user-menu" id="user-menu" hidden>
           <div class="user-menu-header">
             <div class="user-name">{{ session('auth_nome') }}</div>
             <div class="user-role">{{ \App\Support\Acesso::rotulo() }} · {{ session('auth_email') }}</div>
@@ -79,9 +88,7 @@
             <hr>
             <form method="POST" action="{{ route('logout') }}">
               @csrf
-              <button type="submit" style="width:100%;background:none;border:none;text-align:left;padding:0;cursor:pointer;">
-                <a class="logout" href="#" onclick="this.closest('form').submit(); return false;">Sair</a>
-              </button>
+              <button type="submit" class="logout">Sair</button>
             </form>
           </div>
         </div>
@@ -92,6 +99,9 @@
 
 {{-- Conteúdo principal --}}
 <main class="container app-conteudo" id="conteudo-principal">
+  @if($vinculoAtual)
+    <div class="contexto-conteudo"><x-contexto-ativo :contexto="$vinculoAtual" :erro-troca="$opcoesTroca['erro']" /></div>
+  @endif
   {{-- Breadcrumb --}}
   @hasSection('breadcrumb')
   <div class="breadcrumb">
@@ -156,6 +166,7 @@ document.getElementById('menu-recolher').addEventListener('click', function () {
 });
 </script>
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
+@if($vinculoAtual && $opcoesTroca['disponivel']) @include('layouts._troca-contexto') @endif
 <script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
 <script src="{{ asset('js/tabelas.js') }}?v={{ @filemtime(public_path('js/tabelas.js')) }}"></script>
 @stack('scripts')

@@ -119,6 +119,7 @@ class ConsultasEspacosTest extends TestCase
     public function test_professor_e_aluno_nao_recebem_colegas_fora_do_escopo(): void
     {
         $p = $this->usuario('professor'); $this->escopo($p, 'escola', 1); $this->escopo($p, 'turma', 1);
+        DB::table('provas')->where('id',1)->update(['perfil_criacao'=>'coordenador']);
         Sanctum::actingAs($p);
         $this->getJson('/api/v1/dashboard/professor')->assertOk()->assertJsonCount(1, 'data.ranking_top5');
         $this->getJson('/api/v1/relatorios/prova/2')->assertNotFound();
@@ -197,7 +198,7 @@ class ConsultasEspacosTest extends TestCase
         $this->assertDatabaseHas('escolas', ['id' => 1, 'cidade' => 'Nova Cidade']);
     }
 
-    public function test_professor_na_prova_compartilhada_nao_ve_outra_turma_nem_seus_agregados(): void
+    public function test_professor_na_propria_prova_nao_ve_outra_turma_nem_seus_agregados(): void
     {
         $meta = ['espaco_id' => $this->espacos[1]['escola']];
         DB::table('turmas')->insert(['id' => 3, 'escola_id' => 1, 'nome' => 'Turma alheia', 'serie' => '3', 'turno' => 'tarde', 'ano_letivo' => 2026] + $meta);
@@ -206,6 +207,7 @@ class ConsultasEspacosTest extends TestCase
         DB::table('cartoes')->insert(['id' => 3, 'prova_id' => 1, 'aluno_id' => 3, 'status' => 'lido'] + $meta);
         DB::table('notas')->insert(['cartao_id' => 3, 'prova_id' => 1, 'aluno_id' => 3, 'turma_id' => 3, 'acertos' => 0, 'total_questoes' => 1, 'nota_final' => 0, 'status_aprovacao' => 'recuperacao'] + $meta);
         $p = $this->usuario('professor'); $this->escopo($p, 'escola', 1); $this->escopo($p, 'turma', 1); Sanctum::actingAs($p);
+        DB::table('provas')->where('id',1)->update(['criado_por'=>$p->id]);
         $this->getJson('/api/v1/relatorios/prova/1')->assertOk()->assertJsonCount(1, 'data.alunos')->assertJsonPath('data.kpis.media', 8);
         $this->getJson('/api/v1/provas')->assertOk()->assertDontSee('Turma alheia')->assertJsonPath('data.provas.0.total_alunos', 1);
         $this->getJson('/api/v1/dashboard/professor')->assertOk()->assertJsonPath('data.provas.0.total_alunos', 1);

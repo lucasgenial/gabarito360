@@ -34,6 +34,12 @@ class DecisaoResultadosWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']); $code=str_repeat('a',64);
         Http::fake(function($r) use($me,$code) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-resultados'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'?[
                 'codigo'=>$code,'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino'=>['nome'=>'Destino']]:['espacos'=>[['id'=>5,'nome'=>'Destino']],'espaco_id'=>5])]);
@@ -63,7 +69,13 @@ class DecisaoResultadosWebTest extends TestCase
     public function test_evidencia_guarda_preservacao_e_decisoes_distintas(): void
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_origem','copia.autorizar_destino']); $d=$this->decisao(); $id=$d['lote_id'];
-        Http::fake(function($r) use($me,&$d) { return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
+        Http::fake(function($r) use($me,&$d) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+ return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
         $this->get('/copias/resultados/lotes/'.$id.'?lado=origem&_ctx='.$ctx)->assertOk()->assertSee('name="documento"',false)->assertSee('name="guarda"',false)
             ->assertSee('name="preservacao"',false)->assertSee('name="legado_reconhecido"',false)->assertSee('não substitui o prazo de guarda contratual')->assertDontSee('Autorizar saída dos resultados');
         $this->post('/copias/resultados/lotes/'.$id.'/evidencia',['_ctx'=>$ctx,'conteudo_digest'=>$d['conteudo_digest'],

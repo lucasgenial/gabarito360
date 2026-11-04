@@ -130,14 +130,27 @@ function initUserMenu() {
   var trigger = document.getElementById('user-menu-trigger');
   var menu = document.getElementById('user-menu');
   if (!trigger || !menu) return;
+  function abrir(sim, devolverFoco) {
+    menu.hidden = !sim;
+    menu.classList.toggle('active', sim);
+    trigger.setAttribute('aria-expanded', sim ? 'true' : 'false');
+    trigger.setAttribute('aria-label', sim ? 'Fechar opções da conta' : 'Abrir opções da conta');
+    if (devolverFoco) trigger.focus();
+  }
   trigger.addEventListener('click', function (e) {
     e.stopPropagation();
-    menu.classList.toggle('active');
+    abrir(menu.hidden, false);
   });
   document.addEventListener('click', function (e) {
-    if (!menu.contains(e.target) && e.target !== trigger) {
-      menu.classList.remove('active');
+    if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+      abrir(false, false);
     }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !menu.hidden) { e.preventDefault(); abrir(false, true); }
+  });
+  document.addEventListener('focusin', function (e) {
+    if (!menu.hidden && !menu.parentElement.contains(e.target)) abrir(false, false);
   });
 }
 

@@ -37,6 +37,12 @@ class DecisaoCadastroWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']); $code=str_repeat('a',64);
         Http::fake(function($r) use($me,$code) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-cadastro'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'?[
                 'codigo'=>$code,'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino'=>['nome'=>'Escola']]:$this->catalogo())]);
@@ -62,7 +68,13 @@ class DecisaoCadastroWebTest extends TestCase
     public function test_evidencia_e_saida_sao_distintas_documento_nao_vai_ao_flash(): void
     {
         [$ctx,$me]=$this->preparar(); $d=$this->decisao(); $id=$d['lote_id'];
-        Http::fake(function($r) use($me,&$d) { return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
+        Http::fake(function($r) use($me,&$d) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+ return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
         $this->get('/copias/cadastros/lotes/'.$id.'?lado=origem&_ctx='.$ctx)->assertOk()->assertSee('Registrar evidência')->assertSee('name="_token"',false)
             ->assertSee($ctx)->assertDontSee('Autorizar saída do cadastro')->assertDontSee('<script>segredo</script>',false);
         $this->post('/copias/cadastros/lotes/'.$id.'/evidencia',['_ctx'=>$ctx,'conteudo_digest'=>$d['conteudo_digest'],'documento'=>'DOCUMENTO-RESTRITO',
@@ -80,7 +92,13 @@ class DecisaoCadastroWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']); $d=$this->decisao('destino',true); $id=$d['lote_id'];
         $d['saida_valida_ate']=now()->utc()->addMinutes(10)->format('Y-m-d H:i:s');
-        Http::fake(function($r) use($me,&$d) { return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
+        Http::fake(function($r) use($me,&$d) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+ return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
         $this->get('/copias/cadastros/lotes/'.$id.'?lado=destino&_ctx='.$ctx)->assertOk()->assertSee('Conferência no destino')->assertSee('Autorizar entrada do cadastro')
             ->assertSee('name="conciliacao_digest"',false)->assertDontSee('name="documento"',false)->assertDontSee('Autorizar saída do cadastro');
         $this->post('/copias/cadastros/lotes/'.$id.'/aprovar',['_ctx'=>$ctx,'lado'=>'destino','conteudo_digest'=>$d['conteudo_digest'],
