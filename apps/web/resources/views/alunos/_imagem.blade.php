@@ -12,8 +12,15 @@
  @csrf
  <fieldset class="imagem-modal-tipos"><legend class="sr-only">Escolha a imagem</legend><label><input type="radio" name="tipo" value="avatar"> Avatar</label><label><input type="radio" name="tipo" value="foto"> Foto</label></fieldset>
  <div id="imagem-aluno-avatares"><x-seletor-avatar :direto="true" titulo="Escolha um avatar" :nome="$aluno['nome']??old('nome','Novo aluno')" :avatar-id="$imagemInicial['avatar_id']" preview-id="imagem-aluno-avatar-preview" /></div>
- <div id="imagem-aluno-foto" class="field"><div class="imagem-modal-acoes"><button type="button" class="btn btn-secondary" data-camera>Tirar foto</button><button type="button" class="btn btn-secondary" data-arquivo>Escolher arquivo</button></div><input hidden type="file" id="imagem-aluno-arquivo" name="foto" accept="image/jpeg,image/png,image/webp"><input hidden type="file" id="imagem-aluno-camera" accept="image/jpeg,image/png,image/webp" capture="user"><p class="field-help">A câmera depende do celular e do navegador. Você também pode escolher um arquivo; no computador, ambas as opções podem abrir o seletor.</p><p class="field-help">JPG, PNG ou WebP, até 2 MB. A imagem será quadrada e centralizada.</p><details class="field-help"><summary>Limites da imagem</summary><p>Até 12 megapixels e 4096 pixels por lado.</p></details></div>
- <div class="imagem-modal-acoes"><button class="btn btn-secondary" id="imagem-aluno-cancelar" type="button">Cancelar</button><button class="btn btn-primary" id="imagem-aluno-salvar" type="submit" disabled>{{ $rascunho ? 'Usar esta imagem' : 'Salvar imagem' }}</button></div>
+ <div id="imagem-aluno-foto" class="field">
+ <div id="imagem-aluno-origem" class="imagem-modal-acoes foto-origem"><button type="button" class="btn btn-secondary" data-camera>Tirar foto</button><button type="button" class="btn btn-secondary" data-arquivo>Escolher arquivo</button></div>
+ <input hidden type="file" id="imagem-aluno-arquivo" name="foto" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,.dng">
+ <input hidden type="file" id="imagem-aluno-camera" accept="image/*" capture="user">
+ <p class="field-help">A foto será ajustada e compactada antes de enviar. A câmera depende do celular e do navegador.</p>
+ <x-preparo-foto id="imagem-aluno" />
+ <details class="field-help"><summary>Formatos e limites</summary><p>Fotos de até 32 MB e 48 megapixels. JPG, PNG e WebP; HEIC/HEIF são convertidos. RAW/DNG exige uma prévia JPG incorporada compatível. Se não houver, escolha a versão JPG/HEIC ou use o modo padrão da câmera. O original não é enviado nem armazenado.</p></details>
+ </div>
+ <div class="imagem-modal-acoes imagem-modal-rodape"><button class="btn btn-secondary" id="imagem-aluno-cancelar" type="button">Cancelar</button><button class="btn btn-primary" id="imagem-aluno-salvar" type="submit" disabled>{{ $rascunho ? 'Usar esta imagem' : 'Salvar imagem' }}</button></div>
  </form>
 </dialog>
 <script>
@@ -23,10 +30,11 @@
  var camera=document.getElementById('imagem-aluno-camera');
  form.querySelector('[data-camera]').addEventListener('click',function(){camera.click();});
  form.querySelector('[data-arquivo]').addEventListener('click',function(){arquivo.click();});
- camera.addEventListener('change',function(){if(camera.files.length){arquivo.files=camera.files;erro.hidden=true;atualizar();}});
+
  var preview=document.getElementById('imagem-aluno-preview'),galeria=document.getElementById('imagem-aluno-avatares'),foto=document.getElementById('imagem-aluno-foto');
  var atual=@json($imagemInicial),rascunho=@json($rascunho),origem=null,ocupado=false,blob=null,arquivoPreparado=null;
  var cadastro=document.getElementById('cadastro-aluno');
+ var editor=new G360PreparoFoto({input:arquivo,camera:camera,root:document.getElementById('imagem-aluno-editor'),error:mostrarErro,change:atualizar,start:function(){cancelar.textContent='Cancelar';erro.hidden=true;sucesso.hidden=true;}});
  function renderizar(local,d,tamanho){
   var span=document.createElement('span');span.className='avatar-aluno avatar-aluno--azul avatar-aluno--'+tamanho;span.setAttribute('aria-hidden','true');
   if(d.tem_foto&&d.foto_url){var url=new URL(d.foto_url,location.href);if(url.origin!==location.origin&&url.protocol!=='blob:')throw new Error('Imagem indisponível.');var img=document.createElement('img');img.src=url.href;img.alt='';img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:inherit;';span.append(img);}
@@ -39,13 +47,14 @@
  function atualizar(){
   var ehFoto=tipo()==='foto',f=arquivo.files[0],valido=true;galeria.hidden=ehFoto;foto.hidden=!ehFoto;arquivo.disabled=!ehFoto;form.querySelectorAll('[name="avatar_id"]').forEach(function(i){i.disabled=ehFoto;});
   if(blob){URL.revokeObjectURL(blob);blob=null;}
-  if(ehFoto&&f){valido=['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=2097152;if(!valido)mostrarErro('Escolha JPG, PNG ou WebP com até 2 MB.');if(valido){blob=URL.createObjectURL(f);renderizar(preview,{tem_foto:true,foto_url:blob},'lg');}else renderizar(preview,atual,'lg');}
+  preview.hidden=ehFoto&&!!editor?.imagem;modal.classList.toggle('foto-em-edicao',ehFoto&&!!editor?.imagem);
+  if(ehFoto&&f){valido=!!editor?.ready&&['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=2097152;if(valido){blob=URL.createObjectURL(f);renderizar(preview,{tem_foto:true,foto_url:blob},'lg');}else renderizar(preview,atual,'lg');}
   else if(ehFoto)renderizar(preview,atual,'lg');else renderizar(preview,{avatar_id:avatar()},'lg');
-  var mudou=ehFoto?!!f:(atual.tem_foto||String(atual.avatar_id||'')!==avatar());salvar.disabled=ocupado||!mudou||!valido;
+  var mudou=ehFoto?!!f:(atual.tem_foto||String(atual.avatar_id||'')!==avatar());salvar.disabled=ocupado||!!editor?.busy||!mudou||!valido;
  }
- function preparar(){form.reset();cancelar.textContent='Cancelar';arquivo.value='';camera.value='';if(rascunho&&arquivoPreparado){var dt=new DataTransfer();dt.items.add(arquivoPreparado);arquivo.files=dt.files;}erro.hidden=true;sucesso.hidden=true;form.querySelector('[name="tipo"][value="'+(atual.tem_foto?'foto':'avatar')+'"]').checked=true;form.querySelectorAll('[name="avatar_id"]').forEach(function(i){i.checked=i.value===String(atual.avatar_id||'');});atualizar();}
+ function preparar(){editor.reset();form.reset();cancelar.textContent='Cancelar';arquivo.value='';camera.value='';if(rascunho&&arquivoPreparado)editor.preparar(arquivoPreparado);erro.hidden=true;sucesso.hidden=true;form.querySelector('[name="tipo"][value="'+(atual.tem_foto?'foto':'avatar')+'"]').checked=true;form.querySelectorAll('[name="avatar_id"]').forEach(function(i){i.checked=i.value===String(atual.avatar_id||'');});atualizar();}
  document.querySelectorAll('[data-abrir-imagem-aluno]').forEach(function(b){b.addEventListener('click',function(){origem=b;preparar();modal.showModal();fechar.focus();});});
- function sair(){if(!ocupado)modal.close();}fechar.addEventListener('click',sair);cancelar.addEventListener('click',sair);modal.addEventListener('cancel',function(e){if(ocupado)e.preventDefault();});modal.addEventListener('close',function(){if(blob){URL.revokeObjectURL(blob);blob=null;}if(origem)origem.focus();});
+ function sair(){if(!ocupado)modal.close();}fechar.addEventListener('click',sair);cancelar.addEventListener('click',sair);modal.addEventListener('cancel',function(e){if(ocupado)e.preventDefault();});modal.addEventListener('close',function(){editor.reset();if(blob){URL.revokeObjectURL(blob);blob=null;}if(origem)origem.focus();});
  form.addEventListener('change',function(){cancelar.textContent='Cancelar';erro.hidden=true;sucesso.hidden=true;atualizar();});
  form.addEventListener('submit',async function(e){
   e.preventDefault();if(ocupado||salvar.disabled)return;

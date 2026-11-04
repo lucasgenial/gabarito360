@@ -144,6 +144,10 @@ class AlunoController extends Controller
         } catch (\Illuminate\Http\Client\ConnectionException) {
             return response()->json(['message'=>'Não foi possível confirmar a atualização. Atualize a página para conferir.'],503);
         }
+        if($resp->status()===429){
+            $segundos=max(1,min(60,(int)$resp->header('Retry-After')?:60));
+            return response()->json(['message'=>'Muitas tentativas seguidas. Aguarde alguns instantes e tente novamente.','retry_after'=>$segundos],429)->header('Retry-After',(string)$segundos);
+        }
         if (!$resp->successful()) return response()->json(['message'=>$resp->json('message')??'Não foi possível salvar a imagem.'], $resp->status()>=500?503:($resp->status()===404?404:422));
         $d = array_intersect_key($resp->json('data')??[],array_flip(['avatar_id','tem_foto','imagem_versao']));
         $d['foto_url'] = route('alunos.foto',['id'=>$id,'v'=>$d['imagem_versao']??1,'_ctx'=>\App\Support\ContextoWeb::id()]);
