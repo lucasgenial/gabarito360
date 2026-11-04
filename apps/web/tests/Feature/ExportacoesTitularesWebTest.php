@@ -17,6 +17,12 @@ class ExportacoesTitularesWebTest extends TestCase
         $c=['token'=>'token-reservado','tipo_contexto'=>$interno?'interno':'vinculo','perfil'=>$perfil,'espaco'=>['nome'=>'Rede fictícia'],
             'permissoes'=>$perfil==='suporte'?['pedido.atender']:($perfil==='admin_rede'?['pedido.exportacao.autorizar']:[])];
         Http::preventStrayRequests();Http::fake(function($r)use($c,&$timeout){
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer token-reservado'));
             if(str_ends_with($r->url(),'/auth/me'))return Http::response(['data'=>$c]);
             if($r->method()==='POST') {

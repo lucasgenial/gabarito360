@@ -25,6 +25,12 @@ class CopiasWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar();
         Http::fake(function($r) use($me) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-copia'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->dados()]);
         });
@@ -53,6 +59,12 @@ class CopiasWebTest extends TestCase
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'SEGREDO-INTERNO'],500));
         $this->get('/copias?_ctx='.$ctx)->assertStatus(503)->assertDontSee('SEGREDO-INTERNO')->assertDontSee('Nenhuma solicitação encontrada');
         Http::fake(function($r) use($me) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             if (str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$me]);
             throw new \Illuminate\Http\Client\ConnectionException('SEGREDO-CONEXAO');
         });

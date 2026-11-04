@@ -23,6 +23,12 @@ class ClientesWebTest extends TestCase
         [$id,$dados]=$this->preparar();
         $cliente=['id'=>8,'nome'=>'Cliente fictício','tipo'=>'escola','modalidade'=>'teste','situacao'=>'ativo','contato_email'=>'teste@example.test'];
         Http::fake(function ($r) use ($dados,$cliente) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer comercial-token'));
             $path=parse_url($r->url(),PHP_URL_PATH);
             if ($path==='/api/v1/auth/me') return Http::response(['data'=>$dados]);

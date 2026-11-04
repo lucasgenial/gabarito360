@@ -1,4 +1,4 @@
-@props(['contexto'])
+@props(['contexto','erroTroca'=>false])
 @php
   $interno = \App\Support\Acesso::interno();
   $pessoal = ($contexto['espaco']['tipo'] ?? '') === 'pessoal';
@@ -17,4 +17,5 @@
     <div><dt>{{ $rotulo }}</dt><dd>{{ $nome }}</dd></div>
     <div><dt>Meu perfil</dt><dd>{{ \App\Support\Acesso::rotulo() }}</dd></div>
   </dl>
+  @if($erroTroca)<p class="contexto-erro" role="status">Não foi possível verificar outros acessos. Atualize a página para tentar novamente.</p>@endif
 </details>

@@ -24,6 +24,12 @@ class GestaoInternaWebTest extends TestCase
     {
         $id = ContextoWeb::criar($this->dados());
         Http::fake(function ($r) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer token-interno'));
             if (str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$this->dados()]);
             if ($r->method()==='POST') return Http::response(['data'=>['id'=>2]],201);

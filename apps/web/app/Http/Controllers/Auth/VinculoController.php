@@ -5,10 +5,20 @@ use App\Http\Controllers\Controller;
 use App\Services\ApiClient;
 use App\Support\ContextoWeb;
 use Illuminate\Http\Request;
+use Illuminate\Http\Client\ConnectionException;
 
 class VinculoController extends Controller
 {
     public function __construct(private ApiClient $api) {}
+
+    private function falhaTroca(Request $request,bool $interno,int $status=503)
+    {
+        $incerto=$status>=500;
+        $mensagem=$incerto ? 'Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.'
+            : ($interno ? 'Este acesso não está disponível. Atualize a página para conferir seus acessos.' : 'Este vínculo não está disponível. Atualize a página para conferir seus acessos.');
+        if($request->expectsJson())return response()->json(['message'=>$mensagem],$incerto?503:409);
+        return redirect()->route('vinculos.index',['trocar'=>1])->with('erro',$mensagem);
+    }
 
     public function index(Request $request)
     {
@@ -34,11 +44,13 @@ class VinculoController extends Controller
     {
         abort_unless(session('auth_vinculos'), 404);
         $data = $request->validate(['vinculo_id' => 'required|integer|min:1']);
-        $resp = $this->api->identidade()->post('/v1/auth/vinculos/selecionar', $data);
-        if ($resp->failed()) return redirect()->route('vinculos.index', ['trocar' => 1])->with('erro', 'Este vínculo não está disponível. Escolha novamente.');
+        try { $resp = $this->api->identidade()->post('/v1/auth/vinculos/selecionar', $data); }
+        catch(ConnectionException $e){return $this->falhaTroca($request,false);}
+        if ($resp->failed()) return $this->falhaTroca($request,false,$resp->status());
         $dados = $resp->json('data');
-        abort_unless(is_array($dados) && !empty($dados['token']) && !empty($dados['perfil']) && is_array($dados['permissoes'] ?? null), 503);
+        abort_unless(is_array($dados) && !empty($dados['token']) && !empty($dados['perfil']) && is_array($dados['permissoes'] ?? null), 503,'Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.');
         $id = ContextoWeb::criar($dados);
+        if ($request->expectsJson()) return response()->json(['url'=>route('painel',['_ctx'=>$id])]);
         return redirect()->route('painel', ['_ctx' => $id]);
     }
 
@@ -46,11 +58,14 @@ class VinculoController extends Controller
     {
         abort_unless(session('auth_vinculos') && session('auth_internos'), 404);
         $data = $request->validate(['acesso_interno_id' => 'required|integer|min:1']);
-        $resp = $this->api->identidade()->post('/v1/auth/acessos-internos/selecionar', $data);
-        if ($resp->failed()) return redirect()->route('vinculos.index', ['trocar' => 1])->with('erro', 'Este acesso interno não está disponível. Escolha novamente.');
+        try { $resp = $this->api->identidade()->post('/v1/auth/acessos-internos/selecionar', $data); }
+        catch(ConnectionException $e){return $this->falhaTroca($request,true);}
+        if ($resp->failed()) return $this->falhaTroca($request,true,$resp->status());
         $dados = $resp->json('data');
         abort_unless(is_array($dados) && ($dados['tipo_contexto'] ?? null) === 'interno'
-            && !empty($dados['token']) && !empty($dados['perfil']) && is_array($dados['permissoes'] ?? null), 503);
-        return redirect()->route('painel', ['_ctx' => ContextoWeb::criar($dados)]);
+            && !empty($dados['token']) && !empty($dados['perfil']) && is_array($dados['permissoes'] ?? null), 503,'Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.');
+        $id=ContextoWeb::criar($dados);
+        if ($request->expectsJson()) return response()->json(['url'=>route('painel',['_ctx'=>$id])]);
+        return redirect()->route('painel', ['_ctx' => $id]);
     }
 }

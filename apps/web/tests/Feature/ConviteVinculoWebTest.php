@@ -18,6 +18,12 @@ class ConviteVinculoWebTest extends TestCase
     private function fake(callable $f): void
     {
         Http::fake(function ($r) use ($f) {
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             if (str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>['perfil'=>'dir_escolar','permissoes'=>['usuario.gerir','usuario.ver']]]);
             return $f($r);
         });
@@ -63,6 +69,12 @@ class ConviteVinculoWebTest extends TestCase
     {
         $token=str_repeat('x',64);
         Http::fake(function($r)use($token){
+            // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
+            if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
+                $this->assertTrue($r->hasHeader('Authorization','Bearer '.session('auth_token')));
+                return Http::response(['data'=>[]]);
+            }
+
             $this->assertTrue($r->hasHeader('Authorization','Bearer identidade'));
             $this->assertSame($token,$r['token']);
             return Http::response(['data'=>['vinculo'=>'Escola A','funcao'=>'Professor','turmas'=>'3A','convidado_por'=>'Gestor']]);
