@@ -133,4 +133,18 @@ class DisciplinasWebTest extends TestCase
         $this->get('/areas-conhecimento/nova?_ctx='.$ctx)->assertForbidden();
         $this->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'Invasão','ativo'=>1])->assertForbidden();
     }
+
+    public function test_orientacoes_sao_recolhidas_nativas_e_nao_escondem_campos_ou_erros(): void
+    {
+        [$ctx,$me]=$this->preparar();
+        $this->fake($me,fn()=>Http::response(['data'=>['gerir'=>true,'referencias'=>[],'areas'=>[]]]));
+        $html=$this->get('/disciplinas/nova?_ctx='.$ctx.'&origem=propria')->assertOk()->assertSee('Saiba mais')->assertSee('Saiba menos')
+            ->assertSee('sobre disciplinas próprias')->assertSee('sobre situação da disciplina')->assertSee('sobre áreas do conhecimento')
+            ->assertSee('Nenhuma área cadastrada.')->assertSee('name="nome"',false)->assertSee('Adicionar disciplina')->getContent();
+        $dom=new \DOMDocument; @$dom->loadHTML('<?xml encoding="UTF-8">'.$html); $xp=new \DOMXPath($dom);
+        $this->assertSame(3,$xp->query('//details[contains(@class,"dc1-orientacao")]')->length);
+        $this->assertSame(0,$xp->query('//details[contains(@class,"dc1-orientacao")][@open]')->length);
+        $this->assertSame(0,$xp->query('//details[contains(@class,"dc1-orientacao")]//input')->length);
+        $this->assertSame(3,$xp->query('//details[contains(@class,"dc1-orientacao")]/summary')->length);
+    }
 }
