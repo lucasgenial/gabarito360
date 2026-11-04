@@ -12,9 +12,10 @@ final class OpcoesDisciplinaProva
 {
     public function listar(Usuario $ator, array $turmas, string $operacao = 'criar'): array
     {
-        abort_unless(in_array($operacao, ['criar', 'editar'], true), 422, 'Operação inválida.');
+        abort_unless(in_array($operacao, ['criar', 'editar', 'publicar_gabarito'], true), 422, 'Operação inválida.');
         $v = app(GestaoDisciplinas::class)->contexto($ator);
-        abort_unless(Permissao::pode($ator, 'prova.'.$operacao), 403, 'Sem permissão para esta operação com provas.');
+        $capacidade=$operacao==='publicar_gabarito' ? 'gabarito.editar' : 'prova.'.$operacao;
+        abort_unless(Permissao::pode($ator, $capacidade), 403, 'Sem permissão para esta operação com provas.');
         if (!$turmas) return [];
         if (count($turmas) > 500 || count(array_unique($turmas, SORT_REGULAR)) !== count($turmas)
             || collect($turmas)->contains(fn ($id) => !is_int($id) || $id < 1)) {
