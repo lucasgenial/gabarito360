@@ -130,9 +130,33 @@ class ProvasAutoriaTest extends TestCase
         // Ser a mesma pessoa não autoriza copiar uma prova criada sob função de gestão.
         DB::table('provas')->where('id',1)->update(['perfil_criacao'=>'coordenador']);
         $this->chamar($t,'GET','provas/1')->assertOk()->assertJsonPath('data.pode_copiar',false)->assertJsonPath('data.pode_editar',false);
+        DB::table('vinculo_turmas')->where('vinculo_id',1)->delete();
+        $this->chamar($t,'GET','provas/1')->assertNotFound();
+        $this->chamar($t,'GET',"provas/$novo")->assertOk();
+        DB::table('vinculo_turmas')->insert(['vinculo_id'=>1,'espaco_id'=>5,'turma_id'=>1]);
         $coord=$this->token(3);
         $institucional=$this->chamar($coord,'POST','provas',['escola_id'=>1,'titulo'=>'Nova institucional','disciplina'=>'Teste','serie'=>'1','num_questoes'=>1,'num_alternativas'=>4,'turma_ids'=>[1]])->assertCreated()->json('data.id');
         $this->assertDatabaseHas('provas',['id'=>$institucional,'perfil_criacao'=>'coordenador']);
         $this->chamar($t,'GET',"provas/$institucional")->assertOk()->assertJsonPath('data.pode_copiar',false);
+    }
+
+    public function test_mesma_pessoa_diretor_e_professor_na_mesma_escola_nao_soma_funcoes(): void
+    {
+        DB::table('usuario_vinculos')->insert(['id'=>4,'usuario_id'=>1,'espaco_id'=>5,'perfil'=>'dir_escolar','situacao'=>'ativo','inicio_em'=>now()->subDay()]);
+        DB::table('provas')->where('id',3)->update(['criado_por'=>1,'perfil_criacao'=>'dir_escolar']);
+        $identidade=Usuario::findOrFail(1)->createToken('identidade')->plainTextToken;
+        $diretor=$this->chamar($identidade,'POST','auth/vinculos/selecionar',['vinculo_id'=>4])->assertCreated()->json('data.token');
+        $professor=$this->chamar($identidade,'POST','auth/vinculos/selecionar',['vinculo_id'=>1])->assertCreated()->json('data.token');
+        $this->chamar($diretor,'GET','provas')->assertOk()->assertJsonCount(3,'data.provas');
+        $this->chamar($professor,'GET','provas')->assertOk()->assertJsonCount(2,'data.provas');
+        $this->chamar($professor,'GET','provas/2')->assertNotFound();
+        $this->chamar($professor,'GET','provas/3')->assertOk()->assertJsonPath('data.pode_copiar',false)->assertJsonPath('data.pode_editar',false);
+        DB::table('vinculo_turmas')->where('vinculo_id',1)->delete();
+        $this->chamar($professor,'GET','provas/3')->assertNotFound();
+        $this->chamar($diretor,'GET','provas/3')->assertOk();
+        $this->chamar($diretor,'GET','provas')->assertOk()->assertJsonCount(3,'data.provas');
+        $this->chamar($professor,'GET','provas/1')->assertOk();
+        $this->chamar($diretor,'GET','provas/4')->assertNotFound();
+        $this->assertDatabaseHas('usuarios',['id'=>1,'perfil'=>'professor']);
     }
 }

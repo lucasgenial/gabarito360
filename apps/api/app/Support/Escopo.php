@@ -91,7 +91,10 @@ class Escopo
         if ($u->perfil === 'professor') {
             $turmas = self::turmaIds($u);
             $q->where(function ($w) use ($u,$turmas) {
-                $w->where('provas.criado_por',$u->id)->orWhere(function ($institucional) use ($turmas) {
+                $w->where(function ($propria) use ($u) {
+                    $propria->where('provas.criado_por',$u->id)
+                        ->where(fn($perfil)=>$perfil->whereNull('provas.perfil_criacao')->orWhere('provas.perfil_criacao','professor'));
+                })->orWhere(function ($institucional) use ($turmas) {
                     $institucional->whereIn('provas.perfil_criacao',['coordenador','dir_escolar'])
                         ->whereIn('provas.id', DB::table('prova_turmas')->whereIn('turma_id',$turmas ?: [0])
                             ->when(Espacos::ativo(),fn ($pt) => $pt->whereColumn('prova_turmas.espaco_id','provas.espaco_id')
