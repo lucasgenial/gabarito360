@@ -1298,6 +1298,10 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 }
 .app-header .theme-btn, .app-header .avatar { width:44px; height:44px; flex-shrink:0; }
 .app-header .avatar { border:0; font-family:inherit; padding:0; }
+.app-header .avatar > [data-imagem-propria] { display:grid; place-items:center; width:36px; height:36px; line-height:0; }
+.app-header .avatar .avatar-aluno { display:grid; box-sizing:border-box; aspect-ratio:1; border:1px solid var(--border); }
+.app-header .avatar .avatar-aluno img { display:block; width:100%; height:100%; object-fit:cover; object-position:center; }
+.app-header .avatar:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
 .user-name, .user-role { overflow-wrap:anywhere; }
 .user-menu[hidden] { display:none; }
 @media (max-width: 600px) { .vinculo-opcao { align-items: flex-start; flex-direction: column; } }
