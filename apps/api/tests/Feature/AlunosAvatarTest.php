@@ -19,7 +19,7 @@ class AlunosAvatarTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('public');
+        Storage::fake('public');Storage::fake('local');
         Permissao::limparCache();
         Sanctum::actingAs(Usuario::create(['perfil'=>'admin_rede','nome'=>'Gestor fictício',
             'cpf'=>'00000000123','email'=>'avatar@example.test','password'=>'senha-ficticia','ativo'=>true]));
@@ -30,12 +30,14 @@ class AlunosAvatarTest extends TestCase
         $this->dados=['turma_id'=>$turma,'nome'=>'Ágata Érica','matricula'=>'FICTICIO-1','data_nascimento'=>'2010-01-01'];
     }
 
-    public function test_cadastro_rejeita_upload_e_caminho_sem_criar_aluno_ou_arquivo(): void
+    public function test_cadastro_aceita_foto_privada_mas_recusa_caminho_arbitrario(): void
     {
-        foreach (['foto'=>UploadedFile::fake()->image('foto.jpg'),'foto_path'=>'alunos/foto.jpg'] as $campo=>$valor) {
-            $this->post('/api/v1/alunos', $this->dados+[$campo=>$valor], ['Accept'=>'application/json'])->assertUnprocessable()->assertJsonValidationErrors($campo);
-        }
+        $this->post('/api/v1/alunos',$this->dados+['foto_path'=>'alunos/foto.jpg'],['Accept'=>'application/json'])->assertUnprocessable()->assertJsonValidationErrors('foto_path');
         $this->assertDatabaseCount('alunos',0);
+        $id=$this->post('/api/v1/alunos',$this->dados+['foto'=>UploadedFile::fake()->image('retrato.jpg',600,400)],['Accept'=>'application/json'])
+            ->assertCreated()->assertJsonPath('data.tem_foto',true)->assertJsonMissingPath('data.foto_path')->json('data.id');
+        $a=Aluno::find($id);Storage::disk('local')->assertExists($a->foto_path);
+        $info=getimagesizefromstring(Storage::disk('local')->get($a->foto_path));$this->assertSame([384,384],array_slice($info,0,2));
         $this->assertSame([],Storage::disk('public')->allFiles());
     }
 

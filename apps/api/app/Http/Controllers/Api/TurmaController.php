@@ -116,7 +116,7 @@ class TurmaController extends Controller
 
         if (\App\Support\PerfisEscolares::administrativo($request->user()->perfil)) {
             $alunos = $consulta->tabela('alunos')->where('turma_id', $id)->where('espaco_id', $turma->espaco_id)
-                ->orderBy('nome')->get(['id', 'nome', 'matricula', 'ativo']);
+                ->orderBy('nome')->get(['id', 'nome', 'avatar_id', 'imagem_versao', 'foto_path', 'matricula', 'ativo'])->map(function($a){$a->tem_foto=!empty($a->foto_path);unset($a->foto_path);return $a;});
             return ApiResponse::success(array_merge($turma->toArray(), [
                 'escola_nome' => $turma->escola?->nome, 'total_alunos' => $alunos->where('ativo', true)->count(), 'alunos' => $alunos,
             ]));
@@ -125,9 +125,10 @@ class TurmaController extends Controller
         $alunos = $consulta->tabela('alunos')
             ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))
             ->orderBy('nome')
-            ->select('id', 'nome', 'avatar_id', 'matricula', 'data_nascimento', 'ativo')
+            ->select('id', 'nome', 'avatar_id', 'imagem_versao', 'foto_path', 'matricula', 'data_nascimento', 'ativo')
             ->get()
             ->map(function ($a) use ($turma, $consulta) {
+                $a->tem_foto=!empty($a->foto_path);unset($a->foto_path);
                 $a->media_geral = $consulta->tabela('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
                 $a->media_geral = $a->media_geral !== null ? round((float) $a->media_geral, 1) : null;
                 $a->total_provas = $consulta->tabela('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->count();

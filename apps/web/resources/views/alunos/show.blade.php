@@ -20,7 +20,9 @@
 
 {{-- Header do perfil --}}
 <div class="profile-header">
-  <x-avatar :avatar-id="$aluno['avatar_id'] ?? null" :nome="$aluno['nome']" :aluno-id="$aluno['id']" tamanho="lg" />
+  @pode('aluno.gerir')<button type="button" class="imagem-perfil-abrir" data-abrir-imagem-aluno aria-label="Alterar imagem de {{ $aluno['nome'] }}">@endpode
+  <span data-imagem-aluno data-tamanho="lg" data-iniciais="{{ implode('',array_map(fn($p)=>mb_strtoupper(mb_substr($p,0,1)),array_slice(preg_split('/\s+/u',trim($aluno['nome']),-1,PREG_SPLIT_NO_EMPTY),0,2))) }}"><x-avatar :avatar-id="$aluno['avatar_id'] ?? null" :nome="$aluno['nome']" :aluno-id="$aluno['id']" :tem-foto="$aluno['tem_foto']??false" :imagem-versao="$aluno['imagem_versao']??1" tamanho="lg" /></span>
+  @pode('aluno.gerir')</button>@endpode
   <div style="flex:1;">
     <h1 class="page-title" style="margin:0;">{{ $aluno['nome'] }}</h1>
     <p class="page-sub">
@@ -28,6 +30,7 @@
       @if($aluno['turma_nome'] ?? null) · Turma {{ $aluno['turma_nome'] }}@endif
     </p>
     <ul class="info-list">
+      <li><b>Status:</b> {{ $aluno['ativo'] ? 'Ativo' : 'Inativo' }}</li>
       <li><b>Matrícula:</b> {{ $aluno['matricula'] }}</li>
       @if($aluno['data_nascimento'] ?? null)
         <li><b>Nascimento:</b> {{ \Carbon\Carbon::parse($aluno['data_nascimento'])->format('d/m/Y') }}</li>
@@ -51,6 +54,7 @@
   </div>
 </div>
 
+@pode('resultado.ver')
 {{-- KPIs básicos --}}
 <div class="kpi-grid">
   <div class="card" style="text-align:center;padding:20px;">
@@ -88,7 +92,10 @@
   <p>O histórico de avaliações do aluno estará disponível após a aplicação de provas (MP-019).</p>
 </div>
 
+@endpode
+
 @pode('aluno.gerir')
+@include('alunos._imagem')
 {{-- Modal de edição --}}
 <div class="modal-backdrop" id="modal-editar" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
@@ -100,7 +107,6 @@
       @csrf
       @method('PUT')
       <div class="modal-body">
-        <x-seletor-avatar :nome="old('nome', $aluno['nome'])" :aluno-id="$aluno['id']" :avatar-id="$aluno['avatar_id'] ?? null" campo-nome="ed-nome" preview-id="editar-avatar-preview" />
         <div class="form-row-2">
           <div class="field" style="grid-column:1/-1">
             <label for="ed-nome">Nome completo *</label>

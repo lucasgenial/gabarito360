@@ -1,4 +1,4 @@
-@props(['titulo'=>'Avatar do aluno', 'nome' => '', 'alunoId' => null, 'avatarId' => null, 'campoNome' => 'nome', 'previewId' => 'preview-avatar'])
+@props(['direto'=>false, 'titulo'=>'Avatar do aluno', 'nome' => '', 'alunoId' => null, 'avatarId' => null, 'campoNome' => 'nome', 'previewId' => 'preview-avatar'])
 @php
   $selecionado = filter_var(old('avatar_id', $avatarId), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 36]]) ?: null;
 @endphp
@@ -8,8 +8,7 @@
     <x-avatar :nome="$nome" :aluno-id="$alunoId" :avatar-id="$selecionado" tamanho="lg" :id="$previewId" data-avatar-preview />
     <span data-avatar-status aria-live="polite">{{ $selecionado ? 'Avatar '.$selecionado.' selecionado' : 'Iniciais do nome' }}</span>
   </div>
-  <details @if($errors->has('avatar_id')) open @endif>
-    <summary>Escolher avatar</summary>
+  @if($direto)<div>@else<details @if($errors->has('avatar_id')) open @endif><summary>Escolher avatar</summary>@endif
     <div class="avatar-opcoes">
       <label class="avatar-opcao avatar-opcao-iniciais">
         <input type="radio" name="avatar_id" value="" @checked(!$selecionado)>
@@ -23,6 +22,6 @@
         </label>
       @endfor
     </div>
-  </details>
+  @if($direto)</div>@else</details>@endif
   @error('avatar_id')<span class="field-error">Escolha um dos avatares disponíveis ou use as iniciais.</span>@enderror
 </fieldset>

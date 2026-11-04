@@ -40,7 +40,7 @@ class SelecaoMaterialWebTest extends TestCase
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'?$this->previa():$this->catalogo())]);
         });
         $this->get('/copias/materiais?_ctx='.$ctx)->assertOk()->assertSee('Conferir prévia')->assertSee('name="provas[]"',false)
-            ->assertSee('name="_token"',false)->assertSee($ctx)->assertDontSee('checked',false)->assertDontSee('<script>segredo</script>',false);
+            ->assertSee('name="_token"',false)->assertSee($ctx)->assertPaginaSemSelecaoPrevia()->assertDontSee('<script>segredo</script>',false);
         $this->post('/copias/materiais/previa',['_ctx'=>$ctx,'espaco_id'=>5,'provas'=>[2],'destino_espaco_id'=>7,'vinculo_id'=>4])
             ->assertOk()->assertSee('Esta consulta não autoriza nem inicia uma cópia')->assertSee('Conferir gabarito')
             ->assertSee('10.00')->assertDontSee('<script>segredo</script>',false)->assertDontSee('Aprovar cópia');
