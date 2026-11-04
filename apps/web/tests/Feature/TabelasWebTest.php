@@ -59,6 +59,7 @@ class TabelasWebTest extends TestCase
 
     public function test_acoes_post_de_equipe_mantem_alvo_csrf_e_estados(): void
     {
+        $this->withSession(['auth_permissoes'=>['usuario.ver','usuario.gerir']]);
         $membros=[];
         foreach (['ativo','suspenso','pendente'] as $i=>$situacao) $membros[]=['id'=>$i+1,'vinculo_id'=>$i+10,'nome'=>'Pessoa '.$i,'email'=>'teste'.$i.'@example.test','perfil'=>'professor','ativo'=>true,'situacao'=>$situacao];
         Http::fake(['*'=>Http::response(['data'=>['usuarios'=>$membros,'totais'=>['professor'=>3]]])]);

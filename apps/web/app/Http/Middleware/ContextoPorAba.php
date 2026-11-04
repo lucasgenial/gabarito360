@@ -30,7 +30,7 @@ class ContextoPorAba
         $dados['permissoes'] = $me['permissoes'];
         $request->attributes->set('vinculo_contexto', $dados);
         ContextoWeb::renovar($id, $dados);
-        if ($dados['perfil'] === 'secretario_escolar') {
+        if (in_array($dados['perfil'], ['secretario_escolar', 'auxiliar_secretaria'], true)) {
             $permissao = match ($request->route()->getName()) {
                 'painel', 'perfil', 'perfil.update', 'perfil.senha', 'perfil.email' => null,
                 'turmas.index', 'turmas.show' => 'turma.ver',

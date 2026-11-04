@@ -50,7 +50,7 @@ class TurmaController extends Controller
                     ->where('ativo', true)
                     ->count();
 
-                if ($request->user()->perfil === 'secretario_escolar') return array_merge($t->toArray(), [
+                if (\App\Support\PerfisEscolares::administrativo($request->user()->perfil)) return array_merge($t->toArray(), [
                     'total_alunos' => $totalAlunos, 'escola_nome' => $t->escola?->nome,
                 ]);
 
@@ -114,7 +114,7 @@ class TurmaController extends Controller
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        if ($request->user()->perfil === 'secretario_escolar') {
+        if (\App\Support\PerfisEscolares::administrativo($request->user()->perfil)) {
             $alunos = $consulta->tabela('alunos')->where('turma_id', $id)->where('espaco_id', $turma->espaco_id)
                 ->orderBy('nome')->get(['id', 'nome', 'matricula', 'ativo']);
             return ApiResponse::success(array_merge($turma->toArray(), [

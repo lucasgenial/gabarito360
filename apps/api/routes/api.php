@@ -290,7 +290,7 @@ Route::prefix('v1')->group(function () {
             Route::get('dir-nucleo',  [DashboardController::class, 'dirNucleo'])
                 ->middleware('perfil:dir_nucleo');
             Route::get('dir-escolar',  [DashboardController::class, 'dirEscolar'])
-                ->middleware('perfil:dir_escolar');
+                ->middleware('perfil:dir_escolar,vice_dir_escolar');
             Route::get('coordenador',  [DashboardController::class, 'coordenador'])
                 ->middleware('perfil:coordenador');
             Route::get('professor',    [DashboardController::class, 'professor'])

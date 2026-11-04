@@ -20,7 +20,7 @@ class ConviteVinculoController extends Controller
     public function store(Request $request, ConviteVinculo $servico)
     {
         $d = $request->validate(['email' => 'required|email|max:255', 'espaco_id' => 'required|integer|min:1',
-            'perfil' => 'required|in:admin_rede,dir_nucleo,dir_escolar,coordenador,professor,aplicador,aluno',
+            'perfil' => 'required|in:vice_dir_escolar,auxiliar_secretaria,secretario_escolar,admin_rede,dir_nucleo,dir_escolar,coordenador,professor,aplicador,aluno',
             'turma_ids' => 'sometimes|array', 'turma_ids.*' => 'integer|min:1|distinct']);
         $convite = $servico->emitir($request->user(), $d['email'], (int) $d['espaco_id'], $d['perfil'], $d['turma_ids'] ?? []);
         if ($convite) {

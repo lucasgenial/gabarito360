@@ -95,7 +95,7 @@ class Escopo
                     $propria->where('provas.criado_por',$u->id)
                         ->where(fn($perfil)=>$perfil->whereNull('provas.perfil_criacao')->orWhere('provas.perfil_criacao','professor'));
                 })->orWhere(function ($institucional) use ($turmas) {
-                    $institucional->whereIn('provas.perfil_criacao',['coordenador','dir_escolar'])
+                    $institucional->whereIn('provas.perfil_criacao',\App\Support\PerfisEscolares::INSTITUCIONAIS)
                         ->whereIn('provas.id', DB::table('prova_turmas')->whereIn('turma_id',$turmas ?: [0])
                             ->when(Espacos::ativo(),fn ($pt) => $pt->whereColumn('prova_turmas.espaco_id','provas.espaco_id')
                                 ->whereExists(fn ($t) => $t->selectRaw('1')->from('turmas as associada')
@@ -125,7 +125,7 @@ class Escopo
     public static function podeEditarProva(Usuario $u, Prova $p): bool
     {
         return !in_array($u->perfil,['professor','professor_autonomo'],true)
-            || ((int)$p->criado_por === (int)$u->id && !in_array($p->perfil_criacao,['coordenador','dir_escolar'],true));
+            || ((int)$p->criado_por === (int)$u->id && !in_array($p->perfil_criacao,\App\Support\PerfisEscolares::INSTITUCIONAIS,true));
     }
 
     public static function provaEditavel(Usuario $u, int $id): ?Prova

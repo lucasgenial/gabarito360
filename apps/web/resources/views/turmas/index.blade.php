@@ -17,8 +17,8 @@
       <b>{{ $kpis['total_alunos'] ?? 0 }}</b> alunos no total
   @endif
   </x-slot:sub>
-    @unless(\App\Support\Acesso::pessoal())<button class="btn btn-secondary" onclick="abrirModal('modal-importar')">Importar planilha</button>@endunless
-    <button class="btn btn-primary" onclick="abrirModal('modal-criar')">+ Nova turma</button>
+    @pode('aluno.importar')<span class="field-help">Importação por planilha em breve.</span>@endpode
+    @pode('turma.gerir')<button class="btn btn-primary" onclick="abrirModal('modal-criar')">+ Nova turma</button>@endpode
 </x-pagina>
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
@@ -62,7 +62,7 @@
         <th scope="col">Turno</th>
         @unless(\App\Support\Acesso::pessoal())<th scope="col">Escola</th>@endunless
         <th scope="col">Alunos</th>
-        @if(\App\Support\Acesso::perfil() !== 'secretario_escolar')<th scope="col">Desempenho médio</th>@endif
+        @if(!\App\Support\Acesso::administrativo())<th scope="col">Desempenho médio</th>@endif
         <th scope="col">Ano letivo</th>
         <th scope="col">Status</th>
         <th scope="col">Ações</th>
@@ -85,7 +85,7 @@
           </div></td>
           @endunless
           <td style="font-family:var(--font-mono);" data-rotulo="Alunos"><div class="tabela-valor">{{ $t['total_alunos'] ?? 0 }}</div></td>
-          @if(\App\Support\Acesso::perfil() !== 'secretario_escolar')
+          @if(!\App\Support\Acesso::administrativo())
           <td data-rotulo="Desempenho médio"><div class="tabela-valor">
             @if(($t['media_turma'] ?? null) !== null)
               @php
@@ -113,7 +113,7 @@
         </tr>
       @empty
         <tr>
-          <td colspan="{{ (\App\Support\Acesso::pessoal() || \App\Support\Acesso::perfil() === 'secretario_escolar') ? 8 : 9 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
+          <td colspan="{{ (\App\Support\Acesso::pessoal() || \App\Support\Acesso::administrativo()) ? 8 : 9 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="escola" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma encontrada</div>
             <p>@if($haFiltros) Ajuste ou limpe os filtros para encontrar outros registros. @else Crie a primeira turma usando o botão "+ Nova turma". @endif</p>
@@ -127,6 +127,7 @@
 @endif
 
 {{-- Modal: criar turma --}}
+@pode('turma.gerir')
 <div class="modal-backdrop" id="modal-criar" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-head">
@@ -181,23 +182,7 @@
   </div>
 </div>
 
-{{-- Modal: importar planilha (placeholder) --}}
-<div class="modal-backdrop" id="modal-importar" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modal-head">
-      <h2>Importar planilha</h2>
-      <button type="button" class="modal-close" onclick="fecharModal('modal-importar')">&times;</button>
-    </div>
-    <div class="modal-body" style="text-align:center;padding:40px 24px;">
-      <div class="icone-grande"><x-icone nome="grafico" /></div>
-      <h3 style="font-size:16px;font-weight:700;margin-bottom:8px;">Importação em breve</h3>
-      <p style="color:var(--muted);font-size:14px;">A importação de alunos via planilha XLSX estará disponível no MP-017.</p>
-    </div>
-    <div class="modal-foot">
-      <button type="button" class="btn btn-ghost" onclick="fecharModal('modal-importar')">Fechar</button>
-    </div>
-  </div>
-</div>
+@endpode
 
 <div style="height:48px;"></div>
 @endsection
@@ -206,19 +191,21 @@
 <script>
 function abrirModal(id) {
   var m = document.getElementById(id);
+  if (!m) return;
   m.classList.add('open');
   m.setAttribute('aria-hidden','false');
   document.body.style.overflow = 'hidden';
 }
 function fecharModal(id) {
   var m = document.getElementById(id);
+  if (!m) return;
   m.classList.remove('open');
   m.setAttribute('aria-hidden','true');
   document.body.style.overflow = '';
 }
 ['modal-criar','modal-importar'].forEach(function(id){
   var m = document.getElementById(id);
-  m.addEventListener('click', function(e){ if(e.target===m) fecharModal(id); });
+  if (m) m.addEventListener('click', function(e){ if(e.target===m) fecharModal(id); });
 });
 document.addEventListener('keydown', function(e){
   if(e.key==='Escape'){ fecharModal('modal-criar'); fecharModal('modal-importar'); }

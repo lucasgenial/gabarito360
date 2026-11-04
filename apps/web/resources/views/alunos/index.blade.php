@@ -16,7 +16,7 @@
   <b>{{ $kpis['total_alunos'] ?? 0 }}</b> aluno(s) cadastrado(s)
   @endif
   </x-slot:sub>
-  <a href="{{ route('alunos.create') }}" class="btn btn-primary">+ Cadastrar aluno</a>
+  @pode('aluno.gerir')<a href="{{ route('alunos.create') }}" class="btn btn-primary">+ Cadastrar aluno</a>@endpode
 </x-pagina>
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif

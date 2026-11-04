@@ -12,7 +12,7 @@
   $descr   = collect($catalogo['permissoes'] ?? [])->keyBy('chave');
   $porPerf = $catalogo['perfis'] ?? [];
   $cadastra = $catalogo['cadastra'] ?? [];
-  $ordem   = ['admin_rede', 'dir_nucleo', 'dir_escolar', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno', 'secretario_educacao'];
+  $ordem   = ['admin_rede', 'dir_nucleo', 'dir_escolar', 'vice_dir_escolar', 'secretario_escolar', 'auxiliar_secretaria', 'coordenador', 'professor', 'aplicador', 'aluno', 'secretario_educacao'];
   $modulos = ['escolas' => 'Rede, núcleos e escolas', 'equipe' => 'Equipe e usuários', 'turmas' => 'Turmas e alunos',
               'provas' => 'Provas e gabaritos', 'correcao' => 'Cartões e correção', 'relatorios' => 'Resultados e relatórios'];
 @endphp
@@ -37,8 +37,12 @@
 @foreach($ordem as $p)@if(isset($porPerf[$p]))
   @php $g = $porPerf[$p]; @endphp
   <div class="perfil-bloco {{ $loop->first ? 'ativo' : '' }}" id="perfil-{{ $p }}">
+    @if($p === 'vice_dir_escolar')<x-aviso>Acompanha a escola. As ações de gestão dependem de concessão específica.</x-aviso>@endif
+    @if($p === 'auxiliar_secretaria')<x-aviso>Cadastros de alunos e consulta administrativa, sem acesso a notas e resultados.</x-aviso>@endif
+    @if($p === 'secretario_escolar')<x-aviso>A importação por planilha ainda não está disponível.</x-aviso>@endif
     <div class="card card-pad" style="margin-top:12px;font-size:14px;">
-      <b>Cadastra:</b>
+      <b>Pode gerir:</b>
+      @if($p === 'vice_dir_escolar')<span>Somente após receber a permissão de gestão da equipe:</span>@endif
       {{ !empty($cadastra[$p]) ? collect($cadastra[$p])->map(fn ($x) => $perfis[$x]['label'] ?? $x)->implode(', ') : 'ninguém' }}
     </div>
     <div class="duas-col" style="margin-top:12px;">
