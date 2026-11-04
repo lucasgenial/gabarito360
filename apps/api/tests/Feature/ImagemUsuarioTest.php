@@ -42,4 +42,20 @@ class ImagemUsuarioTest extends TestCase
         $this->getJson('/api/v1/auth/foto')->assertUnauthorized();
         $this->getJson('/api/v1/usuarios/1/foto')->assertUnauthorized();
     }
+    public function test_consultas_de_vinculo_nao_consumem_o_limite_da_imagem():void {
+        config(['espacos.ativo'=>true,'vinculos.obrigatorio'=>true]);
+        $token=Usuario::find(1)->createToken('api-token')->plainTextToken;
+        app('auth')->forgetGuards();$this->withToken($token);
+        for($i=0;$i<12;$i++)$this->getJson('/api/v1/auth/vinculos')->assertOk();
+        $this->postJson('/api/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>8])->assertOk();
+    }
+    public function test_limite_da_imagem_continua_dez_por_minuto_e_independente_por_usuario():void {
+        for($i=0;$i<10;$i++)$this->postJson('/api/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>8])->assertOk();
+        $this->postJson('/api/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>9])->assertStatus(429)->assertHeader('Retry-After');
+        $this->getJson('/api/v1/auth/vinculos')->assertNotFound();
+        Sanctum::actingAs(Usuario::find(2));
+        $this->postJson('/api/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>9])->assertOk();
+        Sanctum::actingAs(Usuario::find(1));$this->travel(61)->seconds();
+        $this->postJson('/api/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>9])->assertOk();
+    }
 }
