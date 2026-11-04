@@ -1,9 +1,9 @@
-@props(['nome' => '', 'alunoId' => null, 'avatarId' => null, 'campoNome' => 'nome', 'previewId' => 'preview-avatar'])
+@props(['titulo'=>'Avatar do aluno', 'nome' => '', 'alunoId' => null, 'avatarId' => null, 'campoNome' => 'nome', 'previewId' => 'preview-avatar'])
 @php
   $selecionado = filter_var(old('avatar_id', $avatarId), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 36]]) ?: null;
 @endphp
 <fieldset class="seletor-avatar" data-seletor-avatar data-campo-nome="{{ $campoNome }}">
-  <legend>Avatar do aluno</legend>
+  <legend>{{ $titulo }}</legend>
   <div class="seletor-avatar-atual">
     <x-avatar :nome="$nome" :aluno-id="$alunoId" :avatar-id="$selecionado" tamanho="lg" :id="$previewId" data-avatar-preview />
     <span data-avatar-status aria-live="polite">{{ $selecionado ? 'Avatar '.$selecionado.' selecionado' : 'Iniciais do nome' }}</span>

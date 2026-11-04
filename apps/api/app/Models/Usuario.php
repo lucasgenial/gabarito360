@@ -91,8 +91,12 @@ class Usuario extends Authenticatable
 
     protected $hidden = [
         'password',
-        'remember_token', 'email_hash', 'cpf_hash',
+        'remember_token', 'email_hash', 'cpf_hash', 'foto_path',
     ];
+
+    protected $appends = ['tem_foto'];
+
+    public function getTemFotoAttribute(): bool { return !empty($this->foto_path); }
 
     protected $casts = [
         'email' => \App\Casts\DadoProtegido::class . ':1',

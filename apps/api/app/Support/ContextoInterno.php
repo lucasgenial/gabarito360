@@ -10,8 +10,8 @@ final class ContextoInterno
 {
     public const PERFIS = ['desenvolvedor', 'suporte', 'financeiro'];
     private const PERMISSOES = [
-        'desenvolvedor' => ['cliente.ver', 'cliente.gerir', 'acesso_interno.gerir'],
-        'suporte' => ['cliente.ver', 'cliente.gerir'],
+        'desenvolvedor' => ['cliente.ver', 'cliente.gerir', 'acesso_interno.gerir', 'usuario.excecao_funcional.gerir'],
+        'suporte' => ['cliente.ver', 'cliente.gerir', 'usuario.excecao_funcional.gerir'],
         'financeiro' => ['cliente.ver', 'cliente.gerir'],
     ];
 

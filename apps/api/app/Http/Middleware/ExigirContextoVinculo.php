@@ -33,13 +33,16 @@ class ExigirContextoVinculo
                 \App\Http\Controllers\Api\ClienteController::autorizar($request);
                 return $next($request);
             }
+            if ($request->is('api/v1/configuracoes/funcoes','api/v1/configuracoes/funcoes/*')) {
+                \App\Http\Controllers\Api\ExcecaoFuncionalController::autorizar($request);return $next($request);
+            }
             // A área interna não pode alcançar rotas escolares nem responder convites.
             if (\App\Support\ContextoInterno::presente($usuario)) {
-                abort_unless($request->is('api/v1/auth/me', 'api/v1/auth/email'), 403);
+                abort_unless($request->is('api/v1/auth/me', 'api/v1/auth/imagem', 'api/v1/auth/foto', 'api/v1/auth/email'), 403);
             }
         }
         // Identidade e resposta ao próprio convite precisam funcionar antes da seleção V2.
-        if (!$request->is('api/v1/auth/acessos-internos', 'api/v1/auth/acessos-internos/selecionar', 'api/v1/auth/vinculos', 'api/v1/auth/vinculos/selecionar', 'api/v1/auth/me', 'api/v1/auth/email', 'api/v1/auth/logout', 'api/v1/auth/convites-vinculo/*/consultar', 'api/v1/auth/convites-vinculo/*/responder')) RegimeVinculos::exigir($request->user());
+        if (!$request->is('api/v1/auth/acessos-internos', 'api/v1/auth/acessos-internos/selecionar', 'api/v1/auth/vinculos', 'api/v1/auth/vinculos/selecionar', 'api/v1/auth/me', 'api/v1/auth/imagem', 'api/v1/auth/foto', 'api/v1/auth/email', 'api/v1/auth/logout', 'api/v1/auth/convites-vinculo/*/consultar', 'api/v1/auth/convites-vinculo/*/responder')) RegimeVinculos::exigir($request->user());
         return $next($request);
     }
 }

@@ -71,6 +71,7 @@ class AuthController extends Controller
         if (\App\Support\ContextoInterno::presente($request->user())) {
             return ApiResponse::success(['id' => $request->user()->id, 'nome' => $request->user()->nome,
                 'email' => $request->user()->email, 'cpf' => $request->user()->cpf,
+                'avatar_id'=>$request->user()->avatar_id,'tem_foto'=>$request->user()->tem_foto,'imagem_versao'=>$request->user()->imagem_versao,
                 'created_at' => $request->user()->created_at, 'escola_nome' => null,
                 'tipo_contexto' => 'interno', 'perfil' => $request->user()->perfil,
                 'permissoes' => \App\Support\ContextoInterno::permissoes($request->user())]);

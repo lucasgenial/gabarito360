@@ -17,3 +17,10 @@ A classificação de autoria institucional é única para Coordenador, Diretor e
 Auxiliar usa projeções administrativas e não recebe notas, médias, provas, equipe ou relatórios. Status de aluno exige aluno.desativar também no campo ativo dos endpoints de cadastro/edição; aluno.gerir não contorna essa exigência. Vice tem leitura da equipe, com mutações condicionadas à concessão usuario.gerir e à hierarquia; sem autogestão nem gestão de pares/superiores.
 
 Critérios: regressão do Secretário, mesma pessoa com vínculos distintos, escopo entre escolas, concessão real/auditoria, recusa de extras proibidos, retirada, expiração, suspensão, início futuro, autoria institucional e arquivos/exportações sem concessão. Web confere conteúdo administrativo, ações visíveis e troca por contexto. Evidência de UI em desktop/celular e parecer independente são necessários antes da integração. Recibos operacionais e capturas permanecem fora do Git.
+
+
+## Complemento do responsável — grupos funcionais e imagem
+
+Confirmado em03/11/2026: funções administrativas (Secretário/Auxiliar) não se acumulam com Professor, Coordenação, Direção/Vice-direção ou Aplicador na mesma instituição. Vínculo encerrado não impede nova contratação de outro grupo; o histórico é preservado sem manter o acesso antigo. Escolas distintas são independentes. Acumulação excepcional exige referência de chamado e liberação individual por usuário/instituição, feita por Suporte/Desenvolvedor, com motivo, versão e auditoria imutável. A liberação não cria vínculo nem une permissões. Este complemento substitui orientações anteriores que admitiam acumulação administrativa sem exceção.
+
+O responsável também autorizou foto de perfil e escolha de avatar para usuários/professores. A imagem é editada pelo próprio titular, com galeria existente ou upload limitado/reprocessado e armazenamento privado. Não altera identidade, papéis ou permissões. Evidências e testes dessas duas extensões integram o fechamento de PF1-C antes de publicar somente na homologação.

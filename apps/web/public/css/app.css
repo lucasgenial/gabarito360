@@ -1329,3 +1329,11 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
   .com-release:has(.nav-inferior) .barra-salvar { bottom:calc(104px + env(safe-area-inset-bottom)) !important; }
 }
 @media print { .app-footer, .cp1-modal { display:none !important; } }
+
+/* PF1: catálogo empilhado e leitura das permissões no celular. */
+.tela-perfis .perfis-pilhas { display:grid; gap:16px; }
+.tela-perfis .lista-perm li > span { min-width:0; }
+.tela-perfis .lista-perm code { overflow-wrap:anywhere; }
+@media(max-width:600px) {
+  .tela-perfis .lista-perm li { flex-direction:column; gap:3px; }
+}
