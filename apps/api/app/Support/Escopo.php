@@ -71,7 +71,7 @@ class Escopo
     }
 
     /**
-     * Provas visíveis. Professor: só as que criou ou das turmas em que está vinculado.
+     * Professor: próprias ou institucionais da coordenação/direção nas suas turmas.
      * Aplicador: só as provas da sua escola agendadas para hoje (sem conteúdo/gabarito).
      */
     public static function provas(Usuario $u): Builder
@@ -87,16 +87,21 @@ class Escopo
             $q->whereIn('provas.escola_id', $escolas);
         }
 
+        // Compartilhar turma não libera provas criadas por outro professor.
         if ($u->perfil === 'professor') {
             $turmas = self::turmaIds($u);
-            $q->where(function ($w) use ($u, $turmas) {
-                $w->where('provas.criado_por', $u->id)
-                  ->orWhereIn('provas.id', DB::table('prova_turmas')->whereIn('turma_id', $turmas ?: [0])
-                      ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('prova_turmas.espaco_id', 'provas.espaco_id')
-                          ->whereExists(fn ($t) => $t->selectRaw('1')->from('turmas as associada')
-                              ->whereColumn('associada.id', 'prova_turmas.turma_id')->whereColumn('associada.espaco_id', 'prova_turmas.espaco_id')))
-                      ->select('prova_id'));
+            $q->where(function ($w) use ($u,$turmas) {
+                $w->where('provas.criado_por',$u->id)->orWhere(function ($institucional) use ($turmas) {
+                    $institucional->whereIn('provas.perfil_criacao',['coordenador','dir_escolar'])
+                        ->whereIn('provas.id', DB::table('prova_turmas')->whereIn('turma_id',$turmas ?: [0])
+                            ->when(Espacos::ativo(),fn ($pt) => $pt->whereColumn('prova_turmas.espaco_id','provas.espaco_id')
+                                ->whereExists(fn ($t) => $t->selectRaw('1')->from('turmas as associada')
+                                    ->whereColumn('associada.id','prova_turmas.turma_id')->whereColumn('associada.espaco_id','prova_turmas.espaco_id')))
+                            ->select('prova_id'));
+                });
             });
+        } elseif ($u->perfil === 'professor_autonomo') {
+            $q->where('provas.criado_por', $u->id);
         }
 
         if ($u->perfil === 'aplicador') {
@@ -111,6 +116,19 @@ class Escopo
     {
         RegimeVinculos::exigir($u);
         return self::provas($u)->find($id);
+    }
+
+    /** Visibilidade institucional não concede ao professor a edição da prova da gestão. */
+    public static function podeEditarProva(Usuario $u, Prova $p): bool
+    {
+        return !in_array($u->perfil,['professor','professor_autonomo'],true)
+            || ((int)$p->criado_por === (int)$u->id && !in_array($p->perfil_criacao,['coordenador','dir_escolar'],true));
+    }
+
+    public static function provaEditavel(Usuario $u, int $id): ?Prova
+    {
+        $p=self::provaComConteudo($u,$id);
+        return $p && self::podeEditarProva($u,$p) ? $p : null;
     }
 
     /** Prova com acesso a conteúdo (gabarito, notas, relatórios): nunca para o aplicador. */

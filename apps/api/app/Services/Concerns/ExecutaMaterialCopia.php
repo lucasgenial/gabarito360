@@ -81,6 +81,7 @@ trait ExecutaMaterialCopia
                 $meta=ContextoCorrecao::autoria((int)$destino->id,(int)$ator->id);
                 $prova=DB::table('provas')->insertGetId($material['prova'] + $meta + [
                     'escola_id'=>$destino->escola_id,'espaco_tipo'=>$destino->tipo,'status'=>'rascunho',
+                    'perfil_criacao'=>$ator->perfil,
                     'gerar_cartao_pdf'=>false,'data_aplicacao'=>null,'correcao_fechada_em'=>null,'correcao_fechada_por'=>null,
                     'created_at'=>now(),'updated_at'=>now()]);
                 $gabarito=DB::table('gabaritos')->insertGetId($meta + ['prova_id'=>$prova,

@@ -23,6 +23,7 @@ class DuplicarProva
         if (!Espacos::ativo() || !ContextoVinculo::presente($ator)) return false;
         $v = ContextoVinculo::resolver($ator);
         if (!in_array($v->perfil, ['professor','professor_autonomo'], true)
+            || in_array($prova->perfil_criacao, ['coordenador','dir_escolar'], true)
             || $prova->formato_avaliacao !== 'gabarito'
             || (int)$prova->criado_por !== (int)$ator->id || (int)$prova->espaco_id !== (int)$v->espaco_id) return false;
         if (array_diff(['prova.duplicar_propria','prova.ver','prova.criar','prova.editar','gabarito.ver','gabarito.editar'],Permissao::efetivas($ator))) return false;
@@ -47,6 +48,7 @@ class DuplicarProva
             if ($gabarito) ContextoCorrecao::exigirFilhos('gabarito_questoes','gabarito_id',$gabarito->id,$origem->espaco_id);
             $campos = $origem->only(['formato_avaliacao','escola_id','disciplina','serie','num_questoes','num_alternativas','nota_maxima','tipo_pontuacao','anular_se_todas','opcao_lingua','gerar_cartao_pdf']);
             $nova = new Prova($campos + ['titulo'=>$titulo,'status'=>'rascunho','criado_por'=>$ator->id]);
+            $nova->forceFill(['perfil_criacao'=>$ator->perfil]);
             $nova->forceFill(Espacos::autoria((int)$origem->espaco_id,$ator)+['espaco_tipo'=>$origem->espaco_tipo]);
             $nova->save();
             if ($gabarito) {
