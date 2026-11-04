@@ -141,7 +141,7 @@ Route::prefix('v1')->group(function () {
             Route::get('vinculos', [\App\Http\Controllers\Api\SelecaoVinculoController::class, 'index'])->middleware('throttle:30,1');
             Route::post('vinculos/selecionar', [\App\Http\Controllers\Api\SelecaoVinculoController::class, 'selecionar'])->middleware('throttle:20,1');
             Route::post('logout', [AuthController::class, 'logout']);
-            Route::post('imagem', [\App\Http\Controllers\Api\ImagemUsuarioController::class,'salvar'])->middleware('throttle:10,1');
+            Route::post('imagem', [\App\Http\Controllers\Api\ImagemUsuarioController::class,'salvar'])->middleware('throttle:imagem-perfil');
             Route::get('foto', [\App\Http\Controllers\Api\ImagemUsuarioController::class,'propria']);
             Route::get('me',     [AuthController::class, 'me']);
             Route::post('email', [AuthController::class, 'trocarEmail'])->middleware('throttle:5,1');
@@ -186,7 +186,7 @@ Route::prefix('v1')->group(function () {
 
         // Alunos
         Route::prefix('alunos')->group(function () {
-            Route::post('{id}/imagem', [\App\Http\Controllers\Api\ImagemAlunoController::class,'salvar'])->whereNumber('id')->middleware(['permissao:aluno.gerir','throttle:10,1']);
+            Route::post('{id}/imagem', [\App\Http\Controllers\Api\ImagemAlunoController::class,'salvar'])->whereNumber('id')->middleware(['permissao:aluno.gerir','throttle:imagem-perfil']);
             Route::get('{id}/foto', [\App\Http\Controllers\Api\ImagemAlunoController::class,'mostrar'])->whereNumber('id')->middleware('permissao:aluno.ver');
             Route::get('/',            [AlunoController::class, 'index'])->middleware('permissao:aluno.ver');
             Route::post('/',           [AlunoController::class, 'store'])->middleware('permissao:aluno.gerir');
