@@ -233,15 +233,18 @@ class EscolaController extends Controller
             ->where('escola_id', $id)
             ->orderBy('nome')
             ->select('id', 'nome', 'ano_letivo as ano', 'turno', 'ativo')
-            ->get()
-            ->map(function ($t) use ($request) {
+            ->get();
+        $alunosPorTurma=Espacos::agregadoEscolar(DB::table('alunos'),'alunos',$request->user())
+            ->whereIn('alunos.turma_id',$turmas->pluck('id'))->where('alunos.ativo',true)->groupBy('alunos.turma_id')
+            ->selectRaw('alunos.turma_id, COUNT(*) as total')->pluck('total','turma_id');
+        $turmas=$turmas->map(function ($t) use ($alunosPorTurma) {
                 return [
                     'id'           => $t->id,
                     'nome'         => $t->nome,
                     'ano'          => $t->ano,
                     'turno'        => $t->turno,
                     'ativo'        => (bool) $t->ativo,
-                    'total_alunos' => Espacos::agregadoEscolar(DB::table('alunos'), 'alunos', $request->user())->where('turma_id', $t->id)->where('ativo', true)->count(),
+                    'total_alunos' => (int)($alunosPorTurma[$t->id]??0),
                 ];
             });
 
@@ -296,10 +299,13 @@ class EscolaController extends Controller
             ->where('turmas.escola_id', $id)
             ->select('alunos.id', 'alunos.nome', 'alunos.matricula', 'alunos.ativo', 'turmas.nome as turma')
             ->orderBy('alunos.nome')
-            ->get()
-            ->map(function ($a) use ($request) {
-                $media = Espacos::agregadoEscolar(DB::table('notas'), 'notas', $request->user())->where('aluno_id', $a->id)->avg('nota_final');
-                $totalProvas = Espacos::agregadoEscolar(DB::table('notas'), 'notas', $request->user())->where('aluno_id', $a->id)->count();
+            ->get();
+        $notasPorAluno=Espacos::agregadoEscolar(DB::table('notas'),'notas',$request->user())
+            ->whereIn('notas.aluno_id',$alunosLista->pluck('id'))->groupBy('notas.aluno_id')
+            ->selectRaw('notas.aluno_id, AVG(notas.nota_final) as media, COUNT(*) as total')->get()->keyBy('aluno_id');
+        $alunosLista=$alunosLista->map(function ($a) use ($notasPorAluno) {
+                $media=$notasPorAluno[$a->id]->media??null;
+                $totalProvas=(int)($notasPorAluno[$a->id]->total??0);
 
                 return [
                     'id'           => $a->id,
