@@ -229,3 +229,8 @@ Aprovado pelo responsável do produto: pedido.exportacao.autorizar é padrão so
 ### CI1-D — referências no espaço pessoal (03/11/2026)
 
 catalogo.consultar e catalogo.referencia_pessoal.gerir são padrões somente do professor_autonomo nesta entrega, sem extras na matriz institucional. Exigem contexto pessoal vigente do proprietário e respeitam retiradas. Selecionar referência pública não concede escola.criar, vínculo profissional, acesso escolar ou poder de manutenção cadastral. Habilitação da interface continua desligada por padrão até o gate de publicação L4; poderes de suporte/gestores são tratados separadamente no CI1-E. Contrato124.
+
+
+### PF1 — Vice-diretor e Auxiliar de secretaria (03/11/2026)
+
+Matriz134 aprovada expressamente pelo responsável. Vice-diretor escolar usa política independente: onze padrões de acompanhamento escolar e dezoito extras concedíveis conforme o doc134; nenhuma herança automática de direção, permissão de conceder poderes ou transferência institucional. Auxiliar de secretaria recebe somente escola.ver, turma.ver, aluno.ver e aluno.gerir, sem extras nem desempenho. Secretário escolar mantém os oito padrões anteriores. Perfis novos exigem vínculo escolar selecionado, aceito e vigente; nunca são autorizados pelo campo global da conta. Gestão, autoria institucional e testes seguem [a matriz aprovada](134-pf1-b-matriz-perfis-prioritarios.md). Publicação somente na homologação após fechar PF1-C.

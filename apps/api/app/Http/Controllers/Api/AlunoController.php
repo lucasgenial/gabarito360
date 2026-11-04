@@ -55,6 +55,7 @@ class AlunoController extends Controller
     public function store(Request $request): JsonResponse
     {
         $pessoal = EspacoPessoal::validarAluno($request);
+        if ($request->has('ativo') && !$request->boolean('ativo')) abort_unless(\App\Support\Permissao::pode($request->user(), 'aluno.desativar'), 403);
         $request->validate(['turma_id' => 'required|integer']);
         $turma = Escopo::turmas($request->user())->findOrFail((int) $request->input('turma_id'));
         $espaco = Espacos::ativo() ? (int) $turma->espaco_id : null;
@@ -105,6 +106,7 @@ class AlunoController extends Controller
             return ApiResponse::notFound('Aluno não encontrado.');
         }
 
+        if ($request->has('ativo') && $request->boolean('ativo') !== (bool) $aluno->ativo) abort_unless(\App\Support\Permissao::pode($request->user(), 'aluno.desativar'), 403);
         $data = $request->validate([
             'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'sometimes|integer|exists:turmas,id',

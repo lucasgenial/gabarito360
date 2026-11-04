@@ -39,15 +39,15 @@
   </div>
   <div style="display:flex;gap:10px;flex-wrap:wrap;">
     @pode('resultado.ver')<a class="btn btn-primary" href="{{ route('relatorios.aluno', $aluno['id']) }}"><x-icone nome="prova" /> Boletim</a>@endpode
-    <button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>
-    <form method="POST" action="{{ route('alunos.toggle', $aluno['id']) }}"
+    @pode('aluno.gerir')<button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>@endpode
+    @pode('aluno.desativar')<form method="POST" action="{{ route('alunos.toggle', $aluno['id']) }}"
           onsubmit="return confirm('{{ $aluno['ativo'] ? 'Desativar' : 'Ativar' }} este aluno?')">
       @csrf
       <button type="submit" class="btn btn-ghost"
               style="color:{{ $aluno['ativo'] ? 'var(--danger)' : 'var(--success)' }};{{ $aluno['ativo'] ? 'border-color:var(--danger);' : '' }}">
         {{ $aluno['ativo'] ? 'Desativar' : 'Ativar' }}
       </button>
-    </form>
+    </form>@endpode
   </div>
 </div>
 
@@ -88,6 +88,7 @@
   <p>O histórico de avaliações do aluno estará disponível após a aplicação de provas (MP-019).</p>
 </div>
 
+@pode('aluno.gerir')
 {{-- Modal de edição --}}
 <div class="modal-backdrop" id="modal-editar" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true">
@@ -158,9 +159,11 @@
   </div>
 </div>
 
+@endpode
 <div style="height:48px;"></div>
 @endsection
 
+@pode('aluno.gerir')
 @push('scripts')
 <script>
 var modal = document.getElementById('modal-editar');
@@ -171,3 +174,5 @@ modal.addEventListener('click', function(e){ if(e.target===modal) fecharModal();
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') fecharModal(); });
 </script>
 @endpush
+
+@endpode

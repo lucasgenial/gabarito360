@@ -215,6 +215,8 @@
     admin_rede:  'Administrador da Rede',
     dir_nucleo:  'Diretor de Núcleo',
     dir_escolar: 'Diretor Escolar',
+    vice_dir_escolar: 'Vice-diretor escolar',
+    auxiliar_secretaria: 'Auxiliar de secretaria',
     secretario_escolar: 'Secretário Escolar',
     coordenador: 'Coordenador Pedagógico',
     professor:   'Professor',

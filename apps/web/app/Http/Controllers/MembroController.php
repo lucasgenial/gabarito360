@@ -9,6 +9,8 @@ use Illuminate\View\View;
 class MembroController extends Controller
 {
     private const PERFIS = [
+        'vice_dir_escolar' => ['label' => 'Vice-diretor escolar', 'badge' => 'badge-purple', 'ini' => 'VD'],
+        'auxiliar_secretaria' => ['label' => 'Auxiliar de secretaria', 'badge' => 'badge-info', 'ini' => 'AS'],
         'secretario_escolar' => ['label' => 'Secretário Escolar', 'badge' => 'badge-info', 'ini' => 'S'],
         'admin_rede'  => ['label' => 'Administrador da Rede', 'badge' => 'badge-info',    'ini' => 'A'],
         'dir_nucleo'  => ['label' => 'Diretor de Núcleo',     'badge' => 'badge-warn',    'ini' => 'N'],

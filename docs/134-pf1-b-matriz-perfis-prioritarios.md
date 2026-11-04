@@ -1,6 +1,6 @@
 # PF1-B — matriz proposta dos perfis prioritários
 
-Estado: **definição técnica preparada para aprovação do responsável**, sem habilitação. Complementa o [inventário133](133-planejamento-perfis-institucionais.md). Não modifica o [catálogo oficial03](03-perfis-e-permissoes.md), que exige aprovação do responsável para mudar as permissões. A implementação é PF1-C; não iniciar ID1 por consequência deste trabalho.
+Estado: **matriz aprovada expressamente pelo responsável em03/11/2026; implementação PF1-C autorizada até validar na homologação**, sem produção. Complementa o [inventário133](133-planejamento-perfis-institucionais.md). Não modifica o [catálogo oficial03](03-perfis-e-permissoes.md), que exige aprovação do responsável para mudar as permissões. A implementação é PF1-C; não iniciar ID1 por consequência deste trabalho.
 
 ## Contrato proposto
 
@@ -83,8 +83,8 @@ Testes obrigatórios: funções diferentes da mesma pessoa na mesma escola; vín
 |---|---|
 | Correção132 na homologação | Concluída; não reabrir nem publicar produção para implementar este plano. |
 | PF1-A — inventário | Concluído no doc133. |
-| PF1-B — matriz e critérios | Proposta concreta preparada neste documento; aguarda aprovação de produto. |
-| PF1-C — novos perfis | Próxima implementação após a aprovação da matriz; não entregue por este documento. |
+| PF1-B — matriz e critérios | Aprovada pelo responsável em03/11/2026. |
+| PF1-C — novos perfis | Implementação autorizada; acompanhamento no doc135. |
 | Importação XLSX | Funcionalidade futura do módulo de alunos; não bloqueia a definição de perfis. |
 | Portal de responsáveis / Aluno | Consumidores e relacionamentos futuros; cadastro de perfil não prova entrega de portal. |
 | Outros perfis do doc133 | Backlog com dependências; não ativar todos de uma vez nem ampliar esta entrega implicitamente. |
