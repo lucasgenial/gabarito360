@@ -7,15 +7,16 @@ use Tests\TestCase;
 
 class ImagemAlunoWebTest extends TestCase
 {
-    private function contexto(bool $editar=true): string
+    private function contexto(bool $editar=true,bool $limite=false): string
     {
         config(['services.api.base_url'=>'http://api.test/api']);Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade','auth_vinculos'=>true,'auth_nome'=>'Pessoa fictícia']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
         $d=['token'=>'escolar','perfil'=>'secretario_escolar','permissoes'=>$editar?['aluno.ver','aluno.gerir']:['aluno.ver'],
             'id'=>1,'nome'=>'Pessoa fictícia','espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola fictícia']];
-        Http::fake(function($r)use($d){
+        Http::fake(function($r)use($d,$limite){
             if(str_ends_with($r->url(),'/auth/me'))return Http::response(['data'=>$d]);
+            if($limite&&str_ends_with($r->url(),'/alunos/7/imagem'))return Http::response(['message'=>'Too Many Requests.'],429,['Retry-After'=>'9']);
             if(str_ends_with($r->url(),'/alunos/7/imagem'))return Http::response(['data'=>['avatar_id'=>null,'tem_foto'=>true,'imagem_versao'=>2,'token'=>'nao-devolver','foto_path'=>'privado.webp']]);
             if(str_ends_with($r->url(),'/alunos/7/foto'))return Http::response('webp-ficticio',200,['Content-Type'=>'image/webp']);
             if(str_ends_with($r->url(),'/alunos/7'))return Http::response(['data'=>['id'=>7,'nome'=>'Aluno fictício','matricula'=>'IMG-7','ativo'=>true,'turma_id'=>1,'avatar_id'=>8,'tem_foto'=>false]]);
@@ -44,5 +45,10 @@ class ImagemAlunoWebTest extends TestCase
         $id=$this->contexto();
         $this->post('/alunos',['_ctx'=>$id,'nome'=>'Aluno fictício','matricula'=>'IMG-7','turma_id'=>1,'data_nascimento'=>'2010-01-01','foto'=>UploadedFile::fake()->image('ficticio.jpg')])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/alunos')&&$r->method()==='POST'&&str_contains($r->body(),'name="foto"'));
+    }
+    public function test_limite_real_da_imagem_mantem_prazo_e_erro_em_portugues():void
+    {
+        $id=$this->contexto(true,true);
+        $this->postJson('/alunos/7/imagem',['_ctx'=>$id,'tipo'=>'avatar','avatar_id'=>8])->assertStatus(429)->assertHeader('Retry-After','9')->assertJsonPath('retry_after',9)->assertJsonMissingPath('data.foto_url')->assertJsonPath('message','Muitas tentativas seguidas. Aguarde alguns instantes e tente novamente.');
     }
 }

@@ -5,15 +5,19 @@ Planejamento revisado em04/11/2026 após teste real do responsável no celular. 
 | Bloco interno | Entrega | Estado |
 |---|---|---|
 | A | Diagnóstico, orçamento e desenho de interação | Estudado; fluxo aprovado previamente por UI/UX e Product Design |
-| B | Enquadramento circular, zoom, rotação, cancelamento e compactação | Em implementação |
-| C | HEIC/HEIF com conversor controlado e limites de recursos | Em estudo técnico e validação de fixtures |
-| D | RAW/DNG e compatibilidade real de aparelhos | Delimitar por formato/codec e amostras; não prometer RAW universal |
-| E | Orçamento de armazenamento, reprocessamento e ciclo de substituição | Definido abaixo; verificar em código/testes |
-| F | Testes, revisão visual independente, CI e homologação | Pendente dos blocos anteriores |
+| B | Enquadramento circular, zoom, rotação, cancelamento e compactação | Implementado; visual aprovado pelo responsável, validação final em andamento |
+| C | HEIC/HEIF com conversor controlado e limites de recursos | Implementado; amostra pública convertida no Chrome |
+| D | RAW/DNG e compatibilidade real de aparelhos | Prévia JPEG incorporada de DNG implementada; teste sintético. Sem revelação RAW universal ou certificação de aparelho |
+| E | Orçamento de armazenamento, reprocessamento e ciclo de substituição | Implementado; testes de peso, orientação e saída privada aprovados |
+| F | Testes, revisão visual independente, CI e homologação | Testes locais aprovados; fechamento em andamento |
 
 ## Fluxo aprovado previamente
 
-Dentro do modal atual: Tirar foto/Escolher arquivo → Preparando foto → enquadramento com máscara circular, arrastar/teclas, zoom e giro90° → Salvar imagem. Aluno novo mantém Usar esta imagem e persistência junto ao cadastro. Sem etapa de confirmação redundante. Cancelar preserva a imagem anterior; erro de envio conserva a edição quando possível. Alvos44px, controles rotulados, rolagem fora da área de gesto e botões acessíveis no celular. Aprovação visual final requer evidências novas, não reutiliza o aceite anterior como prova do recorte.
+Dentro do modal atual: Tirar foto/Escolher arquivo → Preparando foto → enquadramento com máscara circular, arrastar/teclas, roda do mouse/pinça e rotação fina → Salvar imagem. Aluno novo mantém Usar esta imagem e persistência junto ao cadastro. Sem etapa de confirmação redundante. Cancelar preserva a imagem anterior; erro de envio conserva a edição. Alvos44px, controles rotulados, rolagem fora da área de gesto e botões acessíveis no celular.
+
+Após revisão holística de UI/UX e feedback expresso do responsável, a edição oculta automaticamente Avatar/Foto, galeria e ações de origem. Exibe somente orientação de gestos, imagem sem moldura/traço circular, máscara externa suave, rotação e ações finais. Trocar foto revela as opções de origem sem descartar o enquadramento ao cancelar o seletor. O responsável removeu atalhos90°, Restaurar e slider de zoom, substituiu o campo numérico por texto “Rotação:5,5°” junto ao slider e aprovou o visual em04/11/2026. A revisão anterior foi considerada excessivamente fragmentada e não é usada como aprovação desta versão.
+
+Rotação de−180° a+180° em passos de0,5°, com texto em pt-BR, aria-valuetext e teclado. Zoom por roda/pinça e +/− com área focada; setas movem, atalhos do navegador são preservados. Cropper.js2.3.1 MIT é o motor, em arquivo local/versionado; interface própria inspirada no cuidado de interação do Pintura, sem SDK/licença paga ou ativos proprietários. A geometria compensa escala/posição na rotação para cobrir o recorte; guarda de no máximo3× o enquadramento mínimo. Girar não revela áreas vazias.
 
 ## Contrato de processamento
 
@@ -30,3 +34,11 @@ Servidor deve validar novamente conteúdo, dimensões e peso; recodificar para r
 Fotos grandes válidas e orientações EXIF, corte/zoom/giro, resultado fiel ao círculo, peso/dimensões finais, cancelamento/preparação obsoleta, erros que preservam a edição e a imagem salva, envio duplicado, dados pessoais fora de logs, limites de memória/pixels/tempo, arquivo inválido, usuário/aluno/novo cadastro, teclado/touch, desktop/mobile. HEIC e RAW exigem fixtures não pessoais, licenças registradas e aparelho real; não declarar conferência física com emulação responsiva.
 
 Referências técnicas: [Canvas/toBlob](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob), [createImageBitmap/orientação](https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap), [libheif](https://github.com/strukturag/libheif), [LibRaw e recursos](https://www.libraw.org/docs/API-notes.html). As medidas e os limites propostos são decisões técnicas do produto, sujeitas aos testes desta entrega.
+
+## Evidência de implementação
+
+Entradas locais até32MB/48MP; imagem redimensionada para edição de até1600px, saída384×384, alvo96KiB/teto128KiB. Se o navegador não codifica WebP, envia JPEG compacto e a API reprocessa em WebP. Não amplia o limite2MB da API. HEIC usa heic-to1.6.7/libheif1.23.7 em worker descartável com prazo25s e conferência de dimensões antes do quadro RGBA; pacote só é carregado nessa seleção. DNG lê uma prévia JPEG delimitada e validada; não desenvolve o mosaico RAW. Cancelamento/reseleção encerra worker, timer e promessa; resultados obsoletos não substituem a escolha atual.
+
+Prévia QA isolada, pessoas e retratos fictícios: original JPEG de10641411bytes preparado e enviado comoWebP384×384 de16478bytes após rotação; amostra HEIC oficial do libheif enviada comoWebP33430bytes. Valores são amostras, não taxa média garantida. Roda do mouse e pinça de dois dedos exercitadas via Chrome/CUA; pinça em emulação, sem alegar teste de câmera física. Erro503 controlado preservou12,5°, arquivo e enquadramento para segunda tentativa bem-sucedida, sem selecionar novamente.
+
+Testes: API de imagem/orçamento e regressões PF1; Web161 aprovados/1542asserções; Node10 aprovados para geometria, limites de codecs e descarte/cancelamento. O BFF mantém429 e Retry-After com mensagem em português quando há excesso real. CI, recibos e publicação exclusiva na homologação serão registrados no PR de fechamento; produção permanece fora do escopo.
