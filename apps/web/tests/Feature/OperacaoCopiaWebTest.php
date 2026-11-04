@@ -36,7 +36,7 @@ class OperacaoCopiaWebTest extends TestCase
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->operacao()]));
         $url='/copias/operacao/'.self::ID;
         $this->get($url.'?lado=destino&_ctx='.$ctx)->assertOk()->assertSee('Solicitar processamento')->assertSee('name="_token"',false)
-            ->assertSee('name="confirmado"',false)->assertDontSee('checked',false)->assertSee('não apaga cópias já publicadas');
+            ->assertSee('name="confirmado"',false)->assertPaginaSemSelecaoPrevia()->assertSee('não apaga cópias já publicadas');
         $this->post($url.'/solicitar',['_ctx'=>$ctx])->assertUnprocessable();
         $this->post($url.'/solicitar',['_ctx'=>$ctx,'confirmado'=>1,'ator_id'=>999,'lado'=>'origem'])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/solicitar') && $r->data()===['confirmado'=>1] && $r->hasHeader('Authorization','Bearer contexto-resultados'));

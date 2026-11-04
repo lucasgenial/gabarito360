@@ -39,7 +39,7 @@ class InstituicoesPessoaisWebTest extends TestCase
             };return Http::response(['data'=>$d]);
         });
         $this->get('/minhas-instituicoes/buscar?_ctx='.$ctx.'&uf=BA&municipio_ibge=2900001&tipo=escola')->assertOk()->assertSee('Conferir instituição')->assertSee('Próxima')->assertSee('INEP da escola')->assertDontSee('<script>ficticia</script>',false);
-        $this->get('/minhas-instituicoes/conferir/'.self::UNIDADE.'?_ctx='.$ctx.'&edicao_id='.self::EDICAO)->assertOk()->assertSee('não confirma vínculo profissional')->assertSee('name="confirmacao"',false)->assertDontSee(' checked',false);
+        $this->get('/minhas-instituicoes/conferir/'.self::UNIDADE.'?_ctx='.$ctx.'&edicao_id='.self::EDICAO)->assertOk()->assertSee('não confirma vínculo profissional')->assertSee('name="confirmacao"',false)->assertPaginaSemSelecaoPrevia();
         $this->post('/minhas-instituicoes',['_ctx'=>$ctx,'unidade_id'=>self::UNIDADE,'edicao_id'=>self::EDICAO,'confirmacao'=>1,'espaco_id'=>999])->assertRedirect();
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['unidade_id']===self::UNIDADE && !isset($r['espaco_id']) && !isset($r['_ctx']));
         $this->get('/minhas-instituicoes?_ctx='.$ctx)->assertOk()->assertSee('Minhas instituições')->assertSee('Arquivar referência')->assertDontSee('href="'.route('escolas.index').'"',false);

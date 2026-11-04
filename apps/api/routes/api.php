@@ -186,6 +186,8 @@ Route::prefix('v1')->group(function () {
 
         // Alunos
         Route::prefix('alunos')->group(function () {
+            Route::post('{id}/imagem', [\App\Http\Controllers\Api\ImagemAlunoController::class,'salvar'])->whereNumber('id')->middleware(['permissao:aluno.gerir','throttle:10,1']);
+            Route::get('{id}/foto', [\App\Http\Controllers\Api\ImagemAlunoController::class,'mostrar'])->whereNumber('id')->middleware('permissao:aluno.ver');
             Route::get('/',            [AlunoController::class, 'index'])->middleware('permissao:aluno.ver');
             Route::post('/',           [AlunoController::class, 'store'])->middleware('permissao:aluno.gerir');
             Route::get('{id}',         [AlunoController::class, 'show'])->middleware('permissao:aluno.ver');

@@ -42,7 +42,7 @@ class AlunoController extends Controller
 
     public function store(Request $request)
     {
-        $this->validarMinimo($request);
+        $this->validarMinimo($request, true);
         $request->validate([
             'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'turma_id'        => 'required|integer',
@@ -51,7 +51,7 @@ class AlunoController extends Controller
             'data_nascimento' => \App\Support\Acesso::pessoal() ? 'prohibited' : 'required|date',
             'cpf'             => 'sometimes|string|nullable',
             'genero'          => 'sometimes|in:M,F,O|nullable',
-            'foto'            => 'prohibited',
+            'foto'            => 'nullable|file|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4096,max_height=4096',
             'foto_path'       => 'prohibited',
         ]);
 
@@ -63,7 +63,7 @@ class AlunoController extends Controller
             $dados['cpf'] = preg_replace('/\D/', '', $cpf);
         }
 
-        $resp = $this->api->post('/v1/alunos', $dados);
+        $resp = $request->hasFile('foto') ? $this->api->postFile('/v1/alunos','foto',$request->file('foto'),$dados) : $this->api->post('/v1/alunos', $dados);
 
         if ($resp->failed()) {
             return back()->withInput()
@@ -134,9 +134,31 @@ class AlunoController extends Controller
         return back()->with('sucesso', "Aluno {$status}.");
     }
 
-    private function validarMinimo(Request $request): void
+    public function imagem(Request $r, int $id)
+    {
+        $r->validateWithBag('imagem',['tipo'=>'required|in:avatar,foto','avatar_id'=>'nullable|integer|between:1,36',
+            'foto'=>'required_if:tipo,foto|file|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4096,max_height=4096']);
+        try {
+            $resp = $r->input('tipo')==='foto' ? $this->api->postFile('/v1/alunos/'.$id.'/imagem','foto',$r->file('foto'),['tipo'=>'foto'])
+                : $this->api->post('/v1/alunos/'.$id.'/imagem',$r->only('tipo','avatar_id'));
+        } catch (\Illuminate\Http\Client\ConnectionException) {
+            return response()->json(['message'=>'Não foi possível confirmar a atualização. Atualize a página para conferir.'],503);
+        }
+        if (!$resp->successful()) return response()->json(['message'=>$resp->json('message')??'Não foi possível salvar a imagem.'], $resp->status()>=500?503:($resp->status()===404?404:422));
+        $d = array_intersect_key($resp->json('data')??[],array_flip(['avatar_id','tem_foto','imagem_versao']));
+        $d['foto_url'] = route('alunos.foto',['id'=>$id,'v'=>$d['imagem_versao']??1,'_ctx'=>\App\Support\ContextoWeb::id()]);
+        return response()->json(['data'=>$d]);
+    }
+    public function foto(int $id)
+    {
+        $r = $this->api->getArquivo('/v1/alunos/'.$id.'/foto');
+        abort_unless($r->successful(),$r->status()===403?403:404);
+        return response($r->body())->header('Content-Type','image/webp')->header('Cache-Control','private, no-store')->header('X-Content-Type-Options','nosniff');
+    }
+
+    private function validarMinimo(Request $request, bool $aceitarRetrato = false): void
     {
         if (\App\Support\Acesso::pessoal()) $request->validate(array_fill_keys(
-            ['cpf', 'data_nascimento', 'genero', 'nome_responsavel', 'foto', 'foto_path'], 'prohibited'));
+            array_diff(['cpf', 'data_nascimento', 'genero', 'nome_responsavel', 'foto', 'foto_path'], $aceitarRetrato ? ['foto'] : []), 'prohibited'));
     }
 }

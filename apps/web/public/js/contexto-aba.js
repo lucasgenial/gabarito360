@@ -42,7 +42,7 @@
     });
     document.querySelectorAll('form').forEach(prepararForm);
     document.querySelectorAll('img[src]').forEach(img => {
-      if (/^\/(escolas|redes|alunos)\//.test(new URL(img.src, location.href).pathname)) { const novo = url(img.src); if (novo !== img.src) img.src = novo; }
+      if (/^\/(escolas|redes|alunos|usuarios)\/|^\/perfil\/foto/.test(new URL(img.src, location.href).pathname)) { const novo = url(img.src); if (novo !== img.src) img.src = novo; }
     });
   }
   document.addEventListener('submit', e => prepararForm(e.target), true);

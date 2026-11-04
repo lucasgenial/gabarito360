@@ -63,7 +63,7 @@ Se autorizado a criar provas, Vice-diretor grava `perfil_criacao=vice_dir_escola
 
 Ao implementar, centralizar a classificação das funções institucionais, hoje repetida em Escopo e DuplicarProva, para que a vice-direção não fique fora de uma das verificações. Manter a origem/autoria das cópias e revisar o consumidor ExecutaMaterialCopia. A alteração não concede cópia de colega ao coordenador (CP2) nem transferência geral.
 
-Secretário e Auxiliar podem ter outro vínculo Professor. As respostas administrativas não devem conter provas, notas, médias, resultados, contadores de desempenho ou gabaritos; trocar de vínculo não reaproveita resposta/cache do acesso anterior. Cadastro de aluno não cria automaticamente conta, matrícula histórica ou cessão entre instituições ainda não suportadas.
+Secretário e Auxiliar só podem acumular vínculo Professor na mesma instituição mediante a exceção individual de Suporte/Desenvolvedor descrita abaixo. Depois de encerrado o vínculo administrativo, a direção pode cadastrar o novo vínculo sem essa exceção. Em instituições diferentes, os vínculos são independentes. As respostas administrativas não devem conter provas, notas, médias, resultados, contadores de desempenho ou gabaritos; trocar de vínculo não reaproveita resposta/cache do acesso anterior. Cadastro de aluno não cria automaticamente conta, matrícula histórica ou cessão entre instituições ainda não suportadas.
 
 ## Roteiro de implementação e fechamento
 
@@ -98,3 +98,14 @@ O único gate de produto para iniciar PF1-C é a aprovação desta matriz, inclu
 Confirmado em03/11/2026: funções administrativas (Secretário/Auxiliar) não se acumulam com Professor, Coordenação, Direção/Vice-direção ou Aplicador na mesma instituição. Vínculo encerrado não impede nova contratação de outro grupo; o histórico é preservado sem manter o acesso antigo. Escolas distintas são independentes. Acumulação excepcional exige referência de chamado e liberação individual por usuário/instituição, feita por Suporte/Desenvolvedor, com motivo, versão e auditoria imutável. A liberação não cria vínculo nem une permissões. Este complemento substitui orientações anteriores que admitiam acumulação administrativa sem exceção.
 
 O responsável também autorizou foto de perfil e escolha de avatar para usuários/professores. A imagem é editada pelo próprio titular, com galeria existente ou upload limitado/reprocessado e armazenamento privado. Não altera identidade, papéis ou permissões. Evidências e testes dessas duas extensões integram o fechamento de PF1-C antes de publicar somente na homologação.
+
+
+### Complemento de imagem — modal, aluno, câmera e arquivo
+
+Autorizado pelo responsável e desenho consultado previamente com UI/UX e Product Design em03–04/11/2026: clicar no avatar abre o diálogo com Avatar ou Foto. Em Foto, duas ações distintas: Tirar foto (captura nativa `capture=user`, somente ao toque) e Escolher arquivo. A disponibilidade da captura depende do dispositivo/navegador; o computador pode abrir o seletor de arquivos. A câmera física do celular não é simulada pelo teste responsivo do Chrome.
+
+Usuário altera a própria imagem. Para aluno, a imagem só é alterada com `aluno.gerir`, dentro do alcance do vínculo ativo; leitura exige `aluno.ver` e o mesmo alcance. O aluno novo prepara a escolha localmente em “Usar esta imagem”; foto e cadastro são enviados juntos e persistidos na mesma transação. A seleção é descartada ao cancelar o cadastro; depois de um retorno de erro do servidor, o navegador exige selecionar a foto novamente, com aviso explícito e os demais campos mantidos. Para aluno existente e usuário, salvar imagem por AJAX preserva rascunhos de outros formulários. Cancelar/Escape não salva e devolve o foco.
+
+A autorização inclui retrato privado de aluno no espaço pessoal, sem liberar CPF, nascimento, gênero ou responsável nesse contexto. O banco mantém esses bloqueios e caminhos de arquivo continuam proibidos no cadastro genérico. A migração só acrescenta `alunos.imagem_versao` e ajusta a guarda de retrato pessoal; não preenche fotos, altera vínculos ou modifica gabaritos. JPG/PNG/WebP até2MB,4096px/lado e12MP são reprocessados em WebP384×384, com orientação EXIF quando disponível, corte central e remoção de metadados. Sem reconhecimento facial, URL pública ou envio a serviço externo.
+
+O comparador de publicação protege todas as colunas acadêmicas anteriores. Só admite as adições explícitas `provas.perfil_criacao` e `alunos.imagem_versao` quando ainda ausentes na origem; após existirem, ambas também entram na comparação. Recibos guardam as colunas antes/depois, quantidades e hashes, além de backup de banco e arquivos.

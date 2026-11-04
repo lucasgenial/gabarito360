@@ -37,8 +37,8 @@ class ContextoPorAba
                 'turmas.index', 'turmas.show' => 'turma.ver',
                 'turmas.store', 'turmas.update' => 'turma.gerir',
                 'turmas.toggle' => 'turma.desativar',
-                'alunos.index', 'alunos.show' => 'aluno.ver',
-                'alunos.create', 'alunos.store', 'alunos.update' => 'aluno.gerir',
+                'alunos.index', 'alunos.show', 'alunos.foto' => 'aluno.ver',
+                'alunos.create', 'alunos.store', 'alunos.update', 'alunos.imagem' => 'aluno.gerir',
                 'alunos.toggle' => 'aluno.desativar',
                 default => false,
             };

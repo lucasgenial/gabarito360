@@ -38,7 +38,7 @@
 
 <div class="profile-layout">
   <div class="profile-card">
-    <x-avatar-usuario :nome="$usuario['nome']" :avatar-id="$usuario['avatar_id']??null" :tem-foto="$usuario['tem_foto']??false" :versao="$usuario['imagem_versao']??1" :proprio="true" tamanho="xl" />
+    <button class="imagem-perfil-abrir" type="button" data-abrir-imagem aria-label="Alterar foto ou avatar" title="Alterar foto ou avatar"><x-avatar-usuario :nome="$usuario['nome']" :avatar-id="$usuario['avatar_id']??null" :tem-foto="$usuario['tem_foto']??false" :versao="$usuario['imagem_versao']??1" :proprio="true" tamanho="xl" /></button><p class="field-help">Clique na imagem para escolher avatar ou foto.</p>
     <div class="profile-name">{{ $usuario['nome'] }}</div>
     <div class="profile-role">{{ $perfilLabels[$usuario['perfil']] ?? $usuario['perfil'] }}</div>
     <div class="profile-institution">
@@ -51,23 +51,6 @@
   </div>
 
   <div class="profile-main">
-    <section class="section-card">
-      <div class="section-head"><div><h2>Foto e avatar</h2><p>Escolha como você aparece no sistema. A imagem não altera seus vínculos ou permissões.</p></div></div>
-      <div class="section-body">
-        <form method="POST" action="{{ route('perfil.imagem') }}" enctype="multipart/form-data">
-          @csrf
-          <fieldset class="field"><legend>Imagem de perfil</legend>
-            <label><input type="radio" name="tipo" value="avatar" @checked(old('tipo',($usuario['tem_foto']??false)?'foto':'avatar')==='avatar')> Usar avatar ou iniciais</label>
-            <label><input type="radio" name="tipo" value="foto" @checked(old('tipo',($usuario['tem_foto']??false)?'foto':'avatar')==='foto')> Enviar foto</label>
-          </fieldset>
-          <div data-imagem-avatar><x-seletor-avatar titulo="Avatar do usuário" :nome="$usuario['nome']" :avatar-id="$usuario['avatar_id']??null" preview-id="usuario-avatar-preview" /></div>
-          <div class="field" data-imagem-foto><label for="foto-perfil">Nova foto</label><input class="input" id="foto-perfil" type="file" name="foto" accept="image/jpeg,image/png,image/webp"><p class="field-help">JPG, PNG ou WebP, até 2 MB, 12 megapixels e 4096 pixels por lado. A foto será ajustada em formato quadrado. Escolher avatar ou iniciais remove a foto anterior.</p></div>
-          @if($errors->any())<x-aviso tipo="erro">{{ $errors->first() }}</x-aviso>@endif
-          <button class="btn btn-primary" type="submit">Salvar imagem de perfil</button>
-        </form>
-      </div>
-    </section>
-
     <div class="section-card">
       <div class="section-head">
         <div>
@@ -151,13 +134,3 @@
 
 <div style="height:48px;"></div>
 @endsection
-
-@push('scripts')
-<script>
-(function(){var f=document.querySelector('form[action="{{ route('perfil.imagem') }}"]');if(!f)return;
- var foto=f.querySelector('[name="foto"]'),a=f.querySelector('[data-imagem-avatar]'),p=f.querySelector('[data-imagem-foto]');
- function modo(){var imagem=f.querySelector('[name="tipo"]:checked').value==='foto';a.hidden=imagem;p.hidden=!imagem;foto.disabled=!imagem;foto.required=imagem;f.querySelectorAll('[name="avatar_id"]').forEach(function(i){i.disabled=imagem;});}
- f.querySelectorAll('[name="tipo"]').forEach(function(i){i.addEventListener('change',modo);});modo();
-})();
-</script>
-@endpush

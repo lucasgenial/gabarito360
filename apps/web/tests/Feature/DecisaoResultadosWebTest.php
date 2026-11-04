@@ -60,7 +60,7 @@ class DecisaoResultadosWebTest extends TestCase
         $this->post('/copias/resultados/preparar',$d)->assertOk()->assertSee('Conferir respostas incluídas')->assertSee('Conferir gabarito')
             ->assertSee('8.00')->assertSee('10.00')->assertSee('Dependências incluídas')->assertSee('name="confirmado"',false)
             ->assertSee('name="dependencias_confirmadas"',false)->assertSee('name="legado_reconhecido"',false)
-            ->assertDontSee('checked',false)->assertDontSee('<script>segredo</script>',false);
+            ->assertPaginaSemSelecaoPrevia()->assertDontSee('<script>segredo</script>',false);
         $this->post('/copias/resultados/lotes',$d+['chave'=>$this->decisao()['lote_id'],'dependencias'=>$deps,'destino_digest'=>str_repeat('d',64),'conteudo_digest'=>str_repeat('c',64),
             'confirmado'=>1,'dependencias_confirmadas'=>1,'legado_reconhecido'=>1])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/lotes') && $r['dependencias']===$deps && !isset($r['ator_id']) && !isset($r['tipo_destino']));

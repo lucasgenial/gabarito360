@@ -22,10 +22,15 @@ class PerfilController extends Controller
     }
 
     public function imagem(Request $r) {
-        $d=$r->validate(['tipo'=>'required|in:avatar,foto','avatar_id'=>'nullable|integer|between:1,36','foto'=>'required_if:tipo,foto|file|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4096,max_height=4096']);
+        $d=$r->validateWithBag('imagem',['tipo'=>'required|in:avatar,foto','avatar_id'=>'nullable|integer|between:1,36','foto'=>'required_if:tipo,foto|file|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4096,max_height=4096']);
         try {$resp=$r->input('tipo')==='foto'?$this->api->postFile('/v1/auth/imagem','foto',$r->file('foto'),['tipo'=>'foto']):$this->api->post('/v1/auth/imagem',['tipo'=>'avatar','avatar_id'=>$r->input('avatar_id')]);}
-        catch(\Illuminate\Http\Client\ConnectionException){return back()->with('erro','Não foi possível confirmar a atualização. Atualize a página.');}
-        return back()->with($resp->successful()?'sucesso':'erro',$resp->successful()?'Imagem de perfil atualizada.':($resp->json('message')??'Não foi possível atualizar a imagem.'));
+        catch(\Illuminate\Http\Client\ConnectionException){if($r->expectsJson())return response()->json(['message'=>'Não foi possível confirmar a atualização. Atualize a página para conferir.'],503);return back()->with('erro_imagem','Não foi possível confirmar a atualização. Atualize a página.');}
+        if($resp->successful()){
+            $d=array_intersect_key($resp->json('data')??[],array_flip(['avatar_id','tem_foto','imagem_versao']));session(['auth_avatar_id'=>$d['avatar_id']??null,'auth_tem_foto'=>$d['tem_foto']??false,'auth_imagem_versao'=>$d['imagem_versao']??1]);
+            $d['foto_url']=route('perfil.foto',['v'=>$d['imagem_versao']??1,'_ctx'=>\App\Support\ContextoWeb::id()]);
+            if($r->expectsJson())return response()->json(['data'=>$d]);
+        } elseif($r->expectsJson()) return response()->json(['message'=>$resp->json('message')??'Não foi possível atualizar a imagem.'], $resp->status()>=500?503:422);
+        return back()->with($resp->successful()?'sucesso_imagem':'erro_imagem',$resp->successful()?'Imagem de perfil atualizada.':($resp->json('message')??'Não foi possível atualizar a imagem.'));
     }
     public function foto(){return $this->arquivo('/v1/auth/foto');}
     public function fotoUsuario(int $id){return $this->arquivo('/v1/usuarios/'.$id.'/foto');}

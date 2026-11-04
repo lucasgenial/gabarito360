@@ -26,7 +26,7 @@ class AlunosAvatarTest extends TestCase
         Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'ficticio']);
         foreach (['POST'=>'/alunos','PUT'=>'/alunos/7'] as $metodo=>$url) {
-            foreach (['foto'=>UploadedFile::fake()->image('foto.jpg'),'foto_path'=>'alunos/foto.jpg'] as $campo=>$valor) {
+            foreach (($metodo==='PUT'?['foto'=>UploadedFile::fake()->image('foto.jpg'),'foto_path'=>'alunos/foto.jpg']:['foto_path'=>'alunos/foto.jpg']) as $campo=>$valor) {
                 $this->{strtolower($metodo)}($url,['nome'=>'Aluno fictício','matricula'=>'FICTICIO-7',
                     'turma_id'=>1,'data_nascimento'=>'2010-01-01',$campo=>$valor])
                     ->assertRedirect()->assertSessionHasErrors($campo);
@@ -35,13 +35,12 @@ class AlunosAvatarTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_formulario_tem_avatar_e_nao_oferece_upload(): void
+    public function test_formulario_oferece_modal_avatar_camera_e_arquivo(): void
     {
         Http::preventStrayRequests();
         Http::fake(['*'=>Http::response(['data'=>['turmas'=>[]]])]);
         $this->withSession(['auth_token'=>'ficticio'])->get('/alunos/novo')->assertOk()
-            ->assertSee('id="preview-avatar"',false)->assertDontSee('type="file"',false)
-            ->assertDontSee('multipart/form-data',false);
+            ->assertSee('id="preview-avatar"',false)->assertSee('Usar esta imagem')->assertSee('Tirar foto')->assertSee('Escolher arquivo')->assertSee('capture="user"',false);
     }
 
     public function test_galeria_tem_36_opcoes_e_recupera_selecao_apos_erro(): void
@@ -50,10 +49,12 @@ class AlunosAvatarTest extends TestCase
         Http::fake(['*'=>Http::response(['data'=>['turmas'=>[]]])]);
         $html=$this->withSession(['auth_token'=>'ficticio','_old_input'=>['avatar_id'=>36]])
             ->get('/alunos/novo')->assertOk()->getContent();
-        $this->assertSame(37,substr_count($html,'type="radio"'));
+        $d=new \DOMDocument();@$d->loadHTML($html);$x=new \DOMXPath($d);
+        $this->assertSame(37,$x->query('//dialog[@id="imagem-aluno-modal"]//input[@name="avatar_id"]')->length);
+        $this->assertSame(1,$x->query('//main//input[@name="avatar_id" and @value="36" and @checked]')->length);
         $this->assertStringContainsString('value="36" aria-label="Avatar 36" checked',$html);
         $this->assertStringContainsString('Usar iniciais do nome',$html);
-        $this->assertStringNotContainsString('type="file"',$html);
+        $this->assertSame(1,$x->query('//form[@id="cadastro-aluno"]//input[@name="foto"]')->length);
         $this->assertStringContainsString('avatar-aluno--imagem',Blade::render('<x-avatar :avatar-id="36" />'));
         $this->assertStringNotContainsString('avatar-aluno--imagem',Blade::render('<x-avatar :avatar-id="37" />'));
     }

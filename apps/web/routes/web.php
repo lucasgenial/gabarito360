@@ -194,6 +194,8 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/escolas/{id}/logo',  [EscolaController::class, 'enviarLogo'])->name('escolas.logo.enviar');
 
     // Alunos (MP-017)
+    Route::post('/alunos/{id}/imagem', [AlunoController::class, 'imagem'])->whereNumber('id')->name('alunos.imagem');
+    Route::get('/alunos/{id}/foto', [AlunoController::class, 'foto'])->whereNumber('id')->name('alunos.foto');
     Route::get('/alunos',              [AlunoController::class, 'index'])->name('alunos.index');
     Route::get('/alunos/novo',         [AlunoController::class, 'create'])->name('alunos.create');
     Route::post('/alunos',             [AlunoController::class, 'store'])->name('alunos.store');
