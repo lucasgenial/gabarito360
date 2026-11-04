@@ -37,3 +37,22 @@ Migração explícita aplicada a50 instâncias. Das19 com inset, cinco são pain
 Refinamento após revisão das primeiras capturas: Alunos, Provas e Turmas passam a reunir filtros GET e tabela em um único card-pad. Retirar `interna=true` dessas três instâncias, reduzindo o total final de insets adicionais a16; o único padding vem do card principal. Busca e selects ganham rótulos acessíveis, e os filtros permanecem disponíveis nos estados vazio/erro. Remover a antiga regra que tornava transparente a superfície dessas três listas no celular. Não envolver os demais formulários de ação em um formulário externo.
 
 A suíte web completa passou178 testes/1698 asserções após a migração inicial das50 tabelas. O refinamento das três listas exige nova conferência dos testes pertinentes e das capturas finais. No Chrome,25 alunos exclusivamente fictícios confirmaram paginação para21–25 e preservação de25 ações; catálogo de disciplinas paginado no servidor permanece sem paginação local. Produção e homologação acessível não foram alteradas.
+
+## Validação final desta entrega
+
+Após integrar os filtros, os 29 testes pertinentes passaram com 341 asserções. A revisão independente de UI/UX e Product Design aprovou o conjunto final em 04/11/2026, incluindo os acabamentos de rótulos nos cards, foco interno da matriz e margens dos avisos nas bordas do card-pad. Parecer rastreável fora do repositório: `operacao-20261102/tbl2-parecer-ui-ux.md`. As 50 instâncias foram inventariadas e migradas; a conferência visual foi representativa, não uma declaração de 50 telas fotografadas nem certificação integral de acessibilidade.
+
+Chrome com API real e dados fictícios: Alunos, Provas, Turmas, Equipe, Disciplinas e estados vazio/erro. A resposta503 do cenário de erro foi simulada somente em rota efêmera do QA local, usando o controller e a view reais; não houve indisponibilidade provocada no servidor. Matrizes e seleção foram exercitadas em página efêmera com o componente real e dados fictícios: rolagem interna, foco visível, seleção de1 e25 através de duas páginas e preservação dos25 inputs. Avisos consecutivos na página pública Fale conosco mantiveram16px; os quatro tipos em grid usaram somente o gap20px, sem margem duplicada. Nenhuma rota ou fixture de QA integra o artefato de publicação.
+
+| Parte | Situação final da implementação |
+|---|---|
+| Contrato compartilhado e orientação permanente | Registrados em AGENTS.md e neste documento |
+| 50 tabelas operacionais /41 views e partials | Migradas |
+| Listas Alunos, Provas e Turmas | Filtros e tabela na mesma superfície, sem inset duplicado |
+| Cards móveis e ações | Conferidos em320/390px, com dados preservados |
+| Avisos, matrizes e seleção | Conferidos; margens/foco/seleções preservados |
+| Testes web | 178/1698 na migração;29/341 após refinamento dos filtros |
+| Revisão UI/UX e Product Design | Aprovada; sem bloqueios materiais nas amostras |
+| CI do head final | Em conferência no PR179 |
+| Integração curricular das provas e fechamentoDC1 | Pendentes; esta entrega não encerra a fase |
+| Publicação | Sem deploy; apenas homologação ao fecharDC1; sem produção |
