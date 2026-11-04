@@ -130,9 +130,12 @@ class GabaritoController extends Controller
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        return DB::transaction(function () use ($prova, $provaId, $usuario) {
+        return app(\App\Services\CurriculoProva::class)->transacionar($usuario,function () use ($prova, $provaId, $usuario) {
+            $curriculo=app(\App\Services\CurriculoProva::class); $curriculo->travar($usuario);
             DB::table('provas')->where('id', $provaId)->lockForUpdate()->firstOrFail();
+            $prova=Escopo::provaEditavel($usuario,$provaId); abort_unless($prova,404);
             \App\Services\DuplicarProva::conferirAplicacao($usuario,$prova);
+            $curriculo->conferirPublicacao($usuario,$prova,'publicar_gabarito');
             $gabarito = ContextoCorrecao::filtrar(DB::table('gabaritos'), $prova->espaco_id)->where('prova_id', $provaId)->first();
             if (!$gabarito) {
                 return ApiResponse::error('Gabarito não preenchido. Preencha o gabarito antes de publicar.', [], 422);
@@ -164,6 +167,7 @@ class GabaritoController extends Controller
                 'status'     => 'publicada',
                 'updated_at' => now(),
             ]);
+            $curriculo->registrarPublicacao($usuario,$prova);
 
             return ApiResponse::success(['publicado' => true]);
         });

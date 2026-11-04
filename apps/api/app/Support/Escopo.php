@@ -94,13 +94,27 @@ class Escopo
                 $w->where(function ($propria) use ($u) {
                     $propria->where('provas.criado_por',$u->id)
                         ->where(fn($perfil)=>$perfil->whereNull('provas.perfil_criacao')->orWhere('provas.perfil_criacao','professor'));
-                })->orWhere(function ($institucional) use ($turmas) {
+                })->orWhere(function ($institucional) use ($u,$turmas) {
                     $institucional->whereIn('provas.perfil_criacao',\App\Support\PerfisEscolares::INSTITUCIONAIS)
                         ->whereIn('provas.id', DB::table('prova_turmas')->whereIn('turma_id',$turmas ?: [0])
                             ->when(Espacos::ativo(),fn ($pt) => $pt->whereColumn('prova_turmas.espaco_id','provas.espaco_id')
                                 ->whereExists(fn ($t) => $t->selectRaw('1')->from('turmas as associada')
                                     ->whereColumn('associada.id','prova_turmas.turma_id')->whereColumn('associada.espaco_id','prova_turmas.espaco_id')))
                             ->select('prova_id'));
+                    if (\App\Services\CurriculoProva::aplicavel($u)) {
+                        $v=ContextoVinculo::resolver($u); $hoje=now('America/Sao_Paulo')->toDateString();
+                        $institucional->whereExists(function($c) use($v,$turmas,$hoje) {
+                            $c->selectRaw('1')->from('prova_disciplinas as pd')
+                                ->join('disciplinas as d',fn($j)=>$j->on('d.id','=','pd.disciplina_id')->on('d.espaco_id','=','pd.espaco_id'))
+                                ->join('turma_disciplinas as td',fn($j)=>$j->on('td.disciplina_id','=','pd.disciplina_id')->on('td.espaco_id','=','pd.espaco_id'))
+                                ->join('prova_turmas as pt',fn($j)=>$j->on('pt.prova_id','=','pd.prova_id')->on('pt.espaco_id','=','pd.espaco_id')->on('pt.turma_id','=','td.turma_id'))
+                                ->join('turmas as t',fn($j)=>$j->on('t.id','=','td.turma_id')->on('t.espaco_id','=','td.espaco_id'))
+                                ->whereColumn('pd.prova_id','provas.id')->whereColumn('pd.espaco_id','provas.espaco_id')
+                                ->whereIn('td.turma_id',$turmas?:[0])->where('d.ativo',true)->where('td.ativo',true)->where('t.ativo',true)
+                                ->whereExists(fn($i)=>$i->selectRaw('1')->from('disciplina_professores as dp')->whereColumn('dp.espaco_id','pd.espaco_id')->whereColumn('dp.disciplina_id','pd.disciplina_id')->where('dp.vinculo_id',$v->id)->where('dp.ativo',true))
+                                ->whereExists(fn($a)=>$a->selectRaw('1')->from('docente_atribuicoes as da')->whereColumn('da.espaco_id','td.espaco_id')->whereColumn('da.turma_disciplina_id','td.id')->where('da.vinculo_id',$v->id)->where('da.situacao','ativa')->where('da.inicio_em','<=',$hoje)->where(fn($f)=>$f->whereNull('da.fim_em')->orWhere('da.fim_em','>',$hoje)));
+                        });
+                    }
                 });
             });
         } elseif ($u->perfil === 'professor_autonomo') {

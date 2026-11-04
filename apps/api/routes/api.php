@@ -171,6 +171,7 @@ Route::prefix('v1')->group(function () {
 
         // Provas
         Route::prefix('provas')->group(function () {
+            Route::get('opcoes-disciplinas',[ProvaController::class,'opcoesDisciplinas']);
             Route::get('{provaId}/resultados/pdf', [ResultadoController::class, 'lote'])->middleware(['permissao:relatorio.prova', 'permissao:resultado.compartilhar', 'throttle:5,1']);
             Route::post('{id}/copiar', [ProvaController::class, 'copiar'])->middleware('permissao:prova.duplicar_propria');
             Route::get('/',             [ProvaController::class, 'index'])->middleware('permissao:prova.ver');
