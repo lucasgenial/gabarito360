@@ -271,7 +271,7 @@
         @foreach(array_slice($escola['equipe'], 0, 4) as $m)
           @php
             $ini = collect(explode(' ', $m['nome']))->filter()->map(fn($p) => mb_strtoupper(mb_substr($p,0,1)))->take(2)->implode('');
-            $labels = ['admin_rede'=>'Admin Rede','dir_nucleo'=>'Dir. Núcleo','dir_escolar'=>'Dir. Escolar','coordenador'=>'Coordenador','professor'=>'Professor','aluno'=>'Aluno'];
+            $labels = ['admin_rede'=>'Admin Rede','dir_nucleo'=>'Dir. Núcleo','vice_dir_escolar'=>'Vice-diretor escolar','auxiliar_secretaria'=>'Auxiliar de secretaria','secretario_escolar'=>'Secretário Escolar','dir_escolar'=>'Dir. Escolar','coordenador'=>'Coordenador','professor'=>'Professor','aluno'=>'Aluno'];
           @endphp
           <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-soft);">
             <div class="team-avatar" style="width:36px;height:36px;font-size:13px;">{{ $ini }}</div>
@@ -493,8 +493,8 @@
   </div>
 
   @php
-    $perfisOrdem = ['admin_rede','dir_escolar','coordenador','professor','aluno'];
-    $labels = ['admin_rede'=>'Admin Rede','dir_nucleo'=>'Dir. Núcleo','dir_escolar'=>'Direção Escolar','coordenador'=>'Coordenação','professor'=>'Professores','aluno'=>'Alunos'];
+    $perfisOrdem = ['admin_rede','dir_escolar','vice_dir_escolar','secretario_escolar','auxiliar_secretaria','coordenador','professor','aluno'];
+    $labels = ['admin_rede'=>'Admin Rede','dir_nucleo'=>'Dir. Núcleo','vice_dir_escolar'=>'Vice-diretor escolar','auxiliar_secretaria'=>'Auxiliar de secretaria','secretario_escolar'=>'Secretário Escolar','dir_escolar'=>'Direção Escolar','coordenador'=>'Coordenação','professor'=>'Professores','aluno'=>'Alunos'];
     $equipeAgrupada = collect($escola['equipe'] ?? [])->groupBy('perfil');
   @endphp
 

@@ -61,7 +61,7 @@ class TurmaController extends Controller
             abort(404, 'Turma não encontrada.');
         }
 
-        if (\App\Support\Acesso::perfil() === 'secretario_escolar') return view('turmas.administrativo', ['turma' => $resp->json('data')]);
+        if (\App\Support\Acesso::administrativo()) return view('turmas.administrativo', ['turma' => $resp->json('data')]);
 
         $escolas     = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
         $professores = \App\Support\Acesso::pessoal() ? [] : ($this->api->get("/v1/turmas/{$id}/professores")->json('data.professores') ?? []);

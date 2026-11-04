@@ -41,7 +41,7 @@ class SelecaoCadastroWebTest extends TestCase
         $this->get('/copias/cadastros?espaco_id=5&turma_id=1&_ctx='.$ctx)->assertOk()
             ->assertSee('name="turmas[]"',false)->assertSee('name="alunos[]"',false)->assertSee('name="_token"',false)->assertSee($ctx)
             ->assertSee('Próximas turmas')->assertSee('Próximos alunos')->assertSee('não identifica um destinatário real')
-            ->assertDontSee('checked',false)->assertDontSee('<script>segredo</script>',false);
+            ->assertPaginaSemSelecaoPrevia()->assertDontSee('<script>segredo</script>',false);
     }
     public function test_previa_simulada_com_pendencia_e_sem_acoes_de_autorizacao(): void
     {

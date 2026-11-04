@@ -34,7 +34,7 @@ class SelecaoResultadosWebTest extends TestCase
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->catalogo()]);
         });
         $this->get('/copias/resultados?_ctx='.$ctx)->assertOk()->assertSee('name="notas[]"',false)->assertSee('name="_token"',false)
-            ->assertSee($ctx)->assertSee('Próxima')->assertDontSee('checked',false)->assertDontSee('<script>segredo</script>',false);
+            ->assertSee($ctx)->assertSee('Próxima')->assertPaginaSemSelecaoPrevia()->assertDontSee('<script>segredo</script>',false);
     }
     public function test_previa_nao_comprova_historico_nem_confirma_dependencias(): void
     {

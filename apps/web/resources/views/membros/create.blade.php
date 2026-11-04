@@ -71,14 +71,15 @@
           </div>
           <div class="field">
             <label>Status inicial</label>
+            @if(session('auth_vinculos'))<p class="field-help">O acesso depende do aceite do convite e de um vínculo vigente.</p>@endif
             <div style="display:flex;gap:20px;padding-top:12px;">
               <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;">
                 <input type="radio" name="ativo" value="1" {{ old('ativo', '1') === '1' ? 'checked' : '' }} style="accent-color:var(--accent);" />
-                Ativo
+                {{ session('auth_vinculos') ? 'Enviar convite' : 'Ativo' }}
               </label>
               <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;">
                 <input type="radio" name="ativo" value="0" {{ old('ativo') === '0' ? 'checked' : '' }} style="accent-color:var(--accent);" />
-                Inativo
+                {{ session('auth_vinculos') ? 'Manter inativo' : 'Inativo' }}
               </label>
             </div>
           </div>
@@ -133,7 +134,7 @@
             <input class="input" type="text" id="telefone" name="telefone" value="{{ old('telefone') }}" placeholder="(00) 00000-0000" />
           </div>
           <div class="field">
-            <label for="data_ingresso">Data de início</label>
+            <label for="data_ingresso">Data de ingresso no cadastro</label>
             <input class="input" type="date" id="data_ingresso" name="data_ingresso" value="{{ old('data_ingresso') }}" />
           </div>
           @if(!empty($nucleos))
@@ -215,6 +216,8 @@
     admin_rede:  'Administrador da Rede',
     dir_nucleo:  'Diretor de Núcleo',
     dir_escolar: 'Diretor Escolar',
+    vice_dir_escolar: 'Vice-diretor escolar',
+    auxiliar_secretaria: 'Auxiliar de secretaria',
     secretario_escolar: 'Secretário Escolar',
     coordenador: 'Coordenador Pedagógico',
     professor:   'Professor',

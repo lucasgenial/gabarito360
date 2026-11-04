@@ -26,6 +26,7 @@ class ContextoVinculo
         abort_unless($e && PerfisEspaco::habilitado($v->perfil)
             && PerfisEspaco::compativel($v->perfil, $e, (int) $u->id)
             && self::espacoValido($e), 403, 'Vínculo indisponível.');
+        if ($e->tipo==='escola') GruposFuncionais::conferir((int)$u->id,(int)$v->espaco_id,$v->perfil,now(),$v->fim_em,(int)$v->id,403);
         $v->espaco = $e;
         return $v;
     }

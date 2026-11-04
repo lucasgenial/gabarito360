@@ -16,7 +16,7 @@
   <b>{{ $kpis['total_alunos'] ?? 0 }}</b> aluno(s) cadastrado(s)
   @endif
   </x-slot:sub>
-  <a href="{{ route('alunos.create') }}" class="btn btn-primary">+ Cadastrar aluno</a>
+  @pode('aluno.gerir')<a href="{{ route('alunos.create') }}" class="btn btn-primary">+ Cadastrar aluno</a>@endpode
 </x-pagina>
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
@@ -63,7 +63,7 @@
         <tr>
           <td data-valor-ordem="{{ $a['nome'] }}" data-rotulo="Aluno" class="tabela-principal"><div class="tabela-valor">
             <div class="student-name">
-              <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id']" tamanho="sm" />
+              <x-avatar :avatar-id="$a['avatar_id'] ?? null" :nome="$a['nome']" :aluno-id="$a['id']" :tem-foto="$a['tem_foto']??false" :imagem-versao="$a['imagem_versao']??1" tamanho="sm" />
               <strong>{{ $a['nome'] }}</strong>
             </div>
           </div></td>

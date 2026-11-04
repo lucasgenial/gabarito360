@@ -15,9 +15,10 @@ class Cadastro
 {
     /** Perfis que cada gestor pode cadastrar/gerir. */
     public const PODE_GERIR = [
-        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
-        'dir_nucleo'  => ['dir_escolar', 'secretario_escolar', 'coordenador'],
-        'dir_escolar' => ['secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'vice_dir_escolar', 'auxiliar_secretaria', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'dir_nucleo'  => ['dir_escolar', 'vice_dir_escolar', 'auxiliar_secretaria', 'secretario_escolar', 'coordenador'],
+        'dir_escolar' => ['vice_dir_escolar', 'auxiliar_secretaria', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'vice_dir_escolar' => ['secretario_escolar', 'auxiliar_secretaria', 'coordenador', 'professor', 'aplicador', 'aluno'],
         'coordenador' => ['professor', 'aplicador', 'aluno'],
     ];
 
@@ -26,6 +27,7 @@ class Cadastro
 
     public static function perfisGeridos(Usuario $gestor): array
     {
+        if ($gestor->perfil === 'vice_dir_escolar' && !Permissao::pode($gestor, 'usuario.gerir')) return [];
         return self::PODE_GERIR[$gestor->perfil] ?? [];
     }
 

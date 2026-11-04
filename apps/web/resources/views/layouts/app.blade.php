@@ -68,10 +68,11 @@
       @endif
       @endunless
       <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+      <button type="button" class="avatar" data-abrir-imagem aria-label="Alterar foto ou avatar" title="Alterar foto ou avatar">
+        <x-avatar-usuario :nome="session('auth_nome','Usuário')" :avatar-id="session('auth_avatar_id')" :tem-foto="session('auth_tem_foto',false)" :versao="session('auth_imagem_versao',1)" :proprio="true" tamanho="sm" />
+      </button>
       <div class="user-menu-container">
-        <button type="button" class="avatar" id="user-menu-trigger" aria-label="Abrir opções da conta" aria-expanded="false" aria-controls="user-menu">
-          {{ strtoupper(substr(session('auth_nome', 'U'), 0, 2)) }}
-        </button>
+        <button type="button" class="theme-btn" id="user-menu-trigger" aria-label="Abrir opções da conta" title="Opções da conta" aria-expanded="false" aria-controls="user-menu"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
         <div class="user-menu" id="user-menu" hidden>
           <div class="user-menu-header">
             <div class="user-name">{{ session('auth_nome') }}</div>
@@ -170,5 +171,6 @@ document.getElementById('menu-recolher').addEventListener('click', function () {
 <script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
 <script src="{{ asset('js/tabelas.js') }}?v={{ @filemtime(public_path('js/tabelas.js')) }}"></script>
 @stack('scripts')
+@include('layouts._imagem-usuario')
 </body>
 </html>

@@ -33,6 +33,18 @@ class CatalogoPermissoes
         'aluno.ver', 'aluno.gerir', 'aluno.importar', 'aluno.desativar',
     ];
 
+    public const VICE_DIRETOR = [
+        'escola.ver', 'turma.ver', 'aluno.ver', 'usuario.ver', 'prova.ver', 'gabarito.ver',
+        'correcao.acompanhar', 'resultado.ver', 'relatorio.prova', 'relatorio.turma', 'relatorio.escola',
+    ];
+    public const VICE_EXTRAS = [
+        'escola.editar', 'escola.logo', 'turma.gerir', 'turma.desativar', 'turma.vincular_professor',
+        'aluno.gerir', 'aluno.importar', 'aluno.desativar', 'usuario.gerir',
+        'prova.criar', 'prova.editar', 'gabarito.editar', 'cartao.imprimir', 'cartao.enviar',
+        'correcao.alterar', 'correcao.fechar', 'correcao.reabrir', 'resultado.compartilhar',
+    ];
+    public const AUXILIAR_SECRETARIA = ['escola.ver', 'turma.ver', 'aluno.ver', 'aluno.gerir'];
+
     public const LISTA = [
         ['catalogo.solicitar', 'catalogo', 'Solicitar cadastro no próprio espaço pessoal', '--------'],
         ['catalogo.manter_escopo', 'catalogo', 'Manter unidades com autoridade institucional comprovada', '-vvv----'],
@@ -107,6 +119,8 @@ class CatalogoPermissoes
 
         $out['professor_autonomo'] = ['padrao' => self::AUTONOMO, 'extra' => []];
         $out['secretario_escolar'] = ['padrao' => self::SECRETARIO_ESCOLAR, 'extra' => []];
+        $out['vice_dir_escolar'] = ['padrao' => self::VICE_DIRETOR, 'extra' => self::VICE_EXTRAS];
+        $out['auxiliar_secretaria'] = ['padrao' => self::AUXILIAR_SECRETARIA, 'extra' => []];
         return $out;
     }
 }

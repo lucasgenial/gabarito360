@@ -418,6 +418,9 @@ class DashboardController extends Controller
 
     public function dirEscolar(Request $request): JsonResponse
     {
+        if ($request->user()->perfil === 'vice_dir_escolar') {
+            foreach (['turma.ver', 'aluno.ver', 'prova.ver', 'resultado.ver', 'relatorio.escola', 'usuario.ver'] as $chave) abort_unless(\App\Support\Permissao::pode($request->user(), $chave), 403);
+        }
         $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
         if ($escolha = $this->escolha($request, $consulta, 'escola')) return $escolha;

@@ -14,6 +14,8 @@ class Acesso
         'suporte' => 'Suporte',
         'financeiro' => 'Financeiro',
         'secretario_escolar' => 'Secretário Escolar',
+        'vice_dir_escolar' => 'Vice-diretor escolar',
+        'auxiliar_secretaria' => 'Auxiliar de secretaria',
         'secretario_educacao' => 'Secretário de Educação',
         'admin_rede'          => 'Administrador da Rede',
         'dir_nucleo'          => 'Diretor de Núcleo',
@@ -31,6 +33,7 @@ class Acesso
      * exige na tela de destino — assim nenhum item leva a 403 (docs/21, etapa 4).
      */
     private const ITENS = [
+        'funcoes' => ['Configurações de usuários','Usuários','equipe','funcoes.index',['funcoes.*'],['usuario.excecao_funcional.gerir']],
         'catalogo_pedidos' => ['Minhas solicitações', 'Solicitações', 'escola', 'catalogo-pedidos.index', ['catalogo-pedidos.*'], ['catalogo.solicitar']],
         'catalogo_atendimento' => ['Cadastro de instituições', 'Instituições', 'escola', 'catalogo-atendimento.index', ['catalogo-atendimento.*'], ['catalogo.solicitacao.analisar']],
         'catalogo_gestao' => ['Cadastro institucional', 'Instituição', 'escola', 'catalogo-gestao.index', ['catalogo-gestao.*'], ['catalogo.manter_escopo']],
@@ -58,7 +61,7 @@ class Acesso
     ];
 
     /** Ordem do menu lateral. */
-    private const ORDEM = ['painel', 'clientes', 'internos', 'catalogo_atendimento', 'pedidos', 'exportacoes', 'provas', 'corrigir', 'turmas', 'instituicoes', 'catalogo_pedidos', 'catalogo_gestao', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
+    private const ORDEM = ['painel', 'funcoes', 'clientes', 'internos', 'catalogo_atendimento', 'pedidos', 'exportacoes', 'provas', 'corrigir', 'turmas', 'instituicoes', 'catalogo_pedidos', 'catalogo_gestao', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
 
     /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
     private const PRINCIPAIS = [
@@ -66,6 +69,8 @@ class Acesso
         'suporte' => ['painel', 'clientes'],
         'financeiro' => ['painel', 'clientes'],
         'secretario_escolar' => ['painel', 'turmas', 'alunos'],
+        'auxiliar_secretaria' => ['painel', 'turmas', 'alunos'],
+        'vice_dir_escolar' => ['painel', 'provas', 'turmas', 'relatorios'],
         'secretario_educacao' => ['painel', 'relatorios', 'escolas'],
         'admin_rede'          => ['painel', 'escolas', 'relatorios', 'equipe'],
         'dir_nucleo'          => ['painel', 'escolas', 'relatorios', 'equipe'],
@@ -79,14 +84,16 @@ class Acesso
 
     /** Perfis que cada gestor pode cadastrar/gerir (espelha App\Support\Cadastro da API). */
     public const PODE_GERIR = [
-        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
-        'dir_nucleo'  => ['dir_escolar', 'secretario_escolar', 'coordenador'],
-        'dir_escolar' => ['secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'admin_rede'  => ['admin_rede', 'dir_nucleo', 'dir_escolar', 'vice_dir_escolar', 'auxiliar_secretaria', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'dir_nucleo'  => ['dir_escolar', 'vice_dir_escolar', 'auxiliar_secretaria', 'secretario_escolar', 'coordenador'],
+        'dir_escolar' => ['vice_dir_escolar', 'auxiliar_secretaria', 'secretario_escolar', 'coordenador', 'professor', 'aplicador', 'aluno'],
+        'vice_dir_escolar' => ['secretario_escolar', 'auxiliar_secretaria', 'coordenador', 'professor', 'aplicador', 'aluno'],
         'coordenador' => ['professor', 'aplicador', 'aluno'],
     ];
 
     public static function perfisGeridos(): array
     {
+        if (self::perfil() === 'vice_dir_escolar' && !self::pode('usuario.gerir')) return [];
         return self::PODE_GERIR[self::perfil()] ?? [];
     }
 
@@ -101,6 +108,11 @@ class Acesso
     public static function perfil(): ?string
     {
         return session('auth_vinculos') ? (ContextoWeb::atual()['perfil'] ?? null) : session('auth_perfil');
+    }
+
+    public static function administrativo(): bool
+    {
+        return in_array(self::perfil(), ['secretario_escolar', 'auxiliar_secretaria'], true);
     }
 
     public static function pessoal(): bool

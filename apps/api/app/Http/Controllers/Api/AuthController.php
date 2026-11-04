@@ -52,6 +52,7 @@ class AuthController extends Controller
             'selecionar_vinculo' => \App\Support\RegimeVinculos::obrigatorio(),
             'selecionar_acesso_interno' => \App\Support\TokenInterno::habilitado(),
             'permissoes' => \App\Support\RegimeVinculos::obrigatorio() ? [] : \App\Support\Permissao::efetivas($usuario),
+            'avatar_id'=>$usuario->avatar_id,'tem_foto'=>$usuario->tem_foto,'imagem_versao'=>$usuario->imagem_versao,
             'nome'       => $usuario->nome,
             'email'      => $usuario->email,
             'eh_titular' => $ehTitular,
@@ -71,6 +72,7 @@ class AuthController extends Controller
         if (\App\Support\ContextoInterno::presente($request->user())) {
             return ApiResponse::success(['id' => $request->user()->id, 'nome' => $request->user()->nome,
                 'email' => $request->user()->email, 'cpf' => $request->user()->cpf,
+                'avatar_id'=>$request->user()->avatar_id,'tem_foto'=>$request->user()->tem_foto,'imagem_versao'=>$request->user()->imagem_versao,
                 'created_at' => $request->user()->created_at, 'escola_nome' => null,
                 'tipo_contexto' => 'interno', 'perfil' => $request->user()->perfil,
                 'permissoes' => \App\Support\ContextoInterno::permissoes($request->user())]);
