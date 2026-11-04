@@ -4,6 +4,8 @@
   function destino(valor, base, id) {
     const u = new URL(valor, base), origem = new URL(base);
     if (!['http:', 'https:'].includes(u.protocol) || u.origin !== origem.origin) return valor;
+    // A API já associa a imagem ao ator/vínculo. Alterar a query invalida sua assinatura.
+    if (u.searchParams.has('signature')) return valor;
     if (['/login', '/logout', '/vinculos'].includes(u.pathname)) return valor;
     u.searchParams.set('_ctx', id);
     return u.href;
