@@ -61,6 +61,8 @@ Route::prefix('v1')->group(function () {
             Route::get('opcoes', [$ac,'opcoes']);
             Route::get('', [$ac,'index']); Route::post('', [$ac,'store']);
             Route::get('{id}', [$ac,'show'])->whereNumber('id'); Route::put('{id}', [$ac,'update'])->whereNumber('id');
+            Route::post('{id}/vinculos', [$ac,'vincular'])->whereNumber('id');
+            Route::post('{id}/desvincular', [$ac,'desvincular'])->whereNumber('id');
         });
         Route::prefix('disciplinas')->middleware('throttle:60,1')->group(function () use ($dc) {
             Route::get('opcoes', [$dc,'opcoes']); Route::get('professores', [$dc,'professores']); Route::get('', [$dc,'index']); Route::post('', [$dc,'store']);

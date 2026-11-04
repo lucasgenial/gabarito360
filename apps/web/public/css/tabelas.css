@@ -19,6 +19,16 @@ table.tabela-padrao { width:100%; border-collapse:collapse; color:var(--fg); fon
 .tabela-padrao .tabela-acoes form { display:inline-block; }
 .tabela-padrao .tabela-acoes a:not(.btn) { display:inline-flex; align-items:center; min-height:44px; padding:8px 12px; border:1px solid var(--accent); border-radius:var(--radius-md); }
 .tabela-valor { min-width:0; }
+.tabela-compacta { table-layout:fixed; }
+.tabela-compacta th:last-child, .tabela-compacta td.tabela-acoes { width:132px; min-width:0; }
+.tabela-compacta td { overflow-wrap:anywhere; }
+.tabela-compacta .tabela-acoes .btn { white-space:nowrap !important; padding:10px 8px; }
+@media screen and (max-width:720px) {
+  [data-modo="compacta"] .tabela-area { overflow-x:auto; }
+  .tabela-compacta th, .tabela-compacta td { padding:12px 10px; }
+  .tabela-compacta th:last-child, .tabela-compacta td.tabela-acoes { width:110px; }
+  .tabela-compacta .tabela-acoes .btn { margin:0; padding:10px 8px; font-size:12px; }
+}
 .tabela-valor .mini-bar { flex-shrink:0; }
 .tabela-padrao .tabela-selecionar input { width:22px; height:22px; margin:11px; accent-color:var(--accent); }
 .tabela-dica { font-size:13px; color:var(--muted); padding:10px 16px; background:var(--surface-2); }
@@ -34,20 +44,20 @@ table.tabela-padrao { width:100%; border-collapse:collapse; color:var(--fg); fon
   .tabela-rodape nav { width:100%; justify-content:space-between; }
   .tabela-area { overflow:visible; }
   [data-modo="matriz"] .tabela-area { overflow-x:auto; overscroll-behavior-x:contain; }
-  .tabela-padrao:not(.tabela-matriz) .tabela-valor { flex:1; min-width:0; }
-  .tabela-padrao:not(.tabela-matriz) td[data-rotulo="Progresso"] .tabela-valor > div:first-child { justify-content:flex-end; white-space:nowrap; }
-  table.tabela-padrao:not(.tabela-matriz), .tabela-padrao:not(.tabela-matriz) tbody { display:block; width:100%; }
-  .tabela-padrao:not(.tabela-matriz) caption:not(.sr-only) { display:block; width:100%; padding:10px 0; text-align:left; font-size:13px; color:var(--muted); }
-  .tabela-padrao:not(.tabela-matriz) thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
-  .tabela-padrao:not(.tabela-matriz) tbody tr { display:flex; flex-direction:column; width:100%; margin:12px 0; padding:4px 16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); }
-  .tabela-padrao:not(.tabela-matriz) tbody td, .tabela-padrao:not(.tabela-matriz) tbody td.hide-sm { display:flex !important; align-items:flex-start; justify-content:space-between; gap:16px; width:100%; min-width:0; max-width:none !important; padding:10px 0 !important; white-space:normal !important; overflow-wrap:anywhere; text-align:right !important; }
-  .tabela-padrao:not(.tabela-matriz) td::before { content:attr(data-rotulo); flex:0 0 30%; text-align:left; font-weight:600; font-size:13px; color:var(--muted); }
-  .tabela-padrao:not(.tabela-matriz) td.tabela-principal { order:-1; display:block !important; text-align:left !important; font-size:16px; padding:14px 0 !important; }
-  .tabela-padrao:not(.tabela-matriz) td.tabela-principal::before, .tabela-padrao:not(.tabela-matriz) td[colspan]::before { content:none; }
-  .tabela-padrao:not(.tabela-matriz) tbody td[colspan] { display:block !important; text-align:center !important; }
-  .tabela-padrao:not(.tabela-matriz) td[colspan] .icone-grande { margin-left:auto; margin-right:auto; }
-  .tabela-padrao:not(.tabela-matriz) td.tabela-acoes { display:block !important; text-align:left !important; padding:12px 0 !important; }
-  .tabela-padrao:not(.tabela-matriz) td.tabela-acoes::before { display:block; margin-bottom:6px; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) .tabela-valor { flex:1; min-width:0; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td[data-rotulo="Progresso"] .tabela-valor > div:first-child { justify-content:flex-end; white-space:nowrap; }
+  table.tabela-padrao:not(.tabela-matriz):not(.tabela-compacta), .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) tbody { display:block; width:100%; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) caption:not(.sr-only) { display:block; width:100%; padding:10px 0; text-align:left; font-size:13px; color:var(--muted); }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) tbody tr { display:flex; flex-direction:column; width:100%; margin:12px 0; padding:4px 16px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) tbody td, .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) tbody td.hide-sm { display:flex !important; align-items:flex-start; justify-content:space-between; gap:16px; width:100%; min-width:0; max-width:none !important; padding:10px 0 !important; white-space:normal !important; overflow-wrap:anywhere; text-align:right !important; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td::before { content:attr(data-rotulo); flex:0 0 30%; text-align:left; font-weight:600; font-size:13px; color:var(--muted); }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-principal { order:-1; display:block !important; text-align:left !important; font-size:16px; padding:14px 0 !important; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-principal::before, .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td[colspan]::before { content:none; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) tbody td[colspan] { display:block !important; text-align:center !important; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td[colspan] .icone-grande { margin-left:auto; margin-right:auto; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-acoes { display:block !important; text-align:left !important; padding:12px 0 !important; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-acoes::before { display:block; margin-bottom:6px; }
   .card.tabela-superficie { background:transparent; border:0; box-shadow:none; overflow:visible !important; }
 }
 @media print {
