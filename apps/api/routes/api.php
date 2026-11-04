@@ -55,6 +55,19 @@ Route::prefix('v1')->group(function () {
 
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
+        $dc=\App\Http\Controllers\Api\DisciplinaController::class;
+        Route::prefix('disciplinas')->middleware('throttle:60,1')->group(function () use ($dc) {
+            Route::get('opcoes', [$dc,'opcoes']); Route::get('professores', [$dc,'professores']); Route::get('', [$dc,'index']); Route::post('', [$dc,'store']);
+            Route::get('{id}', [$dc,'show'])->whereNumber('id'); Route::put('{id}', [$dc,'update'])->whereNumber('id');
+            Route::post('{id}/professores', [$dc,'indicar'])->whereNumber('id');
+        });
+        Route::prefix('turmas/{turma}/disciplinas')->whereNumber('turma')->middleware('throttle:60,1')->group(function () use ($dc) {
+            Route::get('', [$dc,'turma']); Route::post('', [$dc,'adicionar']);
+            Route::get('{componente}', [$dc,'componente'])->whereNumber('componente');
+            Route::post('{componente}/situacao', [$dc,'situacao'])->whereNumber('componente');
+            Route::post('{componente}/atribuicoes', [$dc,'atribuir'])->whereNumber('componente');
+            Route::post('{componente}/atribuicoes/{atribuicao}/encerrar', [$dc,'encerrar'])->whereNumber('componente')->whereNumber('atribuicao');
+        });
         $sol=\App\Http\Controllers\Api\SolicitacaoCatalogoController::class;
         Route::prefix('catalogo/minhas-solicitacoes')->middleware('throttle:catalogo-operacao')->group(function()use($sol){
             Route::get('opcoes',[$sol,'opcoes']);Route::get('municipios',[$sol,'municipios']);

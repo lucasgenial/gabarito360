@@ -67,11 +67,26 @@ class TurmaController extends Controller
         $professores = \App\Support\Acesso::pessoal() ? [] : ($this->api->get("/v1/turmas/{$id}/professores")->json('data.professores') ?? []);
         $todosProfessores = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/usuarios', ['perfil' => 'professor'])->json('data.usuarios') ?? []);
 
+        $dc1Visivel = config('disciplinas.ativo') && session('auth_vinculos') && (\App\Support\ContextoWeb::atual()['espaco']['tipo'] ?? '') === 'escola'
+            && in_array(\App\Support\Acesso::perfil(), ['coordenador','dir_escolar','vice_dir_escolar','professor'], true) && \App\Support\Acesso::pode('turma.ver');
+        $dc1Dados = null; $dc1Erro = false; $dc1Retorno = [];
+        if ($dc1Visivel) {
+            try {
+                $dc1 = $this->api->get("/v1/turmas/{$id}/disciplinas"); $dc1Erro = $dc1->failed(); $dc1Dados = $dc1->json('data');
+                if ((int)request('retorno_turma') === $id && request()->filled('retorno_componente') && \App\Support\Acesso::pode('disciplina.gerir')) {
+                    $campos = request()->validate(['retorno_turma'=>'required|integer|min:1','retorno_componente'=>'required|integer|min:1',
+                        'rascunho_inicio'=>'nullable|date_format:Y-m-d','rascunho_fim'=>'nullable|date_format:Y-m-d','rascunho_papel'=>'nullable|in:titular,codocencia,substituicao','rascunho_vinculo'=>'nullable|integer|min:1','rascunho_chave'=>'nullable|uuid']);
+                    if ($this->api->get("/v1/turmas/{$id}/disciplinas/".$campos['retorno_componente'])->successful()) $dc1Retorno = array_filter($campos, fn($v)=>$v!==null);
+                }
+            } catch (\Illuminate\Http\Client\ConnectionException) { $dc1Erro = true; }
+        }
+
         return view('turmas.show', [
             'turma'            => $resp->json('data'),
             'escolas'          => $escolas,
             'professores'      => $professores,
             'todosProfessores' => $todosProfessores,
+            'dc1Visivel' => $dc1Visivel, 'dc1Dados' => $dc1Dados, 'dc1Erro' => $dc1Erro, 'dc1Retorno' => $dc1Retorno,
         ]);
     }
 

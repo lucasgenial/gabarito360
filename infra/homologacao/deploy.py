@@ -71,6 +71,8 @@ flags={
  'PEDIDOS_TITULARES_ATIVOS':'true','PEDIDOS_EXPORTACAO_AUTORIZACOES_ATIVAS':'true','PEDIDOS_EXPORTACAO_GERACAO_ATIVA':'true','PEDIDOS_EXPORTACAO_ENTREGA_ATIVA':'true',
  'PEDIDOS_TITULARES_INTERFACE_ATIVA':'true','PEDIDOS_EXPORTACOES_INTERFACE_ATIVA':'true',
  'MAIL_MAILER':'log','MP_SANDBOX':'true','MP_ACCESS_TOKEN':'','MP_PUBLIC_KEY':''}
+if fase in ['HOMOLOGACAO-DC1','ENSAIO-DC1']:
+ flags.update({'DISCIPLINAS_ATIVAS':'true','IDENTIDADE_PROVISORIOS_ATIVOS':'false'})
 for app in ['api','web']:
  p=BASE/'shared'/app/'.env';changes=dict(flags)
  if app=='web':changes['API_BASE_URL']='http://127.0.0.1:8081/api'
