@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 class ImagemPerfil
 {
     public const REGRA = 'file|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4096,max_height=4096';
+    public const ALVO_BYTES = 98304;
+    public const MAX_BYTES = 131072;
 
     public function guardar(UploadedFile $foto, string $pasta): string
     {
@@ -31,8 +33,12 @@ class ImagemPerfil
         imagefill($destino, 0, 0, imagecolorallocate($destino, 255, 255, 255));
         $lado = min(imagesx($origem), imagesy($origem));
         imagecopyresampled($destino, $origem, 0, 0, (int)((imagesx($origem)-$lado)/2), (int)((imagesy($origem)-$lado)/2), 384, 384, $lado, $lado);
-        ob_start(); imagewebp($destino, null, 85); $bytes = ob_get_clean();
+        foreach ([80, 72, 60, 45] as $qualidade) {
+            ob_start(); $ok = imagewebp($destino, null, $qualidade); $bytes = ob_get_clean();
+            if (!$ok || strlen($bytes) <= self::ALVO_BYTES) break;
+        }
         imagedestroy($origem); imagedestroy($destino);
+        abort_unless($ok && $bytes && strlen($bytes) <= self::MAX_BYTES, 422, 'Não foi possível compactar esta foto. Escolha outra imagem.');
         $caminho = $pasta.'/'.Str::uuid().'.webp';
         abort_unless(Storage::disk('local')->put($caminho, $bytes), 503, 'Não foi possível salvar a imagem.');
         return $caminho;
