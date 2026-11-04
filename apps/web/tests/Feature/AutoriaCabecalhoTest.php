@@ -30,7 +30,8 @@ class AutoriaCabecalhoTest extends TestCase
                 ->assertSee('data-sem-contexto',false)->assertSee('aria-controls="user-menu"',false)
                 ->assertSee('aria-expanded="false"',false)->assertSee('id="user-menu" hidden',false)
                 ->assertDontSee('badge badge-info badge-dot',false)->assertSee('type="submit" class="logout"',false);
-            $this->assertSame(2,substr_count($r->getContent(),'contexto-ativo-link'));
+            $this->assertSame(1,substr_count($r->getContent(),'class="contexto-ativo"'));
+            $r->assertDontSee('contexto-lateral',false)->assertSee('class="contexto-trocar"',false);
             if ($tipo==='interno') $r->assertSee('Equipe Gabarito360')->assertDontSee('Instituição fictícia com nome longo');
             if ($tipo==='pessoal') $r->assertSee('Meu espaço pessoal');
         }
