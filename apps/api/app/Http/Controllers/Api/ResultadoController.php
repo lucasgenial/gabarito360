@@ -65,13 +65,12 @@ class ResultadoController extends Controller
         }
 
         $prova  = Prova::find($provaId);
-        $escola = $prova->escola_id ? DB::table('escolas')->where('id', $prova->escola_id)->first() : null;
         $emissao = app(\App\Services\EmissaoDocumento::class);
         $preparado = $emissao->preparar($request->user(), $modelo, $dados['cabecalho']['nome'] ?? '', $prova->espaco_id);
         $saida = tempnam(sys_get_temp_dir(), 'g360_e'.($prova->espaco_id ?? 0).'_res_');
         abort_unless($saida !== false, 503, 'Não foi possível preparar o PDF.');
         chmod($saida, 0600);
-        $pdf = $this->dadosPdf($dados, $prova, $escola, $saida) + ['modelo' => $modelo, 'emissao' => $preparado['pdf']];
+        $pdf = $this->dadosPdf($dados, $prova, $saida, (bool) \App\Support\EspacoPessoal::doAtor($request->user())) + ['modelo' => $modelo, 'emissao' => $preparado['pdf']];
         if ($modelo === 'aluno') { unset($pdf['media_turma']); foreach ($pdf['folha'] as &$q) { unset($q['turma'], $q['geral']); } unset($q); }
         try {
         $r = Process::path(config('omr.scripts'))
@@ -116,7 +115,6 @@ class ResultadoController extends Controller
             ->orderBy('turma_id')->orderBy('aluno_id')->distinct()->limit(501)->pluck('aluno_id')->all();
         abort_unless(count($ids), 422, 'Nenhum resultado disponível para este lote.');
         abort_if(count($ids) > 500, 422, 'O limite é de 500 resultados por PDF. Selecione uma turma.');
-        $escola = $prova->escola_id ? DB::table('escolas')->find($prova->escola_id) : null;
         $emissao = app(\App\Services\EmissaoDocumento::class);
         $preparado = null;
         $resultados = [];
@@ -124,7 +122,7 @@ class ResultadoController extends Controller
             $dados = $this->montar($request, (int) $id, $provaId);
             if ($dados instanceof JsonResponse) return $dados;
             $preparado ??= $emissao->preparar($request->user(), $modelo, $dados['cabecalho']['nome'] ?? '', $prova->espaco_id, count($ids));
-            $pdf = $this->dadosPdf($dados, $prova, $escola, '') + ['modelo' => $modelo, 'emissao' => $preparado['pdf']];
+            $pdf = $this->dadosPdf($dados, $prova, '', (bool) \App\Support\EspacoPessoal::doAtor($request->user())) + ['modelo' => $modelo, 'emissao' => $preparado['pdf']];
             if ($modelo === 'aluno') { unset($pdf['media_turma']); foreach ($pdf['folha'] as &$q) { unset($q['turma'], $q['geral']); } unset($q); }
             $resultados[] = $pdf;
         }
@@ -156,13 +154,10 @@ class ResultadoController extends Controller
         } catch (\Throwable $e) { @unlink($saida); throw $e; }
     }
 
-    private function dadosPdf(array $dados, Prova $prova, ?object $escola, string $saida): array
+    private function dadosPdf(array $dados, Prova $prova, string $saida, bool $autonomo): array
     {
         return [
                 'saida'       => $saida,
-                'rede'        => $escola ? DB::table('nucleos')->join('redes', 'nucleos.rede_id', '=', 'redes.id')
-                    ->where('nucleos.id', $escola->nucleo_id)->value('redes.nome') : null,
-                'escola'      => $dados['cabecalho']['nome'] ?? '',
                 'titulo'      => $dados['prova']['titulo'],
                 'disciplina'  => $dados['prova']['disciplina'],
                 'data'        => $prova->data_aplicacao?->format('d/m/Y'),
@@ -172,11 +167,7 @@ class ResultadoController extends Controller
                 'lingua'      => $dados['lingua'],
                 'media_turma' => $dados['media_turma'],
                 'folha'       => $dados['folha'],
-                'logo'        => Cabecalho::logoPath($escola->logo_path ?? null),
-                'logo_ente'   => $escola ? Cabecalho::logoPath(DB::table('nucleos')->join('redes', 'redes.id', '=', 'nucleos.rede_id')
-                    ->where('nucleos.id', $escola->nucleo_id)->value('redes.logo_path')) : null,
-                'detalhe'     => $dados['cabecalho']['detalhe'] ?? null,
-            ];
+            ] + Cabecalho::paraPdf($dados['cabecalho'], $autonomo);
     }
 
     /** Monta o resultado do aluno na prova, ou a resposta de erro. */
