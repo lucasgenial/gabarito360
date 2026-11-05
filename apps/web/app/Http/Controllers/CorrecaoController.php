@@ -50,28 +50,22 @@ class CorrecaoController extends Controller
             return view('correcao.camera', ['prova' => $resp->json('data'), 'alunos' => []]);
         }
 
-        $statusResp = $this->api->get("/v1/provas/{$provaId}/cartoes/status");
-        $status     = $statusResp->successful() ? $statusResp->json('data') : [
-            'total' => 0, 'lidos' => 0, 'pendentes' => 0, 'ambiguos' => 0,
-            'concluida' => false, 'ambiguidades' => [], 'recentes' => [],
-        ];
-
-        $turmas = $resp->json('data.turmas') ?? [];
-        // Alunos de todas as turmas da prova (para vincular cartões sem QR/em branco)
-        $alunos = [];
-        foreach ($turmas as $t) {
-            $alunosResp = $this->api->get('/v1/alunos', ['turma_id' => $t['id']]);
-            foreach ($alunosResp->successful() ? ($alunosResp->json('data.alunos') ?? []) : [] as $a) {
-                $a['turma_nome'] = $t['nome'];
-                $alunos[] = $a;
-            }
-        }
-
         return view('correcao.show', [
             'prova'  => $resp->json('data'),
-            'status' => $status,
-            'alunos' => $alunos,
+            'status' => ['correcao'=>$resp->json('data.correcao')??['fechada'=>!empty($resp->json('data.correcao_fechada_em'))]],
+            'alunos' => [],
         ]);
+    }
+
+    public function alunos(int $provaId)
+    {
+        $resp=$this->api->get('/v1/provas/'.$provaId);abort_unless($resp->successful(),$resp->status());
+        $alunos=[];
+        foreach($resp->json('data.turmas')??[] as $t){
+            $r=$this->api->get('/v1/alunos',['turma_id'=>$t['id']]);abort_unless($r->successful(),$r->status());
+            foreach($r->json('data.alunos')??[] as $a)$alunos[$a['id']]=['id'=>$a['id'],'nome'=>$a['nome'],'matricula'=>$a['matricula']??null,'turma_nome'=>$t['nome']];
+        }
+        return response()->json(['alunos'=>array_values($alunos)]);
     }
 
     public function status(int $provaId)

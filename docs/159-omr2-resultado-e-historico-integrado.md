@@ -1,0 +1,32 @@
+# OMR2 — acertos e erros, cartão e histórico integrado
+
+05/11/2026. Planejamento revisto antes da implementação, conforme solicitação do responsável. Consulta prévia de UI/UX e Product Design concluída; aceite final exige novas evidências no Chrome. Publicar somente na homologação; preservar fotos, gabaritos, notas e histórico. Sem migração de banco nesta entrega.
+
+| Etapa | Entrega | Situação inicial |
+|---|---|---|
+| OMR2-A | Identificação em três linhas, barra própria de ações abaixo, Cartão resposta com ícone e menu Relatório; ícones na tela pequena; retirar revisão/retirada do resultado | Direção aprovada |
+| OMR2-B | PDF.js da Mozilla ajustado à largura, sem comandos de zoom/ajuste/download/impressão/cópia; cards de igual largura/altura; modal compacto | Implementar por opção do leitor compartilhado |
+| OMR2-C | Histórico do aluno abaixo dos cards, tabela padrão/paginação, detalhes na mesma tela; contagem persistida na identificação | Implementar com autorização e falha recuperável |
+| OMR2-C2 | Breadcrumb central por rota/dados autorizados/origem validada; Solid Toast no topo direito com identidade G360 | Acrescentada por solicitação posterior; direção prévia aprovada |
+| OMR2-D | Testes significativos, conferência visual independente, CI, merge e homologação com integridade de dados | Após implementação |
+| Produção | Aguardar decisão posterior do responsável | Não publicar |
+
+Composição: nome; turma/matrícula; quantidade de tentativas registradas. Revisões de questões e repetições técnicas não contam como novas tentativas. A barra própria abaixo da identificação contém Cartão resposta e Relatório (imprimir relatório, baixar PDF do relatório, compartilhar resultado), sem ação verde concorrente. Não há botão Histórico de tentativas; a seção fica abaixo das questões/documento. Remover o atalho de histórico do acompanhamento. Revisar e retirar continuam disponíveis no acompanhamento, com as proteções existentes.
+
+Desktop: documento inicialmente oculto; questões ocupam toda a largura. Aberto, duas colunas iguais e cards com mesma altura externa, determinada pelo card das questões; PDF rola internamente, em largura ajustada. Compacto: somente questões no fluxo e documento em modal. Ícones possuem nomes acessíveis, foco e legenda; não esconder nomes das opções do menu. Preservar zoom do navegador/dispositivo. Bloqueios locais do documento não prometem impedir captura de tela nem bloqueiam a exportação autorizada do relatório.
+
+Histórico: consultar por aluno/prova/espaço com as permissões vigentes; não tratar indisponibilidade como zero. Paginação e conferência permanecem na rota de resultado, com detalhes de tentativa selecionada abaixo da tabela. Aplicar/descartar conservam confirmação, motivo, versão e auditoria; redirecionar à mesma tela quando originados nela. Rotas operacionais anteriores permanecem compatíveis com recibos/fila, sem expor uma nova listagem de histórico como navegação principal. Não alterar nem remover evidências persistidas.
+
+Referência técnica solicitada: https://mozilla.github.io/pdf.js/. O projeto já usa PDF.js 6.5.438 local e pdf-lib para converter a imagem em PDF em memória. Configurar a apresentação solicitada sem incluir o visualizador completo com controles de download/impressão e sem dependências remotas novas.
+
+Extensão solicitada durante a execução: motor de breadcrumb central, começando por prova/correção/resultado e preservando o breadcrumb anterior nas demais telas ainda não mapeadas. Resolver por rota nomeada e dados autorizados, manter origem permitida e contexto por aba, nunca acrescentar parâmetros a documentos assinados. Navegação semântica com lista e página atual; quebra sem overflow no celular. Não inferir hierarquia ou nomes de entidades pela URL.
+
+Solid Toast 0.5.0 com SolidJS 1.9.18 em ilha pequena, distribuída localmente e compilada de forma reproduzível. Não converter Blade em SPA. Toasts personalizados com tokens G360, no canto superior direito abaixo do cabeçalho, margem móvel, fechar44px e movimento reduzido. Sucesso5s, informação8s, erro/carregamento persistentes, pausa em foco/hover/aba oculta, máximo3 e atualização por identificador. Mensagem em texto seguro; sem roubar foco. Validação de campo e conflitos permanecem contextuais. Flashes genéricos conservam fallback sem JS; em diálogo aberto, apresentar o feedback dentro dele.
+
+Outra extensão autorizada: corrigir quantidade/percentual do acompanhamento. A base passa a ser alunos ativos distintos das turmas autorizadas vinculadas à prova; somente cartão lido com nota vigente conta como concluído. Fotos duplicadas, não identificadas, propostas não aplicadas e repetições técnicas não aumentam a conclusão. Resultado vigente continua válido enquanto nova proposta aguarda confirmação. Mostrar alunos previstos, concluídos, sem cartão, em processamento e para revisão, separadamente de cartões recebidos e falhas técnicas. Sem alunos previstos, percentual é indefinido (—), não 100%. Não recalcular nem excluir notas anteriores.
+
+Carregamento progressivo regional por promessas: estrutura e estilos aparecem primeiro; indicadores, lista de cartões e histórico carregam independentemente, com esqueleto inicial e ícone fornecido pelo responsável, otimizado em WebP128px. Atualizações conservam dados anteriores e erros permitem tentar novamente. Não inserir tela bloqueadora global. Leitor PDF também mostra o ícone durante a preparação. Movimento sutil, respeitando prefers-reduced-motion. Os demais módulos podem adotar o componente compartilhado em suas próximas entregas.
+
+Revisão preliminar independente identificou foco perdido em retry/toast, histórico ainda navegando a página inteira e anúncios repetidos no polling. Ajustados antes do aceite final: retry foca a região, fechamento devolve foco, máximo3 preserva notificação focada; paginação/conferência/fechar carregam somente o histórico e mantêm URL/contexto; polling usa feedback visual silencioso. Sem migração; produção não autorizada.
+
+Validação local inicial: API821 testes/6925 asserções, web202/1842; testes específicos do progresso e isolamento do detalhe. Revisão visual final, CI remoto, merge e publicação na homologação ainda pendentes neste registro de implementação. Evidências locais usam dados fictícios e as views reais; não equivalem à validação do servidor.
