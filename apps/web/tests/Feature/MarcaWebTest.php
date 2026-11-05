@@ -21,6 +21,22 @@ class MarcaWebTest extends TestCase
         }
     }
 
+    public function test_rodape_preserva_redes_oficiais_incluindo_youtube_sem_requisicoes_externas(): void
+    {
+        Http::preventStrayRequests();
+        $html=Blade::render('<x-rodape-publico />');
+        foreach ([
+            'Instagram'=>'https://www.instagram.com/gabarito360/',
+            'Facebook'=>'https://www.facebook.com/gabarito360/',
+            'TikTok'=>'https://www.tiktok.com/@gabarito360',
+            'YouTube'=>'https://www.youtube.com/@gabarito360',
+        ] as $rede=>$url) {
+            $this->assertStringContainsString('href="'.$url.'" target="_blank" rel="noopener noreferrer" aria-label="'.$rede.' @gabarito360 (abre em nova aba)"',$html);
+            $this->assertStringContainsString($rede.' · @gabarito360',$html);
+        }
+        Http::assertNothingSent();
+    }
+
     public function test_icone_recolhido_tem_um_nome_acessivel_sem_wordmark_ou_animacao_padrao(): void
     {
         $html=Blade::render('<x-marca variant="icon" size="sm" theme="dark" />');
