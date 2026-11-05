@@ -87,7 +87,7 @@ try {
  modo='sucesso';await page.keyboard.press('Escape');await page.setViewportSize({width:1440,height:1000});await page.goto('http://g360.test/revisao?semrecorte=1');
  assert.equal(await previa.locator('img').evaluate(e=>e.draggable),false);
  assert.deepEqual(await eventosRestritos(previa.locator('img')),{contextmenu:true,dragstart:true,copy:true,cut:true});
- const antesMobile=fotos.length;await page.setViewportSize({width:390,height:844});assert.equal(await previa.locator('img').count(),0);
+ const antesMobile=fotos.length;await page.setViewportSize({width:390,height:844});await previa.locator('img').waitFor({state:'detached'});assert.equal(await previa.locator('img').count(),0);
  await page.goto('http://g360.test/revisao?semrecorte=1');assert.equal(fotos.length,antesMobile);
  await page.setViewportSize({width:1440,height:1000});await page.goto('http://g360.test/revisao?semfoto=1');assert.equal(await page.getByRole('button',{name:'Ver cartão inteiro',exact:true}).count(),0);
  assert.deepEqual(erros,[]);console.log('OK: modal, foco, teclado sem POST, cartão correto, zoom, erro/retry, salvamento e 2560/390/320.');
