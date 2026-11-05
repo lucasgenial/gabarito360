@@ -23,8 +23,9 @@ class PaginasPublicasTest extends TestCase
             $this->get($pagina)->assertOk()->assertSee('Modalidades de atendimento')
                 ->assertSee('Professor autônomo')->assertSee('Escolas')
                 ->assertSee('Núcleos e redes')->assertSee('Secretarias')
-                ->assertSee('Disponível no sistema')->assertSee('Previsto no planejamento')
-                ->assertSee('ainda serão desenvolvidos')->assertSee('Editor de enunciados')
+                ->assertSee('Em breve')->assertSee('Elaboração de provas e avaliações')
+                ->assertSee('A contratação será disponibilizada no lançamento.')
+                ->assertDontSee('Previsto no planejamento')->assertDontSee('Roadmap')->assertDontSee('Em desenvolvimento')
                 ->assertSee(route('leads.index'),false)->assertDontSee('R$')
                 ->assertDontSee('Plano comercial que não deve aparecer')->assertDontSee('/checkout')
                 ->assertDontSee('licenças')->assertDontSee('cobrança');
@@ -36,11 +37,35 @@ class PaginasPublicasTest extends TestCase
     {
         Http::fake(['*' => Http::failedConnection()]);
         foreach (['/','/planos'] as $pagina) {
-            $resposta=$this->get($pagina)->assertOk()->assertSee('Os planos e as condições de atendimento serão definidos posteriormente.');
+            $resposta=$this->get($pagina)->assertOk()->assertSee('A contratação será disponibilizada no lançamento.');
             $dom=new \DOMDocument();@$dom->loadHTML($resposta->getContent());$xpath=new \DOMXPath($dom);
             $this->assertSame(4,$xpath->query('//article[contains(@class,"plan-card")]')->length);
             $this->assertSame(0,$xpath->query('//details[@open]')->length);
-            $this->assertSame(2,$xpath->query('//section[@aria-label="Recursos do Gabarito360"]//details')->length);
+            $futuros=$xpath->query('//*[@data-recurso-futuro]');
+            $this->assertSame(7,$futuros->length);
+            foreach ($futuros as $futuro) {
+                $this->assertSame(1,$xpath->query('.//span[contains(@class,"publico-em-breve") and text()="Em breve"]',$futuro)->length);
+            }
+            $this->assertSame(9,$xpath->query('//div[contains(@class,"publico-faq")]/details')->length);
+            $this->assertSame(1,$xpath->query('//details[@data-menu-publico]/summary')->length);
+            $this->assertSame(0,$xpath->query('//a[not(@href) or @href="" or @href="#"]')->length);
+            $this->assertSame(4,$xpath->query('//article[contains(@class,"plan-card")]/'.($pagina==='/'?'h3':'h2'))->length);
+        }
+        Http::assertNothingSent();
+    }
+
+    public function test_home_demonstra_fluxos_reais_com_dados_ficticios_sem_formularios_ou_promessas_numericas(): void
+    {
+        $resposta=$this->get('/')->assertOk()->assertSee('pré-lançamento')
+            ->assertSee('Revisar leitura')->assertSee('Questão por questão')->assertSee('Relatório individual')
+            ->assertSee('Dados fictícios')->assertDontSee('TALIS')->assertDontSee('15/min')
+            ->assertSee('css/apresentacao-publica.css',false)->assertSee('js/apresentacao-publica.js',false);
+        $dom=new \DOMDocument();@$dom->loadHTML($resposta->getContent());$xpath=new \DOMXPath($dom);
+        $this->assertSame(4,$xpath->query('//article[contains(@class,"publico-demo")]/figure/figcaption')->length);
+        $this->assertSame(0,$xpath->query('//form')->length);
+        $this->assertSame(1,$xpath->query('//main[@id="conteudo"]')->length);
+        foreach (['como-funciona','recursos','demonstracoes','planos','duvidas'] as $id) {
+            $this->assertSame(1,$xpath->query('//*[@id="'.$id.'"]')->length);
         }
         Http::assertNothingSent();
     }
