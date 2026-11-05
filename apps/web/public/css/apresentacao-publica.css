@@ -104,3 +104,12 @@
 .publico-ajuda summary {min-height:44px;padding-block:10px;cursor:pointer;color:var(--accent);font-weight:600;}
 .publico-ajuda p {font-size:14px;}
 .publico-apresentacao a:focus-visible,.publico-apresentacao summary:focus-visible {outline:3px solid var(--accent);outline-offset:3px;}
+
+/* Contato: altura física coerente com o zoom já utilizado no sistema. */
+.pagina-publica.pagina-contato {min-height:calc(100dvh / var(--escala,1));}
+.pagina-contato .publico-conteudo {padding-block:20px;}
+.pagina-contato .fale-conosco {margin:12px auto;}
+.pagina-contato .fale-sub {margin-bottom:16px;}
+.pagina-contato .fale-conosco .field {margin-bottom:12px;}
+.pagina-contato .fale-conosco .input,.pagina-contato .fale-conosco .select,.pagina-contato .fale-conosco .btn {min-height:44px;}
+.pagina-contato #mensagem {resize:vertical;}
