@@ -103,6 +103,11 @@ cartaoModal.addEventListener('close',function() {
 });
 function estadoSalvando(estado) {
   salvando = estado;
+  document.querySelectorAll('.rev-opcoes button,.rev-acoes button').forEach(function(b) {
+    if(estado){b.dataset.desabilitadoAnterior=String(b.disabled);b.disabled=true;}
+    else b.disabled=b.dataset.desabilitadoAnterior==='true';
+  });
+  var aviso=document.getElementById('rev-salvamento');if(aviso)aviso.textContent=estado?'Salvando resposta…':'';
   var botao = document.getElementById('rev-ver-cartao'); if (botao) botao.disabled = estado;
 }
 
@@ -136,8 +141,8 @@ function desenhar() {
   }
   var q = FILA[0];
   var botoes = ALTERNATIVAS.map(function (l) {
-    var classe = q.detectadas.indexOf(l) >= 0 || q.alternativa === l ? 'btn-secondary' : 'btn-ghost';
-    return '<button type="button" class="btn ' + classe + '" onclick="escolher(\'' + l + '\')">' + l + '</button>';
+    var atual = q.alternativa === l && !q.ambigua;
+    return '<button type="button" class="btn rev-resposta' + (atual ? ' rev-resposta-atual' : '') + '"' + (atual ? ' aria-label="' + l + ', resposta atual"' : '') + ' onclick="escolher(\'' + l + '\')">' + l + '</button>';
   }).join('');
   el.innerHTML = '<div class="row-between rev-topo"><div><b>' + escH(q.aluno_nome || 'Aluno não identificado') + '</b>'
     + '<div class="exam-meta">' + escH(q.turma || '') + '</div></div>'
@@ -147,8 +152,9 @@ function desenhar() {
     + '<p class="rev-leitura">' + leitura(q) + '</p>'
     + '<div class="rev-opcoes">' + botoes + '</div>'
     + '<div class="rev-opcoes rev-opcoes-extra">'
-    + '<button type="button" class="btn btn-ghost" onclick="escolher(\'BRANCO\')">Em branco</button>'
-    + '<button type="button" class="btn btn-ghost" onclick="escolher(\'ANULADA\')">Anulada</button></div>'
+    + '<button type="button" class="btn rev-resposta-extra" onclick="escolher(\'BRANCO\')">Em branco</button>'
+    + '<button type="button" class="btn rev-resposta-extra" onclick="escolher(\'ANULADA\')">Anulada</button></div>'
+    + '<p id="rev-salvamento" class="rev-salvamento" role="status" aria-live="polite"></p>'
     + '<div class="rev-acoes">'
     + '<button type="button" class="btn btn-ghost btn-sm" onclick="voltar()"' + (historico.length ? '' : ' disabled') + '>Voltar</button>'
     + '<button type="button" class="btn btn-ghost btn-sm" onclick="pular()"' + (FILA.length > 1 ? '' : ' disabled') + '>Pular</button></div>'

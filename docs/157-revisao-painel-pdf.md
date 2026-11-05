@@ -9,3 +9,7 @@ PDF.js6.5.438 e pdf-lib1.17.1 ficam versionados e hospedados localmente, com lic
 Não expor baixar/imprimir; dissuasão local de copiar/arrastar/menu apenas no documento e no recorte. Não prometer impedir screenshot ou extração de bytes já entregues ao navegador. Preservar seleção de textos externos, rolagem e recursos do navegador. O leitor não executa ações JavaScript do PDF nem monta anotações/links ativos.
 
 Validar conversão/renderização PDF real, página inteira, zoom, documento correto e ausência de recargas na mesma pessoa, troca rápida, respostas atrasadas, erro/retry, foco, teclado sem gravação acidental, assinatura íntegra, desktop amplo/estreito e320/390px. Aceite visual independente, CI/merge e publicação somente na homologação com backup e comparação de dados/arquivos. DC1 anterior já concluído no PR186 e publicado273db8a.
+
+Ajuste solicitado na conferência: alternativas devem parecer botões. Consulta prévia UI/UX aprovou contorno azul em todas as alternativas, fundo e indicação própria somente para resposta atual (sem confundir leituras incertas), secundários Em branco/Anulada, foco externo e bloqueio temporário com status Salvando resposta. Preservar ação imediata e atalhos. Estilos limitados à revisão, tokens claro/escuro; aceite visual final pendente.
+
+Verificação inicial: 190 testes web/1794 asserções; ensaio real de PDF e eventos em 2560/1440/1099/390/320 aprovado. CI apontou verificação prematura do rótulo de zoom antes do render assíncrono; corrigida espera da atualização, sem alterar a aplicação para satisfazer o teste.
