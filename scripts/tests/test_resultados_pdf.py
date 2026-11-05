@@ -34,7 +34,10 @@ class ResultadosPdfTest(unittest.TestCase):
             individual, paginas = PdfReader(a['saida']), PdfReader(lote)
             self.assertEqual(1, len(individual.pages))
             self.assertEqual(2, len(paginas.pages))
-            self.assertEqual(individual.pages[0].extract_text(), paginas.pages[0].extract_text())
+            self.assertEqual(re.sub(r'Página \d+/\d+','',individual.pages[0].extract_text()), re.sub(r'Página \d+/\d+','',paginas.pages[0].extract_text()))
+            self.assertIn('Página 01/01',individual.pages[0].extract_text())
+            self.assertIn('Página 01/02',paginas.pages[0].extract_text())
+            self.assertIn('Página 02/02',paginas.pages[1].extract_text())
             self.assertIn('Aluno fictício B', paginas.pages[1].extract_text())
             self.assertNotIn('Aluno fictício A', paginas.pages[1].extract_text())
             self.assertIn('QUESTÃO POR QUESTÃO', paginas.pages[0].extract_text())
@@ -56,8 +59,9 @@ class ResultadosPdfTest(unittest.TestCase):
                 pdf.gerar(d)
                 pages = PdfReader(d['saida']).pages
                 self.assertGreater(len(pages), 1)
-                for page in pages:
+                for numero, page in enumerate(pages,1):
                     text = page.extract_text()
+                    self.assertIn(f'Página {numero:02d}/{len(pages):02d}',text)
                     self.assertIn('Emissor fictício', text)
                     self.assertIn('G360-'+'A'*32, text)
                     self.assertIn('2026-11-05 12:00:00 UTC', text)
