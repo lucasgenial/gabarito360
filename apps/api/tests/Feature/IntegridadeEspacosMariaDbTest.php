@@ -185,13 +185,13 @@ class IntegridadeEspacosMariaDbTest extends TestCase
         $novo = \App\Models\CartaoEnvio::where('chave', $chave2)->firstOrFail(); $processar($novo);
         $this->assertSame('concluido', $e->fresh()->status);
         $this->assertDatabaseHas('notas', ['cartao_id' => $e->cartao_id, 'nota_final' => 0]);
-        $this->assertSame('aguardando_confirmacao', $novo->fresh()->status);
+        $this->assertSame('aguardando_confirmacao', $novo->refresh()->status);
         $tentativa = $novo->resultado['tentativa_id'];
         $this->postJson('/api/v1/tentativas/'.$tentativa.'/aplicar', [
             'motivo' => 'Nova foto completa conferida no ensaio MariaDB', 'confirmar' => true,
         ])->assertOk();
         $this->assertSame('substituido', $e->fresh()->status); $this->assertNull($e->fresh()->cartao_id);
-        $this->assertSame('concluido', $novo->fresh()->status);
+        $this->assertSame('concluido', $novo->refresh()->status);
         $c = \App\Models\Cartao::findOrFail($novo->cartao_id);
         $this->deleteJson('/api/v1/cartoes/'.$c->id, ['motivo' => 'Retirada documentada no ensaio MariaDB',
             'versao' => app(\App\Services\Omr\HistoricoCartao::class)->fingerprint($c)])->assertOk();
