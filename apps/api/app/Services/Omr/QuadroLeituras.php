@@ -28,9 +28,9 @@ class QuadroLeituras
                 if (!isset($revisoes[$r['id']])) $revisoes[$r['id']] = [$r, $e];
             }
         }
-        $automaticas = []; $finais = []; $obs = [];
-        foreach ($raw ?? [] as $r) { $n = (int) $r['numero_questao']; $automaticas[$n] = $this->resposta($r); $numeros[$n] = true; }
-        foreach ($registradas as $r) { $n = (int) $r['numero_questao']; $finais[$n] = $this->resposta($r); }
+        $automaticas = []; $finais = []; $obs = []; $rawPorQuestao = []; $finalPorQuestao = [];
+        foreach ($raw ?? [] as $r) { $n = (int) $r['numero_questao']; $automaticas[$n] = $this->resposta($r); $rawPorQuestao[$n] = $r; $numeros[$n] = true; }
+        foreach ($registradas as $r) { $n = (int) $r['numero_questao']; $finais[$n] = $this->resposta($r); $finalPorQuestao[$n] = $r; }
         foreach ($revisoes as [$r, $e]) {
             $n = $ids[$r['cartao_resposta_id']] ?? null;
             if (!$n) continue;
@@ -41,12 +41,30 @@ class QuadroLeituras
             $obs[$n][] = 'Revisão humana por '.$nome.($quando ? ' em '.$quando : '').(!empty($e['motivo']) ? '. '.$e['motivo'] : '');
         }
         ksort($numeros);
+        $referencias = array_column($original['referencia_gabarito']['questoes'] ?? [], null, 'numero_questao');
         return array_map(fn ($n) => [
             'numero_questao' => $n,
             'leitura' => $automaticas[$n] ?? ($raw === null ? 'Leitura automática original não preservada' : 'Sem leitura automática'),
             'resposta' => $finais[$n] ?? 'Ainda não aplicada',
             'observacao' => isset($obs[$n]) ? implode(' | ', $obs[$n]) : 'Sem registro preservado de intervenção',
+            'situacao' => $this->situacao($finalPorQuestao[$n] ?? null, $referencias[$n] ?? null),
+            'leitura_situacao' => $this->situacao($rawPorQuestao[$n] ?? null, $referencias[$n] ?? null),
+            'referencia_preservada' => isset($referencias[$n]),
+            'gabarito' => $referencias[$n]['esperada'] ?? null,
+            'modificada' => isset($rawPorQuestao[$n], $finalPorQuestao[$n]) &&
+                (($rawPorQuestao[$n]['alternativa'] ?? null) !== ($finalPorQuestao[$n]['alternativa'] ?? null)
+                || (bool) ($rawPorQuestao[$n]['ambigua'] ?? false) !== (bool) ($finalPorQuestao[$n]['ambigua'] ?? false)),
+            'intervencao_humana' => isset($obs[$n]),
+            'resposta_registrada' => isset($finais[$n]),
         ], array_keys($numeros));
+    }
+
+    private function situacao(?array $r, ?array $referencia): string
+    {
+        if (!$r || !$referencia) return 'nao_preservada';
+        if ($referencia['anulada']) return 'anulada';
+        if (($r['alternativa'] ?? null) === null || !empty($r['ambigua'])) return 'branco';
+        return $r['alternativa'] === $referencia['esperada'] ? 'correta' : 'incorreta';
     }
 
     private function resposta(array $r): string

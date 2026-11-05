@@ -35,4 +35,22 @@ class QuadroLeiturasTest extends TestCase
         $this->assertSame('C', $linhas[0]['leitura']);
         $this->assertSame('Ainda não aplicada', $linhas[0]['resposta']);
     }
+
+    public function test_cores_usam_somente_referencia_preservada_sem_percentuais_no_historico(): void
+    {
+        $r = ['numero_questao'=>1,'alternativa'=>'A'];
+        $final = ['numero_questao'=>1,'alternativa'=>'B'];
+        $d = ['leituras_omr'=>[$r],'respostas'=>[$r], 'referencia_gabarito'=>['questoes'=>[['numero_questao'=>1,'esperada'=>'B','anulada'=>false]]]];
+        $linha = (new QuadroLeituras)->montar($d, [['snapshot'=>['respostas'=>[$final]]]])[0];
+        $this->assertSame('incorreta',$linha['leitura_situacao']);
+        $this->assertSame('correta',$linha['situacao']);
+        $this->assertTrue($linha['modificada']);
+        $this->assertTrue($linha['referencia_preservada']);
+        $this->assertArrayNotHasKey('turma',$linha);
+        $this->assertArrayNotHasKey('geral',$linha);
+        unset($d['referencia_gabarito']);
+        $linha = (new QuadroLeituras)->montar($d, [])[0];
+        $this->assertSame('nao_preservada',$linha['situacao']);
+        $this->assertFalse($linha['referencia_preservada']);
+    }
 }

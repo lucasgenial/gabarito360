@@ -65,6 +65,16 @@ class HistoricoCartao
         $numero = 1 + (int) DB::table('cartao_tentativas')->where('prova_id', $c->prova_id)->where('espaco_id', $c->espaco_id)->where('aluno_id', $c->aluno_id)->max('numero');
         $id = (string) Str::uuid();
         $dados = $this->conteudo($c) + $extra;
+        // Referência congelada só no novo snapshot; não altera contratos de fingerprint
+        // nem preenche retrospectivamente arquivos imutáveis anteriores.
+        $g = ContextoCorrecao::filtrar(DB::table('gabaritos'), $c->espaco_id)->where('prova_id', $c->prova_id)->first();
+        $prova = Prova::find($c->prova_id);
+        $dados['referencia_gabarito'] = ['questoes' => $g ? ContextoCorrecao::filtrar(DB::table('gabarito_questoes'), $c->espaco_id)
+            ->where('gabarito_id', $g->id)->orderBy('numero_questao')->get()->map(fn ($q) => [
+                'numero_questao' => $q->numero_questao,
+                'esperada' => $prova?->opcao_lingua && $c->lingua === 'ESP' && !empty($q->alternativa_espanhol) ? $q->alternativa_espanhol : $q->alternativa,
+                'anulada' => (bool) $q->anulada,
+            ])->all() : []];
         $dados['ator_registrado'] = $ator ? ['id' => $ator->id, 'nome' => $ator->nome, 'perfil' => $ator->perfil, 'vinculo_id' => $ator->vinculoContextoId()] : null;
         DB::table('cartao_tentativas')->insert(['id' => $id, 'espaco_id' => $c->espaco_id, 'prova_id' => $c->prova_id, 'aluno_id' => $c->aluno_id, 'origem_cartao_id' => $c->id, 'numero' => $numero,
             'contexto_chave' => hash('sha256', ($c->espaco_id ?? 0).':'.$c->prova_id.':'.($c->aluno_id ?? 0)),
