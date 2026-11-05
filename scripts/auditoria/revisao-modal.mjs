@@ -48,6 +48,7 @@ try {
  modo='erro';await abrir.click();await page.getByRole('alert').waitFor({state:'visible'});
  assert.equal(await page.getByRole('button',{name:'Ampliar',exact:true}).isDisabled(),true);
  modo='sucesso';await page.getByRole('button',{name:'Tentar novamente'}).click();await page.getByAltText('Cartão-resposta completo').waitFor({state:'visible'});
+ assert.equal(await page.evaluate(()=>!!document.activeElement.closest('#rev-cartao-modal')),true);
  assert.equal(fotos.at(-1),fotos.at(-2));await page.keyboard.press('Escape');
  modo='salvando';await page.getByRole('button',{name:'A',exact:true}).click();
  assert.equal(await abrir.isDisabled(),true);assert.equal(await modal.evaluate(e=>e.open),false);
@@ -63,5 +64,11 @@ try {
   if(saida)await page.screenshot({path:`${saida}/modal-${width}-${tema}.png`});
   await page.keyboard.press('Escape');
  }
+ await page.setViewportSize({width:390,height:844});await page.goto('http://g360.test/revisao');modo='erro';
+ await page.getByRole('button',{name:'Ver cartão inteiro',exact:true}).click();await page.getByRole('alert').waitFor({state:'visible'});
+ for(const alvo of [page.getByRole('heading',{name:'Cartão-resposta',exact:true}),page.getByRole('button',{name:'Fechar cartão'}),page.getByRole('button',{name:'Tentar novamente'})]) {
+  const r=await alvo.boundingBox();assert.ok(r.y>=0&&r.y+r.height<=844,JSON.stringify(r));
+ }
+ if(saida)await page.screenshot({path:`${saida}/modal-390-erro.png`});
  assert.deepEqual(erros,[]);console.log('OK: modal, foco, teclado sem POST, cartão correto, zoom, erro/retry, salvamento e 2560/390/320.');
 } finally {await browser.close();}
