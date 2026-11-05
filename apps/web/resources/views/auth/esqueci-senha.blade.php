@@ -6,7 +6,7 @@
 <style>
   .auth-wrap { min-height: calc(100vh / var(--escala)); display: grid; grid-template-columns: 1.1fr 1fr; }
   .auth-aside {
-    background: var(--g360-navy);
+    background: linear-gradient(160deg, #1d4f9e 0%, var(--g360-navy, #001534) 100%);
     color: #fff; padding: 56px; display: flex; flex-direction: column;
   }
   .auth-aside .brand .logo { background: #fff; color: var(--accent); }
