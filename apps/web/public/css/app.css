@@ -1456,5 +1456,8 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 #retirar-motivo { min-height:90px; width:100%; margin-top:8px; }
 .retirar-acoes { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:12px; margin-top:16px; }
 .retirar-acoes .btn { min-height:44px; }
+#retirar-modal .btn-danger { background:var(--danger); color:#fff; border-color:var(--danger); }
+#retirar-modal .btn-danger:hover { filter:brightness(.92); }
+#retirar-modal .btn-danger:disabled { opacity:.65; cursor:wait; }
 
 .tentativa-lista { margin-block:16px; }

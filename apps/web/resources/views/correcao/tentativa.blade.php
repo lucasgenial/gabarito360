@@ -24,7 +24,7 @@
   <form method="POST" action="{{ route('correcao.tentativa.aplicar',$dados['id']) }}" class="tentativa-confirmacao">
     @csrf<h3>Aplicar nova tentativa</h3><p>O resultado vigente será atualizado com esta leitura. A foto, a nota e as revisões anteriores permanecem no histórico.</p>
     <label for="tentativa-motivo">Motivo da nova tentativa</label><textarea id="tentativa-motivo" class="input" name="motivo" minlength="10" maxlength="500" required>{{ old('motivo') }}</textarea>
-    <label><input type="checkbox" name="confirmar" value="1" required> Conferi a foto e autorizo aplicar esta leitura no lugar da correção vigente.</label>
+    <label><input type="checkbox" name="confirmar" value="1" required @checked(old('confirmar'))> Conferi a foto e autorizo aplicar esta leitura no lugar da correção vigente.</label>
     <button type="submit" class="btn btn-primary">Aplicar nova leitura</button>
   </form>
   @endif
