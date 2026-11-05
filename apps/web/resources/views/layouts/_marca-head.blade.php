@@ -9,15 +9,15 @@
 <meta name="apple-mobile-web-app-title" content="Gabarito360">
 <meta property="og:site_name" content="Gabarito360">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Gabarito360 — Correção de provas e relatórios educacionais">
-<meta property="og:description" content="Correção de cartões-resposta pelo celular e relatórios por aluno, turma e escola.">
+<meta property="og:title" content="{{ $tituloSocial ?? 'Gabarito360 — Correção de provas e relatórios educacionais' }}">
+<meta property="og:description" content="{{ $descricaoSocial ?? 'Correção de cartões-resposta pelo celular e relatórios por aluno, turma e escola.' }}">
 <meta property="og:image" content="{{ asset('brand/gabarito360-og.png') }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Gabarito360 — Correção de provas e relatórios educacionais">
+<meta property="og:image:alt" content="{{ $tituloSocial ?? 'Gabarito360 — Correção de provas e relatórios educacionais' }}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Gabarito360 — Correção de provas e relatórios educacionais">
-<meta name="twitter:description" content="Correção de cartões-resposta pelo celular e relatórios educacionais.">
+<meta name="twitter:title" content="{{ $tituloSocial ?? 'Gabarito360 — Correção de provas e relatórios educacionais' }}">
+<meta name="twitter:description" content="{{ $descricaoSocial ?? 'Correção de cartões-resposta pelo celular e relatórios educacionais.' }}">
 <meta name="twitter:image" content="{{ asset('brand/gabarito360-og.png') }}">
-<meta name="twitter:image:alt" content="Gabarito360 — Correção de provas e relatórios educacionais">
+<meta name="twitter:image:alt" content="{{ $tituloSocial ?? 'Gabarito360 — Correção de provas e relatórios educacionais' }}">
 <link rel="stylesheet" href="{{ asset('css/marca.css') }}?v={{ filemtime(public_path('css/marca.css')) }}">

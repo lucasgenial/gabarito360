@@ -10,10 +10,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/apresentacao-publica.css') }}?v={{ filemtime(public_path('css/apresentacao-publica.css')) }}">
 @stack('styles')
-@include('layouts._marca-head')
+@include('layouts._marca-head', ['tituloSocial'=>trim($__env->yieldContent('title', 'Gabarito360 — Gestão de avaliações')),'descricaoSocial'=>trim($__env->yieldContent('description', 'Correção de cartões-resposta pelo celular e relatórios educacionais.'))])
 </head>
-<body class="area-publica pagina-publica">
+<body class="area-publica pagina-publica @yield('classe_publica')">
 <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 <x-menu-publico />
 <main id="conteudo" class="publico-conteudo" tabindex="-1">
@@ -25,6 +26,7 @@
 </main>
 <x-rodape-publico />
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
+<script src="{{ asset('js/apresentacao-publica.js') }}?v={{ filemtime(public_path('js/apresentacao-publica.js')) }}" defer></script>
 @stack('scripts')
 </body>
 </html>
