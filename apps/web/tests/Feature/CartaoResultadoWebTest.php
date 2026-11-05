@@ -111,4 +111,11 @@ class CartaoResultadoWebTest extends TestCase
         Http::fake(['*' => Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4], 'aplicada' => true, 'status' => 'ambiguo', 'prova_id' => 4, 'cartao_id' => 66]])]);
         $this->post('/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Foto nova conferida para teste', 'confirmar' => 1])->assertRedirect(route('correcao.revisao', [4, 'cartao' => 66]))->assertSessionHas('info', 'Nova tentativa aplicada. Revise as questões pendentes.');
     }
+
+    public function test_conflito_integrado_volta_ao_resultado_canonico_e_preserva_motivo(): void
+    {
+        $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
+        Http::fake(fn ($r) => $r->method() === 'GET' ? Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4]]]) : Http::response(['message' => 'Correção alterada.'], 409));
+        $this->from('/resultados/1/4/historico')->post('/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Motivo documentado de teste', 'confirmar' => 1])->assertRedirect(route('resultados.show', [1, 4, 'tentativa' => $id, 'tentativas_pagina' => 1]).'#tentativa-detalhe')->assertSessionHasErrors('tentativa')->assertSessionHasInput('motivo', 'Motivo documentado de teste');
+    }
 }

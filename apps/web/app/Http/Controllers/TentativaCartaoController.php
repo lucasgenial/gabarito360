@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\ApiClient;
 use App\Support\Acesso;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class TentativaCartaoController extends Controller
 {
@@ -38,10 +39,17 @@ class TentativaCartaoController extends Controller
     public function aplicar(Request $r, string $id)
     {
         $retorno = $this->retornoIntegrado($r, $id);
-        $d = $r->validate(['motivo' => 'required|string|min:10|max:500', 'confirmar' => 'required|accepted']);
+        try {
+            $d = $r->validate(['motivo' => 'required|string|min:10|max:500', 'confirmar' => 'required|accepted']);
+        } catch (ValidationException $e) {
+            if ($retorno) {
+                $e->redirectTo($retorno);
+            }
+            throw $e;
+        }
         $resp = $this->api->post('/v1/tentativas/'.$id.'/aplicar', $d);
         if ($resp->failed()) {
-            return back()->withInput()->withErrors(['tentativa' => $resp->json('message') ?? 'Não foi possível aplicar. A correção atual foi mantida.']);
+            return redirect($retorno ?? url()->previous())->withInput()->withErrors(['tentativa' => $resp->json('message') ?? 'Não foi possível aplicar. A correção atual foi mantida.']);
         }
 
         if ($retorno && $resp->json('data.status') === 'ambiguo') {
@@ -61,7 +69,7 @@ class TentativaCartaoController extends Controller
         $retorno = $this->retornoIntegrado(request(), $id);
         $resp = $this->api->post('/v1/tentativas/'.$id.'/descartar');
         if ($resp->failed()) {
-            return back()->withErrors(['tentativa' => $resp->json('message') ?? 'Não foi possível descartar.']);
+            return redirect($retorno ?? url()->previous())->withErrors(['tentativa' => $resp->json('message') ?? 'Não foi possível descartar.']);
         }
 
         return redirect($retorno ?? route('correcao.tentativa', $id))->with('sucesso', 'Tentativa descartada. A correção vigente foi mantida.');
