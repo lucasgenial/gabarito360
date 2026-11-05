@@ -65,15 +65,18 @@ class CartaoController extends Controller
                 'cartoes.id', 'cartoes.espaco_id', 'cartoes.status', 'cartoes.aluno_id', 'cartoes.lingua', 'cartoes.created_at',
                 'cartoes.imagem_url', 'alunos.nome as aluno_nome', 'alunos.matricula', 'turmas.nome as turma',
                 'notas.acertos', 'notas.total_questoes', 'notas.nota_final',
-            ])
-            ->map(function ($c) use ($imagens, $request) {
+            ]);
+        $urls=$imagens->urlsDaProva($prova,$cartoes->pluck('id')->all(),['original','miniatura'],$request->user());
+        $ambiguas=ContextoCorrecao::filtrar(DB::table('cartao_respostas'),$prova->espaco_id)
+            ->whereIn('cartao_id',$cartoes->pluck('id'))->where('ambigua',true)->groupBy('cartao_id')->selectRaw('cartao_id, COUNT(*) as total')->pluck('total','cartao_id');
+        $cartoes=$cartoes->map(function ($c) use ($urls,$ambiguas) {
                 $c->tem_imagem = (bool) $c->imagem_url;
-                $c->foto_url = $c->imagem_url ? $imagens->url($c->id, 'original', $request->user()) : null;
+                $c->foto_url = $c->imagem_url ? $urls[$c->id]['original'] : null;
                 $c->miniatura_url = Storage::disk('public')->exists(ImagensCartao::disponivel($c->id, 'miniatura', $c->espaco_id))
-                    ? $imagens->url($c->id, 'miniatura', $request->user())
+                    ? ($urls[$c->id]['miniatura']??null)
                     : null;
                 unset($c->imagem_url);
-                $c->ambiguas = ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $c->espaco_id)->where('cartao_id', $c->id)->where('ambigua', true)->count();
+                $c->ambiguas = (int)($ambiguas[$c->id]??0);
                 return $c;
             });
 
@@ -525,8 +528,9 @@ class CartaoController extends Controller
             )
             ->orderBy('a.nome')->orderBy('c.id')->orderBy('r.numero_questao')
             ->get(['c.id as cartao_id', 'c.status', 'c.imagem_url', 'a.nome as aluno_nome', 't.nome as turma',
-                   'r.numero_questao', 'r.alternativa', 'r.ambigua', 'r.alternativas_detectadas'])
-            ->map(function ($r) use ($prova, $imagens, $disco, $request) {
+                   'r.numero_questao', 'r.alternativa', 'r.ambigua', 'r.alternativas_detectadas']);
+        $urls=$imagens->urlsDaProva($prova,$itens->pluck('cartao_id')->unique()->all(),['original','endireitada'],$request->user());
+        $itens=$itens->map(function ($r) use ($prova, $urls, $disco) {
                 $temEndireitada = $disco->exists(ImagensCartao::disponivel($r->cartao_id, 'endireitada', $prova->espaco_id));
                 return [
                     'cartao_id'       => $r->cartao_id,
@@ -537,8 +541,8 @@ class CartaoController extends Controller
                     'alternativa'     => $r->alternativa,
                     'ambigua'         => (bool) $r->ambigua,
                     'detectadas'      => array_column(json_decode($r->alternativas_detectadas ?? '[]', true) ?? [], 'alternativa'),
-                    'foto_url'        => $r->imagem_url ? $imagens->url($r->cartao_id, 'original', $request->user()) : null,
-                    'endireitada_url' => $temEndireitada ? $imagens->url($r->cartao_id, 'endireitada', $request->user()) : null,
+                    'foto_url'        => $r->imagem_url ? $urls[$r->cartao_id]['original'] : null,
+                    'endireitada_url' => $temEndireitada ? $urls[$r->cartao_id]['endireitada'] : null,
                     'recorte'         => ImagensCartao::recorte($r->numero_questao, $prova->num_questoes, $prova->num_alternativas),
                 ];
             })
