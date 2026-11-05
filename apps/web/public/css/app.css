@@ -672,9 +672,9 @@ img { max-width: 100%; display: block; }
 .tela-revisao .rev-recorte { width:100%; background-color:#fff; background-repeat:no-repeat; border:1px solid var(--border-soft); border-radius:var(--radius-md); }
 .tela-revisao .rev-foto { width:100%; max-height:calc(78dvh / var(--escala,1)); object-fit:contain; border-radius:var(--radius-md); }
 .tela-revisao .rev-leitura { margin:12px 0; font-size:14px; color:var(--muted); }
-.tela-revisao .rev-opcoes { display:grid; grid-template-columns:repeat(auto-fit, minmax(52px, 1fr)); gap:8px; }
+.tela-revisao .rev-opcoes { display:grid; grid-template-columns:repeat(var(--rev-alternativas,5),minmax(0,1fr)); gap:8px; }
 .tela-revisao .rev-opcoes .btn { min-height:48px; justify-content:center; }
-.tela-revisao .rev-resposta { background:var(--surface); border:1.5px solid var(--accent); color:var(--accent); font-size:16px; font-weight:600; }
+.tela-revisao .rev-resposta { min-width:0; padding-inline:8px; background:var(--surface); border:1.5px solid var(--accent); color:var(--accent); font-size:16px; font-weight:600; }
 .tela-revisao .rev-resposta-atual { background:var(--accent-light); border-width:2px; box-shadow:inset 0 -3px 0 var(--accent); }
 .tela-revisao .rev-resposta-extra { background:var(--surface-2); border:1.5px solid var(--muted); color:var(--fg-2); font-weight:600; }
 .tela-revisao .rev-opcoes .btn:hover:not(:disabled) { background:var(--accent-light); border-color:var(--accent); }
@@ -683,6 +683,7 @@ img { max-width: 100%; display: block; }
 .tela-revisao .rev-salvamento { color:var(--fg-2); font-size:14px; margin-top:8px; }
 .tela-revisao .rev-salvamento:empty { display:none; }
 .tela-revisao .rev-opcoes-extra { grid-template-columns:1fr 1fr; margin-top:8px; }
+@media(max-width:400px) { .tela-revisao .rev-opcoes:not(.rev-opcoes-extra) { gap:4px; } }
 .tela-revisao .rev-acoes { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:16px; }
 .tela-revisao .rev-acoes .btn:disabled { color:var(--muted); border-color:var(--border); opacity:1; cursor:not-allowed; }
 .rev-cartao-modal { margin:auto; padding:0; width:min(1120px,calc((100vw - 32px)/var(--escala,1))); height:calc((100dvh - 32px)/var(--escala,1)); max-width:none; max-height:none; border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); color:var(--fg); overflow:hidden; }
