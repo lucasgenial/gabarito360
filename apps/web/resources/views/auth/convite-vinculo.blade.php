@@ -1,7 +1,7 @@
 @extends('layouts.auth', ['semMenuPublico' => true])
 @section('title', 'Convite para um vínculo')
 @section('content')
-<main class="vinculo-pagina"><a class="brand" href="{{ route('home') }}"><span class="logo">G360</span> Gabarito360</a>
+<main class="vinculo-pagina"><a class="brand" href="{{ route('home') }}"><x-marca /></a>
 <section class="card vinculo-card" id="convite-vinculo" data-autenticado="{{ session('auth_token') ? '1' : '0' }}" data-trocar-senha="{{ session('auth_trocar_senha') ? '1' : '0' }}" data-consultar="{{ route('vinculos.convite.consultar') }}">
 <h1>Convite para um vínculo</h1>
 @if(session('erro'))<p role="alert">{{ session('erro') }}</p>@endif

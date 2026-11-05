@@ -17,6 +17,10 @@ import math
 import os
 import sys
 
+# Também permite importação direta pelo ensaio de PDF.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import cabecalho_documento as identidade
+
 from reportlab.lib.colors import HexColor, white
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
@@ -30,7 +34,7 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from xml.sax.saxutils import escape
 
-BLUE, BLUE2, GRAY3 = HexColor("#1351b4"), HexColor("#0c326f"), HexColor("#6b6b6b")
+BLUE, BLUE2, GRAY3 = HexColor("#001534"), HexColor("#001534"), HexColor("#6b6b6b")
 CORES = {  # situação: (fundo, borda, texto)
     "correta": (HexColor("#e3f5e1"), HexColor("#168821"), HexColor("#0f5e17")),
     "incorreta": (HexColor("#fde8e4"), HexColor("#e52207"), HexColor("#a3190a")),
@@ -92,7 +96,9 @@ def rodape(c, d, total):
     m = 16*mm
     modelo = 'Relatório do professor' if d.get('modelo') == 'professor' else 'Relatório do aluno'
     c.setFont('Raleway-Regular', 7.5); c.setFillColor(GRAY3)
-    c.drawString(m, 10*mm, modelo+' · Gabarito360')
+    c.drawString(m, 10*mm, modelo)
+    identidade.marca(c,(W-identidade.largura_marca(3*mm))/2,13*mm,3*mm)
+    c.setFillColor(GRAY3);c.setFont('Raleway-Regular',7.5)
     c.drawRightString(W-m, 10*mm, f'Página {c.getPageNumber():02d}/{total:02d}')
     e = d.get('emissao')
     if not e:
@@ -128,73 +134,51 @@ def _resultado_pagina(d, c):
     m = 16 * mm
     y = H - 16 * mm
 
-    # Cabeçalho institucional: logo do ente (rede ou mantenedora) à esquerda,
-    # logo da escola à direita (só a escola: à esquerda), textos centralizados
-    topo = y
-    logos = [p for p in (d.get("logo_ente"), d.get("logo")) if p and os.path.isfile(p)]
-    for i, caminho in enumerate(logos):
-        x = m if i == 0 else W - m - 18 * mm
-        try:
-            c.drawImage(caminho, x, topo - 12 * mm, width=18 * mm, height=18 * mm,
-                        preserveAspectRatio=True, anchor="c", mask="auto")
-        except Exception:
-            pass  # logo inválido não impede o PDF
-    c.setFillColor(GRAY3)
-    c.setFont("Raleway-SemiBold", 8)
-    if d.get("rede"):
-        extra = texto_bloco(c, d['rede'].upper(), 'Raleway-SemiBold', 8, W-2*m-44*mm, W/2, y, GRAY3, True)
-        y -= extra + 5 * mm
-    c.setFillColor(BLUE2)
-    extra = texto_bloco(c, d.get('escola') or '', 'Raleway-ExtraBold', 12, W-2*m-44*mm, W/2, y, BLUE2, True)
-    y -= extra + 4.5 * mm
-    if d.get("detalhe"):
-        c.setFillColor(GRAY3)
-        c.setFont("Raleway-Regular", 8)
-        extra = texto_bloco(c, d['detalhe'], 'Raleway-Regular', 8, W-2*m-44*mm, W/2, y, GRAY3, True)
-        y -= extra + 4 * mm
-    y = min(y, topo - 14 * mm) - 3 * mm
-
-    # Faixa da prova
+    # A identidade ocupa sua altura real, incluindo logos e nomes extensos.
+    y = identidade.desenhar(c, d, W, y, m) - 7*mm
     titulo = f"{d['titulo'].upper()} · RESULTADO"
-    p = Paragraph(escape(titulo), ParagraphStyle('titulo', fontName='Raleway-ExtraBold', fontSize=10.5, leading=12, textColor=white))
+    p = Paragraph(escape(titulo), ParagraphStyle('titulo', fontName='Raleway-ExtraBold',
+                  fontSize=10.5, leading=13, textColor=white, alignment=1))
     _, h = p.wrap(W-2*m-8*mm, H)
     altura = max(10*mm, h+6*mm)
-    topo_faixa = y+6*mm
     c.setFillColor(BLUE)
-    c.roundRect(m, topo_faixa-altura, W-2*m, altura, 2*mm, stroke=0, fill=1)
-    if altura <= 10.5*mm:
-        c.setFillColor(white);c.setFont('Raleway-ExtraBold',10.5)
-        c.drawString(m+4*mm, y-0.3*mm, titulo)
-    else:
-        p.drawOn(c,m+4*mm,topo_faixa-3*mm-h)
-    y = topo_faixa-altura-10*mm
+    c.roundRect(m, y-altura, W-2*m, altura, 2*mm, stroke=0, fill=1)
+    p.drawOn(c,m+4*mm,y-(altura-h)/2-h)
+    top = y-altura-6*mm
 
-    # Aluno + nota
-    c.setFillColor(HexColor("#222222"))
-    extra_nome = texto_bloco(c, aluno['nome'], 'Raleway-Bold', 14, W-2*m-45*mm, m, y, HexColor('#222222'))
-    c.setFont("Raleway-Regular", 9.5)
-    c.setFillColor(GRAY3)
+    # Identificação e nota são duas superfícies com altura comum e conteúdo íntegro.
+    note_width=36*mm; gap=4*mm; left_width=W-2*m-note_width-gap
+    content_width=left_width-8*mm
     linha = " · ".join(filter(None, [
-        f"Turma {aluno['turma']}" if aluno.get("turma") else None,
-        f"Matrícula {aluno['matricula']}" if aluno.get("matricula") else None,
-        ("Espanhol" if d.get("lingua") == "ESP" else "Inglês") if d.get("lingua") else None,
-        d.get("data"),
+        f"Turma {aluno['turma']}" if aluno.get('turma') else None,
+        f"Matrícula {aluno['matricula']}" if aluno.get('matricula') else None,
+        ('Espanhol' if d.get('lingua')=='ESP' else 'Inglês') if d.get('lingua') else None,
+        d.get('data'),
     ]))
-    extra_meta = texto_bloco(c, linha, 'Raleway-Regular', 9.5, W-2*m-45*mm, m, y-extra_nome-5.5*mm, GRAY3)
-
-    maxima = float(d.get("nota_maxima") or 10)
-    aprovado = float(nota["nota_final"]) >= maxima * 0.6
-    c.setFillColor(HexColor("#168821") if aprovado else HexColor("#e52207"))
-    c.setFont("Raleway-ExtraBold", 30)
-    c.drawRightString(W - m, y - 4 * mm, fmt(nota["nota_final"]))
-    c.setFont("Raleway-SemiBold", 8)
-    c.setFillColor(GRAY3)
-    c.drawRightString(W - m, y - 9 * mm, f"NOTA (de {fmt(maxima)})")
-    y -= max(16*mm, extra_nome+extra_meta+12.5*mm)
-    c.setFont('Raleway-Regular', 9)
-    c.setFillColor(GRAY3)
-    extra = texto_bloco(c, d['disciplina'], 'Raleway-Regular', 9, W-2*m, m, y, GRAY3)
-    y -= extra+6*mm
+    parts=[]
+    for txt,font,size in [(aluno['nome'],'Raleway-Bold',13),(linha,'Raleway-Regular',9),
+                          (d.get('disciplina') or '', 'Raleway-Regular',9)]:
+        if txt:
+            par=Paragraph(escape(txt),ParagraphStyle('aluno',fontName=font,fontSize=size,
+                          leading=size+3,textColor=HexColor('#222222') if not parts else GRAY3))
+            _,ph=par.wrap(content_width,H);parts.append((par,ph))
+    box_height=max(26*mm,sum(ph for _,ph in parts)+8*mm+max(0,len(parts)-1)*2*mm)
+    for x,bw in [(m,left_width),(W-m-note_width,note_width)]:
+        c.setFillColor(HexColor('#f5f8fc'));c.setStrokeColor(HexColor('#d5dfeb'));c.setLineWidth(.6)
+        c.roundRect(x,top-box_height,bw,box_height,2*mm,stroke=1,fill=1)
+    py=top-4*mm
+    for par,ph in parts:
+        par.drawOn(c,m+4*mm,py-ph);py-=ph+2*mm
+    maxima=float(d.get('nota_maxima') or 10)
+    center=W-m-note_width/2
+    c.setFillColor(GRAY3);c.setFont('Raleway-SemiBold',8)
+    c.drawCentredString(center,top-6*mm,'NOTA')
+    c.setFillColor(HexColor('#168821') if float(nota['nota_final'])>=maxima*.6 else HexColor('#e52207'))
+    c.setFont('Raleway-ExtraBold',27)
+    c.drawCentredString(center,top-17*mm,fmt(nota['nota_final']))
+    c.setFillColor(GRAY3);c.setFont('Raleway-SemiBold',8)
+    c.drawCentredString(center,top-23*mm,f'de {fmt(maxima)}')
+    y=top-box_height-8*mm
 
     # Resumo
     cont = {k: 0 for k in CORES}

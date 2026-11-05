@@ -52,8 +52,8 @@ class EmailModelo extends Mailable implements ShouldQueue, \Illuminate\Contracts
         $conteudo = $this->preencher($this->arquivo("modelos/{$this->modelo}.html"));
 
         return str_replace(
-            ['{{titulo}}', '{{conteudo}}', '{{ano}}'],
-            [e($this->assunto), $conteudo, date('Y')],
+            ['{{titulo}}', '{{conteudo}}', '{{ano}}', '{{marca_url}}'],
+            [e($this->assunto), $conteudo, date('Y'), e(config('emails.url_web').'/brand/gabarito360-email-dark.png')],
             $this->arquivo('base.html')
         );
     }

@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Gabarito360: correção de provas e relatórios educacionais.">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title', 'Painel') — Gabarito360</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,6 +17,7 @@
 @stack('styles')
 {{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
 <script>try { if (localStorage.getItem('g360-menu') === 'recolhido') document.documentElement.classList.add('menu-recolhido'); } catch (e) {}</script>
+@include('layouts._marca-head')
 </head>
 <body class="area-logada {{ config('release.sha') ? 'com-release' : '' }} @yield('tela')">
 
@@ -25,7 +27,7 @@
 {{-- Menu lateral (a partir de 1024 px), montado pelas permissões efetivas (App\Support\Acesso) --}}
 <aside class="app-lateral" aria-label="Menu principal">
   <a class="brand" href="{{ route('painel') }}">
-    <span class="logo">G360</span> <span class="lateral-rotulo">Gabarito360</span>
+    <x-marca size="sm" />
   </a>
   <nav class="lateral-menu">
     @foreach(\App\Support\Acesso::menu() as $item)
@@ -45,7 +47,7 @@
 <header class="app-header {{ \App\Support\ContextoWeb::id() ? 'com-vinculo' : '' }}">
   <div class="container">
     <a class="brand topo-marca" href="{{ route('painel') }}">
-      <span class="logo">G360</span> <span class="topo-nome">Gabarito360</span>
+      <x-marca size="sm" />
     </a>
 
     <div class="header-right">

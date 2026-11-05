@@ -74,7 +74,7 @@
       const repetindo=this.erro.contains(document.activeElement);
       this.limpar();if(!url)return;this.url=url;
       const seq=this.sequencia;this.abort=new AbortController();
-      this.estado.innerHTML='<div class="g360-carregando g360-carregando-pagina"><div class="g360-carga-marca"><img src="/images/g360-carregando.webp" width="40" height="40" alt="" aria-hidden="true"><span>Carregando cartão em PDF…</span></div><div class="g360-skeleton" aria-hidden="true"><i></i><i></i><i></i></div></div>';this.area.setAttribute('aria-busy','true');
+      this.estado.innerHTML='<div class="g360-carregando g360-carregando-pagina"><div class="g360-carga-marca"><span class="g360-marca-carregando" aria-hidden="true"></span><span>Carregando cartão em PDF…</span></div><div class="g360-skeleton" aria-hidden="true"><i></i><i></i><i></i></div></div>';this.area.setAttribute('aria-busy','true');
       if(repetindo)this.area.focus({preventScroll:true});
       try {
         const timeout=setTimeout(()=>this.abort?.abort(),25000);
