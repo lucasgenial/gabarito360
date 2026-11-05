@@ -3,6 +3,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+import re
 
 from pypdf import PdfReader
 
@@ -64,9 +65,48 @@ class ResultadosPdfTest(unittest.TestCase):
                 self.assertIn('180', text)
                 if modelo == 'professor':
                     self.assertIn('75,0% (6/8)', text)
-                    self.assertIn('RELATÓRIO PEDAGÓGICO', text)
+                    self.assertIn('Relatório do professor', text)
                 else:
                     self.assertNotIn('75,0%', text)
+
+    def test_professor_preserva_cabecalho_logos_nota_e_resumo_do_aluno(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            paginas = []
+            for modelo in ('aluno', 'professor'):
+                d = dados('Pessoa fictícia para conferir o padrão institucional')
+                d['modelo'] = modelo
+                d['logo'] = str(MODULO.parents[3] / 'apps/web/public/images/g360-carregando.webp')
+                d['logo_ente'] = d['logo']
+                d['saida'] = str(Path(tmp) / f'{modelo}.pdf')
+                pdf.gerar(d)
+                paginas.append(PdfReader(d['saida']).pages)
+            prefixos = [p[0].extract_text().split('QUESTÃO POR QUESTÃO')[0] for p in paginas]
+            self.assertEqual(prefixos[0], prefixos[1])
+            for pages in paginas:
+                for page in pages:
+                    self.assertEqual(prefixos[0], page.extract_text().split('QUESTÃO POR QUESTÃO')[0])
+                    self.assertGreater(len(page.images), 0)
+                    text = page.extract_text()
+                    for item in ('REDE FICTÍCIA', 'Escola fictícia', 'SIMULADO FICTÍCIO', '6,9', 'Acertos', 'Erros'):
+                        self.assertIn(item.casefold(), text.casefold())
+
+    def test_textos_longos_paginam_sem_perder_questoes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for modelo in ('aluno', 'professor'):
+                d = dados('Pessoa fictícia '+('de nome composto '*12))
+                d.update(modelo=modelo, escola='Colégio fictício '+('de educação integral '*10),
+                    titulo='Simulado fictício '+('de avaliação de aprendizagem '*8))
+                d['folha']=[dict(d['folha'][n%45],numero_questao=n+1) for n in range(90)]
+                d['emissao']={'emissor':'Emissor fictício','perfil':'Coordenador','contexto':d['escola'],
+                    'emitido_em':'05/11/2026 09:00:00 -03:00','codigo':'G360-'+'A'*32,
+                    'url':'https://homologa.gabarito360.com.br/validar-documento?codigo=G360-'+'A'*32}
+                d['saida']=str(Path(tmp)/f'{modelo}-longo.pdf')
+                pdf.gerar(d)
+                numeros=[]
+                for page in PdfReader(d['saida']).pages:
+                    corpo=page.extract_text().split('QUESTÃO POR QUESTÃO',1)[1]
+                    numeros.extend(int(n) for n in re.findall(r'(?m)^(\d{2,3})(?:\s*·[^\n]*)?$',corpo))
+                self.assertEqual(list(range(1,91)),numeros)
 
 
 if __name__ == '__main__':
