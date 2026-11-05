@@ -40,16 +40,18 @@ class FilaCartoes
 
                 return $existente;
             }
+            // A mesma barreira vale para câmera, galeria e upload direto. Repetir a mesma chave já aceita não a duplica.
+            $qualidade = app(QualidadeCartao::class)->exigir($foto->getRealPath());
             $caminho = $foto->store(Espacos::ativo() ? "cartoes/espacos/{$espaco}/{$provaId}" : "cartoes/{$provaId}", 'public');
             if (!$caminho) {
                 throw new \RuntimeException('Não foi possível salvar a foto do cartão.');
             }
             try {
-                $envio = DB::transaction(function () use ($usuario, $provaId, $chave, $chaveCliente, $caminho, $alunoId, $espaco) {
+                $envio = DB::transaction(function () use ($usuario, $provaId, $chave, $chaveCliente, $caminho, $alunoId, $espaco, $qualidade) {
                     if ($chaveCliente !== null) \App\Support\ContextoVinculo::resolver($usuario);
                     $cartao = new Cartao(['prova_id' => $provaId, 'aluno_id' => $alunoId,
                         'imagem_url' => $caminho, 'status' => 'pendente']);
-                    $cartao->forceFill(ContextoCorrecao::autoria($espaco, $usuario->id))->save();
+                    $cartao->forceFill(ContextoCorrecao::autoria($espaco, $usuario->id) + ['qualidade'=>$qualidade])->save();
 
                     return CartaoEnvio::create(['usuario_id' => $usuario->id, 'prova_id' => $provaId,
                         'vinculo_id' => $usuario->vinculoContextoId(), 'chave_cliente' => $chaveCliente,

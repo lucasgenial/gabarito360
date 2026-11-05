@@ -171,14 +171,21 @@ class CorrecaoController extends Controller
     }
 
     /** Exclui a correção do aluno para fotografar de novo. */
-    public function excluir(int $cartaoId)
+    public function excluir(Request $request,int $cartaoId)
     {
-        $resp = $this->api->delete("/v1/cartoes/{$cartaoId}");
+        $d=$request->validate(['motivo'=>'required|string|min:10|max:500','versao'=>'required|string|size:64']);
+        $resp = $this->api->delete("/v1/cartoes/{$cartaoId}",$d);
 
         return response()->json(
             $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível excluir.'] : $resp->json('data'),
-            $resp->failed() ? 422 : 200
+            $resp->failed() ? $resp->status() : 200
         );
+    }
+
+    public function prepararRetirada(int $cartaoId)
+    {
+        $resp=$this->api->get("/v1/cartoes/{$cartaoId}");
+        return response()->json($resp->failed()?['erro'=>$resp->json('message')]:array_intersect_key($resp->json('data')??[],array_flip(['id','versao_correcao','nota_atual'])),$resp->status());
     }
 
     public function vincularAluno(Request $request, int $cartaoId)

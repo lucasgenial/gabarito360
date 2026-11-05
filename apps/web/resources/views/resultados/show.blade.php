@@ -56,6 +56,11 @@
     </p>
   </div>
   <div class="res-acoes no-print">
+    @if(!empty($dados['cartao_foto_url']))
+      <button type="button" class="btn btn-secondary" id="doc-abrir">Visualizar cartão-resposta</button>
+      <a class="btn btn-secondary" href="{{ route('correcao.tentativas',['id'=>$prova['id'],'aluno_id'=>$aluno['id']]) }}">Histórico de tentativas</a>
+      @if(!empty($dados['tentativa_numero']))<span class="badge badge-muted">Tentativa {{ $dados['tentativa_numero'] }}</span>@endif
+    @endif
     @if($from === 'correcao')
       <a class="btn btn-ghost" href="{{ route('correcao.show', $prova['id']) }}">← Voltar à correção</a>
     @endif
@@ -65,7 +70,7 @@
     @php $podeMexer = \App\Support\Acesso::podeAlterarCorrecao(!empty($dados['correcao']['fechada'])); @endphp
     @if($dados['cartao_id'] && $podeMexer)
       <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-revisar').style.display='flex'">Revisar leitura</button>
-      <button type="button" class="btn btn-ghost" style="color:var(--danger);" id="btn-excluir-correcao"><x-icone nome="lixeira" /> Excluir correção</button>
+      <button type="button" class="btn btn-ghost" style="color:var(--danger);" id="btn-excluir-correcao"><x-icone nome="lixeira" /> Retirar correção</button>
     @elseif(!empty($dados['correcao']['fechada']))
       <span class="badge badge-warn" title="Peça à coordenação para reabrir"><x-icone nome="cadeado" /> correção fechada</span>
     @endif
@@ -73,6 +78,9 @@
 </div>
 
 {{-- Resumo --}}
+@if(($dados['qualidade_foto']['aprovada']??null)===false)
+  <x-aviso tipo="atencao">{{ $dados['qualidade_foto']['mensagem'] }} As respostas e a nota já registradas foram preservadas. Confira todas as questões ou envie outra foto para preparar uma nova tentativa.</x-aviso>
+@endif
 <div class="res-resumo">
   <div class="res-box {{ $aprov ? 'ok' : 'no' }}">
     <div class="v" style="font-size:34px;">{{ $fmt($nota['nota_final']) }}</div>
@@ -85,7 +93,8 @@
 </div>
 
 {{-- Questão por questão --}}
-<div class="card card-pad" style="margin-top:16px;">
+<div class="{{ !empty($dados['cartao_foto_url']) ? 'documento-estacao' : '' }}">
+<div class="card card-pad" @if(empty($dados['cartao_foto_url'])) style="margin-top:16px;" @endif>
   <div class="row-between">
     <h3 style="font-size:17px;">Questão por questão</h3>
     <span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>
@@ -106,6 +115,10 @@
       </div>
     @endforeach
   </div>
+</div>
+@if(!empty($dados['cartao_foto_url']))
+  @include('correcao._documento',['documentoUrl'=>$dados['cartao_foto_url'],'documentoContexto'=>$aluno['nome'].' · '.$prova['titulo']])
+@endif
 </div>
 
 @if($dados['cartao_id'])
@@ -144,6 +157,7 @@
 </div>
 @endif
 
+@include('correcao._retirar')
 <div style="height:48px" class="no-print"></div>
 @endsection
 
@@ -153,15 +167,16 @@
 (function () {
   var b = document.getElementById('btn-excluir-correcao');
   if (!b) return;
-  b.addEventListener('click', function () {
-    if (!confirm('Excluir a correção de {{ addslashes($aluno['nome']) }} nesta prova?\nA foto, as respostas e a nota serão apagadas e você poderá fotografar o cartão de novo.')) return;
-    fetch('/cartoes/{{ (int) $dados['cartao_id'] }}', { method: 'DELETE', credentials: 'same-origin',
-      headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } })
+  b.addEventListener('click', async function () {
+    var retirada;try{retirada=await confirmarRetiradaCartao({{ (int) $dados['cartao_id'] }},@json($aluno['nome']));}catch(e){alert(e.message);return;}
+    if(!retirada)return;b.disabled=true;
+    fetch('/cartoes/{{ (int) $dados['cartao_id'] }}', { method: 'DELETE', credentials: 'same-origin',body:JSON.stringify(retirada),
+      headers: { 'Content-Type':'application/json','Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } })
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
-        if (!res.ok) { alert(res.j.erro || 'Não foi possível excluir.'); return; }
+        if (!res.ok) { b.disabled=false;alert(res.j.erro || 'Não foi possível retirar. A correção atual foi mantida.'); return; }
         window.location.href = @json(route('correcao.show', $prova['id'], false));
-      });
+      }).catch(function(){b.disabled=false;alert('Não foi possível confirmar a retirada. Confira a correção antes de repetir.');});
   });
 })();
 

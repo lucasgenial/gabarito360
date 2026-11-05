@@ -20,6 +20,7 @@ class ResultadoEnvio
         $nota = ContextoCorrecao::filtrar(DB::table('notas'), $cartao->espaco_id)->where('cartao_id', $cartao->id)->first();
         $envio->update(['status' => 'concluido', 'mensagem' => null, 'resultado' => [
             'id' => $cartao->id, 'prova_id' => $cartao->prova_id, 'status' => $cartao->status,
+            'tentativa_numero' => $cartao->tentativa_id ? DB::table('cartao_tentativas')->where('id',$cartao->tentativa_id)->value('numero') : null,
             'aluno_id' => $cartao->aluno_id, 'aluno_nome' => $cartao->aluno?->nome,
             'lingua' => $cartao->lingua, 'acertos' => $nota->acertos ?? null,
             'total' => $nota->total_questoes ?? null, 'nota_final' => $nota->nota_final ?? null,
@@ -42,7 +43,7 @@ class ResultadoEnvio
             }
         }
         // Inclui recibos antigos cuja FK foi anulada por uma exclusão em cascata.
-        if ($envio->status !== 'substituido' &&
+        if (!in_array($envio->status,['substituido','aguardando_confirmacao','recusado'],true) &&
             (! $envio->cartao_id || ! Cartao::whereKey($envio->cartao_id)->exists())) {
             $envio->update(['status' => 'recusado', 'resultado' => null,
                 'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);

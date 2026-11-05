@@ -22,7 +22,16 @@ class ResultadoController extends Controller
     {
         $dados = $this->montar($request, $alunoId, $provaId);
 
-        return $dados instanceof JsonResponse ? $dados : ApiResponse::success($dados);
+        if($dados instanceof JsonResponse)return $dados;
+        $c=\App\Models\Cartao::find($dados['cartao_id']);$dados['qualidade_foto']=$c?->qualidade;
+        $dados['tentativa_numero']=$c?->tentativa_id?DB::table('cartao_tentativas')->where('id',$c->tentativa_id)->value('numero'):null;
+        $dados['cartao_foto_url']=$c?->imagem_url&&\App\Support\Permissao::pode($request->user(),'correcao.acompanhar')
+            &&ContextoCorrecao::cartoes($request->user())->whereKey($c->id)->exists()?app(\App\Services\Omr\ImagensCartao::class)->url($c->id,'original',$request->user()):null;
+        if(!empty($dados['cartao_foto_url'])&&empty($dados['qualidade_foto'])&&$c?->imagem_url){
+            try{$dados['qualidade_foto']=app(\App\Services\Omr\QualidadeCartao::class)->avaliar(\Illuminate\Support\Facades\Storage::disk('public')->path($c->imagem_url));}
+            catch(\Throwable){$dados['qualidade_foto']=['aprovada'=>null,'codigo'=>'indisponivel','mensagem'=>'Não foi possível verificar a qualidade desta foto agora.'];}
+        }
+        return ApiResponse::success($dados);
     }
 
     /**
