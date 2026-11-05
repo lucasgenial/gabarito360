@@ -205,21 +205,25 @@ class ContextoVinculoTest extends TestCase
         $b->getQueueableId();
     }
 
-    public function test_link_assinado_preserva_contexto_e_recusa_revogacao_ou_troca(): void
+    public function test_imagem_autenticada_preserva_contexto_e_recusa_revogacao_ou_troca(): void
     {
         \Illuminate\Support\Facades\Storage::fake('public');
         \Illuminate\Support\Facades\Storage::disk('public')->put('cartoes/contexto.jpg', 'imagem ficticia');
-        DB::table('cartoes')->insert(['id' => 1, 'prova_id' => 2, 'espaco_id' => 6, 'aluno_id' => 2, 'imagem_url' => 'cartoes/contexto.jpg']);
-        $u = Usuario::find(1)->noVinculo(2);
-        $url = app(\App\Services\Omr\ImagensCartao::class)->url(1, 'original', $u);
-        $this->assertStringContainsString('vinculo=2', $url);
-        $this->get($url)->assertOk()->assertHeader('Cache-Control', 'no-store, private');
-        $this->get(str_replace('vinculo=2', 'vinculo=1', $url))->assertForbidden();
-        DB::table('usuario_vinculos')->where('id', 2)->increment('versao_autorizacao');
-        $this->get($url)->assertNotFound();
-        $atual = app(\App\Services\Omr\ImagensCartao::class)->url(1, 'original', $u);
-        $this->get($atual)->assertOk();
-        DB::table('usuario_vinculos')->where('id', 2)->update(['situacao' => 'suspenso']);
-        $this->get($atual)->assertNotFound();
+        DB::table('cartoes')->insert(['id'=>1,'prova_id'=>2,'espaco_id'=>6,'aluno_id'=>2,'imagem_url'=>'cartoes/contexto.jpg']);
+        $pessoa=Usuario::find(1);$pai=$pessoa->createToken('identidade');
+        $a=$pessoa->createToken(\App\Support\TokenVinculo::NOME,['vinculo:1','identidade:'.$pai->accessToken->id]);
+        $b=$pessoa->createToken(\App\Support\TokenVinculo::NOME,['vinculo:2','identidade:'.$pai->accessToken->id]);
+        $url=app(\App\Services\Omr\ImagensCartao::class)->url(1,'original',$pessoa->noVinculo(2));
+        $this->assertSame('/api/v1/cartoes/1/imagens/original',$url);
+        $abrir=function(?string $token)use($url){app('auth')->forgetGuards();return $this->getJson($url,$token?['Authorization'=>'Bearer '.$token]:[]);};
+        $abrir(null)->assertUnauthorized();
+        $abrir($b->plainTextToken)->assertOk()->assertHeader('Cache-Control','no-store, private');
+        $abrir($a->plainTextToken)->assertNotFound();
+        DB::table('usuario_vinculos')->where('id',2)->increment('versao_autorizacao');
+        $abrir($b->plainTextToken)->assertOk(); // A URL não concede acesso; o vínculo atual é revalidado.
+        DB::table('usuario_vinculos')->where('id',2)->update(['situacao'=>'suspenso']);
+        $abrir($b->plainTextToken)->assertForbidden();
+        $antiga=\Illuminate\Support\Facades\URL::temporarySignedRoute('cartoes.arquivo',now()->addHour(),['id'=>1,'tipo'=>'original'],false);
+        $this->get($antiga)->assertNotFound();
     }
 }

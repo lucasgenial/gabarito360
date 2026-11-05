@@ -24,7 +24,7 @@ class ContextoInstitucionalTest extends TestCase
         $this->get('/configuracoes')->assertOk()->assertSee('Selecione a rede')->assertDontSee('Salvar configurações');
         $this->get('/configuracoes?rede_id=2')->assertOk()->assertSee('name="rede_id" value="2"', false);
         $this->post('/configuracoes', ['_method' => 'PUT', 'rede_id' => 2, 'meta_media' => 8, 'meta_minima' => 6, 'limiar_seges_min' => 30])
-            ->assertRedirect('/configuracoes?rede_id=2');
+            ->assertRedirect('/acessos/sessao/configuracoes?rede_id=2');
         Http::assertSent(fn ($r) => $r->method() === 'PUT' && (int) $r['rede_id'] === 2);
         $this->assertNull(session('rede_id'));
     }

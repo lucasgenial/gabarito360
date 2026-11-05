@@ -258,12 +258,12 @@ class UsuarioController extends Controller
             return ApiResponse::error('Você não pode alterar um usuário deste perfil.', [], 403);
         }
         if (!$usuario->ativo) {
-            return ApiResponse::error('Ative o usuário antes de enviar o link.', [], 422);
+            return ApiResponse::error('Ative o usuário antes de enviar as instruções.', [], 422);
         }
 
         $conta->enviarLinkDeSenha($usuario);
 
-        return ApiResponse::success(['mensagem' => 'Link enviado.']);
+        return ApiResponse::success(['mensagem' => 'Instruções e código enviados por e-mail.']);
     }
 
     public function update(Request $request, int $id): JsonResponse

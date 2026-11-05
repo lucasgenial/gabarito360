@@ -28,7 +28,7 @@
     <a class="brand" href="{{ route('home') }}"><x-marca theme="dark" /></a>
     <div class="aside-body">
       <h1>Recupere o acesso à sua conta.</h1>
-      <p>Informe seu e-mail institucional e enviaremos um link para redefinir sua senha.</p>
+      <p>Informe seu e-mail e enviaremos as instruções e o código para redefinir sua senha.</p>
     </div>
   </aside>
 

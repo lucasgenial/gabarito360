@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(\App\Http\Middleware\RecusarCredenciaisNaUrl::class);
         $middleware->append(\App\Http\Middleware\ProtegerRespostas::class);
         $middleware->alias([
             'autenticado' => \App\Http\Middleware\Autenticado::class,
@@ -23,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->dontFlash(['senha_atual', 'cf-turnstile-response', 'token', 'referencia']);
+        $exceptions->dontFlash(['senha_atual', 'cf-turnstile-response', 'token', 'codigo', 'referencia']);
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

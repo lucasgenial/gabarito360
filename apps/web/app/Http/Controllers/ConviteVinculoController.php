@@ -30,7 +30,12 @@ class ConviteVinculoController extends Controller
         return redirect()->route('membros.index')->with('sucesso', 'Se a conta puder receber este vínculo, o convite será enviado.');
     }
 
-    public function show() { return view('auth.convite-vinculo'); }
+    public function show(Request $r)
+    {
+        if ($r->hasAny(['token', 'codigo'])) return redirect()->route('vinculos.convite')
+            ->with('erro', 'Cole o código recebido por e-mail no formulário.');
+        return view('auth.convite-vinculo', ['convite' => null, 'referencia' => null]);
+    }
 
     private function chave(string $id): string
     {
@@ -39,22 +44,33 @@ class ConviteVinculoController extends Controller
 
     public function consultar(Request $r)
     {
-        $d = $r->validate(['convite' => 'required|integer|min:1', 'token' => 'required|string|size:64']);
+        abort_if($r->query->has('token') || $r->query->has('codigo'), 422, 'Cole o código no formulário.');
+        if ($r->has('codigo')) {
+            $entrada = $r->validate(['codigo' => ['required', 'string', 'max:84', 'regex:/^[1-9][0-9]{0,18}\.[A-Za-z0-9]{64}$/D']]);
+            [$numero, $token] = explode('.', $entrada['codigo'], 2);
+            $d = \Illuminate\Support\Facades\Validator::make(['convite' => $numero, 'token' => $token], ['convite' => 'required|integer|min:1|max:'.PHP_INT_MAX, 'token' => 'required|alpha_num:ascii|size:64'])->validate();
+        } else $d = $r->validate(['convite' => 'required|integer|min:1', 'token' => 'required|alpha_num:ascii|size:64']);
         $resp = $this->api->identidade()->post('/v1/auth/convites-vinculo/'.$d['convite'].'/consultar', ['token' => $d['token']]);
-        if ($resp->failed()) return response()->json(['message' => 'Convite indisponível. Confirme a conta usada ou peça um novo convite.'], $resp->status() >= 500 ? 503 : 422);
+        if ($resp->failed()) {
+            $mensagem = 'Convite indisponível. Confira a conta e o código ou peça um novo convite.';
+            if ($r->expectsJson()) return response()->json(['message' => $mensagem], $resp->status() >= 500 ? 503 : 422);
+            return redirect()->route('vinculos.convite')->with('erro', $mensagem);
+        }
         $ref = Str::random(48);
         Cache::put($this->chave($ref), Crypt::encryptString(json_encode($d, JSON_THROW_ON_ERROR)), now()->addMinutes(20));
-        return response()->json(['data' => $resp->json('data'), 'referencia' => $ref]);
+        if ($r->expectsJson()) return response()->json(['data' => $resp->json('data'), 'referencia' => $ref]);
+        return view('auth.convite-vinculo', ['convite' => $resp->json('data'), 'referencia' => $ref]);
     }
 
     public function responder(Request $r)
     {
+        abort_if($r->query->has('referencia') || $r->query->has('token') || $r->query->has('codigo'), 422, 'Use o formulário para confirmar o convite.');
         $d = $r->validate(['referencia' => 'required|alpha_num:ascii|size:48', 'aceitar' => 'required|boolean']);
         $cifra = Cache::get($this->chave($d['referencia']));
-        if (!$cifra) return redirect()->route('vinculos.convite')->with('erro', 'A confirmação expirou. Abra novamente o link do convite.');
+        if (!$cifra) return redirect()->route('vinculos.convite')->with('erro', 'A conferência expirou. Cole novamente o código do convite.');
         $c = json_decode(Crypt::decryptString($cifra), true, 512, JSON_THROW_ON_ERROR);
         $resp = $this->api->identidade()->post('/v1/auth/convites-vinculo/'.$c['convite'].'/responder', ['token' => $c['token'], 'aceitar' => (bool) $d['aceitar']]);
-        if ($resp->failed()) return back()->with('erro', 'Não foi possível confirmar. Abra novamente o link e confira se o convite ainda está disponível.');
+        if ($resp->failed()) return redirect()->route('vinculos.convite')->with('erro', 'Não foi possível confirmar. Confira novamente o código e a conta usada.');
         Cache::forget($this->chave($d['referencia']));
         return redirect()->route('vinculos.index', ['trocar' => 1])->with('sucesso', $d['aceitar'] ? 'Vínculo aceito. Escolha onde deseja entrar.' : 'Convite recusado. Seus outros vínculos foram preservados.');
     }

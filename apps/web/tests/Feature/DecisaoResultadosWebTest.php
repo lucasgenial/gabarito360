@@ -11,7 +11,7 @@ class DecisaoResultadosWebTest extends TestCase
         config(['services.api.base_url'=>'http://api.test/api','services.copias.interface_ativa'=>true]); Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade','auth_vinculos'=>true,'auth_nome'=>'Fictício']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
-        $me=['token'=>'contexto-resultados','tipo_contexto'=>'vinculo','perfil'=>'dir_escolar','espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola'],'permissoes'=>$permissoes];
+        $me=['vinculo_id'=>7,'token'=>'contexto-resultados','tipo_contexto'=>'vinculo','perfil'=>'dir_escolar','espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola'],'permissoes'=>$permissoes];
         return [ContextoWeb::criar($me),$me];
     }
     private function pacote(): array
@@ -44,11 +44,11 @@ class DecisaoResultadosWebTest extends TestCase
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'?[
                 'codigo'=>$code,'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino'=>['nome'=>'Destino']]:['espacos'=>[['id'=>5,'nome'=>'Destino']],'espaco_id'=>5])]);
         });
-        $this->get('/copias/receber-resultados?_ctx='.$ctx)->assertOk()->assertSee('Receber resultados')->assertSee('name="_token"',false);
-        $this->post('/copias/receber-resultados',['_ctx'=>$ctx,'espaco_id'=>5])->assertOk()->assertSee($code);
+        $this->get('/acessos/vinculo-7/copias/receber-resultados')->assertOk()->assertSee('Receber resultados')->assertSee('name="_token"',false);
+        $this->post('/acessos/vinculo-7/copias/receber-resultados',['espaco_id'=>5])->assertOk()->assertSee($code);
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/resultados/recebimentos') && $r->data()===['espaco_id'=>5]);
         $this->assertStringNotContainsString($code,json_encode(session()->all()));
-        $this->post('/copias/resultados/abrir',['_ctx'=>$ctx,'lote_id'=>$this->decisao()['lote_id']])->assertRedirect();
+        $this->post('/acessos/vinculo-7/copias/resultados/abrir',['lote_id'=>$this->decisao()['lote_id']])->assertRedirect();
     }
     public function test_pacote_completo_e_tres_confirmacoes_antes_de_criar(): void
     {
@@ -56,12 +56,12 @@ class DecisaoResultadosWebTest extends TestCase
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:(str_ends_with($r->url(),'/preparar')?[
             'espaco_id'=>5,'notas'=>[1],'dependencias'=>$deps,'pacote'=>$this->pacote(),'conteudo_digest'=>str_repeat('c',64),
             'recebimento'=>['destino'=>['nome'=>'Destino','tipo'=>'pessoal'],'destino_digest'=>str_repeat('d',64),'valida_ate'=>now()->addMinutes(15)->toISOString()]]:['lote_id'=>$this->decisao()['lote_id']])]));
-        $d=['_ctx'=>$ctx,'espaco_id'=>5,'notas'=>[1],'codigo'=>str_repeat('a',64),'tipo_destino'=>'escola','ator_id'=>99];
-        $this->post('/copias/resultados/preparar',$d)->assertOk()->assertSee('Conferir respostas incluídas')->assertSee('Conferir gabarito')
+        $d=['espaco_id'=>5,'notas'=>[1],'codigo'=>str_repeat('a',64),'tipo_destino'=>'escola','ator_id'=>99];
+        $this->post('/acessos/vinculo-7/copias/resultados/preparar',$d)->assertOk()->assertSee('Conferir respostas incluídas')->assertSee('Conferir gabarito')
             ->assertSee('8.00')->assertSee('10.00')->assertSee('Dependências incluídas')->assertSee('name="confirmado"',false)
             ->assertSee('name="dependencias_confirmadas"',false)->assertSee('name="legado_reconhecido"',false)
             ->assertPaginaSemSelecaoPrevia()->assertDontSee('<script>segredo</script>',false);
-        $this->post('/copias/resultados/lotes',$d+['chave'=>$this->decisao()['lote_id'],'dependencias'=>$deps,'destino_digest'=>str_repeat('d',64),'conteudo_digest'=>str_repeat('c',64),
+        $this->post('/acessos/vinculo-7/copias/resultados/lotes',$d+['chave'=>$this->decisao()['lote_id'],'dependencias'=>$deps,'destino_digest'=>str_repeat('d',64),'conteudo_digest'=>str_repeat('c',64),
             'confirmado'=>1,'dependencias_confirmadas'=>1,'legado_reconhecido'=>1])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/lotes') && $r['dependencias']===$deps && !isset($r['ator_id']) && !isset($r['tipo_destino']));
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/aprovar'));
@@ -76,19 +76,19 @@ class DecisaoResultadosWebTest extends TestCase
                 return Http::response(['data'=>[]]);
             }
  return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
-        $this->get('/copias/resultados/lotes/'.$id.'?lado=origem&_ctx='.$ctx)->assertOk()->assertSee('name="documento"',false)->assertSee('name="guarda"',false)
+        $this->get('/acessos/vinculo-7/copias/resultados/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('name="documento"',false)->assertSee('name="guarda"',false)
             ->assertSee('name="preservacao"',false)->assertSee('name="legado_reconhecido"',false)->assertSee('não substitui o prazo de guarda contratual')->assertDontSee('Autorizar saída dos resultados');
-        $this->post('/copias/resultados/lotes/'.$id.'/evidencia',['_ctx'=>$ctx,'conteudo_digest'=>$d['conteudo_digest'],
+        $this->post('/acessos/vinculo-7/copias/resultados/lotes/'.$id.'/evidencia',['conteudo_digest'=>$d['conteudo_digest'],
             'documento'=>'DOC-RESTRITO','guarda'=>'GUARDA-RESTRITA','preservacao'=>'PRESERVACAO-RESTRITA','confirmado'=>1,'legado_reconhecido'=>1,
             'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z')])->assertRedirect();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/aprovar'));
         foreach(['DOC-RESTRITO','GUARDA-RESTRITA','PRESERVACAO-RESTRITA'] as $t) $this->assertStringNotContainsString($t,json_encode(session()->all()));
         $d=$this->decisao('origem',true);
-        $this->get('/copias/resultados/lotes/'.$id.'?lado=origem&_ctx='.$ctx)->assertOk()->assertSee('Autorizar saída dos resultados')->assertDontSee('name="documento"',false);
-        $this->post('/copias/resultados/lotes/'.$id.'/aprovar',['_ctx'=>$ctx,'lado'=>'origem','conteudo_digest'=>$d['conteudo_digest'],
+        $this->get('/acessos/vinculo-7/copias/resultados/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Autorizar saída dos resultados')->assertDontSee('name="documento"',false);
+        $this->post('/acessos/vinculo-7/copias/resultados/lotes/'.$id.'/aprovar',['lado'=>'origem','conteudo_digest'=>$d['conteudo_digest'],
             'confirmado'=>1,'legado_reconhecido'=>1,'valida_ate'=>now()->utc()->addMinutes(30)->format('Y-m-d\TH:i:s\Z')])->assertRedirect();
         $d=$this->decisao('destino',true); $d['saida_valida_ate']=now()->utc()->addMinutes(10)->format('Y-m-d H:i:s');
-        $this->get('/copias/resultados/lotes/'.$id.'?lado=destino&_ctx='.$ctx)->assertOk()->assertSee('Autorizar entrada dos resultados')->assertSee('name="legado_reconhecido"',false)
+        $this->get('/acessos/vinculo-7/copias/resultados/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('Autorizar entrada dos resultados')->assertSee('name="legado_reconhecido"',false)
             ->assertSee('Conferir respostas incluídas')->assertDontSee('name="guarda"',false)->assertDontSee('Autorizar saída dos resultados');
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'executar'));
     }
@@ -96,12 +96,12 @@ class DecisaoResultadosWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar(); $id=$this->decisao()['lote_id'];
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'DOC-RESTRITO GUARDA-RESTRITA'],409));
-        $d=['_ctx'=>$ctx,'conteudo_digest'=>str_repeat('c',64),'documento'=>'DOC-RESTRITO','guarda'=>'GUARDA-RESTRITA','preservacao'=>'PRESERVACAO-RESTRITA',
+        $d=['conteudo_digest'=>str_repeat('c',64),'documento'=>'DOC-RESTRITO','guarda'=>'GUARDA-RESTRITA','preservacao'=>'PRESERVACAO-RESTRITA',
             'confirmado'=>1,'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z')];
-        $this->post('/copias/resultados/lotes/'.$id.'/evidencia',$d)->assertStatus(422);
-        $this->post('/copias/resultados/lotes/'.$id.'/evidencia',$d+['legado_reconhecido'=>1])->assertStatus(409)->assertDontSee('DOC-RESTRITO')->assertDontSee('GUARDA-RESTRITA');
+        $this->post('/acessos/vinculo-7/copias/resultados/lotes/'.$id.'/evidencia',$d)->assertStatus(422);
+        $this->post('/acessos/vinculo-7/copias/resultados/lotes/'.$id.'/evidencia',$d+['legado_reconhecido'=>1])->assertStatus(409)->assertDontSee('DOC-RESTRITO')->assertDontSee('GUARDA-RESTRITA');
         $this->assertNull(session('_old_input')); foreach(['DOC-RESTRITO','GUARDA-RESTRITA','PRESERVACAO-RESTRITA'] as $t) $this->assertStringNotContainsString($t,json_encode(session()->all()));
-        $this->get('/copias/receber-resultados?_ctx='.$ctx)->assertForbidden();
-        config(['services.copias.interface_ativa'=>false]); $this->get('/copias/resultados/lotes/'.$id.'?lado=origem&_ctx='.$ctx)->assertNotFound();
+        $this->get('/acessos/vinculo-7/copias/receber-resultados')->assertForbidden();
+        config(['services.copias.interface_ativa'=>false]); $this->get('/acessos/vinculo-7/copias/resultados/lotes/'.$id.'?lado=origem')->assertNotFound();
     }
 }

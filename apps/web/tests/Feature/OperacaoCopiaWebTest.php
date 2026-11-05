@@ -11,7 +11,7 @@ class OperacaoCopiaWebTest extends TestCase
         config(['services.api.base_url'=>'http://api.test/api','services.copias.interface_ativa'=>true]); Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade','auth_vinculos'=>true,'auth_nome'=>'Fictício']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
-        $me=['token'=>'contexto-resultados','tipo_contexto'=>'vinculo','perfil'=>'dir_escolar','espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola'],'permissoes'=>$permissoes];
+        $me=['vinculo_id'=>7,'token'=>'contexto-resultados','tipo_contexto'=>'vinculo','perfil'=>'dir_escolar','espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola'],'permissoes'=>$permissoes];
         return [ContextoWeb::criar($me),$me];
     }
     private function pacote(): array
@@ -34,38 +34,38 @@ class OperacaoCopiaWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']);
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->operacao()]));
-        $url='/copias/operacao/'.self::ID;
-        $this->get($url.'?lado=destino&_ctx='.$ctx)->assertOk()->assertSee('Solicitar processamento')->assertSee('name="_token"',false)
+        $url='/acessos/vinculo-7/copias/operacao/'.self::ID;
+        $this->get($url.'?lado=destino')->assertOk()->assertSee('Solicitar processamento')->assertSee('name="_token"',false)
             ->assertSee('name="confirmado"',false)->assertPaginaSemSelecaoPrevia()->assertSee('não apaga cópias já publicadas');
-        $this->post($url.'/solicitar',['_ctx'=>$ctx])->assertUnprocessable();
-        $this->post($url.'/solicitar',['_ctx'=>$ctx,'confirmado'=>1,'ator_id'=>999,'lado'=>'origem'])->assertRedirect();
+        $this->post($url.'/solicitar',[])->assertUnprocessable();
+        $this->post($url.'/solicitar',['confirmado'=>1,'ator_id'=>999,'lado'=>'origem'])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/solicitar') && $r->data()===['confirmado'=>1] && $r->hasHeader('Authorization','Bearer contexto-resultados'));
-        $this->post($url.'/revogar',['_ctx'=>$ctx,'lado'=>'destino','confirmado'=>1])->assertRedirect();
+        $this->post($url.'/revogar',['lado'=>'destino','confirmado'=>1])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/revogar') && $r->data()===['lado'=>'destino','confirmado'=>1]);
-        $this->post($url.'/revogar',['_ctx'=>$ctx,'lado'=>'origem','confirmado'=>1])->assertForbidden();
+        $this->post($url.'/revogar',['lado'=>'origem','confirmado'=>1])->assertForbidden();
     }
     public function test_bloqueado_orienta_nova_selecao_sem_reabrir(): void
     {
         [$ctx,$me]=$this->preparar(); $d=array_replace($this->operacao('origem'),['estado'=>'bloqueado','execucao_solicitada'=>true,'pode_revogar'=>false]);
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]));
-        $this->get('/copias/operacao/'.self::ID.'?lado=origem&_ctx='.$ctx)->assertOk()->assertSee('Preparar nova solicitação')
+        $this->get('/acessos/vinculo-7/copias/operacao/'.self::ID.'?lado=origem')->assertOk()->assertSee('Preparar nova solicitação')
             ->assertSee('não duplica a cópia')->assertDontSee('name="confirmado"',false)->assertDontSee('Consultar acervo publicado');
-        $this->post('/copias/operacao/'.self::ID.'/solicitar',['_ctx'=>$ctx,'confirmado'=>1])->assertForbidden();
+        $this->post('/acessos/vinculo-7/copias/operacao/'.self::ID.'/solicitar',['confirmado'=>1])->assertForbidden();
     }
     public function test_acervo_exibe_pacote_legado_escapado_sem_formulario(): void
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']);
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:['lote_id'=>self::ID,'publicado_em'=>'2026-11-02 12:00:00','pacote'=>$this->pacote()]]));
-        $this->get('/copias/operacao/'.self::ID.'/acervo?_ctx='.$ctx)->assertOk()->assertSee('Acervo de resultados')->assertSee('Legado sem versão original comprovada')
+        $this->get('/acessos/vinculo-7/copias/operacao/'.self::ID.'/acervo')->assertOk()->assertSee('Acervo de resultados')->assertSee('Legado sem versão original comprovada')
             ->assertSee('Conferir respostas incluídas')->assertSee('8.00')->assertDontSee('<script>segredo</script>',false)->assertDontSee('name="confirmado"',false);
     }
     public function test_falha_generica_sem_flash_e_flag_fechada(): void
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']);
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'SEGREDO INTERNO'],409));
-        $this->post('/copias/operacao/'.self::ID.'/solicitar',['_ctx'=>$ctx,'confirmado'=>1,'documento'=>'SEGREDO'])->assertStatus(409)->assertDontSee('SEGREDO');
+        $this->post('/acessos/vinculo-7/copias/operacao/'.self::ID.'/solicitar',['confirmado'=>1,'documento'=>'SEGREDO'])->assertStatus(409)->assertDontSee('SEGREDO');
         $this->assertStringNotContainsString('SEGREDO',json_encode(session()->all()));
         config(['services.copias.interface_ativa'=>false]);
-        $this->get('/copias/operacao/'.self::ID.'?lado=destino&_ctx='.$ctx)->assertNotFound();
+        $this->get('/acessos/vinculo-7/copias/operacao/'.self::ID.'?lado=destino')->assertNotFound();
     }
 }

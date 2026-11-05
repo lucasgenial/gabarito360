@@ -26,8 +26,6 @@
     municipio.disabled = true; status.textContent = 'Carregando municípios…';
     var url = new URL(form.dataset.municipios, location.origin);
     url.searchParams.set('uf', uf.value); url.searchParams.set('busca', busca.value.trim()); url.searchParams.set('page', String(p));
-    var contexto = new URL(location.href).searchParams.get('_ctx');
-    if (contexto) url.searchParams.set('_ctx', contexto);
     try {
       var resposta = await fetch(url, {headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}, credentials: 'same-origin'});
       if (!resposta.ok) throw new Error('indisponivel');

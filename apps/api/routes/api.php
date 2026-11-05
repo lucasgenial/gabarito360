@@ -39,10 +39,10 @@ Route::prefix('v1')->group(function () {
     // Fale Conosco (público)
     Route::post('leads', [LeadController::class, 'store'])->middleware('throttle:5,1');
 
-    // Foto do cartão por link temporário assinado: o navegador busca direto, sem passar pela web
-    Route::get('cartoes/{id}/arquivo/{tipo}', [CartaoController::class, 'arquivo'])
+    // Endereço antigo desativado: uma assinatura na URL não substitui autenticação.
+    Route::get('cartoes/{id}/arquivo/{tipo}', fn () => abort(404))
         ->whereNumber('id')->whereIn('tipo', ImagensCartao::TIPOS)
-        ->middleware('signed:relative')->name('cartoes.arquivo');
+        ->name('cartoes.arquivo');
 
     // Rotas públicas de autenticação
     Route::prefix('auth')->group(function () {
@@ -205,6 +205,9 @@ Route::prefix('v1')->group(function () {
         Route::post('tentativas/{id}/aplicar', [\App\Http\Controllers\Api\TentativaCartaoController::class,'aplicar'])->whereUuid('id')->middleware('permissao:correcao.alterar');
         Route::post('tentativas/{id}/descartar', [\App\Http\Controllers\Api\TentativaCartaoController::class,'descartar'])->whereUuid('id')->middleware('permissao:correcao.alterar');
         Route::prefix('cartoes')->group(function () {
+            Route::get('{id}/imagens/{tipo}', [CartaoController::class, 'arquivo'])
+                ->whereNumber('id')->whereIn('tipo', ImagensCartao::TIPOS)
+                ->middleware('permissao:correcao.acompanhar')->name('cartoes.imagem-autenticada');
             Route::get('{id}',                       [CartaoController::class, 'show'])->middleware('permissao:correcao.acompanhar');
             Route::get('{id}/imagem',                [CartaoController::class, 'imagem'])->middleware('permissao:correcao.acompanhar');
             Route::delete('{id}',                    [CartaoController::class, 'destroy'])->middleware('permissao:correcao.alterar');

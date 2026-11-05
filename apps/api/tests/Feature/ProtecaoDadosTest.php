@@ -92,7 +92,9 @@ class ProtecaoDadosTest extends TestCase
         app(ContaUsuario::class)->enviarLinkDeSenha($u);
         $mail = Mail::queued(EmailModelo::class)->sole();
         $this->assertStringNotContainsString('pessoa', $mail->dados['link']);
-        parse_str(parse_url($mail->dados['link'], PHP_URL_QUERY), $link);
+        $this->assertNull(parse_url($mail->dados['link'], PHP_URL_QUERY));
+        $this->assertNull(parse_url($mail->dados['link'], PHP_URL_FRAGMENT));
+        $link = ['token'=>$mail->dados['codigo'], 'conta'=>\App\Support\DadoProtegido::hash($u->email, 'email')];
         $this->assertArrayNotHasKey('email', $link);
         $this->postJson('/api/v1/auth/redefinir-senha', ['email' => $link['conta'], 'token' => $link['token'],
             'password' => 'nova-senha-ficticia', 'password_confirmation' => 'nova-senha-ficticia'])->assertOk();

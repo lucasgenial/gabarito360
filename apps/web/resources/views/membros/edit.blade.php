@@ -185,7 +185,7 @@
     <section class="section-card">
       <div class="section-head">
         <h2>Acesso ao Sistema</h2>
-        <p>A senha é sempre criada pela própria pessoa. Envie um link para que ela defina uma nova senha.</p>
+        <p>A senha é sempre criada pela própria pessoa. Envie as instruções e o código por e-mail para que ela defina uma nova senha.</p>
       </div>
       <div class="section-body">
         <div class="field">
@@ -196,7 +196,7 @@
           </div>
         <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:18px;">
           <button type="submit" form="reenviar-convite" class="btn btn-secondary">Reenviar convite por e-mail</button>
-          <button type="submit" form="enviar-link-senha" class="btn btn-secondary">Enviar link para criar nova senha</button>
+          <button type="submit" form="enviar-link-senha" class="btn btn-secondary">Enviar instruções para criar nova senha</button>
           <button type="submit" form="alternar-acesso" class="btn btn-secondary">
             {{ ($membro['ativo'] ?? true) ? 'Desativar membro' : 'Ativar membro' }}
           </button>

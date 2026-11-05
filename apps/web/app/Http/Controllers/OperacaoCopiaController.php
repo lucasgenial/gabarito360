@@ -39,13 +39,13 @@ class OperacaoCopiaController extends Controller
     {
         $this->autorizar('destino'); $d=$this->dados($r,['confirmado'=>'required|accepted']);
         $this->api('post','/v1/copias/operacao/'.$id.'/solicitar',$d);
-        return redirect()->route('copias.operacao',['id'=>$id,'lado'=>'destino','_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.operacao',['id'=>$id,'lado'=>'destino']);
     }
     public function revogar(Request $r,string $id)
     {
         $d=$this->dados($r,['lado'=>'required|in:origem,destino','confirmado'=>'required|accepted']); $this->autorizar($d['lado']);
         $this->api('post','/v1/copias/operacao/'.$id.'/revogar',$d);
-        return redirect()->route('copias.operacao',['id'=>$id,'lado'=>$d['lado'],'_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.operacao',['id'=>$id,'lado'=>$d['lado']]);
     }
     public function acervo(Request $r,string $id)
     {

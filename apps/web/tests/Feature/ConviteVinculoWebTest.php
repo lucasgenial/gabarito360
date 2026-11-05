@@ -13,7 +13,7 @@ class ConviteVinculoWebTest extends TestCase
         parent::setUp(); config(['services.api.base_url'=>'http://api.test/api']); Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade','auth_vinculos'=>true,'auth_nome'=>'Gestor','auth_email'=>'pessoa@example.test']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
-        $this->ctx = ContextoWeb::criar(['token'=>'contexto','perfil'=>'dir_escolar','permissoes'=>['usuario.gerir','usuario.ver'], 'espaco'=>['nome'=>'Escola A']]);
+        $this->ctx = ContextoWeb::criar(['token'=>'contexto','vinculo_id'=>5,'perfil'=>'dir_escolar','permissoes'=>['usuario.gerir','usuario.ver'], 'espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola A']]);
     }
     private function fake(callable $f): void
     {
@@ -46,15 +46,15 @@ class ConviteVinculoWebTest extends TestCase
                 ['chave'=>'prova.criar','tipo'=>'extra','pode_alterar'=>true]
             ]]]);
         });
-        $this->put('/membros/2',['_ctx'=>$this->ctx,'vinculo_id'=>9,'ativo'=>0,'nome'=>'Não deve alterar'])->assertRedirect();
-        $this->put('/membros/2/permissoes',['_ctx'=>$this->ctx,'vinculo_id'=>9,'retirar'=>['prova.ver'=>'1'],'conceder'=>['prova.criar'=>'1'],'valida_ate'=>['prova.criar'=>'2027-01-01']])->assertRedirect()->assertSessionHas('sucesso');
+        $this->put('/acessos/vinculo-5/membros/2',['vinculo_id'=>9,'ativo'=>0,'nome'=>'Não deve alterar'])->assertRedirect();
+        $this->put('/acessos/vinculo-5/membros/2/permissoes',['vinculo_id'=>9,'retirar'=>['prova.ver'=>'1'],'conceder'=>['prova.criar'=>'1'],'valida_ate'=>['prova.criar'=>'2027-01-01']])->assertRedirect()->assertSessionHas('sucesso');
     }
     public function test_lista_e_edicao_exibem_vinculo_sem_campos_de_identidade_editaveis(): void
     {
         $m=['id'=>2,'nome'=>'Pessoa','email'=>'pessoa@example.test','perfil'=>'professor','situacao'=>'convidado','ativo'=>false,'vinculo_id'=>9,'espaco_nome'=>'Escola A','created_at'=>null];
         $this->fake(fn($r)=>Http::response(['data'=>str_contains($r->url(),'/usuarios/2')?$m:['usuarios'=>[$m, array_merge($m,['vinculo_id'=>10,'espaco_nome'=>'Escola B'])],'totais'=>[]]]));
-        $this->get('/membros?_ctx='.$this->ctx)->assertOk()->assertSee('Vínculo #9')->assertSee('Vínculo #10')->assertSee('vinculo_id=9',false)->assertDontSee('Suspender vínculo');
-        $this->get('/membros/2/editar?_ctx='.$this->ctx.'&vinculo_id=9')->assertOk()->assertSee('Gerir vínculo')->assertDontSee('name="email"',false)->assertDontSee('name="password"',false);
+        $this->get('/acessos/vinculo-5/membros')->assertOk()->assertSee('Vínculo #9')->assertSee('Vínculo #10')->assertSee('vinculo_id=9',false)->assertDontSee('Suspender vínculo');
+        $this->get('/acessos/vinculo-5/membros/2/editar?vinculo_id=9')->assertOk()->assertSee('Gerir vínculo')->assertDontSee('name="email"',false)->assertDontSee('name="password"',false);
     }
     public function test_form_convite_e_envio_generico_usam_contexto(): void
     {
@@ -62,8 +62,8 @@ class ConviteVinculoWebTest extends TestCase
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto'));
             return Http::response(['data'=>str_ends_with($r->url(),'/opcoes')?[['id'=>5,'nome'=>'Escola A','perfis'=>['professor'],'turmas'=>[]]]:['mensagem'=>'Se a conta puder receber este vínculo, o convite será enviado.']],$r->method()==='POST'?202:200);
         });
-        $this->get('/membros/convidar-vinculo?_ctx='.$this->ctx)->assertOk()->assertSee('Convidar conta existente');
-        $this->post('/membros/convidar-vinculo',['_ctx'=>$this->ctx,'email'=>'alvo@example.test','espaco_id'=>5,'perfil'=>'professor'])->assertRedirect()->assertSessionHas('sucesso','Se a conta puder receber este vínculo, o convite será enviado.');
+        $this->get('/acessos/vinculo-5/membros/convidar-vinculo')->assertOk()->assertSee('Convidar conta existente');
+        $this->post('/acessos/vinculo-5/membros/convidar-vinculo',['email'=>'alvo@example.test','espaco_id'=>5,'perfil'=>'professor'])->assertRedirect()->assertSessionHas('sucesso','Se a conta puder receber este vínculo, o convite será enviado.');
     }
     public function test_consulta_e_resposta_usam_identidade_e_referencia_sem_token_no_html_ou_sessao(): void
     {
@@ -115,7 +115,28 @@ class ConviteVinculoWebTest extends TestCase
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto'));
             return Http::response(['data'=>[]]);
         });
-        $this->post('/turmas/1/professores',['_ctx'=>$this->ctx,'usuario_id'=>2,'vinculo_id'=>9])->assertRedirect();
-        $this->delete('/turmas/1/professores/2',['_ctx'=>$this->ctx,'vinculo_id'=>9])->assertRedirect();
+        $this->post('/acessos/vinculo-5/turmas/1/professores',['usuario_id'=>2,'vinculo_id'=>9])->assertRedirect();
+        $this->delete('/acessos/vinculo-5/turmas/1/professores/2',['vinculo_id'=>9])->assertRedirect();
     }
+    public function test_codigo_completo_funciona_com_formulario_nativo_sem_segredo_no_html(): void
+    {
+        $token = str_repeat('z',64);
+        Http::fake(fn($r)=>Http::response(['data'=>[
+            'vinculo'=>'Escola A','funcao'=>'Professor','turmas'=>'3A','convidado_por'=>'Gestor',
+        ]]));
+        $r=$this->post('/vinculos/convite/consultar',['codigo'=>'7.'.$token])
+            ->assertOk()->assertSee('Escola A')->assertDontSee($token)->assertSee('name="referencia"',false);
+        Http::assertSent(fn($r)=>$r->method()==='POST' && $r['token']===$token
+            && !str_contains($r->url(),$token));
+        $this->assertStringNotContainsString($token,json_encode(session()->all()));
+    }
+
+    public function test_codigo_invalido_nao_e_guardado_em_old_input_nem_enviado(): void
+    {
+        $codigo='7.'.str_repeat('z',63);
+        $this->post('/vinculos/convite/consultar',['codigo'=>$codigo])->assertRedirect();
+        $this->assertArrayNotHasKey('codigo',session()->getOldInput());
+        Http::assertNothingSent();
+    }
+
 }

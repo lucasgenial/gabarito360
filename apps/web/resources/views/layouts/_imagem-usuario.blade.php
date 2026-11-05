@@ -1,5 +1,5 @@
 @php
- $imagemInicial=['avatar_id'=>session('auth_avatar_id'),'tem_foto'=>(bool)session('auth_tem_foto',false),'imagem_versao'=>session('auth_imagem_versao',1),'foto_url'=>route('perfil.foto',['v'=>session('auth_imagem_versao',1),'_ctx'=>\App\Support\ContextoWeb::id()])];
+ $imagemInicial=['avatar_id'=>session('auth_avatar_id'),'tem_foto'=>(bool)session('auth_tem_foto',false),'imagem_versao'=>session('auth_imagem_versao',1),'foto_url'=>route('perfil.foto',['v'=>session('auth_imagem_versao',1)])];
 @endphp
 <dialog id="imagem-usuario-modal" class="troca-contexto-modal imagem-modal" aria-labelledby="imagem-usuario-titulo" aria-describedby="imagem-usuario-orientacao">
  <div class="troca-contexto-cabecalho"><h2 id="imagem-usuario-titulo">Sua imagem de perfil</h2><button class="btn btn-secondary" id="imagem-usuario-fechar" type="button" aria-label="Fechar imagem de perfil">Fechar</button></div>

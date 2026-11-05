@@ -6,7 +6,7 @@
 <section class="card card-pad pedidos-bloco">
 <h2>{{ $gestor?'Consultar protocolo para autorizar':'Consultar arquivo gerado' }}</h2>
 <form class="pedidos-form" method="GET" action="{{ route('pedidos.exportacoes') }}">
-<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
+
 <label for="referencia">{{ $gestor?'Referência do protocolo':'Referência do arquivo' }}</label><input class="input" id="referencia" name="referencia" value="{{ $ref }}" required maxlength="36">
 <button class="btn btn-outline">Consultar referência</button></form>
 </section>
@@ -25,7 +25,7 @@
 @elseif($previa)
 <section class="card card-pad pedidos-bloco"><h2>Arquivo disponível</h2><p class="pedidos-ref">{{ $previa['referencia'] }}</p><p>Campos: {{ implode(', ',$previa['campos']) }}</p>
 <p>Expira em {{ \Illuminate\Support\Carbon::parse($previa['expira_em'])->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }} (Brasília).</p>
-<a class="btn btn-primary" href="{{ route('pedidos.exportacoes.arquivo',['id'=>$previa['referencia'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">Baixar arquivo JSON</a><p>O acesso será conferido novamente ao baixar.</p></section>
+<a class="btn btn-primary" href="{{ route('pedidos.exportacoes.arquivo',['id'=>$previa['referencia']]) }}">Baixar arquivo JSON</a><p>O acesso será conferido novamente ao baixar.</p></section>
 @endif
 <section class="card card-pad pedidos-bloco"><h2>{{ $gestor?'Revogar autorização':'Gerar arquivo autorizado' }}</h2>
 <p>{{ $gestor?'Use a referência e a versão da autorização que deseja revogar. O histórico será preservado.':'Informe a autorização fornecida pelo administrador da rede ou proprietário do espaço. Nenhum campo adicional será incluído.' }}</p>

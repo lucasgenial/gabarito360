@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(\App\Http\Middleware\RecusarCredenciaisNaUrl::class);
         $middleware->append(\App\Http\Middleware\ProtegerRespostas::class);
         $middleware->append(\App\Http\Middleware\RegistrarAuditoria::class);
         // A API não tem tela de login: sem autenticação responde 401, nunca redireciona

@@ -26,9 +26,10 @@ class ConviteVinculoController extends Controller
         if ($convite) {
             $titular = Usuario::findOrFail($convite['usuario_id']);
             $dados = app(\App\Services\ContaUsuario::class)->dadosDoConvite($titular, $request->user(), $convite['vinculo_id']);
-            // Fragmento não é enviado ao servidor web em GET nem deve ir para logs de URL.
-            $link = rtrim(config('emails.url_web'), '/').'/vinculos/convite#'.http_build_query(['convite' => $convite['convite_id'], 'token' => $convite['token']]);
-            Mail::to($titular->email)->queue(new EmailModelo('convite-vinculo', 'Convite para um novo vínculo', $dados + ['link' => $link]));
+            // Código no corpo do e-mail; a URL nunca transporta a credencial.
+            $link = rtrim(config('emails.url_web'), '/').'/vinculos/convite';
+            $codigo = $convite['convite_id'].'.'.$convite['token'];
+            Mail::to($titular->email)->queue(new EmailModelo('convite-vinculo', 'Convite para um novo vínculo', $dados + ['link' => $link, 'codigo' => $codigo]));
         }
         return ApiResponse::success(['mensagem' => 'Se a conta puder receber este vínculo, o convite será enviado.'], null, 202);
     }
@@ -36,6 +37,7 @@ class ConviteVinculoController extends Controller
     public function consultar(Request $request, int $id)
     {
         abort_unless($request->user()->ativo, 403);
+        abort_if($request->query->has('token'), 422, 'Envie o código no corpo da requisição.');
         $d = $request->validate(['token' => 'required|string|size:64']);
         $c = \Illuminate\Support\Facades\DB::table('vinculo_convites as c')->join('usuario_vinculos as v', 'v.id', '=', 'c.vinculo_id')
             ->where('c.id', $id)->where('v.usuario_id', $request->user()->id)->where('v.situacao', 'convidado')
@@ -47,6 +49,7 @@ class ConviteVinculoController extends Controller
 
     public function responder(Request $request, int $id, ConviteVinculo $servico)
     {
+        abort_if($request->query->has('token'), 422, 'Envie o código no corpo da requisição.');
         $d = $request->validate(['token' => 'required|string|size:64', 'aceitar' => 'required|boolean']);
         $servico->responder($request->user(), $id, $d['token'], (bool) $d['aceitar']);
         return ApiResponse::success(['mensagem' => $d['aceitar'] ? 'Vínculo aceito.' : 'Convite recusado.']);
