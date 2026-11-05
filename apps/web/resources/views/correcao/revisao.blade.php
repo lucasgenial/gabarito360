@@ -66,6 +66,7 @@ function ajustarCartao() {
 }
 function carregarCartao() {
   if (!cartaoModal.open || !cartaoUrl) return;
+  if (cartaoErro.contains(document.activeElement)) cartaoArea.focus({preventScroll:true});
   var sequencia = ++cartaoSequencia;
   if (cartaoFoto) { cartaoFoto.onload = cartaoFoto.onerror = null; cartaoFoto.removeAttribute('src'); }
   cartaoFoto = new Image(); cartaoFoto.alt = 'Cartão-resposta completo'; cartaoFoto.draggable = false;
