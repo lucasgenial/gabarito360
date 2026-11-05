@@ -52,6 +52,20 @@ def caber(c, txt, fonte, tam, larg):
     c.setFont(fonte, tam)
 
 
+def texto_bloco(c, txt, fonte, tam, larg, x, y, cor, centro=False):
+    """Preserva o tamanho padrão; nomes extensos quebram linha sem cortar dados."""
+    c.setFillColor(cor)
+    if pdfmetrics.stringWidth(txt, fonte, tam) <= larg:
+        c.setFont(fonte, tam)
+        (c.drawCentredString if centro else c.drawString)(x, y, txt)
+        return 0
+    estilo = ParagraphStyle('bloco', fontName=fonte, fontSize=tam, leading=tam+2, textColor=cor, alignment=1 if centro else 0)
+    p = Paragraph(escape(txt), estilo)
+    _, h = p.wrap(larg, H)
+    p.drawOn(c, x-larg/2 if centro else x, y-h+estilo.leading)
+    return max(0, h-estilo.leading)
+
+
 def rodape(c, d):
     e = d.get('emissao')
     if not e:
@@ -69,7 +83,7 @@ def rodape(c, d):
              + '<b>' + escape(e['codigo']) + '</b><br/>'
              + 'Selo de emissão do sistema. Confira o arquivo pelo QR ou em:<br/>'
              + escape(e['url'].split('?')[0]) + '<br/>'
-             + 'Página ' + str(c.getPageNumber()) + ' · Gabarito360')
+             + ('Relatório do professor' if d.get('modelo') == 'professor' else 'Relatório do aluno') + ' · Página ' + str(c.getPageNumber()) + ' · Gabarito360')
     p = Paragraph(texto, estilo)
     _, altura = p.wrap(largura, 44 * mm)
     p.drawOn(c, m, 47 * mm - altura)
@@ -81,7 +95,7 @@ def rodape(c, d):
     renderPDF.draw(desenho, c, W - m - tamanho, 10 * mm)
 
 
-def _aluno_pagina(d, c):
+def _resultado_pagina(d, c):
     aluno, nota, folha = d["aluno"], d["nota"], d["folha"]
     m = 16 * mm
     y = H - 16 * mm
@@ -100,31 +114,36 @@ def _aluno_pagina(d, c):
     c.setFillColor(GRAY3)
     c.setFont("Raleway-SemiBold", 8)
     if d.get("rede"):
-        c.drawCentredString(W / 2, y, d["rede"].upper())
-        y -= 5 * mm
+        extra = texto_bloco(c, d['rede'].upper(), 'Raleway-SemiBold', 8, W-2*m-44*mm, W/2, y, GRAY3, True)
+        y -= extra + 5 * mm
     c.setFillColor(BLUE2)
-    caber(c, d.get("escola") or "", "Raleway-ExtraBold", 12, W - 2 * m - 44 * mm)
-    c.drawCentredString(W / 2, y, d.get("escola") or "")
-    y -= 4.5 * mm
+    extra = texto_bloco(c, d.get('escola') or '', 'Raleway-ExtraBold', 12, W-2*m-44*mm, W/2, y, BLUE2, True)
+    y -= extra + 4.5 * mm
     if d.get("detalhe"):
         c.setFillColor(GRAY3)
         c.setFont("Raleway-Regular", 8)
-        c.drawCentredString(W / 2, y, d["detalhe"])
-        y -= 4 * mm
+        extra = texto_bloco(c, d['detalhe'], 'Raleway-Regular', 8, W-2*m-44*mm, W/2, y, GRAY3, True)
+        y -= extra + 4 * mm
     y = min(y, topo - 14 * mm) - 3 * mm
 
     # Faixa da prova
+    titulo = f"{d['titulo'].upper()} · RESULTADO"
+    p = Paragraph(escape(titulo), ParagraphStyle('titulo', fontName='Raleway-ExtraBold', fontSize=10.5, leading=12, textColor=white))
+    _, h = p.wrap(W-2*m-8*mm, H)
+    altura = max(10*mm, h+6*mm)
+    topo_faixa = y+6*mm
     c.setFillColor(BLUE)
-    c.roundRect(m, y - 4 * mm, W - 2 * m, 10 * mm, 2 * mm, stroke=0, fill=1)
-    c.setFillColor(white)
-    caber(c, f"{d['titulo'].upper()} · RESULTADO", "Raleway-ExtraBold", 10.5, W - 2*m - 8*mm)
-    c.drawString(m + 4 * mm, y - 0.3 * mm, f"{d['titulo'].upper()} · RESULTADO")
-    y -= 14 * mm
+    c.roundRect(m, topo_faixa-altura, W-2*m, altura, 2*mm, stroke=0, fill=1)
+    if altura <= 10.5*mm:
+        c.setFillColor(white);c.setFont('Raleway-ExtraBold',10.5)
+        c.drawString(m+4*mm, y-0.3*mm, titulo)
+    else:
+        p.drawOn(c,m+4*mm,topo_faixa-3*mm-h)
+    y = topo_faixa-altura-10*mm
 
     # Aluno + nota
     c.setFillColor(HexColor("#222222"))
-    caber(c, aluno["nome"], "Raleway-Bold", 14, W - 2 * m - 45 * mm)
-    c.drawString(m, y, aluno["nome"])
+    extra_nome = texto_bloco(c, aluno['nome'], 'Raleway-Bold', 14, W-2*m-45*mm, m, y, HexColor('#222222'))
     c.setFont("Raleway-Regular", 9.5)
     c.setFillColor(GRAY3)
     linha = " · ".join(filter(None, [
@@ -133,7 +152,7 @@ def _aluno_pagina(d, c):
         ("Espanhol" if d.get("lingua") == "ESP" else "Inglês") if d.get("lingua") else None,
         d.get("data"),
     ]))
-    c.drawString(m, y - 5.5 * mm, linha)
+    extra_meta = texto_bloco(c, linha, 'Raleway-Regular', 9.5, W-2*m-45*mm, m, y-extra_nome-5.5*mm, GRAY3)
 
     maxima = float(d.get("nota_maxima") or 10)
     aprovado = float(nota["nota_final"]) >= maxima * 0.6
@@ -143,12 +162,11 @@ def _aluno_pagina(d, c):
     c.setFont("Raleway-SemiBold", 8)
     c.setFillColor(GRAY3)
     c.drawRightString(W - m, y - 9 * mm, f"NOTA (de {fmt(maxima)})")
-    y -= 16 * mm
+    y -= max(16*mm, extra_nome+extra_meta+12.5*mm)
     c.setFont('Raleway-Regular', 9)
     c.setFillColor(GRAY3)
-    caber(c, d['disciplina'], 'Raleway-Regular', 9, W-2*m)
-    c.drawString(m, y, d['disciplina'])
-    y -= 6*mm
+    extra = texto_bloco(c, d['disciplina'], 'Raleway-Regular', 9, W-2*m, m, y, GRAY3)
+    y -= extra+6*mm
 
     # Resumo
     cont = {k: 0 for k in CORES}
@@ -170,51 +188,57 @@ def _aluno_pagina(d, c):
         c.setFont("Raleway-SemiBold", 8.5)
         c.drawRightString(x + bw - 4 * mm, y - 5.8 * mm, rot.upper())
     y -= 15 * mm
-    if d.get("media_turma") is not None and d.get('modelo') != 'aluno':
+    if d.get("media_turma") is not None and d.get('modelo') not in ('aluno', 'professor'):
         c.setFont("Raleway-Regular", 9)
         c.setFillColor(GRAY3)
         c.drawString(m, y, f"Média da turma nesta prova: {fmt(d['media_turma'])}")
         y -= 7 * mm
 
-    # Folha questão por questão (colunas de cima para baixo)
-    c.setFillColor(BLUE2)
-    c.setFont("Raleway-Bold", 10)
-    intervalo = d.get('intervalo', '')
-    c.drawString(m, y, "QUESTÃO POR QUESTÃO" + (' · ' + intervalo if intervalo else ''))
-    y -= 4 * mm
-    cols = 3 if len(folha) <= 60 else 4
-    rows = math.ceil(len(folha) / cols)
-    cw = (W - 2 * m - (cols - 1) * 4 * mm) / cols
-    rh = min(9 * mm, (y - (56 if d.get('emissao') else 32) * mm) / max(rows, 1))
+    # Mesmo cabeçalho, nota e resumo; apenas os itens variam entre os modelos.
+    professor = d.get('modelo') == 'professor'
+    cols = 3 if professor or len(folha) <= 60 else 4
+    disponivel = y-4*mm-(56 if d.get('emissao') else 32)*mm
+    if professor:
+        capacidade = min(24, max(1,int(disponivel/(17*mm)))*cols)
+    else:
+        capacidade = max(1,int(disponivel/(5.5*mm)))*cols
+    folha = folha[:capacidade]
+    total = len(d.get('folha_completa', d['folha']))
+    inicio = d.get('inicio_questoes', 0)
+    intervalo = f"Questões {inicio+1}–{inicio+len(folha)} de {total}" if total > len(folha) else ''
+    c.setFillColor(BLUE2); c.setFont('Raleway-Bold', 10)
+    c.drawString(m, y, 'QUESTÃO POR QUESTÃO' + (' · '+intervalo if intervalo else ''))
+    y -= 4*mm
+    rows = math.ceil(len(folha)/cols)
+    cw = (W-2*m-(cols-1)*4*mm)/cols
+    rh = 17*mm if professor else min(9*mm, (y-(56 if d.get('emissao') else 32)*mm)/max(rows,1))
     for i, q in enumerate(folha):
         col, row = divmod(i, rows)
-        x = m + col * (cw + 4 * mm)
-        yy = y - (row + 1) * rh
-        fundo, borda, texto = CORES.get(q["situacao"], CORES["anulada"])
-        c.setFillColor(fundo)
-        c.setStrokeColor(borda)
-        c.setLineWidth(0.6)
-        c.roundRect(x, yy + 0.6 * mm, cw, rh - 1.2 * mm, 1.5 * mm, stroke=1, fill=1)
+        x = m+col*(cw+4*mm); yy = y-(row+1)*rh
+        fundo, borda, texto = CORES.get(q['situacao'], CORES['anulada'])
+        c.setFillColor(fundo); c.setStrokeColor(borda); c.setLineWidth(0.6)
+        c.roundRect(x, yy+0.6*mm, cw, rh-1.2*mm, 1.5*mm, fill=1, stroke=1)
         c.setFillColor(texto)
-        c.setFont("Raleway-ExtraBold", 9.5)
-        base = yy + rh / 2 - 1.2 * mm
-        c.drawString(x + 3 * mm, base, f"{q['numero_questao']:02d}")
-        c.setFont("Raleway-SemiBold", 9)
-        sit, marc, gab = q["situacao"], q.get("marcada"), q.get("gabarito")
-        if sit == "correta":
-            txt = f"acertou ({marc})"
-        elif sit == "incorreta":
-            txt = f"marcou {marc} · certa {gab}"
-        elif sit == "branco":
-            txt = f"em branco · certa {gab}"
+        sit, marc, gab = q['situacao'], q.get('marcada'), q.get('gabarito')
+        if sit=='correta': resposta=f'acertou ({marc})'
+        elif sit=='incorreta': resposta=f'marcou {marc} · certa {gab}'
+        elif sit=='branco': resposta=f'em branco · certa {gab}'
+        else: resposta='anulada'
+        if professor:
+            c.setFont('Raleway-SemiBold', 9)
+            c.drawString(x+2.5*mm, yy+11.5*mm, f"{q['numero_questao']:02d} · {resposta}")
+            c.setFont('Raleway-Regular', 8.5)
+            c.drawString(x+2.5*mm, yy+7.5*mm, 'Turma '+('—' if sit=='anulada' else percentual(q.get('turma'))))
+            c.drawString(x+2.5*mm, yy+3.5*mm, 'Geral '+('—' if sit=='anulada' else percentual(q.get('geral'))))
         else:
-            txt = "anulada"
-        c.drawString(x + 11 * mm, base, txt)
-    y -= rows * rh + 6 * mm
-
-    # Rodapé
+            base=yy+rh/2-1.2*mm
+            c.setFont('Raleway-ExtraBold', 9.5)
+            c.drawString(x+3*mm, base, f"{q['numero_questao']:02d}")
+            c.setFont('Raleway-SemiBold', 9)
+            c.drawString(x+11*mm, base, resposta)
     rodape(c, d)
     c.showPage()
+    return len(folha)
 
 
 def percentual(s):
@@ -223,71 +247,17 @@ def percentual(s):
     return f"{fmt(s['percentual'])}% ({s['acertos']}/{s['total']})"
 
 
-def _professor(d, c):
-    m = 16 * mm
-    folha = d['folha']
-    inicio = 0
-    while inicio < max(len(folha), 1):
-        y = H - 18 * mm
-        c.setFillColor(BLUE2)
-        p = Paragraph(escape(d.get('escola') or 'Gabarito360'), ParagraphStyle('escola', fontName='Raleway-Bold', fontSize=11, leading=14, textColor=BLUE2))
-        _, h = p.wrap(W-2*m, 25*mm); p.drawOn(c, m, y-h); y -= h+5*mm
-        c.setFont('Raleway-Bold', 11)
-        c.drawString(m, y, 'RELATÓRIO PEDAGÓGICO · PROFESSOR')
-        y -= 7*mm
-        for texto in [d['titulo']+' · '+d['disciplina'], d['aluno']['nome'], 'Turma '+(d['aluno'].get('turma') or '—')+' · Nota '+fmt(d['nota']['nota_final'])]:
-            p = Paragraph(escape(texto), ParagraphStyle('contexto', fontName='Raleway-Regular', fontSize=9, leading=12, textColor=GRAY3))
-            _, h = p.wrap(W-2*m, 20*mm); p.drawOn(c, m, y-h); y -= h+2*mm
-        y -= 3*mm
-        c.setFont('Raleway-Regular', 8)
-        c.drawString(m, y, 'Percentuais: alunos com correção concluída. Em branco conta como erro.')
-        y -= 4*mm
-        c.drawString(m, y, 'Geral: turmas da mesma prova e espaço. Anuladas e amostra vazia: —.')
-        y -= 9*mm
-        c.setFillColor(GRAY3)
-        c.setFont('Raleway-Regular', 8)
-        c.drawString(m, y, 'Cores: verde = acerto; vermelho = erro; amarelo = branco; cinza = anulada.')
-        y -= 8*mm
-        c.setFillColor(BLUE2); c.setFont('Raleway-Bold', 10)
-        c.drawString(m, y, 'QUESTÃO POR QUESTÃO')
-        y -= 5*mm
-        cols = 3
-        rh = 17*mm
-        cw = (W-2*m-8*mm)/cols
-        linhas = max(1, min(int((y-56*mm)/rh), math.ceil((len(folha)-inicio)/cols)))
-        capacidade = linhas*cols
-        for i, q in enumerate(folha[inicio:inicio+capacidade]):
-            col, row = divmod(i, linhas)
-            x = m+col*(cw+4*mm); yy = y-(row+1)*rh
-            fundo, borda, texto = CORES.get(q['situacao'], CORES['anulada'])
-            c.setFillColor(fundo); c.setStrokeColor(borda); c.setLineWidth(0.6)
-            c.roundRect(x, yy+mm, cw, rh-2*mm, 1.5*mm, fill=1, stroke=1)
-            c.setFillColor(texto); c.setFont('Raleway-SemiBold', 9)
-            marc, gab = q.get('marcada'), q.get('gabarito')
-            if q['situacao']=='anulada': resposta='anulada'
-            elif q['situacao']=='correta': resposta=f'acertou ({marc})'
-            elif q['situacao']=='branco': resposta=f'em branco · certa {gab}'
-            else: resposta=f'marcou {marc} · certa {gab}'
-            c.drawString(x+2.5*mm, yy+11.5*mm, f"{q['numero_questao']:02d} · {resposta}")
-            c.setFont('Raleway-Regular', 8.5)
-            c.drawString(x+2.5*mm, yy+7.5*mm, 'Turma '+percentual(q.get('turma')))
-            c.drawString(x+2.5*mm, yy+3.5*mm, 'Geral '+percentual(q.get('geral')))
-        rodape(c, d); c.showPage()
-        inicio += capacidade
-
-
 def gerar(d, c=None):
     individual = c is None
     if individual:
         c = canvas.Canvas(d['saida'], pagesize=A4)
         c.setTitle(f"Resultado — {d['aluno']['nome']} — {d['disciplina']}")
-    if d.get('modelo') == 'professor':
-        _professor(d, c)
-    else:
-        for inicio in range(0, max(len(d['folha']), 1), 90):
-            pagina = dict(d, folha=d['folha'][inicio:inicio+90], folha_completa=d['folha'],
-                intervalo=f"{inicio+1}–{min(inicio+90,len(d['folha']))} de {len(d['folha'])}" if len(d['folha'])>90 else '')
-            _aluno_pagina(pagina, c)
+    inicio = 0
+    while inicio < max(len(d['folha']), 1):
+        limite = 24 if d.get('modelo') == 'professor' else 90
+        pagina = dict(d, folha=d['folha'][inicio:inicio+limite], folha_completa=d['folha'], inicio_questoes=inicio)
+        quantidade = _resultado_pagina(pagina, c)
+        inicio += max(quantidade, 1)
     if individual:
         c.save()
         return {"ok": True, "arquivo": d["saida"]}

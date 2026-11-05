@@ -92,7 +92,7 @@ class ResultadoController extends Controller
         if ($atual instanceof JsonResponse) { @unlink($saida); return $atual; }
         $emissao->registrar($preparado, $saida);
 
-        $nome = 'resultado-' . \Illuminate\Support\Str::slug($dados['aluno']['nome'] . ' ' . $dados['prova']['disciplina']) . '.pdf';
+        $nome = 'resultado-'.($modelo === 'professor' ? 'professor-' : '') . \Illuminate\Support\Str::slug($dados['aluno']['nome'] . ' ' . $dados['prova']['disciplina']) . '.pdf';
 
         return response()->download($saida, $nome, ['Content-Type' => 'application/pdf', 'Cache-Control' => 'private, no-store'])->deleteFileAfterSend();
         } catch (\Throwable $e) { @unlink($saida); throw $e; }
@@ -149,7 +149,7 @@ class ResultadoController extends Controller
                 if ($atual instanceof JsonResponse) { @unlink($saida); return $atual; }
             }
             $emissao->registrar($preparado, $saida);
-            return response()->download($saida, 'resultados-prova-'.$provaId.($turma ? '-turma-'.$turma : '').'.pdf', [
+            return response()->download($saida, 'resultados-prova-'.$provaId.($turma ? '-turma-'.$turma : '').($modelo === 'professor' ? '-professor' : '').'.pdf', [
                 'Content-Type' => 'application/pdf', 'Cache-Control' => 'private, no-store',
                 'X-Content-Type-Options' => 'nosniff',
             ])->deleteFileAfterSend();
