@@ -1,5 +1,7 @@
 <h3>Questões desta leitura</h3>
-@php($naoAplicada=($dados['estado']??null)==='aguardando_confirmacao')
+@php
+  $naoAplicada=($dados['estado']??null)==='aguardando_confirmacao';
+@endphp
 @if($naoAplicada)<p class="page-sub">Não aplicada: as cores abaixo se referem à leitura automática desta foto. A correção vigente foi mantida.</p>@endif
 <div class="res-folha leitura-questoes">
   @forelse($dados['linhas']??[] as $linha)
