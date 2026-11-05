@@ -14,7 +14,7 @@ Sete frentes futuras: elaboração de provas/versões; acervo inteligente GII co
 
 Preservar hero com degradê #1D4F9E→#001534, marca oficial e superfícies atuais. Evoluir em rotina/fluxo, recursos por momento da avaliação, demonstrações fiéis com dados fictícios, confiança/controle, modalidades, FAQ e contato. Alternar composição, sem transformar tudo em cards repetidos. Conteúdo essencial visível em HTML; ajudas longas e FAQ em disclosures acessíveis. Menu móvel funciona semJavaScript; melhoria progressiva pode fechar ao selecionar destino/Escape. Âncoras respeitam cabeçalho fixo. Hierarquia h2/h3 adequada a home e /planos.
 
-Remover a seção de estatísticas de estudos externos desta narrativa, substituindo-a por demonstrações do fluxo real. Nenhum número de produtividade, cliente, depoimento, certificação ou logo institucional sem evidência. Demonstrações fictícias não usam dados, notas ou imagens reais de alunos.
+O responsável determinou posteriormente restaurar a seção O que as pesquisas dizem sobre corrigir e devolver resultados. Manter as três métricas com contexto e fontes primárias verificadas, sem tratá-las como medições do Gabarito360. Nenhum número de produtividade do produto, cliente, depoimento, certificação ou logo institucional sem evidência. Demonstrações fictícias não usam dados, notas ou imagens reais de alunos.
 
 ## Disciplinas e revisão
 
@@ -52,3 +52,10 @@ Reutilizar o exportador Blade e os bundles imutáveis; somente CSS/JS públicos 
 | Adesão escolaautônoma | Doc163 e inventárioEI1; núcleo ainda obrigatório | Futuro, separado do professorautônomo e sem adesão já liberada | Em breve |
 
 Marketing/redação conferiram esta classificação no brief externo publico-marketing-brief.md. Código/testes, validação na homologação e liberação comercial foram tratados separadamente. A base7716868 obteve sucesso nos cinco grupos da CI42084488242; esse resultado não aprova a reforma posterior. Pendências comerciais: condições de lançamento e distribuição futura de recursos por modalidade, sem impedir esta apresentação e sem inventar direitos de acesso.
+
+
+## Refinamentos posteriores à conferência8a58e78
+
+O responsável pediu restaurar as pesquisas, melhorar Uma visão completa da avaliação em desktop/mobile e conectar conferência de correções ao acompanhamento por professor, coordenação, gestão e famílias. As três mudanças passaram por consulta prévia de UI/UX e redação. Grupos de recursos ficam empilhados, recurso atual em faixa própria e duas frentes futuras com selo junto ao título; benefícios essenciais visíveis, aprofundamentos em ajuda nativa. A seção de acompanhamento tem quatro benefícios, com famílias alcançadas pelos relatórios compartilhados pela escola/professor, sem implementar ou anunciar portal parental/notificações novos. Conferência/rastreabilidade não são apresentadas como certificação legal nem revisão humana obrigatória de toda leitura.
+
+Fontes primárias restauradas: OCDE/TALIS2024Brasil(Workinghours), registro institucionalCEUdoInRED2019sobreZipGrade e artigo originalFrontiersWisniewski/Zierer/Hattie2020. Autorreporte de carga de trabalho, experimento com outro aplicativo e meta-análise de feedback têm contextos distintos; não são resultados do Gabarito360. Os detalhes da conferência ficam no recibo externo pesquisas-fontes-verificadas.md. A versão refinada exige nova revisão focal e CI antes da homologação; aprovação8a58e78 permanece histórica.
