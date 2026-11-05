@@ -21,7 +21,7 @@ O autor destes componentes não concede aprovação visual independente à próp
 - `marca.css` centraliza tokens, WOFF2, tamanhos, versões e adaptação do header/menu recolhido.
 - Um nome acessível Gabarito360; vetor/texto internos decorativos evitam leitura duplicada.
 - Animação opt-in de1,05s, sem loop; círculo aparece, check entra e pequena confirmação. `prefers-reduced-motion` desativa. Carregamento comum não ativa confirmação animada nem remove seus estados de progresso.
-- Login/recuperação usam versão dark explicitamente sobre painel navy; no celular, em que esse painel é oculto, a marca permanece no card de acesso. Footer e demais superfícies usam auto; impressão institucional é tratada no doc161.
+- Login/recuperação usam versão dark explicitamente sobre o degradê de acesso aprovado (#1D4F9E → #001534,160°), centralizado em --g360-access-gradient; no celular, em que esse painel é oculto, a marca permanece no card de acesso. Footer e demais superfícies usam auto; impressão institucional é tratada no doc161.
 
 ## Fonte canônica e preservação do vetor
 
@@ -80,3 +80,5 @@ Verificações executadas pelo autor:52 validações de assets/fontes/licenças/
 - Nenhum arquivo antigo foi apagado. PDFs/registros já emitidos e imagens de cartões não foram reescritos. Cadastro de escolas independentes/finanças permanece exclusivamente no planejamento EI1/doc163.
 
 Publicação somente conforme autorização de homologação, após CI e revisão independente. Produção não autorizada por esta documentação.
+
+Decisão posterior do responsável em05/11/2026: após comparar com o degradê antigo (#1D4F9E→#153B78), escolheu o novo (#1D4F9E→#001534), aplicado somente aos três painéis de acesso/recuperação/redefinição. A marca branca e os controles existentes permanecem.
