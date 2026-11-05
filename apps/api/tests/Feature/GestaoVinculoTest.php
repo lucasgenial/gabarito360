@@ -144,7 +144,10 @@ class GestaoVinculoTest extends TestCase
     public function test_aluno_recebe_so_resultado_proprio_sem_media_dos_colegas(): void
     {
         $this->prepararResultado();
-        $this->getJson('/api/v1/alunos/1/resultados/1')->assertOk()->assertJsonPath('data.aluno.id', 1)->assertJsonPath('data.media_turma', null);
+        $r = $this->getJson('/api/v1/alunos/1/resultados/1')->assertOk()->assertJsonPath('data.aluno.id', 1)->assertJsonPath('data.media_turma', null)->assertJsonPath('data.pedagogico', false);
+        $this->assertArrayNotHasKey('geral', $r->json('data.folha.0'));
+        $this->assertArrayNotHasKey('turma', $r->json('data.folha.0'));
+        $this->getJson('/api/v1/alunos/1/resultados/1/pdf?modelo=professor')->assertForbidden();
         $this->getJson('/api/v1/alunos/2/resultados/2')->assertNotFound();
         $this->getJson('/api/v1/alunos/2/resultados/1')->assertNotFound();
         $this->getJson('/api/v1/provas/1')->assertForbidden();
@@ -216,6 +219,9 @@ class GestaoVinculoTest extends TestCase
         DB::table('vinculo_alunos')->insert(['vinculo_id' => 4, 'espaco_id' => 5, 'aluno_id' => 1]);
         DB::table('cartoes')->insert(['id' => 1, 'prova_id' => 1, 'aluno_id' => 1, 'espaco_id' => 5, 'status' => 'lido', 'imagem_url' => 'ficticio.jpg']);
         DB::table('notas')->insert(['prova_id' => 1, 'aluno_id' => 1, 'turma_id' => 1, 'cartao_id' => 1, 'espaco_id' => 5, 'acertos' => 1, 'total_questoes' => 1, 'nota_final' => 10, 'status_aprovacao' => 'aprovado']);
+        $g = DB::table('gabaritos')->insertGetId(['prova_id'=>1,'espaco_id'=>5]);
+        DB::table('gabarito_questoes')->insert(['gabarito_id'=>$g,'espaco_id'=>5,'numero_questao'=>1,'alternativa'=>'A','peso'=>1]);
+        DB::table('cartao_respostas')->insert(['cartao_id'=>1,'espaco_id'=>5,'numero_questao'=>1,'alternativa'=>'A']);
         $this->entrar(4, 2);
     }
 
@@ -226,7 +232,7 @@ class GestaoVinculoTest extends TestCase
         \Illuminate\Support\Facades\Process::fake(function ($process) use (&$saida) {
             $payload = json_decode($process->input, true);
             $this->assertSame('Fictício', $payload['aluno']['nome']);
-            $this->assertNull($payload['media_turma']);
+            $this->assertArrayNotHasKey('media_turma', $payload);
             $saida = $payload['saida'];
             file_put_contents($saida, '%PDF-1.4 teste');
             DB::table('usuario_vinculos')->where('id', 4)->update(['situacao' => 'suspenso']);

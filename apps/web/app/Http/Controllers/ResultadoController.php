@@ -13,7 +13,7 @@ class ResultadoController extends Controller
 
     public function lote(Request $request, int $provaId)
     {
-        $dados = $request->validate(['turma_id' => 'nullable|integer|min:1']);
+        $dados = $request->validate(['turma_id' => 'nullable|integer|min:1', 'modelo' => 'nullable|in:aluno,professor']);
         $resp = $this->api->getArquivo("/v1/provas/{$provaId}/resultados/pdf", $dados);
         if ($resp->failed() || ! str_contains((string) $resp->header('Content-Type'), 'pdf')) {
             abort($resp->failed() ? $resp->status() : 502, $resp->json('message') ?? 'Não foi possível gerar os resultados.');
@@ -83,11 +83,12 @@ class ResultadoController extends Controller
     }
 
     /** PDF do resultado (gerado pela API) para baixar, imprimir ou enviar por WhatsApp. */
-    public function pdf(int $alunoId, int $provaId)
+    public function pdf(Request $request, int $alunoId, int $provaId)
     {
-        $resp = $this->api->getArquivo("/v1/alunos/{$alunoId}/resultados/{$provaId}/pdf");
+        $d = $request->validate(['modelo' => 'nullable|in:aluno,professor']);
+        $resp = $this->api->getArquivo("/v1/alunos/{$alunoId}/resultados/{$provaId}/pdf", $d);
         if ($resp->failed() || ! str_contains((string) $resp->header('Content-Type'), 'pdf')) {
-            abort(404, $resp->json('message') ?? 'Não foi possível gerar o PDF.');
+            abort($resp->failed() ? $resp->status() : 502, $resp->json('message') ?? 'Não foi possível gerar o PDF.');
         }
 
         $nome = 'resultado-aluno-'.$alunoId.'-prova-'.$provaId.'.pdf';
@@ -98,6 +99,7 @@ class ResultadoController extends Controller
         return response($resp->body(), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => (request()->boolean('baixar') ? 'attachment' : 'inline').'; filename="'.$nome.'"',
+            'Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 }

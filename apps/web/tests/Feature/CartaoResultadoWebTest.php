@@ -26,8 +26,8 @@ class CartaoResultadoWebTest extends TestCase
     public function test_resultado_oferece_painel_sob_demanda_e_modal_sem_nova_aba(): void
     {
         $this->fingirResultado();
-        $this->get('/resultados/1/4?from=correcao')->assertOk()->assertSee('Cartão resposta')->assertSee('doc-painel')->assertSee('doc-modal')->assertSee('painel-cartao.js')->assertSee('Histórico de tentativas')
-            ->assertSee('Carregando tentativas…')->assertDontSee('Retirar correção')->assertDontSee('Revisar leitura')->assertSee('Relatório')->assertSee('Caminho da página')->assertSee('aria-current="page"', false);
+        $this->get('/resultados/1/4?from=correcao')->assertOk()->assertSee('Cartão resposta')->assertSee('doc-painel')->assertSee('doc-modal')->assertSee('painel-cartao.js')->assertSee('Histórico de leituras do cartão-resposta')
+            ->assertSee('Carregando leituras…')->assertDontSee('Retirar correção')->assertDontSee('Revisar leitura')->assertSee('Relatório')->assertSee('Caminho da página')->assertSee('aria-current="page"', false);
         Http::assertNotSent(fn ($r) => str_contains($r->url(), '/tentativas'));
     }
 
@@ -56,6 +56,7 @@ class CartaoResultadoWebTest extends TestCase
     {
         $d = $this->resultado('/foto-autorizada.jpg');
         $d['historico_permitido'] = true;
+        $d['total_leituras'] = 3;
         Http::fake(function ($r) use ($d, $falhar, $detalhe) {
             if (str_contains($r->url(), '/v1/provas/4/tentativas')) {
                 return Http::response(['data' => ['tentativas' => [], 'total' => 3, 'pagina' => 2, 'ultima_pagina' => 3]], $falhar ? 503 : 200);
@@ -82,7 +83,7 @@ class CartaoResultadoWebTest extends TestCase
     public function test_falha_no_historico_nao_vira_zero_nem_oculta_nota(): void
     {
         $this->fingirResultado(true);
-        $this->get('/resultados/1/4')->assertOk()->assertSee('Carregando tentativas…')->assertSee('5,0')->assertDontSee('0 tentativas registradas');
+        $this->get('/resultados/1/4')->assertOk()->assertSee('Carregando leituras…')->assertSee('5,0')->assertDontSee('0 leituras registradas');
         $this->getJson('/resultados/1/4/historico')->assertStatus(503);
     }
 
@@ -90,6 +91,34 @@ class CartaoResultadoWebTest extends TestCase
     {
         $this->fingirResultado(false, ['aluno_id' => 2, 'prova' => ['id' => 4]]);
         $this->getJson('/resultados/1/4/historico?tentativa=9d166f17-9d1e-44b7-9719-28452a5c156b')->assertNotFound();
+    }
+
+    public function test_uma_leitura_nao_exibe_historico_e_docente_mantem_itens_coloridos_sem_tabela(): void
+    {
+        $d=$this->resultado(null);$d['pedagogico']=true;$d['historico_permitido']=true;$d['total_leituras']=1;
+        $d['folha'][0]['turma']=['acertos'=>2,'total'=>3,'percentual'=>66.7];
+        $d['folha'][0]['geral']=['acertos'=>6,'total'=>8,'percentual'=>75];
+        Http::fake(['*'=>Http::response(['data'=>$d])]);
+        $this->get('/resultados/1/4')->assertOk()->assertSee('res-q correta',false)->assertSee('66,7%')->assertSee('75,0%')
+            ->assertDontSee('historico-tentativas')->assertDontSee('<table',false)->assertDontSee('resultado-historico.js');
+        Http::assertNotSent(fn($r)=>str_contains($r->url(),'/tentativas'));
+    }
+
+    public function test_detalhe_historico_renderiza_leitura_e_mudanca_coloridas_sem_percentuais(): void
+    {
+        $id='9d166f17-9d1e-44b7-9719-28452a5c156b';
+        $this->fingirResultado(false,['id'=>$id,'aluno_id'=>1,'aluno_nome'=>'Aluno fictício','prova'=>['id'=>4],
+            'numero'=>1,'autor_nome'=>'Pessoa fictícia','ocorrido_em'=>'2026-11-05 12:00:00','estado'=>'substituida',
+            'tem_imagem'=>false,'imagem_sha256'=>null,'leituras'=>[],'nota'=>null,'pode_aplicar'=>false,'pode_descartar'=>false,'eventos'=>[],
+            'linhas'=>[['numero_questao'=>1,'leitura'=>'A','resposta'=>'B','resposta_registrada'=>true,
+                'observacao'=>'Revisão humana por Pessoa fictícia em 05/11/2026 09:00:00 -03:00',
+                'referencia_preservada'=>true,'situacao'=>'correta','leitura_situacao'=>'incorreta','gabarito'=>'B','modificada'=>true,'intervencao_humana'=>true]]]);
+        $r=$this->getJson('/resultados/1/4/historico?tentativa='.$id)->assertOk();
+        $this->assertStringContainsString('res-q correta',$r->json('html'));
+        $this->assertStringContainsString('Resposta modificada',$r->json('html'));
+        $this->assertStringContainsString('Leitura automática',$r->json('html'));
+        $this->assertStringContainsString('Revisão humana por Pessoa fictícia',$r->json('html'));
+        $this->assertStringNotContainsString('resultado-percentuais',$r->json('html'));
     }
 
     public function test_aplicar_tentativa_integrada_volta_ao_aluno_canonico_sem_redirecionamento_arbitrario(): void

@@ -16,7 +16,7 @@
     <input id="lote-input" type="file" accept="image/*" multiple style="display:none;">
   </div>
   <p class="page-sub">Inclua a folha inteira e os quatro quadrados pretos.</p>
-  <details><summary>Saiba mais sobre a foto e a leitura</summary><p>Não corte as bordas. Use boa luz e mantenha a câmera firme, de frente para a folha. As guias verdes indicam enquadramento; a qualidade será conferida antes de aceitar a foto. O QR identifica aluno e prova. Receber uma foto não significa concluir a leitura. Se já existir uma correção, ela será mantida até uma nova tentativa ser conferida e aplicada.</p></details>
+  <details><summary>Saiba mais sobre a foto e a leitura</summary><p>Não corte as bordas. Use boa luz e mantenha a câmera firme, de frente para a folha. As guias verdes indicam enquadramento; a qualidade será conferida antes de aceitar a foto. O QR identifica aluno e prova. Receber uma foto não significa concluir a leitura. Se já existir uma correção, ela será mantida até uma nova leitura ser conferida e aplicada.</p></details>
   <p id="envios-resumo" class="page-sub" role="status"></p>
   <ul id="envios" aria-label="Envios de cartões" aria-live="polite" style="list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;"></ul>
 </div>
@@ -86,7 +86,7 @@ function vincular(cartaoId) {
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CAM_CSRF },
     body: JSON.stringify({ aluno_id: parseInt(sel.value) })
   }).then(function (r) { return r.json().then(function(d){if(!r.ok)throw new Error(d.erro||'Não foi possível vincular.');return d;}); }).then(function (d) {
-    if(d.aguardando_confirmacao){var a=document.createElement('a');a.className='btn btn-secondary';a.href='/tentativas/'+encodeURIComponent(d.tentativa_id);a.textContent='Conferir nova tentativa';sel.parentNode.replaceChildren(a);return;}
+    if(d.aguardando_confirmacao){var a=document.createElement('a');a.className='btn btn-secondary';a.href='/tentativas/'+encodeURIComponent(d.tentativa_id);a.textContent='Conferir nova leitura';sel.parentNode.replaceChildren(a);return;}
     sel.parentNode.innerHTML = '<span class="badge badge-success">Vinculado a ' + esc(sel.options[sel.selectedIndex].text) + '</span>';
     if (typeof atualizar === 'function') atualizar();
   }).catch(function(e){alert(e.message);});
@@ -107,7 +107,7 @@ function resultadoCartao(d) {
         ? '<div style="font-size:13px;margin-top:4px;padding:6px 8px;border-radius:6px;background:var(--warn-light);color:var(--warn-fg);">'
           + 'Este cartão <b>não é de ' + esc(CAM_DISCIPLINA) + '</b>: é de <b>' + esc(d.prova_corrigida) + '</b>. Ele foi corrigido em ' + esc(d.prova_corrigida) + ', com o gabarito certo.</div>'
         : '';
-      var resumo = quem + (d.tentativa_numero?' · Tentativa '+Number(d.tentativa_numero):'') + nota + lg + amb + mov;
+      var resumo = quem + (d.tentativa_numero?' · Leitura '+Number(d.tentativa_numero):'') + nota + lg + amb + mov;
       return resumo + (d.aluno_nome ? '' : (ALUNOS.length ? seletorAluno(d.id) : '<div style="font-size:13px;color:var(--muted);margin-top:4px;">QR ilegível ou cartão em branco: o professor vincula o aluno depois.</div>'));
 }
 var filaCartoes = criarFilaCartoes({

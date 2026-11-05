@@ -1,12 +1,12 @@
 window.iniciarHistoricoResultado=function(base){
   const root=document.getElementById('historico-tentativas'),qtd=document.getElementById('resultado-tentativas-total'),carga=G360Carga(root),caminho=location.pathname;
-  let pronta=false;
   function carregar(alvo,navegar=false,voltar=null){
-    return carga.executar(async()=>{
-      try{return await G360BuscarJSON(base+alvo.search);}catch(e){if(!pronta)qtd.textContent='Histórico de tentativas indisponível no momento.';throw e;}
-    },d=>{
+    return carga.executar(()=>G360BuscarJSON(base+alvo.search),d=>{
       if(typeof d.html!=='string'||!Number.isFinite(d.total))throw new Error('Histórico indisponível');
-      root.querySelector('[data-carga-conteudo]').innerHTML=d.html;qtd.textContent=d.total+' '+(d.total===1?'tentativa registrada':'tentativas registradas');pronta=true;
+      qtd.textContent=d.total+' '+(d.total===1?'leitura registrada':'leituras registradas');
+      root.hidden=d.total<=1;
+      if(d.total<=1)return;
+      root.querySelector('[data-carga-conteudo]').innerHTML=d.html;
       iniciarHistoricoDocumento();if(navegar)history.pushState(null,'',alvo.href);
       if(navegar||alvo.hash==='#tentativa-detalhe')requestAnimationFrame(()=>{
         const links=[...root.querySelectorAll('a[href]')];
