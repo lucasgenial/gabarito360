@@ -113,3 +113,10 @@ Home e `/planos` agora usam exclusivamente `config/apresentacao.php` e o partial
 Esta decisão substitui o requisito anterior de API de planos saudável durante a exportação: `exportar-home.php` renderiza a configuração pública local e recusa HTML com R$. A disponibilidade de API/preços não interfere na home nem na geração estática. Permanecem as verificações de assets, ausência de tokens e troca atômica do publisher. Planos existentes no banco, API comercial, checkout e regras financeiras não foram modificados. Revisão visual independente deve conferir home e página de modalidades, incluindo mobile e ajudas recolhidas, antes da integração.
 
 Validação do incremento de apresentação: lint PHP passou em configuração/controllers/exportador/teste; PaginasPublicasTest e MarcaWebTest passaram em ambiente PHP8.3 isolado,11testes/97asserções. O ensaio não usou API real nem alterou o harness do navegador. Capturas atuais e parecer independente ficam com o integrador antes de publicar a homologação.
+
+
+## Ampliação posterior da apresentação pública
+
+O pedido detalhado de05/11 substitui a listagem pública de recursos futuros por integração na narrativa comercial, com selo literal **Em breve** em cada ocorrência das sete frentes. Manter as quatro modalidades, sem preços/periodicidade/limites/compra, e retirar o texto genérico de planos indefinidos. A contratação ainda não está aberta. A marca, o degradê e os ativos já aprovados permanecem. A nova página usa conteúdo local compartilhado entre home e /planos, demonstrações fictícias, menu móvel e FAQ acessíveis, sem implementar módulos futuros. Replanejamento e matriz no doc164; nova revisão/CI/publicação são exigidos para a versão final, sem reutilizar aprovação visual anterior como se cobrisse o novo conteúdo.
+
+O contrato estático inclui explicitamente css/apresentacao-publica.css e js/apresentacao-publica.js. O segundo apenas melhora o fechamento do menu; conteúdo e navegação básica continuam emHTML. Whitelist fechada, SHA, MIME e preservação de versões permanecem obrigatórios. Não incluir novos assets de demonstração sem caminho individual conferido no contrato.

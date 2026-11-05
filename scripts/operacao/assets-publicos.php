@@ -3,7 +3,7 @@
 function g360_publicos_lista(): array
 {
     return [
-        'css/app.css','css/marca.css','js/app.js',
+        'css/app.css','css/marca.css','css/apresentacao-publica.css','js/app.js','js/apresentacao-publica.js',
         'fonts/brand/Figtree-ExtraBold.woff2','fonts/brand/AlbertSans-ExtraBold.woff2',
         'fonts/brand/Figtree-OFL.txt','fonts/brand/AlbertSans-OFL.txt',
         'brand/gabarito360-icon.svg','brand/gabarito360-icon-dark.svg',
