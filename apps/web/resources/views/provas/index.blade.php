@@ -30,9 +30,13 @@
     <input class="input" type="search" name="busca" aria-label="Buscar prova por título" placeholder="Buscar prova por título…"
            value="{{ $busca }}" style="padding-left:36px;" />
   </div>
-  <select class="select" name="disciplina" aria-label="Filtrar por disciplina" style="min-width:160px;">
-    <option value="">Todas as disciplinas</option>
-    @foreach(['Matemática','Português','Ciências','História','Geografia','Inglês','Ed. Física','Arte'] as $d)
+  @php($disciplinasFiltro = $disciplinasFiltro ?? [])
+  <select class="select" name="disciplina" aria-label="Filtrar por disciplina ou área informada" style="min-width:160px;">
+    <option value="">Todas as disciplinas/áreas</option>
+    @if($disciplina !== '' && !in_array($disciplina, $disciplinasFiltro, true))
+      <option value="{{ $disciplina }}" selected>{{ $disciplina }} (filtro atual sem resultados)</option>
+    @endif
+    @foreach($disciplinasFiltro as $d)
       <option value="{{ $d }}" {{ $disciplina === $d ? 'selected' : '' }}>{{ $d }}</option>
     @endforeach
   </select>

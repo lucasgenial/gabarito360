@@ -33,6 +33,7 @@ class ProvaController extends Controller
             'haFiltros' => collect(['busca', 'disciplina', 'status'])->contains(fn (string $campo) => $request->filled($campo)),
             'provas'     => $provas,
             'kpis'       => $kpis,
+            'disciplinasFiltro' => $resp->successful() ? ($resp->json('data.filtros.disciplinas') ?? []) : [],
             'busca'      => $request->query('busca', ''),
             'disciplina' => $request->query('disciplina', ''),
             'status'     => $request->query('status', ''),

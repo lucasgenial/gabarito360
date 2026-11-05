@@ -166,7 +166,11 @@ class ProvaController extends Controller
             'corrigida'  => (clone $baseQ)->where('status', 'corrigida')->count(),
         ];
 
-        return ApiResponse::success(['provas' => $provas, 'kpis' => $kpis]);
+        // Faceta do escopo completo, anterior aos filtros e à paginação da listagem.
+        // Preserva o texto cadastrado; áreas/disciplinas não concedem acesso por si próprias.
+        $disciplinasFiltro=(clone $baseQ)->reorder()->select('provas.disciplina')->whereNotNull('provas.disciplina')
+            ->where('provas.disciplina','!=','')->distinct()->orderBy('provas.disciplina')->pluck('provas.disciplina')->all();
+        return ApiResponse::success(['provas' => $provas, 'kpis' => $kpis, 'filtros'=>['disciplinas'=>$disciplinasFiltro]]);
     }
 
     public function store(Request $request): JsonResponse

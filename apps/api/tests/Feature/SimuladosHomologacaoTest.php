@@ -126,4 +126,15 @@ class SimuladosHomologacaoTest extends TestCase
         $this->assertSame(0,Escopo::provas($u->noVinculo($v))->count());
         $this->assertDatabaseHas('provas',['id'=>6,'vinculo_criacao_id'=>7,'perfil_criacao'=>'coordenador','autoria_origem'=>'adaptacao_desenvolvimento']);
     }
+
+    public function test_filtro_oferece_escopo_completo_mesmo_apos_filtrar_e_nao_expoe_outras_provas(): void
+    {
+        app(SimuladosHomologacao::class)->executar(true);
+        app('auth')->forgetGuards(); \Laravel\Sanctum\Sanctum::actingAs(Usuario::find(10)->noVinculo(7));
+        $resp=$this->getJson('/api/v1/provas?disciplina=Matem%C3%A1tica&busca=ENEM')->assertOk()->assertJsonCount(1,'data.provas');
+        $this->assertEqualsCanonicalizing(['Linguagens','Ciências Humanas','Ciências da Natureza','Matemática'],$resp->json('data.filtros.disciplinas'));
+        $p=Usuario::porEmail('professor13@gabarito360.dev')->firstOrFail();$v=DB::table('usuario_vinculos')->where('usuario_id',$p->id)->first();
+        app('auth')->forgetGuards(); \Laravel\Sanctum\Sanctum::actingAs($p->noVinculo($v->id));
+        $this->getJson('/api/v1/provas?disciplina=Linguagens')->assertOk()->assertJsonCount(0,'data.provas')->assertJsonPath('data.filtros.disciplinas',['Matemática']);
+    }
 }
