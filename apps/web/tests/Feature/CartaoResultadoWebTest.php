@@ -104,6 +104,23 @@ class CartaoResultadoWebTest extends TestCase
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/tentativas'));
     }
 
+    public function test_detalhe_historico_renderiza_leitura_e_mudanca_coloridas_sem_percentuais(): void
+    {
+        $id='9d166f17-9d1e-44b7-9719-28452a5c156b';
+        $this->fingirResultado(false,['id'=>$id,'aluno_id'=>1,'aluno_nome'=>'Aluno fictício','prova'=>['id'=>4],
+            'numero'=>1,'autor_nome'=>'Pessoa fictícia','ocorrido_em'=>'2026-11-05 12:00:00','estado'=>'substituida',
+            'tem_imagem'=>false,'imagem_sha256'=>null,'leituras'=>[],'nota'=>null,'pode_aplicar'=>false,'pode_descartar'=>false,'eventos'=>[],
+            'linhas'=>[['numero_questao'=>1,'leitura'=>'A','resposta'=>'B','resposta_registrada'=>true,
+                'observacao'=>'Revisão humana por Pessoa fictícia em 05/11/2026 09:00:00 -03:00',
+                'referencia_preservada'=>true,'situacao'=>'correta','leitura_situacao'=>'incorreta','gabarito'=>'B','modificada'=>true,'intervencao_humana'=>true]]]);
+        $r=$this->getJson('/resultados/1/4/historico?tentativa='.$id)->assertOk();
+        $this->assertStringContainsString('res-q correta',$r->json('html'));
+        $this->assertStringContainsString('Resposta modificada',$r->json('html'));
+        $this->assertStringContainsString('Leitura automática',$r->json('html'));
+        $this->assertStringContainsString('Revisão humana por Pessoa fictícia',$r->json('html'));
+        $this->assertStringNotContainsString('resultado-percentuais',$r->json('html'));
+    }
+
     public function test_aplicar_tentativa_integrada_volta_ao_aluno_canonico_sem_redirecionamento_arbitrario(): void
     {
         $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
