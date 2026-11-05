@@ -1,6 +1,6 @@
 """Publicação atômica: falha de atualização não remove a apresentação já disponível."""
 from pathlib import Path
-import hashlib, os, shutil, subprocess, tempfile, unittest
+import json, os, shutil, subprocess, tempfile, unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -8,13 +8,19 @@ class PublicarHomeTest(unittest.TestCase):
     def test_falha_preserva_html_e_css_anteriores(self):
         self.assertEqual(os.geteuid(), 0, 'Executar como root no ambiente de teste.')
         with tempfile.TemporaryDirectory(prefix='g360-export-test-') as temp:
-            p = Path(temp)
+            p = Path(temp); p.chmod(0o755)
             app = p/'app'; base = p/'publico'; aux = p/'aux'; aux.mkdir()
-            (app/'apps/web/public/css').mkdir(parents=True)
+            publico = app/'apps/web/public'; publico.mkdir(parents=True)
+            helper = ROOT/'scripts/operacao/assets-publicos.php'
+            lista = json.loads(subprocess.check_output(['php', str(helper), 'lista'], text=True))
+            for nome in lista:
+                alvo = publico/nome; alvo.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT/'apps/web/public'/nome, alvo)
             css = app/'apps/web/public/css/app.css'; css.write_text('body{color:blue}')
-            for nome in ['publicar-home.sh', 'manutencao.html']:
+            for nome in ['publicar-home.sh', 'manutencao.html', 'assets-publicos.php']:
                 shutil.copy(ROOT/'scripts/operacao'/nome, aux/nome)
-            html = '<html>Versão aprovada /_institucional/'+hashlib.sha256(css.read_bytes()).hexdigest()+'.css</html>'
+            marca = subprocess.check_output(['php', str(helper), 'id', str(publico)], text=True).strip()
+            html = '<html>Versão aprovada /_institucional/marca-'+marca+'/css/app.css /_institucional/marca-'+marca+'/css/marca.css</html>'
             exporter = aux/'exportar-home.php'; exporter.write_text('<?php echo '+repr(html)+';')
             args = ['bash', str(aux/'publicar-home.sh'), str(app), str(base)]
             subprocess.run(args, check=True, capture_output=True)
