@@ -16,8 +16,10 @@ try {
     $html = view('home.index')->render();
     $contrato=g360_publicos_contrato($base.'/public');
     $html=g360_publicos_html($html,$contrato,$url);
+    $texto=html_entity_decode(strip_tags($html),ENT_QUOTES|ENT_HTML5,'UTF-8');
     // Não congelar formulários, tokens, placeholders Blade ou contexto autenticado.
     if (preg_match('/R\$|<form\b|csrf|name=["\x27]_token|g360-contexto|<x-marca|@csrf/i', $html)
+        || preg_match('/Previsto no planejamento|\bRoadmap\b|Em desenvolvimento|\bPlanejado\b/iu',$texto)
         || !str_contains($html, 'tela-inicio') || !str_contains($html, '</html>')
         || !str_contains($html,$contrato['prefixo'].'css/app.css')
         || !str_contains($html,$contrato['prefixo'].'css/marca.css')) {

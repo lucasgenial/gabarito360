@@ -169,7 +169,7 @@ class PublicoNginxTest(unittest.TestCase):
                 self.assertEqual(get('/_g360_manutencao.html')[0], 404)
                 self.assertIn(prefixo+'css/marca.css',body)
                 self.assertNotIn('__G360_',body)
-                for rel,tipo in [('css/marca.css','text/css'),('css/app.css','text/css'),('js/app.js','application/javascript'),('brand/gabarito360-icon.svg','image/svg+xml'),('brand/gabarito360-og.png','image/png'),('fonts/brand/Figtree-ExtraBold.woff2','font/woff2'),('favicon.ico','image/x-icon'),('site.webmanifest','application/manifest+json')]:
+                for rel,tipo in [('css/marca.css','text/css'),('css/app.css','text/css'),('css/apresentacao-publica.css','text/css'),('js/app.js','application/javascript'),('js/apresentacao-publica.js','application/javascript'),('brand/gabarito360-icon.svg','image/svg+xml'),('brand/gabarito360-og.png','image/png'),('fonts/brand/Figtree-ExtraBold.woff2','font/woff2'),('favicon.ico','image/x-icon'),('site.webmanifest','application/manifest+json')]:
                     st,h,b=get(prefixo+rel,binario=True);self.assertEqual(st,200,rel);self.assertTrue(b,rel);self.assertIn(tipo,h['Content-Type']);self.assertIn('immutable',h['Cache-Control'])
                 self.assertEqual(get(prefixo+'css/marca.css','HEAD')[0],200)
                 for rel in ['segredo.txt','.env','foo.php','css/ausente.css']:

@@ -2,13 +2,14 @@
 
 Planejamento revisto em 05/11/2026 antes da implementação, com consulta prévia a UI/UX e Product Design. O título fica centralizado; a sugestão inicial de alinhamento à esquerda foi corrigida pela instrução explícita do responsável.
 
-| Etapa | Entrega | Estado inicial |
+| Etapa | Entrega | Estado nesta revisão |
 |---|---|---|
-| A | Inventário, SVG oficial, fontes e tokens da marca | Em implementação |
-| B | Componente reutilizável e aplicação em layouts, páginas públicas, e-mails e carregamento | Em implementação |
-| C | Favicons, ícones de aplicação, manifest e compartilhamento | Em implementação |
-| D | Cabeçalhos institucionais/autônomos compartilhados, título centralizado, caixas do aluno e nota | Em implementação |
-| E | Testes, revisão independente, CI e publicação na homologação | Pendente |
+| A | Inventário, SVG oficial, fontes e tokens da marca | Implementada e validada na fonte |
+| B | Componente reutilizável e aplicação em layouts, páginas públicas, e-mails e carregamento | Implementada e validada na fonte |
+| C | Favicons, ícones de aplicação, manifest e compartilhamento | Implementada e validada na fonte |
+| D | Cabeçalhos institucionais/autônomos compartilhados, título centralizado, caixas do aluno e nota | Implementada e validada na fonte |
+| P | Apresentação pública de pré-lançamento, narrativa completa, demonstrações e modalidades sem preços | Replanejada em05/11 conforme novo pedido; em implementação |
+| E | Testes, revisão independente, CI e publicação na homologação | Base7716868 aprovada; nova apresentação exige revisão/CI atuais antes da publicação |
 
 Identidade: símbolo oficial preservado, azul-marinho #001534, azul #0588FC e branco. Wordmark Figtree800, somente o6 em AlbertSans800; manter cores semânticas e contraste dos controles. Fontes locais e arquivos de licença. Animação opcional breve, sem loop padrão, respeitando redução de movimento.
 
@@ -21,6 +22,8 @@ Preservar os layouts e funcionalidades atuais; inventariar compatibilidades anti
 ## Complemento: página inicial independente
 
 O responsável pediu a atualização da página inicial estática e confirmou manter a prévia com degradê após considerar a versão clean. A composição e o conteúdo permanecem; somente a abertura recebe o degradê aprovado (#1D4F9E→#001534), texto branco e ações com contraste. Os exemplos continuam em superfícies brancas e as demais seções são preservadas. A marca usa o mesmo componente e fontes.
+
+Decisão posterior explícita de05/11: ampliar a apresentação para o pré-lançamento, preservando a identidade, o degradê e a exportação independente. A instrução de conservar o conteúdo anterior foi substituída. Narrativa completa com recursos atuais comprovados e sete frentes futuras, cada ocorrência identificada pelo selo literal **Em breve**, sem rótulos públicos de planejamento, preços ou compra. Modalidades continuam Professor autônomo, Escolas, Núcleos e redes e Secretarias; não atribuir recursos futuros por plano sem decisão comercial. Esta ampliação não implementa os módulos futuros. Ver doc164 e evidências de marketing/revisão para a entrega final.
 
 O exportador anterior congelava somente app.css. A nova exportação inclui bundle imutável da marca, fontes, favicons, manifestos e imagens públicas sob whitelist, com SHA, MIME correto e preservação das versões anteriores. Home e manutenção devem funcionar sem PHP/API. Não exportar formulários, tokens ou contexto de usuário. Uma falha de exportação preserva o pointer anterior; origem pública explícita evita links para IP interno.
 
