@@ -48,7 +48,7 @@ try {
   await page.getByRole('button',{name:'Visualizar gabarito',exact:true}).click();await pronto();
   const box=await modal.boundingBox();assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=width+1&&box.y+box.height<=height+1);
   const antes=posts.length;await page.keyboard.press('a');await page.keyboard.press('0');assert.equal(posts.length,antes);
-  await page.getByRole('button',{name:'Ampliar PDF',exact:true}).click();assert.equal(await page.locator('[data-zoom]').innerText(),'125%');
+  await page.getByRole('button',{name:'Ampliar PDF',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-zoom]').textContent==='125%');
   await page.getByRole('button',{name:'Ajustar à página',exact:true}).click();await page.waitForFunction(()=>document.querySelector('[data-zoom]').textContent==='Ajustado');
   if(saida)await page.screenshot({path:saida+`/modal${width}-${tema}.png`});
   await page.keyboard.press('Escape');assert.equal(await page.getByRole('button',{name:'Visualizar gabarito',exact:true}).evaluate(e=>e===document.activeElement),true);
@@ -62,9 +62,11 @@ try {
  modo='sucesso';await page.goto('http://g360.test/revisao');modo='salvando';
  const qtdPosts=posts.length;await page.getByRole('button',{name:'A',exact:true}).click();
  assert.equal(await page.getByRole('button',{name:'Visualizar gabarito',exact:true}).isDisabled(),true);await page.keyboard.press('a');assert.equal(posts.length,qtdPosts+1);
+ assert.equal(await page.locator('.rev-opcoes button:disabled').count(),7);assert.equal(await page.getByText('Salvando resposta…',{exact:true}).isVisible(),true);
+ if(saida)await page.screenshot({path:saida+'/salvando320.png'});
  modo='sucesso';liberarResposta();await page.waitForFunction(()=>FILA.length===2);
  await page.getByRole('button',{name:'B',exact:true}).click();await page.waitForFunction(()=>FILA.length===1);
- await page.getByRole('button',{name:'C',exact:true}).click();await page.getByRole('heading',{name:'Revisão concluída',exact:true}).waitFor();
+ await page.getByRole('button',{name:'C, resposta atual',exact:true}).click();await page.getByRole('heading',{name:'Revisão concluída',exact:true}).waitFor();
  assert.equal(await canvas.count(),0);await page.getByRole('button',{name:'Voltar à última',exact:true}).click();assert.equal(await preview.isVisible(),true);
  await page.goto('http://g360.test/revisao?semfoto=1');assert.equal(await page.getByRole('button',{name:'Visualizar gabarito',exact:true}).count(),0);
  assert.deepEqual(erros,[]);console.log('OK: recorte preservado, painel/PDF real, modal/foco/atalhos, troca/latência, erro/retry, páginas, assinatura e 2560/1440/1099/390/320.');
