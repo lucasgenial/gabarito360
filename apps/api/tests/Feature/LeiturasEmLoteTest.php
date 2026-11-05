@@ -75,6 +75,10 @@ class LeiturasEmLoteTest extends TestCase
         $urls=$i->urlsDaProva($p,[1],['original','endireitada'],$this->ator);
         $this->assertSame($i->url(1,'original',$this->ator),$urls[1]['original']);
         $this->get($urls[1]['original'])->assertOk();
+        $this->get($urls[1]['original'].'&_ctx=contexto-indevido')->assertForbidden();
+        $this->travel(3)->hours();
+        $this->get($urls[1]['original'])->assertForbidden();
+        $this->travelBack();
         $this->get(str_replace('/1/arquivo','/200/arquivo',$urls[1]['original']))->assertForbidden();
         try{$i->urlsDaProva($p,[1,200],['original'],$this->ator);$this->fail('Não pode emitir URL de outra prova/espaço.');}
         catch(HttpException $e){$this->assertSame(404,$e->getStatusCode());}
