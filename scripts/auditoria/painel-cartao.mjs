@@ -10,7 +10,7 @@ const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,head
 try{
  const c=await browser.newContext();let modo='ok',fotos=0;const erros=[];
  await c.route('**/*',r=>{const u=new URL(r.request().url());if(u.hostname!=='g360.test')return r.abort();
-  if(u.pathname==='/ensaio')return r.fulfill({contentType:'text/html',body:html});
+  if(u.pathname==='/ensaio')return r.fulfill({contentType:'text/html',body:u.searchParams.has('restrito')?html.replace('documento-estacao','documento-estacao resultado-documentos').replace('class="card card-pad"','class="card card-pad res-questoes"').replace(`criarPainelCartao(${JSON.stringify(foto)});`,`criarPainelCartao(${JSON.stringify(foto)},{ajuste:'largura',controles:false,cardsIguais:true,rotulo:'Cartão resposta'});`):html});
   if(u.pathname.startsWith('/api/')){assert.equal(u.pathname+u.search,foto);fotos++;return r.fulfill(modo==='erro'?{status:403,json:{message:'Recusada'}}:{contentType:'image/svg+xml',body:imagemTeste});}
   if(u.pathname.startsWith('/js/')||u.pathname.startsWith('/css/'))return r.fulfill({contentType:u.pathname.endsWith('.css')?'text/css':'text/javascript',body:readFileSync('apps/web/public'+u.pathname)});
   return r.abort();});
@@ -31,5 +31,11 @@ try{
  modo='ok';await p.getByRole('button',{name:'Tentar novamente',exact:true}).click();await img.waitFor();
  await p.setViewportSize({width:1440,height:1000});await p.waitForFunction(()=>!document.getElementById('doc-modal').open&&document.getElementById('doc-painel').hidden===false);await img.waitFor();assert.equal(await p.locator('#doc-painel').isVisible(),true);
  await p.getByRole('button',{name:'Ocultar cartão-resposta',exact:true}).click();assert.equal(await p.getByText('Resultado preservado.',{exact:true}).isVisible(),true);assert.deepEqual(erros,[]);
- console.log('OK: painel sob demanda/ocultar, modal1099/390/320, foco, resize, erro/retry e resultado preservado.');
+ await p.goto('http://g360.test/ensaio?restrito=1');await p.getByRole('button',{name:'Cartão resposta',exact:true}).click();await img.waitFor();
+ assert.equal(await p.locator('[data-mais],[data-menos],[data-ajustar]').count(),0);
+ const medidas=await p.evaluate(()=>{const q=document.querySelector('.res-questoes').getBoundingClientRect(),d=document.getElementById('doc-painel').getBoundingClientRect(),c=document.querySelector('canvas').getBoundingClientRect(),a=document.querySelector('.rev-leitor-area').getBoundingClientRect();return{q:q.height,d:d.height,qw:q.width,dw:d.width,canvas:c.width,area:a.width};});
+ assert.ok(Math.abs(medidas.q-medidas.d)<=1&&Math.abs(medidas.qw-medidas.dw)<=1,JSON.stringify(medidas));assert.ok(medidas.canvas>medidas.area-40&&medidas.canvas<=medidas.area);
+ const bloqueios=await p.locator('.rev-leitor').evaluate(root=>['p','s','c','x'].every(key=>!root.dispatchEvent(new KeyboardEvent('keydown',{key,ctrlKey:true,bubbles:true,cancelable:true}))));assert.equal(bloqueios,true);
+ await p.getByRole('button',{name:'Cartão resposta',exact:true}).click();assert.equal(await p.locator('#doc-painel').isVisible(),false);
+ console.log('OK: painel sob demanda/ocultar, modal1099/390/320, foco, resize, erro/retry, largura sem controles, cards iguais e atalhos restritos.');
 }finally{await browser.close();}

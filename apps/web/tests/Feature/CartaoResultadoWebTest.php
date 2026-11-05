@@ -25,8 +25,10 @@ class CartaoResultadoWebTest extends TestCase
 
     public function test_resultado_oferece_painel_sob_demanda_e_modal_sem_nova_aba(): void
     {
-        Http::fake(['*' => Http::response(['data' => $this->resultado('/api/v1/cartoes/65/arquivo/original?signature=ficticia')])]);
-        $this->get('/resultados/1/4?from=correcao')->assertOk()->assertSee('Visualizar cartão-resposta')->assertSee('doc-painel')->assertSee('doc-modal')->assertSee('painel-cartao.js')->assertSee('Histórico de tentativas');
+        $this->fingirResultado();
+        $this->get('/resultados/1/4?from=correcao')->assertOk()->assertSee('Cartão resposta')->assertSee('doc-painel')->assertSee('doc-modal')->assertSee('painel-cartao.js')->assertSee('Histórico de tentativas')
+            ->assertSee('Carregando tentativas…')->assertDontSee('Retirar correção')->assertDontSee('Revisar leitura')->assertSee('Relatório')->assertSee('Caminho da página')->assertSee('aria-current="page"', false);
+        Http::assertNotSent(fn ($r) => str_contains($r->url(), '/tentativas'));
     }
 
     public function test_resultado_sem_autorizacao_de_foto_nao_oferece_leitor(): void
@@ -48,5 +50,72 @@ class CartaoResultadoWebTest extends TestCase
         Http::fake(['*' => Http::response(['data' => ['excluido' => true]])]);
         $this->deleteJson('/cartoes/65', ['motivo' => 'Retirada documentada de teste', 'versao' => str_repeat('a', 64)])->assertOk();
         Http::assertSent(fn ($r) => $r->method() === 'DELETE' && $r['motivo'] === 'Retirada documentada de teste' && $r['versao'] === str_repeat('a', 64) && $r->hasHeader('Authorization', 'Bearer ficticio'));
+    }
+
+    private function fingirResultado(bool $falhar = false, ?array $detalhe = null): void
+    {
+        $d = $this->resultado('/foto-autorizada.jpg');
+        $d['historico_permitido'] = true;
+        Http::fake(function ($r) use ($d, $falhar, $detalhe) {
+            if (str_contains($r->url(), '/v1/provas/4/tentativas')) {
+                return Http::response(['data' => ['tentativas' => [], 'total' => 3, 'pagina' => 2, 'ultima_pagina' => 3]], $falhar ? 503 : 200);
+            }
+            if (str_contains($r->url(), '/v1/tentativas/')) {
+                return Http::response(['data' => $detalhe]);
+            }
+
+            return Http::response(['data' => $d]);
+        });
+    }
+
+    public function test_historico_paginado_permanece_no_resultado_e_filtra_o_aluno(): void
+    {
+        $this->fingirResultado();
+        $r = $this->getJson('/resultados/1/4/historico?tentativas_pagina=2')->assertOk()->assertJsonPath('total', 3);
+        $this->assertStringContainsString('tabela-padrao', $r->json('html'));
+        $this->assertStringContainsString('tentativas_pagina=1', $r->json('html'));
+        $this->assertStringContainsString('tentativas_pagina=3', $r->json('html'));
+        $this->assertStringNotContainsString('/historico?', $r->json('html'));
+        Http::assertSent(fn ($r) => str_contains($r->url(), '/v1/provas/4/tentativas') && (int) $r['aluno_id'] === 1 && (int) $r['page'] === 2);
+    }
+
+    public function test_falha_no_historico_nao_vira_zero_nem_oculta_nota(): void
+    {
+        $this->fingirResultado(true);
+        $this->get('/resultados/1/4')->assertOk()->assertSee('Carregando tentativas…')->assertSee('5,0')->assertDontSee('0 tentativas registradas');
+        $this->getJson('/resultados/1/4/historico')->assertStatus(503);
+    }
+
+    public function test_detalhe_de_outro_aluno_nao_e_atribuido_ao_resultado_atual(): void
+    {
+        $this->fingirResultado(false, ['aluno_id' => 2, 'prova' => ['id' => 4]]);
+        $this->getJson('/resultados/1/4/historico?tentativa=9d166f17-9d1e-44b7-9719-28452a5c156b')->assertNotFound();
+    }
+
+    public function test_aplicar_tentativa_integrada_volta_ao_aluno_canonico_sem_redirecionamento_arbitrario(): void
+    {
+        $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
+        Http::fake(['*' => Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4], 'aplicada' => true]])]);
+        $this->post('/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'tentativas_pagina' => 2, 'motivo' => 'Nova leitura conferida no teste', 'confirmar' => 1, 'retorno' => 'https://externo.test'])->assertRedirect(route('resultados.show', [1, 4, 'tentativa' => $id, 'tentativas_pagina' => 2]).'#tentativa-detalhe');
+    }
+
+    public function test_flash_tem_fallback_seguro_e_solid_toast_sem_conteudo_html_executavel(): void
+    {
+        $this->fingirResultado();
+        $this->withSession(['sucesso' => 'Registro salvo <script>alert(1)</script>'])->get('/resultados/1/4')->assertOk()->assertSee('notificacoes.js')->assertSee('g360-notificacoes-iniciais')->assertSee('data-g360-flash="sucesso"', false)->assertDontSee('<script>alert(1)</script>', false);
+    }
+
+    public function test_aplicar_com_ambiguidades_abre_revisao_sem_tentar_abrir_resultado_ainda_inexistente(): void
+    {
+        $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
+        Http::fake(['*' => Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4], 'aplicada' => true, 'status' => 'ambiguo', 'prova_id' => 4, 'cartao_id' => 66]])]);
+        $this->post('/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Foto nova conferida para teste', 'confirmar' => 1])->assertRedirect(route('correcao.revisao', [4, 'cartao' => 66]))->assertSessionHas('info', 'Nova tentativa aplicada. Revise as questões pendentes.');
+    }
+
+    public function test_conflito_integrado_volta_ao_resultado_canonico_e_preserva_motivo(): void
+    {
+        $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
+        Http::fake(fn ($r) => $r->method() === 'GET' ? Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4]]]) : Http::response(['message' => 'Correção alterada.'], 409));
+        $this->from('/resultados/1/4/historico')->post('/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Motivo documentado de teste', 'confirmar' => 1])->assertRedirect(route('resultados.show', [1, 4, 'tentativa' => $id, 'tentativas_pagina' => 1]).'#tentativa-detalhe')->assertSessionHasErrors('tentativa')->assertSessionHasInput('motivo', 'Motivo documentado de teste');
     }
 }
