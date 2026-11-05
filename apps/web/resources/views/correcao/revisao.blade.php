@@ -16,31 +16,25 @@
   <x-slot:sub>{{ $prova['disciplina'] }}</x-slot:sub>
 </x-pagina>
 
-<div class="card card-pad rev-cartao">
-  <div id="rev-conteudo"></div>
+<div class="rev-estacao" id="rev-estacao">
+  <div class="card card-pad rev-cartao"><div id="rev-conteudo"></div></div>
+  <aside class="card rev-documento-painel" id="rev-documento-painel" aria-labelledby="rev-painel-titulo">
+    <header class="rev-modal-cabecalho"><div><h2 id="rev-painel-titulo">Cartão-resposta completo</h2><p id="rev-painel-contexto"></p></div></header>
+    <div id="rev-documento-desktop" class="rev-documento-destino"><div id="rev-leitor"></div></div>
+  </aside>
 </div>
-
 <dialog id="rev-cartao-modal" class="rev-cartao-modal" aria-labelledby="rev-cartao-titulo" aria-describedby="rev-cartao-contexto">
   <header class="rev-modal-cabecalho">
     <div><h2 id="rev-cartao-titulo">Cartão-resposta</h2><p id="rev-cartao-contexto"></p></div>
     <button type="button" class="btn btn-secondary" id="rev-cartao-fechar" autofocus aria-label="Fechar cartão">Fechar</button>
   </header>
-  <div class="rev-modal-ferramentas"><button type="button" class="btn btn-ghost" id="rev-cartao-ampliar" aria-pressed="false" disabled>Ampliar</button></div>
-  <div id="rev-cartao-area" class="rev-modal-area" role="region" aria-label="Imagem do cartão-resposta" tabindex="0">
-    <p id="rev-cartao-carregando" class="rev-modal-estado" role="status" hidden>Carregando cartão…</p>
-    <div id="rev-cartao-imagem" class="rev-modal-imagem rev-imagem-restrita" hidden></div>
-    <div id="rev-cartao-erro" class="rev-modal-estado" hidden>
-      <x-aviso tipo="erro">Não foi possível carregar o cartão. Tente novamente.
-        <p>Se continuar, feche este cartão e atualize a revisão.</p>
-        <button type="button" class="btn btn-secondary" id="rev-cartao-repetir">Tentar novamente</button>
-      </x-aviso>
-    </div>
-  </div>
+  <div id="rev-documento-mobile" class="rev-documento-destino"></div>
 </dialog>
 
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/leitor-cartao.js') }}?v={{ filemtime(public_path('js/leitor-cartao.js')) }}"></script>
 <script>
 var FILA = @json($itens);
 var ALTERNATIVAS = 'ABCDE'.slice(0, {{ (int) ($prova['num_alternativas'] ?? 5) }}).split('');
@@ -53,89 +47,67 @@ var historico = [], salvando = false, total = FILA.length;
 var statusCartao = {};
 FILA.forEach(function (q) { statusCartao[q.cartao_id] = q.status; });
 var cartaoModal = document.getElementById('rev-cartao-modal');
-var cartaoArea = document.getElementById('rev-cartao-area'), cartaoImagem = document.getElementById('rev-cartao-imagem');
-var cartaoCarregando = document.getElementById('rev-cartao-carregando'), cartaoErro = document.getElementById('rev-cartao-erro');
-var cartaoAmpliar = document.getElementById('rev-cartao-ampliar');
-var cartaoUrl = null, cartaoFoto = null, cartaoOrigem = null, cartaoSequencia = 0, cartaoOverflow = '';
-var revisaoDesktop = window.matchMedia('(min-width:1024px)');
-
-// Dissuasão restrita à imagem; não oferece proteção contra captura de tela/devtools.
+var leitorRoot = document.getElementById('rev-leitor'), leitor = new LeitorCartao(leitorRoot);
+var cartaoOrigem = null, cartaoOverflow = '';
+var revisaoDesktop = window.matchMedia('(min-width:1100px)');
+function dimensionarLeitor() {
+  var painel=document.getElementById('rev-documento-painel');
+  if(!revisaoDesktop.matches||!painel.offsetWidth)return;
+  var caixa=painel.getBoundingClientRect(),escala=caixa.width/painel.offsetWidth;
+  var rodape=document.querySelector('footer[aria-label="Versão do software"]');
+  var limite=rodape?Math.min(window.innerHeight,rodape.getBoundingClientRect().top):window.innerHeight;
+  painel.style.height=Math.max(260,(limite-caixa.top-16)/escala)+'px';
+}
+var ajusteLeitorPendente=false;
+function agendarDimensaoLeitor(){if(ajusteLeitorPendente)return;ajusteLeitorPendente=true;requestAnimationFrame(function(){ajusteLeitorPendente=false;dimensionarLeitor();});}
+window.addEventListener('resize',agendarDimensaoLeitor);
+window.addEventListener('scroll',agendarDimensaoLeitor,{passive:true});
 function restringirCopiaImagem(area) {
-  ['contextmenu', 'dragstart', 'copy', 'cut'].forEach(function (tipo) {
-    area.addEventListener(tipo, function (e) { e.preventDefault(); });
-  });
+  ['contextmenu','dragstart','copy','cut'].forEach(function(tipo) { area.addEventListener(tipo,function(e) { e.preventDefault(); }); });
 }
-restringirCopiaImagem(cartaoImagem);
-['copy', 'cut'].forEach(function (tipo) {
-  cartaoArea.addEventListener(tipo, function (e) {
-    // Texto selecionado no cabeçalho/aviso continua copiável.
-    if (!cartaoImagem.hidden && !window.getSelection()?.toString()) e.preventDefault();
-  });
+function sincronizarDocumento() {
+  var q=FILA[0], disponivel=!!q?.foto_url;
+  var contexto=q ? [q.aluno_nome,q.turma].filter(Boolean).join(' · ') || 'Cartão sem aluno identificado' : '';
+  document.getElementById('rev-painel-contexto').textContent=contexto;
+  document.getElementById('rev-cartao-contexto').textContent=contexto;
+  document.getElementById('rev-estacao').classList.toggle('sem-documento',!disponivel);
+  var destino=document.getElementById(revisaoDesktop.matches?'rev-documento-desktop':'rev-documento-mobile');
+  if(leitorRoot.parentNode!==destino)destino.append(leitorRoot);
+  dimensionarLeitor();
+  if(revisaoDesktop.matches&&disponivel)leitor.carregar(q.foto_url);
+  else if(!cartaoModal.open)leitor.limpar();
+}
+revisaoDesktop.addEventListener('change',function() {
+  if(cartaoModal.open&&revisaoDesktop.matches)cartaoModal.close();
+  sincronizarDocumento();
 });
-function atualizarPreviaRevisao() {
-  var area = document.getElementById('rev-previa');
-  if (area) area.innerHTML = revisaoDesktop.matches && FILA[0] ? recorteHtml(FILA[0]) : '';
-}
-revisaoDesktop.addEventListener('change', atualizarPreviaRevisao);
-
-function ajustarCartao() {
-  cartaoImagem.classList.remove('ampliado');
-  if (cartaoFoto) cartaoFoto.style.removeProperty('width');
-  cartaoArea.scrollTop = 0; cartaoArea.scrollLeft = 0;
-  cartaoAmpliar.textContent = 'Ampliar'; cartaoAmpliar.setAttribute('aria-pressed', 'false');
-}
-function carregarCartao() {
-  if (!cartaoModal.open || !cartaoUrl) return;
-  if (cartaoErro.contains(document.activeElement)) cartaoArea.focus({preventScroll:true});
-  var sequencia = ++cartaoSequencia;
-  if (cartaoFoto) { cartaoFoto.onload = cartaoFoto.onerror = null; cartaoFoto.removeAttribute('src'); }
-  cartaoFoto = new Image(); cartaoFoto.alt = 'Cartão-resposta completo'; cartaoFoto.draggable = false;
-  cartaoImagem.replaceChildren(); ajustarCartao(); cartaoImagem.hidden = true;
-  cartaoErro.hidden = true; cartaoCarregando.hidden = false; cartaoAmpliar.disabled = true;
-  cartaoArea.setAttribute('aria-busy', 'true');
-  cartaoFoto.onload = function () {
-    if (!cartaoModal.open || sequencia !== cartaoSequencia) return;
-    cartaoImagem.replaceChildren(cartaoFoto); cartaoImagem.hidden = false;
-    cartaoCarregando.hidden = true; cartaoAmpliar.disabled = false; cartaoArea.setAttribute('aria-busy', 'false');
-  };
-  cartaoFoto.onerror = function () {
-    if (!cartaoModal.open || sequencia !== cartaoSequencia) return;
-    cartaoCarregando.hidden = true; cartaoErro.hidden = false; cartaoArea.setAttribute('aria-busy', 'false');
-  };
-  // Usar a URL assinada exatamente como foi emitida, inclusive ao tentar novamente.
-  cartaoFoto.src = cartaoUrl;
-}
 function abrirCartaoInteiro() {
-  if (salvando || cartaoModal.open || !FILA[0]?.foto_url) return;
-  var q = FILA[0]; cartaoUrl = q.foto_url; cartaoOrigem = document.getElementById('rev-ver-cartao');
-  document.getElementById('rev-cartao-contexto').textContent = [q.aluno_nome, q.turma].filter(Boolean).join(' · ') || 'Cartão sem aluno identificado';
-  cartaoOverflow = document.documentElement.style.overflow; document.documentElement.style.overflow = 'hidden';
-  cartaoModal.showModal(); carregarCartao(); document.getElementById('rev-cartao-fechar').focus({preventScroll:true});
+  if(salvando||cartaoModal.open||!FILA[0]?.foto_url)return;
+  cartaoOrigem=document.getElementById('rev-ver-cartao');
+  cartaoOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow='hidden';
+  cartaoModal.showModal();sincronizarDocumento();leitor.carregar(FILA[0].foto_url);
+  document.getElementById('rev-cartao-fechar').focus({preventScroll:true});
 }
-document.getElementById('rev-cartao-fechar').addEventListener('click', function () { cartaoModal.close(); });
-document.getElementById('rev-cartao-repetir').addEventListener('click', carregarCartao);
-cartaoModal.addEventListener('keydown', function (e) {
-  if (e.key !== 'Tab') return;
-  var controles = Array.from(cartaoModal.querySelectorAll('button:not([disabled]), [tabindex="0"]')).filter(function (el) { return el.getClientRects().length > 0; });
-  var primeiro = controles[0], ultimo = controles[controles.length - 1];
-  if (e.shiftKey && document.activeElement === primeiro) { e.preventDefault(); ultimo.focus(); }
-  else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro.focus(); }
+document.getElementById('rev-cartao-fechar').addEventListener('click',function(){cartaoModal.close();});
+cartaoModal.addEventListener('keydown',function(e) {
+  if(e.key!=='Tab')return;
+  var controles=Array.from(cartaoModal.querySelectorAll('button:not([disabled]),[tabindex="0"]')).filter(function(el){return el.getClientRects().length>0;});
+  var primeiro=controles[0],ultimo=controles[controles.length-1];
+  if(e.shiftKey&&document.activeElement===primeiro){e.preventDefault();ultimo.focus();}
+  else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primeiro.focus();}
 });
-cartaoAmpliar.addEventListener('click', function () {
-  if (!cartaoFoto || cartaoAmpliar.disabled) return;
-  if (cartaoImagem.classList.contains('ampliado')) { ajustarCartao(); return; }
-  cartaoImagem.classList.add('ampliado'); cartaoFoto.style.width = Math.max(cartaoFoto.naturalWidth, cartaoArea.clientWidth * 1.5) + 'px';
-  cartaoAmpliar.textContent = 'Ajustar à tela'; cartaoAmpliar.setAttribute('aria-pressed', 'true');
-});
-cartaoModal.addEventListener('close', function () {
-  ++cartaoSequencia;
-  if (cartaoFoto) { cartaoFoto.onload = cartaoFoto.onerror = null; cartaoFoto.removeAttribute('src'); }
-  cartaoImagem.replaceChildren(); cartaoFoto = null; cartaoUrl = null;
-  document.documentElement.style.overflow = cartaoOverflow;
-  if (cartaoOrigem?.isConnected) cartaoOrigem.focus({preventScroll:true});
+cartaoModal.addEventListener('close',function() {
+  document.documentElement.style.overflow=cartaoOverflow;
+  if(!revisaoDesktop.matches)leitor.limpar();
+  if(cartaoOrigem?.isConnected)cartaoOrigem.focus({preventScroll:true});
 });
 function estadoSalvando(estado) {
   salvando = estado;
+  document.querySelectorAll('.rev-opcoes button,.rev-acoes button').forEach(function(b) {
+    if(estado){b.dataset.desabilitadoAnterior=String(b.disabled);b.disabled=true;}
+    else b.disabled=b.dataset.desabilitadoAnterior==='true';
+  });
+  var aviso=document.getElementById('rev-salvamento');if(aviso)aviso.textContent=estado?'Salvando resposta…':'';
   var botao = document.getElementById('rev-ver-cartao'); if (botao) botao.disabled = estado;
 }
 
@@ -165,30 +137,31 @@ function desenhar() {
     el.innerHTML = '<div class="rev-fim"><h2>Revisão concluída</h2><p>' + historico.length + ' de ' + total + ' respostas salvas. As notas dos cartões concluídos já foram calculadas.</p>'
       + (historico.length ? '<button type="button" class="btn btn-ghost" onclick="voltar()">Voltar à última</button> ' : '')
       + '<a class="btn btn-primary" href="' + VOLTAR_URL + '">Voltar à correção</a></div>';
-    return;
+    sincronizarDocumento();return;
   }
   var q = FILA[0];
   var botoes = ALTERNATIVAS.map(function (l) {
-    var classe = q.detectadas.indexOf(l) >= 0 || q.alternativa === l ? 'btn-secondary' : 'btn-ghost';
-    return '<button type="button" class="btn ' + classe + '" onclick="escolher(\'' + l + '\')">' + l + '</button>';
+    var atual = q.alternativa === l && !q.ambigua;
+    return '<button type="button" class="btn rev-resposta' + (atual ? ' rev-resposta-atual' : '') + '"' + (atual ? ' aria-label="' + l + ', resposta atual"' : '') + ' onclick="escolher(\'' + l + '\')">' + l + '</button>';
   }).join('');
   el.innerHTML = '<div class="row-between rev-topo"><div><b>' + escH(q.aluno_nome || 'Aluno não identificado') + '</b>'
     + '<div class="exam-meta">' + escH(q.turma || '') + '</div></div>'
     + '<div class="rev-progresso">Questão ' + q.numero_questao + ' · Faltam ' + FILA.length + '</div></div>'
-    + '<div class="rev-trabalho' + (q.foto_url || q.endireitada_url ? '' : ' sem-imagem') + '"><div id="rev-previa" class="rev-previa rev-imagem-restrita"></div><div class="rev-respostas">'
-    + (q.foto_url ? '<div class="rev-visualizar"><button type="button" class="btn btn-ghost btn-sm" id="rev-ver-cartao" onclick="abrirCartaoInteiro()">Ver cartão inteiro</button></div>' : '')
+    + '<div class="rev-trabalho"><div id="rev-previa" class="rev-previa rev-imagem-restrita">' + recorteHtml(q) + '</div><div class="rev-respostas">'
+    + (q.foto_url ? '<div class="rev-visualizar"><button type="button" class="btn btn-ghost btn-sm" id="rev-ver-cartao" onclick="abrirCartaoInteiro()">Visualizar gabarito</button></div>' : '')
     + '<p class="rev-leitura">' + leitura(q) + '</p>'
-    + '<div class="rev-opcoes">' + botoes + '</div>'
+    + '<div class="rev-opcoes" style="--rev-alternativas:' + ALTERNATIVAS.length + '">' + botoes + '</div>'
     + '<div class="rev-opcoes rev-opcoes-extra">'
-    + '<button type="button" class="btn btn-ghost" onclick="escolher(\'BRANCO\')">Em branco</button>'
-    + '<button type="button" class="btn btn-ghost" onclick="escolher(\'ANULADA\')">Anulada</button></div>'
+    + '<button type="button" class="btn rev-resposta-extra" onclick="escolher(\'BRANCO\')">Em branco</button>'
+    + '<button type="button" class="btn rev-resposta-extra" onclick="escolher(\'ANULADA\')">Anulada</button></div>'
+    + '<p id="rev-salvamento" class="rev-salvamento" role="status" aria-live="polite"></p>'
     + '<div class="rev-acoes">'
-    + '<button type="button" class="btn btn-ghost btn-sm" onclick="voltar()"' + (historico.length ? '' : ' disabled') + '>Voltar</button>'
-    + '<button type="button" class="btn btn-ghost btn-sm" onclick="pular()"' + (FILA.length > 1 ? '' : ' disabled') + '>Pular</button></div>'
+    + '<button type="button" class="btn btn-secondary btn-sm" onclick="voltar()"' + (historico.length ? '' : ' disabled') + '>Voltar</button>'
+    + '<button type="button" class="btn btn-secondary btn-sm" onclick="pular()"' + (FILA.length > 1 ? '' : ' disabled') + '>Pular</button></div>'
     + '<p class="rev-teclas">Teclado: A a ' + ALTERNATIVAS[ALTERNATIVAS.length - 1] + ' respondem, 0 deixa em branco e X anula.</p></div></div>';
   restringirCopiaImagem(document.getElementById('rev-previa'));
-  atualizarPreviaRevisao();
-  if (revisaoDesktop.matches && FILA[1] && FILA[1].endireitada_url) new Image().src = FILA[1].endireitada_url;
+  sincronizarDocumento();
+  if (FILA[1] && FILA[1].endireitada_url) new Image().src = FILA[1].endireitada_url;
 }
 
 function escolher(alternativa) {
@@ -227,7 +200,7 @@ function pular() {
 }
 
 document.addEventListener('keydown', function (e) {
-  if (document.querySelector('dialog[open]')) return;
+  if (document.querySelector('dialog[open]') || e.target.closest?.('.rev-leitor')) return;
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   var tecla = e.key.toUpperCase();
   if (ALTERNATIVAS.indexOf(tecla) >= 0) escolher(tecla);
