@@ -12,6 +12,7 @@
  */
 """
 import json
+import hashlib
 import math
 import os
 import sys
@@ -66,33 +67,60 @@ def texto_bloco(c, txt, fonte, tam, larg, x, y, cor, centro=False):
     return max(0, h-estilo.leading)
 
 
-def rodape(c, d):
+class CanvasNumerado(canvas.Canvas):
+    """Conclui rodapés após conhecer o total, inclusive em lotes de vários alunos."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._paginas_g360 = []
+        self._rodape_g360 = {}
+
+    def showPage(self):
+        self._paginas_g360.append(dict(self.__dict__))
+        self._startPage()
+
+    def save(self):
+        paginas = list(self._paginas_g360)
+        total = len(paginas)
+        for estado in paginas:
+            self.__dict__.update(estado)
+            rodape(self, self._rodape_g360, total)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+
+
+def rodape(c, d, total):
+    m = 16*mm
+    modelo = 'Relatório do professor' if d.get('modelo') == 'professor' else 'Relatório do aluno'
+    c.setFont('Raleway-Regular', 7.5); c.setFillColor(GRAY3)
+    c.drawString(m, 10*mm, modelo+' · Gabarito360')
+    c.drawRightString(W-m, 10*mm, f'Página {c.getPageNumber():02d}/{total:02d}')
     e = d.get('emissao')
     if not e:
-        c.setFont('Raleway-Regular', 7.5)
-        c.setFillColor(GRAY3)
-        c.drawCentredString(W / 2, 12 * mm, 'Feito com Gabarito360 · gabarito360.com.br')
         return
-    m = 16 * mm
     c.setStrokeColor(HexColor('#d5dfeb'))
-    c.line(m, 50 * mm, W - m, 50 * mm)
-    largura = W - 2 * m - 29 * mm
-    estilo = ParagraphStyle('selo', fontName='Raleway-Regular', fontSize=7, leading=9, textColor=GRAY3)
-    texto = ('Gerado por <b>' + escape(e['emissor']) + '</b> · ' + escape(e['perfil']) + '<br/>'
-             + escape(e['contexto']) + ' · ' + escape(e['emitido_em']) + '<br/>'
-             + '<b>' + escape(e['codigo']) + '</b><br/>'
-             + 'Selo de emissão do sistema. Confira o arquivo pelo QR ou em:<br/>'
-             + escape(e['url'].split('?')[0]) + '<br/>'
-             + ('Relatório do professor' if d.get('modelo') == 'professor' else 'Relatório do aluno') + ' · Página ' + str(c.getPageNumber()) + ' · Gabarito360')
+    c.line(m, 50*mm, W-m, 50*mm)
+    tamanho = 24*mm
+    topo = 46*mm
+    largura = W-2*m-tamanho-6*mm
+    estilo = ParagraphStyle('selo', fontName='Raleway-Regular', fontSize=7.5, leading=9.5, textColor=GRAY3)
+    texto = ('<b>Emitido pelo Gabarito360</b><br/>'
+             + 'Gerado por <b>'+escape(e['emissor'])+'</b> · '+escape(e['perfil'])+'<br/>'
+             + escape(e['contexto'])+'<br/>'
+             + 'Data/hora: '+escape(e['emitido_em'])+'<br/>'
+             + 'Código: <b>'+escape(e['codigo'])+'</b><br/>'
+             + 'Validação: '+escape(e['url'].split('?')[0]))
     p = Paragraph(texto, estilo)
-    _, altura = p.wrap(largura, 44 * mm)
-    p.drawOn(c, m, 47 * mm - altura)
-    qr = QrCodeWidget(e['url'])
-    x1, y1, x2, y2 = qr.getBounds()
-    tamanho = 24 * mm
-    desenho = Drawing(tamanho, tamanho, transform=[tamanho/(x2-x1), 0, 0, tamanho/(y2-y1), 0, 0])
-    desenho.add(qr)
-    renderPDF.draw(desenho, c, W - m - tamanho, 10 * mm)
+    _, altura = p.wrap(largura, 40*mm)
+    p.drawOn(c, m+tamanho+6*mm, topo-altura)
+    # Um único QR vetorial por arquivo, reutilizado em todas as páginas.
+    nome = 'g360qr_'+hashlib.sha256(e['url'].encode()).hexdigest()[:16]
+    if not c.hasForm(nome):
+        qr = QrCodeWidget(e['url']);x1,y1,x2,y2=qr.getBounds()
+        desenho=Drawing(tamanho,tamanho,transform=[tamanho/(x2-x1),0,0,tamanho/(y2-y1),0,0]);desenho.add(qr)
+        c.beginForm(nome,0,0,tamanho,tamanho)
+        renderPDF.draw(desenho,c,0,0)
+        c.endForm()
+    c.saveState();c.translate(m,topo-tamanho);c.doForm(nome);c.restoreState()
 
 
 def _resultado_pagina(d, c):
@@ -236,7 +264,7 @@ def _resultado_pagina(d, c):
             c.drawString(x+3*mm, base, f"{q['numero_questao']:02d}")
             c.setFont('Raleway-SemiBold', 9)
             c.drawString(x+11*mm, base, resposta)
-    rodape(c, d)
+    c._rodape_g360 = {'modelo': d.get('modelo'), 'emissao': d.get('emissao')}
     c.showPage()
     return len(folha)
 
@@ -250,7 +278,7 @@ def percentual(s):
 def gerar(d, c=None):
     individual = c is None
     if individual:
-        c = canvas.Canvas(d['saida'], pagesize=A4)
+        c = CanvasNumerado(d['saida'], pagesize=A4)
         c.setTitle(f"Resultado — {d['aluno']['nome']} — {d['disciplina']}")
     inicio = 0
     while inicio < max(len(d['folha']), 1):
@@ -267,7 +295,7 @@ def gerar_lote(d):
     resultados = d["resultados"]
     if not resultados or len(resultados) > 500:
         raise ValueError("O lote deve conter de 1 a 500 resultados.")
-    c = canvas.Canvas(d["saida"], pagesize=A4)
+    c = CanvasNumerado(d["saida"], pagesize=A4)
     c.setTitle("Resultados dos alunos — Gabarito360")
     for resultado in resultados:
         gerar(resultado, c)

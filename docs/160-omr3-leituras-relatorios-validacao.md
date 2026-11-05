@@ -23,6 +23,7 @@ Planejamento revisto em 05/11/2026 antes da implementação. Direção prévia c
 - Denominador: resultados atuais com nota e cartão lido, uma vez por aluno; ausentes não entram, respostas em branco contam como erro e anuladas não têm percentual. Respeitar gabarito de língua por cartão. Mostrar também o tamanho da amostra. Guardar turma de aplicação quando disponível.
 - Relatório do aluno e relatório do professor têm diagramações distintas. Impressão abre o PDF emitido, por padrão pedagógico para educadores. Lotes permanecem um PDF combinado; cada arquivo final tem um registro próprio.
 - Revisão posterior do PDF do professor: usar exatamente o mesmo fluxo institucional do aluno (logos, rede/escola, título, identificação, nota e resumo global). Somente os itens das questões incluem Turma/Geral com amostras. Remover legendas extensas e repetir os totais globais em todas as páginas; identificar o modelo discretamente no rodapé.
+- Rodapé final solicitado: QR à esquerda e identificação da emissão ao lado, com topos alinhados. Numeração `Página 01/05`, com total do arquivo inteiro e continuidade entre alunos no lote. Concluir o PDF em duas passagens antes de registrar seu hash, sem duplicar páginas ou emissões.
 - Identificar emissor autenticado, perfil/contexto, data/hora e código/QR em todas as páginas. Não é assinatura pessoal com certificado: é selo de emissão e integridade do sistema.
 
 ## ADR: validação de documentos
