@@ -30,7 +30,7 @@ try {
  const saida=process.env.REV_MODAL_CAPTURAS;if(saida)mkdirSync(saida,{recursive:true});
  await page.setViewportSize({width:1440,height:1000});await page.goto('http://g360.test/revisao');await pronto();
  assert.equal(await preview.getByRole('img',{name:'Linha da questão 1 no cartão'}).isVisible(),true);
- assert.equal(await painel.isVisible(),true);const [a,b]=await Promise.all([preview.boundingBox(),page.locator('.rev-respostas').boundingBox()]);assert.ok(a.y+a.height<=b.y+1);
+ assert.equal(await painel.isVisible(),true);assert.ok(await page.evaluate(()=>document.getElementById('rev-documento-painel').getBoundingClientRect().bottom<document.querySelector('footer').getBoundingClientRect().top));const [a,b]=await Promise.all([preview.boundingBox(),page.locator('.rev-respostas').boundingBox()]);assert.ok(a.y+a.height<=b.y+1);
  assert.equal(await page.evaluate(()=>leitor.pdf.numPages),1);assert.ok(fotos.length===1);
  const area=await page.locator('.rev-leitor-area').boundingBox(),c=await canvas.boundingBox();assert.ok(c.width<=area.width&&c.height<=area.height);
  assert.deepEqual(await eventos(canvas),{contextmenu:true,dragstart:true,copy:true,cut:true});

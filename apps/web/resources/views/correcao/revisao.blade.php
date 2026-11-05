@@ -50,6 +50,18 @@ var cartaoModal = document.getElementById('rev-cartao-modal');
 var leitorRoot = document.getElementById('rev-leitor'), leitor = new LeitorCartao(leitorRoot);
 var cartaoOrigem = null, cartaoOverflow = '';
 var revisaoDesktop = window.matchMedia('(min-width:1100px)');
+function dimensionarLeitor() {
+  var painel=document.getElementById('rev-documento-painel');
+  if(!revisaoDesktop.matches||!painel.offsetWidth)return;
+  var caixa=painel.getBoundingClientRect(),escala=caixa.width/painel.offsetWidth;
+  var rodape=document.querySelector('footer[aria-label="Versão do software"]');
+  var limite=rodape?Math.min(window.innerHeight,rodape.getBoundingClientRect().top):window.innerHeight;
+  painel.style.height=Math.max(260,(limite-caixa.top-16)/escala)+'px';
+}
+var ajusteLeitorPendente=false;
+function agendarDimensaoLeitor(){if(ajusteLeitorPendente)return;ajusteLeitorPendente=true;requestAnimationFrame(function(){ajusteLeitorPendente=false;dimensionarLeitor();});}
+window.addEventListener('resize',agendarDimensaoLeitor);
+window.addEventListener('scroll',agendarDimensaoLeitor,{passive:true});
 function restringirCopiaImagem(area) {
   ['contextmenu','dragstart','copy','cut'].forEach(function(tipo) { area.addEventListener(tipo,function(e) { e.preventDefault(); }); });
 }
@@ -61,6 +73,7 @@ function sincronizarDocumento() {
   document.getElementById('rev-estacao').classList.toggle('sem-documento',!disponivel);
   var destino=document.getElementById(revisaoDesktop.matches?'rev-documento-desktop':'rev-documento-mobile');
   if(leitorRoot.parentNode!==destino)destino.append(leitorRoot);
+  dimensionarLeitor();
   if(revisaoDesktop.matches&&disponivel)leitor.carregar(q.foto_url);
   else if(!cartaoModal.open)leitor.limpar();
 }
