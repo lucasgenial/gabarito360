@@ -13,8 +13,8 @@ try {
   if(u.pathname.startsWith('/js/')||u.pathname==='/css/app.css') {
    assert.ok(!u.pathname.includes('..'));return route.fulfill({contentType:u.pathname.endsWith('.css')?'text/css':'text/javascript',body:readFileSync('apps/web/public'+u.pathname)});
   }
-  if(u.pathname==='/recorte.svg')return route.fulfill({contentType:'image/svg+xml',body:imagemTeste});
-  if(u.pathname.includes('/arquivo/original')) {
+  if(u.pathname.replace('/acessos/vinculo-7','')==='/recorte.svg')return route.fulfill({contentType:'image/svg+xml',body:imagemTeste});
+  if(u.pathname.endsWith('/imagens/original')) {
    fotos.push(req.url());if(modo==='lento')await new Promise(r=>liberarImagem=r);
    return route.fulfill(modo==='erro'?{status:403,json:{message:'Indisponível'}}:modo==='pdf'?{contentType:'application/pdf',body:pdfTeste}:{contentType:'image/svg+xml',body:imagemTeste});
   }
@@ -60,7 +60,7 @@ try {
  modo='sucesso';await page.getByRole('button',{name:'Tentar novamente',exact:true}).click();await pronto();await page.keyboard.press('Escape');
  modo='pdf';await page.getByRole('button',{name:'Visualizar gabarito',exact:true}).click();await pronto();assert.equal(await page.evaluate(()=>leitor.pdf.numPages),2);
  await page.getByRole('button',{name:'Próxima página',exact:true}).click();await page.getByRole('img',{name:'Cartão-resposta completo — página 2 de 2',exact:true}).waitFor();await page.keyboard.press('Escape');
- assert.ok(fotos.every(url=>!new URL(url).searchParams.has('_ctx')));
+ assert.ok(fotos.every(url=>new URL(url).search==='' && new URL(url).pathname.startsWith('/acessos/vinculo-7/cartoes/')));
  modo='sucesso';await page.goto('http://g360.test/revisao');modo='salvando';
  const qtdPosts=posts.length;await page.getByRole('button',{name:'A',exact:true}).click();
  assert.equal(await page.getByRole('button',{name:'Visualizar gabarito',exact:true}).isDisabled(),true);await page.keyboard.press('a');assert.equal(posts.length,qtdPosts+1);
@@ -71,5 +71,5 @@ try {
  await page.getByRole('button',{name:'C, resposta atual',exact:true}).click();await page.getByRole('heading',{name:'Revisão concluída',exact:true}).waitFor();
  assert.equal(await canvas.count(),0);await page.getByRole('button',{name:'Voltar à última',exact:true}).click();assert.equal(await preview.isVisible(),true);
  await page.goto('http://g360.test/revisao?semfoto=1');assert.equal(await page.getByRole('button',{name:'Visualizar gabarito',exact:true}).count(),0);
- assert.deepEqual(erros,[]);console.log('OK: recorte preservado, painel/PDF real, modal/foco/atalhos, troca/latência, erro/retry, páginas, assinatura e 2560/1440/1099/390/320.');
+ assert.deepEqual(erros,[]);console.log('OK: recorte preservado, painel/PDF real, modal/foco/atalhos, troca/latência, erro/retry, páginas, URL sem credenciais e 2560/1440/1099/390/320.');
 } finally {await browser.close();}
