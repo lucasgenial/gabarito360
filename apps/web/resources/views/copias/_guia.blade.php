@@ -26,7 +26,7 @@
     ['Histórico de resultados','Preservar resultados autorizados em acervo histórico separado. Não substitui notas atuais nem recalcula avaliações no destino.','copias.resultados','copias.resultado.receber','Selecionar resultados','Receber resultados'],
   ] as [$nomeGuia,$descricaoGuia,$rotaEnvio,$rotaReceber,$rotuloEnvio,$rotuloReceber])
     <article class="card card-pad copias-opcao"><h3>{{ $nomeGuia }}</h3><p>{{ $descricaoGuia }}</p>
-      <a class="btn {{ $ladoGuia==='origem'?'btn-primary':'btn-secondary' }}" href="{{ route($ladoGuia==='origem'?$rotaEnvio:$rotaReceber,['_ctx'=>$ctxGuia]) }}">{{ $ladoGuia==='origem'?$rotuloEnvio:$rotuloReceber }}</a>
+      <a class="btn {{ $ladoGuia==='origem'?'btn-primary':'btn-secondary' }}" href="{{ route($ladoGuia==='origem'?$rotaEnvio:$rotaReceber) }}">{{ $ladoGuia==='origem'?$rotuloEnvio:$rotuloReceber }}</a>
     </article>
   @endforeach
   </div>

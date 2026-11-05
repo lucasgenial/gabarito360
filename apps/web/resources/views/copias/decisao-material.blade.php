@@ -6,7 +6,7 @@
 @include('copias._materiais',['materiais'=>$dados['itens']])
 @if($dados['lado']==='origem' && !$dados['revisado'])
 <form method="POST" action="{{ route('copias.material.revisar',['id'=>$dados['lote_id']]) }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
+  @csrf
   <input type="hidden" name="conteudo_digest" value="{{ $dados['conteudo_digest'] }}">
   <h2>Revisão dos textos</h2><p>Confira títulos, disciplina, série e gabaritos. Não inclua nomes, matrículas ou outros dados pessoais nos materiais.</p>
   <p><label><input type="checkbox" name="sem_dados_pessoais" value="1" required> Revisei os materiais e confirmo que não contêm dados pessoais.</label></p>
@@ -14,7 +14,7 @@
 </form>
 @elseif(!$dados['aprovado'])
 <form method="POST" action="{{ route('copias.material.aprovar',['id'=>$dados['lote_id']]) }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
+  @csrf
   <input type="hidden" name="lado" value="{{ $dados['lado'] }}"><input type="hidden" name="conteudo_digest" value="{{ $dados['conteudo_digest'] }}">
   <input type="hidden" name="valida_ate" value="{{ $validade }}">
   <p>Autorização válida até {{ \Carbon\Carbon::parse($validade,'UTC')->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }} (horário de Brasília).</p>
@@ -31,5 +31,5 @@
   @endif
 </section>
 @endif
-<p style="margin-top:20px;"><a class="btn btn-secondary" href="{{ route('copias.operacao',['id'=>$dados['lote_id'],'lado'=>$dados['lado'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">Acompanhar operação da cópia</a></p>
+<p style="margin-top:20px;"><a class="btn btn-secondary" href="{{ route('copias.operacao',['id'=>$dados['lote_id'],'lado'=>$dados['lado']]) }}">Acompanhar operação da cópia</a></p>
 @endsection

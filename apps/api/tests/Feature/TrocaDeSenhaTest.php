@@ -80,8 +80,7 @@ class TrocaDeSenhaTest extends TestCase
 
         $token = null;
         Mail::assertQueued(EmailModelo::class, function (EmailModelo $mail) use (&$token) {
-            parse_str((string) parse_url($mail->dados['link'] ?? '', PHP_URL_QUERY), $query);
-            $token = $query['token'] ?? null;
+            $token = $mail->dados['codigo'];
             return true;
         });
 

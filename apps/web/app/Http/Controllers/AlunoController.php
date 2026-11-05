@@ -150,7 +150,7 @@ class AlunoController extends Controller
         }
         if (!$resp->successful()) return response()->json(['message'=>$resp->json('message')??'Não foi possível salvar a imagem.'], $resp->status()>=500?503:($resp->status()===404?404:422));
         $d = array_intersect_key($resp->json('data')??[],array_flip(['avatar_id','tem_foto','imagem_versao']));
-        $d['foto_url'] = route('alunos.foto',['id'=>$id,'v'=>$d['imagem_versao']??1,'_ctx'=>\App\Support\ContextoWeb::id()]);
+        $d['foto_url'] = route('alunos.foto',['id'=>$id,'v'=>$d['imagem_versao']??1]);
         return response()->json(['data'=>$d]);
     }
     public function foto(int $id)

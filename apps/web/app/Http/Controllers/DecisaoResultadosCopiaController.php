@@ -58,12 +58,12 @@ class DecisaoResultadosCopiaController extends Controller
             'dependencias'=>'required|array:provas,alunos,turmas','dependencias.provas'=>'required|array|list|min:1|max:20','dependencias.alunos'=>'required|array|list|min:1|max:20','dependencias.turmas'=>'required|array|list|min:1|max:20',
             'dependencias.provas.*'=>'required|integer|min:1|distinct','dependencias.alunos.*'=>'required|integer|min:1|distinct','dependencias.turmas.*'=>'required|integer|min:1|distinct']);
         $dados=$this->api('post','/v1/copias/resultados/lotes',$d);
-        return redirect()->route('copias.resultado.decisao',['id'=>$dados['lote_id'],'lado'=>'origem','_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.resultado.decisao',['id'=>$dados['lote_id'],'lado'=>'origem']);
     }
     public function abrir(Request $r)
     {
         $this->autorizar('destino'); $d=$this->dados($r,['lote_id'=>'required|uuid']);
-        return redirect()->route('copias.resultado.decisao',['id'=>$d['lote_id'],'lado'=>'destino','_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.resultado.decisao',['id'=>$d['lote_id'],'lado'=>'destino']);
     }
     public function show(Request $r,string $id)
     {
@@ -77,13 +77,13 @@ class DecisaoResultadosCopiaController extends Controller
     {
         $this->autorizar('origem'); $d=$this->dados($r,['conteudo_digest'=>'required|string|size:64','documento'=>'required|string|max:65536','guarda'=>'required|string|max:2000','preservacao'=>'required|string|max:2000','legado_reconhecido'=>'required|accepted','confirmado'=>'required|accepted','valida_ate'=>'required|date_format:Y-m-d\TH:i:s\Z']);
         $this->api('post','/v1/copias/resultados/lotes/'.$id.'/evidencia',$d);
-        return redirect()->route('copias.resultado.decisao',['id'=>$id,'lado'=>'origem','_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.resultado.decisao',['id'=>$id,'lado'=>'origem']);
     }
     public function aprovar(Request $r,string $id)
     {
         $d=$this->dados($r,['lado'=>'required|in:origem,destino','conteudo_digest'=>'required|string|size:64',
             'valida_ate'=>'required|date_format:Y-m-d\TH:i:s\Z','confirmado'=>'required|accepted','legado_reconhecido'=>'required|accepted']); $this->autorizar($d['lado']);
         $this->api('post','/v1/copias/resultados/lotes/'.$id.'/aprovar',$d);
-        return redirect()->route('copias.resultado.decisao',['id'=>$id,'lado'=>$d['lado'],'_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.resultado.decisao',['id'=>$id,'lado'=>$d['lado']]);
     }
 }

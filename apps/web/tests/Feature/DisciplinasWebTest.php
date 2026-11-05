@@ -15,7 +15,8 @@ class DisciplinasWebTest extends TestCase
         $me = ['token' => 'contexto-ficticio', 'tipo_contexto' => 'vinculo', 'vinculo_id' => 1, 'perfil' => $perfil,
             'permissoes' => $perfil === 'coordenador' ? ['turma.ver', 'disciplina.gerir', 'turma.vincular_professor'] : ['turma.ver'],
             'espaco' => ['id' => 5, 'tipo' => 'escola', 'nome' => 'Escola fictícia']];
-        return [ContextoWeb::criar($me), $me];
+        ContextoWeb::criar($me);
+        return [ContextoWeb::referencia($me), $me];
     }
 
     private function disciplina(): array { return ['id' => 1, 'nome' => 'Matemática <script>teste</script>', 'sigla' => 'MAT', 'ativo' => true, 'referencia' => 'matematica', 'versao' => 2]; }
@@ -36,18 +37,18 @@ class DisciplinasWebTest extends TestCase
     {
         [$ctx, $me] = $this->preparar();
         $this->fake($me, fn () => Http::response(['data' => ['disciplinas' => [$this->disciplina()], 'gerir' => true], 'meta' => ['pagina' => 1, 'paginas' => 2, 'total' => 21]]));
-        $this->get('/disciplinas?_ctx='.$ctx.'&retorno_turma=1')->assertOk()->assertSee('Disciplinas da escola')->assertSee('Próxima')->assertSee('21 resultado(s)')
+        $this->get('/acessos/'.$ctx.'/disciplinas?retorno_turma=1')->assertOk()->assertSee('Disciplinas da escola')->assertSee('Próxima')->assertSee('21 resultado(s)')
             ->assertSee('Voltar à turma')->assertSee('&lt;script&gt;', false)->assertDontSee('<script>teste</script>', false)->assertSee('retorno_turma=1', false);
-        config(['disciplinas.ativo' => false]); $this->get('/disciplinas?_ctx='.$ctx)->assertNotFound();
+        config(['disciplinas.ativo' => false]); $this->get('/acessos/'.$ctx.'/disciplinas')->assertNotFound();
     }
 
     public function test_formulario_de_referencia_e_proprio_sem_silenciosamente_alterar_origem(): void
     {
         [$ctx, $me] = $this->preparar();
         $this->fake($me, fn () => Http::response(['data' => ['gerir' => true, 'referencias' => [['chave' => 'matematica', 'nome' => 'Matemática', 'area' => 'Matemática']]]]));
-        $this->get('/disciplinas/nova?_ctx='.$ctx)->assertOk()->assertSee('Escolher referência nacional')->assertSee('Escolher')->assertDontSee('name="nome"', false);
-        $this->get('/disciplinas/nova?_ctx='.$ctx.'&origem=referencia&referencia=matematica')->assertOk()->assertSee('Referência escolhida')->assertSee('value="Matemática"', false);
-        $this->get('/disciplinas/nova?_ctx='.$ctx.'&origem=propria')->assertOk()->assertSee('Dados na escola')->assertDontSee('name="referencia"', false);
+        $this->get('/acessos/'.$ctx.'/disciplinas/nova')->assertOk()->assertSee('Escolher referência nacional')->assertSee('Escolher')->assertDontSee('name="nome"', false);
+        $this->get('/acessos/'.$ctx.'/disciplinas/nova?origem=referencia&referencia=matematica')->assertOk()->assertSee('Referência escolhida')->assertSee('value="Matemática"', false);
+        $this->get('/acessos/'.$ctx.'/disciplinas/nova?origem=propria')->assertOk()->assertSee('Dados na escola')->assertDontSee('name="referencia"', false);
     }
 
     public function test_somente_leitura_nao_mostra_botoes_de_gestao(): void
@@ -55,9 +56,9 @@ class DisciplinasWebTest extends TestCase
         foreach (['professor', 'dir_escolar', 'vice_dir_escolar'] as $perfil) {
             [$ctx, $me] = $this->preparar($perfil);
             $this->fake($me, fn () => Http::response(['data' => ['disciplina' => $this->disciplina(), 'professores' => [], 'gerir' => false]]));
-            $this->get('/disciplinas/1?_ctx='.$ctx)->assertOk()->assertDontSee('Editar disciplina')->assertDontSee('Adicionar professor à disciplina');
-            $this->get('/disciplinas/nova?_ctx='.$ctx)->assertForbidden();
-            $this->post('/disciplinas?_ctx='.$ctx, ['nome' => 'Tentativa', 'ativo' => 1])->assertForbidden();
+            $this->get('/acessos/'.$ctx.'/disciplinas/1')->assertOk()->assertDontSee('Editar disciplina')->assertDontSee('Adicionar professor à disciplina');
+            $this->get('/acessos/'.$ctx.'/disciplinas/nova')->assertForbidden();
+            $this->post('/acessos/'.$ctx.'/disciplinas', ['nome' => 'Tentativa', 'ativo' => 1])->assertForbidden();
         }
     }
 
@@ -67,9 +68,9 @@ class DisciplinasWebTest extends TestCase
         $this->fake($me, function ($r, $p) use (&$elegiveis) {
             return Http::response(['data' => str_ends_with($p, '/disciplinas/1') ? ['componente' => $this->componente(), 'gerir' => true, 'atribuir' => true, 'elegiveis' => $elegiveis, 'indicacoes' => []] : ['turma' => $this->turma()]]);
         });
-        $this->get('/turmas/1/disciplinas/1?_ctx='.$ctx)->assertOk()->assertSee('Nenhum professor indicado nesta disciplina')->assertSee('Adicionar à disciplina')->assertSee('Gerir acesso à turma')->assertDontSee('Confirmar atribuição');
+        $this->get('/acessos/'.$ctx.'/turmas/1/disciplinas/1')->assertOk()->assertSee('Nenhum professor indicado nesta disciplina')->assertSee('Adicionar à disciplina')->assertSee('Gerir acesso à turma')->assertDontSee('Confirmar atribuição');
         $elegiveis = [['vinculo_id' => 3, 'nome' => 'Professor fictício']];
-        $this->get('/turmas/1/disciplinas/1?_ctx='.$ctx.'&rascunho_inicio=2026-12-01&rascunho_papel=codocencia')->assertOk()->assertSee('Confirmar atribuição')->assertSee('value="2026-12-01"', false)
+        $this->get('/acessos/'.$ctx.'/turmas/1/disciplinas/1?rascunho_inicio=2026-12-01&rascunho_papel=codocencia')->assertOk()->assertSee('Confirmar atribuição')->assertSee('value="2026-12-01"', false)
             ->assertSee('A partir desta data, o professor não atua mais')->assertSee('Nenhuma opção encerra automaticamente');
     }
 
@@ -77,17 +78,17 @@ class DisciplinasWebTest extends TestCase
     {
         [$ctx, $me] = $this->preparar(); $d = $this->disciplina();
         $this->fake($me, fn ($r) => $r->method() === 'PUT' ? Http::response(['message' => 'Os dados mudaram.'], 409) : Http::response(['data' => ['disciplina' => $d, 'gerir' => true]]));
-        $url = '/disciplinas/1/editar?_ctx='.$ctx;
-        $this->from($url)->put('/disciplinas/1?_ctx='.$ctx, ['nome' => 'Meu rascunho', 'sigla' => 'MR', 'ativo' => '1', 'versao' => 1])->assertRedirect()->assertSessionHas('conflito_dc1', true);
+        $url = '/acessos/'.$ctx.'/disciplinas/1/editar';
+        $this->from($url)->put('/acessos/'.$ctx.'/disciplinas/1', ['nome' => 'Meu rascunho', 'sigla' => 'MR', 'ativo' => '1', 'versao' => 1])->assertRedirect()->assertSessionHas('conflito_dc1', true);
         $this->get($url)->assertOk()->assertSee('Atualizar estado e manter preenchimento')->assertSee('value="Meu rascunho"', false)->assertSee('value="1"', false);
-        $this->get($url.'&rever=1')->assertRedirect();
+        $this->get($url.'?rever=1')->assertRedirect();
         $this->get($url)->assertOk()->assertSee('value="Meu rascunho"', false)->assertSee('value="2"', false)->assertDontSee('Atualizar estado e manter preenchimento');
     }
 
     public function test_indisponibilidade_nao_parece_lista_vazia_e_nao_revela_erro_interno(): void
     {
         [$ctx, $me] = $this->preparar(); $this->fake($me, fn () => Http::response(['message' => 'SEGREDO-DB'], 500));
-        $this->get('/disciplinas?_ctx='.$ctx)->assertStatus(503)->assertDontSee('SEGREDO-DB')->assertDontSee('Nenhuma disciplina por aqui');
+        $this->get('/acessos/'.$ctx.'/disciplinas')->assertStatus(503)->assertDontSee('SEGREDO-DB')->assertDontSee('Nenhuma disciplina por aqui');
     }
 
     public function test_confirmacao_da_atribuicao_e_dialogo_com_acao_alvo_e_consequencia(): void
@@ -95,7 +96,7 @@ class DisciplinasWebTest extends TestCase
         [$ctx,$me]=$this->preparar();$c=$this->componente();
         $c['atribuicoes']=[['id'=>4,'nome'=>'Professor fictício','vinculo_vigente'=>true,'inicio_em'=>'2099-01-01','fim_em'=>null,'papel'=>'titular','estado_periodo'=>'Programada','versao'=>1]];
         $this->fake($me,fn($r,$p)=>Http::response(['data'=>str_ends_with($p,'/disciplinas/1')?['componente'=>$c,'gerir'=>true,'atribuir'=>true,'elegiveis'=>[],'indicacoes'=>[]]:['turma'=>$this->turma()]]));
-        $this->get('/turmas/1/disciplinas/1?_ctx='.$ctx)->assertOk()->assertSee('<dialog',false)->assertSee('aria-labelledby="dc1-confirmacao-titulo"',false)
+        $this->get('/acessos/'.$ctx.'/turmas/1/disciplinas/1')->assertOk()->assertSee('<dialog',false)->assertSee('aria-labelledby="dc1-confirmacao-titulo"',false)
             ->assertSee('data-dc1-verbo="Cancelar atribuição"',false)->assertSee('Cancelar atribuição de Professor fictício em Matemática')
             ->assertSee('A atribuição programada será cancelada. O histórico será preservado.')->assertDontSee('onsubmit="return confirm(',false);
     }
@@ -105,11 +106,11 @@ class DisciplinasWebTest extends TestCase
         [$ctx,$me]=$this->preparar(); $d=$this->disciplina();
         $d['areas']=[['id'=>11,'nome'=>'Área própria','sigla'=>null,'ativo'=>true],['id'=>12,'nome'=>'Área preservada','sigla'=>'AP','ativo'=>false]];
         $this->fake($me,fn()=>Http::response(['data'=>['disciplina'=>$d,'professores'=>[],'gerir'=>true]]));
-        $html=$this->get('/disciplinas/1/editar?_ctx='.$ctx)->assertOk()->assertDontSee('name="area_ids[]"',false)->getContent();
+        $html=$this->get('/acessos/'.$ctx.'/disciplinas/1/editar')->assertOk()->assertDontSee('name="area_ids[]"',false)->getContent();
         $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
         $this->assertSame(0,$xp->query('//div[contains(@class,"g-pagina")]//a[normalize-space(.)="Cancelar"]')->length);
         $this->assertSame(1,$xp->query('//form//a[normalize-space(.)="Cancelar"]')->length);
-        $this->get('/disciplinas/1?_ctx='.$ctx)->assertOk()->assertSee('Áreas do conhecimento:')->assertSee('Área preservada')->assertSee('(inativa)');
+        $this->get('/acessos/'.$ctx.'/disciplinas/1')->assertOk()->assertSee('Áreas do conhecimento:')->assertSee('Área preservada')->assertSee('(inativa)');
     }
 
     public function test_cadastro_da_area_separa_identificacao_da_vinculacao_e_nao_duplica_cancelar(): void
@@ -120,15 +121,15 @@ class DisciplinasWebTest extends TestCase
             if ($r->method()==='POST') return $falhar?Http::response(['message'=>'Seleção inválida.','errors'=>['disciplina_ids.0'=>['Seleção inválida.']]],422):Http::response(['data'=>['id'=>4]],201);
             return Http::response(['data'=>['disciplinas'=>[$disciplina]]]);
         });
-        $url='/areas-conhecimento/nova?_ctx='.$ctx;
+        $url='/acessos/'.$ctx.'/areas-conhecimento/nova';
         $html=$this->get($url)->assertOk()->assertSee('Após adicionar a área')->assertDontSee('name="disciplina_ids[]"',false)->getContent();
         $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
         $this->assertSame(0,$xp->query('//div[contains(@class,"g-pagina")]//a[normalize-space(.)="Cancelar"]')->length);
         $this->assertSame(1,$xp->query('//form//a[normalize-space(.)="Cancelar"]')->length);
-        $this->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'Área','ativo'=>'1','disciplinas_selecao'=>'1'])->assertRedirect();
+        $this->post('/acessos/'.$ctx.'/areas-conhecimento',['nome'=>'Área','ativo'=>'1','disciplinas_selecao'=>'1'])->assertRedirect();
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['disciplina_ids']===[]);
         $falhar=true;
-        $this->from($url)->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'Área','ativo'=>'1','disciplinas_selecao'=>'1','disciplina_ids'=>[1],'disciplina_versoes'=>[1=>2]])->assertRedirect();
+        $this->from($url)->post('/acessos/'.$ctx.'/areas-conhecimento',['nome'=>'Área','ativo'=>'1','disciplinas_selecao'=>'1','disciplina_ids'=>[1],'disciplina_versoes'=>[1=>2]])->assertRedirect();
         $this->get($url)->assertOk()->assertSee('Seleção inválida.')->assertDontSee('name="disciplina_ids[]"',false);
     }
 
@@ -136,16 +137,16 @@ class DisciplinasWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar('professor');
         $this->fake($me,fn()=>Http::response(['data'=>['areas'=>[['id'=>8,'nome'=>'Tecnologia <teste>','sigla'=>null,'ativo'=>true]],'gerir'=>false],'meta'=>['pagina'=>1,'paginas'=>2,'total'=>21]]));
-        $this->get('/areas-conhecimento?_ctx='.$ctx)->assertOk()->assertSee('Tecnologia &lt;teste&gt;',false)->assertSee('Próxima')->assertDontSee('Adicionar área')->assertDontSee('Editar');
-        $this->get('/areas-conhecimento/nova?_ctx='.$ctx)->assertForbidden();
-        $this->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'Invasão','ativo'=>1])->assertForbidden();
+        $this->get('/acessos/'.$ctx.'/areas-conhecimento')->assertOk()->assertSee('Tecnologia &lt;teste&gt;',false)->assertSee('Próxima')->assertDontSee('Adicionar área')->assertDontSee('Editar');
+        $this->get('/acessos/'.$ctx.'/areas-conhecimento/nova')->assertForbidden();
+        $this->post('/acessos/'.$ctx.'/areas-conhecimento',['nome'=>'Invasão','ativo'=>1])->assertForbidden();
     }
 
     public function test_orientacoes_sao_recolhidas_nativas_e_nao_escondem_campos_ou_erros(): void
     {
         [$ctx,$me]=$this->preparar();
         $this->fake($me,fn()=>Http::response(['data'=>['gerir'=>true,'referencias'=>[],'areas'=>[]]]));
-        $html=$this->get('/disciplinas/nova?_ctx='.$ctx.'&origem=propria')->assertOk()->assertSee('Saiba mais')->assertSee('Saiba menos')
+        $html=$this->get('/acessos/'.$ctx.'/disciplinas/nova?origem=propria')->assertOk()->assertSee('Saiba mais')->assertSee('Saiba menos')
             ->assertSee('sobre disciplinas próprias')->assertSee('sobre situação da disciplina')
             ->assertDontSee('name="area_ids[]"',false)->assertSee('name="nome"',false)->assertSee('Adicionar disciplina')->getContent();
         $dom=new \DOMDocument; @$dom->loadHTML('<?xml encoding="UTF-8">'.$html); $xp=new \DOMXPath($dom);
@@ -159,7 +160,7 @@ class DisciplinasWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar();
         $this->fake($me,fn($r,$p)=>Http::response(['data'=>str_ends_with($p,'opcoes')?['disciplinas'=>[]]:['area'=>['id'=>8,'nome'=>'Matemática e raciocínio','sigla'=>'MR','ativo'=>true,'versao'=>1,'disciplinas'=>[$this->disciplina()]],'gerir'=>true]]));
-        $this->get('/areas-conhecimento/8?_ctx='.$ctx)->assertOk()->assertSee('Sigla: MR')->assertSee('Disciplinas desta área')
+        $this->get('/acessos/'.$ctx.'/areas-conhecimento/8')->assertOk()->assertSee('Sigla: MR')->assertSee('Disciplinas desta área')
             ->assertSee('data-colecao-completa="true"',false)->assertDontSee('aria-label="Dados da área"',false)->assertDontSee('sobre organização desta área');
     }
 
@@ -168,12 +169,12 @@ class DisciplinasWebTest extends TestCase
         [$ctx,$me]=$this->preparar();
         $disciplinas=[]; for($i=1;$i<=5;$i++) $disciplinas[]=['id'=>$i,'nome'=>'Disciplina '.$i,'sigla'=>null,'ativo'=>true,'versao'=>2];
         $this->fake($me,fn($r,$p)=>$r->method()==='PUT'?Http::response(['message'=>'Uma disciplina mudou.'],409):Http::response(['data'=>str_ends_with($p,'opcoes')?['disciplinas'=>$disciplinas]:['area'=>['id'=>8,'nome'=>'Área','sigla'=>'MR','ativo'=>true,'versao'=>2,'disciplinas'=>$disciplinas],'gerir'=>true]]));
-        $url=route('areas.edit',['id'=>8,'_ctx'=>$ctx]);
-        $this->withSession(['_previous'=>['url'=>url('/disciplinas/99/editar?_ctx='.$ctx)]])->withHeaders(['Referer'=>'']);
-        $this->put('/areas-conhecimento/8?_ctx='.$ctx,['nome'=>'Área','sigla'=>'MR5','ativo'=>'1','versao'=>1,'disciplina_ids'=>[1,2,3,4,5],'disciplina_versoes'=>[1=>1,2=>1,3=>1,4=>1,5=>1],'disciplinas_selecao'=>1])
+        $url=route('areas.edit',['id'=>8,'acesso'=>$ctx]);
+        $this->withSession(['_previous'=>['url'=>url('/acessos/'.$ctx.'/disciplinas/99/editar')]])->withHeaders(['Referer'=>'']);
+        $this->put('/acessos/'.$ctx.'/areas-conhecimento/8',['nome'=>'Área','sigla'=>'MR5','ativo'=>'1','versao'=>1,'disciplina_ids'=>[1,2,3,4,5],'disciplina_versoes'=>[1=>1,2=>1,3=>1,4=>1,5=>1],'disciplinas_selecao'=>1])
             ->assertRedirect($url)->assertSessionHas('conflito_dc1',true);
         $this->get($url)->assertOk()->assertSee('value="MR5"',false)->assertSee('Atualizar estado e manter preenchimento');
-        $this->get($url.'&rever=1')->assertRedirect($url);
+        $this->get($url.'?rever=1')->assertRedirect($url);
         $html=$this->get($url)->assertOk()->assertSee('value="MR5"',false)->assertDontSee('Atualizar estado e manter preenchimento')->getContent();
         $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
         $this->assertSame(0,$xp->query('//input[@name="disciplina_ids[]"]')->length);
@@ -186,7 +187,7 @@ class DisciplinasWebTest extends TestCase
         $p=['id'=>41,'disciplina_id'=>1,'nome'=>'Matemática','sigla'=>'MAT','ativo'=>true,'disciplina_ativa'=>true,'disciplina_versao'=>2,'versao'=>1,'vinculado_em'=>'2026-11-04 15:00:00','desvinculado_em'=>null];
         $e=array_replace($p,['id'=>40,'ativo'=>false,'vinculado_em'=>'2025-11-15 15:00:00','desvinculado_em'=>'2026-11-04 14:00:00']);
         $this->fake($me,fn($r,$url)=>Http::response(['data'=>str_ends_with($url,'opcoes')?['disciplinas'=>[['id'=>1,'nome'=>'Matemática','sigla'=>'MAT','ativo'=>true,'versao'=>2],['id'=>2,'nome'=>'Português','sigla'=>null,'ativo'=>true,'versao'=>1]]]:['area'=>['id'=>8,'nome'=>'Área','sigla'=>null,'ativo'=>true,'versao'=>3,'vinculos'=>[$p,$e]],'gerir'=>true]]));
-        $html=$this->get('/areas-conhecimento/8?_ctx='.$ctx)->assertOk()->assertSee('Nome/dados')->assertSee('Data da vinculação:')->assertSee('Data da desvinculação:')->assertSee('04/11/2026 · 12:00')->assertSee('Vínculo encerrado')->getContent();
+        $html=$this->get('/acessos/'.$ctx.'/areas-conhecimento/8')->assertOk()->assertSee('Nome/dados')->assertSee('Data da vinculação:')->assertSee('Data da desvinculação:')->assertSee('04/11/2026 · 12:00')->assertSee('Vínculo encerrado')->getContent();
         $dom=new \DOMDocument; @$dom->loadHTML($html); $xp=new \DOMXPath($dom);
         $this->assertSame(2,$xp->query('//table//th')->length);
         $this->assertSame(1,$xp->query('//table//button[@type="submit"]')->length);
@@ -203,17 +204,17 @@ class DisciplinasWebTest extends TestCase
             if($r->method()==='POST') return $confirmar?Http::response(['codigo'=>'confirmacao_desvinculacao','data'=>['confirmacao'=>'confirmacao-ficticia','provas'=>2]],409):Http::response(['data'=>[]]);
             return Http::response(['data'=>str_ends_with($url,'opcoes')?['disciplinas'=>[]]:['area'=>['id'=>8,'nome'=>'Área','sigla'=>null,'ativo'=>true,'versao'=>3,'vinculos'=>[$p]],'gerir'=>true]]);
         });
-        $this->post('/areas-conhecimento/8/vinculos?_ctx='.$ctx,['disciplina_selecao'=>'2:3','versao'=>2])->assertRedirect(route('areas.show',['id'=>8,'_ctx'=>$ctx]));
+        $this->post('/acessos/'.$ctx.'/areas-conhecimento/8/vinculos',['disciplina_selecao'=>'2:3','versao'=>2])->assertRedirect(route('areas.show',['id'=>8,'acesso'=>$ctx]));
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['disciplina_id']===2 && $r['disciplina_versao']===3);
         $confirmar=true;
-        $this->post('/areas-conhecimento/8/desvincular?_ctx='.$ctx,['disciplina_id'=>1,'disciplina_versao'=>2,'versao'=>3,'vinculo_id'=>41])->assertRedirect();
-        $this->get('/areas-conhecimento/8?_ctx='.$ctx)->assertOk()->assertSee('data-dc1-confirmacao-area',false)->assertSee('As provas, os gabaritos, as notas')->assertSee('name="confirmacao"',false)->assertSee('Não registrada');
+        $this->post('/acessos/'.$ctx.'/areas-conhecimento/8/desvincular',['disciplina_id'=>1,'disciplina_versao'=>2,'versao'=>3,'vinculo_id'=>41])->assertRedirect();
+        $this->get('/acessos/'.$ctx.'/areas-conhecimento/8')->assertOk()->assertSee('data-dc1-confirmacao-area',false)->assertSee('As provas, os gabaritos, as notas')->assertSee('name="confirmacao"',false)->assertSee('Não registrada');
     }
 
     public function test_erro_local_de_validacao_tambem_ignora_historico_de_outra_aba(): void
     {
         [$ctx,$me]=$this->preparar();$this->fake($me,fn()=>Http::response(['data'=>[]]));
-        $this->withSession(['_previous'=>['url'=>url('/disciplinas/99/editar?_ctx='.$ctx)]])->withHeaders(['Referer'=>'']);
-        $this->post('/areas-conhecimento?_ctx='.$ctx,['nome'=>'','ativo'=>1])->assertRedirect(route('areas.create',['_ctx'=>$ctx]))->assertSessionHasErrors('nome');
+        $this->withSession(['_previous'=>['url'=>url('/acessos/'.$ctx.'/disciplinas/99/editar')]])->withHeaders(['Referer'=>'']);
+        $this->post('/acessos/'.$ctx.'/areas-conhecimento',['nome'=>'','ativo'=>1])->assertRedirect(route('areas.create',['acesso'=>$ctx]))->assertSessionHasErrors('nome');
     }
 }

@@ -2,16 +2,16 @@
 @section('title', 'Abrindo seu vínculo')
 @section('content')
 <main class="vinculo-pagina"><section class="card vinculo-card">
-<h1>Abrindo seu vínculo</h1>
-<p>Estamos preparando o acesso desta aba.</p>
+<h1>Escolha seu acesso</h1>
+<p>Abra esta página pelo menu do seu vínculo para continuar.</p>
 <a class="btn btn-primary" href="{{ route('vinculos.index') }}">Escolher vínculo</a>
-<noscript><p>Ative o JavaScript para manter o vínculo durante a navegação.</p></noscript>
 </section></main>
 <script>
-let contexto = null;
-try { contexto = sessionStorage.getItem('g360-contexto'); } catch (e) {}
-if (contexto && /^[A-Za-z0-9]{48}$/.test(contexto)) {
-  const destino = new URL(location.href); destino.searchParams.set('_ctx', contexto); location.replace(destino);
-} else { location.replace(@json(route('vinculos.index'))); }
+let acesso = null;
+try { sessionStorage.removeItem('g360-contexto'); acesso = sessionStorage.getItem('g360-acesso'); } catch (e) {}
+if (acesso && /^(vinculo|pessoal|interno)-[1-9][0-9]{0,17}$/.test(acesso)) {
+  const destino = new URL(location.href); destino.searchParams.delete('_ctx');
+  destino.pathname = '/acessos/'+acesso+destino.pathname; location.replace(destino);
+}
 </script>
 @endsection

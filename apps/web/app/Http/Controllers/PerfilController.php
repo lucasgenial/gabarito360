@@ -33,7 +33,7 @@ class PerfilController extends Controller
         }
         if($resp->successful()){
             $d=array_intersect_key($resp->json('data')??[],array_flip(['avatar_id','tem_foto','imagem_versao']));session(['auth_avatar_id'=>$d['avatar_id']??null,'auth_tem_foto'=>$d['tem_foto']??false,'auth_imagem_versao'=>$d['imagem_versao']??1]);
-            $d['foto_url']=route('perfil.foto',['v'=>$d['imagem_versao']??1,'_ctx'=>\App\Support\ContextoWeb::id()]);
+            $d['foto_url']=route('perfil.foto',['v'=>$d['imagem_versao']??1]);
             if($r->expectsJson())return response()->json(['data'=>$d]);
         } elseif($r->expectsJson()) return response()->json(['message'=>$resp->json('message')??'Não foi possível atualizar a imagem.'], $resp->status()>=500?503:422);
         return back()->with($resp->successful()?'sucesso_imagem':'erro_imagem',$resp->successful()?'Imagem de perfil atualizada.':($resp->json('message')??'Não foi possível atualizar a imagem.'));
@@ -117,17 +117,34 @@ class PerfilController extends Controller
             return back()->with('erro', $resp->json('message') ?? 'Não foi possível pedir a troca de e-mail.');
         }
 
-        return back()->with('sucesso', 'Enviamos um link de confirmação para o novo e-mail. O atual segue valendo até lá.');
+        return back()->with('sucesso', 'Enviamos um código de confirmação para o novo e-mail. O atual segue valendo até lá.');
     }
 
-    /** Link do e-mail: funciona com ou sem sessão aberta. */
+    /** Abrir a página nunca confirma nem consome o código. */
+    public function showConfirmarEmail(Request $request)
+    {
+        if ($request->hasAny(['token', 'conta', 'email'])) return redirect()->route('email.confirmar')
+            ->with('erro', 'Cole o código recebido por e-mail no formulário.');
+        return view('auth.confirmar-email');
+    }
+
+    /** Confirmação explícita por POST, protegida pelo middleware web/CSRF. */
     public function confirmarEmail(Request $request)
     {
-        $resp = $this->api->post('/v1/auth/confirmar-email', ['token' => (string) $request->query('token')]);
+        abort_if($request->query->has('token'), 422, 'Cole o código no formulário.');
+        $dados = $request->validate(['token' => 'required|alpha_num:ascii|size:64'], [
+            'token.required' => 'Cole o código recebido por e-mail.',
+            'token.alpha_num' => 'Copie os 64 caracteres do código recebido por e-mail.',
+            'token.size' => 'Copie os 64 caracteres do código recebido por e-mail.',
+        ]);
+        try { $resp = $this->api->post('/v1/auth/confirmar-email', $dados); }
+        catch (\Illuminate\Http\Client\ConnectionException) {
+            return redirect()->route('email.confirmar')->with('erro', 'Não foi possível confirmar agora. Tente novamente.');
+        }
         $destino = session('auth_token') ? 'perfil' : 'login';
 
         if ($resp->failed()) {
-            return redirect()->route($destino)->with('erro', $resp->json('message') ?? 'Link inválido ou expirado.');
+            return redirect()->route('email.confirmar')->with('erro', 'Código inválido ou expirado. Peça a confirmação de e-mail novamente.');
         }
 
         return redirect()->route($destino)->with('sucesso', 'E-mail confirmado.');

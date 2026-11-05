@@ -17,8 +17,7 @@ use Throwable;
 
 /**
  * Arquivo: apps/api/app/Services/Omr/ImagensCartao.php
- * Função: Versões leves da foto do cartão (omr/gerar_imagens.py) e links temporários
- *         assinados para o navegador buscá-las direto na API, sem passar pela web.
+ * Função: Versões leves da foto e endereços de recursos autenticados, sem credenciais na URL.
  */
 class ImagensCartao
 {
@@ -123,7 +122,7 @@ class ImagensCartao
         ]);
     }
 
-    /** A validade fecha em hora cheia: o link fica igual entre consultas e o navegador reaproveita o cache. */
+    /** Endereços estáveis; cada abertura exige autenticação e autorização atuais. */
     public function urlsDaProva(Prova $prova, array $ids, array $tipos, Usuario $ator): array
     {
         $ids=array_values(array_unique(array_map('intval',$ids)));$tipos=array_values(array_unique($tipos));
@@ -141,12 +140,8 @@ class ImagensCartao
         abort_unless($autorizada && ContextoCorrecao::provaValida($autorizada),404);
         $cartoes=ContextoCorrecao::cartoes($ator)->where('cartoes.prova_id',$autorizada->id)->whereIn('cartoes.id',$ids)->get(['cartoes.id','cartoes.espaco_id']);
         abort_unless($cartoes->count()===count($ids),404);
-        $comuns=['ator'=>$ator->id,'acesso'=>ContextoCorrecao::versaoAcesso($ator)];
-        if($ator->vinculoContextoId()!==null)$comuns['vinculo']=$ator->vinculoContextoId();
-        $prazo=now()->startOfHour()->addHours(2);
         foreach($cartoes as $cartao)foreach($tipos as $tipo) {
-            $resultado[$cartao->id][$tipo]=URL::temporarySignedRoute('cartoes.arquivo',$prazo,
-                ['id'=>$cartao->id,'tipo'=>$tipo,'espaco'=>$cartao->espaco_id]+$comuns,false);
+            $resultado[$cartao->id][$tipo]=URL::route('cartoes.imagem-autenticada', ['id'=>$cartao->id,'tipo'=>$tipo], false);
         }
         return $resultado;
     }
@@ -154,19 +149,12 @@ class ImagensCartao
     /** Emissão individual; consumidores de coleções devem usar urlsDaProva. */
     public function url(int $cartaoId, string $tipo, ?Usuario $ator = null): string
     {
-        $parametros = ['id' => $cartaoId, 'tipo' => $tipo];
+        abort_if($cartaoId < 1 || !in_array($tipo, self::TIPOS, true), 404);
         if (Espacos::ativo()) {
             abort_unless($ator && $ator->ativo && $ator->perfil !== 'aplicador' && Permissao::pode($ator, 'correcao.acompanhar'), 404);
             $cartao = ContextoCorrecao::cartoes($ator)->findOrFail($cartaoId);
             abort_unless(ContextoCorrecao::cartaoValido($cartao), 404);
-            $parametros += ['espaco' => $cartao->espaco_id, 'ator' => $ator->id, 'acesso' => ContextoCorrecao::versaoAcesso($ator)];
-            if ($ator->vinculoContextoId() !== null) $parametros['vinculo'] = $ator->vinculoContextoId();
         }
-        return URL::temporarySignedRoute(
-            'cartoes.arquivo',
-            now()->startOfHour()->addHours(2),
-            $parametros,
-            false
-        );
+        return URL::route('cartoes.imagem-autenticada', ['id'=>$cartaoId,'tipo'=>$tipo], false);
     }
 }

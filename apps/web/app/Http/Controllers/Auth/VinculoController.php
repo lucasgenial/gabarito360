@@ -49,9 +49,10 @@ class VinculoController extends Controller
         if ($resp->failed()) return $this->falhaTroca($request,false,$resp->status());
         $dados = $resp->json('data');
         abort_unless(is_array($dados) && !empty($dados['token']) && !empty($dados['perfil']) && is_array($dados['permissoes'] ?? null), 503,'Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.');
-        $id = ContextoWeb::criar($dados);
-        if ($request->expectsJson()) return response()->json(['url'=>route('painel',['_ctx'=>$id])]);
-        return redirect()->route('painel', ['_ctx' => $id]);
+        abort_unless((int)($dados['vinculo_id']??0)===(int)$data['vinculo_id'] && ($acesso=ContextoWeb::referencia($dados)),503,'Não foi possível confirmar seu vínculo.');
+        ContextoWeb::criar($dados);
+        if ($request->expectsJson()) return response()->json(['url'=>route('painel',['acesso'=>$acesso])]);
+        return redirect()->route('painel', ['acesso' => $acesso]);
     }
 
     public function interno(Request $request)
@@ -64,8 +65,9 @@ class VinculoController extends Controller
         $dados = $resp->json('data');
         abort_unless(is_array($dados) && ($dados['tipo_contexto'] ?? null) === 'interno'
             && !empty($dados['token']) && !empty($dados['perfil']) && is_array($dados['permissoes'] ?? null), 503,'Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.');
-        $id=ContextoWeb::criar($dados);
-        if ($request->expectsJson()) return response()->json(['url'=>route('painel',['_ctx'=>$id])]);
-        return redirect()->route('painel', ['_ctx' => $id]);
+        abort_unless((int)($dados['acesso_interno_id']??0)===(int)$data['acesso_interno_id'] && ($acesso=ContextoWeb::referencia($dados)),503,'Não foi possível confirmar seu acesso.');
+        ContextoWeb::criar($dados);
+        if ($request->expectsJson()) return response()->json(['url'=>route('painel',['acesso'=>$acesso])]);
+        return redirect()->route('painel', ['acesso' => $acesso]);
     }
 }

@@ -176,15 +176,26 @@ class CartoesEspacosTest extends TestCase
         $this->assertDatabaseCount('notas', 0);
     }
 
-    public function test_link_assinado_revalida_acesso_e_aceita_arquivo_legado_mapeado(): void
+    public function test_arquivo_autenticado_revalida_acesso_e_aceita_arquivo_legado_mapeado(): void
     {
         $e = $this->enviar();
         Storage::disk('public')->put('cartoes/derivados/'.$e->cartao_id.'-miniatura.jpg', 'fictício');
         $url = (new ImagensCartao())->url($e->cartao_id, 'miniatura', $this->admin);
+        $this->assertSame('/api/v1/cartoes/'.$e->cartao_id.'/imagens/miniatura', $url);
         $this->get($url)->assertOk()->assertHeader('Cache-Control', 'no-store, private');
-        $this->get($url.'&espaco=999')->assertForbidden();
+        $this->getJson($url.'?espaco=999')->assertUnprocessable();
         DB::table('usuario_escopos')->where('usuario_id', $this->admin->id)->delete();
         $this->get($url)->assertNotFound();
+    }
+
+    public function test_recurso_da_imagem_nao_permite_escolher_ator_ou_alcance_pela_url(): void
+    {
+        $e = $this->enviar();
+        $outro = $this->usuario('admin_rede');
+        $this->escopo($outro, 'rede', 2);
+        Sanctum::actingAs($outro);
+        $this->getJson('/api/v1/cartoes/'.$e->cartao_id.'/imagens/original')->assertNotFound();
+        $this->getJson('/api/v1/cartoes/'.$e->cartao_id.'/imagens/original?ator='.$this->admin->id.'&espaco='.$e->espaco_id)->assertUnprocessable();
     }
 
     public function test_revisao_grava_autoria_e_rollback_se_filho_divergente(): void

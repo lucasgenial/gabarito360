@@ -7,5 +7,5 @@
     <li><strong>Por último:</strong> na operação autorizada, solicite o processamento e acompanhe a publicação.</li>
   </ol>
   <p>Você receberá uma cópia independente. Os originais permanecem na origem; mudanças posteriores não são sincronizadas.</p>
-  <a href="{{ route('copias.index',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Ver modalidades, permissões e acompanhamento</a>
+  <a href="{{ route('copias.index',[]) }}">Ver modalidades, permissões e acompanhamento</a>
 </section>

@@ -21,11 +21,12 @@ class BreadcrumbsTest extends TestCase
     {
         session(['auth_permissoes' => ['correcao.acompanhar', 'resultado.ver', 'turma.ver']]);
         $r = $this->requisicao('resultados.show', '?from=correcao');
-        $r->attributes->set('vinculo_handle', 'contexto-ficticio');
+        app('url')->defaults(['acesso'=>'vinculo-7']);
         $dados = ['prova' => ['id' => 4, 'titulo' => 'Prova fictícia'], 'aluno' => ['turma_id' => 7, 'turma_nome' => 'Turma fictícia']];
         $t = Breadcrumbs::itens($r, $dados);
         $this->assertSame(['Início', 'Correção da prova', 'Resultado'], array_column($t, 'rotulo'));
-        $this->assertStringContainsString('_ctx=contexto-ficticio', $t[1]['url']);
+        $this->assertStringContainsString('/acessos/vinculo-7/', $t[1]['url']);
+        $this->assertStringNotContainsString('_ctx', $t[1]['url']);
         $t = Breadcrumbs::itens($this->requisicao('resultados.show', '?from=https://externo.test'), $dados);
         $this->assertSame('Turma fictícia', $t[1]['rotulo']);
         $this->assertStringNotContainsString('externo.test', json_encode($t));

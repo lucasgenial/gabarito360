@@ -1,6 +1,5 @@
 @php
   $parametros=request()->only(['from','tentativas_pagina','tentativa']);
-  if($ctx=request()->attributes->get('vinculo_handle'))$parametros['_ctx']=$ctx;
   $paginaResultado=route('resultados.show',[$aluno['id'],$prova['id']]);
   $urlHistorico=fn($mudancas=[])=>$paginaResultado.'?'.http_build_query(array_filter(array_replace($parametros,$mudancas),fn($v)=>$v!==null&&$v!==''));
 @endphp

@@ -162,8 +162,7 @@ class GestaoVinculoTest extends TestCase
         $token = null;
         Mail::assertQueued(\App\Mail\EmailModelo::class, function ($m) use (&$token) {
             if ($m->modelo !== 'convite-usuario') return false;
-            parse_str(parse_url($m->dados['link'], PHP_URL_QUERY), $q);
-            $token = $q['token'];
+            $token = $m->dados['codigo'];
             return true;
         });
         return [$resposta->json('data.id'), $token];

@@ -13,8 +13,9 @@ class ClientesWebTest extends TestCase
         Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade','auth_vinculos'=>true,'auth_nome'=>'Operador fictício']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
-        $dados=['token'=>'comercial-token','tipo_contexto'=>$interno ? 'interno' : 'vinculo','perfil'=>$perfil,'permissoes'=>['cliente.ver','cliente.gerir']];
-        return [ContextoWeb::criar($dados),$dados];
+        $dados=['acesso_interno_id'=>1,'vinculo_id'=>5,'token'=>'comercial-token','tipo_contexto'=>$interno ? 'interno' : 'vinculo','perfil'=>$perfil,'permissoes'=>['cliente.ver','cliente.gerir']];
+        ContextoWeb::criar($dados);
+        return [ContextoWeb::referencia($dados),$dados];
     }
     private function pagina(array $linhas): array { return ['data'=>$linhas,'total'=>count($linhas),'current_page'=>1,'last_page'=>1]; }
 
@@ -40,29 +41,29 @@ class ClientesWebTest extends TestCase
                 default=>$this->fail('Consulta inesperada: '.$path),
             };
         });
-        $this->get('/painel?_ctx='.$id)->assertOk()->assertSee('Gerenciar clientes')->assertDontSee('Acessos internos');
-        $this->get('/clientes?_ctx='.$id)->assertOk()->assertSee('Cliente fictício')->assertDontSee('teste@example.test')->assertDontSee('comercial-token');
-        $this->get('/clientes/novo?_ctx='.$id)->assertOk()->assertSee('Referência contratual')->assertSee('Salvar cadastro');
-        $this->post('/clientes',['_ctx'=>$id,'nome'=>'Cliente fictício','tipo'=>'escola','modalidade'=>'teste','situacao'=>'suspenso'])
-            ->assertRedirect(route('clientes.show',8).'?_ctx='.$id)->assertSessionHas('sucesso');
+        $this->get('/acessos/'.$id.'/painel')->assertOk()->assertSee('Gerenciar clientes')->assertDontSee('Acessos internos');
+        $this->get('/acessos/'.$id.'/clientes')->assertOk()->assertSee('Cliente fictício')->assertDontSee('teste@example.test')->assertDontSee('comercial-token');
+        $this->get('/acessos/'.$id.'/clientes/novo')->assertOk()->assertSee('Referência contratual')->assertSee('Salvar cadastro');
+        $this->post('/acessos/'.$id.'/clientes',['nome'=>'Cliente fictício','tipo'=>'escola','modalidade'=>'teste','situacao'=>'suspenso'])
+            ->assertRedirect(route('clientes.show',['acesso'=>$id,'id'=>8]))->assertSessionHas('sucesso');
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['nome']==='Cliente fictício' && !isset($r['situacao']) && !isset($r['_ctx']));
-        $this->get('/clientes/8?_ctx='.$id)->assertOk()->assertSee('teste@example.test')->assertSee('Espaço fictício')->assertSee('Ativo: 2');
-        $this->put('/clientes/8',['_ctx'=>$id,'nome'=>'Cliente editado','modalidade'=>'presenteado'])->assertRedirect()->assertSessionHas('sucesso');
+        $this->get('/acessos/'.$id.'/clientes/8')->assertOk()->assertSee('teste@example.test')->assertSee('Espaço fictício')->assertSee('Ativo: 2');
+        $this->put('/acessos/'.$id.'/clientes/8',['nome'=>'Cliente editado','modalidade'=>'presenteado'])->assertRedirect()->assertSessionHas('sucesso');
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/usuarios') || str_contains($r->url(),'/alunos'));
     }
     public function test_papel_escolar_nao_ganha_acesso_mesmo_com_permissao_injetada(): void
     {
         [$id,$dados]=$this->preparar('dir_escolar',false);
         Http::fake(['*'=>Http::response(['data'=>$dados])]);
-        foreach (['/clientes','/clientes/novo','/clientes/8'] as $url) $this->get($url.'?_ctx='.$id)->assertForbidden();
-        $this->post('/clientes',['_ctx'=>$id])->assertForbidden();
+        foreach (['/clientes','/clientes/novo','/clientes/8'] as $url) $this->get('/acessos/'.$id.$url)->assertForbidden();
+        $this->post('/acessos/'.$id.'/clientes',[])->assertForbidden();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/v1/clientes'));
     }
     public function test_erro_de_validacao_preserva_formulario_sem_expor_resposta_interna(): void
     {
         [$id,$dados]=$this->preparar();
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me') ? Http::response(['data'=>$dados]) : Http::response(['message'=>'SEGREDO-INTERNO'],422));
-        $this->from('/clientes/novo')->post('/clientes',['_ctx'=>$id,'nome'=>'Teste','contato_email'=>'invalido'])->assertRedirect()->assertSessionHas('erro')->assertSessionHasInput('nome','Teste');
+        $this->from('/acessos/'.$id.'/clientes/novo')->post('/acessos/'.$id.'/clientes',['nome'=>'Teste','contato_email'=>'invalido'])->assertRedirect()->assertSessionHas('erro')->assertSessionHasInput('nome','Teste');
         $this->assertStringNotContainsString('SEGREDO-INTERNO',session('erro'));
     }
 }

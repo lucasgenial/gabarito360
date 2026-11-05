@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" />
-@if(\App\Support\ContextoWeb::id())
-<meta name="g360-contexto" content="{{ \App\Support\ContextoWeb::id() }}">
+@if(\App\Support\ContextoWeb::referencia())
+<meta name="g360-acesso" content="{{ \App\Support\ContextoWeb::referencia() }}">
 <script src="{{ asset('js/contexto-aba.js') }}?v={{ @filemtime(public_path('js/contexto-aba.js')) }}"></script>
 @endif
 <link rel="stylesheet" href="{{ asset('css/tabelas.css') }}?v={{ @filemtime(public_path('css/tabelas.css')) }}" />

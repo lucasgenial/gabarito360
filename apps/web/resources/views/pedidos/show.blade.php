@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('title','Atendimento do protocolo')
 @include('pedidos._estilo')
-@section('breadcrumb')<a href="{{ route('pedidos.index',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Pedidos de titulares</a><span class="sep">/</span><span>Atendimento</span>@endsection
+@section('breadcrumb')<a href="{{ route('pedidos.index',[]) }}">Pedidos de titulares</a><span class="sep">/</span><span>Atendimento</span>@endsection
 @section('content')
 @php($p=$pedido)
 @php($id=$p['referencia'])
@@ -25,7 +25,7 @@
 <p>Vincular inicia novo ciclo de conferências. A identificação declarada não é suficiente para autorizar acesso.</p>
 @include('pedidos._confirmacao',['sufixo'=>'sujeito'])<button class="btn btn-outline">Vincular aluno conferido</button></form>
 @endif
-<a href="{{ route('pedidos.exportacoes',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Abrir exportações autorizadas</a>
+<a href="{{ route('pedidos.exportacoes',[]) }}">Abrir exportações autorizadas</a>
 </section>
 @endif
 <section class="card card-pad pedidos-bloco"><h2>Conferências atuais</h2>
