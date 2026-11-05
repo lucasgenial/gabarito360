@@ -34,6 +34,9 @@ class MarcaWebTest extends TestCase
             $this->assertStringContainsString('href="'.$url.'" target="_blank" rel="noopener noreferrer" aria-label="'.$rede.' @gabarito360 (abre em nova aba)"',$html);
             $this->assertStringContainsString($rede.' · @gabarito360',$html);
         }
+        $doc=new \DOMDocument(); @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        $linhas=(new \DOMXPath($doc))->query('//ul[contains(@class,"rodape-redes")]/li[contains(.,"YouTube")]');
+        $this->assertSame(1,$linhas->length,'Canal ativo não deve repetir um placeholder Em breve.');
         Http::assertNothingSent();
     }
 
