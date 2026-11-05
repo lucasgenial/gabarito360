@@ -23,6 +23,8 @@
   $fmt    = fn ($n) => number_format((float) $n, 1, ',', '.');
   $urlPdf = route('resultados.pdf', [$aluno['id'], $prova['id']], false);
   $pedagogico = !empty($dados['pedagogico']);
+  $totalLeituras = array_key_exists('total_leituras',$dados) ? (int)$dados['total_leituras'] : null;
+  $mostrarHistorico = !empty($dados['historico_permitido']) && $totalLeituras !== null && $totalLeituras > 1;
   $urlPdfAluno = $urlPdf.'?modelo=aluno';
   $urlPdfProfessor = $urlPdf.'?modelo=professor';
   $urlImpressao = $pedagogico ? $urlPdfProfessor : $urlPdfAluno;
@@ -56,7 +58,7 @@
 <header class="res-identificacao">
   <h1 class="page-title">{{ $aluno['nome'] }}</h1>
   <p class="page-sub">{{ collect([$aluno['turma_nome'] ? 'Turma ' . $aluno['turma_nome'] : null, $aluno['matricula'] ? 'Matrícula ' . $aluno['matricula'] : null, $lingua])->filter()->implode(' · ') }}</p>
-  @if(!empty($dados['historico_permitido']))<p class="res-tentativas-total" id="resultado-tentativas-total">Carregando leituras…</p>@endif
+  @if($totalLeituras !== null)<p class="res-tentativas-total" id="resultado-tentativas-total">{{ $totalLeituras }} {{ $totalLeituras===1?'leitura registrada':'leituras registradas' }}</p>@endif
 </header>
 <div class="res-barra-acoes no-print" aria-label="Ações do resultado">
   @if(!empty($dados['cartao_foto_url']))<button type="button" class="btn btn-secondary res-acao" id="doc-abrir" aria-label="Cartão resposta" title="Cartão resposta"><x-icone nome="prova"/><span class="res-acao-texto">Cartão resposta</span><span class="res-legenda" aria-hidden="true">Cartão resposta</span></button>@endif
@@ -93,7 +95,7 @@
 <div class="card card-pad res-questoes" @if(empty($dados['cartao_foto_url'])) style="margin-top:16px;" @endif>
   <div class="row-between">
     <h3 style="font-size:17px;">Questão por questão</h3>
-    @unless($pedagogico)<span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>@endunless
+    <span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>
   </div>
   @if($pedagogico)
     @include('resultados._pedagogico')
@@ -121,7 +123,7 @@
 @endif
 </div>
 
-@if(!empty($dados['historico_permitido']))@include('resultados._historico')@endif
+@if($mostrarHistorico)@include('resultados._historico')@endif
 <div style="height:48px" class="no-print"></div>
 @endsection
 

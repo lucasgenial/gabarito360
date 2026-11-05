@@ -5,7 +5,7 @@ Planejamento revisto em 05/11/2026 antes da implementação. Direção prévia c
 | Etapa interna | Entrega | Estado inicial |
 |---|---|---|
 | A | Carregamento regional das fotos, erro e nova tentativa da imagem | Em implementação |
-| B | Uma tabela por leitura: questão, leitura automática, resposta registrada, intervenção humana | Em implementação |
+| B | Itens coloridos com leitura anterior, resposta registrada e intervenção humana; seção somente com mais de uma leitura | Em implementação |
 | C | Análise por questão para educadores, com turma e conjunto das turmas da prova | Em implementação |
 | D | PDF do aluno e PDF pedagógico, impressão do PDF emitido, identificação do emissor | Em implementação |
 | E | Registro imutável de emissão e validação pública de código/arquivo | Em implementação |
@@ -16,6 +16,7 @@ Planejamento revisto em 05/11/2026 antes da implementação. Direção prévia c
 
 - Preservar cartões, arquivos, respostas, notas e registros imutáveis existentes. Não reler fotos antigas nem recalcular notas para preencher lacunas de auditoria.
 - Histórico significa leituras de um cartão na mesma aplicação. Consolidar as revisões preservadas por questão, inclusive quando uma pessoa confirmou a mesma alternativa. Ausência de evidência não prova ausência de intervenção; leitura automática original não preservada será identificada.
+- Revisão do planejamento a pedido do usuário: manter o visual anterior de itens coloridos em questão por questão, incluindo a visão docente; acrescentar os percentuais dentro dos itens, sem tabela. No histórico, mostrar apenas leituras e alterações preservadas, sem percentuais. Exibir a seção somente se houver mais de uma leitura. As cores históricas dependem da referência do gabarito congelada no snapshot; registros antigos sem essa referência ficam neutros, sem comparar com o gabarito atual. A nova referência é gravada apenas em snapshots futuros, sem alterar os fingerprints já utilizados por propostas pendentes.
 - Estudantes mantêm sua apresentação, sem percentuais agregados no payload ou PDF. Educadores com acesso à prova e ao resultado recebem percentuais, exclusivamente agregados, das turmas daquela prova no mesmo espaço. Essa autorização específica não amplia listas nem acesso individual a alunos de outras turmas.
 - Denominador: resultados atuais com nota e cartão lido, uma vez por aluno; ausentes não entram, respostas em branco contam como erro e anuladas não têm percentual. Respeitar gabarito de língua por cartão. Mostrar também o tamanho da amostra. Guardar turma de aplicação quando disponível.
 - Relatório do aluno e relatório do professor têm diagramações distintas. Impressão abre o PDF emitido, por padrão pedagógico para educadores. Lotes permanecem um PDF combinado; cada arquivo final tem um registro próprio.

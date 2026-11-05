@@ -56,6 +56,7 @@ class CartaoResultadoWebTest extends TestCase
     {
         $d = $this->resultado('/foto-autorizada.jpg');
         $d['historico_permitido'] = true;
+        $d['total_leituras'] = 3;
         Http::fake(function ($r) use ($d, $falhar, $detalhe) {
             if (str_contains($r->url(), '/v1/provas/4/tentativas')) {
                 return Http::response(['data' => ['tentativas' => [], 'total' => 3, 'pagina' => 2, 'ultima_pagina' => 3]], $falhar ? 503 : 200);
@@ -90,6 +91,17 @@ class CartaoResultadoWebTest extends TestCase
     {
         $this->fingirResultado(false, ['aluno_id' => 2, 'prova' => ['id' => 4]]);
         $this->getJson('/resultados/1/4/historico?tentativa=9d166f17-9d1e-44b7-9719-28452a5c156b')->assertNotFound();
+    }
+
+    public function test_uma_leitura_nao_exibe_historico_e_docente_mantem_itens_coloridos_sem_tabela(): void
+    {
+        $d=$this->resultado(null);$d['pedagogico']=true;$d['historico_permitido']=true;$d['total_leituras']=1;
+        $d['folha'][0]['turma']=['acertos'=>2,'total'=>3,'percentual'=>66.7];
+        $d['folha'][0]['geral']=['acertos'=>6,'total'=>8,'percentual'=>75];
+        Http::fake(['*'=>Http::response(['data'=>$d])]);
+        $this->get('/resultados/1/4')->assertOk()->assertSee('res-q correta',false)->assertSee('66,7%')->assertSee('75,0%')
+            ->assertDontSee('historico-tentativas')->assertDontSee('<table',false)->assertDontSee('resultado-historico.js');
+        Http::assertNotSent(fn($r)=>str_contains($r->url(),'/tentativas'));
     }
 
     public function test_aplicar_tentativa_integrada_volta_ao_aluno_canonico_sem_redirecionamento_arbitrario(): void

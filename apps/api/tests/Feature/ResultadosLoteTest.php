@@ -187,4 +187,24 @@ class ResultadosLoteTest extends TestCase
         $this->getJson('/api/v1/alunos/1/resultados/1/pdf?modelo=aluno')->assertOk();
         $this->getJson('/api/v1/alunos/1/resultados/1/pdf?modelo=externo')->assertUnprocessable();
     }
+
+    public function test_historico_so_aparece_com_outra_leitura_e_referencia_anterior_nao_muda(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        \Illuminate\Support\Facades\Storage::fake('local');
+        \Illuminate\Support\Facades\Storage::disk('public')->put('ficticio.jpg','foto ficticia');
+        $h = app(\App\Services\Omr\HistoricoCartao::class);
+        $c = \App\Models\Cartao::find(1); $u = Usuario::find(1)->noVinculo(1);
+        $antes = $h->fingerprint($c);
+        $t = $h->registrarAtual($c,$u,extra:['leituras_omr'=>[['numero_questao'=>1,'alternativa'=>'A']]]);
+        $this->assertSame($antes,$h->fingerprint($c));
+        $this->getJson('/api/v1/alunos/1/resultados/1')->assertOk()->assertJsonPath('data.total_leituras',1)->assertJsonPath('data.historico_permitido',false);
+        $outro = \App\Models\Cartao::forceCreate(['prova_id'=>1,'aluno_id'=>1,'espaco_id'=>1,'status'=>'lido']);
+        $h->registrarAtual($outro,$u);
+        $this->getJson('/api/v1/alunos/1/resultados/1')->assertOk()->assertJsonPath('data.total_leituras',2)->assertJsonPath('data.historico_permitido',true);
+        DB::table('gabarito_questoes')->where('gabarito_id',1)->update(['alternativa'=>'B']);
+        $this->assertSame($antes,$h->fingerprint($c));
+        $this->getJson('/api/v1/tentativas/'.$t->id)->assertOk()->assertJsonPath('data.linhas.0.gabarito','A')
+            ->assertJsonPath('data.linhas.0.situacao','correta')->assertJsonPath('data.linhas.0.referencia_preservada',true);
+    }
 }

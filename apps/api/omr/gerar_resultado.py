@@ -244,22 +244,34 @@ def _professor(d, c):
         y -= 4*mm
         c.drawString(m, y, 'Geral: turmas da mesma prova e espaço. Anuladas e amostra vazia: —.')
         y -= 9*mm
-        larguras = [22, 24, 24, 54, 54]
-        titulos = ['Questão', 'Marcou', 'Certa', '% acerto turma', '% acerto geral']
-        xs = [m]
-        for largura in larguras: xs.append(xs[-1]+largura*mm)
-        c.setFillColor(BLUE); c.rect(m, y-2*mm, W-2*m, 8*mm, fill=1, stroke=0)
-        c.setFillColor(white); c.setFont('Raleway-Bold', 8.5)
-        for x, titulo in zip(xs, titulos): c.drawString(x+2*mm, y, titulo)
+        c.setFillColor(GRAY3)
+        c.setFont('Raleway-Regular', 8)
+        c.drawString(m, y, 'Cores: verde = acerto; vermelho = erro; amarelo = branco; cinza = anulada.')
         y -= 8*mm
-        capacidade = max(1, int((y - 58*mm)/(6*mm)) + 1)
-        for q in folha[inicio:inicio+capacidade]:
-            c.setFillColor(HexColor('#f2f5fa') if q['numero_questao'] % 2 else white)
-            c.rect(m, y-2*mm, W-2*m, 6*mm, fill=1, stroke=0)
-            c.setFillColor(BLUE2); c.setFont('Raleway-Regular', 9)
-            vals = [str(q['numero_questao']), q.get('marcada') or 'Em branco', 'Anulada' if q['situacao']=='anulada' else q.get('gabarito') or '—', percentual(q.get('turma')), percentual(q.get('geral'))]
-            for x, txt in zip(xs, vals): c.drawString(x+2*mm, y, txt)
-            y -= 6*mm
+        c.setFillColor(BLUE2); c.setFont('Raleway-Bold', 10)
+        c.drawString(m, y, 'QUESTÃO POR QUESTÃO')
+        y -= 5*mm
+        cols = 3
+        rh = 17*mm
+        cw = (W-2*m-8*mm)/cols
+        linhas = max(1, min(int((y-56*mm)/rh), math.ceil((len(folha)-inicio)/cols)))
+        capacidade = linhas*cols
+        for i, q in enumerate(folha[inicio:inicio+capacidade]):
+            col, row = divmod(i, linhas)
+            x = m+col*(cw+4*mm); yy = y-(row+1)*rh
+            fundo, borda, texto = CORES.get(q['situacao'], CORES['anulada'])
+            c.setFillColor(fundo); c.setStrokeColor(borda); c.setLineWidth(0.6)
+            c.roundRect(x, yy+mm, cw, rh-2*mm, 1.5*mm, fill=1, stroke=1)
+            c.setFillColor(texto); c.setFont('Raleway-SemiBold', 9)
+            marc, gab = q.get('marcada'), q.get('gabarito')
+            if q['situacao']=='anulada': resposta='anulada'
+            elif q['situacao']=='correta': resposta=f'acertou ({marc})'
+            elif q['situacao']=='branco': resposta=f'em branco · certa {gab}'
+            else: resposta=f'marcou {marc} · certa {gab}'
+            c.drawString(x+2.5*mm, yy+11.5*mm, f"{q['numero_questao']:02d} · {resposta}")
+            c.setFont('Raleway-Regular', 8.5)
+            c.drawString(x+2.5*mm, yy+7.5*mm, 'Turma '+percentual(q.get('turma')))
+            c.drawString(x+2.5*mm, yy+3.5*mm, 'Geral '+percentual(q.get('geral')))
         rodape(c, d); c.showPage()
         inicio += capacidade
 
