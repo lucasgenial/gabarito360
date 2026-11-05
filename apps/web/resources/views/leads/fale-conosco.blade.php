@@ -1,4 +1,5 @@
 @extends('layouts.public')
+@section('classe_publica', 'pagina-contato')
 @section('title', 'Fale conosco — Gabarito360')
 @section('description', 'Fale com a equipe do Gabarito360 para conhecer o sistema, conversar sobre contratação ou pedir suporte.')
 
@@ -58,7 +59,7 @@
 
     <div class="field">
       <label for="mensagem">Mensagem</label>
-      <textarea id="mensagem" class="input" name="mensagem" rows="6" required maxlength="2000">{{ old('mensagem') }}</textarea>
+      <textarea id="mensagem" class="input" name="mensagem" rows="4" required maxlength="2000">{{ old('mensagem') }}</textarea>
       @error('mensagem')<span class="field-error">{{ $message }}</span>@enderror
     </div>
 
