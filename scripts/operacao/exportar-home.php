@@ -13,18 +13,11 @@ try {
     $app->instance('request', $request);
     Illuminate\Support\Facades\URL::forceRootUrl($url);
     Illuminate\Support\Facades\URL::forceScheme(parse_url($url, PHP_URL_SCHEME));
-    $resposta = $app->make(App\Services\ApiClient::class)->get('/v1/planos');
-    if (!$resposta->successful() || !is_array($resposta->json('data'))) {
-        throw new RuntimeException('Não substituir conteúdo público por fallback de indisponibilidade.');
-    }
-    $planos = array_values(array_filter($resposta->json('data'),
-        fn ($plano) => ($plano['modo'] ?? null) === 'autoatendimento' && ($plano['ativo'] ?? true)));
-    if (!$planos) throw new RuntimeException('Planos públicos exigem conferência antes da exportação.');
-    $html = view('home.index', compact('planos'))->render();
+    $html = view('home.index')->render();
     $contrato=g360_publicos_contrato($base.'/public');
     $html=g360_publicos_html($html,$contrato,$url);
     // Não congelar formulários, tokens, placeholders Blade ou contexto autenticado.
-    if (preg_match('/<form\b|csrf|name=["\x27]_token|g360-contexto|<x-marca|@csrf/i', $html)
+    if (preg_match('/R\$|<form\b|csrf|name=["\x27]_token|g360-contexto|<x-marca|@csrf/i', $html)
         || !str_contains($html, 'tela-inicio') || !str_contains($html, '</html>')
         || !str_contains($html,$contrato['prefixo'].'css/app.css')
         || !str_contains($html,$contrato['prefixo'].'css/marca.css')) {

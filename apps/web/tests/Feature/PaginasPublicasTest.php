@@ -14,22 +14,35 @@ class PaginasPublicasTest extends TestCase
         Http::preventStrayRequests();
     }
 
-    public function test_planos_usam_os_precos_e_limites_da_api(): void
+    public function test_home_e_planos_apresentam_modalidades_sem_precos_ou_compra(): void
     {
-        Http::fake(['api.test/api/v1/planos' => Http::response(['data' => [[
-            'id' => 15, 'nome' => 'Plano de teste', 'publico' => 'individual', 'modo' => 'autoatendimento',
-            'preco_fixo' => 120, 'preco_por_licenca' => null, 'periodicidade' => 'anual',
-            'licencas_min' => 1, 'licencas_max' => 1, 'limites' => ['turmas' => 7],
+        Http::fake(['*' => Http::response(['data' => [[
+            'id'=>15, 'nome'=>'Plano comercial que não deve aparecer', 'preco_fixo'=>120,
         ]]])]);
-        $this->get('/planos')->assertOk()->assertSee('R$ 120,00')->assertSee('Até 7 turma(s)')
-            ->assertSee(route('leads.index'), false)->assertDontSee('Economia de 16%')->assertDontSee('90 dias');
+        foreach (['/','/planos'] as $pagina) {
+            $this->get($pagina)->assertOk()->assertSee('Modalidades de atendimento')
+                ->assertSee('Professor autônomo')->assertSee('Escolas')
+                ->assertSee('Núcleos e redes')->assertSee('Secretarias')
+                ->assertSee('Disponível no sistema')->assertSee('Previsto no planejamento')
+                ->assertSee('ainda serão desenvolvidos')->assertSee('Editor de enunciados')
+                ->assertSee(route('leads.index'),false)->assertDontSee('R$')
+                ->assertDontSee('Plano comercial que não deve aparecer')->assertDontSee('/checkout')
+                ->assertDontSee('licenças')->assertDontSee('cobrança');
+        }
+        Http::assertNothingSent();
     }
 
-    public function test_indisponibilidade_da_api_nao_inventa_precos(): void
+    public function test_apresentacao_funciona_sem_api_e_ajudas_iniciam_recolhidas(): void
     {
-        Http::fake(['api.test/api/v1/planos' => Http::failedConnection()]);
-        $this->get('/planos')->assertOk()->assertSee('Não foi possível consultar os preços agora.')
-            ->assertDontSee('R$ 9,99');
+        Http::fake(['*' => Http::failedConnection()]);
+        foreach (['/','/planos'] as $pagina) {
+            $resposta=$this->get($pagina)->assertOk()->assertSee('Os planos e as condições de atendimento serão definidos posteriormente.');
+            $dom=new \DOMDocument();@$dom->loadHTML($resposta->getContent());$xpath=new \DOMXPath($dom);
+            $this->assertSame(4,$xpath->query('//article[contains(@class,"plan-card")]')->length);
+            $this->assertSame(0,$xpath->query('//details[@open]')->length);
+            $this->assertSame(2,$xpath->query('//section[@aria-label="Recursos do Gabarito360"]//details')->length);
+        }
+        Http::assertNothingSent();
     }
 
     public function test_layout_publico_tem_descricao_e_marca_leva_ao_inicio(): void
