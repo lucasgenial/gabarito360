@@ -109,11 +109,13 @@
   @include('home._demonstracoes')
 </div></section>
 <section class="lp-secao" aria-labelledby="t-controle"><div class="lp-inner">
-  <h2 id="t-controle">O professor confere. Os registros ajudam a acompanhar.</h2>
+  <h2 id="t-controle">Uma correção mais clara. Um acompanhamento mais próximo.</h2>
+  <p class="lp-sub">Entenda as respostas, acompanhe os resultados e compartilhe uma devolutiva que apoie o trabalho da escola e o diálogo com a família.</p>
   <div class="publico-confianca">
-    <article><h3>Conferência humana</h3><p>Examine o trecho da marcação e o cartão completo para revisar leituras sinalizadas.</p></article>
-    <article><h3>Acesso conforme a função</h3><p>Cada pessoa acompanha o que cabe ao seu contexto e às permissões recebidas.</p></article>
-    <article><h3>Leituras e revisões registradas</h3><p>Quando existe mais de uma leitura, o histórico reúne os registros preservados e as intervenções humanas.</p></article>
+    <article><h3>Conferência que dá contexto</h3><p>Examine leituras sinalizadas, registre a revisão e consulte os registros preservados quando precisar conferir o resultado.</p></article>
+    <article><h3>Um olhar para o aluno e para a turma</h3><p>Acertos, erros e percentuais por questão ajudam a perceber onde o aluno e a turma precisam de atenção.</p></article>
+    <article><h3>Coordenação e gestão na mesma conversa</h3><p>Professores e equipes escolares acompanham as avaliações dentro de suas permissões e usam os resultados para combinar os próximos passos.</p></article>
+    <article><h3>Famílias com uma devolutiva compreensível</h3><p>Os relatórios compartilhados pela escola ou pelo professor ajudam pais e responsáveis a entender os resultados dos filhos e participar da conversa sobre a aprendizagem.</p></article>
   </div>
 </div></section>
 <section class="lp-secao lp-alternada" id="planos" aria-labelledby="t-planos">

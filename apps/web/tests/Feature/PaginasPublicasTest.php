@@ -88,6 +88,18 @@ class PaginasPublicasTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_beneficios_da_correcao_abrangem_educadores_e_familias_sem_promessa_de_portal_novo(): void
+    {
+        $resposta=$this->get('/')->assertOk()->assertSee('Uma correção mais clara. Um acompanhamento mais próximo.')
+            ->assertSee('registros preservados')->assertSee('Coordenação e gestão')
+            ->assertSee('relatórios compartilhados pela escola ou pelo professor')
+            ->assertSee('pais e responsáveis')->assertDontSee('portal dos responsáveis')
+            ->assertDontSee('notificações automáticas')->assertDontSee('certificação de correção');
+        $dom=new \DOMDocument();@$dom->loadHTML($resposta->getContent());$xpath=new \DOMXPath($dom);
+        $this->assertSame(4,$xpath->query('//section[@aria-labelledby="t-controle"]//article/h3')->length);
+        Http::assertNothingSent();
+    }
+
     public function test_layout_publico_tem_descricao_e_marca_leva_ao_inicio(): void
     {
         Http::fake(['api.test/api/v1/planos' => Http::response(['data' => []])]);

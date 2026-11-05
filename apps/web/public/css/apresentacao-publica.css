@@ -51,7 +51,9 @@
 .publico-demo-nota strong {font-size:28px;}
 .publico-demo-relatorio {display:grid;gap:12px;}
 .publico-demo-relatorio small {color:var(--fg-2);}
-.publico-confianca {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;margin-top:32px;}
+.publico-confianca {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 40px;margin-top:28px;}
+.publico-confianca article {padding-top:18px;border-top:2px solid var(--border);min-width:0;}
+.publico-confianca p {max-width:60ch;}
 .publico-confianca h3 {font-size:18px;margin-bottom:10px;}
 .publico-apresentacao .plan-card .plan-name {font-size:19px;}
 .publico-apresentacao .plan-card .plan-features {margin-top:4px;}
