@@ -6,7 +6,7 @@
 <style>
   .auth-wrap { min-height: calc(100vh / var(--escala)); display: grid; grid-template-columns: 1.1fr 1fr; }
   .auth-aside {
-    background: linear-gradient(160deg, #1d4f9e 0%, #153b78 100%);
+    background: var(--g360-access-gradient);
     color: #fff; padding: 56px; display: flex; flex-direction: column;
   }
   .auth-aside .brand .logo { background: #fff; color: var(--accent); }
@@ -25,7 +25,7 @@
 @section('content')
 <div class="auth-wrap">
   <aside class="auth-aside">
-    <a class="brand" href="{{ route('home') }}"><span class="logo">G360</span> Gabarito360</a>
+    <a class="brand" href="{{ route('home') }}"><x-marca theme="dark" /></a>
     <div class="aside-body">
       <h1>Recupere o acesso à sua conta.</h1>
       <p>Informe seu e-mail institucional e enviaremos um link para redefinir sua senha.</p>
@@ -34,6 +34,7 @@
 
   <main class="auth-main">
     <div class="auth-card">
+      <a class="brand auth-marca-mobile" href="{{ route('home') }}"><x-marca /></a>
       <div style="margin-bottom:24px;">
         <h2 style="font-size:26px;margin-top:4px;">Recuperar senha</h2>
         <p style="color:var(--muted);margin-top:8px;font-size:14px;">

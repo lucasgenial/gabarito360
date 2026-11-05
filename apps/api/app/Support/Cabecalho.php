@@ -12,6 +12,21 @@ use Illuminate\Support\Facades\Storage;
  */
 class Cabecalho
 {
+    /** Adaptador privado de impressão: não altera o contrato público dos relatórios. */
+    public static function paraPdf(array $cab, bool $autonomo = false): array
+    {
+        $escola = !$autonomo && !empty($cab['escola_id'])
+            ? DB::table('escolas')->where('id', $cab['escola_id'])->value('logo_path') : null;
+        $rede = !$autonomo && !empty($cab['rede_id'])
+            ? DB::table('redes')->where('id', $cab['rede_id'])->value('logo_path') : null;
+        return [
+            'identidade' => $autonomo ? 'autonomo' : (!empty($cab['rede_id']) ? 'rede' : 'escola'),
+            'rede' => $autonomo ? null : ($cab['rede'] ?? null),
+            'escola' => $cab['nome'] ?? '', 'detalhe' => $cab['detalhe'] ?? null,
+            'logo' => self::logoPath($escola), 'logo_ente' => self::logoPath($rede),
+        ];
+    }
+
     public static function contexto(\App\Models\Usuario $ator, ?int $escola): array
     {
         return EspacoPessoal::doAtor($ator)

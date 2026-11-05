@@ -3,21 +3,26 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="description" content="Gabarito360 lê cartões-resposta pela câmera do celular, calcula as notas e monta os relatórios por aluno, turma e escola."/>
-<title>Gabarito360: correção de provas pelo celular</title>
+<meta name="description" content="{{ config('apresentacao.descricao') }}"/>
+<title>{{ config('apresentacao.titulo') }}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}"/>
+@include('layouts._marca-head')
+<link rel="stylesheet" href="{{ asset('css/apresentacao-publica.css') }}?v={{ filemtime(public_path('css/apresentacao-publica.css')) }}">
 </head>
-<body class="area-publica tela-inicio">
+<body class="area-publica tela-inicio publico-apresentacao">
 
+<a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 <x-menu-publico />
+<main id="conteudo">
 
 <section class="lp-abertura" aria-labelledby="titulo">
   <div class="lp-inner lp-abertura-grade">
     <div class="lp-texto">
+      <p class="publico-prelancamento">Conheça o Gabarito360 em pré-lançamento</p>
       <h1 id="titulo">Da prova impressa à nota da turma, pelo celular.</h1>
-      <p>Imprima o cartão-resposta, aplique a prova e fotografe cada cartão. O Gabarito360 lê as marcações, calcula as notas e monta os relatórios.</p>
+      <p>Uma plataforma de avaliação para professores e instituições: organize gabaritos e cartões, confira as leituras e transforme os resultados em acompanhamento da aprendizagem.</p>
       <div class="lp-acoes">
         <a href="{{ route('leads.index') }}" class="btn btn-primary">Falar com a gente</a>
         <a href="#como-funciona" class="btn btn-secondary">Ver como funciona</a>
@@ -30,12 +35,15 @@
         @endforeach
       </div>
       <div class="lp-resultado">
-        <div class="lp-resultado-topo"><b>3º A</b><span>42 de 54 cartões</span></div>
+        <div class="lp-resultado-topo"><b>3º A</b><span>42 de 54 alunos com resultado</span></div>
         <div class="progress-track"><div style="width:78%"></div></div>
         <table>
+          <caption>Resultados de exemplo</caption>
+          <thead><tr><th scope="col">Aluno</th><th scope="col">Nota</th></tr></thead><tbody>
           <tr><td>Aluno de exemplo 1</td><td>8,5</td></tr>
           <tr><td>Aluno de exemplo 2</td><td>6,0</td></tr>
           <tr><td>Aluno de exemplo 3</td><td>7,5</td></tr>
+          </tbody>
         </table>
         <p class="lp-revisar">5 leituras para revisar</p>
       </div>
@@ -44,116 +52,90 @@
   </div>
 </section>
 
-<section class="lp-secao" id="como-funciona" aria-labelledby="t-como">
+<section class="lp-secao" aria-labelledby="t-rotina">
   <div class="lp-inner">
-    <h2 id="t-como">Como funciona</h2>
-    <p class="lp-sub">Você usa a impressora da escola e o celular que já tem. Nenhum scanner é necessário.</p>
+    <h2 id="t-rotina">Organização para cada momento da avaliação</h2>
+    <div class="publico-rotina">
+      <article><h3>Antes da aplicação</h3><p>Gabarito, turmas e cartões reunidos para preparar a avaliação com clareza.</p></article>
+      <article><h3>Na hora de corrigir</h3><p>Leia as marcações por foto e concentre sua atenção nas leituras que precisam de conferência.</p></article>
+      <article><h3>Na devolutiva</h3><p>Entenda os resultados por questão e organize a conversa sobre o que precisa ser retomado.</p></article>
+    </div>
+  </div>
+</section>
+<section class="lp-secao lp-alternada" id="como-funciona" aria-labelledby="t-como">
+  <div class="lp-inner">
+    <h2 id="t-como">Como funciona hoje</h2>
+    <p class="lp-sub">Use os cartões gerados pelo sistema, a impressora e o celular para acompanhar a aplicação.</p>
     <ol class="lp-passos">
-      <li><h3>Prepare a prova</h3><p>Cadastre o gabarito e gere os cartões-resposta em PDF, um para cada aluno.</p></li>
-      <li><h3>Aplique no papel</h3><p>Os alunos marcam o cartão impresso, como em qualquer prova.</p></li>
-      <li><h3>Fotografe os cartões</h3><p>Aponte a câmera para cada cartão. O sistema identifica o aluno e lê as respostas.</p></li>
-      <li><h3>Confira as dúvidas</h3><p>Quando uma marcação fica incerta, você vê a linha do cartão e decide a resposta.</p></li>
+      <li><h3>Organize o gabarito</h3><p>Cadastre a avaliação, as turmas e suas respostas oficiais.</p></li>
+      <li><h3>Imprima e aplique</h3><p>Gere os cartões identificados para os alunos marcarem no papel.</p></li>
+      <li><h3>Envie as fotos</h3><p>Use a câmera ou envie a imagem de cada cartão completo e nítido.</p></li>
+      <li><h3>Confira as leituras</h3><p>Examine as marcações sinalizadas e registre a resposta conferida.</p></li>
+      <li><h3>Acompanhe os resultados</h3><p>Consulte notas, questões e relatórios para orientar a devolutiva.</p></li>
     </ol>
   </div>
 </section>
-
-{{-- Pesquisas: só dados publicados, com fonte. Estudos de terceiros, não medições do Gabarito360 --}}
+{{-- Estudos de terceiros: resultados contextualizados, não medições do Gabarito360. --}}
 <section class="lp-secao lp-alternada" aria-labelledby="t-pesquisas">
   <div class="lp-inner">
     <h2 id="t-pesquisas">O que as pesquisas dizem sobre corrigir e devolver resultados</h2>
+    <p class="lp-sub">Pesquisas de terceiros sobre a rotina docente e a devolutiva. Estes resultados não são medições do Gabarito360.</p>
     <div class="numbers-grid">
       <div class="number-card">
-        <div class="number-val">6,1<small style="font-size:1.5rem"> h</small></div>
-        <div class="number-label">por semana é o tempo que professores brasileiros em tempo integral relatam gastar corrigindo trabalhos de alunos; a média da OCDE é 4,6 h.</div>
-        <a class="number-fonte" href="https://www.oecd.org/en/publications/results-from-talis-2024-country-notes_e127f9e2-en/brazil_1e93d3b5-en.html" target="_blank" rel="noopener">OCDE, TALIS 2024</a>
+        <div class="number-val">6,1<small> h</small></div>
+        <div class="number-label">por semana é o tempo que professores brasileiros em tempo integral, dos anos finais do ensino fundamental, relatam dedicar à correção de trabalhos. A média da OCDE é 4,6 h.</div>
+        <a class="number-fonte" href="https://www.oecd.org/en/publications/results-from-talis-2024-country-notes_e127f9e2-en/brazil_1e93d3b5-en.html" target="_blank" rel="noopener noreferrer">OCDE, TALIS 2024</a>
       </div>
       <div class="number-card">
-        <div class="number-val">15<small style="font-size:1.5rem">/min</small></div>
-        <div class="number-label">provas corrigidas com a câmera do celular em um estudo com 135 alunos, usando outro aplicativo. Os autores relatam menos erros e menos tempo de correção.</div>
-        <a class="number-fonte" href="https://investigacionuch.ceu.es/documentos/6761cd249431f44fab674f3d" target="_blank" rel="noopener">Castillo García et al., In-RED 2019</a>
+        <div class="number-val">15<small>/min</small></div>
+        <div class="number-label">provas corrigidas com o ZipGrade, outro aplicativo, segundo um estudo com 135 alunos. É um resultado desse estudo, não um teste de velocidade do Gabarito360.</div>
+        <a class="number-fonte" href="https://investigacionuch.ceu.es/documentos/6761cd249431f44fab674f3d" target="_blank" rel="noopener noreferrer">Castillo García et al., In-RED 2019</a>
       </div>
       <div class="number-card">
         <div class="number-val">435</div>
-        <div class="number-label">estudos com mais de 61 mil participantes mostram efeito médio do feedback na aprendizagem (d = 0,48), maior quanto mais informação ele traz.</div>
-        <a class="number-fonte" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6987456" target="_blank" rel="noopener">Wisniewski, Zierer e Hattie, 2020</a>
+        <div class="number-label">estudos, com mais de 61 mil participantes, em uma meta-análise sobre feedback na aprendizagem. O efeito médio foi d = 0,48 após excluir valores extremos, com variação entre formas de devolutiva.</div>
+        <a class="number-fonte" href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.03087/full" target="_blank" rel="noopener noreferrer">Wisniewski, Zierer e Hattie, 2020</a>
       </div>
     </div>
   </div>
 </section>
-
-<section class="lp-secao" id="recursos" aria-labelledby="t-recursos">
-  <div class="lp-inner">
-    <h2 id="t-recursos">Recursos</h2>
-    <div class="lp-recursos">
-      <div><h3>Leitura pela câmera</h3><p>O celular lê o cartão e o QR identifica a prova e o aluno.</p></li></div>
-      <div><h3>Relatórios</h3><p>Resultados por aluno, turma, escola, núcleo e rede.</p></div>
-      <div><h3>Impressão e envio</h3><p>Resultados em A4 e PDF, prontos para imprimir ou enviar pelo WhatsApp.</p></div>
-      <div><h3>Acesso por perfil</h3><p>Professor, coordenação, direção e núcleo veem o que cabe a cada função.</p></div>
-    </div>
+<section class="lp-secao" id="recursos" aria-labelledby="t-recursos"><div class="lp-inner">
+  <h2 id="t-recursos">Uma visão completa da avaliação</h2>
+  @include('home._recursos')
+</div></section>
+<section class="lp-secao lp-alternada" id="demonstracoes" aria-labelledby="t-demos"><div class="lp-inner">
+  <h2 id="t-demos">Veja o que o professor pode conferir</h2>
+  <p class="lp-sub">Exemplos da rotina de uso, com dados fictícios. Estas apresentações não alteram respostas ou geram documentos.</p>
+  @include('home._demonstracoes')
+</div></section>
+<section class="lp-secao" aria-labelledby="t-controle"><div class="lp-inner">
+  <h2 id="t-controle">Uma correção mais clara. Um acompanhamento mais próximo.</h2>
+  <p class="lp-sub">Entenda as respostas, acompanhe os resultados e compartilhe uma devolutiva que apoie o trabalho da escola e o diálogo com a família.</p>
+  <div class="publico-confianca">
+    <article><h3>Conferência que dá contexto</h3><p>Examine leituras sinalizadas, registre a revisão e consulte os registros preservados quando precisar conferir o resultado.</p></article>
+    <article><h3>Um olhar para o aluno e para a turma</h3><p>Acertos, erros e percentuais por questão ajudam a perceber onde o aluno e a turma precisam de atenção.</p></article>
+    <article><h3>Coordenação e gestão na mesma conversa</h3><p>Professores e equipes escolares acompanham as avaliações dentro de suas permissões e usam os resultados para combinar os próximos passos.</p></article>
+    <article><h3>Famílias com uma devolutiva compreensível</h3><p>Os relatórios compartilhados pela escola ou pelo professor ajudam pais e responsáveis a entender os resultados dos filhos e participar da conversa sobre a aprendizagem.</p></article>
   </div>
-</section>
-
+</div></section>
 <section class="lp-secao lp-alternada" id="planos" aria-labelledby="t-planos">
   <div class="lp-inner">
-    <h2 id="t-planos">Planos</h2>
-    <p class="lp-sub">Fale com a gente para escolher o plano e começar.</p>
-    <div class="plans-grid">
-      @foreach($planos as $plano)
-        <div class="plan-card">
-          <div class="plan-name">{{ $plano['publico'] === 'individual' ? 'Individual' : 'Institucional' }}</div>
-          <div class="plan-price">
-            @if($plano['preco_fixo'] !== null)
-              R$ {{ number_format($plano['preco_fixo'], 2, ',', '.') }}
-              <small>/{{ $plano['periodicidade'] === 'anual' ? 'ano' : 'mês' }}</small>
-            @else
-              R$ {{ number_format($plano['preco_por_licenca'], 2, ',', '.') }}
-              <small>/licença/mês</small>
-            @endif
-          </div>
-          <div class="plan-desc">
-            @if($plano['periodicidade'] === 'anual')
-              Equivale a R$ {{ number_format($plano['preco_fixo'] / 12, 2, ',', '.') }}/mês
-            @elseif($plano['preco_por_licenca'] !== null)
-              De {{ $plano['licencas_min'] }} a {{ $plano['licencas_max'] }} licenças (professores/usuários)
-            @else
-              Cobrado por mês
-            @endif
-          </div>
-          <ul class="plan-features">
-            @if($plano['publico'] === 'individual')
-              <li>1 escola · até 20 turmas</li>
-              <li>Leitura pela câmera</li>
-              <li>Relatórios completos</li>
-              <li>Suporte por e-mail</li>
-            @else
-              <li>Até 5 escolas · 100 turmas</li>
-              <li>Leitura pela câmera</li>
-              <li>Relatórios e dashboards</li>
-              <li>Gestão de equipe</li>
-            @endif
-          </ul>
-          <div class="plan-cta">
-            <a href="{{ route('leads.index') }}">Falar com a gente</a>
-          </div>
-        </div>
-      @endforeach
-
-      <div class="plan-card">
-        <div class="plan-name">Rede ou secretaria</div>
-        <div class="plan-price">Sob consulta</div>
-        <div class="plan-desc">Para redes acima de 10 licenças e secretarias de educação</div>
-        <ul class="plan-features">
-          <li>Várias escolas e núcleos</li>
-          <li>Leitura pela câmera</li>
-          <li>Relatórios consolidados</li>
-        </ul>
-        <div class="plan-cta"><a href="{{ route('leads.index') }}">Falar com a gente</a></div>
-      </div>
-    </div>
+    <h2 id="t-planos">Modalidades de atendimento</h2>
+    @include('planos._apresentacao', ['heading'=>'h3'])
   </div>
 </section>
 
+<section class="lp-secao" id="duvidas" aria-labelledby="t-duvidas"><div class="lp-inner">
+  <h2 id="t-duvidas">Dúvidas frequentes</h2>
+  @include('home._faq')
+</div></section>
+<section class="lp-secao lp-alternada"><div class="lp-inner publico-chamada">
+  <div><h2>Leve mais clareza à próxima avaliação.</h2><p>Conheça o Gabarito360 e converse com a gente sobre a rotina da sua escola ou do seu trabalho como professor.</p></div>
+  <a class="btn btn-primary" href="{{ route('leads.index') }}">Falar com a gente</a>
+</div></section>
+</main>
 <x-rodape-publico />
+<script src="{{ asset('js/apresentacao-publica.js') }}?v={{ filemtime(public_path('js/apresentacao-publica.js')) }}" defer></script>
 
 </body>
 </html>

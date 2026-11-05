@@ -1,0 +1,115 @@
+/* Apresentação comercial: extensão dos tokens e superfícies do produto. */
+.publico-apresentacao { color:var(--fg); }
+.publico-apresentacao main { min-width:0; }
+.publico-apresentacao section[id],.publico-apresentacao h2[id] { scroll-margin-top:90px; }
+.publico-apresentacao .lp-sub { max-width:72ch; }
+.publico-prelancamento { font-size:13px!important; font-weight:600; letter-spacing:.02em; }
+.publico-em-breve { display:inline-block; width:max-content; max-width:100%; padding:3px 8px; border:1px solid var(--border); border-radius:6px; background:var(--surface-2); color:var(--fg-2); font-size:12px; font-weight:700; line-height:1.4; white-space:nowrap; }
+.publico-apresentacao .lp-passos { grid-template-columns:repeat(5,minmax(0,1fr)); }
+.publico-rotina { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:32px; margin-top:32px; }
+.publico-rotina article { border-top:2px solid var(--accent); padding-top:16px; }
+.publico-rotina h3 { font-size:18px; margin-bottom:8px; }
+.publico-rotina p,.publico-momento p,.publico-confianca p { color:var(--fg-2); }
+.publico-momentos {display:grid;gap:24px;margin-top:28px;}
+.publico-momento {padding:24px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);min-width:0;}
+.publico-momento-cabecalho {display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 24px;margin-bottom:20px;}
+.publico-momento-cabecalho h3 {font-size:23px;font-weight:750;}
+.publico-momento-cabecalho p {font-size:14px;}
+.publico-momento-lista {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:20px;}
+.publico-recurso {min-width:0;display:grid;gap:8px;align-content:start;}
+.publico-recurso h4 {font-size:17px;font-weight:700;line-height:1.35;}
+.publico-recurso p {font-size:14px;line-height:1.6;}
+.publico-recurso-titulo {display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 10px;}
+.publico-recurso-atual {display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:16px 24px;padding:16px;background:var(--surface-2);border-radius:8px;}
+.publico-recurso-estado {display:block;color:var(--accent);font-size:12px;font-weight:700;margin-bottom:5px;}
+.publico-recurso-futuro {border-top:1px solid var(--border-soft);padding-top:16px;}
+.publico-recurso .publico-ajuda {margin-top:0;}
+.publico-recursos-legenda { margin-top:16px; color:var(--fg-2); font-size:14px; }
+.publico-demos { display:grid; gap:48px; margin-top:32px; }
+.publico-demo { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:40px; align-items:center; }
+.publico-demo:nth-child(even) .publico-demo-texto { order:-1; }
+.publico-demo h3 { font-size:23px; margin-bottom:12px; }
+.publico-demo-texto p { color:var(--fg-2); max-width:55ch; }
+.publico-demo figure { margin:0; min-width:0; }
+.publico-demo figcaption { font-size:12px; color:var(--muted); margin-top:10px; }
+.publico-demo-painel { padding:24px; border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); min-width:0; }
+.publico-demo-barra { display:flex; gap:12px; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-soft); padding-bottom:12px; margin-bottom:16px; }
+.publico-demo-linha { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; padding-block:10px; border-bottom:1px solid var(--border-soft); font-size:14px; }
+.publico-demo .lp-cartao { width:100%; padding:0; border:0; background:none; gap:10px; }
+.publico-demo .lp-linha { grid-template-columns:26px repeat(5,28px); justify-content:center; }
+.publico-demo .lp-linha span { width:28px;height:28px; }
+.publico-demo-possibilidades { display:flex; gap:8px; margin-top:16px; }
+.publico-demo-possibilidades span { display:grid;place-items:center;min-width:44px;min-height:44px;border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-weight:700; }
+.publico-demo-possibilidades .selecionada { background:var(--accent);color:white; }
+.publico-demo-estado { color:var(--fg-2);font-size:13px;margin-top:12px; }
+.publico-demo-questao { border:1px solid;border-radius:8px;padding:12px;margin-bottom:8px;font-size:14px; }
+.publico-demo-questao.correta { background:#eaf7ed;border-color:#a6d7af;color:#18552a; }
+.publico-demo-questao.incorreta { background:#fff0ed;border-color:#efbeb4;color:#8d2c20; }
+.publico-demo-questao.branco { background:#fff7df;border-color:#e5d092;color:#6f5100; }
+.publico-demo-indicadores { display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12px;margin-top:6px; }
+.publico-demo-nota { display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px;background:var(--surface-2);border-radius:8px;margin-block:16px; }
+.publico-demo-nota strong {font-size:28px;}
+.publico-demo-relatorio {display:grid;gap:12px;}
+.publico-demo-relatorio small {color:var(--fg-2);}
+.publico-confianca {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 40px;margin-top:28px;}
+.publico-confianca article {padding-top:18px;border-top:2px solid var(--border);min-width:0;}
+.publico-confianca p {max-width:60ch;}
+.publico-confianca h3 {font-size:18px;margin-bottom:10px;}
+.publico-apresentacao .plan-card .plan-name {font-size:19px;}
+.publico-apresentacao .plan-card .plan-features {margin-top:4px;}
+.publico-apresentacao .plan-card .publico-em-breve {margin-top:6px;}
+.publico-modalidades-intro {max-width:70ch;color:var(--fg-2);margin-top:12px;}
+.publico-apresentacao .publico-faq {margin-top:0;}
+.publico-apresentacao .publico-faq summary {min-height:44px;display:list-item;padding-block:10px;}
+.publico-apresentacao .publico-faq details {padding-block:6px;}
+.publico-apresentacao .publico-faq p {margin-bottom:16px;}
+.publico-chamada {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;}
+.publico-chamada h2 {margin-bottom:12px;}
+.publico-chamada p {color:var(--fg-2);max-width:60ch;}
+.lp-menu-movel {display:none;}
+@media(max-width:1023px) {
+ .lp-nav .lp-links {display:none;}
+ .lp-nav-inner {gap:8px;}
+ .lp-menu-movel {display:block;margin-left:auto;}
+ .lp-menu-movel summary {min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--fg);font-size:14px;font-weight:600;list-style:none;}
+ .lp-menu-movel summary::-webkit-details-marker {display:none;}
+ .lp-menu-movel summary::after {content:'+';font-size:20px;}
+ .lp-menu-movel[open] summary::after {content:'−';}
+ .lp-menu-movel .lp-menu-links {position:absolute;left:0;right:0;top:100%;padding:12px 20px 20px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:0 8px 12px rgb(0 21 52 / .08);display:grid;}
+ .lp-menu-movel .lp-menu-links a {min-height:44px;display:flex;align-items:center;padding-block:10px;border-bottom:1px solid var(--border-soft);}
+ .lp-nav .lp-acoes {margin-left:0;}
+ .lp-nav .lp-acoes .btn-primary {display:none;}
+ .publico-apresentacao .lp-passos {grid-template-columns:repeat(2,minmax(0,1fr));}
+
+ .publico-demo {gap:24px;}
+}
+@media(max-width:767px) {
+ .publico-apresentacao .lp-passos,.publico-rotina,.publico-momento-lista,.publico-confianca,.publico-demo {grid-template-columns:minmax(0,1fr);}
+ .publico-demo:nth-child(even) .publico-demo-texto {order:initial;}
+ .publico-demo-texto {order:-1;}
+ .publico-demo-painel {padding:16px;}
+ .publico-momento {padding:18px 16px;}
+ .publico-momento-cabecalho {display:grid;gap:4px;margin-bottom:16px;}
+ .publico-recurso-atual {grid-template-columns:minmax(0,1fr);gap:8px;padding:14px;}
+ .publico-momento-lista {gap:16px;margin-top:16px;}
+ .publico-recurso-titulo {align-items:flex-start;}
+ .publico-demos {gap:40px;}
+ .publico-rotina,.publico-confianca {gap:24px;}
+ .publico-apresentacao .plans-grid {grid-template-columns:minmax(0,1fr);}
+ .publico-apresentacao .lp-secao {padding-block:40px;}
+}
+@media(prefers-reduced-motion:reduce) {.publico-apresentacao * {scroll-behavior:auto!important;}}
+
+.publico-ajuda {margin-top:12px;}
+.publico-ajuda summary {min-height:44px;padding-block:10px;cursor:pointer;color:var(--accent);font-weight:600;}
+.publico-ajuda p {font-size:14px;}
+.publico-apresentacao a:focus-visible,.publico-apresentacao summary:focus-visible {outline:3px solid var(--accent);outline-offset:3px;}
+
+/* Contato: altura física coerente com o zoom já utilizado no sistema. */
+.pagina-publica.pagina-contato {min-height:calc(100dvh / var(--escala,1));}
+.pagina-contato .publico-conteudo {padding-block:20px;}
+.pagina-contato .fale-conosco {margin:12px auto;}
+.pagina-contato .fale-sub {margin-bottom:16px;}
+.pagina-contato .fale-conosco .field {margin-bottom:12px;}
+.pagina-contato .fale-conosco .input,.pagina-contato .fale-conosco .select,.pagina-contato .fale-conosco .btn {min-height:44px;}
+.pagina-contato #mensagem {resize:vertical;}

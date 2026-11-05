@@ -36,11 +36,8 @@ class GeradorCartoes
             ->all();
 
         $pessoal = $ator && \App\Support\EspacoPessoal::doAtor($ator);
-        $escola = $pessoal ? null : DB::table('escolas')->where('id', $prova->escola_id)->first();
-        $rede   = $escola ? DB::table('nucleos')
-            ->join('redes', 'nucleos.rede_id', '=', 'redes.id')
-            ->where('nucleos.id', $escola->nucleo_id)
-            ->value('redes.nome') : null;
+        $cab = $ator ? \App\Support\Cabecalho::contexto($ator, $prova->escola_id)
+            : \App\Support\Cabecalho::escola($prova->escola_id);
 
         $saida = tempnam(sys_get_temp_dir(), 'g360_e'.($prova->espaco_id ?? 0).'_cartoes_');
         @unlink($saida);
@@ -48,8 +45,6 @@ class GeradorCartoes
 
         $dados = [
             'saida'            => $saida,
-            'rede'             => $rede,
-            'escola'           => $pessoal ? \App\Support\ContextoVinculo::resolver($ator)->espaco->nome : ($escola->nome ?? ''),
             'titulo'           => $prova->titulo,
             'disciplina'       => $prova->disciplina,
             'data'             => $prova->data_aplicacao?->format('d/m/Y'),
@@ -59,7 +54,7 @@ class GeradorCartoes
             'opcao_lingua'     => (bool) $prova->opcao_lingua,
             'brancos'          => $brancos,
             'alunos'           => $alunos,
-        ];
+        ] + \App\Support\Cabecalho::paraPdf($cab, (bool) $pessoal);
 
         $r = Process::path(config('omr.scripts'))
             ->timeout(max(120, config('omr.timeout')))
