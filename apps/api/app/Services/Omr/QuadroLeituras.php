@@ -13,13 +13,18 @@ class QuadroLeituras
             $raw = $original['respostas'] ?? [];
         }
         $registradas = $original['respostas'] ?? [];
+        $referenciasLeitura = array_column($original['referencia_gabarito']['questoes'] ?? [], null, 'numero_questao');
+        $referencias = $referenciasLeitura;
         $ids = []; $revisoes = []; $numeros = [];
         foreach (array_merge([$original], array_column($eventos, 'snapshot')) as $snap) {
             foreach ($snap['respostas'] ?? [] as $r) {
                 $numeros[(int) $r['numero_questao']] = true;
                 if (isset($r['id'])) $ids[$r['id']] = (int) $r['numero_questao'];
             }
-            if (!empty($snap['respostas'])) $registradas = $snap['respostas'];
+            if (!empty($snap['respostas'])) {
+                $registradas = $snap['respostas'];
+                if (isset($snap['referencia_gabarito'])) $referencias = array_column($snap['referencia_gabarito']['questoes'] ?? [], null, 'numero_questao');
+            }
         }
         foreach ($original['revisoes'] ?? [] as $r) $revisoes[$r['id']] = [$r, null];
         foreach ($eventos as $e) {
@@ -41,14 +46,15 @@ class QuadroLeituras
             $obs[$n][] = 'Revisão humana por '.$nome.($quando ? ' em '.$quando : '').(!empty($e['motivo']) ? '. '.$e['motivo'] : '');
         }
         ksort($numeros);
-        $referencias = array_column($original['referencia_gabarito']['questoes'] ?? [], null, 'numero_questao');
         return array_map(fn ($n) => [
             'numero_questao' => $n,
             'leitura' => $automaticas[$n] ?? ($raw === null ? 'Leitura automática original não preservada' : 'Sem leitura automática'),
             'resposta' => $finais[$n] ?? 'Ainda não aplicada',
-            'observacao' => isset($obs[$n]) ? implode(' | ', $obs[$n]) : 'Sem registro preservado de intervenção',
+            'observacao' => (isset($obs[$n]) ? implode(' | ', $obs[$n]) : 'Sem registro preservado de intervenção')
+                .(isset($referenciasLeitura[$n], $referencias[$n]) && $referenciasLeitura[$n] !== $referencias[$n]
+                    ? '. O gabarito mudou entre os registros: leitura '.($referenciasLeitura[$n]['anulada'] ? 'anulada' : $referenciasLeitura[$n]['esperada']).'; resposta registrada '.($referencias[$n]['anulada'] ? 'anulada' : $referencias[$n]['esperada']).'.' : ''),
             'situacao' => $this->situacao($finalPorQuestao[$n] ?? null, $referencias[$n] ?? null),
-            'leitura_situacao' => $this->situacao($rawPorQuestao[$n] ?? null, $referencias[$n] ?? null),
+            'leitura_situacao' => $this->situacao($rawPorQuestao[$n] ?? null, $referenciasLeitura[$n] ?? null),
             'referencia_preservada' => isset($referencias[$n]),
             'gabarito' => $referencias[$n]['esperada'] ?? null,
             'modificada' => isset($rawPorQuestao[$n], $finalPorQuestao[$n]) &&

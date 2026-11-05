@@ -23,6 +23,7 @@
   $fmt    = fn ($n) => number_format((float) $n, 1, ',', '.');
   $urlPdf = route('resultados.pdf', [$aluno['id'], $prova['id']], false);
   $pedagogico = !empty($dados['pedagogico']);
+  $visualizacaoModelo2 = $pedagogico && app()->environment(['local','staging']) && request('visualizacao') === 'modelo2';
   $totalLeituras = array_key_exists('total_leituras',$dados) ? (int)$dados['total_leituras'] : null;
   $mostrarHistorico = !empty($dados['historico_permitido']) && $totalLeituras !== null && $totalLeituras > 1;
   $urlPdfAluno = $urlPdf.'?modelo=aluno';
@@ -49,6 +50,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('css/leituras-resultados.css') }}?v={{ filemtime(public_path('css/leituras-resultados.css')) }}">
+@if($visualizacaoModelo2)<link rel="stylesheet" href="{{ asset('css/resultado-modelo2.css') }}?v={{ filemtime(public_path('css/resultado-modelo2.css')) }}">@endif
 <style>@media print { @page { size: A4; margin: 12mm; } }</style>
 @endpush
 
@@ -98,7 +100,7 @@
     <span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>
   </div>
   @if($pedagogico)
-    @include('resultados._pedagogico')
+    @if($visualizacaoModelo2)@include('resultados._pedagogico_alternativa')@else @include('resultados._pedagogico')@endif
   @else
   {{-- Colunas de cima para baixo, como no cartão-resposta (no celular, lista corrida) --}}
   <div class="res-folha" style="--linhas:{{ (int) ceil(count($folha) / 3) }};">

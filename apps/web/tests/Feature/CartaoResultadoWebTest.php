@@ -121,6 +121,19 @@ class CartaoResultadoWebTest extends TestCase
         $this->assertStringNotContainsString('resultado-percentuais',$r->json('html'));
     }
 
+    public function test_modelo2_e_previa_separada_sem_substituir_padrao_nem_liberar_aluno_ou_producao(): void
+    {
+        $d=$this->resultado(null);$d['pedagogico']=true;
+        Http::fake(function () use (&$d) { return Http::response(['data'=>$d]); });
+        app()->instance('env','staging');
+        $this->get('/resultados/1/4')->assertOk()->assertSee('resultado-docente')->assertDontSee('resultado-modelo2-lista');
+        $this->get('/resultados/1/4?visualizacao=modelo2')->assertOk()->assertSee('resultado-modelo2-lista')->assertSee('resultado-modelo2.css')->assertDontSee('class="res-folha resultado-docente"',false);
+        app()->instance('env','production');
+        $this->get('/resultados/1/4?visualizacao=modelo2')->assertOk()->assertSee('resultado-docente')->assertDontSee('resultado-modelo2-lista');
+        app()->instance('env','staging');$d['pedagogico']=false;
+        $this->get('/resultados/1/4?visualizacao=modelo2')->assertOk()->assertDontSee('resultado-modelo2-lista')->assertDontSee('resultado-docente');
+    }
+
     public function test_aplicar_tentativa_integrada_volta_ao_aluno_canonico_sem_redirecionamento_arbitrario(): void
     {
         $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';

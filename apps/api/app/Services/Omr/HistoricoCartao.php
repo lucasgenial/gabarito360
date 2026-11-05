@@ -67,14 +67,7 @@ class HistoricoCartao
         $dados = $this->conteudo($c) + $extra;
         // Referência congelada só no novo snapshot; não altera contratos de fingerprint
         // nem preenche retrospectivamente arquivos imutáveis anteriores.
-        $g = ContextoCorrecao::filtrar(DB::table('gabaritos'), $c->espaco_id)->where('prova_id', $c->prova_id)->first();
-        $prova = Prova::find($c->prova_id);
-        $dados['referencia_gabarito'] = ['questoes' => $g ? ContextoCorrecao::filtrar(DB::table('gabarito_questoes'), $c->espaco_id)
-            ->where('gabarito_id', $g->id)->orderBy('numero_questao')->get()->map(fn ($q) => [
-                'numero_questao' => $q->numero_questao,
-                'esperada' => $prova?->opcao_lingua && $c->lingua === 'ESP' && !empty($q->alternativa_espanhol) ? $q->alternativa_espanhol : $q->alternativa,
-                'anulada' => (bool) $q->anulada,
-            ])->all() : []];
+        $dados['referencia_gabarito'] = $this->referencia($c);
         $dados['ator_registrado'] = $ator ? ['id' => $ator->id, 'nome' => $ator->nome, 'perfil' => $ator->perfil, 'vinculo_id' => $ator->vinculoContextoId()] : null;
         DB::table('cartao_tentativas')->insert(['id' => $id, 'espaco_id' => $c->espaco_id, 'prova_id' => $c->prova_id, 'aluno_id' => $c->aluno_id, 'origem_cartao_id' => $c->id, 'numero' => $numero,
             'contexto_chave' => hash('sha256', ($c->espaco_id ?? 0).':'.$c->prova_id.':'.($c->aluno_id ?? 0)),
@@ -96,6 +89,7 @@ class HistoricoCartao
     {
         $ant = DB::table('cartao_tentativa_eventos')->where('tentativa_id', $t->id)->orderByDesc('id')->value('sha256');
         $payload = ($c ? $this->conteudo($c) : []) + $extra;
+        if ($c) $payload['referencia_gabarito'] = $this->referencia($c);
         $payload['ator_registrado'] = $ator ? ['id' => $ator->id, 'nome' => $ator->nome, 'perfil' => $ator->perfil, 'vinculo_id' => $ator->vinculoContextoId()] : null;
         $dados = Crypt::encryptString(json_encode($payload, JSON_THROW_ON_ERROR));
         $data = now()->utc()->format('Y-m-d H:i:s.u');
@@ -112,6 +106,18 @@ class HistoricoCartao
         $d = Storage::disk('local');
         abort_unless($d->exists($t->imagem_path) && hash_equals($t->imagem_sha256, hash_file('sha256', $d->path($t->imagem_path))), 409,
             'A foto preservada precisa ser conferida. A correção vigente foi mantida.');
+    }
+
+    private function referencia(Cartao $c): array
+    {
+        $g = ContextoCorrecao::filtrar(DB::table('gabaritos'), $c->espaco_id)->where('prova_id', $c->prova_id)->first();
+        $prova = Prova::find($c->prova_id);
+        return ['questoes' => $g ? ContextoCorrecao::filtrar(DB::table('gabarito_questoes'), $c->espaco_id)
+            ->where('gabarito_id', $g->id)->orderBy('numero_questao')->get()->map(fn ($q) => [
+                'numero_questao' => $q->numero_questao,
+                'esperada' => $prova?->opcao_lingua && $c->lingua === 'ESP' && !empty($q->alternativa_espanhol) ? $q->alternativa_espanhol : $q->alternativa,
+                'anulada' => (bool) $q->anulada,
+            ])->all() : []];
     }
 
     public function registrarAtual(Cartao $c, ?Usuario $ator, string $acao = 'vigente', ?string $motivo = null, array $extra = []): object
