@@ -156,8 +156,8 @@ function desenhar() {
     + '<button type="button" class="btn rev-resposta-extra" onclick="escolher(\'ANULADA\')">Anulada</button></div>'
     + '<p id="rev-salvamento" class="rev-salvamento" role="status" aria-live="polite"></p>'
     + '<div class="rev-acoes">'
-    + '<button type="button" class="btn btn-ghost btn-sm" onclick="voltar()"' + (historico.length ? '' : ' disabled') + '>Voltar</button>'
-    + '<button type="button" class="btn btn-ghost btn-sm" onclick="pular()"' + (FILA.length > 1 ? '' : ' disabled') + '>Pular</button></div>'
+    + '<button type="button" class="btn btn-secondary btn-sm" onclick="voltar()"' + (historico.length ? '' : ' disabled') + '>Voltar</button>'
+    + '<button type="button" class="btn btn-secondary btn-sm" onclick="pular()"' + (FILA.length > 1 ? '' : ' disabled') + '>Pular</button></div>'
     + '<p class="rev-teclas">Teclado: A a ' + ALTERNATIVAS[ALTERNATIVAS.length - 1] + ' respondem, 0 deixa em branco e X anula.</p></div></div>';
   restringirCopiaImagem(document.getElementById('rev-previa'));
   sincronizarDocumento();

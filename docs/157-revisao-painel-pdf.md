@@ -13,3 +13,5 @@ Validar conversão/renderização PDF real, página inteira, zoom, documento cor
 Ajuste solicitado na conferência: alternativas devem parecer botões. Consulta prévia UI/UX aprovou contorno azul em todas as alternativas, fundo e indicação própria somente para resposta atual (sem confundir leituras incertas), secundários Em branco/Anulada, foco externo e bloqueio temporário com status Salvando resposta. Preservar ação imediata e atalhos. Estilos limitados à revisão, tokens claro/escuro; aceite visual final pendente.
 
 Verificação inicial: 190 testes web/1794 asserções; ensaio real de PDF e eventos em 2560/1440/1099/390/320 aprovado. CI apontou verificação prematura do rótulo de zoom antes do render assíncrono; corrigida espera da atualização, sem alterar a aplicação para satisfazer o teste.
+
+Direção complementar solicitada pelo usuário e aprovada previamente pelo especialista: Voltar/Pular com contorno visível e centralizados, preservando tamanho, ordem e espaçamento. Voltar indisponível distinguido pelo estado desabilitado.
