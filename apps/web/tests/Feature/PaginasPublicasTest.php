@@ -58,7 +58,7 @@ class PaginasPublicasTest extends TestCase
     {
         $resposta=$this->get('/')->assertOk()->assertSee('pré-lançamento')
             ->assertSee('Revisar leitura')->assertSee('Questão por questão')->assertSee('Relatório individual')
-            ->assertSee('Dados fictícios')->assertDontSee('TALIS')->assertDontSee('15/min')
+            ->assertSee('Dados fictícios')->assertSee('TALIS 2024')->assertSee('ZipGrade')
             ->assertSee('css/apresentacao-publica.css',false)->assertSee('js/apresentacao-publica.js',false);
         $dom=new \DOMDocument();@$dom->loadHTML($resposta->getContent());$xpath=new \DOMXPath($dom);
         $this->assertSame(4,$xpath->query('//article[contains(@class,"publico-demo")]/figure/figcaption')->length);
@@ -67,6 +67,24 @@ class PaginasPublicasTest extends TestCase
         foreach (['como-funciona','recursos','demonstracoes','planos','duvidas'] as $id) {
             $this->assertSame(1,$xpath->query('//*[@id="'.$id.'"]')->length);
         }
+        Http::assertNothingSent();
+    }
+
+    public function test_pesquisas_mantem_fontes_e_contexto_sem_apresentar_dados_como_metricas_do_produto(): void
+    {
+        $resposta=$this->get('/')->assertOk()
+            ->assertSee('O que as pesquisas dizem sobre corrigir e devolver resultados')
+            ->assertSee('Estes resultados não são medições do Gabarito360.')
+            ->assertSee('anos finais do ensino fundamental')->assertSee('ZipGrade, outro aplicativo')
+            ->assertSee('após excluir valores extremos')->assertDontSee('48% de melhoria');
+        $dom=new \DOMDocument();@$dom->loadHTML($resposta->getContent());$xpath=new \DOMXPath($dom);
+        $fontes=$xpath->query('//section[@aria-labelledby="t-pesquisas"]//a');
+        $this->assertSame(3,$fontes->length);
+        foreach (['oecd.org','investigacionuch.ceu.es','frontiersin.org'] as $index=>$host) {
+            $this->assertStringContainsString($host,$fontes->item($index)->getAttribute('href'));
+            $this->assertSame('noopener noreferrer',$fontes->item($index)->getAttribute('rel'));
+        }
+        $this->assertSame(3,$xpath->query('//*[@data-recurso-atual]')->length);
         Http::assertNothingSent();
     }
 

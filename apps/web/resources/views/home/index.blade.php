@@ -75,6 +75,30 @@
     </ol>
   </div>
 </section>
+{{-- Estudos de terceiros: resultados contextualizados, não medições do Gabarito360. --}}
+<section class="lp-secao lp-alternada" aria-labelledby="t-pesquisas">
+  <div class="lp-inner">
+    <h2 id="t-pesquisas">O que as pesquisas dizem sobre corrigir e devolver resultados</h2>
+    <p class="lp-sub">Pesquisas de terceiros sobre a rotina docente e a devolutiva. Estes resultados não são medições do Gabarito360.</p>
+    <div class="numbers-grid">
+      <div class="number-card">
+        <div class="number-val">6,1<small> h</small></div>
+        <div class="number-label">por semana é o tempo que professores brasileiros em tempo integral, dos anos finais do ensino fundamental, relatam dedicar à correção de trabalhos. A média da OCDE é 4,6 h.</div>
+        <a class="number-fonte" href="https://www.oecd.org/en/publications/results-from-talis-2024-country-notes_e127f9e2-en/brazil_1e93d3b5-en.html" target="_blank" rel="noopener noreferrer">OCDE, TALIS 2024</a>
+      </div>
+      <div class="number-card">
+        <div class="number-val">15<small>/min</small></div>
+        <div class="number-label">provas corrigidas com o ZipGrade, outro aplicativo, segundo um estudo com 135 alunos. É um resultado desse estudo, não um teste de velocidade do Gabarito360.</div>
+        <a class="number-fonte" href="https://investigacionuch.ceu.es/documentos/6761cd249431f44fab674f3d" target="_blank" rel="noopener noreferrer">Castillo García et al., In-RED 2019</a>
+      </div>
+      <div class="number-card">
+        <div class="number-val">435</div>
+        <div class="number-label">estudos, com mais de 61 mil participantes, em uma meta-análise sobre feedback na aprendizagem. O efeito médio foi d = 0,48 após excluir valores extremos, com variação entre formas de devolutiva.</div>
+        <a class="number-fonte" href="https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.03087/full" target="_blank" rel="noopener noreferrer">Wisniewski, Zierer e Hattie, 2020</a>
+      </div>
+    </div>
+  </div>
+</section>
 <section class="lp-secao" id="recursos" aria-labelledby="t-recursos"><div class="lp-inner">
   <h2 id="t-recursos">Uma visão completa da avaliação</h2>
   @include('home._recursos')

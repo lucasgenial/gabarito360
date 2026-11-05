@@ -13,19 +13,19 @@ return [
     ],
     'momentos'=>[
         ['nome'=>'Preparação','beneficio'=>'Organize a aplicação antes de chegar à sala.','recursos'=>[
-            ['nome'=>'Gabaritos e cartões identificados','descricao'=>'Cadastre o gabarito, organize turmas e alunos e gere os cartões-resposta para imprimir.'],
-            ['nome'=>'Elaboração de provas e avaliações','descricao'=>'Prepare enunciados, questões e diferentes versões da avaliação em um só fluxo.','em_breve'=>true],
-            ['nome'=>'Acervo inteligente e GII','descricao'=>'Encontre e organize questões para compor avaliações com mais critério. O GII — Gabarito360 Item Intelligence — começará por itens do ENEM.','ajuda'=>'A proposta reúne questões de fontes públicas, de professores e conteúdos produzidos com assistência de IA, conforme as regras do projeto. Isso não representa vínculo oficial com o ENEM nem um acervo completo já disponível.','em_breve'=>true],
+            ['nome'=>'Gabaritos e cartões identificados','descricao'=>'Organize o gabarito, as turmas e os alunos e imprima os cartões identificados.'],
+            ['nome'=>'Elaboração de provas e avaliações','descricao'=>'Crie enunciados, questões e versões da avaliação em um só fluxo.','em_breve'=>true],
+            ['nome'=>'Acervo inteligente e GII','descricao'=>'Encontre e organize questões com mais critério, começando por itens do ENEM.','ajuda'=>'O GII — Gabarito360 Item Intelligence — reunirá questões de fontes públicas, de professores e conteúdos produzidos com assistência de IA, conforme as regras do projeto. Isso não representa vínculo oficial com o ENEM nem um acervo completo já disponível.','em_breve'=>true],
         ]],
         ['nome'=>'Correção','beneficio'=>'Da foto à conferência, com o professor no controle.','recursos'=>[
-            ['nome'=>'Leitura e revisão pelo celular','descricao'=>'Fotografe ou envie a foto do cartão. Confira as leituras sinalizadas e registre a resposta revisada.'],
-            ['nome'=>'Marcações na própria prova','descricao'=>'Integre as marcações à própria página da avaliação e conecte novos formatos à correção por imagem.','em_breve'=>true],
-            ['nome'=>'Avaliações impressas, digitais e mistas','descricao'=>'Combine formatos e conte com apoio à leitura e à correção de questões abertas, mantendo a conferência do professor.','ajuda'=>'O apoio à leitura e correção de questões abertas poderá usar reconhecimento de texto (OCR) e IA, com critérios de avaliação definidos e decisão do professor. Não é correção autônoma irrestrita.','em_breve'=>true],
+            ['nome'=>'Leitura e revisão pelo celular','descricao'=>'Envie a foto do cartão, confira as leituras sinalizadas e registre a resposta revisada.'],
+            ['nome'=>'Marcações na própria prova','descricao'=>'Use a própria página da avaliação para marcar respostas e conectar novos formatos à correção por imagem.','em_breve'=>true],
+            ['nome'=>'Avaliações impressas, digitais e mistas','descricao'=>'Combine formatos e receba apoio à correção de questões abertas, com conferência do professor.','ajuda'=>'O apoio à leitura e correção de questões abertas poderá usar reconhecimento de texto (OCR) e IA, com critérios de avaliação definidos e decisão do professor. Não é correção autônoma irrestrita.','em_breve'=>true],
         ]],
         ['nome'=>'Análise','beneficio'=>'Transforme a devolutiva em um próximo passo pedagógico.','recursos'=>[
-            ['nome'=>'Resultados e relatórios','descricao'=>'Veja acertos, erros, respostas em branco e anulações. Educadores autorizados acompanham percentuais por questão; PDFs individuais e em lote apoiam a devolutiva.'],
-            ['nome'=>'Análises pedagógicas e psicométricas','descricao'=>'Aprofunde a análise de itens e resultados com TCT e TRI, métodos de análise do desempenho em avaliações.','ajuda'=>'A Teoria Clássica dos Testes (TCT) considera medidas como dificuldade e discriminação dos itens. A Teoria de Resposta ao Item (TRI) relaciona respostas e características dos itens a modelos de desempenho. Não se trata de nota oficial do ENEM ou calibração já disponível.','em_breve'=>true],
-            ['nome'=>'Integridade da avaliação e padrões de respostas','descricao'=>'Observe similaridades e padrões atípicos para orientar uma revisão humana, considerando respostas e grupos. A evolução inclui mapa de sala e lista de presença registrados pelo professor e lidos pelo celular.','em_breve'=>true],
+            ['nome'=>'Resultados e relatórios','descricao'=>'Veja acertos, erros e respostas em branco e organize a devolutiva com relatórios.','ajuda'=>'Educadores autorizados acompanham percentuais por questão. Os resultados identificam anulações e os relatórios podem ser gerados em PDF individual ou em lote.'],
+            ['nome'=>'Análises pedagógicas e psicométricas','descricao'=>'Entenda melhor os itens e o desempenho para apoiar suas decisões pedagógicas.','ajuda'=>'A Teoria Clássica dos Testes (TCT) considera medidas como dificuldade e discriminação dos itens. A Teoria de Resposta ao Item (TRI) relaciona respostas e características dos itens a modelos de desempenho. Não se trata de nota oficial do ENEM ou calibração já disponível.','em_breve'=>true],
+            ['nome'=>'Integridade da avaliação e padrões de respostas','descricao'=>'Observe similaridades e padrões atípicos para orientar uma revisão humana.','ajuda'=>'A análise considerará respostas, grupos e contexto. A evolução inclui mapa de sala e lista de presença registrados pelo professor e lidos pelo celular, sem atribuir culpa ou comprovar cola automaticamente.','em_breve'=>true],
         ]],
     ],
     'faq'=>[

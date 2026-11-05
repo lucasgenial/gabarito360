@@ -10,13 +10,20 @@
 .publico-rotina article { border-top:2px solid var(--accent); padding-top:16px; }
 .publico-rotina h3 { font-size:18px; margin-bottom:8px; }
 .publico-rotina p,.publico-momento p,.publico-confianca p { color:var(--fg-2); }
-.publico-momento { display:grid; grid-template-columns:minmax(160px,.5fr) minmax(0,1.5fr); gap:40px; padding-block:32px; border-bottom:1px solid var(--border-soft); }
-.publico-momento:last-child { border-bottom:0; padding-bottom:0; }
-.publico-momento-titulo { font-size:22px; }
-.publico-momento-lista { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px 32px; }
-.publico-recurso { min-width:0; display:grid; gap:8px; align-content:start; }
-.publico-recurso h4 { font-size:17px; font-weight:700; }
-.publico-recurso .publico-em-breve { margin-bottom:2px; }
+.publico-momentos {display:grid;gap:24px;margin-top:28px;}
+.publico-momento {padding:24px;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface);min-width:0;}
+.publico-momento-cabecalho {display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 24px;margin-bottom:20px;}
+.publico-momento-cabecalho h3 {font-size:23px;font-weight:750;}
+.publico-momento-cabecalho p {font-size:14px;}
+.publico-momento-lista {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:20px;}
+.publico-recurso {min-width:0;display:grid;gap:8px;align-content:start;}
+.publico-recurso h4 {font-size:17px;font-weight:700;line-height:1.35;}
+.publico-recurso p {font-size:14px;line-height:1.6;}
+.publico-recurso-titulo {display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 10px;}
+.publico-recurso-atual {display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:16px 24px;padding:16px;background:var(--surface-2);border-radius:8px;}
+.publico-recurso-estado {display:block;color:var(--accent);font-size:12px;font-weight:700;margin-bottom:5px;}
+.publico-recurso-futuro {border-top:1px solid var(--border-soft);padding-top:16px;}
+.publico-recurso .publico-ajuda {margin-top:0;}
 .publico-recursos-legenda { margin-top:16px; color:var(--fg-2); font-size:14px; }
 .publico-demos { display:grid; gap:48px; margin-top:32px; }
 .publico-demo { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:40px; align-items:center; }
@@ -71,7 +78,7 @@
  .lp-nav .lp-acoes {margin-left:0;}
  .lp-nav .lp-acoes .btn-primary {display:none;}
  .publico-apresentacao .lp-passos {grid-template-columns:repeat(2,minmax(0,1fr));}
- .publico-momento {grid-template-columns:minmax(0,1fr);gap:20px;}
+
  .publico-demo {gap:24px;}
 }
 @media(max-width:767px) {
@@ -79,6 +86,11 @@
  .publico-demo:nth-child(even) .publico-demo-texto {order:initial;}
  .publico-demo-texto {order:-1;}
  .publico-demo-painel {padding:16px;}
+ .publico-momento {padding:18px 16px;}
+ .publico-momento-cabecalho {display:grid;gap:4px;margin-bottom:16px;}
+ .publico-recurso-atual {grid-template-columns:minmax(0,1fr);gap:8px;padding:14px;}
+ .publico-momento-lista {gap:16px;margin-top:16px;}
+ .publico-recurso-titulo {align-items:flex-start;}
  .publico-demos {gap:40px;}
  .publico-rotina,.publico-confianca {gap:24px;}
  .publico-apresentacao .plans-grid {grid-template-columns:minmax(0,1fr);}
