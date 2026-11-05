@@ -30,7 +30,9 @@
     <input class="input" type="search" name="busca" aria-label="Buscar prova por título" placeholder="Buscar prova por título…"
            value="{{ $busca }}" style="padding-left:36px;" />
   </div>
-  @php($disciplinasFiltro = $disciplinasFiltro ?? [])
+  @php
+    $disciplinasFiltro = $disciplinasFiltro ?? [];
+  @endphp
   <select class="select" name="disciplina" aria-label="Filtrar por disciplina ou área informada" style="min-width:160px;">
     <option value="">Todas as disciplinas/áreas</option>
     @if($disciplina !== '' && !in_array($disciplina, $disciplinasFiltro, true))
