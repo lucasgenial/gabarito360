@@ -3,10 +3,10 @@ window.iniciarHistoricoResultado=function(base){
   let pronta=false;
   function carregar(alvo,navegar=false,voltar=null){
     return carga.executar(async()=>{
-      try{return await G360BuscarJSON(base+alvo.search);}catch(e){if(!pronta)qtd.textContent='Histórico de tentativas indisponível no momento.';throw e;}
+      try{return await G360BuscarJSON(base+alvo.search);}catch(e){if(!pronta)qtd.textContent='Histórico de leituras do cartão-resposta indisponível no momento.';throw e;}
     },d=>{
       if(typeof d.html!=='string'||!Number.isFinite(d.total))throw new Error('Histórico indisponível');
-      root.querySelector('[data-carga-conteudo]').innerHTML=d.html;qtd.textContent=d.total+' '+(d.total===1?'tentativa registrada':'tentativas registradas');pronta=true;
+      root.querySelector('[data-carga-conteudo]').innerHTML=d.html;qtd.textContent=d.total+' '+(d.total===1?'leitura registrada':'leituras registradas');pronta=true;
       iniciarHistoricoDocumento();if(navegar)history.pushState(null,'',alvo.href);
       if(navegar||alvo.hash==='#tentativa-detalhe')requestAnimationFrame(()=>{
         const links=[...root.querySelectorAll('a[href]')];

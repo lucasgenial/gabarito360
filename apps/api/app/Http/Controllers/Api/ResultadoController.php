@@ -18,6 +18,18 @@ use Illuminate\Support\Facades\Process;
 
 class ResultadoController extends Controller
 {
+    private function modelo(Request $request): string
+    {
+        $d = $request->validate(['modelo' => 'nullable|in:aluno,professor']);
+        $modelo = $d['modelo'] ?? 'aluno';
+        if ($modelo === 'professor') abort_unless($this->pedagogico($request), 403);
+        return $modelo;
+    }
+
+    private function pedagogico(Request $request): bool
+    {
+        return !in_array($request->user()->perfil, ['aluno', 'aplicador']) && \App\Support\Permissao::pode($request->user(), 'relatorio.prova');
+    }
     public function show(Request $request, int $alunoId, int $provaId): JsonResponse
     {
         $dados = $this->montar($request, $alunoId, $provaId);
@@ -42,6 +54,8 @@ class ResultadoController extends Controller
      */
     public function pdf(Request $request, int $alunoId, int $provaId)
     {
+        $modelo = $this->modelo($request);
+        $versao = ContextoCorrecao::versaoAcesso($request->user());
         $dados = $this->montar($request, $alunoId, $provaId);
         if ($dados instanceof JsonResponse) {
             return $dados;
@@ -49,38 +63,42 @@ class ResultadoController extends Controller
 
         $prova  = Prova::find($provaId);
         $escola = $prova->escola_id ? DB::table('escolas')->where('id', $prova->escola_id)->first() : null;
-        $saida  = tempnam(sys_get_temp_dir(), 'g360_e'.($prova->espaco_id ?? 0).'_res_');
-        @unlink($saida);
-        $saida .= '.pdf';
-
+        $emissao = app(\App\Services\EmissaoDocumento::class);
+        $preparado = $emissao->preparar($request->user(), $modelo, $dados['cabecalho']['nome'] ?? '', $prova->espaco_id);
+        $saida = tempnam(sys_get_temp_dir(), 'g360_e'.($prova->espaco_id ?? 0).'_res_');
+        abort_unless($saida !== false, 503, 'Não foi possível preparar o PDF.');
+        chmod($saida, 0600);
+        $pdf = $this->dadosPdf($dados, $prova, $escola, $saida) + ['modelo' => $modelo, 'emissao' => $preparado['pdf']];
+        if ($modelo === 'aluno') { unset($pdf['media_turma']); foreach ($pdf['folha'] as &$q) { unset($q['turma'], $q['geral']); } unset($q); }
+        try {
         $r = Process::path(config('omr.scripts'))
             ->timeout(max(60, config('omr.timeout')))
-            ->input(json_encode($this->dadosPdf($dados, $prova, $escola, $saida), JSON_UNESCAPED_UNICODE))
+            ->input(json_encode($pdf, JSON_UNESCAPED_UNICODE))
             ->run([config('omr.python'), 'gerar_resultado.py']);
 
         $json = json_decode(trim($r->output()), true);
-        if (!is_array($json) || empty($json['ok']) || !is_file($saida)) {
+        if (!$r->successful() || !is_array($json) || empty($json['ok']) || !is_file($saida) || !filesize($saida)) {
+            @unlink($saida);
             report(new \RuntimeException('Falha ao gerar PDF do resultado: ' . ($json['erro'] ?? trim($r->errorOutput()))));
             return ApiResponse::error('Não foi possível gerar o PDF do resultado.', [], 500);
         }
-
-        // A geração pode demorar; não entregar dados após revogação do contexto.
-        if (ContextoVinculo::presente($request->user())) {
-            try {
-                abort_unless(\App\Support\Permissao::pode($request->user(), 'resultado.compartilhar'), 403);
-                $atual = $this->montar($request, $alunoId, $provaId);
-                if ($atual instanceof JsonResponse) { @unlink($saida); return $atual; }
-            } catch (\Throwable $e) { @unlink($saida); throw $e; }
-        }
+        // A geração pode demorar; não entregar nem registrar emissão após revogação.
+        abort_unless(hash_equals($versao, ContextoCorrecao::versaoAcesso($request->user())) && \App\Support\Permissao::pode($request->user(), 'resultado.compartilhar'), 403);
+        if ($modelo === 'professor') abort_unless($this->pedagogico($request), 403);
+        $atual = $this->montar($request, $alunoId, $provaId);
+        if ($atual instanceof JsonResponse) { @unlink($saida); return $atual; }
+        $emissao->registrar($preparado, $saida);
 
         $nome = 'resultado-' . \Illuminate\Support\Str::slug($dados['aluno']['nome'] . ' ' . $dados['prova']['disciplina']) . '.pdf';
 
-        return response()->download($saida, $nome, ['Content-Type' => 'application/pdf'])->deleteFileAfterSend();
+        return response()->download($saida, $nome, ['Content-Type' => 'application/pdf', 'Cache-Control' => 'private, no-store'])->deleteFileAfterSend();
+        } catch (\Throwable $e) { @unlink($saida); throw $e; }
     }
 
-    /** Um documento com uma página por aluno, usando o mesmo modelo individual. */
+    /** Um arquivo combinado: cada aluno pode ocupar mais de uma página. */
     public function lote(Request $request, int $provaId)
     {
+        $modelo = $this->modelo($request);
         $request->validate(['turma_id' => 'nullable|integer|min:1']);
         abort_if(in_array($request->user()->perfil, ['aluno', 'aplicador']), 403);
         $versao = ContextoCorrecao::versaoAcesso($request->user());
@@ -92,15 +110,20 @@ class ResultadoController extends Controller
         $ids = $consulta->tabela('notas')->where('prova_id', $provaId)
             ->whereIn('aluno_id', Escopo::alunos($request->user())->select('alunos.id'))
             ->when($turma, fn ($q) => $q->where('turma_id', $turma))
-            ->orderBy('turma_id')->orderBy('aluno_id')->limit(501)->pluck('aluno_id')->all();
+            ->orderBy('turma_id')->orderBy('aluno_id')->distinct()->limit(501)->pluck('aluno_id')->all();
         abort_unless(count($ids), 422, 'Nenhum resultado disponível para este lote.');
         abort_if(count($ids) > 500, 422, 'O limite é de 500 resultados por PDF. Selecione uma turma.');
         $escola = $prova->escola_id ? DB::table('escolas')->find($prova->escola_id) : null;
+        $emissao = app(\App\Services\EmissaoDocumento::class);
+        $preparado = null;
         $resultados = [];
         foreach ($ids as $id) {
             $dados = $this->montar($request, (int) $id, $provaId);
             if ($dados instanceof JsonResponse) return $dados;
-            $resultados[] = $this->dadosPdf($dados, $prova, $escola, '');
+            $preparado ??= $emissao->preparar($request->user(), $modelo, $dados['cabecalho']['nome'] ?? '', $prova->espaco_id, count($ids));
+            $pdf = $this->dadosPdf($dados, $prova, $escola, '') + ['modelo' => $modelo, 'emissao' => $preparado['pdf']];
+            if ($modelo === 'aluno') { unset($pdf['media_turma']); foreach ($pdf['folha'] as &$q) { unset($q['turma'], $q['geral']); } unset($q); }
+            $resultados[] = $pdf;
         }
         usort($resultados, fn ($a, $b) => strnatcasecmp(($a['aluno']['turma'] ?? '').' '.$a['aluno']['nome'], ($b['aluno']['turma'] ?? '').' '.$b['aluno']['nome']));
         $saida = tempnam(sys_get_temp_dir(), 'g360_lote_');
@@ -122,6 +145,7 @@ class ResultadoController extends Controller
                 $atual = $this->montar($request, (int) $id, $provaId);
                 if ($atual instanceof JsonResponse) { @unlink($saida); return $atual; }
             }
+            $emissao->registrar($preparado, $saida);
             return response()->download($saida, 'resultados-prova-'.$provaId.($turma ? '-turma-'.$turma : '').'.pdf', [
                 'Content-Type' => 'application/pdf', 'Cache-Control' => 'private, no-store',
                 'X-Content-Type-Options' => 'nosniff',
@@ -225,8 +249,24 @@ class ResultadoController extends Controller
             ->avg('nota_final');
 
         $turmaResultado = $pessoal ? Escopo::turmas($request->user())->find($nota->turma_id) : $aluno->turma;
+        $pedagogico = $this->pedagogico($request);
+        if ($pedagogico) {
+            $chave = 'resultado_estatisticas_'.$provaId;
+            $stats = $request->attributes->get($chave);
+            if ($stats === null) {
+                $stats = app(\App\Services\Omr\EstatisticasQuestoes::class)->calcular($request->user(), $prova);
+                $request->attributes->set($chave, $stats);
+            }
+            foreach ($folha as &$q) {
+                $s = $stats[$q['numero_questao']] ?? [];
+                $q['geral'] = $s['geral'] ?? ['acertos' => 0, 'total' => 0, 'percentual' => null];
+                $q['turma'] = $s['turmas'][$nota->turma_id] ?? ['acertos' => 0, 'total' => 0, 'percentual' => null];
+            }
+            unset($q);
+        }
         $cabecalho = Cabecalho::contexto($request->user(), $prova->escola_id);
         return [
+            'pedagogico' => $pedagogico,
             'aluno' => [
                 'id'         => $aluno->id,
                 'nome'       => $aluno->nome,

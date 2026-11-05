@@ -26,8 +26,8 @@ class CartaoResultadoWebTest extends TestCase
     public function test_resultado_oferece_painel_sob_demanda_e_modal_sem_nova_aba(): void
     {
         $this->fingirResultado();
-        $this->get('/resultados/1/4?from=correcao')->assertOk()->assertSee('Cartão resposta')->assertSee('doc-painel')->assertSee('doc-modal')->assertSee('painel-cartao.js')->assertSee('Histórico de tentativas')
-            ->assertSee('Carregando tentativas…')->assertDontSee('Retirar correção')->assertDontSee('Revisar leitura')->assertSee('Relatório')->assertSee('Caminho da página')->assertSee('aria-current="page"', false);
+        $this->get('/resultados/1/4?from=correcao')->assertOk()->assertSee('Cartão resposta')->assertSee('doc-painel')->assertSee('doc-modal')->assertSee('painel-cartao.js')->assertSee('Histórico de leituras do cartão-resposta')
+            ->assertSee('Carregando leituras…')->assertDontSee('Retirar correção')->assertDontSee('Revisar leitura')->assertSee('Relatório')->assertSee('Caminho da página')->assertSee('aria-current="page"', false);
         Http::assertNotSent(fn ($r) => str_contains($r->url(), '/tentativas'));
     }
 
@@ -82,7 +82,7 @@ class CartaoResultadoWebTest extends TestCase
     public function test_falha_no_historico_nao_vira_zero_nem_oculta_nota(): void
     {
         $this->fingirResultado(true);
-        $this->get('/resultados/1/4')->assertOk()->assertSee('Carregando tentativas…')->assertSee('5,0')->assertDontSee('0 tentativas registradas');
+        $this->get('/resultados/1/4')->assertOk()->assertSee('Carregando leituras…')->assertSee('5,0')->assertDontSee('0 leituras registradas');
         $this->getJson('/resultados/1/4/historico')->assertStatus(503);
     }
 

@@ -104,9 +104,9 @@ class HistoricoCartao
             'A foto preservada precisa ser conferida. A correção vigente foi mantida.');
     }
 
-    public function registrarAtual(Cartao $c, ?Usuario $ator, string $acao = 'vigente', ?string $motivo = null): object
+    public function registrarAtual(Cartao $c, ?Usuario $ator, string $acao = 'vigente', ?string $motivo = null, array $extra = []): object
     {
-        $t = $this->garantir($c, $ator);
+        $t = $this->garantir($c, $ator, $extra);
         $this->evento($t, $acao, $c, $ator, $motivo);
 
         return $t;

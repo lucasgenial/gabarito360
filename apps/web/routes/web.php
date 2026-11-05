@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 
 // Saúde
 Route::get('/health', fn () => response()->json(['status' => 'ok', 'app' => 'gabarito360-web']));
+Route::get('/validar-documento', [\App\Http\Controllers\ValidacaoDocumentoController::class, 'index'])->name('documentos.validar');
+Route::post('/validar-documento', [\App\Http\Controllers\ValidacaoDocumentoController::class, 'conferir'])->middleware('throttle:20,1')->name('documentos.conferir');
 
 // Landing page (rota raiz)
 Route::get('/', [HomeController::class, 'index'])->name('home');
