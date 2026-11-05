@@ -15,8 +15,9 @@
     <label for="lote-input" class="btn btn-secondary" style="flex:1 1 220px;justify-content:center;padding:16px;cursor:pointer;">Enviar fotos da galeria</label>
     <input id="lote-input" type="file" accept="image/*" multiple style="display:none;">
   </div>
-  <p style="font-size:12px;color:var(--muted);margin-top:10px;">Folha sobre a mesa e com boa luz. Encaixe os <b>4 quadrados pretos</b> nas guias da tela: quando os 4 ficarem verdes, a foto é tirada sozinha. O aluno é identificado pelo QR do cartão.</p>
-  <p style="font-size:13px;color:var(--muted);margin-top:10px;">Depois do envio, você pode fotografar o próximo cartão. Acompanhe cada leitura na lista abaixo.</p>
+  <p class="page-sub">Inclua a folha inteira e os quatro quadrados pretos.</p>
+  <details><summary>Saiba mais sobre a foto e a leitura</summary><p>Não corte as bordas. Use boa luz e mantenha a câmera firme, de frente para a folha. As guias verdes indicam enquadramento; a qualidade será conferida antes de aceitar a foto. O QR identifica aluno e prova. Receber uma foto não significa concluir a leitura. Se já existir uma correção, ela será mantida até uma nova tentativa ser conferida e aplicada.</p></details>
+  <p id="envios-resumo" class="page-sub" role="status"></p>
   <ul id="envios" aria-label="Envios de cartões" aria-live="polite" style="list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;"></ul>
 </div>
 
@@ -84,10 +85,11 @@ function vincular(cartaoId) {
     method: 'POST', credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CAM_CSRF },
     body: JSON.stringify({ aluno_id: parseInt(sel.value) })
-  }).then(function (r) { return r.json(); }).then(function () {
+  }).then(function (r) { return r.json().then(function(d){if(!r.ok)throw new Error(d.erro||'Não foi possível vincular.');return d;}); }).then(function (d) {
+    if(d.aguardando_confirmacao){var a=document.createElement('a');a.className='btn btn-secondary';a.href='/tentativas/'+encodeURIComponent(d.tentativa_id);a.textContent='Conferir nova tentativa';sel.parentNode.replaceChildren(a);return;}
     sel.parentNode.innerHTML = '<span class="badge badge-success">Vinculado a ' + esc(sel.options[sel.selectedIndex].text) + '</span>';
     if (typeof atualizar === 'function') atualizar();
-  });
+  }).catch(function(e){alert(e.message);});
 }
 // Mensagem legível para respostas que não são JSON (sessão expirada, foto grande, servidor fora)
 function erroHttp(status) {
@@ -105,7 +107,7 @@ function resultadoCartao(d) {
         ? '<div style="font-size:13px;margin-top:4px;padding:6px 8px;border-radius:6px;background:var(--warn-light);color:var(--warn-fg);">'
           + 'Este cartão <b>não é de ' + esc(CAM_DISCIPLINA) + '</b>: é de <b>' + esc(d.prova_corrigida) + '</b>. Ele foi corrigido em ' + esc(d.prova_corrigida) + ', com o gabarito certo.</div>'
         : '';
-      var resumo = quem + nota + lg + amb + mov;
+      var resumo = quem + (d.tentativa_numero?' · Tentativa '+Number(d.tentativa_numero):'') + nota + lg + amb + mov;
       return resumo + (d.aluno_nome ? '' : (ALUNOS.length ? seletorAluno(d.id) : '<div style="font-size:13px;color:var(--muted);margin-top:4px;">QR ilegível ou cartão em branco: o professor vincula o aluno depois.</div>'));
 }
 var filaCartoes = criarFilaCartoes({
@@ -115,7 +117,14 @@ var filaCartoes = criarFilaCartoes({
   chaveSessao: @json('g360:envios:' . hash('sha256', session()->getId()) . ':' . ($prova['espaco_id'] ?? 'legado') . ':' . $prova['id']),
   envioInicial: @json(session('cartao_envio')),
   linha: linhaEnvio, reduzir: reduzirFoto, erroHttp: erroHttp, resultado: resultadoCartao,
-  atualizar: function () { if (typeof atualizar === 'function') atualizar(); }
+  atualizar: function () { if (typeof atualizar === 'function') atualizar(); },
+  tentativaUrl: @json(\App\Support\Acesso::pode('correcao.alterar')?route('correcao.tentativa','__TENTATIVA__',false):null),
+  escolherOutra: function(){document.getElementById('lote-input').click();},
+  resumo: function(){
+    var xs=Array.from(document.querySelectorAll('#envios li')),fim=xs.filter(function(li){return li.dataset.processamento==='concluido';}).length;
+    var atencao=xs.filter(function(li){return ['recusado','erro','aguardando_confirmacao','substituido'].includes(li.dataset.processamento);}).length;
+    document.getElementById('envios-resumo').textContent='Neste acompanhamento: '+xs.length+' fotos · '+fim+' concluídas · '+atencao+' precisam de ação.';
+  }
 });
 function enviarCartao(file) { return filaCartoes.enviar(file); }
 document.getElementById('cam-input').addEventListener('change', function (e) {
@@ -250,6 +259,7 @@ document.getElementById('lote-input').addEventListener('change', function (e) {
   // Foto em resolução total, recortada na área da folha (com margem) direto do vídeo
   function capturar() {
     if (ocupado || !folha) return;
+    if(cantosOk.some(function(c){return !c;})){dica.textContent='Inclua os quatro quadrados inteiros nas guias antes de fotografar.';return;}
     ocupado = true; estaveis = 0;
     if (navigator.vibrate) navigator.vibrate(60);
     var f = folha, v = f.video, m = f.w * 0.06;
@@ -260,11 +270,12 @@ document.getElementById('lote-input').addEventListener('change', function (e) {
     c.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, c.width, c.height);
     dica.textContent = 'Enviando foto…';
     ultimo.textContent = 'Enviando foto…';
-    paraJpeg(c).then(enviarCartao).then(function (html) {
-      ultimo.innerHTML = html + '<div style="font-size:12px;color:#555;margin-top:4px;">Coloque o próximo cartão.</div>';
-      ocupado = false; esperaTrocar = true; pausaAte = performance.now() + 800;
+    paraJpeg(c).then(enviarCartao).then(function (r) {
+      ultimo.textContent = r.mensagem + (r.aceita?' Coloque o próximo cartão.':' Ajuste a foto e tente novamente.');
+      ocupado = false; esperaTrocar = r.aceita; pausaAte = performance.now() + 1500;
+      if(!r.aceita)autoChk.checked=false;
       cantosOk = [false, false, false, false];
-      dica.textContent = 'Foto capturada. Coloque o próximo cartão.';
+      dica.textContent = r.aceita?'Foto recebida. Coloque o próximo cartão.':'Foto recusada. Ajuste e toque para fotografar novamente.';
     });
   }
 

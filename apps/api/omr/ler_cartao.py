@@ -17,45 +17,16 @@ import cv2
 import numpy as np
 
 import layout as L
+import qualidade as Q
 
 PX = 8.0            # px por mm na imagem retificada
 MARCA = 0.55        # fração preenchida a partir da qual a bolinha conta como marcada
+BRANCO_SEGURO = 0.08
 DUVIDA = 0.30       # entre DUVIDA e MARCA: marcação fraca/rasura -> ambígua
 
 
 def achar_marcadores(gray):
-    h, w = gray.shape
-    esc = min(1.0, 1600.0 / max(h, w))
-    g = cv2.resize(gray, None, fx=esc, fy=esc) if esc < 1 else gray.copy()
-    k = int(max(g.shape) / 14) | 1
-    bg = cv2.morphologyEx(g, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_RECT, (k, k)))
-    n = cv2.divide(g, bg, scale=255)
-    _, th = cv2.threshold(cv2.GaussianBlur(n, (5, 5), 0), 150, 255, cv2.THRESH_BINARY_INV)
-    cnts, _ = cv2.findContours(th, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cands = []
-    for c in cnts:
-        a = cv2.contourArea(c)
-        if a < 80:
-            continue
-        x, y, bw, bh = cv2.boundingRect(c)
-        hull = cv2.contourArea(cv2.convexHull(c))
-        if 0.6 < bw / float(bh) < 1.6 and hull and a / hull > 0.9 and a / float(bw * bh) > 0.7:
-            m = cv2.moments(c)
-            cands.append((a, m["m10"] / m["m00"], m["m01"] / m["m00"]))
-    if len(cands) < 4:
-        return None
-    cands.sort(reverse=True)
-    top = cands[:12]
-    ref = top[min(3, len(top) - 1)][0] * 0.35
-    big = [p for p in top if p[0] >= ref]
-    H, W = g.shape
-    pts = []
-    for cx, cy in [(0, 0), (W, 0), (0, H), (W, H)]:
-        b = min(big, key=lambda p: (p[1] - cx) ** 2 + (p[2] - cy) ** 2)
-        pts.append((b[1] / esc, b[2] / esc))
-    if len(set(pts)) < 4:
-        return None
-    return np.float32(pts)
+    return Q.analisar(gray).get("pontos")
 
 
 def retificar(gray, pts):
@@ -84,7 +55,7 @@ def decidir(vals):
     """vals: {letra: fração}. Retorna leitura no contrato do OmrDriverInterface (sem número)."""
     ordem = sorted(vals.items(), key=lambda kv: -kv[1])
     marcadas = [k for k, v in ordem if v >= MARCA]
-    detect = [{"alternativa": k, "confianca": round(v, 4)} for k, v in ordem if v >= DUVIDA]
+    detect = [{"alternativa": k, "confianca": round(v, 4)} for k, v in ordem if v >= BRANCO_SEGURO]
     f1 = ordem[0][1]
     f2 = ordem[1][1] if len(ordem) > 1 else 0.0
     if len(marcadas) == 1:
@@ -94,7 +65,7 @@ def decidir(vals):
     if len(marcadas) > 1:
         return {"alternativa": None, "confianca": 0.0, "ambigua": True,
                 "multiplas_marcacoes": True, "alternativas_detectadas": detect}
-    if f1 >= DUVIDA:  # marcação fraca: pede revisão humana
+    if f1 >= BRANCO_SEGURO:  # marcação fraca: pede revisão humana
         return {"alternativa": None, "confianca": round(1.0 - f1, 4), "ambigua": True,
                 "multiplas_marcacoes": False, "alternativas_detectadas": detect}
     return {"alternativa": None, "confianca": round(1.0 - f1, 4), "ambigua": False,
@@ -120,9 +91,10 @@ def ler(caminho, n_questoes, n_alt):
     if img is None:
         return {"ok": False, "erro": "imagem ilegível"}
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    pts = achar_marcadores(gray)
-    if pts is None:
-        return {"ok": False, "erro": "marcadores de canto não encontrados"}
+    qualidade = Q.analisar(gray)
+    pts = qualidade.pop("pontos", None)
+    if not qualidade["aprovada"]:
+        return {"ok": False, "erro": qualidade["mensagem"], "qualidade": qualidade}
     w = retificar(gray, pts)
     norm = normalizar(w)
     txt, qr = ler_qr(w)
@@ -140,12 +112,16 @@ def ler(caminho, n_questoes, n_alt):
         por_q.setdefault(q, {})[letra] = preench(norm, x, y, g["r"])
     leituras = [{"numero_questao": q, **decidir(v)} for q, v in sorted(por_q.items())]
     return {"ok": True, "qr": txt, "prova_id": qr.get("P"), "aluno_id": qr.get("A") or None,
-            "lingua": lingua, "leituras": leituras}
+            "lingua": lingua, "leituras": leituras, "qualidade": qualidade,
+            "num_questoes": n_questoes, "num_alternativas": n_alt}
 
 
 if __name__ == "__main__":
     try:
-        r = ler(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+        if sys.argv[1] == "--qualidade":
+            r = Q.avaliar(sys.argv[2]); r.pop("pontos", None)
+        else:
+            r = ler(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
     except Exception as e:  # nunca deixa o PHP sem JSON
         r = {"ok": False, "erro": f"{type(e).__name__}: {e}"}
     print(json.dumps(r, ensure_ascii=False))

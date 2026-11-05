@@ -263,7 +263,13 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/provas/{id}/revisao',          [CorrecaoController::class, 'revisao'])->name('correcao.revisao');
     Route::post('/provas/{id}/correcao/fechar', [CorrecaoController::class, 'fechar'])->name('correcao.fechar');
     Route::post('/provas/{id}/correcao/reabrir',[CorrecaoController::class, 'reabrir'])->name('correcao.reabrir');
+    Route::get('/provas/{id}/tentativas', [\App\Http\Controllers\TentativaCartaoController::class,'index'])->name('correcao.tentativas');
+    Route::get('/tentativas/{id}', [\App\Http\Controllers\TentativaCartaoController::class,'show'])->whereUuid('id')->name('correcao.tentativa');
+    Route::get('/tentativas/{id}/imagem', [\App\Http\Controllers\TentativaCartaoController::class,'imagem'])->whereUuid('id')->name('correcao.tentativa.imagem');
+    Route::post('/tentativas/{id}/aplicar', [\App\Http\Controllers\TentativaCartaoController::class,'aplicar'])->whereUuid('id')->name('correcao.tentativa.aplicar');
+    Route::post('/tentativas/{id}/descartar', [\App\Http\Controllers\TentativaCartaoController::class,'descartar'])->whereUuid('id')->name('correcao.tentativa.descartar');
     Route::get('/cartoes/{id}/imagem',          [CorrecaoController::class, 'imagem'])->name('cartoes.imagem');
+    Route::get('/cartoes/{id}/retirada', [CorrecaoController::class,'prepararRetirada'])->name('cartoes.retirada');
     Route::delete('/cartoes/{id}',              [CorrecaoController::class, 'excluir'])->name('cartoes.excluir');
     Route::post('/provas/{id}/cartoes',         [CorrecaoController::class, 'upload'])->name('correcao.upload');
     Route::get('/provas/{id}/cartoes/envios/{chave}', [CorrecaoController::class, 'envio'])->whereUuid('chave')->name('correcao.envio');

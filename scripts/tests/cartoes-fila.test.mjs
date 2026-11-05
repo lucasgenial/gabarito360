@@ -15,7 +15,7 @@ function abrir(memoria, responder) {
     setTimeout, clearTimeout, setInterval: fn => { ciclo = fn; },
     sessionStorage: {getItem: k => memoria.get(k) ?? null, setItem: (k, v) => memoria.set(k, v)},
     document: {hidden: true, addEventListener() {}, createElement() {return {style: {}, addEventListener(_, fn) {this.clicar = fn;}};}},
-    fetch: async (url, init) => {chamadas.push({url, init}); return {ok: true, json: async () => responder(url, init)};}};
+    fetch: async (url, init) => {chamadas.push({url, init}); const d=responder(url, init); return {ok: !d.__status || d.__status<400, status:d.__status||200, json: async () => d.__body||d};}};
   vm.runInNewContext(codigo, contexto);
   const fila = contexto.window.criarFilaCartoes({chaveSessao: 'envios', csrf: 'ficticio', uploadUrl: '/upload',
     envioUrl: '/envios/__ENVIO__', erroHttp: () => '', reduzir: async f => f, resultado: () => 'Leitura concluída',
@@ -55,3 +55,29 @@ for (const estado of ['recusado', 'substituido', 'concluido']) {
     assert.equal(pagina.linhas[0].dataset.processamento, estado);
   });
 }
+
+test('nova tentativa termina o polling sem substituir a correção nem repetir upload', async () => {
+  const memoria = new Map([['envios', JSON.stringify([chave])]]);
+  const pagina = abrir(memoria, () => resposta('aguardando_confirmacao'));
+  await pagina.consultar();
+  assert.deepEqual(JSON.parse(memoria.get('envios')), []);
+  assert.equal(pagina.linhas[0].dataset.processamento, 'aguardando_confirmacao');
+  assert.ok(pagina.chamadas.every(c => c.url !== '/upload'));
+});
+
+test('recusa de qualidade é acionável e não impede aceitar a próxima foto do lote', async () => {
+  let uploads=0;
+  const pagina=abrir(new Map(),()=>++uploads===1
+    ? {__status:422,__body:{message:'Inclua os quatro quadrados completos.'}}
+    : resposta('concluido'));
+  const cortada=new Blob(['foto fictícia'],{type:'image/jpeg'});cortada.name='cortada.jpg';
+  const inteira=new Blob(['foto fictícia íntegra'],{type:'image/jpeg'});inteira.name='inteira.jpg';
+  const recusada=await pagina.fila.enviar(cortada);
+  assert.equal(recusada.aceita,false);
+  assert.match(pagina.linhas[0].textContent,/cortada.jpg.*Foto recusada.*quatro quadrados/);
+  assert.equal(pagina.linhas[0].dataset.processamento,'recusado');
+  const aceita=await pagina.fila.enviar(inteira);
+  assert.equal(aceita.aceita,true);
+  assert.equal(pagina.linhas[1].dataset.processamento,'concluido');
+  assert.equal(uploads,2);
+});

@@ -40,6 +40,7 @@ class CartoesFilaTest extends TestCase
         parent::setUp();
         Queue::fake([ProcessarCartaoJob::class]);
         Storage::fake('public');
+        Storage::fake('local');
         Permissao::limparCache();
         $this->usuario = $this->usuario();
         Sanctum::actingAs($this->usuario);
@@ -165,7 +166,7 @@ class CartoesFilaTest extends TestCase
         $this->assertDatabaseCount('notas', 1);
     }
 
-    public function test_foto_mais_nova_prevalece_mesmo_lida_antes_da_antiga(): void
+    public function test_primeira_leitura_concluida_permanece_e_outra_vira_proposta(): void
     {
         $antigo = $this->enviar(aluno: $this->aluno);
         $novo = $this->enviar(aluno: $this->aluno);
@@ -175,16 +176,18 @@ class CartoesFilaTest extends TestCase
         $this->assertDatabaseCount('notas', 1);
         $this->assertDatabaseHas('cartoes', ['id' => $novo->cartao_id]);
         $this->assertEquals('corrigida', $this->prova->fresh()->status);
-        $this->getJson($this->uri($antigo))->assertJsonPath('data.processamento', 'substituido');
+        $this->getJson($this->uri($antigo))->assertJsonPath('data.processamento', 'aguardando_confirmacao');
     }
 
-    public function test_foto_nova_substitui_a_anterior_sem_resultado_obsoleto(): void
+    public function test_foto_nova_nao_substitui_a_anterior_sem_confirmacao(): void
     {
         $antigo = $this->enviar(aluno: $this->aluno);
         $this->job($antigo)->handle($this->driver(), app(ImagensCartao::class));
         $novo = $this->enviar(aluno: $this->aluno);
         $this->job($novo)->handle($this->driver(), app(ImagensCartao::class));
-        $this->getJson($this->uri($antigo))->assertJsonPath('data.processamento', 'substituido')->assertJsonPath('data.resultado', []);
+        $this->getJson($this->uri($antigo))->assertJsonPath('data.processamento', 'concluido');
+        $this->getJson($this->uri($novo))->assertJsonPath('data.processamento','aguardando_confirmacao');
+        $this->assertDatabaseHas('notas',['cartao_id'=>$antigo->cartao_id]);
         $this->assertDatabaseCount('notas', 1);
     }
 
@@ -263,7 +266,7 @@ class CartoesFilaTest extends TestCase
         try {
             $this->job($novo)->handle($d, app(ImagensCartao::class));
             $this->fail('A gravação deveria falhar');
-        } catch (QueryException) {
+        } catch (\UnexpectedValueException) {
         }
         $this->assertDatabaseHas('notas', ['cartao_id' => $antigo->cartao_id]);
         $this->assertDatabaseHas('cartoes', ['id' => $novo->cartao_id, 'status' => 'pendente']);
@@ -290,7 +293,7 @@ class CartoesFilaTest extends TestCase
         $this->job($novo)->handle($this->driver(), app(ImagensCartao::class));
 
         $this->getJson($this->uri($antigo))->assertOk()
-            ->assertJsonPath('data.processamento', 'substituido')->assertJsonPath('data.pode_repetir', false);
+            ->assertJsonPath('data.processamento', 'recusado')->assertJsonPath('data.pode_repetir', false);
         $this->getJson('/api/v1/provas/'.$this->prova->id.'/cartoes/status')->assertOk()
             ->assertJsonPath('data.pendentes', 0)->assertJsonPath('data.concluida', true);
         $jobAntigo->handle($this->driver(), app(ImagensCartao::class));
@@ -298,7 +301,7 @@ class CartoesFilaTest extends TestCase
         $this->assertDatabaseCount('cartoes', 1);
         $this->assertDatabaseCount('notas', 1);
         $this->assertDatabaseHas('notas', ['cartao_id' => $novo->cartao_id]);
-        $this->assertEquals('substituido', $antigo->fresh()->status);
+        $this->assertEquals('recusado', $antigo->fresh()->status);
     }
 
     public function test_leitura_antiga_nao_descarta_foto_mais_nova_com_erro(): void
@@ -313,14 +316,15 @@ class CartoesFilaTest extends TestCase
         $this->postJson($this->uri($novo).'/repetir')->assertStatus(202);
         $this->job($novo->fresh())->handle($this->driver(), app(ImagensCartao::class));
         $this->assertDatabaseCount('cartoes', 1);
-        $this->assertDatabaseHas('notas', ['cartao_id' => $novo->cartao_id]);
+        $this->assertDatabaseHas('notas', ['cartao_id' => $antigo->cartao_id]);
+        $this->getJson($this->uri($novo))->assertJsonPath('data.processamento','aguardando_confirmacao');
     }
 
     public function test_excluir_cartao_limpa_recibo_e_uuid_nao_ressuscita_resultado(): void
     {
         $e = $this->enviar(aluno: $this->aluno);
         $this->job($e)->handle($this->driver(), app(ImagensCartao::class));
-        $this->deleteJson('/api/v1/cartoes/'.$e->cartao_id)->assertOk();
+        $this->deleteJson('/api/v1/cartoes/'.$e->cartao_id,['motivo'=>'Retirada de teste documentada','versao'=>app(\App\Services\Omr\HistoricoCartao::class)->fingerprint(Cartao::findOrFail($e->cartao_id))])->assertOk();
         $this->assertDatabaseCount('cartoes', 0);
         $this->assertDatabaseCount('notas', 0);
         $this->assertNull($e->fresh()->resultado);
@@ -378,4 +382,98 @@ class CartoesFilaTest extends TestCase
             'imagem' => UploadedFile::fake()->image('cartao.jpg')])->assertNotFound();
         $this->assertDatabaseCount('cartoes', 1);
     }
+    private function proposta(): array
+    {
+        $antigo=$this->enviar(aluno:$this->aluno);$this->job($antigo)->handle($this->driver(),app(ImagensCartao::class));
+        $novo=$this->enviar(aluno:$this->aluno);$this->job($novo)->handle($this->driver(),app(ImagensCartao::class));
+        return [$antigo,$novo, $novo->fresh()->resultado['tentativa_id']];
+    }
+    private function aplicarTentativa(string $id)
+    {
+        return $this->postJson('/api/v1/tentativas/'.$id.'/aplicar',['motivo'=>'Nova foto completa conferida pelo responsável','confirmar'=>true]);
+    }
+    public function test_reenvio_so_atualiza_apos_confirmacao_e_preserva_foto_nota_revisoes(): void
+    {
+        [$antigo,$novo,$id]=$this->proposta();$h=app(\App\Services\Omr\HistoricoCartao::class);
+        $this->assertDatabaseHas('notas',['cartao_id'=>$antigo->cartao_id]);$this->assertDatabaseCount('cartao_tentativas',2);
+        $this->postJson('/api/v1/tentativas/'.$id.'/aplicar')->assertUnprocessable();
+        $this->aplicarTentativa($id)->assertOk()->assertJsonPath('data.aplicada',true);
+        $this->assertDatabaseCount('cartoes',1);$this->assertDatabaseCount('notas',1);$this->assertDatabaseMissing('cartoes',['id'=>$antigo->cartao_id]);
+        $this->assertDatabaseHas('cartao_tentativa_eventos',['tentativa_id'=>$id,'acao'=>'aplicada','ator_id'=>$this->usuario->id]);
+        $anterior=DB::table('cartao_tentativas')->where('origem_cartao_id',$antigo->cartao_id)->first();$snap=$h->dados($anterior);
+        $this->assertCount(2,$snap['respostas']);$this->assertEquals(2,$snap['nota']['acertos']);Storage::disk('local')->assertExists($anterior->imagem_path);
+        $this->getJson($this->uri($novo))->assertJsonPath('data.processamento','concluido');$this->getJson($this->uri($antigo))->assertJsonPath('data.processamento','substituido');
+        $this->aplicarTentativa($id)->assertOk();$this->assertEquals(1,DB::table('cartao_tentativa_eventos')->where('tentativa_id',$id)->where('acao','aplicada')->count());
+    }
+    public function test_descartar_nao_altera_a_correcao_vigente(): void
+    {
+        [$antigo,$novo,$id]=$this->proposta();$this->postJson('/api/v1/tentativas/'.$id.'/descartar')->assertOk();
+        $this->assertDatabaseHas('notas',['cartao_id'=>$antigo->cartao_id,'acertos'=>2]);$this->aplicarTentativa($id)->assertConflict();
+        $this->getJson('/api/v1/tentativas/'.$id)->assertOk()->assertJsonPath('data.estado','descartada');
+    }
+    public function test_revisao_concorrente_impede_aplicacao_de_proposta_obsoleta(): void
+    {
+        [$antigo,$novo,$id]=$this->proposta();$this->postJson('/api/v1/cartoes/'.$antigo->cartao_id.'/revisar',['numero_questao'=>1,'alternativa'=>'B'])->assertOk();
+        $this->aplicarTentativa($id)->assertConflict();$this->assertDatabaseHas('notas',['cartao_id'=>$antigo->cartao_id,'acertos'=>1]);
+        $this->assertDatabaseHas('cartao_tentativa_eventos',['acao'=>'revisada']);
+    }
+    public function test_foto_arquivada_corrompida_nao_pode_ser_aplicada(): void
+    {
+        [$antigo,$novo,$id]=$this->proposta();$t=DB::table('cartao_tentativas')->find($id);Storage::disk('local')->put($t->imagem_path,'arquivo adulterado fictício');
+        $this->aplicarTentativa($id)->assertConflict();$this->assertDatabaseHas('notas',['cartao_id'=>$antigo->cartao_id]);
+    }
+    public function test_historico_permite_consulta_da_foto_e_bloqueia_outro_usuario(): void
+    {
+        [$antigo,$novo,$id]=$this->proposta();$this->getJson('/api/v1/tentativas/'.$id)->assertOk()->assertJsonPath('data.numero',2);
+        $this->get('/api/v1/tentativas/'.$id.'/imagem')->assertOk();
+        $this->getJson('/api/v1/provas/'.$this->prova->id.'/tentativas')->assertOk()->assertJsonPath('data.total',2);
+        Sanctum::actingAs($this->usuario('professor'));$this->getJson('/api/v1/tentativas/'.$id)->assertNotFound();$this->getJson('/api/v1/tentativas/'.$id.'/imagem')->assertNotFound();
+    }
+    public function test_tabelas_historicas_recusam_update_e_delete(): void
+    {
+        [$antigo,$novo,$id]=$this->proposta();
+        foreach(['cartao_tentativas','cartao_tentativa_eventos'] as $tabela)foreach(['update','delete'] as $acao){
+            try{$q=DB::table($tabela);$acao==='delete'?$q->delete():$q->update(['dados'=>'adulteração fictícia']);$this->fail('Histórico deveria estar selado');}catch(QueryException){}
+        }
+        $this->assertDatabaseCount('cartao_tentativas',2);
+    }
+    public function test_foto_inadequada_e_recusada_antes_de_salvar_ou_enfileirar(): void
+    {
+        $this->partialMock(\App\Services\Omr\QualidadeCartao::class)->shouldReceive('avaliar')->once()->andReturn(['aprovada'=>false,'codigo'=>'marcador_cortado','mensagem'=>'Inclua os quatro quadrados inteiros.']);
+        $this->postJson('/api/v1/provas/'.$this->prova->id.'/cartoes',['imagem'=>UploadedFile::fake()->image('cortado.jpg')])->assertUnprocessable()->assertJsonValidationErrors('imagem');
+        $this->assertDatabaseCount('cartoes',0);$this->assertDatabaseCount('cartao_envios',0);$this->assertSame([],Storage::disk('public')->allFiles());Queue::assertNotPushed(ProcessarCartaoJob::class);
+    }
+    public function test_worker_recusa_foto_sem_geometria_sem_criar_brancos_ou_nota(): void
+    {
+        $e=$this->enviar(aluno:$this->aluno);$this->job($e)->handle($this->driver(['qualidade'=>['aprovada'=>false,'codigo'=>'marcadores_incompletos','mensagem'=>'Inclua a folha inteira.']]),app(ImagensCartao::class));
+        $this->getJson($this->uri($e))->assertOk()->assertJsonPath('data.processamento','recusado')->assertJsonPath('data.mensagem','Inclua a folha inteira.');
+        $this->assertDatabaseCount('notas',0);$this->assertDatabaseCount('cartao_respostas',0);$this->assertDatabaseCount('cartao_tentativas',1);
+    }
+    public function test_retirada_exige_motivo_versao_e_preserva_revisoes_no_historico(): void
+    {
+        $e=$this->enviar(aluno:$this->aluno);$this->job($e)->handle($this->driver(),app(ImagensCartao::class));
+        $this->deleteJson('/api/v1/cartoes/'.$e->cartao_id)->assertUnprocessable();$c=Cartao::findOrFail($e->cartao_id);$h=app(\App\Services\Omr\HistoricoCartao::class);$versao=$h->fingerprint($c);
+        $this->postJson('/api/v1/cartoes/'.$e->cartao_id.'/revisar',['numero_questao'=>1,'alternativa'=>'B'])->assertOk();
+        $this->deleteJson('/api/v1/cartoes/'.$e->cartao_id,['motivo'=>'Retirada documentada de teste','versao'=>$versao])->assertConflict();
+        $this->deleteJson('/api/v1/cartoes/'.$e->cartao_id,['motivo'=>'Retirada documentada de teste','versao'=>$h->fingerprint($c->fresh())])->assertOk();
+        $evento=DB::table('cartao_tentativa_eventos')->where('acao','excluida')->first();$snap=json_decode(\Illuminate\Support\Facades\Crypt::decryptString($evento->dados),true);
+        $this->assertCount(1,$snap['revisoes']);$this->assertEquals(1,$snap['nota']['acertos']);$this->assertDatabaseCount('ambiguidade_logs',0);
+        $this->getJson('/api/v1/tentativas/'.$evento->tentativa_id)->assertOk()->assertJsonPath('data.estado','excluida');
+    }
+
+    public function test_preservacao_inicial_e_idempotente_e_nao_recalcula_notas(): void
+    {
+        $c=Cartao::create(['prova_id'=>$this->prova->id,'aluno_id'=>$this->aluno,'status'=>'lido']);
+        $antes=$c->getAttributes();$this->artisan('g360:preservar-cartoes')->assertSuccessful();$this->assertDatabaseCount('cartao_tentativas',0);
+        $this->artisan('g360:preservar-cartoes --executar')->assertSuccessful();$this->artisan('g360:preservar-cartoes --executar')->assertSuccessful();
+        $this->assertDatabaseCount('cartao_tentativas',1);$this->assertDatabaseCount('cartao_tentativa_eventos',1);$this->assertDatabaseCount('notas',0);
+        $this->assertSame($antes['status'],$c->fresh()->status);
+    }
+
+    public function test_qr_com_layout_divergente_nao_produz_nota(): void
+    {
+        $e=$this->enviar(aluno:$this->aluno);$this->job($e)->handle($this->driver(['num_questoes'=>3,'num_alternativas'=>5]),app(ImagensCartao::class));
+        $this->assertSame('recusado',$e->fresh()->status);$this->assertDatabaseCount('notas',0);$this->assertDatabaseCount('cartao_respostas',0);
+    }
+
 }
