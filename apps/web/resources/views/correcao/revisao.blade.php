@@ -150,7 +150,7 @@ function desenhar() {
     + '<div class="rev-trabalho"><div id="rev-previa" class="rev-previa rev-imagem-restrita">' + recorteHtml(q) + '</div><div class="rev-respostas">'
     + (q.foto_url ? '<div class="rev-visualizar"><button type="button" class="btn btn-ghost btn-sm" id="rev-ver-cartao" onclick="abrirCartaoInteiro()">Visualizar gabarito</button></div>' : '')
     + '<p class="rev-leitura">' + leitura(q) + '</p>'
-    + '<div class="rev-opcoes">' + botoes + '</div>'
+    + '<div class="rev-opcoes" style="--rev-alternativas:' + ALTERNATIVAS.length + '">' + botoes + '</div>'
     + '<div class="rev-opcoes rev-opcoes-extra">'
     + '<button type="button" class="btn rev-resposta-extra" onclick="escolher(\'BRANCO\')">Em branco</button>'
     + '<button type="button" class="btn rev-resposta-extra" onclick="escolher(\'ANULADA\')">Anulada</button></div>'

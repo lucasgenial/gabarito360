@@ -42,6 +42,8 @@ try {
  for(const [width,height,tema] of [[2560,1263,'light'],[1099,900,'light'],[390,844,'light'],[320,740,'dark']]) {
   await page.setViewportSize({width,height});await page.goto('http://g360.test/revisao?tema='+tema);
   assert.equal(await preview.getByRole('img',{name:'Linha da questão 1 no cartão'}).isVisible(),true);
+  const alternativas=await page.locator('.rev-resposta').evaluateAll(bs=>bs.map(b=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));
+  assert.equal(new Set(alternativas.map(b=>Math.round(b.y))).size,1,'Alternativas permanecem na mesma linha');assert.ok(alternativas.every(b=>b.w>=44&&b.h>=48));
   if(width>=1100){await pronto();if(saida)await page.screenshot({path:saida+`/desktop${width}.png`});continue;}
   const qtd=fotos.length;assert.equal(await painel.isVisible(),false);assert.equal(await canvas.count(),0);assert.equal(fotos.length,qtd);
   if(saida)await page.screenshot({path:saida+`/revisao${width}-${tema}.png`});

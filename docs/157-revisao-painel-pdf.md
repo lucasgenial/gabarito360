@@ -15,3 +15,5 @@ Ajuste solicitado na conferência: alternativas devem parecer botões. Consulta 
 Verificação inicial: 190 testes web/1794 asserções; ensaio real de PDF e eventos em 2560/1440/1099/390/320 aprovado. CI apontou verificação prematura do rótulo de zoom antes do render assíncrono; corrigida espera da atualização, sem alterar a aplicação para satisfazer o teste.
 
 Direção complementar solicitada pelo usuário e aprovada previamente pelo especialista: Voltar/Pular com contorno visível e centralizados, preservando tamanho, ordem e espaçamento. Voltar indisponível distinguido pelo estado desabilitado.
+
+Na menor largura, impedir quebra de A–E: colunas seguem a quantidade de alternativas, padding horizontal8px e gap4px até400px, mantendo48px de altura e ao menos44px de largura em320px. Direção previamente aprovada pelo especialista; teste mede geometria real.
