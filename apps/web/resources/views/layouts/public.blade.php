@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}">
 @stack('styles')
+@include('layouts._marca-head')
 </head>
 <body class="area-publica pagina-publica">
 <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>

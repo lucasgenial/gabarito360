@@ -2,7 +2,7 @@
 @section('title', !empty($internos) ? 'Escolha seu acesso' : 'Escolha seu vínculo')
 @section('content')
 <main class="vinculo-pagina">
-  <a class="brand" href="{{ route('home') }}"><span class="logo">G360</span> Gabarito360</a>
+  <a class="brand" href="{{ route('home') }}"><x-marca /></a>
   <section class="card vinculo-card" aria-labelledby="vinculo-titulo">
     <h1 id="vinculo-titulo">{{ !empty($internos) ? 'Escolha seu acesso' : 'Escolha seu vínculo' }}</h1>
     <p>Olá, {{ session('auth_nome') }}. Selecione onde deseja trabalhar nesta aba.</p>

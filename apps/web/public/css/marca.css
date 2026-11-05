@@ -1,0 +1,32 @@
+@font-face { font-family:'G360 Figtree'; src:url('../fonts/brand/Figtree-ExtraBold.woff2') format('woff2'); font-style:normal; font-weight:800; font-display:swap; }
+@font-face { font-family:'G360 Albert Sans'; src:url('../fonts/brand/AlbertSans-ExtraBold.woff2') format('woff2'); font-style:normal; font-weight:800; font-display:swap; }
+:root { --g360-navy:#001534; --g360-blue:#0588FC; --g360-white:#FFFFFF; }
+.g360-marca { --marca-cor:var(--g360-navy); --marca-icone:36px; --marca-texto:22px; display:inline-flex; align-items:center; gap:9px; flex:none; vertical-align:middle; color:var(--marca-cor); line-height:1; white-space:nowrap; }
+.g360-marca-sm { --marca-icone:32px; --marca-texto:18px; gap:8px; }
+.g360-marca-lg { --marca-icone:56px; --marca-texto:32px; gap:12px; }
+.g360-simbolo { display:block; width:var(--marca-icone); height:var(--marca-icone); flex:none; }
+.g360-simbolo svg { display:block; width:100%; height:100%; }
+.g360-wordmark { font-family:'G360 Figtree',Figtree,sans-serif; font-size:var(--marca-texto); font-style:normal; font-weight:800; letter-spacing:0; color:var(--marca-cor); }
+.g360-numeros { color:var(--g360-blue); }
+.g360-six { font-family:'G360 Albert Sans','G360 Figtree',sans-serif; font-weight:800; }
+.brand:has(> .g360-marca) { min-width:44px; min-height:44px; }
+.auth-marca-mobile { display:none; }
+.g360-marca[data-marca-theme="dark"] { --marca-cor:var(--g360-white); }
+.g360-marca[data-marca-theme="dark"] .g360-simbolo-circulo { fill:var(--g360-white); stroke:var(--g360-white); }
+html[data-theme="dark"] .g360-marca[data-marca-theme="auto"] { --marca-cor:var(--g360-white); }
+html[data-theme="dark"] .g360-marca[data-marca-theme="auto"] .g360-simbolo-circulo { fill:var(--g360-white); stroke:var(--g360-white); }
+.g360-marca-animada .g360-simbolo-circulo { transform-box:fill-box; transform-origin:center; animation:g360-marca-circulo .35s ease-out both; }
+.g360-marca-animada .g360-simbolo-check { transform-box:fill-box; transform-origin:center; animation:g360-marca-check .45s .3s ease-out both; }
+.g360-marca-animada .g360-simbolo { animation:g360-marca-confirmar .3s .75s ease-out both; }
+@keyframes g360-marca-circulo { from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)} }
+@keyframes g360-marca-check { from{opacity:0;transform:translateY(3%)}to{opacity:1;transform:translateY(0)} }
+@keyframes g360-marca-confirmar { 0%,100%{transform:scale(1)}50%{transform:scale(1.035)} }
+.menu-recolhido .app-lateral .g360-wordmark { display:none; }
+.g360-carga-marca img[src*="/brand/"],.corr-miniatura-carga img[src*="/brand/"] { animation:none; }
+.g360-marca-carregando { display:block; flex:none; width:40px; height:40px; background:url('../brand/gabarito360-icon.svg') center/contain no-repeat; }
+html[data-theme="dark"] .g360-marca-carregando { background-image:url('../brand/gabarito360-icon-dark.svg'); }
+.corr-miniatura-carga .g360-marca-carregando { width:28px; height:28px; }
+@media(max-width:440px) { .topo-marca .g360-wordmark,.lp-nav .g360-wordmark { display:none; } }
+@media(max-width:860px) { .auth-marca-mobile { display:flex; margin-bottom:24px; } }
+@media(prefers-reduced-motion:reduce) { .g360-marca-animada .g360-simbolo,.g360-marca-animada .g360-simbolo-circulo,.g360-marca-animada .g360-simbolo-check { animation:none; } }
+@media print { .g360-marca { --marca-cor:var(--g360-navy); }.g360-marca .g360-simbolo-circulo { fill:var(--g360-navy); stroke:#373435; } }

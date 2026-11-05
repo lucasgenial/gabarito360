@@ -198,7 +198,7 @@ function desenharCorrigidos() {
     var foto = c.miniatura_url
       ? '<button type="button" class="corr-thumb corr-miniatura" data-miniatura-cartao="' + c.id + '" data-miniatura-versao="' + escH(c.tentativa_numero || c.created_at || '') + '" data-miniatura-url="' + escH(c.miniatura_url) + '" aria-busy="true" aria-label="Carregando miniatura do cartão-resposta" disabled>'
         + '<img data-miniatura-imagem alt="" hidden>'
-        + '<span class="corr-miniatura-carga" data-miniatura-carga aria-hidden="true"><img src="{{ asset('images/g360-carregando.webp') }}" alt=""><i></i><i></i></span>'
+        + '<span class="corr-miniatura-carga" data-miniatura-carga aria-hidden="true"><span class="g360-marca-carregando" aria-hidden="true"></span><i></i><i></i></span>'
         + '<span class="corr-miniatura-erro" data-miniatura-erro hidden>Foto indisponível<b>Tentar novamente</b></span></button>'
       : '<div class="corr-thumb corr-miniatura-ausente">Sem miniatura disponível</div>';
     var acoes = c.tem_imagem ? '<button type="button" class="btn btn-sm btn-ghost" onclick="verFoto(' + c.id + ')">Ver foto</button>' : '';
