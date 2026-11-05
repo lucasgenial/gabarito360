@@ -85,6 +85,9 @@ jobs:
       - run: node scripts/auditoria/contexto-abas.mjs
         env:
           CHROME_PATH: /usr/bin/google-chrome
+      - run: node scripts/auditoria/revisao-modal.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
       - run: |
           bash -n scripts/operacao/deploy.sh
           bash -n infra/deploy.sh
