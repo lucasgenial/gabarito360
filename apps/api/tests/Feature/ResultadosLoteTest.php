@@ -50,6 +50,9 @@ class ResultadosLoteTest extends TestCase
             $this->assertSame(['Aluno 1','Aluno 3'],array_column(array_column($d['resultados'],'aluno'),'nome'));
             $this->assertSame('A',$d['resultados'][0]['folha'][0]['marcada']);
             $this->assertSame('Pessoal 1',$d['resultados'][0]['escola']);
+            $this->assertSame('autonomo',$d['resultados'][0]['identidade']);
+            $this->assertNull($d['resultados'][0]['logo']);
+            $this->assertNull($d['resultados'][0]['logo_ente']);
             file_put_contents($d['saida'],'%PDF-ficticio');
             if ($durante) $durante();
             return Process::result(output:json_encode(['ok'=>true,'total'=>2]));

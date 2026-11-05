@@ -24,6 +24,35 @@ def dados(nome):
 
 
 class ResultadosPdfTest(unittest.TestCase):
+    def test_titulo_centralizado_e_logo_escolar_nao_ocupa_lugar_de_rede_ausente(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d=dados('Estudante fictício')
+            d.update(saida=str(Path(tmp)/'rede.pdf'),identidade='rede',
+                     logo=str(MODULO.parents[3]/'apps/web/public/brand/gabarito360-icon.png'))
+            pdf.gerar(d)
+            page=PdfReader(d['saida']).pages[0]; titles=[]; images=[]
+            def text(t,cm,tm,font,size):
+                if 'SIMULADO FICTÍCIO · RESULTADO' in t:
+                    titles.append(cm[4]+tm[4]+pdf.pdfmetrics.stringWidth(t.strip(),'Raleway-ExtraBold',size)/2)
+            def op(o,args,cm,tm):
+                if o==b'Do' and cm[5]>pdf.H-80*pdf.mm:images.append(cm[4])
+            page.extract_text(visitor_text=text,visitor_operand_before=op)
+            self.assertEqual(1,len(titles));self.assertAlmostEqual(pdf.W/2,titles[0],places=2)
+            self.assertEqual(1,len(images));self.assertGreater(images[0],pdf.W/2)
+            # A mesma escola sem rede passa à esquerda e não duplica a logo.
+            d.update(identidade='escola',rede=None,saida=str(Path(tmp)/'escola.pdf'));pdf.gerar(d)
+            images.clear();PdfReader(d['saida']).pages[0].extract_text(visitor_operand_before=op)
+            self.assertEqual(1,len(images));self.assertLess(images[0],pdf.W/2)
+
+    def test_autonomo_prioriza_marca_e_nao_apresenta_rede_como_emissora(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d=dados('Estudante fictício');d.update(identidade='autonomo',escola='Professor fictício',saida=str(Path(tmp)/'auto.pdf'))
+            pdf.gerar(d);page=PdfReader(d['saida']).pages[0];text=page.extract_text()
+            self.assertIn('Uso autônomo',text);self.assertIn('Espaço pessoal: Professor fictício',text)
+            self.assertNotIn('REDE FICTÍCIA',text)
+            fontes=' '.join(str(f.get_object().get('/BaseFont')) for f in page['/Resources']['/Font'].values())
+            self.assertIn('Figtree',fontes);self.assertIn('AlbertSans',fontes)
+
     def test_lote_repete_modelo_sem_misturar_alunos_e_individual_continua_igual(self):
         with tempfile.TemporaryDirectory() as tmp:
             a, b = dados('Aluno fictício A'), dados('Aluno fictício B')

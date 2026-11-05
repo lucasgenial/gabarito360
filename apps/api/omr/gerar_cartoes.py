@@ -25,8 +25,9 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
 import layout as L
+import cabecalho_documento as identidade
 
-BLUE, BLUE2, GRAY3, GRAY1 = HexColor("#1351b4"), HexColor("#0c326f"), HexColor("#8e8e8e"), HexColor("#f8f8f8")
+BLUE, BLUE2, GRAY3, GRAY1 = HexColor("#001534"), HexColor("#001534"), HexColor("#8e8e8e"), HexColor("#f8f8f8")
 STRIPE = HexColor("#eef3fb")
 SITE = "gabarito360.com.br"
 FD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
@@ -73,16 +74,6 @@ def campo(c, x0, y0, x1, y1, rotulo, valor):
     c.drawString(X(x0 + 1.5), Y(y1 - 2), valor)
 
 
-def selo(c, x, y, h=4.2, fs=7.0):
-    w = pdfmetrics.stringWidth("G360", "Raleway-ExtraBold", fs) / mm + 2.6
-    c.setFillColor(BLUE)
-    c.roundRect(X(x), Y(y + h), w * mm, h * mm, 0.9 * mm, stroke=0, fill=1)
-    c.setFillColor(white)
-    c.setFont("Raleway-ExtraBold", fs)
-    c.drawString(X(x + 1.3), Y(y + h) + (h * mm - fs * 0.7) / 2, "G360")
-    c.setFillColor(black)
-    return w
-
 
 def cartao(c, d, aluno):
     nq, na = int(d["num_questoes"]), int(d["num_alternativas"])
@@ -94,21 +85,17 @@ def cartao(c, d, aluno):
     for fx, fy in L.FIDUCIALS:
         c.rect(X(fx - s / 2), Y(fy + s / 2), s * mm, s * mm, stroke=0, fill=1)
 
-    # cabeçalho
-    c.setFillColor(GRAY3)
-    caber(c, (d.get("rede") or "").upper(), "Raleway-SemiBold", 7.5, 165)
-    c.drawCentredString(X(105), Y(20), (d.get("rede") or "").upper())
-    c.setFillColor(BLUE2)
-    caber(c, (d.get("escola") or "").upper(), "Raleway-ExtraBold", 12, 165)
-    c.drawCentredString(X(105), Y(26.5), (d.get("escola") or "").upper())
+    # Variante compacta compartilhada; posições ópticas continuam intocadas.
+    identidade.desenhar(c,d,210*mm,Y(17),20*mm,compact=True)
     c.setFillColor(BLUE)
-    c.roundRect(X(20), Y(39.5), 170 * mm, 8.5 * mm, 1.5 * mm, stroke=0, fill=1)
+    c.roundRect(X(20),Y(39.5),170*mm,8.5*mm,1.5*mm,stroke=0,fill=1)
     c.setFillColor(white)
-    titulo = f"{d.get('titulo', '')} · CARTÃO-RESPOSTA".upper()
-    caber(c, titulo, "Raleway-Black", 10.5, 120)
-    c.drawString(X(23.5), Y(36.6), titulo)
-    caber(c, (d.get("disciplina") or "").upper(), "Raleway-ExtraBold", 9.5, 44)
-    c.drawRightString(X(186.5), Y(36.6), (d.get("disciplina") or "").upper())
+    titulo=f"{d.get('titulo','')} · CARTÃO-RESPOSTA".upper()
+    caber(c,titulo,'Raleway-Black',9.5,162)
+    c.drawCentredString(X(105),Y(34.5),titulo)
+    disciplina=(d.get('disciplina') or '').upper()
+    caber(c,disciplina,'Raleway-SemiBold',7,162)
+    c.drawCentredString(X(105),Y(38),disciplina)
     c.setFillColor(black)
 
     campo(c, 20, 43, 155, 53, "ESTUDANTE", aluno["nome"] if aluno else "")
@@ -196,24 +183,18 @@ def cartao(c, d, aluno):
     c.drawCentredString(X(105), Y(261.5), "Assinatura do(a) estudante")
     c.setStrokeColor(HexColor("#e0e0e0"))
     c.line(X(22), Y(270), X(188), Y(270))
-    t1, brand = "Feito com", "Gabarito360"
-    t2 = f"  ·  Corrija provas em minutos, não em dias  ·  {SITE}"
-    w1 = pdfmetrics.stringWidth(t1, "Raleway-SemiBold", 7.5) / mm
-    wb = pdfmetrics.stringWidth(brand, "Raleway-Black", 9) / mm
-    w2 = pdfmetrics.stringWidth(t2, "Raleway-SemiBold", 7.5) / mm
-    x = 105 - (w1 + 1.5 + 11 + 1.2 + wb + w2) / 2
-    c.setFillColor(GRAY3)
-    c.setFont("Raleway-SemiBold", 7.5)
-    c.drawString(X(x), Y(277), t1)
-    x += w1 + 1.5
-    x += selo(c, x, 273.9) + 1.2
-    c.setFillColor(BLUE)
-    c.setFont("Raleway-Black", 9)
-    c.drawString(X(x), Y(277), brand)
-    c.linkURL(f"https://{SITE}", (X(x - 12), Y(279), X(x + wb + w2), Y(272)))
-    c.setFillColor(GRAY3)
-    c.setFont("Raleway-SemiBold", 7.5)
-    c.drawString(X(x + wb), Y(277), t2)
+    t1='Feito com'
+    t2=f'  ·  Corrija provas em minutos, não em dias  ·  {SITE}'
+    w1=pdfmetrics.stringWidth(t1,'Raleway-SemiBold',7.5)
+    w2=pdfmetrics.stringWidth(t2,'Raleway-SemiBold',7.5)
+    brand_width=identidade.largura_marca(4*mm)
+    start=(210*mm-w1-2*mm-brand_width-w2)/2
+    c.setFillColor(GRAY3);c.setFont('Raleway-SemiBold',7.5)
+    c.drawString(start,Y(277),t1)
+    identidade.marca(c,start+w1+2*mm,Y(273),4*mm)
+    c.setFillColor(GRAY3);c.setFont('Raleway-SemiBold',7.5)
+    c.drawString(start+w1+2*mm+brand_width,Y(277),t2)
+    c.linkURL(f'https://{SITE}',(start,Y(279),210*mm-start,Y(272)))
     c.setFont("Helvetica", 5.5)
     c.setFillColor(HexColor("#b0b0b0"))
     c.drawCentredString(X(105), Y(283), qr_txt)
