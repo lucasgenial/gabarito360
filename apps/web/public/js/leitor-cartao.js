@@ -32,14 +32,15 @@
     } finally {imagem.removeAttribute('src');URL.revokeObjectURL(url);}
   }
   window.LeitorCartao=class {
-    constructor(root) {
+    constructor(root,opcoes={}) {
       this.root=root;this.sequencia=0;this.url=null;this.pdf=null;this.pagina=1;this.zoom=1;
+      this.controles=opcoes.controles!==false;this.largura=opcoes.ajuste==='largura';
       root.classList.add('rev-leitor');
       root.innerHTML='<div class="rev-leitor-ferramentas" aria-label="Controles do PDF">'
-        +'<button type="button" class="btn btn-ghost" data-menos aria-label="Diminuir PDF" disabled>−</button>'
+        +(this.controles?'<button type="button" class="btn btn-ghost" data-menos aria-label="Diminuir PDF" disabled>−</button>'
         +'<output data-zoom aria-label="Ampliação do PDF">Ajustado</output>'
         +'<button type="button" class="btn btn-ghost" data-mais aria-label="Ampliar PDF" disabled>+</button>'
-        +'<button type="button" class="btn btn-ghost" data-ajustar disabled>Ajustar à página</button>'
+        +'<button type="button" class="btn btn-ghost" data-ajustar disabled>Ajustar à página</button>':'')
         +'<span data-paginas hidden><button type="button" class="btn btn-ghost" data-anterior aria-label="Página anterior">‹</button><output data-pagina></output><button type="button" class="btn btn-ghost" data-proxima aria-label="Próxima página">›</button></span></div>'
         +'<div class="rev-leitor-area" tabindex="0" role="region" aria-label="Leitor PDF do cartão-resposta">'
         +'<p class="rev-modal-estado" data-estado role="status">Selecione um cartão para visualizar.</p>'
@@ -47,14 +48,16 @@
         +'<div class="rev-pdf-pagina rev-imagem-restrita" data-folha hidden><canvas role="img" aria-label="Cartão-resposta completo" draggable="false"></canvas></div></div>';
       this.area=root.querySelector('.rev-leitor-area');this.canvas=root.querySelector('canvas');this.folha=root.querySelector('[data-folha]');
       this.estado=root.querySelector('[data-estado]');this.erro=root.querySelector('[data-erro]');
-      root.querySelector('[data-mais]').onclick=()=>this.ampliar(1.25);
+      this.ferramentas=root.querySelector('.rev-leitor-ferramentas');this.ferramentas.hidden=!this.controles;
+      if(this.controles){root.querySelector('[data-mais]').onclick=()=>this.ampliar(1.25);
       root.querySelector('[data-menos]').onclick=()=>this.ampliar(.8);
-      root.querySelector('[data-ajustar]').onclick=()=>{this.zoom=1;this.renderizar();};
+      root.querySelector('[data-ajustar]').onclick=()=>{this.zoom=1;this.renderizar();};}
       root.querySelector('[data-anterior]').onclick=()=>{if(this.pagina>1){this.pagina--;this.renderizar();}};
       root.querySelector('[data-proxima]').onclick=()=>{if(this.pdf&&this.pagina<this.pdf.numPages){this.pagina++;this.renderizar();}};
       root.querySelector('[data-repetir]').onclick=()=>this.carregar(this.url,true);
       ['contextmenu','dragstart','copy','cut'].forEach(tipo=>this.folha.addEventListener(tipo,e=>e.preventDefault()));
-      this.area.addEventListener('wheel',e=>{if(e.ctrlKey&&this.pdf){e.preventDefault();this.ampliar(e.deltaY<0?1.1:1/1.1);}},{passive:false});
+      root.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['p','s','c','x'].includes(e.key.toLowerCase())){e.preventDefault();e.stopPropagation();}});
+      this.area.addEventListener('wheel',e=>{if(this.controles&&e.ctrlKey&&this.pdf){e.preventDefault();this.ampliar(e.deltaY<0?1.1:1/1.1);}},{passive:false});
       this.observer=new ResizeObserver(()=>{if(this.pdf&&this.area.clientWidth&&this.area.clientHeight)this.renderizar();});this.observer.observe(this.area);
     }
     botoes(ativo) {this.root.querySelectorAll('[data-mais],[data-menos],[data-ajustar]').forEach(b=>b.disabled=!ativo);}
@@ -64,13 +67,14 @@
       this.pdf=null;this.carga=null;this.url=null;this.folha.hidden=true;this.canvas.width=this.canvas.height=0;
       this.erro.hidden=true;this.estado.hidden=false;this.estado.textContent='Selecione um cartão para visualizar.';this.botoes(false);
       this.root.querySelector('[data-paginas]').hidden=true;this.area.setAttribute('aria-busy','false');
+      this.ferramentas.hidden=!this.controles;
     }
     async carregar(url,forcar=false) {
       if(url===this.url&&!forcar)return;
       const repetindo=this.erro.contains(document.activeElement);
       this.limpar();if(!url)return;this.url=url;
       const seq=this.sequencia;this.abort=new AbortController();
-      this.estado.textContent='Carregando cartão em PDF…';this.area.setAttribute('aria-busy','true');
+      this.estado.innerHTML='<div class="g360-carregando g360-carregando-pagina"><div class="g360-carga-marca"><img src="/images/g360-carregando.webp" width="40" height="40" alt="" aria-hidden="true"><span>Carregando cartão em PDF…</span></div><div class="g360-skeleton" aria-hidden="true"><i></i><i></i><i></i></div></div>';this.area.setAttribute('aria-busy','true');
       if(repetindo)this.area.focus({preventScroll:true});
       try {
         const timeout=setTimeout(()=>this.abort?.abort(),25000);
@@ -87,7 +91,7 @@
       } catch(e) {if(seq!==this.sequencia)return;this.folha.hidden=true;this.estado.hidden=true;this.erro.hidden=false;this.botoes(false);}
       finally {if(seq===this.sequencia)this.area.setAttribute('aria-busy','false');}
     }
-    ampliar(fator){if(!this.pdf)return;this.zoom=Math.max(.5,Math.min(5,this.zoom*fator));this.renderizar();}
+    ampliar(fator){if(!this.pdf||!this.controles)return;this.zoom=Math.max(.5,Math.min(5,this.zoom*fator));this.renderizar();}
     async renderizar() {
       if(!this.pdf||!this.area.clientWidth||!this.area.clientHeight)return;
       const seq=this.sequencia,rodada=(this.rodada||0)+1;this.rodada=rodada;const anterior=this.tarefa;anterior?.cancel();
@@ -95,7 +99,7 @@
         if(anterior)await anterior.promise.catch(()=>{});
         if(seq!==this.sequencia||rodada!==this.rodada||!this.pdf)return;
         const page=await this.pdf.getPage(this.pagina);if(seq!==this.sequencia||rodada!==this.rodada)return;
-        const base=page.getViewport({scale:1}),fit=Math.min((this.area.clientWidth-32)/base.width,(this.area.clientHeight-32)/base.height);
+        const base=page.getViewport({scale:1}),largura=(this.area.clientWidth-32)/base.width,fit=this.largura?largura:Math.min(largura,(this.area.clientHeight-32)/base.height);
         const v=page.getViewport({scale:Math.max(.05,fit)*this.zoom});
         const dpr=Math.min(window.devicePixelRatio||1,2,Math.sqrt(8000000/(v.width*v.height)));
         this.canvas.width=Math.ceil(v.width*dpr);this.canvas.height=Math.ceil(v.height*dpr);
@@ -104,7 +108,8 @@
         this.tarefa=page.render({canvasContext:this.canvas.getContext('2d'),viewport:v,transform:[dpr,0,0,dpr,0,0],annotationMode:0});
         await this.tarefa.promise;if(seq!==this.sequencia||rodada!==this.rodada)return;
         this.estado.hidden=true;this.erro.hidden=true;this.folha.hidden=false;this.botoes(true);
-        this.root.querySelector('[data-zoom]').textContent=this.zoom===1?'Ajustado':Math.round(this.zoom*100)+'%';
+        if(this.controles)this.root.querySelector('[data-zoom]').textContent=this.zoom===1?'Ajustado':Math.round(this.zoom*100)+'%';
+        this.ferramentas.hidden=!this.controles&&this.pdf.numPages===1;
         this.root.querySelector('[data-paginas]').hidden=this.pdf.numPages===1;
         this.root.querySelector('[data-pagina]').textContent=this.pagina+' / '+this.pdf.numPages;
         this.root.querySelector('[data-anterior]').disabled=this.pagina===1;this.root.querySelector('[data-proxima]').disabled=this.pagina===this.pdf.numPages;

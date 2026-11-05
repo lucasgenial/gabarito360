@@ -11,5 +11,5 @@
 @push('scripts')
 <script src="{{ asset('js/leitor-cartao.js') }}?v={{ filemtime(public_path('js/leitor-cartao.js')) }}"></script>
 <script src="{{ asset('js/painel-cartao.js') }}?v={{ filemtime(public_path('js/painel-cartao.js')) }}"></script>
-<script>criarPainelCartao(@json($documentoUrl));</script>
+<script>criarPainelCartao(@json($documentoUrl),@json($documentoOpcoes??[]));</script>
 @endpush

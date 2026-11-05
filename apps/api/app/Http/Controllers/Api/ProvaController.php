@@ -259,6 +259,7 @@ class ProvaController extends Controller
             ->get();
 
         return ApiResponse::success(array_merge($prova->toArray(), [
+            'correcao'=>\App\Support\Correcao::situacao($prova),
             'organizacao_curricular'=>CurriculoProva::aplicavel($request->user())?app(CurriculoProva::class)->estado($prova):null,
             'curriculo'=>config('disciplinas.ativo')?(app(CurriculoProva::class)->resumos($request->user(),[$prova->id])[$prova->id]??null):null,
             'criado_por_nome' => $prova->autor?->nome,

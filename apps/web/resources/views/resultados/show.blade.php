@@ -48,34 +48,24 @@
 @section('content')
 @include('relatorios._cabecalho', ['cabecalho' => $dados['cabecalho'] ?? [], 'titulo' => 'Resultado · ' . $dados['prova']['titulo'], 'subtitulo' => $dados['prova']['disciplina']])
 
-<div class="row-between" style="margin-top:12px;flex-wrap:wrap;">
-  <div>
-    <h1 class="page-title" style="margin:4px 0 2px;">{{ $aluno['nome'] }}</h1>
-    <p class="page-sub">
-      {{ collect([$aluno['turma_nome'] ? 'Turma ' . $aluno['turma_nome'] : null, $aluno['matricula'] ? 'Matrícula ' . $aluno['matricula'] : null, $lingua])->filter()->implode(' · ') }}
-    </p>
-  </div>
-  <div class="res-acoes no-print">
-    @if(!empty($dados['cartao_foto_url']))
-      <button type="button" class="btn btn-secondary" id="doc-abrir">Visualizar cartão-resposta</button>
-      <a class="btn btn-secondary" href="{{ route('correcao.tentativas',['id'=>$prova['id'],'aluno_id'=>$aluno['id']]) }}">Histórico de tentativas</a>
-      @if(!empty($dados['tentativa_numero']))<span class="badge badge-muted">Tentativa {{ $dados['tentativa_numero'] }}</span>@endif
-    @endif
-    @if($from === 'correcao')
-      <a class="btn btn-ghost" href="{{ route('correcao.show', $prova['id']) }}">← Voltar à correção</a>
-    @endif
-    <button type="button" class="btn btn-secondary" onclick="window.print()"><x-icone nome="imprimir" /> Imprimir</button>
-    <a class="btn btn-secondary" href="{{ $urlPdf }}?baixar=1">⬇ PDF</a>
-    <button type="button" class="btn btn-primary" id="btn-whats" style="background:#1fa855;border-color:#1fa855;"><x-icone nome="compartilhar" /> WhatsApp</button>
-    @php $podeMexer = \App\Support\Acesso::podeAlterarCorrecao(!empty($dados['correcao']['fechada'])); @endphp
-    @if($dados['cartao_id'] && $podeMexer)
-      <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-revisar').style.display='flex'">Revisar leitura</button>
-      <button type="button" class="btn btn-ghost" style="color:var(--danger);" id="btn-excluir-correcao"><x-icone nome="lixeira" /> Retirar correção</button>
-    @elseif(!empty($dados['correcao']['fechada']))
-      <span class="badge badge-warn" title="Peça à coordenação para reabrir"><x-icone nome="cadeado" /> correção fechada</span>
-    @endif
-  </div>
+<header class="res-identificacao">
+  <h1 class="page-title">{{ $aluno['nome'] }}</h1>
+  <p class="page-sub">{{ collect([$aluno['turma_nome'] ? 'Turma ' . $aluno['turma_nome'] : null, $aluno['matricula'] ? 'Matrícula ' . $aluno['matricula'] : null, $lingua])->filter()->implode(' · ') }}</p>
+  @if(!empty($dados['historico_permitido']))<p class="res-tentativas-total" id="resultado-tentativas-total">Carregando tentativas…</p>@endif
+</header>
+<div class="res-barra-acoes no-print" aria-label="Ações do resultado">
+  @if(!empty($dados['cartao_foto_url']))<button type="button" class="btn btn-secondary res-acao" id="doc-abrir" aria-label="Cartão resposta" title="Cartão resposta"><x-icone nome="prova"/><span class="res-acao-texto">Cartão resposta</span><span class="res-legenda" aria-hidden="true">Cartão resposta</span></button>@endif
+  <details class="res-menu-relatorio" id="res-menu-relatorio"><summary class="btn btn-secondary res-acao" aria-label="Relatório" title="Relatório"><x-icone nome="grafico"/><span class="res-acao-texto">Relatório</span><span class="res-legenda" aria-hidden="true">Relatório</span></summary>
+    <div class="res-opcoes-relatorio">
+      <button type="button" class="btn btn-ghost" data-imprimir-relatorio><x-icone nome="imprimir"/>Imprimir relatório</button>
+      <a class="btn btn-ghost" href="{{ $urlPdf }}?baixar=1"><x-icone nome="prova"/>Baixar relatório PDF</a>
+      <button type="button" class="btn btn-ghost" id="btn-whats"><x-icone nome="compartilhar"/>Compartilhar resultado</button>
+    </div>
+  </details>
+  @if(!empty($dados['correcao']['fechada']))<span class="badge badge-warn"><x-icone nome="cadeado"/>Correção fechada</span>@endif
 </div>
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if($errors->any() && !request('tentativa'))<x-aviso tipo="erro">{{ $errors->first() }}</x-aviso>@endif
 
 {{-- Resumo --}}
 @if(($dados['qualidade_foto']['aprovada']??null)===false)
@@ -93,8 +83,8 @@
 </div>
 
 {{-- Questão por questão --}}
-<div class="{{ !empty($dados['cartao_foto_url']) ? 'documento-estacao' : '' }}">
-<div class="card card-pad" @if(empty($dados['cartao_foto_url'])) style="margin-top:16px;" @endif>
+<div class="{{ !empty($dados['cartao_foto_url']) ? 'documento-estacao resultado-documentos' : '' }}">
+<div class="card card-pad res-questoes" @if(empty($dados['cartao_foto_url'])) style="margin-top:16px;" @endif>
   <div class="row-between">
     <h3 style="font-size:17px;">Questão por questão</h3>
     <span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>
@@ -117,68 +107,20 @@
   </div>
 </div>
 @if(!empty($dados['cartao_foto_url']))
-  @include('correcao._documento',['documentoUrl'=>$dados['cartao_foto_url'],'documentoContexto'=>$aluno['nome'].' · '.$prova['titulo']])
+  @include('correcao._documento',['documentoUrl'=>$dados['cartao_foto_url'],'documentoContexto'=>$aluno['nome'].' · '.$prova['titulo'],'documentoOpcoes'=>['ajuste'=>'largura','controles'=>false,'cardsIguais'=>true,'rotulo'=>'Cartão resposta']])
 @endif
 </div>
 
-@if($dados['cartao_id'])
-<div class="modal-backdrop no-print" id="modal-revisar" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;">
-  <div class="modal" style="background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,.22);width:100%;max-width:420px;">
-    <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between;">
-      <h2 style="font-size:17px;font-weight:700;">Revisar leitura</h2>
-      <button type="button" onclick="document.getElementById('modal-revisar').style.display='none'" style="width:32px;height:32px;border-radius:50%;background:none;border:0;cursor:pointer;font-size:20px;color:var(--muted);">&times;</button>
-    </div>
-    <form method="POST" action="{{ route('cartoes.revisar', $dados['cartao_id']) }}">
-      @csrf
-      <div style="padding:22px;display:flex;flex-direction:column;gap:14px;">
-        <div class="field">
-          <label>Questão *</label>
-          <select class="select" name="numero_questao" required>
-            @foreach($folha as $q)
-              <option value="{{ $q['numero_questao'] }}">Questão {{ $q['numero_questao'] }} (marcou: {{ $q['marcada'] ?? '—' }})</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="field">
-          <label>Nova alternativa *</label>
-          <select class="select" name="alternativa" required>
-            @foreach(range('A', chr(64 + ($prova['num_alternativas'] ?? 5))) as $alt)
-              <option value="{{ $alt }}">{{ $alt }}</option>
-            @endforeach
-          </select>
-        </div>
-      </div>
-      <div style="padding:14px 22px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end;gap:10px;">
-        <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-revisar').style.display='none'">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Salvar revisão</button>
-      </div>
-    </form>
-  </div>
-</div>
-@endif
-
-@include('correcao._retirar')
+@if(!empty($dados['historico_permitido']))@include('resultados._historico')@endif
 <div style="height:48px" class="no-print"></div>
 @endsection
 
 @push('scripts')
 <script>
-// Excluir a correção do aluno (apaga foto, respostas e nota) para fotografar de novo
-(function () {
-  var b = document.getElementById('btn-excluir-correcao');
-  if (!b) return;
-  b.addEventListener('click', async function () {
-    var retirada;try{retirada=await confirmarRetiradaCartao({{ (int) $dados['cartao_id'] }},@json($aluno['nome']));}catch(e){alert(e.message);return;}
-    if(!retirada)return;b.disabled=true;
-    fetch('/cartoes/{{ (int) $dados['cartao_id'] }}', { method: 'DELETE', credentials: 'same-origin',body:JSON.stringify(retirada),
-      headers: { 'Content-Type':'application/json','Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) {
-        if (!res.ok) { b.disabled=false;alert(res.j.erro || 'Não foi possível retirar. A correção atual foi mantida.'); return; }
-        window.location.href = @json(route('correcao.show', $prova['id'], false));
-      }).catch(function(){b.disabled=false;alert('Não foi possível confirmar a retirada. Confira a correção antes de repetir.');});
-  });
-})();
+// O relatório pode ser exportado; o cartão digitalizado fica fora da impressão.
+document.querySelector('[data-imprimir-relatorio]').addEventListener('click',function(){document.getElementById('res-menu-relatorio').open=false;window.print();});
+document.addEventListener('click',function(e){var m=document.getElementById('res-menu-relatorio');if(!m.contains(e.target))m.open=false;});
+document.getElementById('res-menu-relatorio').addEventListener('keydown',function(e){if(e.key==='Escape'){this.open=false;this.querySelector('summary').focus();}});
 
 // Envia o PDF pelo compartilhamento do celular (WhatsApp aparece na lista); sem suporte a
 // arquivos, baixa o PDF e abre o WhatsApp com o resumo para anexar.
@@ -187,7 +129,8 @@
   var PDF_URL = @json($urlPdf);
   var TEXTO = @json($resumoTexto);
   btn.addEventListener('click', function () {
-    var rotulo = btn.textContent;
+    var rotulo = btn.innerHTML;
+    var aviso=window.G360Toast?.carregando('Preparando o relatório para compartilhar.');
     btn.disabled = true; btn.textContent = 'Gerando PDF…';
     fetch(PDF_URL, { credentials: 'same-origin' })
       .then(function (r) { if (!r.ok) throw new Error('falha ao gerar o PDF'); return r.blob(); })
@@ -198,11 +141,12 @@
           return navigator.share({ files: [arq], title: 'Resultado', text: TEXTO }).catch(function () {});
         }
         var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+        a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click(); a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
         window.open('https://wa.me/?text=' + encodeURIComponent(TEXTO + '\n(PDF em anexo)'), '_blank');
       })
-      .catch(function (e) { alert('Não foi possível enviar: ' + e.message); })
-      .finally(function () { btn.disabled = false; btn.textContent = rotulo; });
+      .then(function(){if(aviso)window.G360Toast.sucesso('Relatório preparado. Conclua o envio no aplicativo escolhido.',{id:aviso});})
+      .catch(function (e) { if(window.G360Toast)window.G360Toast.erro('Não foi possível preparar o relatório: '+e.message,{id:aviso});else alert('Não foi possível enviar: ' + e.message); })
+      .finally(function () { btn.disabled = false; btn.innerHTML = rotulo; });
   });
 })();
 </script>
