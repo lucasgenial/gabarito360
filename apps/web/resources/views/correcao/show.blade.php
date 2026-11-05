@@ -18,7 +18,6 @@
     <h1 class="page-title">{{ $prova['titulo'] }}</h1>
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ implode(' · ', array_column($prova['turmas'] ?? [], 'nome')) }}{{ $prova['data_aplicacao'] ? ' · aplicado em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }}</p>
   </div>
-  @pode('correcao.acompanhar')<a class="btn btn-secondary" href="{{ route('correcao.tentativas',$prova['id']) }}">Histórico de tentativas</a>@endpode
   <button class="btn btn-ghost" id="btn-upload" onclick="abrirUpload()">Envio manual</button>
 </div>
 
@@ -56,44 +55,43 @@
   @endpode
 @endif
 
-@if(session('sucesso'))
-  <div style="background:var(--success-light);color:var(--success);border:1px solid var(--success);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('sucesso') }}
-  </div>
-@endif
-@if(session('erro'))
-  <div style="background:var(--danger-light);color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;font-weight:600;margin-top:16px;">
-    {{ session('erro') }}
-  </div>
-@endif
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 <div class="progress-head">
-  <div class="card card-pad">
+  <div class="card card-pad" id="regiao-progresso" aria-busy="true">
+    <x-carregando rotulo="Carregando indicadores…" data-carga-esqueleto role="status"/>
+    <div data-carga-conteudo hidden>
     <div class="stat-row">
-      <div class="correcao-pct"><b id="v-pct">0%</b><span>concluído</span></div>
+      <div class="correcao-pct"><b id="v-pct">—</b><span>dos alunos previstos</span></div>
       <div class="stat-grid">
-        <div><div class="v" id="v-lidos" style="color:var(--accent);">{{ $status['lidos'] }}</div><div class="l">Cartões lidos</div></div>
-        <div><div class="v" id="v-pendentes" style="color:var(--muted)">{{ $status['pendentes'] }}</div><div class="l">Pendentes</div></div>
-        <div><div class="v" id="v-ambiguos" style="color:var(--atencao)">{{ $status['ambiguos'] }}</div><div class="l">Ambíguos</div></div>
-        <div><div class="v" id="v-total" style="color:var(--muted)">{{ $status['total'] }}</div><div class="l">Total de cartões</div></div>
+        <div><div class="v" id="v-concluidos">—</div><div class="l">Correções concluídas</div></div>
+        <div><div class="v" id="v-esperados">—</div><div class="l">Alunos previstos</div></div>
+        <div><div class="v" id="v-sem-cartao">—</div><div class="l">Sem cartão</div></div>
+        <div><div class="v" id="v-processando">—</div><div class="l">Em processamento</div></div>
+        <div><div class="v" id="v-revisao">—</div><div class="l">Precisam de revisão</div></div>
+        <div><div class="v" id="v-total">—</div><div class="l">Cartões recebidos</div></div>
       </div>
     </div>
-    <div class="progress-track"><div id="bar"></div></div>
+    <p id="v-progresso-resumo" class="page-sub"></p><p id="v-pendencias-tecnicas" class="page-sub"></p>
+    <div class="progress-track" role="progressbar" aria-label="Correções concluídas" aria-valuemin="0" aria-valuemax="100"><div id="bar"></div></div>
+    </div><p data-carga-feedback role="status"></p>
   </div>
   <div class="card card-pad">
     <h3 style="font-size:16px;margin-bottom:8px;">Leituras para revisar</h3>
-    <p id="ambig-resumo" style="margin-bottom:12px;"></p>
+    <p id="ambig-resumo" style="margin-bottom:12px;">Carregando revisões…</p>
     @if($podeMexer)<a class="btn btn-primary" id="btn-revisar" href="{{ route('correcao.revisao', $prova['id']) }}" style="display:none;">Revisar leituras</a>@endif
   </div>
 </div>
 
 {{-- Alunos corrigidos: foto do cartão, nota, acertos/erros e exclusão para fotografar de novo --}}
-<div class="card card-pad" style="margin-top:20px;" id="corrigidos">
+<div class="card card-pad" style="margin-top:20px;" id="corrigidos" aria-busy="true">
   <div class="row-between" style="flex-wrap:wrap;margin-bottom:12px;">
-    <h3 style="font-size:17px;">Alunos corrigidos <span class="badge badge-muted" id="corr-qtd">0</span></h3>
-    <input class="input" id="corr-busca" type="search" placeholder="Buscar aluno…" style="max-width:240px;">
+    <h3 style="font-size:17px;">Cartões recebidos <span class="badge badge-muted" id="corr-qtd">—</span></h3>
+    <input class="input" id="corr-busca" disabled type="search" placeholder="Buscar aluno…" style="max-width:240px;">
   </div>
-  <ul class="corr-list" id="corr-lista"><li style="color:var(--muted);font-size:13px;">Carregando…</li></ul>
+  <x-carregando rotulo="Carregando cartões…" data-carga-esqueleto role="status"/>
+  <div data-carga-conteudo hidden><ul class="corr-list" id="corr-lista"></ul></div><p data-carga-feedback role="status"></p>
 </div>
 
 <div class="g360-modal" id="foto-modal" onclick="if (event.target === this) fecharModal('foto-modal')">
@@ -107,7 +105,7 @@
 
 <div class="card card-pad" style="margin-top:20px;">
   <h3 style="font-size:17px;margin-bottom:8px;">Cartões processados recentemente</h3>
-  <ul class="activity" id="activity-list"></ul>
+  <ul class="activity" id="activity-list"><li>Carregando atividade…</li></ul>
 </div>
 
 {{-- Modal de upload --}}
@@ -126,8 +124,8 @@
           <input class="input" type="file" name="imagem" accept="image/*" required />
         </div>
         <div class="field">
-          <label>Aluno (opcional — pode vincular depois)</label>
-          <select class="select" name="aluno_id">
+          <label for="upload-aluno">Aluno (opcional — pode vincular depois)</label><p id="upload-alunos-estado" role="status"></p>
+          <select class="select" name="aluno_id" id="upload-aluno">
             <option value="">— Não identificado —</option>
             @foreach($alunos as $a)
               <option value="{{ $a['id'] }}">{{ $a['nome'] }}{{ isset($a['matricula']) ? ' — ' . $a['matricula'] : '' }}</option>
@@ -160,14 +158,14 @@ var NOTA_MAX = {{ (float) ($prova['nota_maxima'] ?? 10) }};
 var corrDados = [], corrAssinatura = '';
 function escH(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
 function fmtNota(n) { return Number(n).toFixed(1).replace('.', ','); }
-function carregarCorrigidos() {
-  fetch(LISTA_URL, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      var lista = d.cartoes || [], assin = JSON.stringify(lista);
-      if (assin === corrAssinatura) return; // nada mudou: não redesenha (evita piscar as fotos)
-      corrAssinatura = assin; corrDados = lista; desenharCorrigidos();
-    }).catch(function () {});
+var cargaCartoes=G360Carga(document.getElementById('corrigidos'));
+function carregarCorrigidos(silenciosa=false) {
+  return cargaCartoes.executar(()=>G360BuscarJSON(LISTA_URL),function(d){
+    if(!Array.isArray(d.cartoes))throw new Error('Lista indisponível');
+    var lista=d.cartoes,assin=JSON.stringify(lista);document.getElementById('corr-busca').disabled=false;
+    if(assin===corrAssinatura)return;corrAssinatura=assin;corrDados=lista;desenharCorrigidos();
+    if(lista.some(c=>!c.aluno_id))carregarAlunos();
+  },{silenciosa});
 }
 function desenharCorrigidos() {
   var termo = (document.getElementById('corr-busca').value || '').toLowerCase();
@@ -177,7 +175,7 @@ function desenharCorrigidos() {
   document.getElementById('corr-qtd').textContent = corrDados.length;
   var ul = document.getElementById('corr-lista');
   if (!itens.length) {
-    ul.innerHTML = '<li style="color:var(--muted);font-size:13px;">' + (corrDados.length ? 'Nenhum aluno encontrado.' : 'Nenhum cartão corrigido ainda.') + '</li>';
+    ul.innerHTML = '<li style="color:var(--muted);font-size:13px;">' + (corrDados.length ? 'Nenhum aluno encontrado.' : 'Nenhum cartão recebido ainda.') + '</li>';
     return;
   }
   ul.innerHTML = itens.map(function (c) {
@@ -234,16 +232,27 @@ async function excluirCorrecao(id) {
     .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
     .then(function (res) {
       if (!res.ok) { alert(res.j.erro || 'Não foi possível excluir.'); return; }
-      corrAssinatura = ''; carregarCorrigidos(); atualizar();alert('Correção retirada. Os registros anteriores foram preservados no histórico.');
+      corrAssinatura = ''; carregarCorrigidos(); atualizar();window.G360Toast?.sucesso('Correção retirada. Os registros anteriores foram preservados no histórico.');
     });
 }
 document.getElementById('corr-busca').addEventListener('input', desenharCorrigidos);
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fecharModal('foto-modal'); } });
 carregarCorrigidos();
-setInterval(function () { if (!document.hidden) carregarCorrigidos(); }, 20000);
+setInterval(function () { if (!document.hidden) carregarCorrigidos(true); }, 20000);
 var CSRF = '{{ csrf_token() }}';
 
-function abrirUpload() { document.getElementById('modal-upload').style.display = 'flex'; }
+var promessaAlunos;
+function carregarAlunos(){
+  if(promessaAlunos)return promessaAlunos;
+  var estado=document.getElementById('upload-alunos-estado'),select=document.getElementById('upload-aluno');estado.textContent='Carregando alunos…';select.disabled=true;
+  promessaAlunos=G360BuscarJSON(@json(route('correcao.alunos',$prova['id'],false))).then(function(d){
+    ALUNOS=d.alunos.map(a=>({id:a.id,nome:a.nome,turma:a.turma_nome||''}));
+    ALUNOS.forEach(a=>{var o=document.createElement('option');o.value=a.id;o.textContent=a.nome;select.append(o);});
+    estado.textContent='';select.disabled=false;desenharCorrigidos();return ALUNOS;
+  }).catch(function(){promessaAlunos=null;estado.textContent='Não foi possível carregar os alunos. Você pode enviar sem identificar e vincular depois. ';var b=document.createElement('button');b.type='button';b.className='btn btn-secondary btn-sm';b.textContent='Tentar novamente';b.onclick=carregarAlunos;estado.append(b);});
+  return promessaAlunos;
+}
+function abrirUpload() { document.getElementById('modal-upload').style.display = 'flex';carregarAlunos(); }
 function fecharUpload() { document.getElementById('modal-upload').style.display = 'none'; }
 
 function tempoRelativo(iso) {
@@ -257,27 +266,17 @@ function tempoRelativo(iso) {
 }
 
 function renderEstado(data) {
-  var pct = data.total > 0 ? Math.round(data.lidos / data.total * 100) : 0;
-  document.getElementById('v-pct').textContent = pct + '%';
-
-  document.getElementById('v-lidos').textContent = data.lidos;
-  document.getElementById('v-pendentes').textContent = data.pendentes;
-  document.getElementById('v-ambiguos').textContent = data.ambiguos;
-  document.getElementById('v-total').textContent = data.total;
-  document.getElementById('bar').style.width = pct + '%';
-
-  var btn = document.getElementById('btn-upload');
-  if (data.concluida && data.total > 0) {
-    var aviso = document.getElementById('aviso-concluida');
-    if (!aviso) {
-      aviso = document.createElement('span');
-      aviso.id = 'aviso-concluida';
-      aviso.className = 'badge badge-success';
-      aviso.style.marginRight = '10px';
-      aviso.textContent = 'Leitura concluída';
-      btn.parentNode.insertBefore(aviso, btn);
-    }
-  }
+  if(!Number.isFinite(data.esperados)||!Number.isFinite(data.concluidos))throw new Error('Indicadores indisponíveis');
+  var pct=data.percentual_concluido;
+  document.getElementById('v-pct').textContent=pct===null?'—':new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(pct)+'%';
+  [['concluidos','concluidos'],['esperados','esperados'],['sem-cartao','sem_cartao'],['processando','em_processamento'],['revisao','alunos_revisao'],['total','cartoes_recebidos']].forEach(x=>document.getElementById('v-'+x[0]).textContent=data[x[1]]);
+  document.getElementById('v-progresso-resumo').textContent=data.esperados?data.concluidos+' de '+data.esperados+' alunos com correção concluída.':'Sem alunos previstos.';
+  document.getElementById('v-pendencias-tecnicas').textContent=[data.falhas?data.falhas+' aluno(s) com leitura não concluída.':'',data.nao_identificados?data.nao_identificados+' cartão(ões) sem aluno identificado.':''].filter(Boolean).join(' ');
+  document.getElementById('bar').style.width=(pct??0)+'%';
+  var progresso=document.querySelector('.progress-track');if(pct===null)progresso.removeAttribute('aria-valuenow');else progresso.setAttribute('aria-valuenow',pct);
+  var aviso=document.getElementById('aviso-concluida');
+  if(data.concluida&&!aviso){aviso=document.createElement('span');aviso.id='aviso-concluida';aviso.className='badge badge-success';aviso.textContent='Todos os alunos previstos têm resultado concluído';document.getElementById('v-progresso-resumo').append(' ',aviso);}
+  if(!data.concluida)aviso?.remove();
 }
 
 function renderAmbiguidades(lista) {
@@ -304,23 +303,22 @@ function renderAtividade(recentes) {
     var li = document.createElement('li');
     var nome = r.aluno_nome || 'Aluno não identificado';
     var nota = r.nota_final !== null ? parseFloat(r.nota_final).toFixed(1).replace('.', ',') : '—';
-    li.innerHTML = '<div class="act-ico" style="background:var(--success-light);color:var(--success);">✓</div><div><b>' + nome + '</b> — nota ' + nota + '<div class="act-time">' + tempoRelativo(r.updated_at) + '</div></div>';
+    li.innerHTML = '<div class="act-ico" style="background:var(--success-light);color:var(--success);">✓</div><div><b>' + escH(nome) + '</b> — nota ' + nota + '<div class="act-time">' + tempoRelativo(r.updated_at) + '</div></div>';
     ul.appendChild(li);
   });
 }
 
-function atualizar() {
-  fetch(STATUS_URL, { headers: { 'Accept': 'application/json' } })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      renderEstado(data);
-      renderAmbiguidades(data.ambiguidades || []);
-      renderAtividade(data.recentes || []);
-    });
+var cargaProgresso=G360Carga(document.getElementById('regiao-progresso'));
+document.getElementById('regiao-progresso').addEventListener('g360:carga',function(e){
+  if(e.detail.estado!=='erro')return;
+  if(!e.detail.anterior){document.getElementById('ambig-resumo').textContent='Revisões indisponíveis no momento. Tente novamente nos indicadores.';document.getElementById('activity-list').textContent='Atividade indisponível no momento. Tente novamente nos indicadores.';}
+});
+function atualizar(silenciosa=false) {
+  return cargaProgresso.executar(()=>G360BuscarJSON(STATUS_URL),function(data){renderEstado(data);renderAmbiguidades(data.ambiguidades||[]);renderAtividade(data.recentes||[]);},{silenciosa});
 }
 
 atualizar();
-setInterval(function () { if (!document.hidden) atualizar(); }, 10000);
+setInterval(function () { if (!document.hidden) atualizar(true); }, 10000);
 
 </script>
 @endpush

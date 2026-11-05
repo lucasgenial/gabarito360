@@ -104,14 +104,11 @@
     <div class="contexto-conteudo"><x-contexto-ativo :contexto="$vinculoAtual" :erro-troca="$opcoesTroca['erro']" /></div>
   @endif
   {{-- Breadcrumb --}}
-  @hasSection('breadcrumb')
-  <div class="breadcrumb">
-    @yield('breadcrumb')
-  </div>
-  @endif
+  @include('layouts._breadcrumb')
 
   {{-- Conteúdo --}}
   @yield('content')
+  @include('layouts._flash-fallback')
 </main>
   @if(config('release.sha'))
   <footer class="app-footer" aria-label="Versão do software">Versão de testes: {{ config('release.fase') }} · {{ substr(config('release.sha'),0,8) }}</footer>
@@ -167,10 +164,12 @@ document.getElementById('menu-recolher').addEventListener('click', function () {
 });
 </script>
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
+<script src="{{ asset('js/carregamento.js') }}?v={{ @filemtime(public_path('js/carregamento.js')) }}"></script>
 @if($vinculoAtual && $opcoesTroca['disponivel']) @include('layouts._troca-contexto') @endif
 <script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
 <script src="{{ asset('js/tabelas.js') }}?v={{ @filemtime(public_path('js/tabelas.js')) }}"></script>
 @stack('scripts')
 @include('layouts._imagem-usuario')
+@include('layouts._notificacoes')
 </body>
 </html>

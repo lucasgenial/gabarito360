@@ -261,6 +261,7 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/provas/{id}/acompanhar/status',[CorrecaoController::class, 'status'])->name('correcao.status');
     Route::get('/provas/{id}/acompanhar/cartoes',[CorrecaoController::class, 'cartoes'])->name('correcao.cartoes');
     Route::get('/provas/{id}/revisao',          [CorrecaoController::class, 'revisao'])->name('correcao.revisao');
+    Route::get('/provas/{id}/correcao/alunos', [CorrecaoController::class,'alunos'])->name('correcao.alunos');
     Route::post('/provas/{id}/correcao/fechar', [CorrecaoController::class, 'fechar'])->name('correcao.fechar');
     Route::post('/provas/{id}/correcao/reabrir',[CorrecaoController::class, 'reabrir'])->name('correcao.reabrir');
     Route::get('/provas/{id}/tentativas', [\App\Http\Controllers\TentativaCartaoController::class,'index'])->name('correcao.tentativas');
@@ -282,6 +283,7 @@ Route::middleware('autenticado')->group(function () {
     // Resultados e relatórios (MP-022)
     Route::get('/provas/{provaId}/resultados/pdf', [ResultadoController::class, 'lote'])->name('resultados.lote');
     Route::get('/resultados/{alunoId}/{provaId}', [ResultadoController::class, 'show'])->name('resultados.show');
+    Route::get('/resultados/{alunoId}/{provaId}/historico', [ResultadoController::class,'historico'])->name('resultados.historico');
     Route::get('/resultados/{alunoId}/{provaId}/pdf', [ResultadoController::class, 'pdf'])->name('resultados.pdf');
     Route::get('/relatorios/prova/{id}', [RelatorioController::class, 'prova'])->name('relatorios.prova');
     Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');

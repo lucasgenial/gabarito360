@@ -24,6 +24,8 @@ class ResultadoController extends Controller
 
         if($dados instanceof JsonResponse)return $dados;
         $c=\App\Models\Cartao::find($dados['cartao_id']);$dados['qualidade_foto']=$c?->qualidade;
+        $dados['historico_permitido']=$c && \App\Support\Permissao::pode($request->user(),'correcao.acompanhar')
+            && ContextoCorrecao::cartoes($request->user())->whereKey($c->id)->exists();
         $dados['tentativa_numero']=$c?->tentativa_id?DB::table('cartao_tentativas')->where('id',$c->tentativa_id)->value('numero'):null;
         $dados['cartao_foto_url']=$c?->imagem_url&&\App\Support\Permissao::pode($request->user(),'correcao.acompanhar')
             &&ContextoCorrecao::cartoes($request->user())->whereKey($c->id)->exists()?app(\App\Services\Omr\ImagensCartao::class)->url($c->id,'original',$request->user()):null;

@@ -43,7 +43,9 @@ class TentativaCartaoController extends Controller
 
         return ApiResponse::success(['prova' => ['id' => $p->id, 'titulo' => $p->titulo], 'tentativas' => $rows->map(fn ($t) => [
             'id' => $t->id, 'numero' => $t->numero, 'aluno_nome' => $nomes[$t->aluno_id] ?? 'Aluno não identificado', 'autor_nome' => $autores[$t->autor_id] ?? 'Registro anterior',
-            'ocorrido_em' => $t->ocorrido_em, 'estado' => isset($vigentes[$t->id]) ? 'vigente' : ($eventos[$t->id]->acao ?? 'registrada')])->all(),
+            'ocorrido_em' => $t->ocorrido_em, 'motivo'=>$eventos[$t->id]->motivo??null,
+            'nota_final'=>isset($eventos[$t->id])?(json_decode(Crypt::decryptString($eventos[$t->id]->dados),true)['nota']['nota_final']??null):null,
+            'estado' => isset($vigentes[$t->id]) ? 'vigente' : ($eventos[$t->id]->acao ?? 'registrada')])->all(),
             'pagina' => $pagina->currentPage(), 'ultima_pagina' => $pagina->lastPage(), 'total' => $pagina->total()]);
     }
 
