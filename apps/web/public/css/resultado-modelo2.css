@@ -1,0 +1,19 @@
+/* Prévia opcional local/staging. Nenhum seletor altera o modelo padrão. */
+.resultado-modelo2 { container-type:inline-size; margin-top:16px; }
+.resultado-modelo2-lista { display:grid; gap:10px; list-style:none; margin:0; padding:0; }
+.resultado-modelo2-linha { display:grid; grid-template-columns:minmax(0,1fr) minmax(240px,.8fr); gap:10px; align-items:stretch; min-width:0; }
+.tela-resultado .resultado-modelo2-resposta { margin:0; min-width:0; min-height:44px; padding:8px 12px; gap:8px; }
+.resultado-modelo2-resposta > span { min-width:0; overflow-wrap:anywhere; }
+.resultado-modelo2-indicadores { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:12px; min-height:44px; padding:8px 10px; margin:0; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--surface-2); color:var(--fg); }
+.resultado-modelo2-indicadores > div { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px; min-width:0; }
+.resultado-modelo2-indicadores dt { color:var(--fg-2); font-size:12px; }
+.resultado-modelo2-indicadores dd { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px; margin:0; min-width:0; }
+.resultado-modelo2-indicadores strong { font-size:14px; font-weight:600; white-space:nowrap; }
+.resultado-modelo2-amostra { color:var(--muted); font-size:12px; line-height:1.4; white-space:nowrap; }
+.resultado-modelo2-sr { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+@container (max-width:620px) {
+  .resultado-modelo2-linha { grid-template-columns:minmax(0,1fr); gap:6px; }
+}
+@media(max-width:640px) {
+  .resultado-modelo2-linha { grid-template-columns:minmax(0,1fr); gap:6px; }
+}

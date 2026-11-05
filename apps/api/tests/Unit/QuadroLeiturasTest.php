@@ -53,4 +53,15 @@ class QuadroLeiturasTest extends TestCase
         $this->assertSame('nao_preservada',$linha['situacao']);
         $this->assertFalse($linha['referencia_preservada']);
     }
+
+    public function test_edicao_do_gabarito_entre_leitura_e_revisao_preserva_ambas_as_referencias(): void
+    {
+        $d=['leituras_omr'=>[['numero_questao'=>1,'alternativa'=>'A']], 'referencia_gabarito'=>['questoes'=>[['numero_questao'=>1,'esperada'=>'A','anulada'=>false]]]];
+        $e=[['snapshot'=>['respostas'=>[['numero_questao'=>1,'alternativa'=>'B']], 'referencia_gabarito'=>['questoes'=>[['numero_questao'=>1,'esperada'=>'B','anulada'=>false]]]]]];
+        $linha=(new QuadroLeituras)->montar($d,$e)[0];
+        $this->assertSame('correta',$linha['leitura_situacao']);
+        $this->assertSame('correta',$linha['situacao']);
+        $this->assertSame('B',$linha['gabarito']);
+        $this->assertStringContainsString('gabarito mudou entre os registros: leitura A; resposta registrada B',$linha['observacao']);
+    }
 }
