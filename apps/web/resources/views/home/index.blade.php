@@ -96,61 +96,8 @@
 
 <section class="lp-secao lp-alternada" id="planos" aria-labelledby="t-planos">
   <div class="lp-inner">
-    <h2 id="t-planos">Planos</h2>
-    <p class="lp-sub">Fale com a gente para escolher o plano e começar.</p>
-    <div class="plans-grid">
-      @foreach($planos as $plano)
-        <div class="plan-card">
-          <div class="plan-name">{{ $plano['publico'] === 'individual' ? 'Individual' : 'Institucional' }}</div>
-          <div class="plan-price">
-            @if($plano['preco_fixo'] !== null)
-              R$ {{ number_format($plano['preco_fixo'], 2, ',', '.') }}
-              <small>/{{ $plano['periodicidade'] === 'anual' ? 'ano' : 'mês' }}</small>
-            @else
-              R$ {{ number_format($plano['preco_por_licenca'], 2, ',', '.') }}
-              <small>/licença/mês</small>
-            @endif
-          </div>
-          <div class="plan-desc">
-            @if($plano['periodicidade'] === 'anual')
-              Equivale a R$ {{ number_format($plano['preco_fixo'] / 12, 2, ',', '.') }}/mês
-            @elseif($plano['preco_por_licenca'] !== null)
-              De {{ $plano['licencas_min'] }} a {{ $plano['licencas_max'] }} licenças (professores/usuários)
-            @else
-              Cobrado por mês
-            @endif
-          </div>
-          <ul class="plan-features">
-            @if($plano['publico'] === 'individual')
-              <li>1 escola · até 20 turmas</li>
-              <li>Leitura pela câmera</li>
-              <li>Relatórios completos</li>
-              <li>Suporte por e-mail</li>
-            @else
-              <li>Até 5 escolas · 100 turmas</li>
-              <li>Leitura pela câmera</li>
-              <li>Relatórios e dashboards</li>
-              <li>Gestão de equipe</li>
-            @endif
-          </ul>
-          <div class="plan-cta">
-            <a href="{{ route('leads.index') }}">Falar com a gente</a>
-          </div>
-        </div>
-      @endforeach
-
-      <div class="plan-card">
-        <div class="plan-name">Rede ou secretaria</div>
-        <div class="plan-price">Sob consulta</div>
-        <div class="plan-desc">Para redes acima de 10 licenças e secretarias de educação</div>
-        <ul class="plan-features">
-          <li>Várias escolas e núcleos</li>
-          <li>Leitura pela câmera</li>
-          <li>Relatórios consolidados</li>
-        </ul>
-        <div class="plan-cta"><a href="{{ route('leads.index') }}">Falar com a gente</a></div>
-      </div>
-    </div>
+    <h2 id="t-planos">Modalidades de atendimento</h2>
+    @include('planos._apresentacao')
   </div>
 </section>
 
