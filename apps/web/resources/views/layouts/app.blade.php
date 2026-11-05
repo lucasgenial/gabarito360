@@ -100,6 +100,7 @@
 
 {{-- Conteúdo principal --}}
 <main class="container app-conteudo" id="conteudo-principal">
+  <div id="g360-notificacoes" class="no-print" aria-label="Notificações"></div>
   @if($vinculoAtual)
     <div class="contexto-conteudo"><x-contexto-ativo :contexto="$vinculoAtual" :erro-troca="$opcoesTroca['erro']" /></div>
   @endif

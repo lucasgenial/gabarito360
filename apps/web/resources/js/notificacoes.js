@@ -5,7 +5,8 @@ import toast,{Toaster} from 'solid-toast';
 // Ilha Solid pequena: Blade continua responsável pelas páginas e formulários.
 const raiz=document.getElementById('g360-notificacoes');
 if(raiz){
-  render(()=>createComponent(Toaster,{position:'top-right',gutter:12,containerClassName:'g360-toaster',containerStyle:{top:'80px',right:'16px',left:'16px',bottom:'auto','z-index':1100}}),raiz);
+  render(()=>createComponent(Toaster,{position:'top-right',gutter:12,containerClassName:'g360-toaster',containerStyle:{position:'relative',top:'0',right:'0',left:'0',bottom:'auto','z-index':10}}),raiz);
+  // CSS em fluxo mede a pilha e suas quebras de texto, inclusive após mudar a largura.
   const ativos=new Map();let seq=0;
   const titulos={sucesso:'Concluído',erro:'Não foi possível concluir',info:'Informação',carregando:'Em andamento'};
   function suspender(n,motivo,sim){
