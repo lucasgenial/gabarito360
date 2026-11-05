@@ -7,13 +7,13 @@
 <x-pagina :titulo="$p?'Configurar turmas e disciplinas':'Criar prova'"><x-slot:sub>{{ $p?$p['titulo']:'Selecione as turmas e as disciplinas antes de preencher os dados da prova.' }}</x-slot:sub></x-pagina>
 <form method="POST" action="{{ $p?route('provas.curriculo.salvar',$p['id']):route('provas.store') }}" class="pc-form dc1-stack" data-prova-curriculo>
   @csrf
-  <input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
+
   @if($errors->any() || $mensagens->any())<x-aviso tipo="erro"><strong>Confira o preenchimento.</strong><ul>@foreach(array_unique(array_merge($errors->all(),$mensagens->all())) as $erro)<li>{{ $erro }}</li>@endforeach</ul></x-aviso>@endif
   @include('provas.curriculo._editor')
   @unless($p) @include('provas.curriculo._dados') @endunless
   <div class="pc-acoes pc-final">
     <button class="btn btn-primary" type="submit" data-curriculo-salvar @disabled(!$pronto)>{{ $p?'Salvar turmas e disciplinas':'Criar prova e preencher gabarito' }}</button>
-    <a class="btn btn-ghost" href="{{ $p?route('provas.show',['id'=>$p['id'],'_ctx'=>\App\Support\ContextoWeb::id()]):route('provas.index',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Cancelar</a>
+    <a class="btn btn-ghost" href="{{ $p?route('provas.show',['id'=>$p['id']]):route('provas.index',[]) }}">Cancelar</a>
   </div>
 </form>
 @endsection

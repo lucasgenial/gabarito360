@@ -37,7 +37,7 @@
       <div style="margin-bottom:24px;">
         <h2 style="font-size:26px;margin-top:4px;">Redefinir senha</h2>
         <p style="color:var(--muted);margin-top:8px;font-size:14px;">
-          Informe sua nova senha abaixo.
+          Informe seu e-mail, cole o código recebido e escolha a nova senha.
         </p>
       </div>
 
@@ -45,24 +45,18 @@
         <div class="alert-erro">{{ session('erro') }}</div>
       @endif
 
-      @if(!$token || !$email)
-        <div class="alert-erro">
-          Link de recuperação inválido. <a href="{{ route('esqueci-senha') }}" style="color:inherit;font-weight:700;">Solicite um novo link.</a>
-        </div>
-      @else
-
       <form method="POST" action="{{ route('redefinir-senha.store') }}" novalidate>
         @csrf
-        <input type="hidden" name="token" value="{{ $token }}" />
-        <input type="hidden" name="email" value="{{ $email }}" />
+        <div class="field"><label for="redefinir-email">E-mail</label><input class="input" type="email" id="redefinir-email" name="email" value="{{ old('email') }}" required maxlength="190" autocomplete="email" aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" aria-describedby="redefinir-email-erro">@error('email')<span id="redefinir-email-erro" role="alert" class="field-error">{{ $message }}</span>@enderror</div>
+        <div class="field"><label for="redefinir-codigo">Código de recuperação</label><input class="input" type="text" id="redefinir-codigo" name="token" required minlength="64" maxlength="64" autocomplete="one-time-code" autocapitalize="none" spellcheck="false" aria-describedby="redefinir-codigo-erro redefinir-codigo-ajuda" aria-invalid="{{ $errors->has('token') ? 'true' : 'false' }}"><p class="field-help" id="redefinir-codigo-ajuda">Copie os 64 caracteres da mensagem. O código vale por 60 minutos.</p>@error('token')<span id="redefinir-codigo-erro" role="alert" class="field-error">{{ $message }}</span>@enderror</div>
 
         <div class="field">
           <label for="password">Nova senha</label>
           <div class="input-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-            <input class="input" type="password" id="password" name="password" placeholder="Mínimo 8 caracteres" required minlength="8" />
+            <input class="input" type="password" id="password" name="password" placeholder="Mínimo 8 caracteres" required minlength="8"  aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}" aria-describedby="password-erro">
           </div>
-          @error('password')<div style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
+          @error('password')<div id="password-erro" role="alert" style="color:var(--danger);font-size:13px;margin-top:6px;">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
@@ -78,9 +72,8 @@
         </button>
       </form>
 
-      @endif
-
       <div style="text-align:center;margin-top:20px;">
+        <a href="{{ route('esqueci-senha') }}" class="btn btn-ghost">Solicitar novo código</a>
         <a href="{{ route('login') }}" style="font-size:14px;color:var(--accent);">
           ← Voltar para o login
         </a>

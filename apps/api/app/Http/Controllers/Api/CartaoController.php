@@ -88,40 +88,22 @@ class CartaoController extends Controller
     /** Foto do cartão (dado de aluno: só para quem acessa a prova; nunca por URL pública). */
     public function imagem(Request $request, int $id)
     {
-        $cartao = ContextoCorrecao::cartoes($request->user())->find($id);
-        if (!$cartao || !$cartao->imagem_url || !$this->encontrarProva($request, $cartao->prova_id)) {
-            return ApiResponse::notFound('Imagem não encontrada.');
-        }
-
-        $caminho = Storage::disk('public')->path($cartao->imagem_url);
-        if (!is_file($caminho)) {
-            return ApiResponse::notFound('Imagem não encontrada.');
-        }
-
-        return response()->file($caminho, ['Cache-Control' => 'private, no-store']);
+        return $this->arquivo($request, $id, 'original');
     }
 
-    /** Link assinado com versão do acesso; revalida ator e espaço a cada abertura. */
+    /** Arquivo autenticado: a identidade vem do Bearer, nunca de parâmetros da URL. */
     public function arquivo(Request $request, int $id, string $tipo)
     {
-        abort_if(\App\Support\RegimeVinculos::obrigatorio() && (!Espacos::ativo() || !$request->has('vinculo')), 404);
-        if (Espacos::ativo()) {
-            $ator = Usuario::find($request->integer('ator'));
-            if ($ator && $request->has('vinculo')) {
-                try { $ator = $ator->noVinculo($request->integer('vinculo')); }
-                catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { abort(404); }
-            }
-            abort_unless($ator && $ator->ativo && $ator->perfil !== 'aplicador', 404);
-            abort_unless(hash_equals(ContextoCorrecao::versaoAcesso($ator), (string) $request->query('acesso', '')) && Permissao::pode($ator, 'correcao.acompanhar'), 404);
-            $cartao = ContextoCorrecao::cartoes($ator)->where('espaco_id', $request->integer('espaco'))->find($id);
-            abort_unless(ContextoCorrecao::cartaoValido($cartao), 404);
-        } else {
-            $cartao = Cartao::find($id);
-        }
+        abort_unless(in_array($tipo, ImagensCartao::TIPOS, true), 404);
+        $request->validate(array_fill_keys(['ator','vinculo','espaco','acesso','signature','expires','token','_ctx'], 'prohibited'));
+        $ator = $request->user();
+        abort_unless($ator && $ator->ativo && $ator->perfil !== 'aplicador' && Permissao::pode($ator, 'correcao.acompanhar'), 404);
+        $cartao = ContextoCorrecao::cartoes($ator)->find($id);
+        abort_unless(ContextoCorrecao::cartaoValido($cartao) && $this->encontrarProva($request, $cartao->prova_id), 404);
         $relativo = $tipo === 'original' ? $cartao?->imagem_url : ImagensCartao::disponivel($id, $tipo, $cartao?->espaco_id);
         $caminho = $cartao && $relativo ? Storage::disk('public')->path($relativo) : null;
         if (!$caminho || !is_file($caminho)) return ApiResponse::notFound('Imagem não encontrada.');
-        return response()->file($caminho, ['Cache-Control' => Espacos::ativo() ? 'private, no-store' : 'private, max-age=3600']);
+        return response()->file($caminho, ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     /** Exclui a correção (cartão, respostas, nota e foto) para o aluno ser fotografado de novo. */

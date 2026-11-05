@@ -43,7 +43,7 @@ class EmailsTest extends TestCase
         $this->postJson('/api/v1/auth/esqueci-senha', ['email' => 'prof@gabarito360.dev'])->assertOk();
 
         Mail::assertQueued(EmailModelo::class, fn ($m) => $m->modelo === 'recuperar-senha'
-            && str_contains((string) $m->dados['link'], '/redefinir-senha?token='));
+            && str_ends_with((string) $m->dados['link'], '/redefinir-senha') && preg_match('/^[A-Za-z0-9]{64}$/D', $m->dados['codigo']));
     }
 
     public function test_email_desconhecido_recebe_a_mesma_resposta_e_nada_e_enviado(): void
@@ -70,8 +70,7 @@ class EmailsTest extends TestCase
         $this->postJson('/api/v1/auth/esqueci-senha', ['email' => $usuario->email]);
         $token = null;
         Mail::assertQueued(EmailModelo::class, function ($m) use (&$token) {
-            parse_str((string) parse_url((string) $m->dados['link'], PHP_URL_QUERY), $q);
-            $token = $q['token'];
+            $token = $m->dados['codigo'];
             return true;
         });
 
@@ -117,8 +116,7 @@ class EmailsTest extends TestCase
         $token = null;
         Mail::assertQueued(EmailModelo::class, function ($m) use (&$token) {
             if ($m->modelo === 'convite-usuario') {
-                parse_str((string) parse_url((string) $m->dados['link'], PHP_URL_QUERY), $q);
-                $token = $q['token'];
+            $token = $m->dados['codigo'];
             }
             return true;
         });
@@ -175,8 +173,7 @@ class EmailsTest extends TestCase
         $token = null;
         Mail::assertQueued(EmailModelo::class, function ($m) use (&$token) {
             if ($m->modelo === 'confirmar-email') {
-                parse_str((string) parse_url((string) $m->dados['link'], PHP_URL_QUERY), $q);
-                $token = $q['token'];
+            $token = $m->dados['codigo'];
             }
             return true;
         });
@@ -219,4 +216,16 @@ class EmailsTest extends TestCase
         $this->postJson('/api/v1/auth/confirmar-email', ['token' => $token])->assertStatus(422);
         $this->assertSame('prof@gabarito360.dev', $usuario->fresh()->email);
     }
+    public function test_credenciais_na_url_nao_executam_acoes_de_email(): void
+    {
+        Mail::fake();
+        foreach (['confirmar-email', 'redefinir-senha', 'convite', 'convite/recusar'] as $acao) {
+            $this->postJson('/api/v1/auth/'.$acao.'?token='.str_repeat('x',64), [
+                'token'=>str_repeat('x',64), 'email'=>'pessoa@example.test',
+                'password'=>'senha-nova-123', 'password_confirmation'=>'senha-nova-123',
+            ])->assertStatus(400);
+        }
+        Mail::assertNothingQueued();
+    }
+
 }

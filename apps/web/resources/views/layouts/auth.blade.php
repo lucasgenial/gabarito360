@@ -17,6 +17,9 @@
 <div class="acesso-conteudo">@yield('content')</div>
 @unless(request()->routeIs('login') || ($semMenuPublico ?? false))<x-rodape-publico />@endunless
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
+@if($errors->any())
+<script>document.querySelector('form [aria-invalid="true"]')?.focus();</script>
+@endif
 @stack('scripts')
 </body>
 </html>

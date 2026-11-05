@@ -15,7 +15,7 @@ class IntegracaoPessoalWebTest extends TestCase
         $this->withSession(['auth_token'=>'identidade','auth_vinculos'=>true,'auth_nome'=>'Pessoa fictícia']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
         $permissoes=['turma.ver','turma.gerir','aluno.ver','aluno.gerir','prova.ver','prova.criar','gabarito.ver','correcao.acompanhar','cartao.imprimir'];
-        $pessoal=['perfil'=>'professor_autonomo','espaco'=>['id'=>1,'tipo'=>'pessoal','nome'=>'Meu espaço pessoal'],'permissoes'=>$permissoes];
+        $pessoal=['vinculo_id'=>1,'perfil'=>'professor_autonomo','espaco'=>['id'=>1,'tipo'=>'pessoal','nome'=>'Meu espaço pessoal'],'permissoes'=>$permissoes];
         Http::fake(function ($r) use ($pessoal) {
             $path=parse_url($r->url(),PHP_URL_PATH);
             if ($path==='/api/v1/auth/vinculos') return Http::response(['data'=>[
@@ -31,9 +31,11 @@ class IntegracaoPessoalWebTest extends TestCase
         });
         $this->get('/vinculos')->assertOk()->assertSee('Professor autônomo')->assertSee('Escola fictícia');
         $destino=$this->post('/vinculos',['vinculo_id'=>1])->assertRedirect()->headers->get('Location');
+        $this->assertSame(route('painel',['acesso'=>'pessoal-1']),$destino);
+        $this->assertNull(parse_url($destino,PHP_URL_QUERY));
         $this->get($destino)->assertOk()->assertSee('Meu espaço pessoal')->assertSee('Minhas provas')
-            ->assertDontSee('Administrador da Rede')->assertDontSee('href="'.route('escolas.index').'"',false)
-            ->assertDontSee('href="'.route('membros.index').'"',false);
+            ->assertDontSee('Administrador da Rede')->assertDontSee('href="'.route('escolas.index',['acesso'=>'pessoal-1']).'"',false)
+            ->assertDontSee('href="'.route('membros.index',['acesso'=>'pessoal-1']).'"',false);
         $this->assertSame(['Painel','Corrigir','Provas','Turmas'],array_column(Acesso::menuCelular()['barra'],'rotulo'));
         $this->assertContains('Alunos',array_column(Acesso::menu(),'rotulo'));
         $this->assertSame('identidade',session('auth_token'));

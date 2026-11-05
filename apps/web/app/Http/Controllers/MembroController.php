@@ -252,9 +252,9 @@ class MembroController extends Controller
         $resp = $this->api->post("/v1/usuarios/{$id}/link-senha");
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Não foi possível enviar o link.');
+            return back()->with('erro', $resp->json('message') ?? 'Não foi possível enviar as instruções.');
         }
 
-        return back()->with('sucesso', 'Link para criar nova senha enviado por e-mail.');
+        return back()->with('sucesso', 'Instruções e código para criar nova senha enviados por e-mail.');
     }
 }

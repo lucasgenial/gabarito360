@@ -56,12 +56,12 @@ class DecisaoMaterialCopiaController extends Controller
             'provas'=>'required|array|list|min:1|max:20','provas.*'=>'integer|min:1|distinct','chave'=>'required|uuid',
             'destino_digest'=>'required|string|size:64','conteudo_digest'=>'required|string|size:64','confirmado'=>'required|accepted']);
         $dados=$this->api('post','/v1/copias/materiais/lotes',$d);
-        return redirect()->route('copias.material.decisao',['id'=>$dados['lote_id'],'lado'=>'origem','_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.material.decisao',['id'=>$dados['lote_id'],'lado'=>'origem']);
     }
     public function abrir(Request $r)
     {
         $this->autorizar('destino'); $d=$this->dados($r,['lote_id'=>'required|uuid']);
-        return redirect()->route('copias.material.decisao',['id'=>$d['lote_id'],'lado'=>'destino','_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.material.decisao',['id'=>$d['lote_id'],'lado'=>'destino']);
     }
     public function show(Request $r,string $id)
     {
@@ -75,13 +75,13 @@ class DecisaoMaterialCopiaController extends Controller
     {
         $this->autorizar('origem'); $d=$this->dados($r,['conteudo_digest'=>'required|string|size:64','sem_dados_pessoais'=>'required|accepted']);
         $this->api('post','/v1/copias/materiais/lotes/'.$id.'/revisar',$d);
-        return redirect()->route('copias.material.decisao',['id'=>$id,'lado'=>'origem','_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.material.decisao',['id'=>$id,'lado'=>'origem']);
     }
     public function aprovar(Request $r,string $id)
     {
         $d=$this->dados($r,['lado'=>'required|in:origem,destino','conteudo_digest'=>'required|string|size:64',
             'valida_ate'=>'required|date_format:Y-m-d\TH:i:s\Z','confirmado'=>'required|accepted']); $this->autorizar($d['lado']);
         $this->api('post','/v1/copias/materiais/lotes/'.$id.'/aprovar',$d);
-        return redirect()->route('copias.material.decisao',['id'=>$id,'lado'=>$d['lado'],'_ctx'=>ContextoWeb::id()]);
+        return redirect()->route('copias.material.decisao',['id'=>$id,'lado'=>$d['lado']]);
     }
 }

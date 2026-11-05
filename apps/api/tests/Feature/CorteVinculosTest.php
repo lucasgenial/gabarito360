@@ -198,7 +198,7 @@ class CorteVinculosTest extends TestCase
         $b = $this->postJson('/api/v1/usuarios/convites-vinculo', array_replace($dados, ['email' => 'ausente@example.test']))->assertStatus(202)->json();
         $this->assertSame($a, $b);
         $this->assertArrayNotHasKey('token', $a['data']);
-        Mail::assertQueued(\App\Mail\EmailModelo::class, fn ($m) => $m->modelo === 'convite-vinculo' && $m->hasTo('2@example.test') && str_contains($m->dados['link'], '#convite='));
+        Mail::assertQueued(\App\Mail\EmailModelo::class, fn ($m) => $m->modelo === 'convite-vinculo' && $m->hasTo('2@example.test') && str_ends_with($m->dados['link'], '/vinculos/convite') && preg_match('/^[1-9][0-9]*\.[A-Za-z0-9]{64}$/D', $m->dados['codigo']));
         $this->postJson('/api/v1/usuarios/convites-vinculo', array_replace($dados, ['espaco_id' => 6]))->assertNotFound();
     }
     public function test_manifesto_nao_pode_exibir_revisao_diferente_do_hash(): void

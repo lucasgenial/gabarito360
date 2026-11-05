@@ -69,24 +69,45 @@ class LoginController extends Controller
         $this->api->post('/v1/auth/esqueci-senha', ['email' => $request->email]);
 
         return redirect()->route('esqueci-senha')
-            ->with('sucesso', 'Se o e-mail estiver cadastrado, um link de recuperação foi enviado.');
+            ->with('sucesso', 'Se o e-mail estiver cadastrado, as instruções e o código de recuperação foram enviados.');
     }
 
     public function showConvite(Request $request)
     {
-        $token = (string) $request->query('token', '');
-        $email = (string) $request->query('conta', $request->query('email', ''));
-        $resp  = $this->api->post('/v1/auth/convite', ['token' => $token, 'email' => $email]);
+        if ($request->hasAny(['token', 'conta', 'email'])) return redirect()->route('convite')
+            ->with('erro', 'Cole o código recebido por e-mail no formulário. O endereço não precisa de código ou dados da conta.');
+
+        return view('auth.convite', ['token' => '', 'email' => '', 'convite' => null, 'conferido' => false]);
+    }
+
+    public function conferirConvite(Request $request)
+    {
+        abort_if($request->query->has('token'), 422, 'Cole o código no formulário.');
+        $dados = $request->validate(['email' => 'required|email|max:190', 'token' => 'required|alpha_num:ascii|size:64'], [
+            'email.required' => 'Informe seu e-mail.',
+            'email.email' => 'Informe um e-mail válido.',
+            'email.max' => 'Use um e-mail com até 190 caracteres.',
+            'token.required' => 'Cole o código recebido por e-mail.',
+            'token.alpha_num' => 'Copie os 64 caracteres do código recebido por e-mail.',
+            'token.size' => 'Copie os 64 caracteres do código recebido por e-mail.',
+        ]);
+        try { $resp = $this->api->post('/v1/auth/convite', $dados); }
+        catch (\Illuminate\Http\Client\ConnectionException) {
+            return redirect()->route('convite')->withInput($request->only('email'))
+                ->with('erro', 'Não foi possível conferir agora. Tente novamente.');
+        }
+        if (!$resp->successful()) return redirect()->route('convite')->withInput($request->only('email'))
+            ->with('erro', 'Não foi possível conferir o convite. Confira o e-mail e o código ou peça um novo convite.');
 
         return view('auth.convite', [
-            'token'   => $token,
-            'email'   => $email,
-            'convite' => $resp->successful() ? $resp->json('data') : null,
+            'token' => $dados['token'], 'email' => $dados['email'],
+            'convite' => $resp->json('data'), 'conferido' => true,
         ]);
     }
 
     public function recusarConvite(Request $request)
     {
+        abort_if($request->query->has('token'), 422, 'Use o formulário para confirmar o convite.');
         $dados = $request->validate(['email' => 'required|string|max:255', 'token' => 'required|string']);
         $resp  = $this->api->post('/v1/auth/convite/recusar', $dados);
 
@@ -99,21 +120,28 @@ class LoginController extends Controller
 
     public function showRedefinirSenha(Request $request)
     {
-        return view('auth.redefinir-senha', [
-            'token' => $request->query('token', ''),
-            'email' => $request->query('conta', $request->query('email', '')),
-        ]);
+        if ($request->hasAny(['token', 'conta', 'email'])) return redirect()->route('redefinir-senha')
+            ->with('erro', 'Cole o código recebido por e-mail no formulário. O endereço não precisa de código ou dados da conta.');
+        return view('auth.redefinir-senha');
     }
 
     public function postRedefinirSenha(Request $request)
     {
+        abort_if($request->query->has('token'), 422, 'Cole o código no formulário.');
         $request->validate([
-            'email'                 => 'required|string|max:255',
-            'token'                 => 'required|string',
+            'email'                 => 'required|email|max:190',
+            'token'                 => 'required|alpha_num:ascii|size:64',
             'password'              => 'required|string|min:8|confirmed',
         ], [
-            'password.min'       => 'A senha deve ter pelo menos 8 caracteres.',
-            'password.confirmed' => 'As senhas não conferem.',
+            'email.required' => 'Informe seu e-mail.',
+            'email.email' => 'Informe um e-mail válido.',
+            'email.max' => 'Use um e-mail com até 190 caracteres.',
+            'token.required' => 'Cole o código recebido por e-mail.',
+            'token.alpha_num' => 'Copie os 64 caracteres do código recebido por e-mail.',
+            'token.size' => 'Copie os 64 caracteres do código recebido por e-mail.',
+            'password.required' => 'Informe a nova senha.',
+            'password.min'       => 'Use uma senha com pelo menos 8 caracteres.',
+            'password.confirmed' => 'As senhas não coincidem.',
         ]);
 
         $resp = $this->api->post('/v1/auth/redefinir-senha', [

@@ -80,7 +80,7 @@ final class PedidoTitularController extends Controller
         $res=$this->envios->enviar($ticket,$acao,$id,$d);
         abort_if(in_array($res['status'],[401,403,404],true),$res['status']);
         if ($res['status']!==200) return response()->view('pedidos.envio',['status'=>$res['status'],'envio'=>$ticket,'acao'=>$acao,'id'=>$id],$res['status']);
-        if ($acao!=='abrir') return redirect()->route('pedidos.show',['id'=>$id,'_ctx'=>ContextoWeb::id()]);
+        if ($acao!=='abrir') return redirect()->route('pedidos.show',['id'=>$id]);
         return view('pedidos.recibo',['recibo'=>$res['recibo']]);
     }
 }

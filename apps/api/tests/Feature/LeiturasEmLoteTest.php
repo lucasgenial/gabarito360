@@ -69,21 +69,28 @@ class LeiturasEmLoteTest extends TestCase
         $this->assertDatabaseCount('notas',32);$this->assertDatabaseHas('notas',['aluno_id'=>1,'nota_final'=>5,'status_aprovacao'=>'recuperacao']);
     }
 
-    public function test_lote_mantem_assinatura_vigencia_isolamento_e_revogacao_na_abertura(): void
+    public function test_lote_exige_autenticacao_vigente_isolamento_e_revogacao_na_abertura(): void
     {
         $i=app(ImagensCartao::class);$p=Prova::findOrFail(1);
         $urls=$i->urlsDaProva($p,[1],['original','endireitada'],$this->ator);
+        $this->assertSame('/api/v1/cartoes/1/imagens/original',$urls[1]['original']);
         $this->assertSame($i->url(1,'original',$this->ator),$urls[1]['original']);
-        $this->get($urls[1]['original'])->assertOk();
-        $this->get($urls[1]['original'].'&_ctx=contexto-indevido')->assertForbidden();
+        $pessoa=Usuario::find(1);$pai=$pessoa->createToken('identidade');
+        $token=$pessoa->createToken(\App\Support\TokenVinculo::NOME,['vinculo:1','identidade:'.$pai->accessToken->id],now()->addHours(2));
+        $abrir=function(string $url,?string $t) {app('auth')->forgetGuards();return $this->getJson($url,$t?['Authorization'=>'Bearer '.$t]:[]);};
+        $abrir($urls[1]['original'],null)->assertUnauthorized();
+        $abrir($urls[1]['original'],$token->plainTextToken)->assertOk();
+        $abrir($urls[1]['original'].'?_ctx=contexto-indevido',$token->plainTextToken)->assertUnprocessable();
         $this->travel(3)->hours();
-        $this->get($urls[1]['original'])->assertForbidden();
+        $abrir($urls[1]['original'],$token->plainTextToken)->assertUnauthorized();
         $this->travelBack();
-        $this->get(str_replace('/1/arquivo','/200/arquivo',$urls[1]['original']))->assertForbidden();
+        $abrir(str_replace('/1/imagens','/200/imagens',$urls[1]['original']),$token->plainTextToken)->assertNotFound();
         try{$i->urlsDaProva($p,[1,200],['original'],$this->ator);$this->fail('Não pode emitir URL de outra prova/espaço.');}
         catch(HttpException $e){$this->assertSame(404,$e->getStatusCode());}
         DB::table('usuario_vinculos')->where('id',1)->update(['situacao'=>'suspenso']);
-        $this->get($urls[1]['original'])->assertNotFound();
+        $abrir($urls[1]['original'],$token->plainTextToken)->assertForbidden();
+        $antiga=\Illuminate\Support\Facades\URL::temporarySignedRoute('cartoes.arquivo',now()->addHour(),['id'=>1,'tipo'=>'original'],false);
+        $this->get($antiga)->assertNotFound();
     }
 
     public function test_escola_agrega_notas_sem_consultas_por_aluno_e_sem_misturar_espacos(): void

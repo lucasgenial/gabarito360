@@ -201,7 +201,7 @@
     </div>
     <form method="POST" action="{{ route('provas.update', $prova['id']) }}">
       @csrf
-      @if($curricular??false)<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">@endif
+      @if($curricular??false)@endif
       @method('PUT')
       <div class="modal-body">
         @if($editarFalhou && $errors->any())<x-aviso tipo="erro"><ul>@foreach($errors->all() as $erro)<li>{{ $erro }}</li>@endforeach</ul></x-aviso>@endif

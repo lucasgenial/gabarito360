@@ -8,14 +8,14 @@
   $estados=['aguardando_autorizacao'=>'Aguardando autorizações','aguardando_auditoria'=>'Aguardando confirmação dos registros',
     'aguardando_execucao'=>'Aguardando processamento','em_processamento'=>'Em processamento',
     'aguardando_recibo'=>'Publicado; confirmação dos registros pendente','concluido'=>'Concluído','bloqueado'=>'Bloqueado para revisão'];
-  $filtros=['lado'=>$dados['lado'],'espaco_id'=>$dados['espaco_id'],'_ctx'=>\App\Support\ContextoWeb::id()];
+  $filtros=['lado'=>$dados['lado'],'espaco_id'=>$dados['espaco_id']];
 @endphp
 <x-pagina titulo="Cópias entre espaços"><x-slot:sub>Envie ou receba cópias independentes, com autorização de cada espaço.</x-slot:sub></x-pagina>
 @include('copias._guia')
 <h2 id="acompanhamento">Acompanhar solicitações</h2>
 <p>Selecione o espaço e veja o que está saindo dele ou entrando nele. Abra uma solicitação para conferir decisões, processamento e conteúdo publicado.</p>
 <form method="GET" action="{{ route('copias.index') }}" class="card card-pad" style="margin-top:20px;">
-  <input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
+
   <div class="form-row-2">
     <div class="field"><label for="espaco_id">Espaço</label><select class="select" id="espaco_id" name="espaco_id" @disabled(!$dados['espacos'])>
       @forelse($dados['espacos'] as $e)<option value="{{ $e['id'] }}" @selected($dados['espaco_id']===$e['id'])>{{ $e['nome'] }}</option>
@@ -32,7 +32,7 @@
   <x-tabela :integrada="true" titulo="Solicitações de cópia" modo="lista"><table class="tabela-padrao table"><caption style="text-align:left;margin-bottom:16px;">{{ $lista['total'] }} solicitação(ões) neste acompanhamento</caption>
     <thead><tr><th scope="col">Conteúdo</th><th scope="col">Criado em</th><th scope="col">Situação</th><th scope="col">Publicação</th></tr></thead>
     <tbody>@forelse($lista['data'] as $c)
-      <tr><td class="tabela-principal" data-rotulo="Conteúdo"><div class="tabela-valor">@if($c['operacao_disponivel']??false)<a href="{{ route('copias.operacao',['id'=>$c['id'],'lado'=>$dados['lado'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">{{ $tipos[$c['finalidade']] ?? 'Cópia' }}</a>@else{{ $tipos[$c['finalidade']] ?? 'Cópia' }}@endif</div></td>
+      <tr><td class="tabela-principal" data-rotulo="Conteúdo"><div class="tabela-valor">@if($c['operacao_disponivel']??false)<a href="{{ route('copias.operacao',['id'=>$c['id'],'lado'=>$dados['lado']]) }}">{{ $tipos[$c['finalidade']] ?? 'Cópia' }}</a>@else{{ $tipos[$c['finalidade']] ?? 'Cópia' }}@endif</div></td>
         <td data-rotulo="Criado em"><div class="tabela-valor">{{ \Carbon\Carbon::parse($c['criado_em'],'UTC')->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</div></td>
         <td data-rotulo="Situação"><div class="tabela-valor">{{ $estados[$c['estado']] ?? 'Em acompanhamento' }}
           @if($c['auditoria_pendente'])<div class="text-muted">Há registros aguardando confirmação.</div>@endif

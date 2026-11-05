@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 final class CatalogoAtendimentoController extends Controller
 {
     public function __construct(private ApiClient $api){}
-    private function modo(Request $r): string {return str_starts_with($r->path(),'catalogo/atendimento')?'atendimento':(str_starts_with($r->path(),'catalogo/gestao')?'gestao':'minhas-solicitacoes');}
+    private function modo(Request $r): string {return $r->routeIs('catalogo-atendimento.*')?'atendimento':($r->routeIs('catalogo-gestao.*')?'gestao':'minhas-solicitacoes');}
     private function autorizar(Request $r): string
     {
         abort_unless(config('catalogo.interface_ativa')===true,404);$m=$this->modo($r);
@@ -75,7 +75,7 @@ final class CatalogoAtendimentoController extends Controller
     {
         $modo=$this->autorizar($r);$d=$r->except(['_token','_ctx']);
         $path=$modo;
-        if(str_ends_with($r->path(),'/autoridades')){abort_unless($modo==='atendimento',403);$path.='/autoridades';}
+        if($r->routeIs('catalogo-atendimento.autorizar')){abort_unless($modo==='atendimento',403);$path.='/autoridades';}
         elseif($id!==null)$path.='/'.$id.'/acoes';
         elseif($modo!=='minhas-solicitacoes')$path.='/instituicoes'.($unidade?'/'.$unidade:'');
         try{$resp=$this->api->post('/v1/catalogo/'.$path,$d);}catch(ConnectionException){return back()->withInput()->with('erro','Não foi possível confirmar. Atualize o acompanhamento antes de repetir a operação.');}

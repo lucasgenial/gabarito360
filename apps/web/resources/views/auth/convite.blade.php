@@ -11,8 +11,14 @@
     @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
     @if(!$convite)
-      <p class="convite-texto">Este convite é inválido ou venceu. Peça um novo a quem criou sua conta.</p>
-      <a class="btn btn-primary" href="{{ route('login') }}">Ir para o login</a>
+      <p class="convite-texto">Informe o e-mail que recebeu o convite e cole o código completo da mensagem.</p>
+      <form method="POST" action="{{ route('convite.conferir') }}">
+        @csrf
+        <div class="field"><label for="convite-email">E-mail</label><input class="input" id="convite-email" type="email" name="email" value="{{ old('email') }}" required maxlength="190" autocomplete="email" aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" aria-describedby="convite-email-erro">@error('email')<span id="convite-email-erro" role="alert" class="field-error">{{ $message }}</span>@enderror</div>
+        <div class="field"><label for="convite-codigo">Código do convite</label><input class="input" id="convite-codigo" type="text" name="token" required minlength="64" maxlength="64" autocomplete="one-time-code" autocapitalize="none" spellcheck="false" aria-describedby="convite-codigo-erro convite-codigo-ajuda" aria-invalid="{{ $errors->has('token') ? 'true' : 'false' }}"><p class="field-help" id="convite-codigo-ajuda">Copie os 64 caracteres recebidos por e-mail.</p>@error('token')<span id="convite-codigo-erro" role="alert" class="field-error">{{ $message }}</span>@enderror</div>
+        <button class="btn btn-primary btn-block" type="submit">Conferir convite</button>
+      </form>
+      <a class="btn btn-ghost btn-block" href="{{ route('login') }}">Ir para o login</a>
     @else
       <p class="convite-texto">Olá, <b>{{ $convite['nome'] }}</b>. <b>{{ $convite['convidado_por'] }}</b> convidou você para usar o sistema.</p>
 
@@ -29,8 +35,8 @@
 
         <div class="field">
           <label for="password">Crie sua senha</label>
-          <input class="input" type="password" id="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Mínimo 8 caracteres">
-          @error('password')<span class="field-error">{{ $message }}</span>@enderror
+          <input class="input" type="password" id="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Mínimo 8 caracteres" aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}" aria-describedby="password-erro">
+          @error('password')<span id="password-erro" role="alert" class="field-error">{{ $message }}</span>@enderror
         </div>
         <div class="field">
           <label for="password_confirmation">Confirme a senha</label>

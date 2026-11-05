@@ -68,7 +68,9 @@ class ConviteInterfaceTest extends TestCase
         $t = $this->chamar($gestor, 'POST', 'auth/vinculos/selecionar', ['vinculo_id'=>1])->assertCreated()->json('data.token');
         $this->chamar($t, 'POST', 'usuarios/convites-vinculo', ['email'=>'2@example.test','espaco_id'=>5,'perfil'=>'coordenador'])->assertStatus(202);
         $mail = Mail::queued(\App\Mail\EmailModelo::class)->first();
-        parse_str(parse_url($mail->dados['link'], PHP_URL_FRAGMENT), $link);
+        [$numero, $codigo] = explode('.', $mail->dados['codigo'], 2);
+        $link = ['convite'=>$numero, 'token'=>$codigo];
+        $this->assertNull(parse_url($mail->dados['link'], PHP_URL_FRAGMENT));
         $this->assertNull(parse_url($mail->dados['link'], PHP_URL_QUERY));
         $dono = Usuario::find(2)->createToken('api-token')->plainTextToken;
         $base = 'auth/convites-vinculo/'.$link['convite'];

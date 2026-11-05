@@ -2,11 +2,11 @@
 @section('title','Selecionar cadastro')
 @section('content')
 @php($ctx=\App\Support\ContextoWeb::id())
-@php($f=['espaco_id'=>$dados['espaco_id'],'_ctx'=>$ctx])
+@php($f=['espaco_id'=>$dados['espaco_id']])
 <x-pagina titulo="Selecionar cadastro"><x-slot:sub>Confira uma turma e seus alunos antes de preparar uma solicitação.</x-slot:sub></x-pagina>
 <x-aviso>Esta consulta não autoriza nem inicia uma cópia. Trocar o espaço, a turma ou a página limpa a seleção.</x-aviso>
 <form method="GET" action="{{ route('copias.cadastros') }}" class="card card-pad" style="margin-top:20px;">
-  <input type="hidden" name="_ctx" value="{{ $ctx }}">
+
   <div class="field"><label for="espaco">Espaço de origem</label><select class="select" id="espaco" name="espaco_id" @disabled(!$dados['espacos'])>
     @forelse($dados['espacos'] as $e)<option value="{{ $e['id'] }}" @selected($dados['espaco_id']===$e['id'])>{{ $e['nome'] }}</option>@empty<option>Nenhum espaço disponível</option>@endforelse
   </select></div><button class="btn btn-secondary" type="submit">Ver turmas</button>
@@ -26,7 +26,7 @@
 </section>
 @if($dados['turma'])
 <form method="POST" action="{{ route('copias.cadastros.previa') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="_ctx" value="{{ $ctx }}"><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
+  @csrf<input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   <h2>{{ $dados['turma']['nome'] }}</h2>
   <p><label><input type="checkbox" name="turmas[]" value="{{ $dados['turma']['id'] }}" required> Incluir esta turma na prévia.</label></p>
   <p>Marque somente os alunos que deseja incluir. A turma precisa ser confirmada mesmo quando houver alunos selecionados. Também é possível conferir apenas a turma.</p>

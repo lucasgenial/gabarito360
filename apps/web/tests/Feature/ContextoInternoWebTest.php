@@ -37,8 +37,9 @@ class ContextoInternoWebTest extends TestCase
             ->assertSee('Escola fictícia')->assertDontSee('id="vinculo-unico"',false);
         $r = $this->post('/vinculos/interno',['acesso_interno_id'=>1])->assertRedirect();
         $this->assertStringNotContainsString('token-interno-secreto',$r->headers->get('Location'));
-        parse_str(parse_url($r->headers->get('Location'),PHP_URL_QUERY),$q);
-        $this->assertSame('interno',ContextoWeb::obter($q['_ctx'])['tipo_contexto']);
+        $this->assertSame(route('painel',['acesso'=>'interno-1']),$r->headers->get('Location'));
+        $this->assertSame('interno',ContextoWeb::resolverReferencia('interno-1')['dados']['tipo_contexto']);
+        $this->assertNull(parse_url($r->headers->get('Location'),PHP_URL_QUERY));
         $this->assertSame('identidade',session('auth_token'));
         $this->assertNull(session('auth_perfil'));
     }
@@ -57,16 +58,16 @@ class ContextoInternoWebTest extends TestCase
             $this->assertStringEndsWith('/auth/me',$r->url());
             return Http::response(['data'=>$this->dados()]);
         });
-        $this->get('/painel?_ctx='.$id)->assertOk()->assertSee('Área interna do Gabarito360')->assertSee('Financeiro')
-            ->assertDontSee('token-interno-secreto')->assertDontSee('href="http://localhost/provas"',false)->assertDontSee('Assinatura e cobrança');
-        $this->get('/perfil?_ctx='.$id)->assertOk()->assertSee('Financeiro')->assertDontSee('token-interno-secreto');
-        foreach (['provas','alunos','turmas','configuracoes'] as $url) $this->get('/'.$url.'?_ctx='.$id)->assertForbidden();
+        $this->get('/acessos/interno-1/painel')->assertOk()->assertSee('Área interna do Gabarito360')->assertSee('Financeiro')
+            ->assertDontSee('token-interno-secreto')->assertDontSee('href="'.route('provas.index',['acesso'=>'interno-1']).'"',false)->assertDontSee('Assinatura e cobrança');
+        $this->get('/acessos/interno-1/perfil')->assertOk()->assertSee('Financeiro')->assertDontSee('token-interno-secreto');
+        foreach (['provas','alunos','turmas','configuracoes'] as $url) $this->get('/acessos/interno-1/'.$url)->assertForbidden();
     }
 
     public function test_duas_abas_preservam_perfil_e_revogacao_nao_afeta_irma(): void
     {
         $a = ContextoWeb::criar($this->dados());
-        $dev = array_merge($this->dados('desenvolvedor'),['token'=>'token-dev']);
+        $dev = array_merge($this->dados('desenvolvedor'),['token'=>'token-dev','acesso_interno_id'=>2]);
         $b = ContextoWeb::criar($dev);
         $revogado = false;
         Http::fake(function ($r) use (&$revogado,$dev) {
@@ -79,12 +80,12 @@ class ContextoInternoWebTest extends TestCase
             if ($r->hasHeader('Authorization','Bearer token-dev')) return Http::response(['data'=>$dev]);
             return $revogado ? Http::response([],403) : Http::response(['data'=>$this->dados()]);
         });
-        $this->get('/painel?_ctx='.$a)->assertOk()->assertSee('Financeiro');
-        $this->get('/painel?_ctx='.$b)->assertOk()->assertSee('Desenvolvedor');
+        $this->get('/acessos/interno-1/painel')->assertOk()->assertSee('Financeiro');
+        $this->get('/acessos/interno-2/painel')->assertOk()->assertSee('Desenvolvedor');
         $revogado = true;
-        $this->postJson('/perfil/email',['_ctx'=>$a])->assertStatus(409);
+        $this->postJson('/acessos/interno-1/perfil/email',[])->assertStatus(409);
         $this->assertNull(ContextoWeb::obter($a));
-        $this->get('/painel?_ctx='.$b)->assertOk()->assertSee('Desenvolvedor');
+        $this->get('/acessos/interno-2/painel')->assertOk()->assertSee('Desenvolvedor');
         $this->assertSame('identidade',session('auth_token'));
         Http::assertNotSent(fn ($r)=>str_ends_with($r->url(),'/auth/email'));
     }

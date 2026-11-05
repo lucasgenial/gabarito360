@@ -126,11 +126,12 @@ class AuthController extends Controller
 
         $conta->pedirTrocaDeEmail($request->user(), $data['novo_email']);
 
-        return ApiResponse::success(['mensagem' => 'Enviamos um link de confirmação para o novo e-mail.']);
+        return ApiResponse::success(['mensagem' => 'Enviamos um código de confirmação para o novo e-mail.']);
     }
 
     public function confirmarEmail(Request $request, ContaUsuario $conta): JsonResponse
     {
+        abort_if($request->query->has('token'), 422, 'Envie o código no corpo da requisição.');
         $data = $request->validate(['token' => 'required|string']);
 
         if (!$conta->confirmarTrocaDeEmail($data['token'])) {
@@ -143,6 +144,7 @@ class AuthController extends Controller
     /** Mostra ao convidado a função e o vínculo antes de aceitar. */
     public function consultarConvite(Request $request, ContaUsuario $conta): JsonResponse
     {
+        abort_if($request->query->has('token'), 422, 'Envie o código no corpo da requisição.');
         $data = $request->validate(['email' => 'required|string|max:255', 'token' => 'required|string']);
 
         $usuario = Usuario::where('email_hash', \App\Support\DadoProtegido::conta($data['email']))->first();
@@ -156,6 +158,7 @@ class AuthController extends Controller
 
     public function recusarConvite(Request $request, ContaUsuario $conta): JsonResponse
     {
+        abort_if($request->query->has('token'), 422, 'Envie o código no corpo da requisição.');
         $data = $request->validate(['email' => 'required|string|max:255', 'token' => 'required|string']);
 
         $usuario = Usuario::where('email_hash', \App\Support\DadoProtegido::conta($data['email']))->first();
@@ -181,12 +184,13 @@ class AuthController extends Controller
 
         // Sempre retorna sucesso por segurança (evita enumeração de e-mails)
         return ApiResponse::success([
-            'mensagem' => 'Se o e-mail estiver cadastrado, um link de recuperação foi enviado.',
+            'mensagem' => 'Se o e-mail estiver cadastrado, as instruções e o código de recuperação foram enviados.',
         ]);
     }
 
     public function redefinirSenha(Request $request): JsonResponse
     {
+        abort_if($request->query->has('token'), 422, 'Envie o código no corpo da requisição.');
         $request->validate([
             'email'                 => 'required|string|max:255',
             'token'                 => 'required|string',
@@ -206,7 +210,7 @@ class AuthController extends Controller
 
             $expira = $record->expira_em ? Carbon::parse($record->expira_em) : Carbon::parse($record->created_at)->addMinutes(self::VALIDADE_LINK_MINUTOS);
             if ($expira->isPast()) {
-                return ApiResponse::error('Link expirado. Solicite um novo link de recuperação.', [], 422);
+                return ApiResponse::error('Código expirado. Solicite um novo código de recuperação.', [], 422);
             }
 
             $usuario = Usuario::where('email_hash', \App\Support\DadoProtegido::conta($request->email))->first();

@@ -1,6 +1,6 @@
 @php
  $rascunho=!isset($aluno);
- $imagemInicial=['avatar_id'=>$aluno['avatar_id']??old('avatar_id'),'tem_foto'=>(bool)($aluno['tem_foto']??false),'imagem_versao'=>$aluno['imagem_versao']??1,'foto_url'=>$rascunho?null:route('alunos.foto',['id'=>$aluno['id'],'v'=>$aluno['imagem_versao']??1,'_ctx'=>\App\Support\ContextoWeb::id()])];
+ $imagemInicial=['avatar_id'=>$aluno['avatar_id']??old('avatar_id'),'tem_foto'=>(bool)($aluno['tem_foto']??false),'imagem_versao'=>$aluno['imagem_versao']??1,'foto_url'=>$rascunho?null:route('alunos.foto',['id'=>$aluno['id'],'v'=>$aluno['imagem_versao']??1])];
 @endphp
 <dialog id="imagem-aluno-modal" class="troca-contexto-modal imagem-modal" aria-labelledby="imagem-aluno-titulo" aria-describedby="imagem-aluno-orientacao">
  <div class="troca-contexto-cabecalho"><h2 id="imagem-aluno-titulo">{{ $rascunho ? 'Imagem do novo aluno' : 'Imagem de '.$aluno['nome'] }}</h2><button class="btn btn-secondary" id="imagem-aluno-fechar" type="button" aria-label="Fechar imagem do aluno">Fechar</button></div>

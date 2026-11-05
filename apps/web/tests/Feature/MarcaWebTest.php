@@ -25,7 +25,7 @@ class MarcaWebTest extends TestCase
     {
         Http::preventStrayRequests(); Http::fake(['*'=>Http::response(['data'=>[]])]);
         foreach (['/'=>'Avaliações, correção e resultados','/planos'=>'Modalidades de atendimento','/fale-conosco'=>'Fale com o Gabarito360'] as $path=>$titulo) {
-            $res=$this->get('https://homologa.gabarito360.com.br'.$path.'?utm_source=campanha&token=nao-publicar')->assertOk();
+            $res=$this->get('https://homologa.gabarito360.com.br'.$path.'?utm_source=campanha&referencia=nao-publicar')->assertOk();
             $m=$this->sociais($res->getContent());
             $this->assertSame('https://homologa.gabarito360.com.br'.$path,$m['og:url']);
             $this->assertSame($m['og:url'],$m['canonical']);
@@ -44,10 +44,21 @@ class MarcaWebTest extends TestCase
     public function test_rota_privada_nao_expoe_identificadores_ou_parametros_nos_metadados_sociais(): void
     {
         \Illuminate\Support\Facades\Route::get('/qa-privado/{aluno}',fn()=>view('layouts._marca-head',['tituloSocial'=>'Pessoa privada','descricaoSocial'=>'Nota privada']))->name('qa.privado');
-        $m=$this->sociais('<html><head>'.$this->get('https://homologa.gabarito360.com.br/qa-privado/91827?token=segredo&_ctx=contexto')->assertOk()->getContent().'</head></html>');
+        $m=$this->sociais('<html><head>'.$this->get('https://homologa.gabarito360.com.br/qa-privado/91827?aluno_id=91827&referencia=nao-publicar&_ctx=contexto')->assertOk()->getContent().'</head></html>');
         $this->assertSame('https://homologa.gabarito360.com.br/',$m['og:url']);
         $this->assertSame($m['og:url'],$m['canonical']);
-        foreach (['91827','segredo','contexto','Pessoa privada','Nota privada'] as $dado) $this->assertStringNotContainsString($dado,implode(' ',$m));
+        foreach (['91827','nao-publicar','contexto','Pessoa privada','Nota privada'] as $dado) $this->assertStringNotContainsString($dado,implode(' ',$m));
+    }
+
+    public function test_credencial_na_url_e_rejeitada_antes_da_renderizacao_social_sem_refletir_segredo(): void
+    {
+        Http::preventStrayRequests();
+        foreach (['/','/planos','/fale-conosco'] as $path) {
+            $this->get($path.'?token=segredo-ficticio-nao-refletir')->assertStatus(400)
+                ->assertDontSee('segredo-ficticio-nao-refletir')->assertDontSee('property="og:',false)
+                ->assertHeader('Cache-Control','no-store, private');
+        }
+        Http::assertNothingSent();
     }
 
     public function test_paginas_publicas_e_acesso_renderizam_marca_sem_depender_da_api(): void
