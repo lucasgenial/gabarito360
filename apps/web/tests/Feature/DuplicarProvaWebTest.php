@@ -33,7 +33,7 @@ class DuplicarProvaWebTest extends TestCase
         $this->preparar();
         Http::fake(['*/v1/provas/1/copiar'=>Http::response(['data'=>['id'=>3]],201)]);
         $chave='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-        $this->post('/provas/1/copiar',['titulo'=>'Versão B','chave'=>$chave,'turma_ids'=>[9]])->assertRedirect('/provas/3')->assertSessionHas('sucesso');
+        $this->post('/provas/1/copiar',['titulo'=>'Versão B','chave'=>$chave,'turma_ids'=>[9]])->assertRedirect('/acessos/sessao/provas/3')->assertSessionHas('sucesso');
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['titulo']==='Versão B' && $r['chave']===$chave && !isset($r['turma_ids']));
     }
 
@@ -42,7 +42,7 @@ class DuplicarProvaWebTest extends TestCase
         $this->preparar();
         Http::fake(['*/v1/provas/1/copiar'=>Http::response(['message'=>'Solicitação conflitante'],409)]);
         $this->post('/provas/1/copiar',['titulo'=>'Versão B','chave'=>'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'])
-            ->assertRedirect('/provas')->assertSessionHas('erro','Solicitação conflitante')->assertSessionMissing('sucesso')->assertSessionHasInput('titulo','Versão B')->assertSessionHasInput('origem_id',1);
+            ->assertRedirect('/acessos/sessao/provas')->assertSessionHas('erro','Solicitação conflitante')->assertSessionMissing('sucesso')->assertSessionHasInput('titulo','Versão B')->assertSessionHasInput('origem_id',1);
     }
 
     public function test_origem_nao_elegivel_nao_abre_formulario(): void

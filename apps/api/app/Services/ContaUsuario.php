@@ -55,9 +55,9 @@ class ContaUsuario
             ['token' => Hash::make($token), 'created_at' => now(), 'expira_em' => now()->addDays(self::VALIDADE_CONVITE_DIAS), 'convidado_por' => $convidadoPor->id, 'vinculo_id' => $vinculoId]
         );
 
-        $link = config('emails.url_web') . '/convite?' . http_build_query(['token' => $token, 'conta' => \App\Support\DadoProtegido::hash($usuario->email, 'email')]);
+        $link = rtrim(config('emails.url_web'), '/') . '/convite';
 
-        Mail::to($usuario->email)->queue(new EmailModelo('convite-usuario', 'Convite para o Gabarito360', $this->dadosDoConvite($usuario, $convidadoPor, $vinculoId) + ['link' => $link]));
+        Mail::to($usuario->email)->queue(new EmailModelo('convite-usuario', 'Convite para o Gabarito360', $this->dadosDoConvite($usuario, $convidadoPor, $vinculoId) + ['link' => $link, 'codigo' => $token]));
     }
 
     /** O que o convidado precisa saber para decidir. @return array<string, string> */
@@ -145,36 +145,32 @@ class ContaUsuario
 
         Mail::to($novoEmail)->queue(new EmailModelo('confirmar-email', 'Confirme seu novo e-mail', [
             'nome' => $usuario->nome,
-            'link' => config('emails.url_web') . '/confirmar-email?' . http_build_query(['token' => $token]),
+            'link' => rtrim(config('emails.url_web'), '/') . '/confirmar-email',
+            'codigo' => $token,
         ]));
     }
 
     /** @return bool false quando o link é inválido, venceu ou o endereço foi ocupado */
     public function confirmarTrocaDeEmail(string $token): bool
     {
-        $troca = DB::table('trocas_email')->where('token_hash', hash('sha256', $token))->first();
-        if (!$troca) {
-            return false;
-        }
+        return DB::transaction(function () use ($token) {
+            $troca = DB::table('trocas_email')->where('token_hash', hash('sha256', $token))->lockForUpdate()->first();
+            if (!$troca) return false;
 
-        DB::table('trocas_email')->where('id', $troca->id)->delete();
+            $novoEmail = \Illuminate\Support\Facades\Crypt::decryptString(substr($troca->novo_email, 8));
+            $usuario = Usuario::whereKey($troca->usuario_id)->lockForUpdate()->first();
+            if (!$usuario || now()->greaterThan($troca->expira_em) || Usuario::porEmail($novoEmail)->exists()) return false;
 
-        $troca->novo_email = \Illuminate\Support\Facades\Crypt::decryptString(substr($troca->novo_email, 8));
-        $usuario = Usuario::find($troca->usuario_id);
-        if (!$usuario || now()->greaterThan($troca->expira_em) || Usuario::porEmail($troca->novo_email)->exists()) {
-            return false;
-        }
+            $anterior = $usuario->email;
+            DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::hash($anterior, 'email'))->delete();
+            $usuario->update(['email' => $novoEmail]);
+            DB::table('trocas_email')->where('id', $troca->id)->delete();
 
-        $anterior = $usuario->email;
-        DB::table('password_reset_tokens')->where('email', \App\Support\DadoProtegido::hash($anterior, 'email'))->delete();
-        $usuario->update(['email' => $troca->novo_email]);
-
-        Mail::to($anterior)->queue(new EmailModelo('email-alterado-aviso', 'O e-mail da sua conta foi alterado', [
-            'nome'       => $usuario->nome,
-            'novo_email' => $troca->novo_email,
-        ]));
-
-        return true;
+            Mail::to($anterior)->queue((new EmailModelo('email-alterado-aviso', 'O e-mail da sua conta foi alterado', [
+                'nome' => $usuario->nome, 'novo_email' => $novoEmail,
+            ]))->afterCommit());
+            return true;
+        });
     }
 
     /** Link de nova senha, vale 60 minutos. Usado por "esqueci a senha" e pelo gestor. */
@@ -188,11 +184,12 @@ class ContaUsuario
             ['token', 'created_at', 'expira_em', 'vinculo_id']
         );
 
-        $link = config('emails.url_web') . '/redefinir-senha?' . http_build_query(['token' => $token, 'conta' => \App\Support\DadoProtegido::hash($usuario->email, 'email')]);
+        $link = rtrim(config('emails.url_web'), '/') . '/redefinir-senha';
 
         Mail::to($usuario->email)->queue(new EmailModelo('recuperar-senha', 'Redefina sua senha do Gabarito360', [
             'nome' => $usuario->nome,
             'link' => $link,
+            'codigo' => $token,
         ]));
     }
     /** Um link antigo nunca passa a decidir sobre todos os vínculos após a conversão. */

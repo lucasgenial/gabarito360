@@ -52,18 +52,20 @@ Route::middleware('guest')->group(function () {
     Route::get('/esqueci-senha',    [LoginController::class, 'showEsqueciSenha'])->name('esqueci-senha');
     Route::post('/esqueci-senha',   [LoginController::class, 'postEsqueciSenha'])->name('esqueci-senha.store');
     Route::get('/convite',          [LoginController::class, 'showConvite'])->name('convite');
+    Route::post('/convite/conferir', [LoginController::class, 'conferirConvite'])->middleware('throttle:20,1')->name('convite.conferir');
     Route::post('/convite/recusar', [LoginController::class, 'recusarConvite'])->name('convite.recusar');
     Route::get('/redefinir-senha',  [LoginController::class, 'showRedefinirSenha'])->name('redefinir-senha');
     Route::post('/redefinir-senha', [LoginController::class, 'postRedefinirSenha'])->name('redefinir-senha.store');
 });
 
-Route::get('/confirmar-email', [PerfilController::class, 'confirmarEmail'])->name('email.confirmar');
+Route::get('/confirmar-email', [PerfilController::class, 'showConfirmarEmail'])->name('email.confirmar');
+Route::post('/confirmar-email', [PerfilController::class, 'confirmarEmail'])->name('email.confirmar.store');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
 Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController::class, 'show'])->name('vinculos.convite');
 
-// Rotas autenticadas
-Route::middleware('autenticado')->group(function () {
+// Mesmas ações registradas nativamente: URLs canônicas e entrada legada de migração.
+$rotasContextuais = static function () {
     $dc=\App\Http\Controllers\DisciplinaController::class;
     Route::get('disciplinas',[$dc,'index'])->name('disciplinas.index');
     $ac=\App\Http\Controllers\AreaConhecimentoController::class;
@@ -144,11 +146,6 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/copias/materiais/lotes/{id}', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'show'])->whereUuid('id')->name('copias.material.decisao');
     Route::post('/copias/materiais/lotes/{id}/revisar', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'revisar'])->whereUuid('id')->name('copias.material.revisar');
     Route::post('/copias/materiais/lotes/{id}/aprovar', [\App\Http\Controllers\DecisaoMaterialCopiaController::class,'aprovar'])->whereUuid('id')->name('copias.material.aprovar');
-    Route::post('/vinculos/convite/consultar', [\App\Http\Controllers\ConviteVinculoController::class, 'consultar'])->middleware('throttle:20,1')->name('vinculos.convite.consultar');
-    Route::post('/vinculos/convite/responder', [\App\Http\Controllers\ConviteVinculoController::class, 'responder'])->middleware('throttle:10,1')->name('vinculos.convite.responder');
-    Route::get('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'index'])->name('vinculos.index');
-    Route::post('/vinculos/interno', [\App\Http\Controllers\Auth\VinculoController::class, 'interno'])->middleware('throttle:20,1')->name('vinculos.interno');
-    Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
     Route::get('/painel',  [DashboardController::class, 'index'])->name('painel');
     Route::get('/clientes', [\App\Http\Controllers\ClienteController::class,'index'])->name('clientes.index');
     Route::get('/exportacoes-titulares', [\App\Http\Controllers\ExportacaoTitularController::class,'index'])->name('pedidos.exportacoes');
@@ -173,8 +170,6 @@ Route::middleware('autenticado')->group(function () {
     Route::post('/membros/{id}/encerrar-vinculo',[\App\Http\Controllers\MembroController::class,'encerrar'])->name('membros.encerrar');
     // Meu perfil (MP-024)
     Route::view('/referencia-visual', 'referencia.index')->name('referencia');
-    Route::get('/trocar-senha',  [PerfilController::class, 'formTrocarSenha'])->name('trocar-senha');
-    Route::put('/trocar-senha',  [PerfilController::class, 'trocarSenha'])->name('trocar-senha.store');
     Route::post('/perfil/imagem',[PerfilController::class,'imagem'])->name('perfil.imagem');
     Route::get('/perfil/foto',[PerfilController::class,'foto'])->name('perfil.foto');
     Route::get('/usuarios/{id}/foto',[PerfilController::class,'fotoUsuario'])->whereNumber('id')->name('usuarios.foto');
@@ -271,6 +266,7 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/tentativas/{id}/imagem', [\App\Http\Controllers\TentativaCartaoController::class,'imagem'])->whereUuid('id')->name('correcao.tentativa.imagem');
     Route::post('/tentativas/{id}/aplicar', [\App\Http\Controllers\TentativaCartaoController::class,'aplicar'])->whereUuid('id')->name('correcao.tentativa.aplicar');
     Route::post('/tentativas/{id}/descartar', [\App\Http\Controllers\TentativaCartaoController::class,'descartar'])->whereUuid('id')->name('correcao.tentativa.descartar');
+    Route::get('/cartoes/{id}/imagens/{tipo}', \App\Http\Controllers\CartaoImagemController::class)->whereNumber('id')->whereIn('tipo',['original','miniatura','endireitada'])->name('cartoes.imagem-segura');
     Route::get('/cartoes/{id}/imagem',          [CorrecaoController::class, 'imagem'])->name('cartoes.imagem');
     Route::get('/cartoes/{id}/retirada', [CorrecaoController::class,'prepararRetirada'])->name('cartoes.retirada');
     Route::delete('/cartoes/{id}',              [CorrecaoController::class, 'excluir'])->name('cartoes.excluir');
@@ -299,5 +295,18 @@ Route::middleware('autenticado')->group(function () {
     Route::get('/assinatura',           [AssinaturaController::class, 'index'])->name('assinatura.index');
     Route::post('/assinatura/cancelar', [AssinaturaController::class, 'cancelar'])->name('assinatura.cancelar');
 
-});
+};
 
+Route::pattern('acesso', '(?:vinculo|pessoal|interno)-[1-9][0-9]{0,17}|sessao');
+Route::middleware('autenticado')->group(function () use ($rotasContextuais) {
+    Route::post('/vinculos/convite/consultar', [\App\Http\Controllers\ConviteVinculoController::class, 'consultar'])->middleware('throttle:20,1')->name('vinculos.convite.consultar');
+    Route::post('/vinculos/convite/responder', [\App\Http\Controllers\ConviteVinculoController::class, 'responder'])->middleware('throttle:10,1')->name('vinculos.convite.responder');
+    Route::get('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'index'])->name('vinculos.index');
+    Route::post('/vinculos/interno', [\App\Http\Controllers\Auth\VinculoController::class, 'interno'])->middleware('throttle:20,1')->name('vinculos.interno');
+    Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
+    Route::get('/trocar-senha',  [PerfilController::class, 'formTrocarSenha'])->name('trocar-senha');
+    Route::put('/trocar-senha',  [PerfilController::class, 'trocarSenha'])->name('trocar-senha.store');
+    Route::prefix('acessos/{acesso}')->group($rotasContextuais);
+    // Não reexecuta ações antigas: o middleware apenas migra GETs válidos.
+    Route::name('legado.')->group($rotasContextuais);
+});

@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 /**
  * Arquivo: apps/api/tests/Feature/ImagensCartaoTest.php
- * Função: Links assinados das fotos dos cartões: só abrem com assinatura válida e dentro do prazo.
+ * Função: Endereços de fotos não concedem acesso; legado assinado permanece desativado.
  */
 class ImagensCartaoTest extends TestCase
 {
@@ -31,29 +31,29 @@ class ImagensCartaoTest extends TestCase
         $this->cartao = Cartao::find(7);
     }
 
-    public function test_link_assinado_abre_a_imagem_sem_sessao(): void
+    public function test_endereco_do_arquivo_nao_contem_segredo_e_exige_autenticacao(): void
     {
         $url = app(ImagensCartao::class)->url(7, 'miniatura');
 
-        $this->assertStringStartsWith('/api/v1/cartoes/7/arquivo/miniatura?', $url);
-        $this->get($url)->assertOk();
+        $this->assertSame('/api/v1/cartoes/7/imagens/miniatura', $url);
+        $this->getJson($url)->assertUnauthorized();
     }
 
-    public function test_link_sem_assinatura_ou_alterado_e_recusado(): void
+    public function test_endereco_antigo_nao_abre_imagem_nem_com_assinatura_valida(): void
     {
-        $url = app(ImagensCartao::class)->url(7, 'miniatura');
-
-        $this->get('/api/v1/cartoes/7/arquivo/miniatura')->assertForbidden();
-        $this->get(str_replace('/7/', '/8/', $url))->assertForbidden();
+        $url = \Illuminate\Support\Facades\URL::temporarySignedRoute('cartoes.arquivo', now()->addHour(), ['id'=>7, 'tipo'=>'miniatura'], false);
+        $this->get('/api/v1/cartoes/7/arquivo/miniatura')->assertNotFound();
+        $this->get($url)->assertNotFound();
+        $this->get(str_replace('/7/', '/8/', $url))->assertNotFound();
     }
 
-    public function test_link_vencido_e_recusado(): void
+    public function test_copiar_o_endereco_nao_concede_acesso_em_outro_momento(): void
     {
         $url = app(ImagensCartao::class)->url(7, 'miniatura');
 
         $this->travel(3)->hours();
 
-        $this->get($url)->assertForbidden();
+        $this->getJson($url)->assertUnauthorized();
     }
 
     public function test_link_fica_igual_dentro_da_mesma_hora(): void

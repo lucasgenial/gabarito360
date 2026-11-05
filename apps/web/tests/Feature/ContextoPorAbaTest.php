@@ -19,14 +19,14 @@ class ContextoPorAbaTest extends TestCase
             'auth_permissoes' => [], 'auth_nome' => 'Pessoa fictícia']);
         $this->withCookie(config('session.cookie'), session()->getId());
         $this->withCredentials();
-        Route::middleware(['web', 'autenticado'])->get('/teste-contexto', function () {
+        Route::middleware(['web', 'autenticado'])->get('/acessos/{acesso}/teste-contexto', function () {
             return response()->json(['perfil' => Acesso::perfil(), 'permissoes' => Acesso::permissoes()]);
         });
-        Route::middleware(['web', 'autenticado'])->post('/teste-contexto', function () {
+        Route::middleware(['web', 'autenticado'])->post('/acessos/{acesso}/teste-contexto', function () {
             app(ApiClient::class)->post('/v1/operacao');
             return redirect('/teste-contexto');
         });
-        Route::middleware(['web', 'autenticado'])->get('/teste-pdf', function () {
+        Route::middleware(['web', 'autenticado'])->get('/acessos/{acesso}/teste-pdf', function () {
             $r = app(ApiClient::class)->getArquivo('/v1/arquivo');
             return response($r->body())->header('Content-Type', 'application/pdf');
         });
@@ -41,7 +41,12 @@ class ContextoPorAbaTest extends TestCase
 
     private function dados(string $token, string $perfil = 'professor'): array
     {
-        return ['token' => $token, 'perfil' => $perfil, 'permissoes' => ['prova.ver'], 'espaco' => ['id' => 1, 'nome' => 'Escola fictícia', 'tipo' => 'escola']];
+        return ['vinculo_id' => $token === 'token-b' ? 2 : 1, 'token' => $token, 'perfil' => $perfil, 'permissoes' => ['prova.ver'], 'espaco' => ['id' => 1, 'nome' => 'Escola fictícia', 'tipo' => 'escola']];
+    }
+
+    private function url(string $path, string $id): string
+    {
+        return '/acessos/'.ContextoWeb::referencia(ContextoWeb::obter($id)).$path;
     }
 
     public function test_dois_contextos_usam_tokens_e_permissoes_independentes_sem_mudar_sessao(): void
@@ -49,9 +54,9 @@ class ContextoPorAbaTest extends TestCase
         $a = ContextoWeb::criar($this->dados('token-a', 'dir_escolar'));
         $b = ContextoWeb::criar($this->dados('token-b'));
         $this->fingir(fn ($r) => Http::response(['data' => $this->dados('omitido', $r->hasHeader('Authorization', 'Bearer token-a') ? 'dir_escolar' : 'professor')]));
-        $this->getJson('/teste-contexto?_ctx='.$a)->assertOk()->assertJsonPath('perfil', 'dir_escolar');
-        $this->getJson('/teste-contexto?_ctx='.$b)->assertOk()->assertJsonPath('perfil', 'professor');
-        $this->getJson('/teste-contexto?_ctx='.$a)->assertOk()->assertJsonPath('perfil', 'dir_escolar');
+        $this->getJson($this->url('/teste-contexto',$a))->assertOk()->assertJsonPath('perfil', 'dir_escolar');
+        $this->getJson($this->url('/teste-contexto',$b))->assertOk()->assertJsonPath('perfil', 'professor');
+        $this->getJson($this->url('/teste-contexto',$a))->assertOk()->assertJsonPath('perfil', 'dir_escolar');
         $this->assertSame('identidade', session('auth_token'));
         $this->assertNull(session('auth_perfil'));
         $this->assertSame([], session('auth_permissoes'));
@@ -60,15 +65,15 @@ class ContextoPorAbaTest extends TestCase
 
     public function test_contexto_ausente_invalido_de_outra_sessao_e_expirado_nao_envia_operacao(): void
     {
-        $this->get('/teste-contexto')->assertOk()->assertSee('Abrindo seu vínculo');
-        $this->postJson('/teste-contexto')->assertStatus(409);
-        $this->postJson('/teste-contexto', ['_ctx' => 'inventado'])->assertStatus(409);
+        $this->get('/painel')->assertOk()->assertSee('Escolha seu acesso');
+        $this->postJson('/provas')->assertStatus(409);
+        $this->postJson('/acessos/vinculo-999/teste-contexto')->assertStatus(409);
         $id = ContextoWeb::criar($this->dados('privado'));
         $this->withSession(['auth_token' => 'outra-identidade']); session()->save();
-        $this->postJson('/teste-contexto', ['_ctx' => $id])->assertStatus(409);
+        $this->postJson('/acessos/vinculo-1/teste-contexto')->assertStatus(409);
         $this->withSession(['auth_token' => 'identidade']); session()->save();
         $this->travel(121)->minutes();
-        $this->postJson('/teste-contexto', ['_ctx' => $id])->assertStatus(409);
+        $this->postJson('/acessos/vinculo-1/teste-contexto')->assertStatus(409);
         Http::assertNothingSent();
     }
 
@@ -76,12 +81,12 @@ class ContextoPorAbaTest extends TestCase
     {
         $id = ContextoWeb::criar($this->dados('revogado'));
         $this->fingir(['*' => Http::response(['message' => 'Indisponível'], 403)]);
-        $this->postJson('/teste-contexto', ['_ctx' => $id])->assertStatus(409)->assertJsonPath('selecionar_vinculo', true);
+        $this->postJson('/acessos/vinculo-1/teste-contexto')->assertStatus(409)->assertJsonPath('selecionar_vinculo', true);
         $this->assertNull(ContextoWeb::obter($id));
         Http::assertSentCount(1);
         $id2 = ContextoWeb::criar($this->dados('temporario'));
         $this->fingir(['*' => Http::response([], 503)]);
-        $this->getJson('/teste-contexto?_ctx='.$id2)->assertStatus(503);
+        $this->getJson($this->url('/teste-contexto',$id2))->assertStatus(503);
         $this->assertNotNull(ContextoWeb::obter($id2));
     }
 
@@ -93,9 +98,10 @@ class ContextoPorAbaTest extends TestCase
             if (str_ends_with($r->url(), '/arquivo')) return Http::response('%PDF-ficticio', 200, ['Content-Type' => 'application/pdf']);
             return Http::response(['data' => $this->dados('omitido')]);
         });
-        $this->post('/teste-contexto', ['_ctx' => $id])->assertRedirect('/teste-contexto?_ctx='.$id);
-        $this->getJson('/teste-contexto', ['X-G360-Contexto' => $id])->assertOk();
-        $this->get('/teste-pdf?_ctx='.$id)->assertOk()->assertHeader('Content-Type', 'application/pdf')->assertSee('%PDF-ficticio');
+        $r=$this->post($this->url('/teste-contexto',$id))->assertRedirect();
+        $this->assertSame('/acessos/vinculo-1/teste-contexto',parse_url($r->headers->get('Location'),PHP_URL_PATH));
+        $this->getJson($this->url('/teste-contexto',$id), ['X-G360-Acesso' => 'vinculo-1'])->assertOk();
+        $this->get($this->url('/teste-pdf',$id))->assertOk()->assertHeader('Content-Type', 'application/pdf')->assertSee('%PDF-ficticio');
     }
 
     public function test_escolha_varios_unico_e_sem_vinculo_e_token_nunca_aparece_no_html(): void
@@ -111,8 +117,9 @@ class ContextoPorAbaTest extends TestCase
         $this->fingir(['*' => Http::response(['data' => $this->dados('segredo-nao-publicar')], 201)]);
         $r = $this->post('/vinculos', ['vinculo_id' => 1])->assertRedirect();
         $this->assertStringNotContainsString('segredo-nao-publicar', $r->headers->get('Location'));
-        parse_str(parse_url($r->headers->get('Location'), PHP_URL_QUERY), $q);
-        $this->assertSame('segredo-nao-publicar', ContextoWeb::obter($q['_ctx'])['token']);
+        $this->assertStringNotContainsString('_ctx',$r->headers->get('Location'));
+        $this->assertSame('/acessos/vinculo-1/painel',parse_url($r->headers->get('Location'),PHP_URL_PATH));
+        $this->assertSame('segredo-nao-publicar', ContextoWeb::resolverReferencia('vinculo-1')['dados']['token']);
         $this->assertSame('identidade', session('auth_token'));
         Http::assertSent(fn ($r) => $r->hasHeader('Authorization', 'Bearer identidade'));
     }
@@ -124,7 +131,7 @@ class ContextoPorAbaTest extends TestCase
             ['id'=>1,'perfil'=>'professor','espaco'=>['id'=>1,'tipo'=>'escola','nome'=>'Escola fictícia']],
             ['id'=>2,'perfil'=>'professor','espaco'=>['id'=>2,'tipo'=>'escola','nome'=>'Outra escola']],
         ] : $this->dados('omitido')]));
-        $this->get('/referencia-visual?_ctx='.$id)->assertOk()->assertSee('Trocar vínculo')->assertSee('Escola fictícia')->assertDontSee('contextual');
+        $this->get($this->url('/referencia-visual',$id))->assertOk()->assertSee('Trocar vínculo')->assertSee('Escola fictícia')->assertDontSee('contextual');
         $this->post('/logout')->assertRedirect('/login')->assertSessionMissing('auth_token');
         Http::assertSent(fn ($r) => str_ends_with($r->url(), '/auth/logout') && $r->hasHeader('Authorization', 'Bearer identidade'));
     }

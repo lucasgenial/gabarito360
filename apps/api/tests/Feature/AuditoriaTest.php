@@ -158,7 +158,8 @@ class AuditoriaTest extends TestCase
     {
         Queue::fake([GravarAuditoria::class]);
         $this->getJson('/api/v1/health')->assertOk();
-        $this->getJson('/api/v1/inexistente?token=segredo')->assertNotFound();
+        $this->getJson('/api/v1/inexistente?token=segredo')->assertStatus(400)->assertDontSee('segredo');
+        $this->getJson('/api/v1/inexistente?busca=ficticia')->assertNotFound();
         Queue::assertNothingPushed();
         config(['auditoria.ativa'=>false]);
         $this->token();
@@ -168,7 +169,7 @@ class AuditoriaTest extends TestCase
     public function test_requisicao_sem_autenticacao_e_driver_sincrono(): void
     {
         Queue::fake([GravarAuditoria::class]);
-        $this->getJson('/api/v1/alunos?token=segredo')->assertUnauthorized();
+        $this->getJson('/api/v1/alunos?busca=ficticia')->assertUnauthorized();
         $evento=Queue::pushed(GravarAuditoria::class)->first()->evento;
         $this->assertNull($evento['usuario_real_id']);
         $this->assertSame(401,$evento['status_http']);

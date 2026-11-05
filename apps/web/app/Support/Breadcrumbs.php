@@ -45,10 +45,6 @@ final class Breadcrumbs
     private static function url(Request $r, string $nome, array $parametros = []): string
     {
         // Só rotas internas nomeadas. Documentos assinados não passam por este gerador.
-        if ($ctx = $r->attributes->get('vinculo_handle')) {
-            $parametros['_ctx'] = $ctx;
-        }
-
         return route($nome,$parametros);
     }
 }

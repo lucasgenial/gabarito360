@@ -1,14 +1,14 @@
 @extends('layouts.app')
 @section('title','Abrir protocolo')
 @include('pedidos._estilo')
-@section('breadcrumb')<a href="{{ route('pedidos.index',['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Pedidos de titulares</a><span class="sep">/</span><span>Abrir protocolo</span>@endsection
+@section('breadcrumb')<a href="{{ route('pedidos.index',[]) }}">Pedidos de titulares</a><span class="sep">/</span><span>Abrir protocolo</span>@endsection
 @section('content')
 @php($ctx=\App\Support\ContextoWeb::id())
 <x-pagina titulo="Abrir protocolo" subtitulo="Designe o atendimento a um responsável. Isso não concede acesso aos dados escolares." />
 <section class="card card-pad pedidos-bloco">
 <h2>1. Escolha a instituição</h2>
 <form class="pedidos-form" method="GET" action="{{ route('pedidos.create') }}">
-<input type="hidden" name="_ctx" value="{{ $ctx }}">
+
 <div class="form-group"><label for="cliente">Cliente</label><select class="input" id="cliente" name="cliente_id" required>
 <option value="">Selecione</option>
 @if($opcoes['cliente'])<option value="{{ $opcoes['cliente']['id'] }}" selected>{{ $opcoes['cliente']['nome'] }}</option>@endif
@@ -22,7 +22,7 @@
 <nav class="pedidos-acoes" aria-label="Paginação de {{ $rotulo }}"><span>{{ $rotulo }}: página {{ $opcoes[$grupo]['current_page'] }} de {{ $opcoes[$grupo]['last_page'] }}</span>
 @foreach([-1=>'Anterior',1=>'Próxima'] as $delta=>$texto)
 @php($pagina=$opcoes[$grupo]['current_page']+$delta)
-@if($pagina>=1 && $pagina<=$opcoes[$grupo]['last_page'])<a href="{{ route('pedidos.create',array_merge($filtros,[$grupo.'_page'=>$pagina,'_ctx'=>$ctx])) }}">{{ $texto }}</a>@endif
+@if($pagina>=1 && $pagina<=$opcoes[$grupo]['last_page'])<a href="{{ route('pedidos.create',array_merge($filtros,[$grupo.'_page'=>$pagina])) }}">{{ $texto }}</a>@endif
 @endforeach</nav>
 @endif
 @endforeach

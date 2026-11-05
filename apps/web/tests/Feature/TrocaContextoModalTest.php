@@ -46,7 +46,7 @@ class TrocaContextoModalTest extends TestCase
     public function test_vinculo_unico_nao_renderiza_icone_nem_modal(): void
     {
         $ctx=$this->preparar();$this->api([$this->opcoes()[0]]);
-        $this->get('/referencia-visual?_ctx='.$ctx)->assertOk()->assertSee('Meu espaço')
+        $this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/referencia-visual')->assertOk()->assertSee('Meu espaço')
             ->assertDontSee('id="contexto-trocar"',false)->assertDontSee('id="troca-contexto-modal"',false);
         Http::assertSentCount(2);
     }
@@ -54,7 +54,7 @@ class TrocaContextoModalTest extends TestCase
     public function test_modal_preserva_identidade_atual_csrf_e_nao_expoe_tokens(): void
     {
         $ctx=$this->preparar();$this->api($this->opcoes());
-        $r=$this->get('/referencia-visual?_ctx='.$ctx)->assertOk()->assertSee('id="contexto-trocar"',false)
+        $r=$this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/referencia-visual')->assertOk()->assertSee('id="contexto-trocar"',false)
             ->assertSee('aria-haspopup="dialog"',false)->assertSee('id="troca-contexto-modal"',false)
             ->assertSee('Atual')->assertSee('Escola &lt;teste&gt; B',false)->assertSee('data-sem-contexto',false)
             ->assertDontSee('contexto-atual-secreto')->assertDontSee('Bearer identidade');
@@ -69,16 +69,16 @@ class TrocaContextoModalTest extends TestCase
     public function test_acesso_interno_unico_e_alternativa_escolar_sao_contados_separadamente(): void
     {
         $ctx=$this->preparar(true);$this->api([],[['id'=>1,'perfil'=>'suporte']]);
-        $this->get('/painel?_ctx='.$ctx)->assertOk()->assertDontSee('id="contexto-trocar"',false);
+        $this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/painel')->assertOk()->assertDontSee('id="contexto-trocar"',false);
         Http::swap(new \Illuminate\Http\Client\Factory());
         $this->api([$this->opcoes()[0]],[['id'=>1,'perfil'=>'suporte']]);
-        $this->get('/painel?_ctx='.$ctx)->assertOk()->assertSee('Trocar acesso')->assertSee('Equipe Gabarito360')->assertSee('Escola A');
+        $this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/painel')->assertOk()->assertSee('Trocar acesso')->assertSee('Equipe Gabarito360')->assertSee('Escola A');
     }
 
     public function test_falha_de_consulta_nao_inventa_alternativas_e_apresenta_orientacao(): void
     {
         $ctx=$this->preparar();$this->api([],[],503);
-        $this->get('/referencia-visual?_ctx='.$ctx)->assertOk()->assertDontSee('id="contexto-trocar"',false)
+        $this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/referencia-visual')->assertOk()->assertDontSee('id="contexto-trocar"',false)
             ->assertSee('Não foi possível verificar outros acessos.');
     }
 
@@ -91,10 +91,11 @@ class TrocaContextoModalTest extends TestCase
                 'espaco'=>['id'=>2,'tipo'=>'escola','nome'=>'Escola B']]],201);
         });
         $r=$this->postJson('/vinculos',['vinculo_id'=>22])->assertOk()->assertDontSee('novo-token-secreto');
-        parse_str(parse_url($r->json('url'),PHP_URL_QUERY),$q);
-        $this->assertNotSame($ctx,$q['_ctx']);
+        $this->assertSame('/acessos/vinculo-22/painel',parse_url($r->json('url'),PHP_URL_PATH));
+        $this->assertNull(parse_url($r->json('url'),PHP_URL_QUERY));
+        $this->assertStringNotContainsString($ctx,$r->json('url'));
         $this->assertSame('contexto-atual-secreto',ContextoWeb::obter($ctx)['token']);
-        $this->assertSame('novo-token-secreto',ContextoWeb::obter($q['_ctx'])['token']);
+        $this->assertSame('novo-token-secreto',ContextoWeb::resolverReferencia('vinculo-22')['dados']['token']);
         $this->assertSame('identidade',session('auth_token'));
         Http::swap(new \Illuminate\Http\Client\Factory());
         Http::fake(['*'=>Http::response(['message'=>'revogado'],403)]);
@@ -112,8 +113,10 @@ class TrocaContextoModalTest extends TestCase
                 'perfil'=>'desenvolvedor','permissoes'=>[]]],201);
         });
         $r=$this->postJson('/vinculos/interno',['acesso_interno_id'=>2])->assertOk()->assertDontSee('interno-novo-secreto');
-        parse_str(parse_url($r->json('url'),PHP_URL_QUERY),$q);
-        $this->assertSame('interno-novo-secreto',ContextoWeb::obter($q['_ctx'])['token']);
+        $this->assertSame('/acessos/interno-2/painel',parse_url($r->json('url'),PHP_URL_PATH));
+        $this->assertNull(parse_url($r->json('url'),PHP_URL_QUERY));
+        $this->assertStringNotContainsString($ctx,$r->json('url'));
+        $this->assertSame('interno-novo-secreto',ContextoWeb::resolverReferencia('interno-2')['dados']['token']);
         $this->assertSame('contexto-atual-secreto',ContextoWeb::obter($ctx)['token']);
         Http::swap(new \Illuminate\Http\Client\Factory());
         Http::fake(['*'=>Http::response([],403)]);

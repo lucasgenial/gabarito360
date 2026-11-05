@@ -14,7 +14,7 @@
   <p>Use um código desta modalidade: um código de materiais não serve para cadastros ou resultados. O código tem validade curta e serve para uma solicitação; se vencer, o destinatário deve gerar outro.</p>
   <p>Se você administra origem e destino, abra o recebimento em outra aba e use <strong>Trocar vínculo</strong> para escolher o destino. Mantenha esta seleção aberta na aba de origem.</p>
   @if(\App\Support\Acesso::pode('copia.autorizar_destino'))
-    <a class="btn btn-secondary" target="_blank" rel="noopener" href="{{ route($rotaReceber,['_ctx'=>\App\Support\ContextoWeb::id()]) }}">Abrir {{ $nomeReceber }} em outra aba</a>
+    <a class="btn btn-secondary" target="_blank" rel="noopener" href="{{ route($rotaReceber,[]) }}">Abrir {{ $nomeReceber }} em outra aba</a>
   @endif
   <p>O código apenas indica onde receber. A autorização de entrada será registrada depois que a solicitação estiver preparada e a saída autorizada.</p>
 </section>

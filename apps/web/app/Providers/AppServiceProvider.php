@@ -22,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Sentinel sem poder: a ausência de vínculo sempre exige seleção no middleware.
+        \Illuminate\Support\Facades\URL::defaults(['acesso'=>'sessao']);
         // @pode('cartao.enviar') ... @endpode — esconde ações que o perfil não tem (doc 03)
         Blade::if('pode', fn (string $acao) => Acesso::pode($acao));
         \Illuminate\Support\Facades\View::composer('layouts.app',function ($view) {

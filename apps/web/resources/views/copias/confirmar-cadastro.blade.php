@@ -5,7 +5,7 @@
 <x-aviso>Tipo real do destino: {{ $dados['recebimento']['destino']['tipo']==='escola'?'escolar':'pessoal' }}. Confira novamente os campos abaixo. Preparar a solicitação não autoriza a transferência.</x-aviso>
 @include('copias._cadastro',['dados'=>$dados['previa']])
 <form method="POST" action="{{ route('copias.cadastro.criar') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="_ctx" value="{{ \App\Support\ContextoWeb::id() }}">
+  @csrf
   <input type="hidden" name="codigo" value="{{ $codigo }}"><input type="hidden" name="chave" value="{{ $chave }}">
   <input type="hidden" name="espaco_id" value="{{ $dados['previa']['origem_espaco_id'] }}">
   <input type="hidden" name="destino_digest" value="{{ $dados['recebimento']['destino_digest'] }}"><input type="hidden" name="conteudo_digest" value="{{ $dados['previa']['conteudo_digest'] }}">
