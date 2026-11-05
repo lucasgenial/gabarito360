@@ -177,7 +177,7 @@ class ProcessarCartaoJob implements ShouldQueue
                     }
                 }
                 $this->gravarLeituras($atual, $leituras);
-                if ($atual->aluno_id) app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($atual,$usuario);
+                if ($atual->aluno_id) app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($atual,$usuario, extra: ['leituras_omr' => $leituras]);
                 foreach ($provas as $p) {
                     AtualizadorStatusProva::atualizar($p);
                 }

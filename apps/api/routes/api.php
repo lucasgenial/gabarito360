@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
 
     Route::get('health', fn () => response()->json(['status' => 'ok', 'app' => 'gabarito360-api']));
+    Route::post('documentos/validar', \App\Http\Controllers\Api\ValidacaoDocumentoController::class)->middleware('throttle:20,1');
 
     // Webhook Mercado Pago (sem autenticação Sanctum — verificado por assinatura HMAC)
     Route::post('webhooks/mercadopago', [WebhookController::class, 'mercadoPago']);

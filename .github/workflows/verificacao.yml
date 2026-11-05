@@ -100,6 +100,9 @@ jobs:
       - run: node scripts/auditoria/historico-regional.mjs
         env:
           CHROME_PATH: /usr/bin/google-chrome
+      - run: node scripts/auditoria/leituras-relatorios.mjs
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
       - run: |
           bash -n scripts/operacao/deploy.sh
           bash -n infra/deploy.sh

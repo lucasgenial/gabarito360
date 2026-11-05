@@ -44,13 +44,13 @@ window.criarFilaCartoes = function (opcoes) {
       else { ativos.delete(chave); guardar(); }
       texto(li, d.mensagem || 'Não foi possível concluir esta leitura. Fotografe novamente.');
       if(d.processamento==='aguardando_confirmacao'&&opcoes.tentativaUrl&&/^[0-9a-f-]{36}$/i.test(d.resultado?.tentativa_id||'')){
-        var link=document.createElement('a');link.className='btn btn-secondary';link.textContent='Conferir nova tentativa';
+        var link=document.createElement('a');link.className='btn btn-secondary';link.textContent='Conferir nova leitura';
         link.href=opcoes.tentativaUrl.replace('__TENTATIVA__',encodeURIComponent(d.resultado.tentativa_id));li.appendChild(link);
       }
     }
     if (d.pode_repetir) botao(li, 'Tentar leitura novamente', async function () {
       try { mostrar(chave, li, await pedir(opcoes.envioUrl.replace('__ENVIO__', chave) + '/repetir', {method: 'POST'})); }
-      catch (e) { texto(li, 'Não foi possível confirmar a nova tentativa. Acompanhando o envio…'); acompanhar(chave, li); }
+      catch (e) { texto(li, 'Não foi possível confirmar o reprocessamento. Acompanhando o envio…'); acompanhar(chave, li); }
     });
     if(opcoes.resumo)opcoes.resumo();
   }
@@ -89,7 +89,7 @@ window.criarFilaCartoes = function (opcoes) {
         foto = null; mostrar(chave, li, d);
         if (d.processamento === 'concluido') return {aceita:true,mensagem:'Leitura concluída. Confira o resultado na lista de envios.'};
         if (['recusado', 'substituido'].includes(d.processamento)) return {aceita:false,mensagem:d.mensagem||'Envio encerrado. Confira o motivo na lista de envios.'};
-        if(d.processamento==='aguardando_confirmacao')return {aceita:true,mensagem:'Nova tentativa aguardando conferência. A correção atual foi mantida.'};
+        if(d.processamento==='aguardando_confirmacao')return {aceita:true,mensagem:'Nova leitura aguardando conferência. A correção atual foi mantida.'};
         return {aceita:true,mensagem:d.processamento === 'erro' ? 'Foto recebida. Use “Tentar leitura novamente” na lista de envios.' : 'Qualidade inicial conferida. Foto recebida; leitura na fila.'};
       } catch (e) {
         li.dataset.processamento='recusado';texto(li, (e.status===422?'Foto recusada para leitura: ':'Envio não confirmado: ') + e.message);

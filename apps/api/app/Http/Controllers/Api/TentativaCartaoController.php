@@ -60,12 +60,15 @@ class TentativaCartaoController extends Controller
         $vigente = Cartao::where('tentativa_id', $id)->first();
         $proposta = $ultima?->acao === 'aguardando_confirmacao';
         $autores = DB::table('usuarios')->whereIn('id', $eventos->pluck('ator_id')->push($t->autor_id))->pluck('nome', 'id');
+        $snapshots = $eventos->map(fn ($e) => ['acao' => $e->acao, 'motivo' => $e->motivo, 'ocorrido_em' => $e->ocorrido_em,
+            'snapshot' => json_decode(Crypt::decryptString($e->dados), true, 512, JSON_THROW_ON_ERROR)])->all();
 
         return ApiResponse::success(['id' => $t->id, 'numero' => $t->numero, 'prova' => ['id' => $p->id, 'titulo' => $p->titulo],
             'aluno_nome' => DB::table('alunos')->where('id', $t->aluno_id)->value('nome') ?? 'Aluno não identificado', 'aluno_id' => $t->aluno_id,
             'autor_nome' => $autores[$t->autor_id] ?? 'Registro anterior', 'ocorrido_em' => $t->ocorrido_em, 'estado' => $vigente ? 'vigente' : ($ultima?->acao ?? 'registrada'),
             'tem_imagem' => (bool) $t->imagem_path, 'imagem_sha256' => $t->imagem_sha256, 'qualidade' => $d['cartao']['qualidade'] ?? null,
             'leituras' => $d['leituras_propostas'] ?? $d['respostas'] ?? [], 'nota' => $d['nota'] ?? null,
+            'linhas' => app(\App\Services\Omr\QuadroLeituras::class)->montar($d, $snapshots),
             'pode_aplicar' => $proposta && Permissao::pode($r->user(), 'correcao.alterar') && ! Correcao::bloqueio($r->user(), $p),
             'pode_descartar' => $proposta && Permissao::pode($r->user(), 'correcao.alterar') && ! Correcao::bloqueio($r->user(), $p),
             'eventos' => $eventos->map(function ($e) use ($autores) {
