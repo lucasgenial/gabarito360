@@ -150,7 +150,7 @@ img { max-width: 100%; display: block; }
 .g360-toaster { top:0!important; }
 #g360-notificacoes { overflow:clip; overflow-anchor:none; }
 .g360-toaster { display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
-.g360-toaster:has(> .sldt-active) { padding-bottom:16px; }
+.g360-toaster:has(> .sldt-active) { padding-block:16px; }
 .g360-toaster > div { position:static!important; margin:0!important; width:100%; }
 .g360-toaster > div:not(.sldt-active) { display:none!important; }
 .g360-toast { width:360px; max-width:100%!important; font-family:var(--font-body); }
