@@ -683,7 +683,8 @@ img { max-width: 100%; display: block; }
 .tela-revisao .rev-salvamento { color:var(--fg-2); font-size:14px; margin-top:8px; }
 .tela-revisao .rev-salvamento:empty { display:none; }
 .tela-revisao .rev-opcoes-extra { grid-template-columns:1fr 1fr; margin-top:8px; }
-.tela-revisao .rev-acoes { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+.tela-revisao .rev-acoes { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:16px; }
+.tela-revisao .rev-acoes .btn:disabled { color:var(--muted); border-color:var(--border); opacity:1; cursor:not-allowed; }
 .rev-cartao-modal { margin:auto; padding:0; width:min(1120px,calc((100vw - 32px)/var(--escala,1))); height:calc((100dvh - 32px)/var(--escala,1)); max-width:none; max-height:none; border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--surface); color:var(--fg); overflow:hidden; }
 .rev-cartao-modal[open] { display:flex; flex-direction:column; }
 .rev-cartao-modal::backdrop { background:rgba(0,0,0,.6); }
