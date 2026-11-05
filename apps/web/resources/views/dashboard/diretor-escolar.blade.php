@@ -118,7 +118,7 @@
     <div class="card-pad" style="padding-bottom:0;">
       <h3 style="font-size:18px;">Últimas provas por turma</h3>
     </div>
-    <x-tabela titulo="Turmas da escola" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Turmas da escola</caption>
+    <x-tabela :interna="true" :integrada="true" titulo="Turmas da escola" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Turmas da escola</caption>
       <thead>
         <tr>
           <th scope="col">Turma</th>

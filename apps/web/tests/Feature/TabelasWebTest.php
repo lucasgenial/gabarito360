@@ -75,4 +75,22 @@ class TabelasWebTest extends TestCase
             $this->assertStringContainsString('vinculo_id=',$form->getAttribute('action'));
         }
     }
+
+    public function test_selecao_integral_preserva_inputs_sem_js_e_nao_ativa_controles_em_colecao_parcial(): void
+    {
+        $html=\Illuminate\Support\Facades\Blade::render('<x-tabela titulo="Disciplinas" modo="selecao" :completa="true"><table class="table tabela-padrao"><thead><tr><th data-ordenar="texto">Disciplina</th><th>Selecionar</th></tr></thead><tbody>@for($i=1;$i<=25;$i++)<tr><td>Disciplina {{ $i }}</td><td><input type="checkbox" name="disciplina_ids[]" value="{{ $i }}" checked></td></tr>@endfor</tbody></table></x-tabela>');
+        $this->assertStringContainsString('data-modo="selecao"',$html);
+        $this->assertStringContainsString('data-colecao-completa="true"',$html);
+        $this->assertStringContainsString('Somente selecionadas',$html);
+        $this->assertStringContainsString('Limpar filtros',$html);
+        $doc=new \DOMDocument; @$doc->loadHTML($html); $xp=new \DOMXPath($doc);
+        $this->assertSame(25,$xp->query('//input[@name="disciplina_ids[]"][@checked]')->length);
+        $this->assertSame(0,$xp->query('//table/tbody/tr[@hidden]')->length);
+        $parcial=\Illuminate\Support\Facades\Blade::render('<x-tabela titulo="Parcial" modo="selecao"><table><tbody><tr><td>Dados da página</td></tr></tbody></table></x-tabela>');
+        $this->assertStringContainsString('data-colecao-completa="false"',$parcial);
+        $this->assertStringNotContainsString('data-tabela-busca',$parcial);
+        $matriz=\Illuminate\Support\Facades\Blade::render('<x-tabela titulo="Matriz" modo="matriz" :completa="true"><table><tbody><tr><td>Quadro</td></tr></tbody></table></x-tabela>');
+        $this->assertStringContainsString('data-colecao-completa="false"',$matriz);
+        $this->assertStringNotContainsString('data-tabela-busca',$matriz);
+    }
 }

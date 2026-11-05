@@ -33,14 +33,16 @@ class ProvaController extends Controller
             'haFiltros' => collect(['busca', 'disciplina', 'status'])->contains(fn (string $campo) => $request->filled($campo)),
             'provas'     => $provas,
             'kpis'       => $kpis,
+            'disciplinasFiltro' => $resp->successful() ? ($resp->json('data.filtros.disciplinas') ?? []) : [],
             'busca'      => $request->query('busca', ''),
             'disciplina' => $request->query('disciplina', ''),
             'status'     => $request->query('status', ''),
         ]);
     }
 
-    public function create(Request $request): View
+    public function create(Request $request)
     {
+        if (CurriculoProvaController::ativo()) return app(CurriculoProvaController::class)->novo($request);
         $turmas  = $this->api->get('/v1/turmas', ['ativo' => 1])->json('data.turmas') ?? [];
         $escolas = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
 
@@ -52,6 +54,7 @@ class ProvaController extends Controller
 
     public function store(Request $request)
     {
+        if (CurriculoProvaController::ativo()) return app(CurriculoProvaController::class)->criar($request);
         $request->validate([
             'escola_id'       => \App\Support\Acesso::pessoal() ? 'prohibited' : 'required|integer',
             'titulo'          => 'required|string|max:255',
@@ -95,6 +98,7 @@ class ProvaController extends Controller
         $turmas = $this->api->get('/v1/turmas')->json('data.turmas') ?? [];
 
         return view('provas.show', [
+            'curricular'=>CurriculoProvaController::ativo(),
             'prova'  => $resp->json('data'),
             'turmas' => $turmas,
         ]);
@@ -102,6 +106,7 @@ class ProvaController extends Controller
 
     public function update(Request $request, int $id)
     {
+        if (CurriculoProvaController::ativo()) $request->validate(['disciplina'=>'prohibited','turma_ids'=>'prohibited','disciplina_ids'=>'prohibited','curriculo_versao'=>'prohibited']);
         $payload = $request->only(
             'titulo','disciplina','serie','num_questoes','num_alternativas',
             'nota_maxima','tipo_pontuacao','anular_se_todas','opcao_lingua','gerar_cartao_pdf','data_aplicacao'
@@ -115,6 +120,7 @@ class ProvaController extends Controller
 
         if ($resp->failed()) {
             return back()->withInput()
+                ->withErrors($resp->json('errors')??[])->with('edicao_prova_erro',true)
                 ->with('erro', $resp->json('message') ?? 'Não foi possível atualizar a prova.');
         }
 

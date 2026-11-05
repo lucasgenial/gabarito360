@@ -46,6 +46,8 @@ class CatalogoPermissoes
     public const AUXILIAR_SECRETARIA = ['escola.ver', 'turma.ver', 'aluno.ver', 'aluno.gerir'];
 
     public const LISTA = [
+        // DC1: gestão pedagógica solicitada para a coordenação; doc141.
+        ['disciplina.gerir', 'turmas', 'Organizar disciplinas e atribuições docentes da própria escola', '----v---'],
         ['catalogo.solicitar', 'catalogo', 'Solicitar cadastro no próprio espaço pessoal', '--------'],
         ['catalogo.manter_escopo', 'catalogo', 'Manter unidades com autoridade institucional comprovada', '-vvv----'],
         ['catalogo.consultar', 'catalogo', 'Consultar referências públicas institucionais', '--------'],

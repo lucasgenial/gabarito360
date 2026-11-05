@@ -16,6 +16,14 @@ Regra solicitada pelo responsável em03/11/2026: toda alteração que afete inte
 
 Decisão explícita do responsável em03/11/2026: as telas da aplicação devem ocupar toda a área útil do viewport, em largura e altura, descontando menu, cabeçalho, rodapé e navegação móvel. Usar o layout compartilhado e superfícies de trabalho com largura100%; não introduzir max-width fixo em painéis, formulários principais ou listas que deixe uma faixa vazia na tela ampla. Margens responsivas e limites de leitura de parágrafos são permitidos; controles, diálogos e imagens mantêm limites próprios quando necessários. Grupos de trabalho seguem empilhados, com campos responsivos dentro deles. Validar desktop amplo, menu recolhido e celular sem overflow nem ações encobertas por rodapé. Toda mudança visual continua sujeita à aprovação independente acima.
 
+## Tabelas, cards de registros e avisos
+
+Padrão aprovado pelo responsável em 04/11/2026: tabelas operacionais usam `x-tabela`, integrado à área interna do card principal, com alinhamento comum ao título, filtros e formulário. Não criar um card separado para a tabela nem deixar seu conteúdo full-bleed. Usar `interna=true` somente quando o pai não fornece padding; em card-pad, gráficos, details e diálogos, evitar inset duplicado. A composição compartilhada usa 24px no desktop e 16px no celular onde o próprio componente fornece o inset.
+
+Listas podem virar cards no celular, preservando título, dados secundários, contexto e todas as ações autorizadas. O card principal continua visível; não anular sua superfície na adaptação móvel. Duas colunas Nome/dados e Ações são a escolha explícita do histórico de vínculos de áreas; não impor essa estrutura a matrizes comparativas, seleção em lote ou relatórios que precisem de outras colunas. Preservar paginação/seleção e nunca ativar controles de coleção completa sobre uma página parcial. Manter impressão/PDF sem padding adicional que prejudique A4.
+
+Avisos compartilhados de sucesso, erro, atenção e informação têm separação antes e depois (`margin-block:16px`); nos containers explícitos com gap, deixar o próprio gap separar os elementos. Preservar cores semânticas e roles status/alert. Revisar o componente compartilhado antes de criar exceções locais. Alterações continuam exigindo consulta prévia e aprovação visual independente.
+
 ## Continuidade e publicação
 
 Revisar o planejamento antes de implementar cada etapa e apresentar a tabela atualizada ao finalizar. Prosseguir autonomamente pelas subdivisões internas autorizadas. Usar terminal para Git/GitHub e preferir o Chrome do usuário para testes visuais do aplicativo.

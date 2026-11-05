@@ -93,7 +93,7 @@
     <div class="card-pad" style="padding-bottom:0;">
       <h3 style="font-size:18px;">Escolas do núcleo</h3>
     </div>
-    <x-tabela titulo="Escolas do núcleo" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Escolas do núcleo</caption>
+    <x-tabela :interna="true" :integrada="true" titulo="Escolas do núcleo" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Escolas do núcleo</caption>
       <thead>
         <tr>
           <th scope="col">Escola</th>

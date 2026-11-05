@@ -44,7 +44,7 @@
   <p class="copias-nota">O código identifica o destino; a referência identifica a solicitação criada depois. São informações diferentes. Nenhuma mensagem é enviada automaticamente.</p>
   <p>Se você administra os dois espaços, pode realizar os dois papéis: use <strong>Trocar vínculo</strong> para atuar em cada um. As autorizações continuam separadas.</p>
   <details><summary>Quem tem autonomia para autorizar?</summary>
-    <div style="overflow-x:auto"><x-tabela titulo="Perfis e alcance" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Perfis e alcance</caption><thead><tr><th scope="col">Perfil</th><th scope="col">Alcance nesta versão</th></tr></thead><tbody>
+    <div style="overflow-x:auto"><x-tabela :integrada="true" titulo="Perfis e alcance" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Perfis e alcance</caption><thead><tr><th scope="col">Perfil</th><th scope="col">Alcance nesta versão</th></tr></thead><tbody>
       <tr><td class="tabela-principal" data-rotulo="Perfil"><div class="tabela-valor">Administrador da Rede</div></td><td data-rotulo="Alcance nesta versão"><div class="tabela-valor">Escolas da própria rede, com permissão vigente.</div></td></tr>
       <tr><td class="tabela-principal" data-rotulo="Perfil"><div class="tabela-valor">Diretor Escolar</div></td><td data-rotulo="Alcance nesta versão"><div class="tabela-valor">Somente a própria escola, com permissão vigente.</div></td></tr>
       <tr><td class="tabela-principal" data-rotulo="Perfil"><div class="tabela-valor">Professor autônomo</div></td><td data-rotulo="Alcance nesta versão"><div class="tabela-valor">Somente o espaço pessoal do qual é proprietário.</div></td></tr>

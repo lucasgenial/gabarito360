@@ -70,7 +70,7 @@
   <div class="card-pad" style="padding-bottom:0;">
     <h3 style="font-size:17px;">Resultado detalhado por aluno</h3>
   </div>
-  <x-tabela titulo="Desempenho dos alunos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Desempenho dos alunos</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Desempenho dos alunos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Desempenho dos alunos</caption>
     <thead><tr><th scope="col">Aluno</th><th scope="col">Nota</th><th scope="col">Desempenho</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
     <tbody>
       @forelse($alunos as $a)
