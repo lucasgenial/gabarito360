@@ -82,3 +82,23 @@ Verificações executadas pelo autor:52 validações de assets/fontes/licenças/
 Publicação somente conforme autorização de homologação, após CI e revisão independente. Produção não autorizada por esta documentação.
 
 Decisão posterior do responsável em05/11/2026: após comparar com o degradê antigo (#1D4F9E→#153B78), escolheu o novo (#1D4F9E→#001534), aplicado somente aos três painéis de acesso/recuperação/redefinição. A marca branca e os controles existentes permanecem.
+
+## Página institucional e manutenção independentes (H1)
+
+A página inicial aprovada mantém o degradê #1D4F9E→#001534 na abertura. Sua publicação estática também inclui a identidade oficial; a manutenção usa símbolo/wordmark oficiais e fontes locais, sem o badge antigo. O funcionamento servido pelo Nginx não exige PHP, API, sessão ou banco. O conteúdo de planos é conferido e congelado durante a exportação saudável; falha da API impede substituir a versão anterior.
+
+Contrato único: `scripts/operacao/assets-publicos.php`, executável em PHP CLI sem inicializar Laravel. A whitelist contém apenas CSS compartilhado/da marca, app.js, fontes/licenças da marca, símbolo/OG, sprite já referenciado pelo CSS, favicons e manifests. Arquivos externos à lista e symlinks são recusados; o recibo verifica lista, SHA256 de cada arquivo, extras e integridade antes da ativação. O bundle tem limite de5MiB por arquivo. SVG/fontes/PNG não são recriados durante a publicação.
+
+O identificador SHA256 deriva dos caminhos e bytes de entrada ordenados (texto UTF8+LF), mais versão explícita da transformação. O manifest é então reescrito para apontar para esse bundle; os hashes dos bytes finais ficam no recibo. Caminho público imutável: `/_institucional/marca-{sha256}/...`. Os caminhos relativos do CSS continuam válidos, inclusive `../fonts/brand/`. OG usa a origem pública absoluta informada pelo operador; links de navegação continuam relativos. Não se admite origem com credenciais, IP ou caminho. O namespace institucional desconhecido retorna404 sem cair no PHP.
+
+Uso operacional, como root no servidor já autorizado:
+
+```text
+bash scripts/operacao/publicar-home.sh /srv/gabarito360/current /var/www/gabarito360-publico https://homologa.gabarito360.com.br
+```
+
+Os argumentos são raiz do projeto, raiz pública independente e origem pública. Preservados os padrões antigos dos dois primeiros; o terceiro deve ser explícito na homologação para não gerar OG apontando para produção. O publisher copia somente os três auxiliares fixos para um diretório temporário legível por www-data e executa a renderização anônima com esse usuário; o exportador PHP não exige acesso a diretórios de root. Não congela formulários, CSRF, tokens ou contexto autenticado.
+
+Primeiro exporta/valida HTML e assets em versão nova; depois instala o bundle e só então troca atomicamente o symlink `current`. Falhas anteriores à troca mantêm a página publicada. Versões antigas e bundles antigos permanecem; o alias legado `/_institucional/{sha256}.css` continua funcionando. A volta à versão anterior utiliza seu pointer e os mesmos assets preservados. A instalação do snippet Nginx/rollback de configuração é responsabilidade do ensaio operacional e não é executada pelo exportador.
+
+Validação local: lint dos dois PHP e sintaxe Bash passaram; dois testes puros passaram, cobrindo reprodução, fontes relativas, manifests/OG, whitelist, symlink, arquivo extra, adulteração e coexistência de versões. O caso de falha do publisher que exige root foi inicialmente pulado no WSL UID1000 e depois executado com sucesso em WSL root, mantendo o pointer anterior. A integração `PublicoNginxTest` foi ampliada para MIME, GET/HEAD de assets, manutenção503 e home/assets200 sem FastCGI, com Nginx isolado em porta/pid próprios. O integrador executou a suíte completa na VM120, em /tmp/h1-publico-teste, com quatro testes aprovados em2,247s e Nginx de porta/pid próprios: publisher com falha preservou o pointer, e home/assets permaneceram200 durante indisponibilidade do FastCGI fictício. Não houve alteração do Nginx global. Registro operacional privado informado: /root/g360-homologa/h1-ensaio-nginx/testes-publico.log. Isso valida a instância de ensaio; a pausa dos serviços reais de homologação permanece uma verificação operacional separada. Nenhum serviço global foi instalado, parado ou alterado pelo autor destes arquivos. Revisão visual independente da home/manutenção e CI continuam necessários antes da publicação somente em homologação.
