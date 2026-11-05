@@ -36,7 +36,7 @@ class ProgressoCorrecaoTest extends TestCase
 
     private function aluno(bool $ativo = true): int
     {
-        return DB::table('alunos')->insertGetId(['turma_id' => $this->turma, 'nome' => 'Aluno fictício', 'matricula' => (string) Str::uuid(), 'ativo' => $ativo]);
+        return DB::table('alunos')->insertGetId(['turma_id' => $this->turma, 'nome' => 'Aluno fictício', 'matricula' => 'FICT-'.DB::table('alunos')->count(), 'ativo' => $ativo]);
     }
 
     private function cartao(?int $aluno, string $status = 'lido', bool $nota = false): int
