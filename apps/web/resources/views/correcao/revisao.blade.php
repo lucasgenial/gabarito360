@@ -78,7 +78,7 @@ function desenhar() {
     + '<button type="button" class="btn btn-ghost" onclick="escolher(\'BRANCO\')">Em branco</button>'
     + '<button type="button" class="btn btn-ghost" onclick="escolher(\'ANULADA\')">Anulada</button></div>'
     + '<div class="rev-acoes">'
-    + (q.foto_url ? '<a class="btn btn-ghost btn-sm" href="' + escH(q.foto_url) + '" target="_blank" rel="noopener">Ver cartão inteiro</a>' : '')
+    + (q.foto_url ? '<a class="btn btn-ghost btn-sm" href="' + escH(q.foto_url) + '" target="_blank" rel="noopener" data-sem-contexto>Ver cartão inteiro</a>' : '')
     + '<button type="button" class="btn btn-ghost btn-sm" onclick="voltar()"' + (historico.length ? '' : ' disabled') + '>Voltar</button>'
     + '<button type="button" class="btn btn-ghost btn-sm" onclick="pular()"' + (FILA.length > 1 ? '' : ' disabled') + '>Pular</button></div>'
     + '<p class="rev-teclas">Teclado: A a ' + ALTERNATIVAS[ALTERNATIVAS.length - 1] + ' respondem, 0 deixa em branco e X anula.</p>';
