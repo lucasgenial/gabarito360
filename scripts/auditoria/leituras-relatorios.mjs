@@ -1,0 +1,60 @@
+import {chromium} from 'playwright-core';
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+
+const browser = await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true});
+try {
+  const c = await browser.newContext();
+  let ativos=0,pico=0,falhar=true,consultas=[],soltar;
+  const pendentes=[];
+  const img='<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="blue"/></svg>';
+  const botao=n=>`<button data-miniatura-cartao="${n}" data-miniatura-versao="1" data-miniatura-url="/foto/${n}?assinatura=preservada"><img data-miniatura-imagem><span data-miniatura-carga>Carregando</span><span data-miniatura-erro>Tentar novamente</span></button>`;
+  const thumbs=`<main id="root">${Array.from({length:6},(_,n)=>botao(n+1)).join('')}</main><script src="/js/cartoes-miniaturas.js"></script><script>window.thumbs=criarMiniaturasCartoes(document.getElementById('root'),()=>{});thumbs.atualizar();</script>`;
+  const validar=`<form id="documento-validacao" action="/validar"><input name="codigo" value="G360-${'A'.repeat(32)}"><input name="_token" value="ficticio"><input id="arquivo-documento" type="file"><button>Conferir</button></form><div id="documento-status" hidden></div><script src="/js/validacao-documento.js"></script>`;
+  await c.route('**/*',async r=>{
+    const u=new URL(r.request().url());
+    if(u.hostname!=='localhost')return r.abort();
+    if(u.pathname==='/miniaturas')return r.fulfill({contentType:'text/html',body:thumbs});
+    if(u.pathname==='/conferir')return r.fulfill({contentType:'text/html',body:validar});
+    if(u.pathname.startsWith('/js/'))return r.fulfill({contentType:'text/javascript',body:readFileSync('apps/web/public'+u.pathname)});
+    if(u.pathname.startsWith('/foto/')){
+      assert.equal(u.search,'?assinatura=preservada');ativos++;pico=Math.max(pico,ativos);
+      await new Promise(resolve=>pendentes.push(resolve));ativos--;
+      return r.fulfill(u.pathname==='/foto/1'&&falhar?{status:503}:{contentType:'image/svg+xml',body:img});
+    }
+    if(u.pathname==='/validar'){
+      consultas.push(r.request().postDataJSON());
+      await new Promise(resolve=>{soltar=resolve;});
+      return r.fulfill({json:{data:{estado:consultas.at(-1).sha256?'arquivo_confirmado':'emissao_encontrada'}}});
+    }
+    return r.abort();
+  });
+  const p=await c.newPage(); const erros=[];p.on('pageerror',e=>erros.push(e.message));
+  await p.goto('http://localhost/miniaturas',{waitUntil:'domcontentloaded'});
+  await p.waitForFunction(()=>document.querySelectorAll('[aria-busy="true"]').length===6);
+  await p.waitForTimeout(100);assert.equal(ativos,4);
+  while(pendentes.length||ativos){pendentes.splice(0).forEach(f=>f());await p.waitForTimeout(70);}
+  await p.locator('[data-estado="erro"]').waitFor();assert.equal(pico,4);
+  assert.equal(await p.locator('[data-estado="pronta"]').count(),5);
+  falhar=false;await p.locator('[data-estado="erro"]').click();
+  await p.waitForTimeout(70);pendentes.splice(0).forEach(f=>f());
+  await p.waitForFunction(()=>document.querySelectorAll('[data-estado="pronta"]').length===6);
+  // Polling com assinatura renovada reutiliza as fotos carregadas.
+  await p.evaluate(html=>{document.getElementById('root').innerHTML=html;thumbs.atualizar();},Array.from({length:6},(_,n)=>botao(n+1)).join('').replaceAll('assinatura=preservada','assinatura=renovada'));
+  assert.equal(await p.locator('[data-estado="pronta"]').count(),6);assert.equal(ativos,0);
+  await p.goto('http://localhost/conferir');
+  const bytes=Buffer.from('%PDF-1.4\nArquivo fictício para hash local.');
+  await p.locator('#arquivo-documento').setInputFiles({name:'ficticio.pdf',mimeType:'application/pdf',buffer:bytes});
+  await p.getByRole('button',{name:'Conferir',exact:true}).click();
+  await p.waitForFunction(()=>document.getElementById('documento-validacao').getAttribute('aria-busy')==='true');
+  assert.equal(await p.locator('[name="codigo"]').isDisabled(),true);
+  assert.equal(await p.locator('#arquivo-documento').isDisabled(),true);
+  while(!soltar)await p.waitForTimeout(20);soltar();
+  await p.locator('[data-estado="arquivo_confirmado"]').waitFor();
+  assert.deepEqual(Object.keys(consultas[0]).sort(),['codigo','sha256']);
+  assert.equal(consultas[0].sha256,createHash('sha256').update(bytes).digest('hex'));
+  assert.equal(await p.locator('[name="codigo"]').isEnabled(),true);
+  assert.deepEqual(erros,[]);
+  console.log('OMR3: fila4, erro/retry regional, polling preservado, hash local sem upload e bloqueio de seleção durante consulta: OK.');
+} finally {await browser.close();}

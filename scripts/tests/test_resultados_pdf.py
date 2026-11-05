@@ -42,6 +42,32 @@ class ResultadosPdfTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             pdf.gerar_lote({'saida': 'nao-criado.pdf', 'resultados': []})
 
+    def test_modelos_paginam_e_identificam_cada_pagina_sem_perder_questoes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for modelo in ('aluno', 'professor'):
+                d = dados('Aluno fictício de nome extenso para conferir a paginação')
+                d['modelo'] = modelo
+                d['emissao'] = {'emissor': 'Emissor fictício', 'perfil': 'coordenador', 'contexto': 'Escola fictícia',
+                    'emitido_em': '2026-11-05 12:00:00 UTC', 'codigo': 'G360-'+'A'*32,
+                    'url': 'https://homologa.gabarito360.com.br/validar-documento?codigo=G360-'+'A'*32}
+                d['folha'] = [dict(d['folha'][n % 45], numero_questao=n+1, turma={'percentual':50,'acertos':2,'total':4}, geral={'percentual':75,'acertos':6,'total':8}) for n in range(180)]
+                d['saida'] = str(Path(tmp) / f'{modelo}.pdf')
+                pdf.gerar(d)
+                pages = PdfReader(d['saida']).pages
+                self.assertGreater(len(pages), 1)
+                for page in pages:
+                    text = page.extract_text()
+                    self.assertIn('Emissor fictício', text)
+                    self.assertIn('G360-'+'A'*32, text)
+                    self.assertIn('2026-11-05 12:00:00 UTC', text)
+                text = '\n'.join(p.extract_text() for p in pages)
+                self.assertIn('180', text)
+                if modelo == 'professor':
+                    self.assertIn('75,0% (6/8)', text)
+                    self.assertIn('RELATÓRIO PEDAGÓGICO', text)
+                else:
+                    self.assertNotIn('75,0%', text)
+
 
 if __name__ == '__main__':
     unittest.main()

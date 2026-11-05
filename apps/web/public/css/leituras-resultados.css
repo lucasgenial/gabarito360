@@ -1,0 +1,22 @@
+/* Extensão dos componentes existentes; não altera outras listas ou leitores. */
+.tela-correcao button.corr-miniatura { display:grid; place-items:center; padding:0; position:relative; overflow:hidden; cursor:pointer; font:inherit; color:var(--muted); }
+.tela-correcao .corr-miniatura[aria-disabled="true"] { cursor:progress; opacity:1; }
+.tela-correcao .corr-miniatura:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.tela-correcao .corr-miniatura > img { width:100%; height:100%; object-fit:contain; display:block; }
+.tela-correcao .corr-miniatura [hidden] { display:none!important; }
+.tela-correcao .corr-miniatura-carga { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; width:100%; height:100%; background:var(--surface-2); }
+.tela-correcao .corr-miniatura-carga img { width:28px; height:28px; animation:g360-respirar 1.8s ease-in-out infinite; }
+.tela-correcao .corr-miniatura-carga i { display:block; height:5px; width:40px; border-radius:3px; background:var(--border-soft); }
+.tela-correcao .corr-miniatura-erro { padding:4px; font-size:11px; line-height:1.35; text-align:center; }
+.tela-correcao .corr-miniatura-erro b { display:block; margin-top:5px; color:var(--accent); }
+.tela-correcao .corr-miniatura-ausente { display:grid; place-items:center; text-align:center; font-size:11px; line-height:1.35; padding:4px; cursor:default; }
+.leitura-observacao { white-space:pre-line; overflow-wrap:anywhere; }
+.leitura-cabecalho { display:grid; gap:10px; margin-block:12px 18px; }
+.leitura-cabecalho > button { justify-self:start; }
+.leitura-cabecalho > p { margin:0; }
+.resultado-pedagogico { margin-top:16px; }
+.resultado-amostra { display:block; font-size:12px; color:var(--muted); margin-top:3px; }
+.resultado-conceitos { margin-top:12px; color:var(--fg-2); font-size:13px; }
+.res-modelo-relatorio { padding:8px 12px; margin:0; color:var(--muted); font-size:12px; font-weight:600; }
+.res-opcoes-relatorio a,.res-opcoes-relatorio button { white-space:normal; text-align:left; }
+@media(prefers-reduced-motion:reduce) { .tela-correcao .corr-miniatura-carga img { animation:none; } }

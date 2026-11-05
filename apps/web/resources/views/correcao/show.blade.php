@@ -11,6 +11,10 @@
 <span>Acompanhar correção</span>
 @endsection
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/leituras-resultados.css') }}?v={{ filemtime(public_path('css/leituras-resultados.css')) }}">
+@endpush
+
 @section('content')
 
 <div class="row-between" style="margin-top:12px;">
@@ -146,6 +150,7 @@
 
 @include('correcao._retirar')
 @push('scripts')
+<script src="{{ asset('js/cartoes-miniaturas.js') }}?v={{ filemtime(public_path('js/cartoes-miniaturas.js')) }}"></script>
 <script>
 var STATUS_URL = '{{ route('correcao.status', $prova['id'], false) }}';
 var CARTOES_URL = '/cartoes';
@@ -156,6 +161,7 @@ var NOTA_MAX = {{ (float) ($prova['nota_maxima'] ?? 10) }};
 
 // ---------- Alunos corrigidos ----------
 var corrDados = [], corrAssinatura = '';
+var miniaturasCartoes = criarMiniaturasCartoes(document.getElementById('corr-lista'), verFoto);
 function escH(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
 function fmtNota(n) { return Number(n).toFixed(1).replace('.', ','); }
 var cargaCartoes=G360Carga(document.getElementById('corrigidos'));
@@ -176,6 +182,7 @@ function desenharCorrigidos() {
   var ul = document.getElementById('corr-lista');
   if (!itens.length) {
     ul.innerHTML = '<li style="color:var(--muted);font-size:13px;">' + (corrDados.length ? 'Nenhum aluno encontrado.' : 'Nenhum cartão recebido ainda.') + '</li>';
+    miniaturasCartoes.atualizar();
     return;
   }
   ul.innerHTML = itens.map(function (c) {
@@ -189,8 +196,11 @@ function desenharCorrigidos() {
         + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
       : '';
     var foto = c.miniatura_url
-      ? '<img class="corr-thumb" data-src="' + escH(c.miniatura_url) + '" alt="Foto do cartão" onclick="verFoto(' + c.id + ')">'
-      : '<div class="corr-thumb" style="display:grid;place-items:center;font-size:11px;color:var(--muted);">sem miniatura</div>';
+      ? '<button type="button" class="corr-thumb corr-miniatura" data-miniatura-cartao="' + c.id + '" data-miniatura-versao="' + escH(c.tentativa_numero || c.created_at || '') + '" data-miniatura-url="' + escH(c.miniatura_url) + '" aria-busy="true" aria-label="Carregando miniatura do cartão-resposta" disabled>'
+        + '<img data-miniatura-imagem alt="" hidden>'
+        + '<span class="corr-miniatura-carga" data-miniatura-carga aria-hidden="true"><img src="{{ asset('images/g360-carregando.webp') }}" alt=""><i></i><i></i></span>'
+        + '<span class="corr-miniatura-erro" data-miniatura-erro hidden>Foto indisponível<b>Tentar novamente</b></span></button>'
+      : '<div class="corr-thumb corr-miniatura-ausente">Sem miniatura disponível</div>';
     var acoes = c.tem_imagem ? '<button type="button" class="btn btn-sm btn-ghost" onclick="verFoto(' + c.id + ')">Ver foto</button>' : '';
     if (c.aluno_id && c.nota_final !== null && c.nota_final !== undefined) {
       acoes += '<a class="btn btn-sm btn-secondary" href="/resultados/' + c.aluno_id + '/' + PROVA_ID + '?from=correcao">Acertos e erros</a>';
@@ -201,18 +211,7 @@ function desenharCorrigidos() {
     return '<li class="corr-item">' + foto + '<div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
       + '<div style="margin-top:4px;">' + st + '</div><div class="corr-acoes">' + acoes + '</div></div><div>' + nota + '</div></li>';
   }).join('');
-  filaMiniaturas = Array.prototype.slice.call(ul.querySelectorAll('img[data-src]'));
-  proximaMiniatura();
-}
-// Poucas por vez, para uma turma inteira não ocupar todos os processos da API
-var filaMiniaturas = [], miniaturasAtivas = 0;
-function proximaMiniatura() {
-  while (miniaturasAtivas < 4 && filaMiniaturas.length) {
-    var img = filaMiniaturas.shift();
-    miniaturasAtivas++;
-    img.onload = img.onerror = function () { miniaturasAtivas--; proximaMiniatura(); };
-    img.src = img.getAttribute('data-src');
-  }
+  miniaturasCartoes.atualizar();
 }
 function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
 function fecharModal(id) { document.getElementById(id).style.display = 'none'; if (id === 'foto-modal') document.getElementById('foto-img').src = ''; }

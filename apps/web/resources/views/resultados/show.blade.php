@@ -22,6 +22,10 @@
   $lingua = !empty($dados['lingua']) ? ($dados['lingua'] === 'ESP' ? 'Espanhol' : 'Inglês') : null;
   $fmt    = fn ($n) => number_format((float) $n, 1, ',', '.');
   $urlPdf = route('resultados.pdf', [$aluno['id'], $prova['id']], false);
+  $pedagogico = !empty($dados['pedagogico']);
+  $urlPdfAluno = $urlPdf.'?modelo=aluno';
+  $urlPdfProfessor = $urlPdf.'?modelo=professor';
+  $urlImpressao = $pedagogico ? $urlPdfProfessor : $urlPdfAluno;
   $resumoTexto = "Resultado — {$prova['titulo']} ({$prova['disciplina']})\n{$aluno['nome']}"
     . ($aluno['turma_nome'] ? " · {$aluno['turma_nome']}" : '')
     . "\nNota: " . $fmt($nota['nota_final']) . " · {$nota['acertos']} acertos de {$nota['total_questoes']} questões";
@@ -42,6 +46,7 @@
 @endsection
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('css/leituras-resultados.css') }}?v={{ filemtime(public_path('css/leituras-resultados.css')) }}">
 <style>@media print { @page { size: A4; margin: 12mm; } }</style>
 @endpush
 
@@ -51,15 +56,16 @@
 <header class="res-identificacao">
   <h1 class="page-title">{{ $aluno['nome'] }}</h1>
   <p class="page-sub">{{ collect([$aluno['turma_nome'] ? 'Turma ' . $aluno['turma_nome'] : null, $aluno['matricula'] ? 'Matrícula ' . $aluno['matricula'] : null, $lingua])->filter()->implode(' · ') }}</p>
-  @if(!empty($dados['historico_permitido']))<p class="res-tentativas-total" id="resultado-tentativas-total">Carregando tentativas…</p>@endif
+  @if(!empty($dados['historico_permitido']))<p class="res-tentativas-total" id="resultado-tentativas-total">Carregando leituras…</p>@endif
 </header>
 <div class="res-barra-acoes no-print" aria-label="Ações do resultado">
   @if(!empty($dados['cartao_foto_url']))<button type="button" class="btn btn-secondary res-acao" id="doc-abrir" aria-label="Cartão resposta" title="Cartão resposta"><x-icone nome="prova"/><span class="res-acao-texto">Cartão resposta</span><span class="res-legenda" aria-hidden="true">Cartão resposta</span></button>@endif
   <details class="res-menu-relatorio" id="res-menu-relatorio"><summary class="btn btn-secondary res-acao" aria-label="Relatório" title="Relatório"><x-icone nome="grafico"/><span class="res-acao-texto">Relatório</span><span class="res-legenda" aria-hidden="true">Relatório</span></summary>
     <div class="res-opcoes-relatorio">
-      <button type="button" class="btn btn-ghost" data-imprimir-relatorio><x-icone nome="imprimir"/>Imprimir relatório</button>
-      <a class="btn btn-ghost" href="{{ $urlPdf }}?baixar=1"><x-icone nome="prova"/>Baixar relatório PDF</a>
-      <button type="button" class="btn btn-ghost" id="btn-whats"><x-icone nome="compartilhar"/>Compartilhar resultado</button>
+      <a class="btn btn-ghost" href="{{ $urlImpressao }}" target="_blank" rel="noopener" title="Abrir o PDF emitido para impressão"><x-icone nome="imprimir"/>Imprimir relatório {{ $pedagogico ? 'do professor' : 'do aluno' }}</a>
+      <a class="btn btn-ghost" href="{{ $urlPdfAluno }}&amp;baixar=1"><x-icone nome="prova"/>Baixar relatório do aluno</a>
+      @if($pedagogico)<a class="btn btn-ghost" href="{{ $urlPdfProfessor }}&amp;baixar=1"><x-icone nome="prova"/>Baixar relatório do professor</a>@endif
+      <button type="button" class="btn btn-ghost" id="btn-whats"><x-icone nome="compartilhar"/>Compartilhar relatório do aluno</button>
     </div>
   </details>
   @if(!empty($dados['correcao']['fechada']))<span class="badge badge-warn"><x-icone nome="cadeado"/>Correção fechada</span>@endif
@@ -74,7 +80,7 @@
 <div class="res-resumo">
   <div class="res-box {{ $aprov ? 'ok' : 'no' }}">
     <div class="v" style="font-size:34px;">{{ $fmt($nota['nota_final']) }}</div>
-    <div class="l">Nota (de {{ $fmt($maxima) }}){{ $dados['media_turma'] !== null ? ' · média da turma ' . $fmt($dados['media_turma']) : '' }}</div>
+    <div class="l">Nota (de {{ $fmt($maxima) }}){{ $pedagogico && ($dados['media_turma'] ?? null) !== null ? ' · média da turma ' . $fmt($dados['media_turma']) : '' }}</div>
   </div>
   <div class="res-box ok"><div class="v">{{ $cont['correta'] ?? 0 }}</div><div class="l">Acertos</div></div>
   <div class="res-box no"><div class="v">{{ $cont['incorreta'] ?? 0 }}</div><div class="l">Erros</div></div>
@@ -87,8 +93,11 @@
 <div class="card card-pad res-questoes" @if(empty($dados['cartao_foto_url'])) style="margin-top:16px;" @endif>
   <div class="row-between">
     <h3 style="font-size:17px;">Questão por questão</h3>
-    <span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>
+    @unless($pedagogico)<span class="no-print" style="font-size:12px;color:var(--muted);">Verde: acertou · vermelho: errou · amarelo: em branco · cinza: anulada</span>@endunless
   </div>
+  @if($pedagogico)
+    @include('resultados._pedagogico')
+  @else
   {{-- Colunas de cima para baixo, como no cartão-resposta (no celular, lista corrida) --}}
   <div class="res-folha" style="--linhas:{{ (int) ceil(count($folha) / 3) }};">
     @foreach($folha as $q)
@@ -105,6 +114,7 @@
       </div>
     @endforeach
   </div>
+  @endif
 </div>
 @if(!empty($dados['cartao_foto_url']))
   @include('correcao._documento',['documentoUrl'=>$dados['cartao_foto_url'],'documentoContexto'=>$aluno['nome'].' · '.$prova['titulo'],'documentoOpcoes'=>['ajuste'=>'largura','controles'=>false,'cardsIguais'=>true,'rotulo'=>'Cartão resposta']])
@@ -118,7 +128,7 @@
 @push('scripts')
 <script>
 // O relatório pode ser exportado; o cartão digitalizado fica fora da impressão.
-document.querySelector('[data-imprimir-relatorio]').addEventListener('click',function(){document.getElementById('res-menu-relatorio').open=false;window.print();});
+document.querySelectorAll('#res-menu-relatorio a').forEach(function(a){a.addEventListener('click',function(){document.getElementById('res-menu-relatorio').open=false;});});
 document.addEventListener('click',function(e){var m=document.getElementById('res-menu-relatorio');if(!m.contains(e.target))m.open=false;});
 document.getElementById('res-menu-relatorio').addEventListener('keydown',function(e){if(e.key==='Escape'){this.open=false;this.querySelector('summary').focus();}});
 
@@ -126,7 +136,7 @@ document.getElementById('res-menu-relatorio').addEventListener('keydown',functio
 // arquivos, baixa o PDF e abre o WhatsApp com o resumo para anexar.
 (function () {
   var btn = document.getElementById('btn-whats');
-  var PDF_URL = @json($urlPdf);
+  var PDF_URL = @json($urlPdfAluno);
   var TEXTO = @json($resumoTexto);
   btn.addEventListener('click', function () {
     var rotulo = btn.innerHTML;

@@ -88,6 +88,7 @@ class ResultadosLoteTest extends TestCase
         $this->gerador(fn()=>DB::table('usuario_vinculos')->where('id',1)->update(['situacao'=>'suspenso']));
         $this->getJson('/api/v1/provas/1/resultados/pdf')->assertForbidden();
         $this->assertFileDoesNotExist($this->arquivos[0]);
+        $this->assertDatabaseCount('documento_emissoes', 0);
     }
 
     public function test_falha_do_gerador_remove_arquivo_parcial(): void
@@ -121,6 +122,12 @@ class ResultadosLoteTest extends TestCase
         }
         DB::table('vinculo_turmas')->insert(['vinculo_id'=>10,'espaco_id'=>12,'turma_id'=>10]);
         Sanctum::actingAs(Usuario::find(1)->noVinculo(10));
+        DB::table('cartao_respostas')->insert(['cartao_id'=>10,'espaco_id'=>12,'numero_questao'=>1,'alternativa'=>'A']);
+        DB::table('cartao_respostas')->insert(['cartao_id'=>11,'espaco_id'=>12,'numero_questao'=>1,'alternativa'=>null]);
+        $this->getJson('/api/v1/alunos/10/resultados/10')->assertOk()
+            ->assertJsonPath('data.folha.0.turma.percentual',100)->assertJsonPath('data.folha.0.geral.percentual',50)
+            ->assertJsonPath('data.folha.0.geral.total',2);
+        $this->getJson('/api/v1/alunos/11/resultados/10')->assertNotFound();
         Process::fake(function ($p) {
             $d=json_decode($p->input,true);$this->arquivos[]=$d['saida'];
             $this->assertSame(['Escolar 10'],array_column(array_column($d['resultados'],'aluno'),'nome'));
@@ -133,5 +140,51 @@ class ResultadosLoteTest extends TestCase
         Sanctum::actingAs(Usuario::find(1)->noVinculo(10));
         $this->getJson('/api/v1/provas/10/resultados/pdf')->assertForbidden();
         Process::assertRanTimes(fn()=>true,1);
+    }
+
+    public function test_estatisticas_respeitam_lingua_anulada_ausente_e_outro_espaco(): void
+    {
+        DB::table('provas')->where('id',1)->update(['opcao_lingua'=>true]);
+        DB::table('gabarito_questoes')->where('gabarito_id',1)->update(['alternativa_espanhol'=>'B']);
+        DB::table('cartoes')->where('id',3)->update(['lingua'=>'ESP']);
+        DB::table('cartao_respostas')->where('cartao_id',3)->update(['alternativa'=>'B']);
+        $this->getJson('/api/v1/alunos/1/resultados/1')->assertOk()->assertJsonPath('data.pedagogico',true)
+            ->assertJsonPath('data.folha.0.geral.total',2)->assertJsonPath('data.folha.0.geral.percentual',100);
+        DB::table('cartao_respostas')->where('cartao_id',3)->update(['alternativa'=>null]);
+        $this->getJson('/api/v1/alunos/1/resultados/1')->assertOk()->assertJsonPath('data.folha.0.geral.percentual',50);
+        DB::table('gabarito_questoes')->where('gabarito_id',1)->update(['anulada'=>true]);
+        $this->getJson('/api/v1/alunos/1/resultados/1')->assertOk()->assertJsonPath('data.folha.0.geral.percentual',null);
+    }
+
+    public function test_modelo_professor_identifica_emissor_e_registra_hash_final(): void
+    {
+        $codigo = null;
+        Process::fake(function ($p) use (&$codigo) {
+            $d=json_decode($p->input,true);$this->arquivos[]=$d['saida'];
+            $this->assertSame('professor',$d['modelo']);
+            $this->assertSame('Professor fictício',$d['emissao']['emissor']);
+            $this->assertSame(2,$d['folha'][0]['geral']['total']);
+            $codigo=$d['emissao']['codigo'];
+            file_put_contents($d['saida'],'%PDF-professor');
+            return Process::result(output:'{"ok":true}');
+        });
+        $this->getJson('/api/v1/alunos/1/resultados/1/pdf?modelo=professor')->assertOk();
+        $this->assertDatabaseCount('documento_emissoes',1);
+        $this->assertDatabaseHas('documento_emissoes',['codigo_hash'=>hash('sha256',$codigo),'arquivo_sha256'=>hash('sha256','%PDF-professor'),'emissor_id'=>1]);
+    }
+
+    public function test_modelo_aluno_nao_carrega_agregados_para_o_gerador(): void
+    {
+        Process::fake(function ($p) {
+            $d=json_decode($p->input,true);$this->arquivos[]=$d['saida'];
+            $this->assertSame('aluno',$d['modelo']);
+            $this->assertArrayNotHasKey('media_turma',$d);
+            $this->assertArrayNotHasKey('turma',$d['folha'][0]);
+            $this->assertArrayNotHasKey('geral',$d['folha'][0]);
+            file_put_contents($d['saida'],'%PDF-aluno');
+            return Process::result(output:'{"ok":true}');
+        });
+        $this->getJson('/api/v1/alunos/1/resultados/1/pdf?modelo=aluno')->assertOk();
+        $this->getJson('/api/v1/alunos/1/resultados/1/pdf?modelo=externo')->assertUnprocessable();
     }
 }
