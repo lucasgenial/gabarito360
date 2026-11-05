@@ -102,6 +102,13 @@ class CartaoResultadoWebTest extends TestCase
     public function test_flash_tem_fallback_seguro_e_solid_toast_sem_conteudo_html_executavel(): void
     {
         $this->fingirResultado();
-        $this->withSession(['sucesso' => 'Registro salvo <script>alert(1)</script>'])->get('/resultados/1/4')->assertOk()->assertSee('notificacoes.js')->assertSee('g360-notificacoes-iniciais')->assertSee('data-g360-flash="sucesso"', false)->assertDontSee('<script>alert(1)</script>',false);
+        $this->withSession(['sucesso' => 'Registro salvo <script>alert(1)</script>'])->get('/resultados/1/4')->assertOk()->assertSee('notificacoes.js')->assertSee('g360-notificacoes-iniciais')->assertSee('data-g360-flash="sucesso"', false)->assertDontSee('<script>alert(1)</script>', false);
+    }
+
+    public function test_aplicar_com_ambiguidades_abre_revisao_sem_tentar_abrir_resultado_ainda_inexistente(): void
+    {
+        $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
+        Http::fake(['*' => Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4], 'aplicada' => true, 'status' => 'ambiguo', 'prova_id' => 4, 'cartao_id' => 66]])]);
+        $this->post('/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Foto nova conferida para teste', 'confirmar' => 1])->assertRedirect(route('correcao.revisao', [4, 'cartao' => 66]))->assertSessionHas('info', 'Nova tentativa aplicada. Revise as questões pendentes.');
     }
 }
