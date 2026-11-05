@@ -671,6 +671,8 @@ img { max-width: 100%; display: block; }
 @media(max-width:640px){.tela-correcao .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));flex-basis:100%;}.tela-correcao .stat-row{gap:20px;}}
 .tela-correcao .stat-grid .v { font-family:var(--font-mono);font-size:24px;font-weight:700; }
 .tela-correcao .stat-grid .l { font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px; }
+.tela-correcao .corr-nota-aprovada { color:var(--success); }
+.tela-correcao .corr-nota-reprovada { color:var(--danger); }
 .tela-correcao .progress-track { height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:18px; }
 .tela-correcao .progress-track > div { height:100%;background:var(--accent);width:0;transition:width .25s; }
 .tela-correcao .exam-meta { font-size:13px;color:var(--muted);margin-top:2px; }
@@ -1102,6 +1104,12 @@ html[data-theme="dark"] .user-menu-header { background: var(--surface-2); border
 html[data-theme="dark"] .user-menu-links a { color: var(--fg-2); }
 html[data-theme="dark"] .user-menu-links a:hover { background: var(--surface-2); }
 html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
+@media screen {
+  html[data-theme="dark"] { --texto-sucesso:#86efac; --texto-erro:#fca5a5; }
+  html[data-theme="dark"] :is(.tela-resultado .res-q.correta,.tela-resultado .res-box.ok,.tela-correcao .corr-nota-aprovada,.tela-correcao .badge-success,.g-aviso.sucesso) { color:var(--texto-sucesso); }
+  html[data-theme="dark"] :is(.tela-resultado .res-q.incorreta,.tela-resultado .res-box.no,.tela-correcao .corr-nota-reprovada,.g-aviso.erro) { color:var(--texto-erro); }
+  html[data-theme="dark"] .tela-resultado .res-q.branco { color:var(--warn-fg); }
+}
 
 .table .badge { white-space: nowrap; }
 /* ---------- Números do painel: uma faixa só, em vez de um cartão para cada (docs/26, V3) ---------- */
