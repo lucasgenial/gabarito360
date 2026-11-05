@@ -198,6 +198,11 @@ Route::prefix('v1')->group(function () {
         });
 
         // Cartões / OMR (MP-021)
+        Route::get('provas/{id}/tentativas', [\App\Http\Controllers\Api\TentativaCartaoController::class,'index'])->middleware('permissao:correcao.acompanhar');
+        Route::get('tentativas/{id}', [\App\Http\Controllers\Api\TentativaCartaoController::class,'show'])->whereUuid('id')->middleware('permissao:correcao.acompanhar');
+        Route::get('tentativas/{id}/imagem', [\App\Http\Controllers\Api\TentativaCartaoController::class,'imagem'])->whereUuid('id')->middleware('permissao:correcao.acompanhar');
+        Route::post('tentativas/{id}/aplicar', [\App\Http\Controllers\Api\TentativaCartaoController::class,'aplicar'])->whereUuid('id')->middleware('permissao:correcao.alterar');
+        Route::post('tentativas/{id}/descartar', [\App\Http\Controllers\Api\TentativaCartaoController::class,'descartar'])->whereUuid('id')->middleware('permissao:correcao.alterar');
         Route::prefix('cartoes')->group(function () {
             Route::get('{id}',                       [CartaoController::class, 'show'])->middleware('permissao:correcao.acompanhar');
             Route::get('{id}/imagem',                [CartaoController::class, 'imagem'])->middleware('permissao:correcao.acompanhar');

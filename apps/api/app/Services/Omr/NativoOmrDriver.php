@@ -28,7 +28,7 @@ class NativoOmrDriver implements OmrDriverInterface, OmrIdentificacaoInterface
         if (!is_array($json) || empty($json['ok'])) {
             $erro = $json['erro'] ?? trim($resultado->errorOutput()) ?: 'falha desconhecida no OMR';
             Log::warning('OMR nativo: leitura falhou', ['imagem' => $imagemPath, 'erro' => $erro]);
-            $this->ultima = ['erro' => $erro];
+            $this->ultima = ['erro' => $erro, 'qualidade' => $json['qualidade'] ?? ['aprovada'=>false,'codigo'=>'leitura_indisponivel','mensagem'=>'Não foi possível validar esta foto. Envie uma nova foto com a folha inteira.']];
 
             // Sem leitura possível: todas as questões vão para revisão manual.
             return array_map(fn ($n) => [
@@ -46,6 +46,9 @@ class NativoOmrDriver implements OmrDriverInterface, OmrIdentificacaoInterface
             'aluno_id' => $json['aluno_id'] ?? null,
             'lingua'   => in_array($json['lingua'] ?? null, ['ING', 'ESP'], true) ? $json['lingua'] : null,
             'erro'     => null,
+            'qualidade' => $json['qualidade'] ?? null,
+            'num_questoes' => $json['num_questoes'] ?? null,
+            'num_alternativas' => $json['num_alternativas'] ?? null,
         ];
 
         // Garante exatamente as questões da prova (o QR pode descrever outro layout)

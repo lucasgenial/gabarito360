@@ -52,6 +52,7 @@ class CartaoController extends Controller
 
         // Lista para a tela de correção: aluno, turma, nota e se há foto (a foto vem por /cartoes/{id}/imagem)
         $cartoes = DB::table('cartoes')->when(Espacos::ativo(), fn ($q) => $q->whereIn('cartoes.id', ContextoCorrecao::cartoes($request->user())->select('cartoes.id')))
+            ->leftJoin('cartao_tentativas as tentativa','tentativa.id','=','cartoes.tentativa_id')
             ->leftJoin('alunos', 'alunos.id', '=', 'cartoes.aluno_id')
             ->leftJoin('turmas', fn ($j) => $j->whereRaw('turmas.id = COALESCE(cartoes.turma_aplicacao_id, alunos.turma_id)'))
             ->leftJoin('notas', function ($j) {
@@ -64,6 +65,7 @@ class CartaoController extends Controller
             ->get([
                 'cartoes.id', 'cartoes.espaco_id', 'cartoes.status', 'cartoes.aluno_id', 'cartoes.lingua', 'cartoes.created_at',
                 'cartoes.imagem_url', 'alunos.nome as aluno_nome', 'alunos.matricula', 'turmas.nome as turma',
+                'tentativa.numero as tentativa_numero',
                 'notas.acertos', 'notas.total_questoes', 'notas.nota_final',
             ]);
         $urls=$imagens->urlsDaProva($prova,$cartoes->pluck('id')->all(),['original','miniatura'],$request->user());
@@ -134,7 +136,8 @@ class CartaoController extends Controller
             return ApiResponse::error($bloqueio, ['motivo' => 'correcao_fechada'], 403);
         }
 
-        DB::transaction(function () use ($cartao, $prova, $request) {
+        $data=$request->validate(['motivo'=>'required|string|min:10|max:500','versao'=>'required|string|size:64']);
+        DB::transaction(function () use ($cartao, $prova, $request, $data) {
             $provaAtual = Prova::whereKey($prova->id)->lockForUpdate()->firstOrFail();
             $atual = ContextoCorrecao::cartoes($request->user())->whereKey($cartao->id)->lockForUpdate()->first();
             if (! $atual) {
@@ -143,9 +146,12 @@ class CartaoController extends Controller
             abort_if((int) $atual->prova_id !== (int) $provaAtual->id, 409,
                 'O cartão mudou de prova durante a leitura. Atualize a página antes de excluir.');
             abort_unless(ContextoCorrecao::cartaoValido($atual, $provaAtual), 409);
+            abort_unless(hash_equals($data['versao'],app(\App\Services\Omr\HistoricoCartao::class)->fingerprint($atual)),409,
+                'A correção mudou durante a conferência. Abra novamente a confirmação para ver a versão atual.');
             ContextoCorrecao::filtrar(CartaoEnvio::query(), $atual->espaco_id)->where('cartao_id', $atual->id)->update(['status' => 'recusado', 'resultado' => null, 'cartao_id' => null,
                 'mensagem' => 'O cartão foi excluído. Fotografe novamente.']);
-            $atual->delete(); // respostas, nota e logs de ambiguidade saem em cascata
+            app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($atual,$request->user(),'excluida',$data['motivo']);
+            $atual->delete(); // snapshot e foto privados permanecem consultáveis após a cascata operacional
             AtualizadorStatusProva::atualizar($provaAtual);
             DB::afterCommit(function () use ($atual) {
                 if ($atual->imagem_url) {
@@ -340,6 +346,8 @@ class CartaoController extends Controller
             });
 
         return ApiResponse::success(array_merge($cartao->toArray(), [
+            'versao_correcao' => app(\App\Services\Omr\HistoricoCartao::class)->fingerprint($cartao),
+            'nota_atual' => DB::table('notas')->where('cartao_id',$cartao->id)->value('nota_final'),
             'aluno_nome' => $cartao->aluno?->nome,
             'respostas'  => $respostas,
         ]));
@@ -367,11 +375,22 @@ class CartaoController extends Controller
             abort_unless((int) $cartao->prova_id === (int) $prova->id, 409);
             abort_if(Correcao::bloqueio($usuario, $prova->fresh()), 403);
             abort_unless(ContextoCorrecao::alunos($prova, $request->user())->where('alunos.id', $data['aluno_id'])->exists(), 404);
+            $outro=ContextoCorrecao::filtrar(Cartao::query(),$prova->espaco_id)->where('prova_id',$prova->id)->where('aluno_id',$data['aluno_id'])->where('id','!=',$id)->whereIn('status',['lido','ambiguo'])->lockForUpdate()->first();
+            if($outro){
+                $cartao->aluno_id=$data['aluno_id'];
+                $leituras=DB::table('cartao_respostas')->where('cartao_id',$id)->orderBy('numero_questao')->get()->map(fn($l)=>[
+                    'numero_questao'=>$l->numero_questao,'alternativa'=>$l->alternativa,'confianca'=>(float)$l->confianca,'ambigua'=>(bool)$l->ambigua,
+                    'multiplas_marcacoes'=>false,'alternativas_detectadas'=>json_decode($l->alternativas_detectadas,true)??[]])->all();
+                $envio=CartaoEnvio::where('cartao_id',$id)->lockForUpdate()->first();abort_unless($envio&&count($leituras)===(int)$prova->num_questoes,409,'Este aluno já possui correção. Envie outra foto para preparar uma tentativa.');
+                app(\App\Services\Omr\HistoricoCartao::class)->propor($cartao,$outro,$envio,$request->user(),$leituras);
+                return ApiResponse::success(['vinculado'=>false,'aguardando_confirmacao'=>true,'tentativa_id'=>$envio->fresh()->resultado['tentativa_id']]);
+            }
             $cartao->update(['aluno_id' => $data['aluno_id']]);
 
             if ($cartao->status === 'lido') {
                 CalculadoraNota::calcular($cartao->fresh(), $request->user()->id);
             }
+            app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($cartao->fresh(),$request->user(),'vinculada');
 
             return ApiResponse::success(['vinculado' => true]);
         });
@@ -428,6 +447,7 @@ class CartaoController extends Controller
                 AtualizadorStatusProva::atualizar($cartao->prova);
             }
 
+            app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($cartao->fresh(),$request->user(),'revisada','Conferência manual da questão '.$data['numero_questao']);
             return ApiResponse::success([
                 'resolvido'      => true,
                 'cartao_status'  => $cartao->fresh()->status,
@@ -481,6 +501,7 @@ class CartaoController extends Controller
 
             CalculadoraNota::calcular($cartao->fresh(), $request->user()->id);
 
+            app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($cartao->fresh(),$request->user(),'revisada','Revisão manual da questão '.$data['numero_questao']);
             return ApiResponse::success(['revisado' => true, 'cartao_status' => 'lido']);
         });
     }
@@ -488,6 +509,7 @@ class CartaoController extends Controller
     /** Em branco e anulada ficam sem alternativa (não pontuam); o log guarda quem decidiu o quê e quando. */
     private function registrarDecisao(Cartao $cartao, object $resposta, int $usuarioId, string $alternativa): void
     {
+        if(!$cartao->tentativa_id)app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($cartao,null,'registro_anterior');
         $codigo = self::DECISOES[$alternativa] ?? null;
 
         ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)->where('id', $resposta->id)->update([

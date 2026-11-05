@@ -18,6 +18,7 @@
     <h1 class="page-title">{{ $prova['titulo'] }}</h1>
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ implode(' · ', array_column($prova['turmas'] ?? [], 'nome')) }}{{ $prova['data_aplicacao'] ? ' · aplicado em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }}</p>
   </div>
+  @pode('correcao.acompanhar')<a class="btn btn-secondary" href="{{ route('correcao.tentativas',$prova['id']) }}">Histórico de tentativas</a>@endpode
   <button class="btn btn-ghost" id="btn-upload" onclick="abrirUpload()">Envio manual</button>
 </div>
 
@@ -145,6 +146,7 @@
 <div style="height:48px"></div>
 @endsection
 
+@include('correcao._retirar')
 @push('scripts')
 <script>
 var STATUS_URL = '{{ route('correcao.status', $prova['id'], false) }}';
@@ -197,7 +199,7 @@ function desenharCorrigidos() {
     }
     if (!c.aluno_id && typeof seletorAluno === 'function' && typeof ALUNOS !== 'undefined' && ALUNOS.length) acoes += seletorAluno(c.id);
     if (PODE_EXCLUIR && c.status === 'lido') acoes += '<a class="btn btn-sm btn-ghost" href="/provas/' + PROVA_ID + '/revisao?cartao=' + c.id + '">Revisar leitura</a>';
-    if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">Excluir</button>';
+    if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">Retirar correção</button>';
     return '<li class="corr-item">' + foto + '<div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
       + '<div style="margin-top:4px;">' + st + '</div><div class="corr-acoes">' + acoes + '</div></div><div>' + nota + '</div></li>';
   }).join('');
@@ -224,14 +226,15 @@ function verFoto(id) {
   document.getElementById('foto-img').src = c.foto_url || (CARTOES_URL + '/' + id + '/imagem');
   abrirModal('foto-modal');
 }
-function excluirCorrecao(id) {
+async function excluirCorrecao(id) {
   var c = corrDados.filter(function (x) { return x.id === id; })[0] || {};
-  if (!confirm('Excluir a correção de ' + (c.aluno_nome || 'este cartão') + '?\nA foto e a nota serão apagadas e você poderá fotografar o cartão de novo.')) return;
-  fetch(CARTOES_URL + '/' + id, { method: 'DELETE', credentials: 'same-origin', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF } })
+  var retirada;try{retirada=await confirmarRetiradaCartao(id,c.aluno_nome||'Cartão-resposta');}catch(e){alert(e.message);return;}
+  if(!retirada)return;
+  fetch(CARTOES_URL + '/' + id, { method: 'DELETE', credentials: 'same-origin',body:JSON.stringify(retirada), headers: { 'Content-Type':'application/json','Accept': 'application/json', 'X-CSRF-TOKEN': CSRF } })
     .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
     .then(function (res) {
       if (!res.ok) { alert(res.j.erro || 'Não foi possível excluir.'); return; }
-      corrAssinatura = ''; carregarCorrigidos(); atualizar();
+      corrAssinatura = ''; carregarCorrigidos(); atualizar();alert('Correção retirada. Os registros anteriores foram preservados no histórico.');
     });
 }
 document.getElementById('corr-busca').addEventListener('input', desenharCorrigidos);

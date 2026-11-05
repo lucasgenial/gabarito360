@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Cartao extends Model
 {
     protected $table = 'cartoes';
+    protected $casts = ['qualidade'=>'array'];
 
     protected $fillable = [
         'prova_id', 'aluno_id', 'lingua', 'imagem_url', 'status',
