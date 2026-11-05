@@ -147,7 +147,7 @@ img { max-width: 100%; display: block; }
 .breadcrumb-dinamico ol { display:flex; align-items:center; flex-wrap:wrap; gap:8px; list-style:none; padding:0; margin:0; min-width:0; }
 .breadcrumb-dinamico li { display:flex; align-items:center; gap:8px; min-width:0; overflow-wrap:anywhere; }
 .breadcrumb-dinamico li+li::before { content:'/'; opacity:.5; }
-.g360-toaster { top:calc(64px + 16px)!important; }
+.g360-toaster { top:0!important; }
 #g360-notificacoes { overflow:clip; overflow-anchor:none; }
 .g360-toaster { display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
 .g360-toaster:has(> .sldt-active) { padding-bottom:16px; }
