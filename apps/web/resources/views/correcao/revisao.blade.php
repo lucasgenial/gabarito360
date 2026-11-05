@@ -28,7 +28,7 @@
   <div class="rev-modal-ferramentas"><button type="button" class="btn btn-ghost" id="rev-cartao-ampliar" aria-pressed="false" disabled>Ampliar</button></div>
   <div id="rev-cartao-area" class="rev-modal-area" role="region" aria-label="Imagem do cartão-resposta" tabindex="0">
     <p id="rev-cartao-carregando" class="rev-modal-estado" role="status" hidden>Carregando cartão…</p>
-    <div id="rev-cartao-imagem" class="rev-modal-imagem" hidden></div>
+    <div id="rev-cartao-imagem" class="rev-modal-imagem rev-imagem-restrita" hidden></div>
     <div id="rev-cartao-erro" class="rev-modal-estado" hidden>
       <x-aviso tipo="erro">Não foi possível carregar o cartão. Tente novamente.
         <p>Se continuar, feche este cartão e atualize a revisão.</p>
@@ -57,6 +57,26 @@ var cartaoArea = document.getElementById('rev-cartao-area'), cartaoImagem = docu
 var cartaoCarregando = document.getElementById('rev-cartao-carregando'), cartaoErro = document.getElementById('rev-cartao-erro');
 var cartaoAmpliar = document.getElementById('rev-cartao-ampliar');
 var cartaoUrl = null, cartaoFoto = null, cartaoOrigem = null, cartaoSequencia = 0, cartaoOverflow = '';
+var revisaoDesktop = window.matchMedia('(min-width:1024px)');
+
+// Dissuasão restrita à imagem; não oferece proteção contra captura de tela/devtools.
+function restringirCopiaImagem(area) {
+  ['contextmenu', 'dragstart', 'copy', 'cut'].forEach(function (tipo) {
+    area.addEventListener(tipo, function (e) { e.preventDefault(); });
+  });
+}
+restringirCopiaImagem(cartaoImagem);
+['copy', 'cut'].forEach(function (tipo) {
+  cartaoArea.addEventListener(tipo, function (e) {
+    // Texto selecionado no cabeçalho/aviso continua copiável.
+    if (!cartaoImagem.hidden && !window.getSelection()?.toString()) e.preventDefault();
+  });
+});
+function atualizarPreviaRevisao() {
+  var area = document.getElementById('rev-previa');
+  if (area) area.innerHTML = revisaoDesktop.matches && FILA[0] ? recorteHtml(FILA[0]) : '';
+}
+revisaoDesktop.addEventListener('change', atualizarPreviaRevisao);
 
 function ajustarCartao() {
   cartaoImagem.classList.remove('ampliado');
@@ -123,7 +143,7 @@ function escH(t) { var d = document.createElement('div'); d.textContent = t == n
 
 function recorteHtml(q) {
   if (!q.endireitada_url) {
-    return '<img class="rev-foto" src="' + escH(q.foto_url) + '" alt="Foto do cartão">';
+    return q.foto_url ? '<img class="rev-foto" src="' + escH(q.foto_url) + '" alt="Foto do cartão" draggable="false">' : '';
   }
   var r = q.recorte;
   // Mostra só a linha da questão: a foto endireitada tem sempre a mesma geometria da folha
@@ -155,18 +175,20 @@ function desenhar() {
   el.innerHTML = '<div class="row-between rev-topo"><div><b>' + escH(q.aluno_nome || 'Aluno não identificado') + '</b>'
     + '<div class="exam-meta">' + escH(q.turma || '') + '</div></div>'
     + '<div class="rev-progresso">Questão ' + q.numero_questao + ' · Faltam ' + FILA.length + '</div></div>'
-    + recorteHtml(q)
+    + '<div class="rev-trabalho' + (q.foto_url || q.endireitada_url ? '' : ' sem-imagem') + '"><div id="rev-previa" class="rev-previa rev-imagem-restrita"></div><div class="rev-respostas">'
+    + (q.foto_url ? '<div class="rev-visualizar"><button type="button" class="btn btn-ghost btn-sm" id="rev-ver-cartao" onclick="abrirCartaoInteiro()">Ver cartão inteiro</button></div>' : '')
     + '<p class="rev-leitura">' + leitura(q) + '</p>'
     + '<div class="rev-opcoes">' + botoes + '</div>'
     + '<div class="rev-opcoes rev-opcoes-extra">'
     + '<button type="button" class="btn btn-ghost" onclick="escolher(\'BRANCO\')">Em branco</button>'
     + '<button type="button" class="btn btn-ghost" onclick="escolher(\'ANULADA\')">Anulada</button></div>'
     + '<div class="rev-acoes">'
-    + (q.foto_url ? '<button type="button" class="btn btn-ghost btn-sm" id="rev-ver-cartao" onclick="abrirCartaoInteiro()">Ver cartão inteiro</button>' : '')
     + '<button type="button" class="btn btn-ghost btn-sm" onclick="voltar()"' + (historico.length ? '' : ' disabled') + '>Voltar</button>'
     + '<button type="button" class="btn btn-ghost btn-sm" onclick="pular()"' + (FILA.length > 1 ? '' : ' disabled') + '>Pular</button></div>'
-    + '<p class="rev-teclas">Teclado: A a ' + ALTERNATIVAS[ALTERNATIVAS.length - 1] + ' respondem, 0 deixa em branco e X anula.</p>';
-  if (FILA[1] && FILA[1].endireitada_url) new Image().src = FILA[1].endireitada_url;
+    + '<p class="rev-teclas">Teclado: A a ' + ALTERNATIVAS[ALTERNATIVAS.length - 1] + ' respondem, 0 deixa em branco e X anula.</p></div></div>';
+  restringirCopiaImagem(document.getElementById('rev-previa'));
+  atualizarPreviaRevisao();
+  if (revisaoDesktop.matches && FILA[1] && FILA[1].endireitada_url) new Image().src = FILA[1].endireitada_url;
 }
 
 function escolher(alternativa) {
