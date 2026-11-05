@@ -185,7 +185,7 @@ function desenharCorrigidos() {
       : c.status === 'ambiguo' ? '<span class="badge badge-warn">' + c.ambiguas + ' p/ revisar</span>'
       : '<span class="badge badge-muted">lendo</span>';
     var nota = (c.nota_final !== null && c.nota_final !== undefined)
-      ? '<div class="corr-nota" style="color:' + (Number(c.nota_final) >= NOTA_MAX * 0.6 ? 'var(--success)' : 'var(--danger)') + '">' + fmtNota(c.nota_final) + '</div>'
+      ? '<div class="corr-nota ' + (Number(c.nota_final) >= NOTA_MAX * 0.6 ? 'corr-nota-aprovada' : 'corr-nota-reprovada') + '">' + fmtNota(c.nota_final) + '</div>'
         + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
       : '';
     var foto = c.miniatura_url
