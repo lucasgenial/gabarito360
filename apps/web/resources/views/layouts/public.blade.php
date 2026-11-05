@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}">
 <link rel="stylesheet" href="{{ asset('css/apresentacao-publica.css') }}?v={{ filemtime(public_path('css/apresentacao-publica.css')) }}">
 @stack('styles')
-@include('layouts._marca-head', ['tituloSocial'=>trim($__env->yieldContent('title', 'Gabarito360 — Gestão de avaliações')),'descricaoSocial'=>trim($__env->yieldContent('description', 'Correção de cartões-resposta pelo celular e relatórios educacionais.'))])
+@include('layouts._marca-head')
 </head>
 <body class="area-publica pagina-publica @yield('classe_publica')">
 <a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>

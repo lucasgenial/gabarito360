@@ -60,11 +60,13 @@ class AssetsPublicosTest(unittest.TestCase):
             self.assertNotIn('__G360_',html);self.assertNotIn('<form',html);self.assertNotIn('csrf',html)
             self.assertNotIn('class="selo"',html)
             codigo='require $argv[1]; echo g360_publicos_html($argv[3],g360_publicos_contrato($argv[2]),$argv[4]);'
-            entrada='<link href="'+ORIGEM+'/css/marca.css?v=1"><meta content="'+ORIGEM+'/brand/gabarito360-og.png"><a href="'+ORIGEM+'/login">Entrar</a>'
+            entrada='<link rel="canonical" href="'+ORIGEM+'/"><meta property="og:url" content="'+ORIGEM+'/"><link href="'+ORIGEM+'/css/marca.css?v=1"><meta content="'+ORIGEM+'/brand/gabarito360-og.png"><a href="'+ORIGEM+'/login">Entrar</a>'
             saida=subprocess.check_output(['php','-r',codigo,str(HELPER),str(PUBLIC),entrada,ORIGEM],text=True)
             self.assertIn('href="'+prefixo+'css/marca.css"',saida)
             self.assertIn('href="/login"',saida)
             self.assertIn('content="'+ORIGEM+prefixo+'brand/gabarito360-og.png"',saida)
+            self.assertIn('<link rel="canonical" href="'+ORIGEM+'/">',saida)
+            self.assertIn('property="og:url" content="'+ORIGEM+'/"',saida)
 
     def test_whitelist_recusa_symlink_e_integridade_alterada(self):
         with tempfile.TemporaryDirectory(prefix='g360-assets-seguro-') as temp:
