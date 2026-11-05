@@ -17,11 +17,17 @@ try {
    return route.fulfill(modo==='erro'?{status:403,json:{message:'Imagem indisponível'},headers:{'Cache-Control':'no-store'}}:{contentType:'image/svg+xml',body:imagemTeste,headers:{'Cache-Control':'no-store'}});
   }
   if(req.method()==='POST') {posts.push(req.postDataJSON());if(modo==='salvando')await new Promise(r=>liberarResposta=r);return route.fulfill({json:{cartao_status:'lido'}});}
-  if(u.pathname==='/revisao')return route.fulfill({contentType:'text/html',body:paginaRevisao({tema:u.searchParams.get('tema')})});
+  if(u.pathname==='/revisao')return route.fulfill({contentType:'text/html',body:paginaRevisao({tema:u.searchParams.get('tema'),semRecorte:u.searchParams.has('semrecorte'),semFoto:u.searchParams.has('semfoto')})});
   return route.abort();
  });
  const page=await context.newPage();page.on('pageerror',e=>erros.push(e.message));
  await page.setViewportSize({width:1440,height:1000});await page.goto('http://g360.test/revisao');
+ const previa=page.locator('#rev-previa'), respostas=page.locator('.rev-respostas');
+ const [pbox,rbox]=await Promise.all([previa.boundingBox(),respostas.boundingBox()]);assert.ok(pbox.x+pbox.width<=rbox.x);
+ const eventosRestritos=async alvo=>alvo.evaluate(el=>Object.fromEntries(['contextmenu','dragstart','copy','cut'].map(tipo=>{const e=new Event(tipo,{bubbles:true,cancelable:true});return[tipo,!el.dispatchEvent(e)];})));
+ assert.deepEqual(await eventosRestritos(page.locator('.rev-recorte')),{contextmenu:true,dragstart:true,copy:true,cut:true});
+ assert.equal(await page.locator('.rev-topo b').evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);return s.toString()===el.textContent&&el.dispatchEvent(new Event('copy',{bubbles:true,cancelable:true}));}),true);
+ await page.evaluate(()=>getSelection().removeAllRanges());
  const abrir=page.getByRole('button',{name:'Ver cartão inteiro',exact:true}), modal=page.locator('#rev-cartao-modal');
  const original=page.url();modo='lento';await abrir.click();
  await page.getByText('Carregando cartão…',{exact:true}).waitFor({state:'visible'});
@@ -30,6 +36,11 @@ try {
  assert.equal(posts.length,0);assert.match(await page.locator('.rev-progresso').innerText(),/Faltam 2/);
  modo='sucesso';liberarImagem();await page.getByAltText('Cartão-resposta completo').waitFor({state:'visible'});
  assert.equal(await page.getByAltText('Cartão-resposta completo').getAttribute('src'),itensTeste[0].foto_url);
+ assert.deepEqual(await eventosRestritos(page.getByAltText('Cartão-resposta completo')),{contextmenu:true,dragstart:true,copy:true,cut:true});
+ assert.equal(await page.getByAltText('Cartão-resposta completo').evaluate(e=>e.draggable),false);
+ assert.equal(await page.locator('#rev-cartao-area').evaluate(e=>e.dispatchEvent(new Event('copy',{bubbles:true,cancelable:true}))),false);
+ assert.equal(await page.locator('#rev-cartao-contexto').evaluate(el=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);return document.getElementById('rev-cartao-area').dispatchEvent(new Event('copy',{bubbles:true,cancelable:true}));}),true);
+ await page.evaluate(()=>getSelection().removeAllRanges());
  assert.ok(fotos.every(url=>!new URL(url).searchParams.has('_ctx')));
  assert.equal(context.pages().length,1);assert.equal(page.url(),original);
  for(let i=0;i<9;i++){await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>!!document.activeElement.closest('#rev-cartao-modal')),true);}
@@ -58,6 +69,9 @@ try {
  const saida=process.env.REV_MODAL_CAPTURAS;if(saida)mkdirSync(saida,{recursive:true});
  for(const [width,height,tema] of [[2560,1263,'light'],[390,844,'light'],[320,740,'dark']]) {
   await page.setViewportSize({width,height});await page.goto('http://g360.test/revisao?tema='+tema);
+  if(width<1024){assert.equal(await previa.isVisible(),false);assert.equal(await previa.locator('img, [role="img"]').count(),0);}
+  else {const [p,r]=await Promise.all([previa.boundingBox(),respostas.boundingBox()]);assert.ok(p.x+p.width<=r.x);}
+  if(saida)await page.screenshot({path:`${saida}/revisao-${width}-${tema}.png`});
   await page.getByRole('button',{name:'Ver cartão inteiro',exact:true}).click();await page.getByAltText('Cartão-resposta completo').waitFor({state:'visible'});
   const m=await modal.boundingBox();assert.ok(m.x>=0&&m.y>=0&&m.x+m.width<=width+1&&m.y+m.height<=height+1,JSON.stringify({width,m}));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
@@ -70,5 +84,11 @@ try {
   const r=await alvo.boundingBox();assert.ok(r.y>=0&&r.y+r.height<=844,JSON.stringify(r));
  }
  if(saida)await page.screenshot({path:`${saida}/modal-390-erro.png`});
+ modo='sucesso';await page.keyboard.press('Escape');await page.setViewportSize({width:1440,height:1000});await page.goto('http://g360.test/revisao?semrecorte=1');
+ assert.equal(await previa.locator('img').evaluate(e=>e.draggable),false);
+ assert.deepEqual(await eventosRestritos(previa.locator('img')),{contextmenu:true,dragstart:true,copy:true,cut:true});
+ const antesMobile=fotos.length;await page.setViewportSize({width:390,height:844});assert.equal(await previa.locator('img').count(),0);
+ await page.goto('http://g360.test/revisao?semrecorte=1');assert.equal(fotos.length,antesMobile);
+ await page.setViewportSize({width:1440,height:1000});await page.goto('http://g360.test/revisao?semfoto=1');assert.equal(await page.getByRole('button',{name:'Ver cartão inteiro',exact:true}).count(),0);
  assert.deepEqual(erros,[]);console.log('OK: modal, foco, teclado sem POST, cartão correto, zoom, erro/retry, salvamento e 2560/390/320.');
 } finally {await browser.close();}
