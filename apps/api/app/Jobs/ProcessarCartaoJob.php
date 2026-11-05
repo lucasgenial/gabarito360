@@ -95,6 +95,9 @@ class ProcessarCartaoJob implements ShouldQueue
             $caminho = Storage::disk('public')->path($cartao->imagem_url);
             $leituras = $driver->processar($caminho, $prova->num_questoes, $prova->num_alternativas);
             $id = $driver instanceof OmrIdentificacaoInterface ? $driver->identificacao() : [];
+            if (($id['qualidade']['aprovada'] ?? true) === false) {
+                $this->recusarFoto($envio,$cartao,$usuario,$id['qualidade']);return;
+            }
             $provaQr = (int) ($id['prova_id'] ?? 0);
             if ($provaQr && $provaQr !== (int) $prova->id) {
                 $destino = Prova::find($provaQr);
@@ -106,8 +109,15 @@ class ProcessarCartaoJob implements ShouldQueue
                 $prova = $destino;
                 $leituras = $driver->processar($caminho, $prova->num_questoes, $prova->num_alternativas);
                 $id = $driver->identificacao();
+                if (($id['qualidade']['aprovada'] ?? true) === false) {
+                    $this->recusarFoto($envio,$cartao,$usuario,$id['qualidade']);return;
+                }
             }
             // Trabalho caro fora da transação: não bloqueia os novos uploads na prova.
+            if((isset($id['num_questoes'])&&(int)$id['num_questoes']!==(int)$prova->num_questoes)||(isset($id['num_alternativas'])&&(int)$id['num_alternativas']!==(int)$prova->num_alternativas)){
+                $this->recusarFoto($envio,$cartao,$usuario,['aprovada'=>false,'codigo'=>'layout_divergente','mensagem'=>'O cartão impresso tem outra quantidade de questões ou alternativas. Confira a prova e gere o cartão adequado antes de enviar.']);return;
+            }
+            \App\Services\Omr\GravadorLeituras::validar($leituras,(int)$prova->num_questoes,(int)$prova->num_alternativas);
             $cartao->prova_id = $prova->id;
             $cartao->setRelation('prova', $prova);
             $imagens->gerar($cartao);
@@ -151,21 +161,23 @@ class ProcessarCartaoJob implements ShouldQueue
                                         ->whereIn('id', CartaoEnvio::where('status', 'erro')->select('cartao_id'));
                                 });
                         })->get();
-                    if ($anteriores->contains(fn ($c) => $c->id > $atual->id)) {
-                        $this->substituido($recibo, $atual);
-                        foreach ($provas as $p) {
-                            AtualizadorStatusProva::atualizar($p);
+                    if ($anteriores->isNotEmpty()) {
+                        foreach($anteriores as $chave=>$antigo){
+                            if($antigo->status==='pendente'&&!DB::table('cartao_respostas')->where('cartao_id',$antigo->id)->exists()&&!DB::table('notas')->where('cartao_id',$antigo->id)->exists()){
+                                app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($antigo,null,'recusada','Envio anterior sem leitura concluída; uma nova foto foi recebida.');
+                                CartaoEnvio::where('cartao_id',$antigo->id)->update(['status'=>'recusado','resultado'=>null,'mensagem'=>'O envio anterior não concluiu a leitura e foi preservado no histórico.']);
+                                $this->apagar($antigo);$anteriores->forget($chave);
+                            }
                         }
-
-                        return;
                     }
-                    foreach ($anteriores as $antigo) {
-                        ContextoCorrecao::filtrar(CartaoEnvio::query(), $this->espacoId)->where('cartao_id', $antigo->id)->update(['status' => 'substituido', 'resultado' => null,
-                            'mensagem' => 'Uma foto mais recente deste aluno substituiu esta leitura.']);
-                        $this->apagar($antigo);
+                    if ($anteriores->isNotEmpty()) {
+                        app(\App\Services\Omr\HistoricoCartao::class)->propor($atual,$anteriores->sortBy('id')->first(),$recibo,$usuario,$leituras);
+                        foreach ($provas as $p) AtualizadorStatusProva::atualizar($p);
+                        return;
                     }
                 }
                 $this->gravarLeituras($atual, $leituras);
+                if ($atual->aluno_id) app(\App\Services\Omr\HistoricoCartao::class)->registrarAtual($atual,$usuario);
                 foreach ($provas as $p) {
                     AtualizadorStatusProva::atualizar($p);
                 }
@@ -189,6 +201,17 @@ class ProcessarCartaoJob implements ShouldQueue
         CartaoEnvio::whereKey($this->envioId)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $this->espacoId ?: 0)->where('usuario_id', $this->atorId ?: 0)->where('cartao_id', $this->cartaoId))->where('tentativa', $this->tentativa)->whereIn('status', ['na_fila', 'processando'])
             ->where('vinculo_id', $this->vinculoId)
             ->update(['status' => 'erro', 'mensagem' => 'Não foi possível ler esta foto. Tente novamente ou fotografe outro cartão.']);
+    }
+
+    private function recusarFoto(CartaoEnvio $envio,Cartao $cartao,Usuario $u,array $qualidade): void
+    {
+        DB::transaction(function()use($envio,$cartao,$u,$qualidade){
+            $p=Prova::whereKey($envio->prova_id)->lockForUpdate()->firstOrFail();$e=$this->envioAtivo();if(!$e)return;
+            $c=Cartao::whereKey($cartao->id)->lockForUpdate()->first();if(!$c)return;
+            $c->forceFill(['qualidade'=>$qualidade])->save();$h=app(\App\Services\Omr\HistoricoCartao::class);$t=$h->registrarAtual($c,$u,'recusada',$qualidade['mensagem']);
+            $e->update(['status'=>'recusado','cartao_id'=>null,'resultado'=>['tentativa_id'=>$t->id,'prova_id'=>$p->id],'mensagem'=>$qualidade['mensagem']]);
+            $c->delete();DB::afterCommit(function()use($c){if($c->imagem_url)Storage::disk('public')->delete($c->imagem_url);});AtualizadorStatusProva::atualizar($p);
+        },3);
     }
 
     private function podeLer(?Usuario $u, ?Prova $p): bool
@@ -248,31 +271,6 @@ class ProcessarCartaoJob implements ShouldQueue
 
     private function gravarLeituras(Cartao $cartao, array $leituras): void
     {
-        ContextoCorrecao::exigirFilhos('cartao_respostas', 'cartao_id', $cartao->id, $cartao->espaco_id);
-        ContextoCorrecao::filtrar(DB::table('cartao_respostas'), $cartao->espaco_id)->where('cartao_id', $cartao->id)->delete();
-        $rows = [];
-        $soma = 0;
-        $pendente = false;
-        foreach ($leituras as $l) {
-            $ambigua = $l['ambigua'] || $l['confianca'] < 0.90;
-            if ($ambigua && $l['multiplas_marcacoes'] && $cartao->prova->anular_se_todas) {
-                $ambigua = false;
-                $l['alternativa'] = null;
-            }
-            $pendente = $pendente || $ambigua;
-            $soma += $l['confianca'];
-            $rows[] = ['cartao_id' => $cartao->id, 'numero_questao' => $l['numero_questao'],
-                'alternativa' => $ambigua ? null : $l['alternativa'], 'confianca' => $l['confianca'],
-                'ambigua' => $ambigua, 'alternativas_detectadas' => json_encode($l['alternativas_detectadas'])] + ContextoCorrecao::autoria($cartao->espaco_id, $this->atorId);
-        }
-        if ($rows) {
-            DB::table('cartao_respostas')->insert($rows);
-        }
-        $cartao->status = $pendente ? 'ambiguo' : 'lido';
-        $cartao->confianca_geral = count($leituras) ? $soma / count($leituras) : 0;
-        $cartao->save();
-        if (! $pendente) {
-            CalculadoraNota::calcular($cartao, $this->atorId);
-        }
+        \App\Services\Omr\GravadorLeituras::gravar($cartao,$leituras,$this->atorId);
     }
 }

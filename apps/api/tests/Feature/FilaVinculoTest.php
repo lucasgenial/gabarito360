@@ -53,7 +53,7 @@ class FilaVinculoTest extends TestCase
             DB::table('usuario_vinculos')->insert(['id' => $id, 'usuario_id' => 1, 'espaco_id' => $espaco, 'perfil' => $perfil, 'situacao' => 'ativo', 'inicio_em' => now()->subDay()]);
         }
         DB::table('vinculo_turmas')->insert([['vinculo_id' => 1, 'espaco_id' => 3, 'turma_id' => 1], ['vinculo_id' => 3, 'espaco_id' => 4, 'turma_id' => 2]]);
-        $this->mock(ImagensCartao::class, fn ($m) => $m->shouldReceive('gerar')->andReturn(true));
+        $this->mock(ImagensCartao::class,function($m){$m->shouldReceive('gerar')->andReturn(true);$m->shouldReceive('apagar')->andReturnNull();});
     }
 
     private function ator(int $v = 1): Usuario
@@ -207,6 +207,17 @@ class FilaVinculoTest extends TestCase
         $this->assertSame('recusado', $e->fresh()->status);
         $this->assertDatabaseCount('notas', 0);
         $this->assertDatabaseHas('cartoes', ['id' => $e->cartao_id]);
+    }
+
+    public function test_tentativa_exige_vinculo_docente_autorizado_e_preserva_vigente(): void
+    {
+        Storage::fake('local');$a=$this->enviar(1);$this->job($a)->handle($this->driver(),app(ImagensCartao::class));
+        $b=$this->enviar(1);$this->job($b)->handle($this->driver(),app(ImagensCartao::class));$id=$b->fresh()->resultado['tentativa_id'];
+        $this->getJson('/api/v1/tentativas/'.$id)->assertOk();
+        Sanctum::actingAs($this->ator(2));$this->getJson('/api/v1/tentativas/'.$id)->assertForbidden();
+        $this->postJson('/api/v1/tentativas/'.$id.'/aplicar',['motivo'=>'Nova foto conferida de teste','confirmar'=>true])->assertForbidden();
+        Sanctum::actingAs($this->ator(3));$this->getJson('/api/v1/tentativas/'.$id)->assertNotFound();$this->get('/api/v1/tentativas/'.$id.'/imagem')->assertNotFound();
+        $this->assertDatabaseHas('notas',['cartao_id'=>$a->cartao_id,'acertos'=>1]);
     }
 
 }

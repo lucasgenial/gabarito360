@@ -259,4 +259,15 @@ class CartoesEspacosTest extends TestCase
         $this->getJson('/api/v1/alunos/1/resultados/1')->assertNotFound();
         $this->getJson('/api/v1/provas/1/cartoes')->assertOk()->assertJsonPath('data.cartoes.0.nota_final', null);
     }
+    public function test_proposta_e_arquivos_historicos_nao_cruzam_redes(): void
+    {
+        Storage::fake('local');$a=$this->enviar();$this->processar($a);$b=$this->enviar();$this->processar($b);
+        $id=$b->fresh()->resultado['tentativa_id'];$this->getJson('/api/v1/tentativas/'.$id)->assertOk();
+        $this->get('/api/v1/tentativas/'.$id.'/imagem')->assertOk();
+        DB::table('usuario_escopos')->where('usuario_id',$this->admin->id)->delete();$this->escopo($this->admin,'rede',2);Permissao::limparCache();
+        $this->getJson('/api/v1/tentativas/'.$id)->assertNotFound();$this->getJson('/api/v1/tentativas/'.$id.'/imagem')->assertNotFound();
+        $this->postJson('/api/v1/tentativas/'.$id.'/aplicar',['motivo'=>'Nova foto conferida de teste','confirmar'=>true])->assertNotFound();
+        $this->assertDatabaseHas('notas',['cartao_id'=>$a->cartao_id]);
+    }
+
 }
