@@ -208,7 +208,7 @@
       <a href="{{ route('membros.index') }}" class="btn btn-secondary btn-sm">Gerenciar usuários</a>
     </div>
   </div>
-  <x-tabela titulo="Últimos acessos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Últimos acessos</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Últimos acessos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Últimos acessos</caption>
     <thead>
       <tr>
         <th scope="col">Nome</th>

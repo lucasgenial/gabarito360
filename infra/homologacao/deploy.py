@@ -58,7 +58,7 @@ tabelas=['alunos','turmas','provas','prova_turmas','gabaritos','gabarito_questoe
 colunas_php=bootstrap_php+"$r=[];foreach("+json.dumps(tabelas)+" as $t)$r[$t]=Illuminate\\Support\\Facades\\Schema::getColumnListing($t);echo json_encode($r);"
 colunas_antes=json.loads(run(['php','-r',colunas_php],cwd=anterior/'apps/api'))
 (recibo/'academico-colunas-antes.json').write_text(json.dumps(colunas_antes))
-adicoes_permitidas={'alunos':{'imagem_versao'},'provas':{'perfil_criacao'}}
+adicoes_permitidas={'alunos':{'imagem_versao'},'provas':{'perfil_criacao','vinculo_criacao_id','autoria_origem'}}
 ignorar={t:sorted(adicoes_permitidas.get(t,set())-set(colunas_antes[t])) for t in tabelas}
 manifest_php=bootstrap_php+"$ignorar=json_decode('"+json.dumps(ignorar)+"',true);$r=[];foreach("+json.dumps(tabelas)+" as $t){$rows=Illuminate\\Support\\Facades\\DB::table($t)->get()->map(function($v)use($t,$ignorar){$v=(array)$v;foreach($ignorar[$t] as $c)unset($v[$c]);ksort($v);return json_encode($v,JSON_THROW_ON_ERROR);})->all();sort($rows,SORT_STRING);$r[$t]=['total'=>count($rows),'sha256'=>hash('sha256',implode(chr(10),$rows))];}echo json_encode($r,JSON_THROW_ON_ERROR);"
 antes=run(['php','-r',manifest_php],cwd=anterior/'apps/api');(recibo/'academico-antes.json').write_text(antes)
@@ -71,6 +71,8 @@ flags={
  'PEDIDOS_TITULARES_ATIVOS':'true','PEDIDOS_EXPORTACAO_AUTORIZACOES_ATIVAS':'true','PEDIDOS_EXPORTACAO_GERACAO_ATIVA':'true','PEDIDOS_EXPORTACAO_ENTREGA_ATIVA':'true',
  'PEDIDOS_TITULARES_INTERFACE_ATIVA':'true','PEDIDOS_EXPORTACOES_INTERFACE_ATIVA':'true',
  'MAIL_MAILER':'log','MP_SANDBOX':'true','MP_ACCESS_TOKEN':'','MP_PUBLIC_KEY':''}
+if fase in ['HOMOLOGACAO-DC1','ENSAIO-DC1']:
+ flags.update({'DISCIPLINAS_ATIVAS':'true','IDENTIDADE_PROVISORIOS_ATIVOS':'false'})
 for app in ['api','web']:
  p=BASE/'shared'/app/'.env';changes=dict(flags)
  if app=='web':changes['API_BASE_URL']='http://127.0.0.1:8081/api'

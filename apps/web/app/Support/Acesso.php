@@ -33,6 +33,7 @@ class Acesso
      * exige na tela de destino — assim nenhum item leva a 403 (docs/21, etapa 4).
      */
     private const ITENS = [
+        'disciplinas' => ['Disciplinas da escola', 'Disciplinas', 'prova', 'disciplinas.index', ['disciplinas.*'], ['turma.ver']],
         'funcoes' => ['Configurações de usuários','Usuários','equipe','funcoes.index',['funcoes.*'],['usuario.excecao_funcional.gerir']],
         'catalogo_pedidos' => ['Minhas solicitações', 'Solicitações', 'escola', 'catalogo-pedidos.index', ['catalogo-pedidos.*'], ['catalogo.solicitar']],
         'catalogo_atendimento' => ['Cadastro de instituições', 'Instituições', 'escola', 'catalogo-atendimento.index', ['catalogo-atendimento.*'], ['catalogo.solicitacao.analisar']],
@@ -61,7 +62,7 @@ class Acesso
     ];
 
     /** Ordem do menu lateral. */
-    private const ORDEM = ['painel', 'funcoes', 'clientes', 'internos', 'catalogo_atendimento', 'pedidos', 'exportacoes', 'provas', 'corrigir', 'turmas', 'instituicoes', 'catalogo_pedidos', 'catalogo_gestao', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
+    private const ORDEM = ['painel', 'funcoes', 'clientes', 'internos', 'catalogo_atendimento', 'pedidos', 'exportacoes', 'provas', 'corrigir', 'turmas', 'disciplinas', 'instituicoes', 'catalogo_pedidos', 'catalogo_gestao', 'relatorios', 'escolas', 'alunos', 'equipe', 'copias'];
 
     /** Barra inferior do celular: os 4 itens principais de cada perfil (se a pessoa tiver acesso). */
     private const PRINCIPAIS = [
@@ -170,6 +171,7 @@ class Acesso
         $atual = request()->route()?->getName() ?? '';
         $itens = [];
         foreach (self::ORDEM as $chave) {
+            if ($chave==='disciplinas' && (!config('disciplinas.ativo') || !session('auth_vinculos') || (ContextoWeb::atual()['espaco']['tipo'] ?? '') !== 'escola' || !in_array(self::perfil(), ['coordenador','dir_escolar','vice_dir_escolar','professor'], true))) continue;
             if ($chave==='instituicoes' && (config('catalogo.interface_ativa')!==true || !self::pessoal())) continue;
             if (str_starts_with($chave,'catalogo_') && config('catalogo.interface_ativa')!==true) continue;
             if ($chave==='exportacoes' && (!config('services.pedidos.exportacoes') || !config('services.pedidos.interface_ativa') || !session('auth_vinculos'))) continue;

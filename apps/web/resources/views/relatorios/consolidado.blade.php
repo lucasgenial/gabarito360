@@ -62,7 +62,7 @@
       :dados="['categorias' => $listaA->map(fn ($a) => \Illuminate\Support\Str::limit($a['disciplina'], 18))->values(), 'formato' => 'nota', 'maximo' => 10, 'rotulos' => true,
                'series' => [['nome' => 'Média', 'valores' => $listaA->pluck('media'),
                              'cores' => $listaA->map(fn ($a) => $a['media'] >= 6 ? '--serie-1' : '--danger')->values()]]]">
-      <x-tabela titulo="Resultados por área" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Resultados por área</caption>
+      <x-tabela :integrada="true" titulo="Resultados por área" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Resultados por área</caption>
         <thead><tr><th scope="col">Área</th><th scope="col">Média</th><th scope="col">Aprovação</th><th scope="col">Notas</th></tr></thead>
         <tbody>
           @foreach($areas as $a)
@@ -82,7 +82,7 @@
   <h3 style="font-size:17px;margin-bottom:6px;">Comparativo entre {{ $grupo === 'turma' ? 'turmas' : 'escolas' }}</h3>
   @php $disciplinas = collect($areas)->pluck('disciplina'); @endphp
   <div class="quadro-cel" style="overflow-x:auto;">
-    <x-tabela titulo="Comparação de grupos" modo="matriz"><table class="tabela-padrao tabela-matriz tab"><caption class="sr-only">Comparação de grupos</caption>
+    <x-tabela :integrada="true" titulo="Comparação de grupos" modo="matriz"><table class="tabela-padrao tabela-matriz tab"><caption class="sr-only">Comparação de grupos</caption>
       <thead>
         <tr>
           <th scope="col">#</th><th scope="col" class="esq fixa">{{ $grupo === 'turma' ? 'Turma' : 'Escola' }}</th>

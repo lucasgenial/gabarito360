@@ -59,6 +59,8 @@
   </div>
 </div>
 
+@include('disciplinas._turma')
+
 {{-- Seção de alunos --}}
 <h2 class="section-title secao-topo">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -81,7 +83,7 @@
 </div>
 
 <div class="card" style="overflow:hidden;">
-  <x-tabela titulo="Alunos da turma" modo="lista"><table class="tabela-padrao table " id="alunos-table"><caption class="sr-only">Alunos da turma</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Alunos da turma" modo="lista"><table class="tabela-padrao table " id="alunos-table"><caption class="sr-only">Alunos da turma</caption>
     <thead>
       <tr>
         <th scope="col">Aluno</th>
@@ -141,7 +143,7 @@
 
 <div class="card" style="overflow:hidden;margin-bottom:24px;">
   @if(count($turma['provas'] ?? []) > 0)
-  <x-tabela titulo="Provas da turma" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Provas da turma</caption>
+  <x-tabela :interna="true" :integrada="true" titulo="Provas da turma" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Provas da turma</caption>
     <thead>
       <tr>
         <th scope="col">Prova</th>
@@ -198,16 +200,18 @@
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
     <circle cx="12" cy="7" r="4"/>
   </svg>
-  Professores
+  <span id="professores">Professores</span>
   <span class="badge" style="margin-left:6px;font-size:13px;">{{ count($professores ?? []) }}</span>
 </h2>
 
 <div class="card card-pad" style="margin-bottom:24px;">
   {{-- Vincular professor --}}
+  @if(!empty($dc1Retorno))@include('disciplinas._voltar',['retorno'=>$dc1Retorno])@endif
+  @pode('turma.vincular_professor')
   <form method="POST" action="{{ route('turmas.professores.store', $turma['id']) }}"
         style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
     @csrf
-    <select class="select" name="usuario_id" id="professor-selecionado" required style="flex:1;min-width:200px;">
+    <select class="select" name="usuario_id" id="professor-selecionado" aria-label="Professor para acesso à turma" required style="flex:1;min-width:200px;">
       <option value="">— Selecione um professor —</option>
       @foreach($todosProfessores as $p)
         @php $jaVinculado = isset($p['vinculo_id']) ? collect($professores)->contains('vinculo_id', $p['vinculo_id']) : collect($professores)->contains('id', $p['id']); @endphp
@@ -219,9 +223,10 @@
     @if(session('auth_vinculos'))<input type="hidden" name="vinculo_id" id="professor-vinculo">@endif
     <button type="submit" class="btn btn-primary btn-sm">Vincular professor</button>
   </form>
+  @endpode
 
   @if(count($professores ?? []) > 0)
-    <x-tabela titulo="Professores da turma" modo="lista"><table class="tabela-padrao table " style="margin-top:0;"><caption class="sr-only">Professores da turma</caption>
+    <x-tabela :integrada="true" titulo="Professores da turma" modo="lista"><table class="tabela-padrao table " style="margin-top:0;"><caption class="sr-only">Professores da turma</caption>
       <thead>
         <tr>
           <th scope="col">Professor(a)</th>
@@ -249,14 +254,14 @@
               @endif
             </div></td>
             <td style="text-align:right;" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
-              <form method="POST"
+              @pode('turma.vincular_professor')<form method="POST"
                     action="{{ route('turmas.professores.destroy', array_filter(['id' => $turma['id'], 'uid' => $p['id'], 'vinculo_id' => $p['vinculo_id'] ?? null])) }}"
                     onsubmit="return confirm('Desvincular {{ $p['nome'] }} desta turma?')">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-ghost"
                         style="color:var(--danger);border-color:var(--danger);">Desvincular</button>
-              </form>
+              </form>@endpode
             </div></td>
           </tr>
         @endforeach

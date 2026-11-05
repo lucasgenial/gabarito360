@@ -62,6 +62,28 @@ Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController:
 
 // Rotas autenticadas
 Route::middleware('autenticado')->group(function () {
+    $dc=\App\Http\Controllers\DisciplinaController::class;
+    Route::get('disciplinas',[$dc,'index'])->name('disciplinas.index');
+    $ac=\App\Http\Controllers\AreaConhecimentoController::class;
+    Route::get('areas-conhecimento',[$ac,'index'])->name('areas.index');
+    Route::get('areas-conhecimento/nova',[$ac,'create'])->name('areas.create');
+    Route::post('areas-conhecimento',[$ac,'store'])->name('areas.store');
+    Route::get('areas-conhecimento/{id}',[$ac,'show'])->whereNumber('id')->name('areas.show');
+    Route::get('areas-conhecimento/{id}/editar',[$ac,'edit'])->whereNumber('id')->name('areas.edit');
+    Route::put('areas-conhecimento/{id}',[$ac,'update'])->whereNumber('id')->name('areas.update');
+    Route::post('areas-conhecimento/{id}/vinculos',[$ac,'vincular'])->whereNumber('id')->name('areas.vincular');
+    Route::post('areas-conhecimento/{id}/desvincular',[$ac,'desvincular'])->whereNumber('id')->name('areas.desvincular');
+    Route::get('disciplinas/nova',[$dc,'create'])->name('disciplinas.create');
+    Route::post('disciplinas',[$dc,'store'])->name('disciplinas.store');
+    Route::get('disciplinas/{id}',[$dc,'show'])->whereNumber('id')->name('disciplinas.show');
+    Route::get('disciplinas/{id}/editar',[$dc,'edit'])->whereNumber('id')->name('disciplinas.edit');
+    Route::put('disciplinas/{id}',[$dc,'update'])->whereNumber('id')->name('disciplinas.update');
+    Route::post('disciplinas/{id}/professores',[$dc,'indicar'])->whereNumber('id')->name('disciplinas.indicar');
+    Route::post('turmas/{turma}/disciplinas',[$dc,'adicionar'])->whereNumber('turma')->name('disciplinas.adicionar');
+    Route::get('turmas/{turma}/disciplinas/{componente}',[$dc,'componente'])->whereNumber('turma')->whereNumber('componente')->name('disciplinas.componente');
+    Route::post('turmas/{turma}/disciplinas/{componente}/atribuicoes',[$dc,'atribuir'])->whereNumber('turma')->whereNumber('componente')->name('disciplinas.atribuir');
+    Route::post('turmas/{turma}/disciplinas/{componente}/situacao',[$dc,'situacao'])->whereNumber('turma')->whereNumber('componente')->name('disciplinas.situacao');
+    Route::post('turmas/{turma}/disciplinas/{componente}/atribuicoes/{atribuicao}/encerrar',[$dc,'encerrar'])->whereNumber('turma')->whereNumber('componente')->whereNumber('atribuicao')->name('disciplinas.encerrar');
     $atendimento=\App\Http\Controllers\CatalogoAtendimentoController::class;
     Route::prefix('instituicoes/solicitacoes')->name('catalogo-pedidos.')->group(function()use($atendimento){
         Route::get('',[$atendimento,'index'])->name('index');Route::get('nova',[$atendimento,'novo'])->name('novo');Route::post('',[$atendimento,'enviar'])->name('enviar');
@@ -215,6 +237,10 @@ Route::middleware('autenticado')->group(function () {
     // Provas (MP-019)
     Route::get('/provas',             [ProvaController::class, 'index'])->name('provas.index');
     Route::get('/provas/nova',        [ProvaController::class, 'create'])->name('provas.create');
+    Route::post('/provas/preparar', [\App\Http\Controllers\CurriculoProvaController::class,'preparar'])->name('provas.preparar');
+    Route::get('/provas/{id}/curriculo', [\App\Http\Controllers\CurriculoProvaController::class,'editar'])->name('provas.curriculo.edit');
+    Route::post('/provas/{id}/curriculo/preparar', [\App\Http\Controllers\CurriculoProvaController::class,'preparar'])->name('provas.curriculo.preparar');
+    Route::post('/provas/{id}/curriculo', [\App\Http\Controllers\CurriculoProvaController::class,'salvar'])->name('provas.curriculo.salvar');
     Route::post('/provas/{id}/copiar', [ProvaController::class, 'copiar'])->name('provas.copiar.store');
     Route::post('/provas',            [ProvaController::class, 'store'])->name('provas.store');
     Route::get('/provas/{id}',        [ProvaController::class, 'show'])->name('provas.show');

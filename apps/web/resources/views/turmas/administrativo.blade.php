@@ -37,7 +37,7 @@
 </section>
 <section class="card card-pad" style="margin-top:20px;">
   <h2>Alunos</h2>
-  <x-tabela titulo="Alunos da turma" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Alunos da turma</caption><thead><tr><th scope="col">Nome</th><th scope="col">Matrícula</th><th scope="col">Status</th></tr></thead><tbody>
+  <x-tabela :integrada="true" titulo="Alunos da turma" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Alunos da turma</caption><thead><tr><th scope="col">Nome</th><th scope="col">Matrícula</th><th scope="col">Status</th></tr></thead><tbody>
     @forelse($turma['alunos'] as $aluno)
     <tr><td class="tabela-principal" data-rotulo="Nome"><div class="tabela-valor">{{ $aluno['nome'] }}</div></td><td data-rotulo="Matrícula"><div class="tabela-valor">{{ $aluno['matricula'] }}</div></td><td data-rotulo="Status"><div class="tabela-valor">{{ $aluno['ativo'] ? 'Ativo' : 'Inativo' }}</div></td></tr>
     @empty <tr><td colspan="3">Nenhum aluno cadastrado nesta turma.</td></tr> @endforelse

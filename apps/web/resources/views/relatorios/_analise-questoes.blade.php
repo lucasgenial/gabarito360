@@ -56,7 +56,7 @@
       <summary style="cursor:pointer;font-weight:600;font-size:14px;">Ver marcações de cada questão (A–E)</summary>
       @php $letras = array_keys(collect($questoes)->first()['distribuicao'] ?? []); @endphp
       <div class="quadro-cel" style="overflow-x:auto;">
-        <x-tabela titulo="Distribuição das alternativas" modo="matriz"><table class="tabela-padrao tabela-matriz aq-tabela"><caption class="sr-only">Distribuição das alternativas</caption>
+        <x-tabela :integrada="true" titulo="Distribuição das alternativas" modo="matriz"><table class="tabela-padrao tabela-matriz aq-tabela"><caption class="sr-only">Distribuição das alternativas</caption>
           <thead><tr><th scope="col" class="fixa">Questão</th>@foreach($letras as $l)<th scope="col">{{ $l === 'branco' ? 'Branco' : $l }}</th>@endforeach<th scope="col">Acerto</th></tr></thead>
           <tbody>
             @foreach($questoes as $q)

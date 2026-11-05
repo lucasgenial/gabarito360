@@ -75,7 +75,7 @@
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Resumo por prova</h3>
   <div>
-    <x-tabela titulo="Resultados por prova" modo="lista"><table class="tabela-padrao tab "><caption class="sr-only">Resultados por prova</caption>
+    <x-tabela :integrada="true" titulo="Resultados por prova" modo="lista"><table class="tabela-padrao tab "><caption class="sr-only">Resultados por prova</caption>
       <thead><tr><th scope="col" class="esq">Prova</th><th scope="col">Corrigidos</th><th scope="col">Média</th><th scope="col">Aprovação</th><th scope="col">Maior</th><th scope="col">Menor</th><th scope="col" class="no-print"></th></tr></thead>
       <tbody>
         @foreach($provas as $p)
@@ -98,7 +98,7 @@
 <div class="card card-pad" style="margin-top:16px;">
   <h3 style="font-size:17px;margin-bottom:6px;">Ranking dos alunos</h3>
   <div class="quadro-cel" style="overflow-x:auto;">
-    <x-tabela titulo="Notas por aluno e prova" modo="matriz"><table class="tabela-padrao tabela-matriz tab"><caption class="sr-only">Notas por aluno e prova</caption>
+    <x-tabela :integrada="true" titulo="Notas por aluno e prova" modo="matriz"><table class="tabela-padrao tabela-matriz tab"><caption class="sr-only">Notas por aluno e prova</caption>
       <thead>
         <tr><th scope="col">#</th><th scope="col" class="esq fixa">Aluno</th>@foreach($provas as $p)<th scope="col" title="{{ $p['titulo'] }}">{{ $p['disciplina'] }}</th>@endforeach<th scope="col">Média</th></tr>
       </thead>

@@ -17,7 +17,7 @@
   <a class="btn btn-ghost" href="{{ route('clientes.index') }}">Limpar</a>
 </form>
 <div class="card card-pad" style="margin-top:20px;overflow-x:auto;">
-<x-tabela titulo="Clientes" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Clientes</caption><thead><tr><th scope="col">Cliente</th><th scope="col">Tipo</th><th scope="col">Modalidade</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead><tbody>
+<x-tabela :integrada="true" titulo="Clientes" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Clientes</caption><thead><tr><th scope="col">Cliente</th><th scope="col">Tipo</th><th scope="col">Modalidade</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead><tbody>
 @forelse($lista['data'] as $c)
 <tr><td class="tabela-principal" data-rotulo="Cliente"><div class="tabela-valor">{{ $c['nome'] }}</div></td><td data-rotulo="Tipo"><div class="tabela-valor">{{ $tipos[$c['tipo']] ?? $c['tipo'] }}</div></td><td data-rotulo="Modalidade"><div class="tabela-valor">{{ $modalidades[$c['modalidade']] ?? $c['modalidade'] }}</div></td><td data-rotulo="Situação"><div class="tabela-valor">{{ ucfirst($c['situacao']) }}</div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><a class="btn btn-secondary" href="{{ route('clientes.show',$c['id']) }}">Ver cadastro</a></div></td></tr>
 @empty <tr><td colspan="5">Nenhum cliente encontrado.</td></tr> @endforelse

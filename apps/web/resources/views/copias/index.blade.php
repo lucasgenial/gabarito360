@@ -29,7 +29,7 @@
 </form>
 @if($dados['lado']==='destino')<p style="margin-top:16px;">As entradas aparecem aqui depois que este espaço registra sua decisão.</p>@endif
 <div class="card card-pad" style="margin-top:20px;overflow-x:auto;">
-  <x-tabela titulo="Solicitações de cópia" modo="lista"><table class="tabela-padrao table"><caption style="text-align:left;margin-bottom:16px;">{{ $lista['total'] }} solicitação(ões) neste acompanhamento</caption>
+  <x-tabela :integrada="true" titulo="Solicitações de cópia" modo="lista"><table class="tabela-padrao table"><caption style="text-align:left;margin-bottom:16px;">{{ $lista['total'] }} solicitação(ões) neste acompanhamento</caption>
     <thead><tr><th scope="col">Conteúdo</th><th scope="col">Criado em</th><th scope="col">Situação</th><th scope="col">Publicação</th></tr></thead>
     <tbody>@forelse($lista['data'] as $c)
       <tr><td class="tabela-principal" data-rotulo="Conteúdo"><div class="tabela-valor">@if($c['operacao_disponivel']??false)<a href="{{ route('copias.operacao',['id'=>$c['id'],'lado'=>$dados['lado'],'_ctx'=>\App\Support\ContextoWeb::id()]) }}">{{ $tipos[$c['finalidade']] ?? 'Cópia' }}</a>@else{{ $tipos[$c['finalidade']] ?? 'Cópia' }}@endif</div></td>
