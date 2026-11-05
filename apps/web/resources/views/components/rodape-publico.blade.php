@@ -1,7 +1,7 @@
 <footer class="lp-rodape rodape-publico">
   <div class="rodape-publico-grade">
     <div class="rodape-publico-marca">
-      <a class="brand" href="{{ route('home') }}" aria-label="Gabarito360 — página inicial"><span class="logo">G360</span> Gabarito360</a>
+      <a class="brand" href="{{ route('home') }}" aria-label="Gabarito360 — página inicial"><x-marca /></a>
       <p>Correção de provas e relatórios educacionais.</p>
       <p>© {{ date('Y') }} Gabarito360</p>
     </div>

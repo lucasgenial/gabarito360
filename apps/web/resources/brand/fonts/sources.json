@@ -1,0 +1,18 @@
+[
+  {
+    "family": "Figtree",
+    "url": "https://raw.githubusercontent.com/google/fonts/a60a77e14f28abd4ef243a1b5dfc48df0cec5205/ofl/figtree/Figtree%5Bwght%5D.ttf",
+    "license_url": "https://raw.githubusercontent.com/google/fonts/a60a77e14f28abd4ef243a1b5dfc48df0cec5205/ofl/figtree/OFL.txt",
+    "sha256_variable": "26ad3db9b31ff7dde67a91ff515d022d2f495cd506590699cf264f0bfe6fb714",
+    "weight": 800,
+    "commit": "a60a77e14f28abd4ef243a1b5dfc48df0cec5205"
+  },
+  {
+    "family": "AlbertSans",
+    "url": "https://raw.githubusercontent.com/google/fonts/fffdadf0f0c9cc1ec8b407063424a8bfbee05611/ofl/albertsans/AlbertSans%5Bwght%5D.ttf",
+    "license_url": "https://raw.githubusercontent.com/google/fonts/fffdadf0f0c9cc1ec8b407063424a8bfbee05611/ofl/albertsans/OFL.txt",
+    "sha256_variable": "8fe5d4cf5822d7096d4d17ad781c90f97c745ac13a22be619db74966fba45fda",
+    "weight": 800,
+    "commit": "fffdadf0f0c9cc1ec8b407063424a8bfbee05611"
+  }
+]
