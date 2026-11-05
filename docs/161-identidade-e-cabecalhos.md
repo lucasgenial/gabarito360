@@ -17,3 +17,11 @@ Documentos: escola com rede usa logo da rede à esquerda e escolar à direita, m
 Usar o mesmo resolvedor de identidade para exportações e o partial de impressão compartilhado para relatórios HTML. A variante compacta dos cartões-resposta preserva marcadores, QR, campos e posições da grade óptica. Não regenerar arquivos antigos nem alterar notas/fotos. Novos PDFs do resultado mantêm selo, QR e numeração contínua, com identidade e título separados por respiro, identificação do aluno e nota em caixas próprias.
 
 Preservar os layouts e funcionalidades atuais; inventariar compatibilidades antigas antes de remover arquivos. Nenhuma publicação em produção. Publicar a entrega completa primeiro na homologação, com backup e reversão do código.
+
+## Complemento: página inicial independente
+
+O responsável pediu a atualização da página inicial estática e confirmou manter a prévia com degradê após considerar a versão clean. A composição e o conteúdo permanecem; somente a abertura recebe o degradê aprovado (#1D4F9E→#001534), texto branco e ações com contraste. Os exemplos continuam em superfícies brancas e as demais seções são preservadas. A marca usa o mesmo componente e fontes.
+
+O exportador anterior congelava somente app.css. A nova exportação inclui bundle imutável da marca, fontes, favicons, manifestos e imagens públicas sob whitelist, com SHA, MIME correto e preservação das versões anteriores. Home e manutenção devem funcionar sem PHP/API. Não exportar formulários, tokens ou contexto de usuário. Uma falha de exportação preserva o pointer anterior; origem pública explícita evita links para IP interno.
+
+A inspeção da VM120 confirmou que a homologação ainda não tinha a home independente configurada. A instalação será restrita a ela, mantendo BasicAuth, com backup da configuração Nginx, lint, ensaio protegido de indisponibilidade do PHP-FPM e rollback. Não aplicar esta configuração em produção nesta entrega. Suíte Nginx executada em instância isolada, sem alteração do serviço ativo; verificar a configuração efetiva no deploy após CI e revisão final.
