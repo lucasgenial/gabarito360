@@ -9,7 +9,7 @@
   @if($dados['pode_aplicar'])
   @if($errors->any())<x-aviso tipo="erro">{{ $errors->first() }}</x-aviso>@endif
   @php($pendencias=collect($dados['leituras'])->where('ambigua',true)->count())
-  @if($pendencias)<x-aviso tipo="atencao">Esta leitura tem {{ $pendencias }} questões para revisão. Se aplicar esta tentativa, a nova nota ficará pendente até resolver essas questões. O resultado anterior continuará preservado no histórico.</x-aviso>@endif
+  @if($pendencias)<x-aviso tipo="atencao">Esta leitura tem {{ $pendencias }} questões para revisão. Ao aplicar, você será levado à revisão das questões pendentes. O novo resultado ficará disponível após concluir essa revisão; o anterior permanecerá no histórico.</x-aviso>@endif
   <form method="POST" action="{{ route('correcao.tentativa.aplicar',$dados['id']) }}" class="tentativa-confirmacao">
     @csrf<input type="hidden" name="integrada" value="1"><input type="hidden" name="tentativas_pagina" value="{{ request('tentativas_pagina',1) }}"><h3>Aplicar nova tentativa</h3><p>O resultado vigente será atualizado com esta leitura. A foto, a nota e as revisões anteriores permanecem no histórico.</p>
     <label for="tentativa-motivo">Motivo da nova tentativa</label><textarea id="tentativa-motivo" class="input" name="motivo" minlength="10" maxlength="500" required>{{ old('motivo') }}</textarea>

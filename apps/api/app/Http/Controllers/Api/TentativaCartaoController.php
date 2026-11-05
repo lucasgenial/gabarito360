@@ -97,7 +97,7 @@ class TentativaCartaoController extends Controller
         $d = $r->validate(['motivo' => 'required|string|min:10|max:500', 'confirmar' => 'required|accepted']);
         $c = $h->aplicar($id, $r->user(), $d['motivo']);
 
-        return ApiResponse::success(['aplicada' => true, 'cartao_id' => $c->id, 'prova_id' => $c->prova_id, 'aluno_id' => $c->aluno_id]);
+        return ApiResponse::success(['aplicada' => true, 'cartao_id' => $c->id, 'prova_id' => $c->prova_id, 'aluno_id' => $c->aluno_id, 'status' => $c->status]);
     }
 
     public function descartar(Request $r, string $id, HistoricoCartao $h)
