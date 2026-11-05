@@ -22,14 +22,14 @@ try{
  assert.ok(await p.evaluate(()=>document.getElementById('doc-painel').getBoundingClientRect().bottom<document.querySelector('footer').getBoundingClientRect().top));
  await p.getByRole('button',{name:'Ocultar cartão-resposta',exact:true}).click();assert.equal(await img.count(),0);assert.equal(await p.locator('#doc-painel').isVisible(),false);
  for(const width of [1099,390,320]){
-  await p.setViewportSize({width,height:844});assert.equal(await p.locator('#doc-abrir').getAttribute('aria-haspopup'),'dialog');
+  await p.setViewportSize({width,height:844});await p.waitForFunction(()=>document.getElementById('doc-abrir').getAttribute('aria-haspopup')==='dialog');
   await p.getByRole('button',{name:'Visualizar cartão-resposta',exact:true}).click();await img.waitFor();assert.equal(await modal.isVisible(),true);
   const b=await modal.boundingBox();assert.ok(b.x>=0&&b.x+b.width<=width+1&&b.y+b.height<=845);
   await p.keyboard.press('Escape');assert.equal(await p.locator('#doc-abrir').evaluate(e=>e===document.activeElement),true);assert.equal(await img.count(),0);
  }
  modo='erro';await p.getByRole('button',{name:'Visualizar cartão-resposta',exact:true}).click();await p.getByRole('alert').waitFor();
  modo='ok';await p.getByRole('button',{name:'Tentar novamente',exact:true}).click();await img.waitFor();
- await p.setViewportSize({width:1440,height:1000});assert.equal(await modal.isVisible(),false);await img.waitFor();assert.equal(await p.locator('#doc-painel').isVisible(),true);
+ await p.setViewportSize({width:1440,height:1000});await p.waitForFunction(()=>!document.getElementById('doc-modal').open&&document.getElementById('doc-painel').hidden===false);await img.waitFor();assert.equal(await p.locator('#doc-painel').isVisible(),true);
  await p.getByRole('button',{name:'Ocultar cartão-resposta',exact:true}).click();assert.equal(await p.getByText('Resultado preservado.',{exact:true}).isVisible(),true);assert.deepEqual(erros,[]);
  console.log('OK: painel sob demanda/ocultar, modal1099/390/320, foco, resize, erro/retry e resultado preservado.');
 }finally{await browser.close();}
