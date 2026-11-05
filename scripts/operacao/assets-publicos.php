@@ -68,7 +68,10 @@ function g360_publicos_contrato(string $publico): array
 function g360_publicos_html(string $html,array $contrato,string $origem): string
 {
     $origem=g360_publicos_origem($origem);
-    return preg_replace_callback('~\b(href|src|content)="([^"<>]*)"~',function($m)use($contrato,$origem){
+    // Canonical deve permanecer absoluto; links de navegação continuam relativos à origem.
+    return preg_replace_callback('~(<link\b(?=[^>]*\brel="canonical")[^>]*>)|\b(href|src|content)="([^"<>]*)"~i',function($m)use($contrato,$origem){
+        if (!empty($m[1])) return $m[1];
+        $m=[0=>$m[0],1=>strtolower($m[2]),2=>$m[3]];
         $valor=html_entity_decode($m[2],ENT_QUOTES|ENT_HTML5,'UTF-8');
         $caminho=ltrim(parse_url($valor,PHP_URL_PATH)??'','/');
         if (array_key_exists($caminho,$contrato['arquivos'])) {

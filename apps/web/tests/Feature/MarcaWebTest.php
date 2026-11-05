@@ -8,6 +8,48 @@ use Tests\TestCase;
 
 class MarcaWebTest extends TestCase
 {
+    private function sociais(string $html): array
+    {
+        $doc=new \DOMDocument(); @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        $xpath=new \DOMXPath($doc); $dados=[];
+        foreach ($xpath->query('//head/meta[starts-with(@property,"og:") or starts-with(@name,"twitter:")]') as $meta) {
+            $chave=$meta->getAttribute('property')?:$meta->getAttribute('name');
+            $this->assertArrayNotHasKey($chave,$dados,'Metadado social duplicado.');
+            $dados[$chave]=$meta->getAttribute('content');
+        }
+        $dados['canonical']=$xpath->evaluate('string(//head/link[@rel="canonical"]/@href)');
+        return $dados;
+    }
+
+    public function test_previa_social_publica_tem_url_limpa_imagem_absoluta_e_contexto_da_pagina(): void
+    {
+        Http::preventStrayRequests(); Http::fake(['*'=>Http::response(['data'=>[]])]);
+        foreach (['/'=>'Avaliações, correção e resultados','/planos'=>'Modalidades de atendimento','/fale-conosco'=>'Fale com o Gabarito360'] as $path=>$titulo) {
+            $res=$this->get('https://homologa.gabarito360.com.br'.$path.'?utm_source=campanha&token=nao-publicar')->assertOk();
+            $m=$this->sociais($res->getContent());
+            $this->assertSame('https://homologa.gabarito360.com.br'.$path,$m['og:url']);
+            $this->assertSame($m['og:url'],$m['canonical']);
+            $this->assertStringContainsString($titulo,$m['og:title']);
+            $this->assertSame('https://homologa.gabarito360.com.br/brand/gabarito360-og.png',$m['og:image']);
+            $this->assertSame($m['og:image'],$m['og:image:secure_url']);
+            $this->assertSame('image/png',$m['og:image:type']);
+            $this->assertSame('pt_BR',$m['og:locale']);
+            $this->assertSame('1200',$m['og:image:width']); $this->assertSame('630',$m['og:image:height']);
+            $this->assertSame('summary_large_image',$m['twitter:card']);
+            $this->assertStringNotContainsString('nao-publicar',implode(' ',$m));
+            $this->assertStringNotContainsString('utm_source',implode(' ',$m));
+        }
+    }
+
+    public function test_rota_privada_nao_expoe_identificadores_ou_parametros_nos_metadados_sociais(): void
+    {
+        \Illuminate\Support\Facades\Route::get('/qa-privado/{aluno}',fn()=>view('layouts._marca-head',['tituloSocial'=>'Pessoa privada','descricaoSocial'=>'Nota privada']))->name('qa.privado');
+        $m=$this->sociais('<html><head>'.$this->get('https://homologa.gabarito360.com.br/qa-privado/91827?token=segredo&_ctx=contexto')->assertOk()->getContent().'</head></html>');
+        $this->assertSame('https://homologa.gabarito360.com.br/',$m['og:url']);
+        $this->assertSame($m['og:url'],$m['canonical']);
+        foreach (['91827','segredo','contexto','Pessoa privada','Nota privada'] as $dado) $this->assertStringNotContainsString($dado,implode(' ',$m));
+    }
+
     public function test_paginas_publicas_e_acesso_renderizam_marca_sem_depender_da_api(): void
     {
         Http::preventStrayRequests();

@@ -2,6 +2,11 @@
 
 // Comunicação pública local; não configura contratos, preços ou permissões.
 return [
+    'compartilhamento'=>[
+        'home'=>['titulo'=>'Gabarito360 — Avaliações, correção e resultados','descricao'=>'Gabaritos e cartões-resposta, conferência de leituras e relatórios. Conheça o Gabarito360 em pré-lançamento.'],
+        'planos.index'=>['titulo'=>'Gabarito360 — Modalidades de atendimento','descricao'=>'Professor autônomo, escolas, núcleos e redes e secretarias. Conheça as modalidades; a contratação será disponibilizada no lançamento.'],
+        'leads.index'=>['titulo'=>'Fale com o Gabarito360','descricao'=>'Converse com a equipe para conhecer o sistema e apresentar as necessidades da sua rotina de avaliações.'],
+    ],
     'titulo'=>'Gabarito360 — avaliações, correção e resultados para professores',
     'descricao'=>'Organize gabaritos e cartões-resposta, confira leituras por câmera ou foto e acompanhe resultados. Conheça o Gabarito360 e suas modalidades em pré-lançamento.',
     'modalidades_intro'=>'Do trabalho individual à organização de uma rede de ensino. A contratação será disponibilizada no lançamento.',

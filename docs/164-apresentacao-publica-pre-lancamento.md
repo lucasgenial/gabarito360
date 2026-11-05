@@ -64,3 +64,10 @@ Fontes primárias restauradas: OCDE/TALIS2024Brasil(Workinghours), registro inst
 ## Ajuste focal do contato
 
 Após aprovar a apresentação e conferir o formulário, o responsável pediu compactar Fale conosco e remover a rolagem excedente no desktop. A causa era a altura mínima100vh aplicada dentro do zoom da área pública. A página de contato recebe classe exclusiva e altura mínima ajustada à escala, com padding/margens menores e mensagem de quatro linhas; fontes, campos, envio, proteção e rodapé permanecem. Não ocultar overflow nem alterar o zoom global. No ensaio2560×1263, documento e rodapé terminam em1263, sem rolagem adicional; telas baixas, erros e ampliação do conteúdo continuam com rolagem natural. Nenhuma mensagem de teste é enviada a partir da prévia visual.
+
+
+## Prévia de links
+
+Pedido posterior: preparar o cartão de compartilhamento em mensageiros e redes. Reutilizar a arte oficial1200×630 aprovada; o protocolo [OpenGraph](https://ogp.me/) fornece título, tipo, imagem e URL canônica. Acrescentar localept_BR, MIME/dimensões/alt da imagem, canonical absoluto e metadadosTwitterlargeimage. Texto próprio apenas para início, modalidades e contato. Outras rotas usam a apresentação genérica da home; nunca gerar metadados a partir de nome, nota, ID, query, token ou contexto autenticado. Isso não modifica as URLs de navegação/autenticação nem constitui uma funcionalidade de compartilhamento de resultados privados.
+
+O exportador conserva canonical absoluto e imagem social absoluta no bundle, conferindo origem/integração antes de trocar a versão. A imagem e oHTML continuam servidos estaticamente na home. A proteçãoBasicAuth de homologação permanece: o teste dos metadados não é demonstração de cartão já renderizado no WhatsApp/Messenger/Instagram. A aparência/cache depende do aplicativo; conferência pública externa somente após publicação pública autorizada. Nenhuma mensagem real, player/vídeo fictício ou abertura comercial nesta tarefa.
