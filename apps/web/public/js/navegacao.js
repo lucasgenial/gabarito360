@@ -103,7 +103,7 @@
     const ponte=document.querySelector('[data-navegacao-redirecionar]');
     if (ponte) {
       try { const d=descritor(ponte.dataset.recurso);sessionStorage.setItem(CHAVE,JSON.stringify({destino:d,revisao:revisao()}));location.replace(d.pagina); }
-      catch (_) { erro(ponte.querySelector('section'),'Abra o registro novamente pela lista para continuar.',false); }
+      catch (_) { erro(ponte.querySelector('[data-navegacao-status]'),'Abra o registro novamente pela lista para continuar.',false); }
       return;
     }
     const shell=document.querySelector('[data-navegacao-estrutura]');
