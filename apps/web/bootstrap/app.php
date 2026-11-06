@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SerializarSessao::class,
             \App\Http\Middleware\RevisaoAcesso::class,
+            \App\Http\Middleware\RespostaNavegacao::class,
+            \App\Http\Middleware\RecursoNavegacao::class,
         ]);
         $middleware->prependToPriorityList(\Illuminate\Session\Middleware\StartSession::class, \App\Http\Middleware\SerializarSessao::class);
         $middleware->appendToPriorityList(\Illuminate\Session\Middleware\StartSession::class, \App\Http\Middleware\RevisaoAcesso::class);
@@ -30,7 +32,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->dontFlash(['senha_atual', 'cf-turnstile-response', 'token', 'codigo', 'referencia', '_revisao']);
+        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, Request $request) {
+            return $response->isRedirection() ? app(\App\Http\Middleware\RespostaNavegacao::class)->converter($request,$response) : $response;
+        });
+        $exceptions->dontFlash(['senha_atual', 'cf-turnstile-response', 'token', 'codigo', 'referencia', '_revisao','_recurso','_retorno_tela','_hidratar']);
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

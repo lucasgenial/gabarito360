@@ -3,10 +3,12 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 use Tests\Support\AcessoAtivoLegado;
 
 class TabelasWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use AcessoAtivoLegado;
 
     protected function setUp(): void
@@ -22,7 +24,7 @@ class TabelasWebTest extends TestCase
     {
         $this->apiLegada(['*'=>Http::response(['message'=>'Indisponível'],503)]);
         foreach (['/app/alunos','/app/turmas','/app/provas','/app/membros'] as $url) {
-            $this->get($url)->assertOk()->assertSee('Não foi possível carregar')
+            $this->consultarTela($url)->assertOk()->assertSee('Não foi possível carregar')
                 ->assertDontSee('Nenhum aluno encontrado')->assertDontSee('Nenhuma turma encontrada')
                 ->assertDontSee('Nenhuma prova encontrada')->assertDontSee('Nenhum membro encontrado')
                 ->assertDontSee('data-colecao-completa="true"',false);
@@ -36,7 +38,7 @@ class TabelasWebTest extends TestCase
         foreach (['/app/alunos?busca=termo-sem-resultado','/app/turmas?busca=termo-sem-resultado',
             '/app/provas?busca=termo-sem-resultado','/app/membros?busca=termo-sem-resultado',
             '/app/alunos?ativo=0','/app/turmas?ativo=0'] as $url) {
-            $this->get($url)->assertOk()->assertSee('Limpar')
+            $this->consultarTela($url)->assertOk()->assertSee('Limpar')
                 ->assertSee('Ajuste ou limpe os filtros')
                 ->assertDontSee('Cadastre o primeiro aluno')->assertDontSee('Crie a primeira prova')
                 ->assertDontSee('Crie a primeira turma');
@@ -50,14 +52,14 @@ class TabelasWebTest extends TestCase
         $this->apiLegada(['*/v1/alunos*'=>Http::response(['data'=>['alunos'=>$alunos,'kpis'=>['total_alunos'=>25]]]),
             '*/v1/turmas*'=>Http::response(['data'=>['turmas'=>[]]]),
             '*/v1/auth/me'=>Http::response(['data'=>['perfil'=>'admin_rede','titular'=>false]])]);
-        $html=$this->get('/app/alunos?busca=Aluno')->assertOk()->assertSee('Aluno &lt;teste&gt; 25',false)->getContent();
+        $html=$this->consultarTela('/app/alunos?busca=Aluno')->assertOk()->assertSee('Aluno &lt;teste&gt; 25',false)->getContent();
         $doc=new \DOMDocument(); @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
         $xp=new \DOMXPath($doc);
         $this->assertSame(25,$xp->query('//table[contains(@class,"tabela-padrao")]/tbody/tr')->length);
         $this->assertSame(25,$xp->query('//td[@data-rotulo="Ações"]//a')->length);
         $this->assertSame(0,$xp->query('//table/tbody/tr[@hidden]')->length);
         $this->assertSame(25,$xp->query('//td[@data-rotulo="Aluno" and contains(@class,"tabela-principal")]')->length);
-        $this->assertSame(1,$xp->query('//a[contains(@href,"/alunos/25")]')->length);
+        $alvos=0;foreach($xp->query('//a[@data-recurso]') as $link){$d=json_decode($link->getAttribute('data-recurso'),true);$a=\App\Support\NavegacaoWeb::obter($d['referencia']);if(($a['nome']??null)==='alunos.show'&&(int)($a['parametros']['id']??0)===25)$alvos++;}$this->assertSame(1,$alvos);
         Http::assertSent(fn($r)=>str_contains($r->url(),'/v1/alunos') && $r['busca']==='Aluno');
     }
 
@@ -67,7 +69,7 @@ class TabelasWebTest extends TestCase
         $membros=[];
         foreach (['ativo','suspenso','pendente'] as $i=>$situacao) $membros[]=['id'=>$i+1,'vinculo_id'=>$i+10,'nome'=>'Pessoa '.$i,'email'=>'teste'.$i.'@example.test','perfil'=>'professor','ativo'=>true,'situacao'=>$situacao];
         $this->apiLegada(['*'=>Http::response(['data'=>['usuarios'=>$membros,'totais'=>['professor'=>3]]])]);
-        $html=$this->get('/app/membros')->assertOk()->assertSee('Suspender vínculo')->assertSee('Reativar vínculo')->getContent();
+        $html=$this->consultarTela('/app/membros')->assertOk()->assertSee('Suspender vínculo')->assertSee('Reativar vínculo')->getContent();
         $doc=new \DOMDocument(); @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);$xp=new \DOMXPath($doc);
         $this->assertSame(3,$xp->query('//td[@data-rotulo="Ações"]//a[contains(@href,"/editar")]')->length);
         $this->assertSame(3,$xp->query('//td[@data-rotulo="Ações"]//a[contains(@href,"/permissoes")]')->length);
@@ -76,7 +78,7 @@ class TabelasWebTest extends TestCase
         $this->assertSame(2,$xp->query('//td[@data-rotulo="Ações"]//form[contains(@action,"/encerrar-vinculo")]')->length);
         foreach ($forms as $form) {
             $this->assertSame(1,$xp->query('.//input[@name="_token"]',$form)->length);
-            $this->assertStringContainsString('vinculo_id=',$form->getAttribute('action'));
+            $this->assertNull(parse_url($form->getAttribute('action'),PHP_URL_QUERY));$d=json_decode($form->getAttribute('data-recurso'),true,512,JSON_THROW_ON_ERROR);$alvo=\App\Support\NavegacaoWeb::obter($d['referencia']);$this->assertContains((int)$alvo['consulta']['vinculo_id'],[10,11,12]);$this->assertGreaterThan(0,(int)$alvo['parametros']['id']);$this->assertSame(1,$xp->query('.//input[@name="_recurso"]',$form)->length);
         }
     }
 

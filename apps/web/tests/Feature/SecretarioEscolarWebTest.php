@@ -4,9 +4,11 @@ namespace Tests\Feature;
 use App\Support\{Acesso, ContextoWeb};
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class SecretarioEscolarWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     public function test_painel_e_turma_administrativos_nao_consultam_dados_pedagogicos(): void
     {
@@ -36,14 +38,14 @@ class SecretarioEscolarWebTest extends TestCase
                 default=>$this->fail('Consulta inesperada: '.$path),
             };
         });
-        $this->get('/app/painel')->assertOk()->assertSee('Secretaria escolar')->assertSee('Ver alunos')->assertDontSee('Relatórios');
+        $this->consultarTela('/app/painel')->assertOk()->assertSee('Secretaria escolar')->assertSee('Ver alunos')->assertDontSee('Relatórios');
         $this->assertSame(['Painel','Turmas','Alunos'],array_column(Acesso::menuCelular()['barra'],'rotulo'));
-        $this->get('/app/turmas')->assertOk()->assertSee('Turma fictícia')->assertDontSee('Desempenho médio');
-        $this->get('/app/turmas/1')->assertOk()->assertSee('Aluno fictício')->assertSee('Salvar alterações')->assertDontSee('Média')->assertDontSee('Vincular professor');
-        $this->put('/app/turmas/1',['nome'=>'Turma editada','serie'=>'4','turno'=>'tarde','ano_letivo'=>2026])->assertRedirect()->assertSessionHas('sucesso');
-        $this->get('/app/provas')->assertForbidden();
-        $this->get('/app/membros')->assertForbidden();
-        $this->get('/app/acessos-internos')->assertForbidden();
+        $this->consultarTela('/app/turmas')->assertOk()->assertSee('Turma fictícia')->assertDontSee('Desempenho médio');
+        $this->consultarTela('/app/turmas/1')->assertOk()->assertSee('Aluno fictício')->assertSee('Salvar alterações')->assertDontSee('Média')->assertDontSee('Vincular professor');
+        $this->alterarRecurso('PUT', '/app/turmas/1',['nome'=>'Turma editada','serie'=>'4','turno'=>'tarde','ano_letivo'=>2026])->assertRetornoTela()->assertSessionHas('sucesso');
+        $this->consultarTela('/app/provas')->assertForbidden();
+        $this->consultarTela('/app/membros')->assertForbidden();
+        $this->consultarTela('/app/acessos-internos')->assertForbidden();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/dashboard/') || str_contains($r->url(),'/professores') || str_contains($r->url(),'/usuarios'));
     }
 }

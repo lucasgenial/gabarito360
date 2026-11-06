@@ -3,9 +3,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class ExportacoesTitularesWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private string $ref='11111111-1111-4111-8111-111111111111';
     private array $posts=[];
@@ -40,69 +42,67 @@ class ExportacoesTitularesWebTest extends TestCase
     }
     private function ticket(string $ctx,?string $ref=null,int $pos=0): string
     {
-        $html=$this->get('/app/exportacoes-titulares'.($ref?'?referencia='.$ref:''))->assertOk()->assertDontSee('token-reservado')->getContent();
+        $html=$this->consultarTela('/app/exportacoes-titulares'.($ref?'?referencia='.$ref:''))->assertOk()->assertDontSee('token-reservado')->getContent();
         preg_match_all('/name="envio" value="([a-zA-Z0-9]{48})"/',$html,$m);return $m[1][$pos];
     }
     public function test_geracao_repetida_usa_mesmo_payload_e_chave_sem_token_no_html(): void
     {
         $ctx=$this->preparar('suporte',true);$t=$this->ticket($ctx);
         $d=['envio'=>$t,'referencia'=>$this->ref,'versao'=>1,'confirmado'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];
-        $this->post('/app/exportacoes-titulares/gerar',$d)->assertStatus(503)->assertSee('Repetir o mesmo envio');
-        $this->post('/app/exportacoes-titulares/gerar',array_diff_key($d,['versao'=>true])+['repetir'=>1])->assertOk()->assertSee('Arquivo gerado');
+        $this->alterarRecurso('POST', '/app/exportacoes-titulares/gerar',$d)->assertStatus(503)->assertSee('Repetir o mesmo envio');
+        $this->alterarRecurso('POST', '/app/exportacoes-titulares/gerar',array_diff_key($d,['versao'=>true])+['repetir'=>1])->assertOk()->assertSee('Arquivo gerado');
         $this->assertSame($this->posts[0],$this->posts[1]);
         $this->assertArrayNotHasKey('_revisao',$this->posts[0]['dados']);
         $this->assertArrayNotHasKey('_token',$this->posts[0]['dados']);
         $this->assertArrayNotHasKey('referencia_alvo',$this->posts[0]['dados']);
         $this->assertStringEndsWith('/exportacoes/'.$this->ref,$this->posts[0]['url']);
-        $this->post('/app/exportacoes-titulares/gerar',array_replace($d,['versao'=>2]))->assertConflict();
+        $this->alterarRecurso('POST', '/app/exportacoes-titulares/gerar',array_replace($d,['versao'=>2]))->assertConflict();
     }
     public function test_administrador_confirma_campos_e_prazo_utc_e_nao_baixa(): void
     {
         $ctx=$this->preparar('admin_rede');$t=$this->ticket($ctx,$this->ref);
-        $this->post('/app/exportacoes-titulares/conceder',['envio'=>$t,'referencia'=>$this->ref,'confirmado'=>1,
+        $this->alterarRecurso('POST', '/app/exportacoes-titulares/conceder',['envio'=>$t,'referencia'=>$this->ref,'confirmado'=>1,
             'versao'=>5,'aluno_id'=>1,'sujeito_versao'=>1,'destinatario_acesso_id'=>2,'campos'=>['nome','matricula'],
             'valida_ate'=>'2026-12-01T08:00','motivo'=>'Motivo fictício','evidencia_referencia'=>'Evidência fictícia'])->assertOk()->assertSee('Autorização registrada');
         $this->assertSame('2026-12-01T11:00:00+00:00',$this->posts[0]['dados']['valida_ate']);
         $this->assertSame(['matricula','nome'],$this->posts[0]['dados']['campos']);
-        $this->get('/app/exportacoes-titulares/'.$this->ref.'/arquivo')->assertForbidden();
+        $this->consultarTela('/app/exportacoes-titulares/'.$this->ref.'/arquivo')->assertForbidden();
         $this->assertNull(session()->getOldInput('motivo'));
     }
     public function test_download_proxy_autenticado_sem_cache_e_flag(): void
     {
         $ctx=$this->preparar();$this->ticket($ctx,$this->ref);
-        $this->get('/app/exportacoes-titulares/'.$this->ref.'/arquivo')->assertOk()
+        $this->consultarTela('/app/exportacoes-titulares/'.$this->ref.'/arquivo')->assertOk()
             ->assertHeader('Content-Disposition','attachment; filename="exportacao-'.$this->ref.'.json"')->assertHeader('Cache-Control','no-store, private')->assertDontSee('token-reservado');
-        config(['services.pedidos.exportacoes'=>false]);$this->get('/app/exportacoes-titulares')->assertNotFound();
+        config(['services.pedidos.exportacoes'=>false]);$this->consultarTela('/app/exportacoes-titulares')->assertNotFound();
     }
     public function test_financeiro_e_diretor_nao_entram(): void
     {
-        $ctx=$this->preparar('financeiro');$this->get('/app/exportacoes-titulares')->assertForbidden();
+        $ctx=$this->preparar('financeiro');$this->consultarTela('/app/exportacoes-titulares')->assertForbidden();
     }
     public function test_download_post_usa_csrf_e_revisao_do_formulario_ssr_sem_header(): void
     {
         $this->preparar();
-        $html=$this->get('/app/exportacoes-titulares?referencia='.$this->ref)->assertOk()->getContent();
-        preg_match('/name="_token" value="([^"]+)"/',$html,$csrf);
-        preg_match('/name="_revisao" value="([^"]+)"/',$html,$rev);
-        $this->assertNotEmpty($csrf[1]);$this->assertNotEmpty($rev[1]);
-        $url='/app/exportacoes-titulares/'.$this->ref.'/arquivo';
+        $html=$this->consultarTela('/app/exportacoes-titulares?referencia='.$this->ref)->assertOk()->getContent();
+        $dom=new \DOMDocument();@$dom->loadHTML($html);$xp=new \DOMXPath($dom);$form=$xp->query('//form[contains(@class,"arquivo-form")]')->item(0);$this->assertNotNull($form);
+        $d=[];foreach($xp->query('.//input[@type="hidden"]',$form) as $i)$d[$i->getAttribute('name')]=$i->getAttribute('value');
+        foreach(['_token','_revisao','_recurso'] as $nome)$this->assertNotEmpty($d[$nome]);
+        $destino=json_decode($form->getAttribute('data-recurso'),true,512,JSON_THROW_ON_ERROR);$url=$form->getAttribute('action');
         $this->flushHeaders();$this->app->instance('env','local');
-        $this->get($url)->assertStatus(409);
-        $this->post($url,['_revisao'=>$rev[1]])->assertStatus(419);
+        $this->get($destino['pagina'])->assertStatus(409);
+        $this->post($url,array_diff_key($d,['_token'=>true]))->assertStatus(419);
         Http::assertNotSent(fn($r)=>str_ends_with($r->url(),'/arquivo'));
-        $this->post($url,['_token'=>$csrf[1],'_revisao'=>$rev[1]])->assertOk()
-            ->assertHeader('Content-Disposition','attachment; filename="exportacao-'.$this->ref.'.json"')
-            ->assertHeader('Cache-Control','no-store, private');
+        $this->post($url,$d)->assertOk()->assertHeader('Content-Disposition','attachment; filename="exportacao-'.$this->ref.'.json"')->assertHeader('Cache-Control','no-store, private');
         Http::assertSent(fn($r)=>$r->method()==='GET' && str_ends_with($r->url(),'/arquivo') && $r->data()===[]);
-        $this->post($url,['_token'=>$csrf[1],'_revisao'=>'revisao-antiga'])->assertStatus(409);
+        $this->post($url,array_replace($d,['_revisao'=>'revisao-antiga']))->assertStatus(409);
     }
 
     public function test_envio_e_repeticao_nao_aceitam_campos_de_negocio_desconhecidos(): void
     {
         $ctx=$this->preparar();$t=$this->ticket($ctx);
         $d=['envio'=>$t,'referencia'=>$this->ref,'versao'=>1,'confirmado'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];
-        $this->post('/app/exportacoes-titulares/gerar',$d+['campo_inesperado'=>'nao-enviar'])->assertStatus(422);
-        $this->post('/app/exportacoes-titulares/gerar',array_diff_key($d,['versao'=>true])+['repetir'=>1,'campo_inesperado'=>'nao-enviar'])->assertStatus(422);
+        $this->alterarRecurso('POST', '/app/exportacoes-titulares/gerar',$d+['campo_inesperado'=>'nao-enviar'])->assertStatus(422);
+        $this->alterarRecurso('POST', '/app/exportacoes-titulares/gerar',array_diff_key($d,['versao'=>true])+['repetir'=>1,'campo_inesperado'=>'nao-enviar'])->assertStatus(422);
         $this->assertSame([],$this->posts);
     }
 

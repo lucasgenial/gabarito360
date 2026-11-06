@@ -15,6 +15,7 @@
   if (typeof module === 'object' && module.exports) { module.exports = { destino }; return; }
   const revisao = document.querySelector('meta[name="g360-revisao"]')?.content;
   if (!revisao) return;
+  root.g360ContextoDesmontar?.();
   try { sessionStorage.removeItem('g360-contexto'); sessionStorage.removeItem('g360-acesso'); } catch (_) {}
   const url = valor => destino(valor, location.href);
   let invalidado = false, canal;
@@ -36,7 +37,39 @@
   function conflito() {
     return new Response(JSON.stringify({ message: 'Seu acesso ativo mudou. Esta ação não foi executada.', selecionar_vinculo: true }), { status: 409, headers: { 'Content-Type': 'application/json' } });
   }
+  // Referências são transportadas somente no corpo. A API e suas permissões continuam no servidor.
+  root.G360Requisicao = function (descritor, options = {}) {
+    if (!descritor || typeof descritor !== 'object' || typeof descritor.url !== 'string' || typeof descritor.referencia !== 'string') return Promise.reject(new TypeError('Recurso indisponível.'));
+    const alvo = new URL(descritor.url, location.href);
+    if (alvo.origin !== location.origin || alvo.username || alvo.password || !alvo.pathname.startsWith('/app/') || alvo.search || alvo.hash) return Promise.reject(new TypeError('Destino inválido.'));
+    const config = Object.assign({}, options), headers = new Headers(config.headers);
+    let body;
+    if (config.body instanceof FormData) body = new FormData();
+    else if (config.body instanceof URLSearchParams) body = new URLSearchParams(config.body);
+    else {
+      try { body = typeof config.body === 'string' ? JSON.parse(config.body) : Object.assign({}, config.body || {}); }
+      catch (_) { return Promise.reject(new TypeError('Dados inválidos.')); }
+      if (!body || Array.isArray(body) || typeof body !== 'object') return Promise.reject(new TypeError('Dados inválidos.'));
+    }
+    if (config.body instanceof FormData) for (const [chave, valor] of config.body.entries()) body.append(chave, valor);
+    // O método lógico pertence à referência registrada; o POST de transporte não aceita spoofing.
+    if (body instanceof FormData || body instanceof URLSearchParams) body.delete('_method'); else delete body._method;
+    const get = nome => body instanceof FormData || body instanceof URLSearchParams ? body.get(nome) : body[nome];
+    const set = (nome, valor) => { if (body instanceof FormData || body instanceof URLSearchParams) body.set(nome, valor); else body[nome] = valor; };
+    if (get('_recurso') && get('_recurso') !== descritor.referencia) return Promise.reject(new TypeError('Recurso divergente.'));
+    set('_recurso', descritor.referencia);
+    if (!get('_revisao')) set('_revisao', revisao);
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('input[name="_token"]')?.value;
+    if (!get('_token') && csrf) set('_token', csrf);
+    if (!headers.has('X-CSRF-TOKEN') && csrf) headers.set('X-CSRF-TOKEN', csrf);
+    if (body instanceof FormData) headers.delete('Content-Type');
+    else if (!(body instanceof URLSearchParams)) { headers.set('Content-Type', 'application/json'); body = JSON.stringify(body); }
+    config.body = body; config.headers = headers; config.method = 'POST'; config.credentials = 'same-origin'; config.cache = 'no-store'; config.redirect = 'error';
+    return root.fetch(alvo.href, config);
+  };
   const fetchOriginal = root.fetch.bind(root);
+  let observador;
+  root.g360ContextoDesmontar = () => { canal?.close(); observador?.disconnect(); root.fetch = fetchOriginal; HTMLFormElement.prototype.submit = submitOriginal; document.removeEventListener('submit', aoEnviar, true); root.removeEventListener('pagehide', aoOcultar); root.removeEventListener('pageshow', aoMostrar); blobs.forEach(b => URL.revokeObjectURL(b)); blobs.clear(); };
   root.fetch = function (input, options) {
     const alvo = new URL(input instanceof Request ? input.url : input, location.href);
     if (alvo.origin !== location.origin) return fetchOriginal(input, options);
@@ -81,7 +114,9 @@
   }
   const imagens = new WeakMap(), blobs = new Set();
   root.g360ImagemContextual = async function (img, valor, opcoes = {}) {
-    const alvo = new URL(valor, location.href);
+    const descritor = typeof valor === 'string' ? JSON.parse(valor) : valor;
+    if (!descritor || typeof descritor !== 'object') throw new Error('Imagem indisponível.');
+    const alvo = new URL(descritor.url, location.href);
     if (alvo.origin !== location.origin || !['http:', 'https:'].includes(alvo.protocol)) throw new Error('Imagem indisponível.');
     const anterior = imagens.get(img); anterior?.abort.abort();
     const tarefa = { url: valor, abort: new AbortController() }; imagens.set(img, tarefa);
@@ -98,7 +133,7 @@
     }
     opcoes.signal?.addEventListener('abort', () => tarefa.abort.abort(), { once: true });
     try {
-      const r = await root.fetch(alvo.href, { credentials: 'same-origin', cache: 'no-store', signal: tarefa.abort.signal });
+      const r = await root.G360Requisicao(descritor, { credentials: 'same-origin', cache: 'no-store', signal: tarefa.abort.signal });
       if (!r.ok) throw new Error('Imagem indisponível.');
       const blob = await r.blob();
       if (!/^image\/(?:jpeg|png|webp|gif|avif)(?:;|$)/i.test(blob.type)) throw new Error('Imagem indisponível.');
@@ -122,17 +157,20 @@
       if (valor && imagens.get(img)?.url !== valor) root.g360ImagemContextual(img, valor).catch(() => {});
     });
   }
-  document.addEventListener('submit', e => {
+  function aoEnviar(e) {
     if (invalidado) { e.preventDefault(); e.stopImmediatePropagation(); aviso(); return; }
     prepararForm(e.target);
-  }, true);
+  }
+  document.addEventListener('submit', aoEnviar, true);
   const submitOriginal = HTMLFormElement.prototype.submit;
   HTMLFormElement.prototype.submit = function () { if (invalidado) { aviso(); return; } prepararForm(this); return submitOriginal.call(this); };
   function iniciar() {
     preparar();
-    new MutationObserver(preparar).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-imagem-contextual'] });
+    observador = new MutationObserver(preparar); observador.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-imagem-contextual'] });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
-  root.addEventListener('pagehide', () => { blobs.forEach(b => URL.revokeObjectURL(b)); blobs.clear(); });
-  root.addEventListener('pageshow', e => { if (e.persisted) aviso(); });
+  function aoOcultar() { blobs.forEach(b => URL.revokeObjectURL(b)); blobs.clear(); }
+  function aoMostrar(e) { if (e.persisted) aviso(); }
+  root.addEventListener('pagehide', aoOcultar);
+  root.addEventListener('pageshow', aoMostrar);
 })(typeof window !== 'undefined' ? window : globalThis);

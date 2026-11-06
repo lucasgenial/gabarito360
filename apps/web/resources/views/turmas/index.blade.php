@@ -18,7 +18,7 @@
   @endif
   </x-slot:sub>
     @pode('aluno.importar')<span class="field-help">Importação por planilha em breve.</span>@endpode
-    @pode('turma.gerir')<button class="btn btn-primary" onclick="abrirModal('modal-criar')">+ Nova turma</button>@endpode
+    @pode('turma.gerir')<button class="btn btn-primary" data-turma-abrir="modal-criar">+ Nova turma</button>@endpode
 </x-pagina>
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
@@ -132,7 +132,7 @@
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-head">
       <h2>Nova turma</h2>
-      <button type="button" class="modal-close" onclick="fecharModal('modal-criar')">&times;</button>
+      <button type="button" class="modal-close" data-turma-fechar="modal-criar">&times;</button>
     </div>
     <form method="POST" action="{{ route('turmas.store') }}">
       @csrf <x-revisao-acesso />
@@ -175,7 +175,7 @@
         </div>
       </div>
       <div class="modal-foot">
-        <button type="button" class="btn btn-ghost" onclick="fecharModal('modal-criar')">Cancelar</button>
+        <button type="button" class="btn btn-ghost" data-turma-fechar="modal-criar">Cancelar</button>
         <button type="submit" class="btn btn-primary">Criar turma</button>
       </div>
     </form>
@@ -187,28 +187,8 @@
 <div style="height:48px;"></div>
 @endsection
 
+
+
 @push('scripts')
-<script>
-function abrirModal(id) {
-  var m = document.getElementById(id);
-  if (!m) return;
-  m.classList.add('open');
-  m.setAttribute('aria-hidden','false');
-  document.body.style.overflow = 'hidden';
-}
-function fecharModal(id) {
-  var m = document.getElementById(id);
-  if (!m) return;
-  m.classList.remove('open');
-  m.setAttribute('aria-hidden','true');
-  document.body.style.overflow = '';
-}
-['modal-criar','modal-importar'].forEach(function(id){
-  var m = document.getElementById(id);
-  if (m) m.addEventListener('click', function(e){ if(e.target===m) fecharModal(id); });
-});
-document.addEventListener('keydown', function(e){
-  if(e.key==='Escape'){ fecharModal('modal-criar'); fecharModal('modal-importar'); }
-});
-</script>
+<script src="{{ asset('js/turmas.js') }}?v={{ filemtime(public_path('js/turmas.js')) }}" defer></script>
 @endpush

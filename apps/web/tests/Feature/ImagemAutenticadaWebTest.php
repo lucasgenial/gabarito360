@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Services\ApiClient;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class ImagemAutenticadaWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\AcessoAtivoLegado;
     protected function setUp(): void
     {
@@ -47,7 +49,7 @@ class ImagemAutenticadaWebTest extends TestCase
     {
         $this->selecionarAcessoLegado('professor', ['correcao.acompanhar'], 'token-ficticio-servidor');
         $this->apiLegada(['api.test/api/v1/cartoes/7/imagens/original'=>Http::response('bytes-ficticios',200,['Content-Type'=>'image/jpeg'])]);
-        $this->get(route('cartoes.imagem-segura',['id'=>7,'tipo'=>'original']))->assertOk()
+        $this->consultarTela(route('cartoes.imagem-segura',['id'=>7,'tipo'=>'original']))->assertOk()
             ->assertHeader('Content-Type','image/jpeg')->assertHeader('Cache-Control','no-store, private')
             ->assertHeader('X-Content-Type-Options','nosniff')->assertContent('bytes-ficticios');
         Http::assertSent(fn($q)=>$q->url()==='http://api.test/api/v1/cartoes/7/imagens/original' && $q->hasHeader('Authorization','Bearer token-ficticio-servidor'));
@@ -57,6 +59,6 @@ class ImagemAutenticadaWebTest extends TestCase
     {
         $this->selecionarAcessoLegado('professor', ['correcao.acompanhar'], 'token-ficticio');
         $this->apiLegada(['api.test/*'=>Http::response('<html>conteudo indevido</html>',200,['Content-Type'=>'text/html'])]);
-        $this->get(route('cartoes.imagem-segura',['id'=>7,'tipo'=>'original']))->assertStatus(502)->assertDontSee('conteudo indevido');
+        $this->consultarTela(route('cartoes.imagem-segura',['id'=>7,'tipo'=>'original']))->assertStatus(502)->assertDontSee('conteudo indevido');
     }
 }

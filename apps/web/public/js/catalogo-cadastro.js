@@ -10,10 +10,10 @@ document.querySelectorAll('[data-catalogo-localizacao]').forEach(box => {
         if(pesquisa)pesquisa.hidden=!uf.value;
         if(!uf.value){select.replaceChildren(new Option('Selecione a UF primeiro',''));status.textContent='Selecione uma UF.';return;}
         status.textContent='Carregando municípios…';
-        const url=new URL(box.dataset.url,location.origin);url.searchParams.set('uf',uf.value);url.searchParams.set('page',String(page));
-        if(codigo)url.searchParams.set('codigo_ibge',codigo);else if(busca.value.trim())url.searchParams.set('busca',busca.value.trim());
+        const recurso=JSON.parse(box.dataset.url),dados={uf:uf.value,page:page};
+        if(codigo)dados.codigo_ibge=codigo;else if(busca.value.trim())dados.busca=busca.value.trim();
         try {
-            const r=await fetch(url,{headers:{Accept:'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin'});if(!r.ok)throw new Error('indisponivel');const d=await r.json();if(seq!==sequencia)return;
+            const r=await G360Requisicao(recurso,{body:JSON.stringify(dados),headers:{Accept:'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin'});if(!r.ok)throw new Error('indisponivel');const d=await r.json();if(seq!==sequencia)return;
             d.itens.forEach(m=>select.add(new Option(m.nome,m.codigo_ibge)));select.disabled=false;
             if(codigo && d.itens.some(m=>m.codigo_ibge===codigo))select.value=codigo;
             pagina=d.paginacao.atual;mais.hidden=pagina>=d.paginacao.ultima;
