@@ -7,7 +7,7 @@
 @section('content')
 <x-pagina :titulo="$turma['nome']">
   <x-slot:sub>{{ $turma['escola_nome'] }} · {{ $turma['ano_letivo'] }} · {{ $turma['total_alunos'] }} aluno(s) ativo(s)</x-slot:sub>
-  @if(\App\Support\Acesso::pode('aluno.ver'))<a class="btn btn-secondary" href="{{ route('alunos.index', ['turma_id' => $turma['id']]) }}">Gerenciar alunos</a>@endif
+  @if(\App\Support\Acesso::pode('aluno.ver'))<a class="btn btn-secondary" href="{{ route('alunos.index', ['turma_id' => $turma['id']]) }}"><x-icone nome="aluno" /> Gerenciar alunos</a>@endif
 </x-pagina>
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
@@ -17,10 +17,10 @@
 <section class="card card-pad">
   <h2>Dados da turma</h2>
   <p>Status: {{ $turma['ativo'] ? 'Ativa' : 'Inativa' }}</p>
-  @pode('turma.gerir')<a class="btn btn-secondary" href="{{ route('turmas.edit',$turma['id']) }}">Editar turma</a>@endpode
+  @pode('turma.gerir')<a class="btn btn-secondary" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /> Editar turma</a>@endpode
   @if(\App\Support\Acesso::pode('turma.desativar'))
   <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}" style="margin-top:16px;">
-    @csrf <x-revisao-acesso /> <button class="btn btn-secondary" type="submit">{{ $turma['ativo'] ? 'Desativar turma' : 'Ativar turma' }}</button>
+    @csrf <x-revisao-acesso /> <button class="btn btn-secondary" type="submit"><x-icone nome="situacao" /> {{ $turma['ativo'] ? 'Desativar turma' : 'Ativar turma' }}</button>
   </form>
   @endif
 </section>

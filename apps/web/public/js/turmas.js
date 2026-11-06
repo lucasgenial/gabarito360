@@ -46,14 +46,28 @@
       }
     }
   });
+  const aprovados = new WeakSet();
+  let dialogo, formularioConfirmado, submitter;
+  function confirmarFormulario(form, botao) {
+    if (!dialogo) {
+      dialogo=document.createElement('dialog');dialogo.className='tu1-dialog';dialogo.setAttribute('aria-labelledby','tu1-confirmar-titulo');
+      const titulo=document.createElement('h2');titulo.id='tu1-confirmar-titulo';titulo.textContent='Confirmar ação';
+      const texto=document.createElement('p');texto.dataset.confirmacaoTexto='';
+      const acoes=document.createElement('div');acoes.className='tu1-acoes';
+      [['Cancelar','fechar'],['Confirmar','confirmar']].forEach(([rotulo,icone],i)=>{
+        const b=document.createElement('button');b.type='button';b.className='btn '+(i?'btn-primary':'btn-secondary');
+        const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('width','20');svg.setAttribute('height','20');svg.setAttribute('aria-hidden','true');svg.setAttribute('fill','none');svg.setAttribute('stroke','currentColor');svg.setAttribute('stroke-width','2');
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',icone==='fechar'?'M6 6l12 12M6 18 18 6':'m5 12 4 4L19 6');svg.append(path);b.append(svg,document.createTextNode(' '+rotulo));
+        b.addEventListener('click',()=>{dialogo.close();if(i){aprovados.add(formularioConfirmado);formularioConfirmado.requestSubmit(submitter||undefined);}});acoes.append(b);
+      });
+      dialogo.append(titulo,texto,acoes);document.body.append(dialogo);dialogo.addEventListener('close',()=>submitter?.focus());
+    }
+    formularioConfirmado=form;submitter=botao;dialogo.querySelector('[data-confirmacao-texto]').textContent=form.dataset.turmaConfirmar;dialogo.showModal();dialogo.querySelector('button').focus();
+  }
   document.querySelectorAll('[data-turma-confirmar]').forEach(form => {
     form.addEventListener('submit', e => {
-      let mensagem=form.dataset.turmaConfirmar;
-      if(form.hasAttribute('data-turma-transferencia')) {
-        const destino=form.querySelector('[name="turma_id"]').selectedOptions[0]?.textContent.trim();
-        mensagem=`Transferir ${form.dataset.aluno} de ${form.dataset.origem} para ${destino}? O histórico será preservado.`;
-      }
-      if (!window.confirm(mensagem)) e.preventDefault();
+      if(aprovados.has(form)){aprovados.delete(form);return;}
+      e.preventDefault();if(form.reportValidity())confirmarFormulario(form,e.submitter);
     });
   });
   const filtro = document.querySelector('[data-turma-filtrar-alunos]');

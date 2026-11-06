@@ -15,7 +15,7 @@
 <div class="field"><label for="responsavel">Responsável</label><input class="input" id="responsavel" name="nome_responsavel" maxlength="200" value="{{ old('nome_responsavel',$aluno['nome_responsavel']??'') }}" @error('nome_responsavel') aria-invalid="true" aria-describedby="erro-nome_responsavel" @enderror ><x-erro-campo nome="nome_responsavel" /></div>
 @endunless
 </div>
-<div class="form-actions"><a class="btn btn-secondary" href="{{ route('turmas.show',['id'=>$aluno['turma_id'],'secao'=>'alunos']) }}">Cancelar</a><button class="btn btn-primary" type="submit">Salvar alterações</button></div>
+<div class="form-actions"><a class="btn btn-secondary" href="{{ route('turmas.show',['id'=>$aluno['turma_id'],'secao'=>'alunos']) }}"><x-icone nome="fechar" /> Cancelar</a><button class="btn btn-primary" type="submit"><x-icone nome="salvar" /> Salvar alterações</button></div>
 </form>
 @endsection
 

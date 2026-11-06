@@ -41,11 +41,11 @@
           <td data-rotulo="Status"><div class="tabela-valor"><span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span></div></td>
           <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
             @if($p['status'] === 'em_correcao')
-              <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary">Acompanhar</a>
+              <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="grafico" /> Acompanhar</a>
             @elseif($p['status'] === 'corrigida')
-              <a href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}" class="btn btn-sm btn-secondary">Relatório</a>
+              <a href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}" class="btn btn-sm btn-secondary"><x-icone nome="pdf" /> Relatório</a>
             @else
-              <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
+              <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver</a>
             @endif
           </div></td>
         </tr>

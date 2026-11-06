@@ -20,7 +20,7 @@
     <input id="aluno-search" class="input" type="search" placeholder="Buscar aluno por nome…"
            style="padding-left:36px;" data-turma-filtrar-alunos />
   </div>
-  @pode('aluno.gerir')<a href="{{ route('alunos.create', ['turma_id' => $turma['id']]) }}" class="btn btn-primary btn-sm">Adicionar aluno</a>@endpode
+  @pode('aluno.gerir')<a href="{{ route('alunos.create', ['turma_id' => $turma['id']]) }}" class="btn btn-primary btn-sm"><x-icone nome="adicionar" /> Adicionar aluno</a>@endpode
 </div>
 
 </div>
@@ -54,11 +54,11 @@
               <span class="badge badge-danger badge-dot">Inativo</span>
             @endif
           </div></td>
-          <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor tu1-acoes"><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
+          <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor tu1-acoes"><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver</a>
           @if($gestorAluno)
-          @pode('aluno.gerir')<a class="btn btn-sm btn-secondary" href="{{ route('alunos.edit',$a['id']) }}">Editar<span class="sr-only"> {{ $a['nome'] }}</span></a>
-          @if($a['ativo'])<a class="btn btn-sm btn-secondary" href="{{ route('alunos.transferencia',$a['id']) }}">Transferir<span class="sr-only"> {{ $a['nome'] }} entre turmas</span></a>@endif @endpode
-          @pode('aluno.desativar')<form method="POST" action="{{ route('alunos.toggle',$a['id']) }}" data-turma-confirmar="{{ $a['ativo']?'Desativar':'Ativar' }} {{ $a['nome'] }}? O histórico será preservado.">@csrf <x-revisao-acesso /><input type="hidden" name="esperado_ativo" value="{{ (int)$a['ativo'] }}"><button class="btn btn-sm btn-secondary" @if($a['ativo']) style="color:var(--danger);border-color:var(--danger)" @endif type="submit">{{ $a['ativo']?'Desativar':'Ativar' }}<span class="sr-only"> {{ $a['nome'] }}</span></button></form>@endpode
+          @pode('aluno.gerir')<a class="btn btn-sm btn-secondary" href="{{ route('alunos.edit',$a['id']) }}"><x-icone nome="editar" /> Editar<span class="sr-only"> {{ $a['nome'] }}</span></a>
+          @if($a['ativo'])<a class="btn btn-sm btn-secondary" href="{{ route('alunos.transferencia',$a['id']) }}" data-transferencia-abrir><x-icone nome="transferir" /> Transferir<span class="sr-only"> {{ $a['nome'] }} entre turmas</span></a>@endif @endpode
+          @pode('aluno.desativar')<form method="POST" action="{{ route('alunos.toggle',$a['id']) }}" data-turma-confirmar="{{ $a['ativo']?'Desativar':'Ativar' }} {{ $a['nome'] }}? O histórico será preservado.">@csrf <x-revisao-acesso /><input type="hidden" name="esperado_ativo" value="{{ (int)$a['ativo'] }}"><button class="btn btn-sm btn-secondary" @if($a['ativo']) style="color:var(--danger);border-color:var(--danger)" @endif type="submit"><x-icone nome="situacao" /> {{ $a['ativo']?'Desativar':'Ativar' }}<span class="sr-only"> {{ $a['nome'] }}</span></button></form>@endpode
           @endif
           </div></td>
         </tr>
@@ -78,3 +78,8 @@
   </div>
 </div>
 
+
+@if($gestorAluno && \App\Support\Acesso::pode('aluno.gerir'))
+<dialog class="tu1-dialog" data-transferencia-modal aria-labelledby="transferencia-titulo"><div class="tu1-dialog-cabecalho"><h2 id="transferencia-titulo">Transferir aluno entre turmas</h2><button class="btn btn-ghost tu1-icone-acao" type="button" data-transferencia-fechar aria-label="Fechar transferência" title="Fechar transferência"><x-icone nome="fechar" /></button></div><div data-transferencia-corpo></div></dialog>
+@push('scripts')<script src="{{ asset('js/turma-transferencia.js') }}?v={{ filemtime(public_path('js/turma-transferencia.js')) }}" defer></script>@endpush
+@endif

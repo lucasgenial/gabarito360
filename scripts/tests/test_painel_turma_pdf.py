@@ -43,5 +43,19 @@ class PainelTurmaPdfTest(unittest.TestCase):
             self.assertIn('Nenhuma avaliação aplicada neste recorte.',text)
             self.assertNotIn('75,0%',text)
 
+    def test_situacoes_e_operacoes_usam_bases_diferentes_sem_inventar_participacao(self):
+        with tempfile.TemporaryDirectory()as temp:
+            path=Path(temp)/'situacoes.pdf';d=self.dados(path,'retrato',2)
+            d['kpis'].update(alunos_com_resultado=2,resultados_com_percentual=5,avaliacoes_sem_resultado=1,leituras_revisao=1)
+            d['situacoes_resultados']={'total':6,'dentro_criterio':4,'indicacao_recuperacao':2,'outros':0}
+            d['acompanhamento']={'total':8,'revisao':1,'processamento':1,'falhas':0,'nao_identificados':1,'aguardando_leitura':0}
+            gerar(d);text=' '.join(p.extract_text()for p in PdfReader(path).pages)
+            self.assertIn('Dentro do critério registrado: 4',text)
+            self.assertIn('Com indicação de recuperação: 2',text)
+            self.assertIn('Base: 6 resultados.',text)
+            self.assertIn('Base: 8 cartões vigentes',text)
+            self.assertIn('percentual válido: 5',text)
+            self.assertNotIn('100,0%',text)
+
 
 if __name__=='__main__':unittest.main()
