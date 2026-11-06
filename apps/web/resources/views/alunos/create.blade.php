@@ -8,7 +8,7 @@
 <a href="{{ route('painel') }}">Início</a><span class="sep">/</span>
 <a href="{{ route('turmas.index') }}">Turmas</a><span class="sep">/</span>
 @if($turma_id)
-  <a href="{{ route('turmas.show', $turma_id) }}">Turma</a><span class="sep">/</span>
+  <a href="{{ route('turmas.show', ['id'=>$turma_id,'secao'=>'alunos']) }}">Turma</a><span class="sep">/</span>
 @endif
 <span>Novo Aluno</span>
 @endsection
@@ -53,7 +53,7 @@
         <input class="input" type="text" id="nome" name="nome" required
                placeholder="Ex: João da Silva Santos"
                value="{{ old('nome') }}"
-               oninput="atualizarPreview()" />
+               />
         @error('nome')<span class="field-error">{{ $message }}</span>@enderror
       </div>
       <div class="field">
@@ -91,7 +91,7 @@
 @endunless
       <div class="field" style="grid-column:1/-1">
         <label for="turma_id">Turma de destino *</label>
-        <select class="select" id="turma_id" name="turma_id" required onchange="atualizarPreview()">
+        <select class="select" id="turma_id" name="turma_id" required>
           <option value="">— Selecione a turma —</option>
           @foreach($turmas as $t)
             <option value="{{ $t['id'] }}"
@@ -115,9 +115,9 @@
     </div>
 
     <div class="form-actions">
-      <a href="{{ $turma_id ? route('turmas.show', $turma_id) : route('turmas.index') }}"
-         class="btn btn-secondary">Cancelar</a>
-      <button type="submit" class="btn btn-primary">Salvar Cadastro</button>
+      <a href="{{ $turma_id ? route('turmas.show', ['id'=>$turma_id,'secao'=>'alunos']) : route('turmas.index') }}"
+         class="btn btn-secondary"><x-icone nome="fechar" /> Cancelar</a>
+      <button type="submit" class="btn btn-primary"><x-icone nome="salvar" /> Salvar Cadastro</button>
     </div>
   </div>
 </form>
@@ -126,21 +126,4 @@
 <div style="height:48px;"></div>
 @endsection
 
-@push('scripts')
-<script>
-function atualizarPreview() {
-  var nome  = document.getElementById('nome').value;
-  var sel   = document.getElementById('turma_id');
-  var opt   = sel.options[sel.selectedIndex];
-
-  var ini = nome.trim()
-    ? nome.trim().split(/\s+/u).filter(Boolean).map(function(p){ return Array.from(p)[0].toLocaleUpperCase('pt-BR'); }).slice(0,2).join('')
-    : '?';
-
-  var area=document.querySelector('[data-imagem-aluno]');area.dataset.iniciais=ini;var letras=area.querySelector('.avatar-iniciais');if(letras)letras.textContent=ini;
-  document.getElementById('preview-nome').textContent   = nome || 'Novo Aluno';
-  document.getElementById('preview-turma').textContent  = (opt && opt.value) ? opt.dataset.label : 'Série / Turma';
-}
-atualizarPreview();
-</script>
-@endpush
+@push('scripts')<script src="{{ asset('js/aluno-cadastro.js') }}" defer></script>@endpush

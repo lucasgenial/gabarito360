@@ -16,6 +16,13 @@
   @if(!empty($dc1Retorno))@include('disciplinas._voltar',['retorno'=>$dc1Retorno])@endif
   @if($acessoErro??false)<x-aviso tipo="erro">Não foi possível consultar os acessos da turma. Atualize a página antes de fazer alterações.</x-aviso>@else
   @pode('turma.vincular_professor')
+  @php
+  $candidatos=collect($todosProfessores)->filter(function($p)use($professores,$turma){
+      $ligado=isset($p['vinculo_id'])?collect($professores)->contains('vinculo_id',$p['vinculo_id']):collect($professores)->contains('id',$p['id']);
+      return !$ligado && (!isset($p['vinculo_id']) || ($p['ativo'] && (int)$p['escola_id']===(int)$turma['escola_id']));
+  });
+  @endphp
+  @if($candidatos->isNotEmpty())
   <form method="POST" action="{{ route('turmas.professores.store', $turma['id']) }}"
         class="tu1-acoes">
     @csrf <x-revisao-acesso />
@@ -30,8 +37,9 @@
       @endforeach
     </select></div>
     @if(session('auth_vinculos'))<input type="hidden" name="vinculo_id" id="professor-vinculo">@endif
-    <button type="submit" class="btn btn-primary btn-sm">Conceder acesso</button>
+    <button type="submit" class="btn btn-primary btn-sm"><x-icone nome="adicionar" /> Conceder acesso</button>
   </form>
+  @else<p class="field-help">Nenhum professor disponível para receber acesso neste momento. Confira os vínculos ativos na equipe e os acessos já concedidos abaixo.</p>@endif
   @endpode
 
   @if(count($professores ?? []) > 0)
@@ -69,7 +77,7 @@
                 @csrf <x-revisao-acesso />
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-ghost"
-                        style="color:var(--danger);border-color:var(--danger);">Retirar acesso</button>
+                        style="color:var(--danger);border-color:var(--danger);"><x-icone nome="cadeado" /> Retirar acesso</button>
               </form>@endpode
             </div></td>
           </tr>

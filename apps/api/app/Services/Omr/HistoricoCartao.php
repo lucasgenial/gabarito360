@@ -169,6 +169,7 @@ class HistoricoCartao
         abort_unless(Permissao::pode($u, 'correcao.alterar'), 403);
 
         return DB::transaction(function () use ($id, $u, $p, $motivo) {
+            if (\App\Support\Espacos::ativo()) DB::table('espacos')->where('id',$p->espaco_id)->lockForUpdate()->first();
             $p = Prova::whereKey($p->id)->lockForUpdate()->firstOrFail();
             $t = DB::table('cartao_tentativas')->find($id);
             $this->exigirAcesso($u, $t);
@@ -194,7 +195,7 @@ class HistoricoCartao
                 $oldPath = $atual->imagem_url;
                 $atual->delete();
                 $novo = new Cartao(['prova_id' => $p->id, 'aluno_id' => $t->aluno_id, 'imagem_url' => $path, 'status' => 'pendente', 'lingua' => $d['cartao']['lingua'] ?? null]);
-                $novo->forceFill(ContextoCorrecao::autoria($t->espaco_id, $u->id) + ['tentativa_id' => $id, 'qualidade' => $d['cartao']['qualidade'] ?? null])->save();
+                $novo->forceFill(ContextoCorrecao::autoria($t->espaco_id, $u->id) + ['turma_aplicacao_id'=>$atual->turma_aplicacao_id,'tentativa_id' => $id, 'qualidade' => $d['cartao']['qualidade'] ?? null])->save();
                 $novo->setRelation('prova', $p);
                 GravadorLeituras::gravar($novo, $d['leituras_propostas'], $u->id);
                 $this->evento($t, 'aplicada', $novo, $u, $motivo);

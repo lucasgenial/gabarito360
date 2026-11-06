@@ -182,13 +182,15 @@ class ResultadoController extends Controller
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
+        $historica = Espacos::ativo() ? (new \App\Support\ConsultasPedagogicas($request->user()))->tabela('notas')->where('aluno_id',$alunoId)->where('prova_id',$provaId)->first() : null;
         $aluno = Escopo::alunos($request->user())->with('turma:id,nome,serie')->find($alunoId);
+        if(!$aluno && $historica) $aluno=\App\Models\Aluno::where('espaco_id',$prova->espaco_id)->with('turma:id,nome,serie')->find($alunoId);
         if (!$aluno) {
             return ApiResponse::notFound('Aluno não encontrado.');
         }
 
         $pessoal = \App\Support\EspacoPessoal::doAtor($request->user());
-        if (Espacos::ativo() && !$pessoal && !ContextoCorrecao::alunos($prova, $individual ? null : $request->user())->where('alunos.id', $alunoId)->exists()) return ApiResponse::notFound('Resultado não encontrado.');
+        if (Espacos::ativo() && !$pessoal && !$historica && !ContextoCorrecao::alunos($prova, $individual ? null : $request->user())->where('alunos.id', $alunoId)->exists()) return ApiResponse::notFound('Resultado não encontrado.');
         $notas = $pessoal ? (new \App\Support\ConsultasPedagogicas($request->user()))->tabela('notas')
             : ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id);
         $nota = $notas->where('aluno_id', $alunoId)->where('prova_id', $provaId)->first();
@@ -242,7 +244,7 @@ class ResultadoController extends Controller
             ->where('turma_id', $nota->turma_id)
             ->avg('nota_final');
 
-        $turmaResultado = $pessoal ? Escopo::turmas($request->user())->find($nota->turma_id) : $aluno->turma;
+        $turmaResultado = Escopo::turmas($request->user())->find($nota->turma_id);
         $pedagogico = $this->pedagogico($request);
         if ($pedagogico) {
             $chave = 'resultado_estatisticas_'.$provaId;

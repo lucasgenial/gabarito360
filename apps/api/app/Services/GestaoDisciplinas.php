@@ -246,11 +246,22 @@ final class GestaoDisciplinas
                 ->where(fn ($q) => $q->whereNull('fim_em')->orWhere('fim_em', '>', $pedido['inicio_em']));
             if ($pedido['fim_em']) $sobrepostas->where('inicio_em', '<', $pedido['fim_em']);
             $this->campo(!(clone $sobrepostas)->where('vinculo_id', $p->id)->exists(), 'inicio_em', 'Este professor já possui uma atribuição neste período.');
-            $this->campo($pedido['papel'] !== 'titular' || !$sobrepostas->exists(), 'papel', 'Há outro professor neste período. Escolha codocência ou substituição, ou encerre a atribuição anterior.');
+            $this->campo(!$sobrepostas->exists(), 'inicio_em', 'Esta disciplina já possui professor neste período. Encerre a atribuição anterior ou escolha um período sem sobreposição.');
             $id = DB::table('docente_atribuicoes')->insertGetId($pedido + ['espaco_id' => $v->espaco_id, 'ator_vinculo_id' => $v->id, 'chave' => $dados['chave'], 'pedido_hash' => $hash, 'situacao' => 'ativa', 'versao' => 1, 'created_at' => now(), 'updated_at' => now()]);
             DB::table('turma_disciplinas')->where('id', $c->id)->increment('versao');
             $depois = DB::table('docente_atribuicoes')->find($id); $this->evento($v, 'atribuicao', $id, 'criada', null, $depois); return $depois;
         }, 3);
+    }
+
+    public function opcoesAtribuicao(Usuario $u, int $turma): array
+    {
+        $v = $this->contexto($u, true); $this->turma($u, $turma);
+        return $this->professores($u)
+            ->join('disciplina_professores as dp', fn ($j) => $j->on('dp.vinculo_id','=','v.id')->on('dp.espaco_id','=','v.espaco_id'))
+            ->join('turma_disciplinas as td', fn ($j) => $j->on('td.disciplina_id','=','dp.disciplina_id')->on('td.espaco_id','=','v.espaco_id'))
+            ->join('vinculo_turmas as vt', fn ($j) => $j->on('vt.vinculo_id','=','v.id')->on('vt.turma_id','=','td.turma_id')->on('vt.espaco_id','=','v.espaco_id'))
+            ->where('td.turma_id',$turma)->where('td.ativo',true)->where('dp.ativo',true)
+            ->select('td.id as componente_id','v.id as vinculo_id','u.nome')->distinct()->get()->all();
     }
 
     public function encerrar(Usuario $u, int $turma, int $componente, int $id, array $dados): object

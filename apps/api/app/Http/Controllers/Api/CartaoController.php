@@ -349,6 +349,7 @@ class CartaoController extends Controller
         ]);
 
         return DB::transaction(function () use ($request, $id, $data, $prova) {
+            if(Espacos::ativo()) DB::table('espacos')->where('id',$prova->espaco_id)->lockForUpdate()->first();
             Prova::whereKey($prova->id)->lockForUpdate()->firstOrFail();
             $usuario = $request->user()->fresh();
             abort_unless($usuario && $usuario->ativo, 404);

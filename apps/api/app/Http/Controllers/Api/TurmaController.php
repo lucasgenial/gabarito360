@@ -93,6 +93,10 @@ class TurmaController extends Controller
             'turno'      => ['required', Rule::in(['manha','tarde','noite','integral'])],
             'ano_letivo' => 'required|integer|min:2020|max:2099',
             'ativo'      => 'sometimes|boolean',
+            'sala' => 'sometimes|nullable|string|max:50',
+            'capacidade' => 'sometimes|nullable|integer|min:1|max:1000',
+            'etapa_ensino' => ['sometimes', 'nullable', Rule::in(Turma::ETAPAS)],
+            'observacoes' => 'sometimes|nullable|string|max:1000',
         ]);
 
         $turma = new Turma($data);
@@ -195,6 +199,10 @@ class TurmaController extends Controller
             'turno'      => ['sometimes', Rule::in(['manha','tarde','noite','integral'])],
             'ano_letivo' => 'sometimes|integer|min:2020|max:2099',
             'ativo'      => 'sometimes|boolean',
+            'sala' => 'sometimes|nullable|string|max:50',
+            'capacidade' => 'sometimes|nullable|integer|min:1|max:1000',
+            'etapa_ensino' => ['sometimes', 'nullable', Rule::in(Turma::ETAPAS)],
+            'observacoes' => 'sometimes|nullable|string|max:1000',
         ]);
 
         if (isset($data['escola_id'])) {

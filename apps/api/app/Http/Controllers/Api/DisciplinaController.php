@@ -77,7 +77,8 @@ class DisciplinaController extends Controller
         $t = $this->gestao->turma($r->user(), $turma);
         return ApiResponse::success(['turma' => ['id' => $t->id, 'nome' => $t->nome, 'ano_letivo' => $t->ano_letivo, 'ativo' => $t->ativo],
             'componentes' => $this->gestao->componentes($r->user(), $turma), 'gerir' => $this->gestao->gerir($r->user()),
-            'atribuir' => $this->gestao->gerir($r->user()) && Permissao::pode($r->user(), 'turma.vincular_professor')]);
+            'atribuir' => $this->gestao->gerir($r->user()) && Permissao::pode($r->user(), 'turma.vincular_professor'),
+            'opcoes_atribuicao' => $this->gestao->gerir($r->user()) && Permissao::pode($r->user(), 'turma.vincular_professor') ? $this->gestao->opcoesAtribuicao($r->user(),$turma) : []]);
     }
 
     public function adicionar(Request $r, int $turma): JsonResponse
