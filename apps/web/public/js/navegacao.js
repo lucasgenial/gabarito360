@@ -110,7 +110,7 @@
     if (shell) { hidratar(shell);return; }
     const renderizada=document.querySelector('meta[name="g360-pagina-renderizada"]');
     if (renderizada) {
-      try { history.replaceState({ur4:{destino:descritor(renderizada.content),revisao:revisao()}},'',location.pathname); }
+      try { history.replaceState({ur4:{destino:descritor(renderizada.content),revisao:revisao()}},'',location.pathname+location.hash); }
       catch (_) { /* Não escolher outro alvo se o estado desta entrada não puder ser registrado. */ }
     }
     document.addEventListener('click',e=>{

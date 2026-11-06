@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('tela','tela-turma')
 @section('title', $turma['nome'])
 @section('breadcrumb')
 <a href="{{ route('turmas.index') }}">Turmas</a><span class="sep">/</span><span>{{ $turma['nome'] }}</span>
@@ -10,6 +11,9 @@
 </x-pagina>
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
+@php($secoes=['visao-geral'=>'Visão geral','alunos'=>'Alunos'])
+@include('turmas._abas')
+<section id="visao-geral" data-turma-painel="visao-geral" class="tu1-painel" aria-label="Visão geral">
 <section class="card card-pad">
   <h2>Dados da turma</h2>
   <p>Status: {{ $turma['ativo'] ? 'Ativa' : 'Inativa' }}</p>
@@ -35,12 +39,15 @@
   </form>
   @endif
 </section>
-<section class="card card-pad" style="margin-top:20px;">
+</section>
+<section id="alunos" data-turma-painel="alunos" class="tu1-painel" aria-label="Alunos">
+<section class="card card-pad">
   <h2>Alunos</h2>
   <x-tabela :integrada="true" titulo="Alunos da turma" modo="lista"><table class="tabela-padrao table"><caption class="sr-only">Alunos da turma</caption><thead><tr><th scope="col">Nome</th><th scope="col">Matrícula</th><th scope="col">Status</th></tr></thead><tbody>
     @forelse($turma['alunos'] as $aluno)
     <tr><td class="tabela-principal" data-rotulo="Nome"><div class="tabela-valor">{{ $aluno['nome'] }}</div></td><td data-rotulo="Matrícula"><div class="tabela-valor">{{ $aluno['matricula'] }}</div></td><td data-rotulo="Status"><div class="tabela-valor">{{ $aluno['ativo'] ? 'Ativo' : 'Inativo' }}</div></td></tr>
     @empty <tr><td colspan="3">Nenhum aluno cadastrado nesta turma.</td></tr> @endforelse
   </tbody></table></x-tabela>
+</section>
 </section>
 @endsection
