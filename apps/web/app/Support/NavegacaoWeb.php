@@ -60,19 +60,12 @@ final class NavegacaoWeb
         if (isset($u['scheme']) && !in_array(strtolower($u['scheme']), ['http','https'], true)) return null;
         $path = $u['path'] ?? ''; if (!str_starts_with($path, '/app/')) return null;
         parse_str($u['query'] ?? '', $query);
-        foreach (app('router')->getRoutes() as $r) {
-            if (($m=$r->getAction('ur4')) && !$r->getAction('ur4_consulta')
-                && (($m['consulta']!==$m['original'] && $path==='/'.$m['consulta']) || ($m['parametros'] && $path==='/'.$m['pagina']))) return null;
-        }
-        foreach (app('router')->getRoutes() as $rota) {
-            if (!($meta = $rota->getAction('ur4')) || $rota->getAction('ur4_consulta')) continue;
+        $catalogo=self::catalogoDeUrls();
+        if (isset($catalogo['fixos'][$path])) return null;
+        foreach ($catalogo['originais'] as $entrada) {
+            $meta=$entrada['meta'];
             if ($metodo && !in_array($metodo, $meta['metodos'], true)) continue;
-            // Compilar o template independente evita reutilizar o matcher da URL fixa.
-            $teste = new \Illuminate\Routing\Route($rota->methods(), $meta['original'], $rota->getAction());
-            $teste->setUri($meta['original']);
-            $teste->where($rota->wheres);
-            $regex = $teste->toSymfonyRoute()->compile()->getRegex();
-            if (!preg_match($regex, $path, $m)) continue;
+            if (!preg_match($entrada['regex'], $path, $m)) continue;
             $params = $query;
             foreach ($meta['parametros'] as $p) if (isset($m[$p]) && $m[$p] !== '') $params[$p] = rawurldecode($m[$p]);
             // Módulos sem alvo ou query continuam como links GET simples.
@@ -80,6 +73,24 @@ final class NavegacaoWeb
             return self::destino($meta['nome'], $params, $metodo);
         }
         return null;
+    }
+
+    /** Compilar o catálogo uma vez por requisição, sem guardar alvos ou autoridade. */
+    private static function catalogoDeUrls(): array
+    {
+        $request=request();
+        if ($request->attributes->has('ur4_catalogo_urls')) return $request->attributes->get('ur4_catalogo_urls');
+        $catalogo=['fixos'=>[],'originais'=>[]];
+        foreach (app('router')->getRoutes() as $rota) {
+            if (!($meta=$rota->getAction('ur4')) || $rota->getAction('ur4_consulta')) continue;
+            if ($meta['consulta']!==$meta['original']) $catalogo['fixos']['/'.$meta['consulta']]=true;
+            if ($meta['parametros']) $catalogo['fixos']['/'.$meta['pagina']]=true;
+            $teste=new \Illuminate\Routing\Route($rota->methods(),$meta['original'],$rota->getAction());
+            $teste->setUri($meta['original'])->where($rota->wheres);
+            $catalogo['originais'][]=['meta'=>$meta,'regex'=>$teste->toSymfonyRoute()->compile()->getRegex()];
+        }
+        $request->attributes->set('ur4_catalogo_urls',$catalogo);
+        return $catalogo;
     }
 
     public static function original(array $dados): string

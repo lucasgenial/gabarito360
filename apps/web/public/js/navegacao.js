@@ -34,11 +34,14 @@
     location.reload(); // GET real: atualizar/voltar nunca repete o POST da operação.
   }
   root.G360Navegacao={abrir,descritor};
-  function erro(caixa,mensagem,repetir) {
+  function erro(caixa,mensagem,repetir,acesso=false) {
     caixa.replaceChildren();caixa.setAttribute('aria-busy','false');caixa.setAttribute('role','alert');caixa.tabIndex=-1;
     const h=document.createElement('h1');h.textContent='Não foi possível abrir esta tela';
     const p=document.createElement('p');p.textContent=mensagem;caixa.append(h,p);
     const acoes=document.createElement('div');acoes.className='contexto-aviso-acoes';caixa.append(acoes);
+    if (acesso) {
+      const a=document.createElement('a');a.href='/app/vinculos';a.className='btn btn-primary';a.textContent='Selecionar vínculo';acoes.append(a);caixa.focus();return;
+    }
     if (repetir) { const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Tentar novamente';b.addEventListener('click',()=>location.reload());acoes.append(b); }
     const lista=document.querySelector('[data-navegacao-estrutura]')?.dataset.lista;
     if (!repetir && lista && lista!=='/app/painel') { const l=document.createElement('a');l.href=lista;l.className='btn btn-primary';l.textContent='Ir para a lista';acoes.append(l); }
@@ -60,8 +63,16 @@
     try {
       const r=await fetch(url,{method:'POST',body,credentials:'same-origin',cache:'no-store',redirect:'error',signal:abort.signal,headers:{'Accept':'text/html','X-G360-Hidratar':'1','X-Requested-With':'XMLHttpRequest'}});
       const tipo=r.headers.get('Content-Type')||'';
+      // Recuperar somente a leitura inicial; nunca reaplicar formulários ou arquivos.
+      if (r.status===401 || r.status===419) { location.assign('/login');return; }
       if (!tipo.toLowerCase().includes('text/html')) {
-        erro(shell.querySelector('[data-navegacao-status]'),r.status===401?'Sua sessão expirou. Entre novamente para continuar.':'Confira seu acesso e abra o registro novamente pela lista.',r.status>=500);return;
+        let dados=null;
+        if (tipo.toLowerCase().includes('application/json')) { try { dados=await r.json(); } catch (_) {} }
+        if (r.status===409 && dados?.acesso_alterado) {
+          erro(shell.querySelector('[data-navegacao-status]'),'Seu acesso ativo mudou. Esta tela não foi aberta. Selecione o vínculo para continuar.',false,true);return;
+        }
+        if (r.status===409 && dados?.selecionar_vinculo) { location.assign('/app/vinculos');return; }
+        erro(shell.querySelector('[data-navegacao-status]'),'Confira seu acesso e abra o registro novamente pela lista.',r.status>=500);return;
       }
       if (r.status>=500) { erro(shell.querySelector('[data-navegacao-status]'),'O serviço está temporariamente indisponível. Tente novamente.',true);return; }
       const html=await r.text();

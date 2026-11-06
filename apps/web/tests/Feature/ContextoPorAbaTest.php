@@ -76,7 +76,7 @@ class ContextoPorAbaTest extends TestCase
 
     public function test_contexto_ausente_invalido_de_outra_sessao_e_expirado_nao_envia_operacao(): void
     {
-        $this->get('/app/painel')->assertOk()->assertSee('data-navegacao-estrutura',false);
+        $this->get('/app/painel')->assertRedirect('/app/vinculos')->assertDontSee('data-navegacao-estrutura',false);
         $this->consultarTela('/app/painel')->assertRedirect('/app/vinculos');
         $this->postJson('/provas')->assertStatus(409);
         $this->postJson('/acessos/vinculo-999/turmas')->assertStatus(409);
