@@ -157,7 +157,7 @@ class DisciplinaController extends Controller
             'disciplinas.store' => route('disciplinas.create', $origem + $retorno),
             'disciplinas.update' => route('disciplinas.edit', ['id'=>$p['id']] + $retorno),
             'disciplinas.indicar' => route('disciplinas.show', ['id'=>$p['id']] + $retorno),
-            'disciplinas.adicionar' => route('turmas.show', ['id'=>$p['turma']]),
+            'disciplinas.adicionar' => route('turmas.show', ['id'=>$p['turma'],'secao'=>'disciplinas']),
             'disciplinas.atribuir', 'disciplinas.encerrar', 'disciplinas.situacao' => route('disciplinas.componente', ['turma'=>$p['turma'],'componente'=>$p['componente']] + $retorno),
             default => $r->url(),
         };

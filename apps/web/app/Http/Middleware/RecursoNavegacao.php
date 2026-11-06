@@ -49,6 +49,7 @@ final class RecursoNavegacao
         }
         $retorno = NavegacaoWeb::obter($r->input('_retorno_tela'));
         if ($r->has('_retorno_tela') && !$retorno) return RevisaoAcesso::recusar($r);
+        $r->attributes->set('ur4_retorno', $retorno);
         if ($retorno) $r->headers->set('referer', NavegacaoWeb::original($retorno));
         foreach (NavegacaoWeb::TRANSPORTE as $campo) unset($corpo[$campo]);
         foreach ($meta['corpo'] as $p) unset($corpo[$p]);

@@ -70,9 +70,23 @@ class TurmaController extends Controller
 
         if (\App\Support\Acesso::administrativo()) return view('turmas.administrativo', ['turma' => $resp->json('data')]);
 
-        $escolas     = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
-        $professores = \App\Support\Acesso::pessoal() ? [] : ($this->api->get("/v1/turmas/{$id}/professores")->json('data.professores') ?? []);
-        $todosProfessores = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/usuarios', ['perfil' => 'professor'])->json('data.usuarios') ?? []);
+        $filtros = request()->validate(['secao'=>'nullable|in:visao-geral,alunos,disciplinas,provas,acesso',
+            'catalogo_busca'=>'nullable|string|max:100','catalogo_pagina'=>'nullable|integer|min:1|max:10000']);
+        $escolas = []; $professores = []; $todosProfessores = []; $acessoErro = false; $escolasErro = false;
+        if (!\App\Support\Acesso::pessoal()) {
+            try {
+                $r = $this->api->get("/v1/turmas/{$id}/professores");
+                $acessoErro = $r->failed(); $professores = $r->successful() ? ($r->json('data.professores') ?? []) : [];
+                if (\App\Support\Acesso::pode('turma.vincular_professor')) {
+                    $r = $this->api->get('/v1/usuarios', ['perfil'=>'professor']);
+                    $acessoErro = $acessoErro || $r->failed(); $todosProfessores = $r->successful() ? ($r->json('data.usuarios') ?? []) : [];
+                }
+            } catch (ConnectionException) { $acessoErro = true; }
+            if (\App\Support\Acesso::pode('turma.gerir')) {
+                try { $r = $this->api->get('/v1/escolas'); $escolasErro = $r->failed(); $escolas = $r->json('data.escolas') ?? []; }
+                catch (ConnectionException) { $escolasErro = true; }
+            }
+        }
 
         $dc1Visivel = config('disciplinas.ativo') && session('auth_vinculos') && (\App\Support\ContextoWeb::atual()['espaco']['tipo'] ?? '') === 'escola'
             && in_array(\App\Support\Acesso::perfil(), ['coordenador','dir_escolar','vice_dir_escolar','professor'], true) && \App\Support\Acesso::pode('turma.ver');
@@ -88,7 +102,18 @@ class TurmaController extends Controller
             } catch (\Illuminate\Http\Client\ConnectionException) { $dc1Erro = true; }
         }
 
+        $catalogo = []; $catalogoMeta = []; $catalogoErro = false;
+        if (!$dc1Erro && ($dc1Dados['gerir'] ?? false) && \App\Support\Acesso::perfil() === 'coordenador' && \App\Support\Acesso::pode('disciplina.gerir')) {
+            try {
+                $r = $this->api->get('/v1/disciplinas', ['ativo'=>1,'busca'=>$filtros['catalogo_busca']??'', 'page'=>$filtros['catalogo_pagina']??1]);
+                $catalogoErro = $r->failed();
+                if (!$catalogoErro) { $catalogo = $r->json('data.disciplinas') ?? []; $catalogoMeta = $r->json('meta') ?? []; }
+            } catch (ConnectionException) { $catalogoErro = true; }
+        }
+
         return view('turmas.show', [
+            'secaoInicial'=>$filtros['secao']??'visao-geral', 'catalogo'=>$catalogo,'catalogoMeta'=>$catalogoMeta,'catalogoErro'=>$catalogoErro,'catalogoBusca'=>$filtros['catalogo_busca']??'',
+            'acessoErro'=>$acessoErro,'escolasErro'=>$escolasErro,
             'turma'            => $resp->json('data'),
             'escolas'          => $escolas,
             'professores'      => $professores,
@@ -104,25 +129,40 @@ class TurmaController extends Controller
 
     public function vincularProfessor(Request $request, int $id)
     {
+        $retorno = $this->retornoAcesso($request, $id);
         if (session('auth_vinculos')) $request->validate(['vinculo_id' => 'required|integer|min:1']);
         $resp = $this->api->post("/v1/turmas/{$id}/professores", $request->only('usuario_id', 'vinculo_id'));
 
         if ($resp->failed()) {
-            return back()->with('erro', $resp->json('message') ?? 'Não foi possível vincular o professor.');
+            return redirect()->route('turmas.show', $retorno)->withInput()->with('erro', $resp->json('message') ?? 'Não foi possível conceder acesso à turma.');
         }
 
-        return back()->with('sucesso', 'Professor vinculado à turma.');
+        return redirect()->route('turmas.show', $retorno)->with('sucesso', 'Acesso à turma concedido. A atribuição de disciplina é uma ação separada.');
     }
 
     public function desvincularProfessor(int $id, int $usuarioId)
     {
+        $retorno = $this->retornoAcesso(request(), $id);
         $resp = $this->api->delete("/v1/turmas/{$id}/professores/{$usuarioId}", session('auth_vinculos') ? request()->validate(['vinculo_id' => 'required|integer|min:1']) : []);
 
         if ($resp->failed()) {
-            return back()->with('erro', 'Não foi possível desvincular o professor.');
+            return redirect()->route('turmas.show', $retorno)->with('erro', 'Não foi possível retirar o acesso à turma.');
         }
 
-        return back()->with('sucesso', 'Professor desvinculado da turma.');
+        return redirect()->route('turmas.show', $retorno)->with('sucesso', 'Acesso à turma retirado. O histórico foi preservado.');
+    }
+
+    private function retornoAcesso(Request $request, int $id): array
+    {
+        $destino = ['id'=>$id,'secao'=>'acesso'];
+        // A caixa pertence à entrada de origem nesta sessão/revisão, nunca à última turma global.
+        $origem = $request->attributes->get('ur4_retorno');
+        if (($origem['nome']??null)!=='turmas.show' || (int)($origem['parametros']['id']??0)!==$id) return $destino;
+        $campos = array_intersect_key($origem['consulta'], array_flip(['retorno_turma','retorno_componente','rascunho_inicio','rascunho_fim','rascunho_papel','rascunho_vinculo','rascunho_chave']));
+        if ((int)($campos['retorno_turma']??0)!==$id || empty($campos['retorno_componente'])) return $destino;
+        $v = \Illuminate\Support\Facades\Validator::make($campos, ['retorno_turma'=>'required|integer|min:1','retorno_componente'=>'required|integer|min:1',
+            'rascunho_inicio'=>'nullable|date_format:Y-m-d','rascunho_fim'=>'nullable|date_format:Y-m-d','rascunho_papel'=>'nullable|in:titular,codocencia,substituicao','rascunho_vinculo'=>'nullable|integer|min:1','rascunho_chave'=>'nullable|uuid']);
+        return $v->fails() ? $destino : $destino + $v->validated();
     }
 
     public function update(Request $request, int $id)
