@@ -1,0 +1,19 @@
+.tela-turma .tu1-abas{display:flex;gap:4px;overflow-x:auto;max-width:100%;border-bottom:1px solid var(--border);margin-block:8px 24px;padding:4px 0 8px;scroll-padding-inline:8px}
+.tela-turma .tu1-abas a{display:flex;align-items:center;justify-content:center;flex:0 0 auto;min-height:44px;padding:10px 16px;color:var(--muted);text-decoration:none;font-weight:600;border-radius:8px;border:1px solid transparent;white-space:nowrap}
+.tela-turma .tu1-abas a[aria-selected=true]{color:var(--accent);background:var(--accent-light);border-color:var(--border);box-shadow:inset 0 -3px currentColor}
+.tela-turma .tu1-abas a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tela-turma .tu1-painel{display:grid;gap:20px;min-width:0;width:100%;margin-bottom:24px}
+.tela-turma .tu1-painel[hidden]{display:none!important}
+.tela-turma .tu1-painel:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:10px}
+.tela-turma .tu1-painel .section-title{margin-top:0}
+.tela-turma .tu1-acoes{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:16px}
+.tela-turma .tu1-acoes .field{margin-bottom:0;min-width:0;flex:1}
+.tela-turma form.tu1-acoes{margin-bottom:16px}
+.tela-turma .tu1-acoes .btn,.tela-turma .tu1-acoes .input,.tela-turma .tu1-acoes .select{min-height:44px}
+.tela-turma .tu1-catalogo .tu1-acoes{margin:0}
+.tela-turma .tu1-catalogo{display:grid;gap:16px}
+.tela-turma .tu1-ajuda{margin-block:16px;color:var(--muted)}
+.tela-turma .tu1-ajuda summary{cursor:pointer;min-height:44px;font-weight:600}
+.tela-turma .tu1-ajuda p{margin-block:8px}
+.tela-turma .tu1-catalogo .field{min-width:0;flex:1}
+@media(max-width:600px){.tela-turma .tu1-abas{margin-bottom:16px}.tela-turma .tu1-abas a{padding-inline:12px}.tela-turma .tu1-acoes{align-items:stretch}.tela-turma .tu1-acoes .field{flex-basis:100%}}

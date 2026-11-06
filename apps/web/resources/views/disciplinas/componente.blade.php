@@ -1,11 +1,11 @@
 @extends('layouts.app')
 @section('title',$dados['componente']['nome'].' — '.$turma['nome'])
-@section('breadcrumb')<a href="{{ route('turmas.index') }}">Turmas</a><span class="sep">/</span><a href="{{ route('turmas.show',$turma['id']) }}">{{ $turma['nome'] }}</a><span class="sep">/</span><span>{{ $dados['componente']['nome'] }}</span>@endsection
+@section('breadcrumb')<a href="{{ route('turmas.index') }}">Turmas</a><span class="sep">/</span><a href="{{ route('turmas.show',$turma['id']) }}">{{ $turma['nome'] }}</a><span class="sep">/</span><a href="{{ route('turmas.show',['id'=>$turma['id'],'secao'=>'disciplinas']) }}">Disciplinas e professores</a><span class="sep">/</span><span>{{ $dados['componente']['nome'] }}</span>@endsection
 @section('content')
 @php($c=$dados['componente'])
 @php($hoje=now('America/Sao_Paulo')->toDateString())
 @php($voltar=['retorno_turma'=>$turma['id'],'retorno_componente'=>$c['id']]+$retorno)
-<x-pagina :titulo="$c['nome'].' · '.$turma['nome']"><x-slot:sub>Disciplinas e professores · Ano letivo {{ $turma['ano_letivo'] }}</x-slot:sub><a class="btn btn-secondary" href="{{ route('turmas.show',$turma['id']) }}#disciplinas">Voltar à turma</a></x-pagina>
+<x-pagina :titulo="$c['nome'].' · '.$turma['nome']"><x-slot:sub>Disciplinas e professores · Ano letivo {{ $turma['ano_letivo'] }}</x-slot:sub><a class="btn btn-secondary" href="{{ route('turmas.show',['id'=>$turma['id'],'secao'=>'disciplinas']) }}">Voltar à turma</a></x-pagina>
 @include('disciplinas._base')
 <div class="dc1-stack">
 <section class="card card-pad" aria-label="Situação da disciplina na turma">
@@ -50,7 +50,7 @@
   @endif
   <details class="dc1-ajuda" @if(!count($dados['elegiveis'])) open @endif><summary>Não encontrou o professor?</summary><div class="dc1-acoes">
     <a class="btn btn-secondary" data-dc1-retorno href="{{ route('disciplinas.show',['id'=>$c['disciplina_id']]+$voltar) }}#adicionar-professor">Adicionar à disciplina</a>
-    @if(\App\Support\Acesso::pode('turma.vincular_professor'))<a class="btn btn-secondary" data-dc1-retorno href="{{ route('turmas.show',['id'=>$turma['id']]+$voltar) }}#professores">Gerir acesso à turma</a>@endif
+    @if(\App\Support\Acesso::pode('turma.vincular_professor'))<a class="btn btn-secondary" data-dc1-retorno href="{{ route('turmas.show',['id'=>$turma['id'],'secao'=>'acesso']+$voltar) }}#professores">Gerir acesso à turma</a>@endif
   </div></details>
   @endif
 </section>
