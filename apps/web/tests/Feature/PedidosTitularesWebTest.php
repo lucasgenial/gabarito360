@@ -57,7 +57,7 @@ class PedidosTitularesWebTest extends TestCase
     }
     private function dados(string $ctx,string $ticket): array
     {
-        return ['envio'=>$ticket,'confirmado'=>1,'versao'=>2,'situacao'=>'aguardando_informacao','motivo'=>'Motivo reservado fictício'];
+        return ['_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao'),'envio'=>$ticket,'confirmado'=>1,'versao'=>2,'situacao'=>'aguardando_informacao','motivo'=>'Motivo reservado fictício'];
     }
     public function test_listagem_detalhe_escape_contexto_e_formulario_de_abertura(): void
     {
@@ -85,9 +85,9 @@ class PedidosTitularesWebTest extends TestCase
         $this->simular(post:function($r) use (&$tentativas){$tentativas[]=$r->data();if(count($tentativas)===1)throw new ConnectionException('canario-secreto');return Http::response(['data'=>['referencia'=>$this->ref,'situacao'=>'aguardando_informacao','versao'=>3]]);});
         $ctx=$this->selecionarContextoFixture($this->contexto());$ticket=$this->ticket($ctx);$url='/app/pedidos-titulares/'.$this->ref.'/triagem';
         $this->post($url,$this->dados($ctx,$ticket))->assertStatus(503)->assertSee('Repetir o mesmo envio')->assertDontSee('canario-secreto')->assertDontSee('Motivo reservado fictício')->assertSessionMissing('_old_input');
-        $repetir=['envio'=>$ticket,'confirmado'=>1,'repetir'=>1];
+        $repetir=['envio'=>$ticket,'confirmado'=>1,'repetir'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];
         $this->post($url,$repetir)->assertRedirect(route('pedidos.show',['id'=>$this->ref,]));
-        $this->assertCount(2,$tentativas);$this->assertSame($tentativas[0],$tentativas[1]);$this->assertArrayNotHasKey('_ctx',$tentativas[0]);$this->assertArrayNotHasKey('envio',$tentativas[0]);
+        $this->assertCount(2,$tentativas);$this->assertSame($tentativas[0],$tentativas[1]);$this->assertArrayNotHasKey('_ctx',$tentativas[0]);$this->assertArrayNotHasKey('envio',$tentativas[0]);$this->assertArrayNotHasKey('_revisao',$tentativas[0]);$this->assertArrayNotHasKey('_token',$tentativas[0]);
         $this->post($url,$repetir)->assertRedirect();$this->assertCount(2,$tentativas);
         $key='l4-envio:'.hash('sha256',session()->getId().'|identidade|'.$ctx.'|'.$ticket);
         $registro=json_decode(Crypt::decryptString(Cache::get($key)),true);
@@ -101,7 +101,7 @@ class PedidosTitularesWebTest extends TestCase
         $this->post($url,array_replace($d,['motivo'=>'Outro motivo']))->assertStatus(409);
         $outro=$this->selecionarContextoFixture(array_replace($this->contexto(),['acesso_interno_id'=>3]));
         $this->simular(post:function()use(&$posts){$posts++;throw new ConnectionException('Falha fictícia');},acesso:3);
-        $repetir=['envio'=>$ticket,'confirmado'=>1,'repetir'=>1];$this->post('/app/pedidos-titulares/'.$this->ref.'/triagem',$repetir)->assertStatus(419);
+        $repetir=['envio'=>$ticket,'confirmado'=>1,'repetir'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];$this->post('/app/pedidos-titulares/'.$this->ref.'/triagem',$repetir)->assertStatus(419);
         $this->post('/app/pedidos-titulares/'.$this->ref.'/decisao',$repetir)->assertStatus(419);
         $this->travel(16)->minutes();$this->post($url,$repetir)->assertStatus(419);$this->travelBack();$this->assertSame(1,$posts);
     }
@@ -132,4 +132,21 @@ class PedidosTitularesWebTest extends TestCase
         finally {$this->app['env']='testing';}
         Http::assertNothingSent();
     }
+    public function test_envio_ssr_com_csrf_real_e_revisao_nao_amplia_whitelist(): void
+    {
+        $this->simular();$ctx=$this->selecionarContextoFixture($this->contexto());
+        $html=$this->get('/app/pedidos-titulares/'.$this->ref)->assertOk()->getContent();
+        preg_match('/name="envio" value="([a-zA-Z0-9]{48})"/',$html,$ticket);
+        preg_match('/name="_token" value="([^"]+)"/',$html,$csrf);
+        preg_match('/name="_revisao" value="([^"]+)"/',$html,$rev);
+        $d=$this->dados($ctx,$ticket[1])+['_token'=>$csrf[1],'_revisao'=>$rev[1]];
+        $this->flushHeaders();$this->app->instance('env','local');
+        $url='/app/pedidos-titulares/'.$this->ref.'/triagem';
+        $this->post($url,array_replace($d,['_token'=>'csrf-invalido']))->assertStatus(419);
+        $this->post($url,$d+['campo_inesperado'=>'nao-enviar'])->assertStatus(422);
+        Http::assertNotSent(fn($r)=>$r->method()==='POST');
+        $this->post($url,$d)->assertRedirect();
+        Http::assertSent(fn($r)=>$r->method()==='POST' && !isset($r['_revisao']) && !isset($r['_token']) && $r['situacao']==='aguardando_informacao');
+    }
+
 }

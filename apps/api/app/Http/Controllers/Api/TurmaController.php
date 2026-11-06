@@ -126,18 +126,26 @@ class TurmaController extends Controller
             ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))
             ->orderBy('nome')
             ->select('id', 'nome', 'avatar_id', 'imagem_versao', 'foto_path', 'matricula', 'data_nascimento', 'ativo')
-            ->get()
-            ->map(function ($a) use ($turma, $consulta) {
-                $a->tem_foto=!empty($a->foto_path);unset($a->foto_path);
-                $a->media_geral = $consulta->tabela('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
-                $a->media_geral = $a->media_geral !== null ? round((float) $a->media_geral, 1) : null;
-                $a->total_provas = $consulta->tabela('notas')->where('aluno_id', $a->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->count();
-                return $a;
-            });
+            ->get();
 
+        // Construir o mesmo escopo completo uma vez por requisição. Os clones mantêm
+        // todos os filtros de integridade/autorização, inclusive o histórico do aluno.
+        $notas = $consulta->tabela('notas')
+            ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id));
+        $porAluno = $alunos->isEmpty() ? collect() : (clone $notas)
+            ->whereIn('aluno_id', $alunos->pluck('id'))
+            ->select('aluno_id')->selectRaw('AVG(nota_final) as media_geral, COUNT(*) as total_provas')
+            ->groupBy('aluno_id')->get()->keyBy('aluno_id');
+        $alunos->transform(function ($a) use ($porAluno) {
+            $a->tem_foto = !empty($a->foto_path); unset($a->foto_path);
+            $agregado = $porAluno->get($a->id);
+            $a->media_geral = $agregado?->media_geral !== null ? round((float) $agregado->media_geral, 1) : null;
+            $a->total_provas = (int) ($agregado?->total_provas ?? 0);
+            return $a;
+        });
         $totalAlunos = $alunos->where('ativo', true)->count();
-
-        $mediaTurma = $consulta->tabela('notas')->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))->avg('nota_final');
+        // AVG continua no banco: não recompor a média usando médias arredondadas.
+        $mediaTurma = (clone $notas)->where('turma_id', $id)->avg('nota_final');
 
         $provas = $consulta->tabela('prova_turmas')
             ->joinSub($consulta->tabela('provas'), 'provas', 'prova_turmas.prova_id', '=', 'provas.id')
@@ -145,22 +153,22 @@ class TurmaController extends Controller
             ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $turma->espaco_id)->whereColumn('provas.espaco_id', 'prova_turmas.espaco_id'))
             ->orderByDesc('provas.data_aplicacao')
             ->select('provas.id', 'provas.titulo', 'provas.disciplina', 'provas.status', 'provas.data_aplicacao')
-            ->get()
-            ->map(function ($p) use ($id, $turma, $consulta) {
-                $media = $consulta->tabela('notas')
-                    ->where('prova_id', $p->id)
-                    ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))
-                    ->avg('nota_final');
-
-                return [
-                    'id'             => $p->id,
-                    'titulo'         => $p->titulo,
-                    'disciplina'     => $p->disciplina,
-                    'data_aplicacao' => $p->data_aplicacao,
-                    'media'          => $media !== null ? round((float) $media, 1) : null,
-                    'status'         => $p->status,
-                ];
-            });
+            ->get();
+        $porProva = $provas->isEmpty() ? collect() : (clone $notas)
+            ->where('turma_id', $id)->whereIn('prova_id', $provas->pluck('id'))
+            ->select('prova_id')->selectRaw('AVG(nota_final) as media')
+            ->groupBy('prova_id')->get()->keyBy('prova_id');
+        $provas = $provas->map(function ($p) use ($porProva) {
+            $media = $porProva->get($p->id)?->media;
+            return [
+                'id'             => $p->id,
+                'titulo'         => $p->titulo,
+                'disciplina'     => $p->disciplina,
+                'data_aplicacao' => $p->data_aplicacao,
+                'media'          => $media !== null ? round((float) $media, 1) : null,
+                'status'         => $p->status,
+            ];
+        });
 
         return ApiResponse::success(array_merge($turma->toArray(), [
             'total_alunos'  => $totalAlunos,
