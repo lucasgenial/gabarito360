@@ -38,15 +38,34 @@ class ContextoVinculo
         foreach (['rede_id', 'nucleo_id', 'escola_id', 'usuario_proprietario_id'] as $campo) {
             if (($campo === $referencia) !== ($e->$campo !== null)) return false;
         }
-        if (!DB::table('clientes')->where('id', $e->cliente_id)->where('situacao', 'ativo')->exists()) return false;
-        if ($e->tipo === 'pessoal') return DB::table('usuarios')->where('id', $e->usuario_proprietario_id)->where('ativo', true)->exists();
-        $tabela = match ($e->tipo) { 'rede' => 'redes', 'nucleo' => 'nucleos', 'escola' => 'escolas' };
-        $instituicao = DB::table($tabela)->find($e->{$e->tipo.'_id'});
-        if (!$instituicao) return false;
-        if ($e->tipo === 'rede') return true;
-        $tipoPai = $e->tipo === 'escola' ? 'nucleo' : 'rede';
-        $pai = DB::table('espacos')->where('tipo', $tipoPai)->where($tipoPai.'_id', $instituicao->{$tipoPai.'_id'})->first();
-        return $pai && (int) $pai->cliente_id === (int) $e->cliente_id && self::espacoValido($pai);
+        $cliente = DB::table('clientes')->where('id', $e->cliente_id)->where('situacao', 'ativo');
+        if ($e->tipo === 'pessoal') {
+            return $cliente->whereExists(DB::table('usuarios')->selectRaw('1')
+                ->where('id', $e->usuario_proprietario_id)->where('ativo', true))->exists();
+        }
+        // Uma statement atual por uso, sem guardar concessões ou IDs entre consultas.
+        return $cliente->whereExists(self::instituicaoValida($e->tipo, $e->{$e->tipo.'_id'}, $e->cliente_id))->exists();
+    }
+
+    private static function instituicaoValida(string $tipo, mixed $referencia, mixed $cliente, bool $coluna = false, int $nivel = 0): \Illuminate\Database\Query\Builder
+    {
+        $tabela = match ($tipo) { 'rede' => 'redes', 'nucleo' => 'nucleos', 'escola' => 'escolas' };
+        $i = 'instituicao_valida_'.$nivel;
+        $q = DB::table($tabela.' as '.$i)->selectRaw('1');
+        if ($coluna) $q->whereColumn($i.'.id', $referencia);
+        else $q->where($i.'.id', $referencia);
+        if ($tipo === 'rede') return $q;
+
+        $tipoPai = $tipo === 'escola' ? 'nucleo' : 'rede';
+        $p = 'espaco_pai_valido_'.$nivel;
+        $pai = DB::table('espacos as '.$p)->selectRaw('1')
+            ->where($p.'.tipo', $tipoPai)->where($p.'.situacao', 'ativo')->where($p.'.cliente_id', $cliente)
+            ->whereColumn($p.'.'.$tipoPai.'_id', $i.'.'.$tipoPai.'_id');
+        foreach (['rede_id', 'nucleo_id', 'escola_id', 'usuario_proprietario_id'] as $campo) {
+            if ($campo === $tipoPai.'_id') $pai->whereNotNull($p.'.'.$campo);
+            else $pai->whereNull($p.'.'.$campo);
+        }
+        return $q->whereExists($pai->whereExists(self::instituicaoValida($tipoPai, $p.'.'.$tipoPai.'_id', $cliente, true, $nivel + 1)));
     }
 
     public static function referencias(Usuario $u, string $tipo): array
