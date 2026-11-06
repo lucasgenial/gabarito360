@@ -67,7 +67,7 @@ class ContextoInternoWebTest extends TestCase
         foreach (['provas','alunos','turmas','configuracoes'] as $url) $this->consultarTela('/app/'.$url)->assertForbidden();
     }
 
-    public function test_troca_interna_invalida_tela_anterior_e_revogacao_exige_nova_selecao(): void
+    public function test_troca_interna_invalida_tela_anterior_e_revogacao_encerra_sessao_inteira(): void
     {
         $revision = ContextoWeb::ativar($this->dados());
         $a = session('auth_contexto_ativo');
@@ -78,10 +78,11 @@ class ContextoInternoWebTest extends TestCase
         Http::fake(['*'=>Http::response([],403)]);
         $this->withHeader('X-G360-Revisao', $revision)->postJson('/app/perfil/email',[])->assertStatus(409);
         Http::assertNothingSent();
-        $this->withHeader('X-G360-Revisao', $nova)->postJson('/app/perfil/email',[])->assertStatus(409)->assertJsonPath('selecionar_vinculo',true);
+        $this->withHeader('X-G360-Revisao', $nova)->postJson('/app/perfil/email',[])->assertUnauthorized()->assertJsonPath('login_necessario',true)->assertSessionMissing('auth_token')->assertSessionMissing('auth_contexto_ativo');
         $this->assertNull(ContextoWeb::obter($b));
-        $this->assertSame('identidade',session('auth_token'));
-        Http::assertSentCount(1);
+        $this->assertNull(session('auth_token'));
+        Http::assertSentCount(2);
+        Http::assertSent(fn ($r)=>str_ends_with($r->url(),'/auth/logout') && $r->hasHeader('Authorization','Bearer identidade'));
         Http::assertNotSent(fn ($r)=>str_ends_with($r->url(),'/auth/email'));
     }
 

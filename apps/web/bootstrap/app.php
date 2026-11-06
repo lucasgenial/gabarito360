@@ -17,11 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SerializarSessao::class,
             \App\Http\Middleware\RevisaoAcesso::class,
+            \App\Http\Middleware\ExigirSessaoIntegra::class,
             \App\Http\Middleware\RespostaNavegacao::class,
             \App\Http\Middleware\RecursoNavegacao::class,
         ]);
         $middleware->prependToPriorityList(\Illuminate\Session\Middleware\StartSession::class, \App\Http\Middleware\SerializarSessao::class);
         $middleware->appendToPriorityList(\Illuminate\Session\Middleware\StartSession::class, \App\Http\Middleware\RevisaoAcesso::class);
+        $middleware->appendToPriorityList(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class, \App\Http\Middleware\ExigirSessaoIntegra::class);
         $middleware->alias([
             'autenticado' => \App\Http\Middleware\Autenticado::class,
         ]);

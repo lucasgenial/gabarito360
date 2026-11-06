@@ -11,6 +11,7 @@ const antiga='epoca-antiga-ficticia',nova='epoca-nova-ficticia';
 function ambiente({selecao=false,bus=[],servidor={revisao:antiga}}={}){
  const handlers={},elementos=new Map(),chamadas=[];
  class Elemento{
+  constructor(){this.dataset={};}
   append(){}prepend(e){elementos.set(e.id,e);}setAttribute(){}focus(){}addEventListener(){}
  }
  class Formulario{submit(){}}

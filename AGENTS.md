@@ -30,6 +30,8 @@ Avisos compartilhados de sucesso, erro, atenção e informação têm separaçã
 
 ## Continuidade e publicação
 
+Decisão explícita de 06/11/2026: o vínculo ativo acompanha a sessão autenticada, sem expiração por tempo independente. A seleção acontece no login ou na troca pelo controle de espaço/perfil. Se a sessão ou seu contexto ativo se tornar irrecuperável, encerrar toda a sessão Web e exigir novo login; não recuperar o acesso pedindo apenas outro vínculo. Não criar novo prazo de sessão nesta entrega. Uma aba antiga após troca legítima continua bloqueada sem encerrar a sessão nova e sem reenviar operações.
+
 Revisar o planejamento antes de implementar cada etapa e apresentar a tabela atualizada ao finalizar. Prosseguir autonomamente pelas subdivisões internas autorizadas. Usar terminal para Git/GitHub e preferir o Chrome do usuário para testes visuais do aplicativo.
 
 Decisão atualizada pelo responsável em03/11/2026: toda entrega deve ser publicada primeiro na homologação isolada `homologa.gabarito360.com.br`, com banco, arquivos, filas e credenciais de serviços próprios. Posteriormente o responsável autorizou expressamente copiar os usuários e dados atuais de produção para homologação, mantendo suas senhas de acesso. A cópia é pontual, protegida e independente: não compartilhar o banco operacional, não enviar e-mails ou pagamentos reais, não reaproveitar sessões, tokens de acesso ou trabalhos pendentes. Preservar a origem e validar a cópia antes da troca; manter a proteção adicional da homologação. Dados criptografados exigem material de leitura protegido, sem copiar indiscriminadamente o `.env` de produção.
