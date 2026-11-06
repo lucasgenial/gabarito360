@@ -101,7 +101,12 @@
       canal.onmessage = e => { if (e.data?.tipo === 'selecionado' && e.data.revisao !== revisao) aviso(); };
     }
   } catch (_) {}
-  root.g360ContextoSelecionado = nova => { if (typeof nova === 'string' && nova !== revisao) canal?.postMessage({ tipo: 'selecionado', revisao: nova }); };
+  root.g360ContextoSelecionado = nova => {
+    if (typeof nova === 'string' && nova !== revisao) {
+      root.G360Navegacao?.limparEntradaDeAcesso();
+      canal?.postMessage({ tipo: 'selecionado', revisao: nova });
+    }
+  };
   function prepararForm(form) {
     const destinoForm = new URL(form.action, location.href);
     if (destinoForm.origin !== location.origin) return;
