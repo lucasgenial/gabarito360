@@ -46,10 +46,12 @@ class ExportacoesTitularesWebTest extends TestCase
     public function test_geracao_repetida_usa_mesmo_payload_e_chave_sem_token_no_html(): void
     {
         $ctx=$this->preparar('suporte',true);$t=$this->ticket($ctx);
-        $d=['envio'=>$t,'referencia'=>$this->ref,'versao'=>1,'confirmado'=>1];
+        $d=['envio'=>$t,'referencia'=>$this->ref,'versao'=>1,'confirmado'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];
         $this->post('/app/exportacoes-titulares/gerar',$d)->assertStatus(503)->assertSee('Repetir o mesmo envio');
         $this->post('/app/exportacoes-titulares/gerar',array_diff_key($d,['versao'=>true])+['repetir'=>1])->assertOk()->assertSee('Arquivo gerado');
         $this->assertSame($this->posts[0],$this->posts[1]);
+        $this->assertArrayNotHasKey('_revisao',$this->posts[0]['dados']);
+        $this->assertArrayNotHasKey('_token',$this->posts[0]['dados']);
         $this->assertArrayNotHasKey('referencia_alvo',$this->posts[0]['dados']);
         $this->assertStringEndsWith('/exportacoes/'.$this->ref,$this->posts[0]['url']);
         $this->post('/app/exportacoes-titulares/gerar',array_replace($d,['versao'=>2]))->assertConflict();
@@ -76,4 +78,32 @@ class ExportacoesTitularesWebTest extends TestCase
     {
         $ctx=$this->preparar('financeiro');$this->get('/app/exportacoes-titulares')->assertForbidden();
     }
+    public function test_download_post_usa_csrf_e_revisao_do_formulario_ssr_sem_header(): void
+    {
+        $this->preparar();
+        $html=$this->get('/app/exportacoes-titulares?referencia='.$this->ref)->assertOk()->getContent();
+        preg_match('/name="_token" value="([^"]+)"/',$html,$csrf);
+        preg_match('/name="_revisao" value="([^"]+)"/',$html,$rev);
+        $this->assertNotEmpty($csrf[1]);$this->assertNotEmpty($rev[1]);
+        $url='/app/exportacoes-titulares/'.$this->ref.'/arquivo';
+        $this->flushHeaders();$this->app->instance('env','local');
+        $this->get($url)->assertStatus(409);
+        $this->post($url,['_revisao'=>$rev[1]])->assertStatus(419);
+        Http::assertNotSent(fn($r)=>str_ends_with($r->url(),'/arquivo'));
+        $this->post($url,['_token'=>$csrf[1],'_revisao'=>$rev[1]])->assertOk()
+            ->assertHeader('Content-Disposition','attachment; filename="exportacao-'.$this->ref.'.json"')
+            ->assertHeader('Cache-Control','no-store, private');
+        Http::assertSent(fn($r)=>$r->method()==='GET' && str_ends_with($r->url(),'/arquivo') && $r->data()===[]);
+        $this->post($url,['_token'=>$csrf[1],'_revisao'=>'revisao-antiga'])->assertStatus(409);
+    }
+
+    public function test_envio_e_repeticao_nao_aceitam_campos_de_negocio_desconhecidos(): void
+    {
+        $ctx=$this->preparar();$t=$this->ticket($ctx);
+        $d=['envio'=>$t,'referencia'=>$this->ref,'versao'=>1,'confirmado'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];
+        $this->post('/app/exportacoes-titulares/gerar',$d+['campo_inesperado'=>'nao-enviar'])->assertStatus(422);
+        $this->post('/app/exportacoes-titulares/gerar',array_diff_key($d,['versao'=>true])+['repetir'=>1,'campo_inesperado'=>'nao-enviar'])->assertStatus(422);
+        $this->assertSame([],$this->posts);
+    }
+
 }

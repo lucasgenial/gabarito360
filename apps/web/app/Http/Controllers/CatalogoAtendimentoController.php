@@ -73,7 +73,7 @@ final class CatalogoAtendimentoController extends Controller
     public function gravar(Request $r,string $unidade) {return $this->enviar($r,null,$unidade);}
     public function enviar(Request $r,?string $id=null,?string $unidade=null)
     {
-        $modo=$this->autorizar($r);$d=$r->except(['_token','_ctx']);
+        $modo=$this->autorizar($r);$d=$r->except(['_token','_revisao']);
         $path=$modo;
         if($r->routeIs('catalogo-atendimento.autorizar')){abort_unless($modo==='atendimento',403);$path.='/autoridades';}
         elseif($id!==null)$path.='/'.$id.'/acoes';

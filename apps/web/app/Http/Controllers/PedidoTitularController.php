@@ -60,7 +60,7 @@ final class PedidoTitularController extends Controller
         $ticket=$this->validar($r->only('envio'),['envio'=>'required|string|size:48'])['envio'];
         $this->validar($r->only('confirmado'),['confirmado'=>'required|accepted']);
         $d=null;
-        if ($r->boolean('repetir')) abort_if(array_diff(array_keys($r->all()),['_ctx','_token','envio','confirmado','repetir']),422);
+        if ($r->boolean('repetir')) abort_if(array_diff(array_keys($r->all()),['_revisao','_token','envio','confirmado','repetir']),422);
         if (!$r->boolean('repetir')) {
             $regras=match($acao) {
                 'sujeito'=>['versao'=>'required|integer|min:1','aluno_id'=>'required|integer|min:1','evidencia_referencia'=>'required|string|min:5|max:500','motivo'=>'required|string|min:5|max:500'],
@@ -72,7 +72,7 @@ final class PedidoTitularController extends Controller
                 'decisao'=>['versao'=>'required|integer|min:1','situacao'=>'required|in:em_analise,concluida','motivo'=>'required|string|min:5|max:500',
                     'resultado'=>'nullable|string|max:40','resposta_referencia'=>'nullable|string|min:5|max:500'],
             };
-            abort_if(array_diff(array_keys($r->all()),array_merge(array_keys($regras),['_ctx','_token','envio','confirmado','repetir'])),422);
+            abort_if(array_diff(array_keys($r->all()),array_merge(array_keys($regras),['_revisao','_token','envio','confirmado','repetir'])),422);
             $d=$this->validar($r->only(array_keys($regras)),$regras);
             foreach (['resultado','resposta_referencia'] as $campo) if (array_key_exists($campo,$d) && ($d[$campo]===null || $d[$campo]==='')) unset($d[$campo]);
             if ($acao==='verificacoes') $d['valida_ate']=Carbon::createFromFormat('Y-m-d\TH:i',$d['valida_ate'],'America/Sao_Paulo')->seconds(0)->utc()->toIso8601String();
