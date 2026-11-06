@@ -1,17 +1,17 @@
 import {chromium} from 'playwright-core';
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
-import {imagemTeste} from './revisao-modal-fixture.mjs';
+import {imagemRaster} from './revisao-modal-fixture.mjs';
 const parcial=readFileSync('apps/web/resources/views/correcao/_documento.blade.php','utf8').split("@push('scripts')")[0]
  .replace(/\{\{ \$documentoContexto \}\}/g,'Pessoa fictícia · Prova de teste').replace(/\{\{--[\s\S]*?--\}\}/g,'');
-const foto='/api/v1/cartoes/65/arquivo/original?signature=ficticia';
-const html=`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/css/app.css"><body><main style="padding:24px"><h1>Resultado fictício</h1><button type="button" id="doc-abrir" class="btn btn-secondary">Visualizar cartão-resposta</button><div class="documento-estacao"><div class="card card-pad"><h2>Questão por questão</h2><p>Resultado preservado.</p></div>${parcial}</div></main><footer aria-label="Versão do software" style="position:fixed;bottom:0;height:44px;width:100%">Ensaio</footer><script src="/js/leitor-cartao.js"></script><script src="/js/painel-cartao.js"></script><script>criarPainelCartao(${JSON.stringify(foto)});</script></body></html>`;
+const foto='/app/cartoes/65/imagens/original';
+const html=`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="g360-revisao" content="revisao-ficticia-ci"><script src="/js/contexto-aba.js"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/css/app.css"><body><main style="padding:24px"><h1>Resultado fictício</h1><button type="button" id="doc-abrir" class="btn btn-secondary">Visualizar cartão-resposta</button><div class="documento-estacao"><div class="card card-pad"><h2>Questão por questão</h2><p>Resultado preservado.</p></div>${parcial}</div></main><footer aria-label="Versão do software" style="position:fixed;bottom:0;height:44px;width:100%">Ensaio</footer><script src="/js/leitor-cartao.js"></script><script src="/js/painel-cartao.js"></script><script>criarPainelCartao(${JSON.stringify(foto)});</script></body></html>`;
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true});
 try{
- const c=await browser.newContext();let modo='ok',fotos=0;const erros=[];
+ const raster=await imagemRaster(browser);const c=await browser.newContext();let modo='ok',fotos=0;const erros=[];
  await c.route('**/*',r=>{const u=new URL(r.request().url());if(u.hostname!=='g360.test')return r.abort();
   if(u.pathname==='/ensaio')return r.fulfill({contentType:'text/html',body:u.searchParams.has('restrito')?html.replace('documento-estacao','documento-estacao resultado-documentos').replace('class="card card-pad"','class="card card-pad res-questoes"').replace(`criarPainelCartao(${JSON.stringify(foto)});`,`criarPainelCartao(${JSON.stringify(foto)},{ajuste:'largura',controles:false,cardsIguais:true,rotulo:'Cartão resposta'});`):html});
-  if(u.pathname.startsWith('/api/')){assert.equal(u.pathname+u.search,foto);fotos++;return r.fulfill(modo==='erro'?{status:403,json:{message:'Recusada'}}:{contentType:'image/svg+xml',body:imagemTeste});}
+  if(u.pathname.startsWith('/app/cartoes/')){assert.equal(u.pathname+u.search,foto);assert.equal(r.request().headers()['x-g360-revisao'],'revisao-ficticia-ci');fotos++;return r.fulfill(modo==='erro'?{status:403,json:{message:'Recusada'}}:{contentType:'image/png',body:raster});}
   if(u.pathname.startsWith('/js/')||u.pathname.startsWith('/css/'))return r.fulfill({contentType:u.pathname.endsWith('.css')?'text/css':'text/javascript',body:readFileSync('apps/web/public'+u.pathname)});
   return r.abort();});
  const p=await c.newPage();p.on('pageerror',e=>erros.push(e.message));const img=p.getByRole('img',{name:'Cartão-resposta completo — página 1 de 1',exact:true}),modal=p.getByRole('dialog',{name:'Cartão-resposta',exact:true});

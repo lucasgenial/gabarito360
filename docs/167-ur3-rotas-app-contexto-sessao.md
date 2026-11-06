@@ -22,6 +22,8 @@ Cada seleção bem-sucedida por POST gera nova revisão e invalida o handle ante
 
 Fotos são carregadas por fetch autenticado e Blob local. Downloads nativos usam POST com CSRF/revisão; o leitor PDF recebe dados por fetch. Formulários trazem a revisão no HTML e funcionam sem depender de sua inclusão pelo JavaScript. Uma aba antiga nunca recebe automaticamente a revisão nova nem reaproveita o rascunho no novo acesso.
 
+O recorte da marcação também usa fetch contextual e Blob, mantendo a geometria anterior. Cargas antigas são canceladas e descartadas na troca; falha não representa uma questão em branco. A escolha de resposta aguarda a imagem válida, com tentativa de recarregamento disponível sem registrar correção.
+
 GETs antigos não adotam o vínculo presente no endereço, cache ou query. Ações antigas não são convertidas nem repetidas. O regime anterior sem múltiplos vínculos oferece “Acesso da conta”, obtido da identidade autenticada no servidor, sem aceitar escola/perfil fornecidos pelo navegador. Quando o regime de vínculos estiver ativo, não existe essa alternativa de fallback.
 
 ## Concorrência e limites

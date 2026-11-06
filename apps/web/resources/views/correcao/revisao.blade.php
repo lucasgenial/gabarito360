@@ -44,6 +44,60 @@ var CSRF = '{{ csrf_token() }}';
 var ROTULOS = { BRANCO: 'Em branco', ANULADA: 'Anulada' };
 
 var historico = [], salvando = false, total = FILA.length;
+var cargaRecorte = null, recorteIndisponivel = false;
+function limparRecorte() {
+  if (cargaRecorte) { clearTimeout(cargaRecorte.timer); cargaRecorte.abort.abort(); if (cargaRecorte.blob) URL.revokeObjectURL(cargaRecorte.blob); }
+  cargaRecorte = null;
+}
+window.addEventListener('pagehide', limparRecorte);
+document.addEventListener('g360:acesso-alterado', function () {
+  limparRecorte(); recorteIndisponivel = true;
+  var recorte = document.querySelector('#rev-previa .rev-recorte'); if (recorte) { recorte.style.backgroundImage = 'none'; recorte.hidden = true; }
+  document.querySelectorAll('.rev-opcoes button').forEach(function (b) { b.disabled = true; });
+});
+function carregarRecorte(q) {
+  limparRecorte();
+  var alvo = document.querySelector('#rev-previa .rev-recorte');
+  recorteIndisponivel = !!alvo;
+  if (!alvo) return;
+  var tarefa = { abort: new AbortController(), blob: null }; cargaRecorte = tarefa;
+  var feedback = document.getElementById('rev-recorte-feedback');
+  function bloquear(valor) { document.querySelectorAll('.rev-opcoes button').forEach(function (b) { b.disabled = valor || salvando; }); }
+  function falhar() {
+    if (cargaRecorte !== tarefa || tarefa.falhou || !alvo.isConnected) return;
+    tarefa.falhou = true; clearTimeout(tarefa.timer);
+    if (tarefa.blob) { URL.revokeObjectURL(tarefa.blob); tarefa.blob = null; }
+    alvo.hidden = true; feedback.className = 'g-aviso erro'; feedback.setAttribute('role', 'alert');
+    feedback.textContent = 'Não foi possível carregar o trecho da marcação. Carregue a imagem antes de registrar a resposta. ';
+    var repetir = document.createElement('button'); repetir.type = 'button'; repetir.className = 'btn btn-secondary'; repetir.textContent = 'Tentar novamente';
+    repetir.onclick = function () {
+      alvo.hidden = false; feedback.className = ''; feedback.setAttribute('role', 'status');
+      feedback.focus({ preventScroll: true }); carregarRecorte(q);
+    };
+    feedback.append(repetir);
+  }
+  bloquear(true); alvo.setAttribute('aria-busy', 'true');
+  feedback.hidden = false; feedback.textContent = 'Carregando trecho da marcação…';
+  tarefa.timer = setTimeout(function () { tarefa.abort.abort(); falhar(); }, 25000);
+  Promise.resolve().then(function () {
+    var url = new URL(q.endireitada_url, location.href);
+    if (url.origin !== location.origin || !url.pathname.startsWith('/app/')) throw new Error('Imagem inválida');
+    return fetch(url.href, { credentials: 'same-origin', cache: 'no-store', signal: tarefa.abort.signal });
+  })
+    .then(function (r) { if (!r.ok) throw new Error('Imagem indisponível'); return r.blob(); })
+    .then(async function (blob) {
+      if (!/^image\/(?:jpeg|png|webp|gif|avif)(?:;|$)/i.test(blob.type)) throw new Error('Imagem inválida');
+      if (cargaRecorte !== tarefa || tarefa.abort.signal.aborted || !alvo.isConnected) return;
+      tarefa.blob = URL.createObjectURL(blob);
+      var imagem = new Image(); imagem.src = tarefa.blob; await imagem.decode();
+      if (cargaRecorte !== tarefa || tarefa.abort.signal.aborted || !alvo.isConnected) return;
+      alvo.style.backgroundImage = 'url("' + tarefa.blob + '")';
+      alvo.setAttribute('aria-busy', 'false');
+      recorteIndisponivel = false; bloquear(false);
+      if (document.activeElement === feedback) document.querySelector('.rev-opcoes .rev-resposta-atual,.rev-opcoes .rev-resposta')?.focus({ preventScroll: true });
+      feedback.hidden = true;
+    }).catch(falhar).finally(function () { clearTimeout(tarefa.timer); });
+}
 var statusCartao = {};
 FILA.forEach(function (q) { statusCartao[q.cartao_id] = q.status; });
 var cartaoModal = document.getElementById('rev-cartao-modal');
@@ -120,7 +174,6 @@ function recorteHtml(q) {
   var r = q.recorte;
   // Mostra só a linha da questão: a foto endireitada tem sempre a mesma geometria da folha
   var estilo = 'aspect-ratio:' + (r.largura * 210 / (r.altura * 297)).toFixed(3)
-    + ';background-image:url(\'' + escH(q.endireitada_url) + '\')'
     + ';background-size:' + (100 / r.largura).toFixed(2) + '% auto'
     + ';background-position:' + (r.x / (1 - r.largura) * 100).toFixed(2) + '% ' + (r.y / (1 - r.altura) * 100).toFixed(2) + '%';
   return '<div class="rev-recorte" role="img" aria-label="Linha da questão ' + q.numero_questao + ' no cartão" style="' + estilo + '"></div>';
@@ -132,6 +185,7 @@ function leitura(q) {
 }
 
 function desenhar() {
+  limparRecorte();
   var el = document.getElementById('rev-conteudo');
   if (!FILA.length) {
     el.innerHTML = '<div class="rev-fim"><h2>Revisão concluída</h2><p>' + historico.length + ' de ' + total + ' respostas salvas. As notas dos cartões concluídos já foram calculadas.</p>'
@@ -147,7 +201,7 @@ function desenhar() {
   el.innerHTML = '<div class="row-between rev-topo"><div><b>' + escH(q.aluno_nome || 'Aluno não identificado') + '</b>'
     + '<div class="exam-meta">' + escH(q.turma || '') + '</div></div>'
     + '<div class="rev-progresso">Questão ' + q.numero_questao + ' · Faltam ' + FILA.length + '</div></div>'
-    + '<div class="rev-trabalho"><div id="rev-previa" class="rev-previa rev-imagem-restrita">' + recorteHtml(q) + '</div><div class="rev-respostas">'
+    + '<div class="rev-trabalho"><div id="rev-previa" class="rev-previa rev-imagem-restrita">' + recorteHtml(q) + '<div id="rev-recorte-feedback" role="status" aria-live="polite" tabindex="-1" hidden></div></div><div class="rev-respostas">'
     + (q.foto_url ? '<div class="rev-visualizar"><button type="button" class="btn btn-ghost btn-sm" id="rev-ver-cartao" onclick="abrirCartaoInteiro()">Visualizar gabarito</button></div>' : '')
     + '<p class="rev-leitura">' + leitura(q) + '</p>'
     + '<div class="rev-opcoes" style="--rev-alternativas:' + ALTERNATIVAS.length + '">' + botoes + '</div>'
@@ -160,12 +214,13 @@ function desenhar() {
     + '<button type="button" class="btn btn-secondary btn-sm" onclick="pular()"' + (FILA.length > 1 ? '' : ' disabled') + '>Pular</button></div>'
     + '<p class="rev-teclas">Teclado: A a ' + ALTERNATIVAS[ALTERNATIVAS.length - 1] + ' respondem, 0 deixa em branco e X anula.</p></div></div>';
   restringirCopiaImagem(document.getElementById('rev-previa'));
+  carregarRecorte(q);
   sincronizarDocumento();
   // O próximo cartão será buscado com a revisão desta tela quando for aberto.
 }
 
 function escolher(alternativa) {
-  if (salvando || cartaoModal.open || !FILA.length) return;
+  if (salvando || recorteIndisponivel || cartaoModal.open || !FILA.length) return;
   estadoSalvando(true);
   var q = FILA[0];
   var acao = statusCartao[q.cartao_id] === 'lido' ? 'revisar' : 'resolver-ambiguidade';
