@@ -14,6 +14,7 @@ var NOTA_MAX = correcao_acompanhamentoConfig.notaMax;
 var corrDados = [], corrAssinatura = '';
 var miniaturasCartoes = criarMiniaturasCartoes(document.getElementById('corr-lista'), verFoto);
 function escH(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
+function escA(t) { return escH(t).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function fmtNota(n) { return Number(n).toFixed(1).replace('.', ','); }
 var cargaCartoes=G360Carga(document.getElementById('corrigidos'));
 function carregarCorrigidos(silenciosa=false) {
@@ -48,11 +49,11 @@ function desenharCorrigidos() {
         + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
       : '';
     var foto = c.miniatura_url
-      ? '<button type="button" class="corr-thumb corr-miniatura" data-miniatura-cartao="' + c.id + '" data-miniatura-versao="' + escH(c.tentativa_numero || c.created_at || '') + '" data-miniatura-url="' + escH(JSON.stringify(c.miniatura_url)) + '" aria-busy="true" aria-label="Carregando miniatura do cartão-resposta" disabled>'
+      ? '<button type="button" class="corr-thumb corr-miniatura" data-miniatura-cartao="' + c.id + '" data-miniatura-versao="' + escA(c.tentativa_numero || c.created_at || '') + '" data-miniatura-url="' + escA(JSON.stringify(c.miniatura_url)) + '" aria-busy="true" aria-label="Carregando miniatura do cartão-resposta" disabled>'
         + '<img data-miniatura-imagem alt="" hidden>'
-        + '<span class="corr-miniatura-carga" data-miniatura-carga aria-hidden="true"><span class="g360-marca-carregando" aria-hidden="true"></span><i></i><i></i></span>'
-        + '<span class="corr-miniatura-erro" data-miniatura-erro hidden>Foto indisponível<b>Tentar novamente</b></span></button>'
-      : '<div class="corr-thumb corr-miniatura-ausente">Sem miniatura disponível</div>';
+        + '<span class="corr-miniatura-carga" data-miniatura-carga aria-hidden="true"><span class="g360-marca-carregando" aria-hidden="true"></span><span>Aguarde…</span></span>'
+        + '<span class="corr-miniatura-erro" data-miniatura-erro hidden><span class="g360-marca-carregando" aria-hidden="true"></span><span>Falha na foto</span><svg class="corr-miniatura-atualizar" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 4v7h-7M20 11a8 8 0 1 0-2 6"/></svg></span></button>'
+      : '<div class="corr-thumb corr-miniatura-ausente"><span class="g360-marca-carregando" aria-hidden="true"></span><span>' + (c.tem_imagem === false ? 'Sem imagem' : 'Sem miniatura') + '</span></div>';
     var acoes = c.tem_imagem ? '<button type="button" class="btn btn-sm btn-ghost" data-cartao-acao="foto" data-cartao-id="' + c.id + '">Ver foto</button>' : '';
     if (c.aluno_id && c.nota_final !== null && c.nota_final !== undefined) {
       acoes += '<button type="button" class="btn btn-sm btn-secondary" data-cartao-acao="resultado" data-cartao-id="' + c.id + '">Acertos e erros</button>';
