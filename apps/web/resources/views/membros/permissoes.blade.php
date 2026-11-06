@@ -44,7 +44,7 @@
 </div>
 
 <form method="POST" action="{{ route('membros.permissoes.salvar', array_filter(['id' => $u['id'], 'vinculo_id' => $u['vinculo_id'] ?? null])) }}">
-  @csrf @method('PUT')
+  @csrf <x-revisao-acesso /> @method('PUT')
   @foreach($modulos as $mod => $rotulo)
     @php $doModulo = $itens->where('modulo', $mod); @endphp
     @if($doModulo->isNotEmpty())

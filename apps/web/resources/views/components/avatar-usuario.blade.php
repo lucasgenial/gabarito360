@@ -6,7 +6,7 @@
 @endphp
 <span @if($proprio) data-imagem-propria data-tamanho="{{ $tamanho }}" data-iniciais="{{ $iniciais }}" @endif aria-hidden="true">
 @if($temFoto)
-<span class="avatar-aluno avatar-aluno--{{ in_array($tamanho,['sm','md','lg','xl'])?$tamanho:'md' }}"><img src="{{ $foto }}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></span>
+<span class="avatar-aluno avatar-aluno--{{ in_array($tamanho,['sm','md','lg','xl'])?$tamanho:'md' }}"><img data-imagem-avatar data-imagem-contextual="{{ $foto }}" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:inherit;"><span class="avatar-iniciais" aria-hidden="true">{{ $iniciais }}</span></span>
 @else
 <x-avatar :nome="$nome" :aluno-id="$usuarioId" :avatar-id="$avatarId" :tamanho="$tamanho" />
 @endif

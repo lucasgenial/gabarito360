@@ -120,14 +120,14 @@
                     <a href="{{ route('membros.permissoes', array_filter(['id' => $m['id'], 'vinculo_id' => $m['vinculo_id'] ?? null])) }}" class="btn btn-ghost btn-sm">Permissões</a>
                     @if(\App\Support\Acesso::pode('usuario.gerir') && in_array($perfilKey, \App\Support\Acesso::perfisGeridos(), true) && (!isset($m['situacao']) || in_array($m['situacao'], ['ativo', 'suspenso'])))
                     <form method="POST" action="{{ route('membros.toggle', array_filter(['id' => $m['id'], 'vinculo_id' => $m['vinculo_id'] ?? null])) }}" style="display:inline;">
-                      @csrf
+                      @csrf <x-revisao-acesso />
                       <button type="submit" class="btn btn-ghost btn-sm">
                         {{ isset($m['situacao']) ? ($m['situacao'] === 'ativo' ? 'Suspender vínculo' : 'Reativar vínculo') : ($m['ativo'] ? 'Desativar' : 'Ativar') }}
                       </button>
                     </form>
                     @endif
                     @if(isset($m['situacao']) && in_array($m['situacao'],['ativo','suspenso','convidado'],true) && \App\Support\Acesso::pode('usuario.gerir') && in_array($perfilKey,\App\Support\Acesso::perfisGeridos(),true))
-                    <form method="POST" action="{{ route('membros.encerrar',['id'=>$m['id'],'vinculo_id'=>$m['vinculo_id']]) }}" onsubmit="return confirm('Encerrar este vínculo? O acesso será retirado e o histórico preservado.')">@csrf<button class="btn btn-ghost btn-sm" type="submit">Encerrar vínculo</button></form>
+                    <form method="POST" action="{{ route('membros.encerrar',['id'=>$m['id'],'vinculo_id'=>$m['vinculo_id']]) }}" onsubmit="return confirm('Encerrar este vínculo? O acesso será retirado e o histórico preservado.')">@csrf <x-revisao-acesso /><button class="btn btn-ghost btn-sm" type="submit">Encerrar vínculo</button></form>
                     @endif
                   </div>
                 </div></td>

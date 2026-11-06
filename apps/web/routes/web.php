@@ -21,7 +21,7 @@ use App\Http\Controllers\TurmaController;
 use Illuminate\Support\Facades\Route;
 
 // Saúde
-Route::get('/health', fn () => response()->json(['status' => 'ok', 'app' => 'gabarito360-web']));
+Route::get('/health', fn () => response()->json(['status' => 'ok', 'app' => 'gabarito360-web']))->name('web.health');
 Route::get('/validar-documento', [\App\Http\Controllers\ValidacaoDocumentoController::class, 'index'])->name('documentos.validar');
 Route::post('/validar-documento', [\App\Http\Controllers\ValidacaoDocumentoController::class, 'conferir'])->middleware('throttle:20,1')->name('documentos.conferir');
 
@@ -62,7 +62,7 @@ Route::get('/confirmar-email', [PerfilController::class, 'showConfirmarEmail'])-
 Route::post('/confirmar-email', [PerfilController::class, 'confirmarEmail'])->name('email.confirmar.store');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController::class, 'show'])->name('vinculos.convite');
+Route::get('/app/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController::class, 'show'])->name('vinculos.convite');
 
 // Mesmas ações registradas nativamente: URLs canônicas e entrada legada de migração.
 $rotasContextuais = static function () {
@@ -150,7 +150,7 @@ $rotasContextuais = static function () {
     Route::get('/clientes', [\App\Http\Controllers\ClienteController::class,'index'])->name('clientes.index');
     Route::get('/exportacoes-titulares', [\App\Http\Controllers\ExportacaoTitularController::class,'index'])->name('pedidos.exportacoes');
     Route::post('/exportacoes-titulares/{acao}', [\App\Http\Controllers\ExportacaoTitularController::class,'enviar'])->whereIn('acao',['conceder','revogar','gerar'])->middleware('throttle:10,1')->name('pedidos.exportacoes.enviar');
-    Route::get('/exportacoes-titulares/{id}/arquivo', [\App\Http\Controllers\ExportacaoTitularController::class,'arquivo'])->whereUuid('id')->name('pedidos.exportacoes.arquivo');
+    Route::match(['GET','POST'], '/exportacoes-titulares/{id}/arquivo', [\App\Http\Controllers\ExportacaoTitularController::class,'arquivo'])->whereUuid('id')->name('pedidos.exportacoes.arquivo');
     Route::get('/pedidos-titulares', [\App\Http\Controllers\PedidoTitularController::class,'index'])->name('pedidos.index');
     Route::get('/pedidos-titulares/novo', [\App\Http\Controllers\PedidoTitularController::class,'create'])->name('pedidos.create');
     Route::post('/pedidos-titulares', [\App\Http\Controllers\PedidoTitularController::class,'store'])->middleware('throttle:10,1')->name('pedidos.store');
@@ -273,16 +273,16 @@ $rotasContextuais = static function () {
     Route::post('/provas/{id}/cartoes',         [CorrecaoController::class, 'upload'])->name('correcao.upload');
     Route::get('/provas/{id}/cartoes/envios/{chave}', [CorrecaoController::class, 'envio'])->whereUuid('chave')->name('correcao.envio');
     Route::post('/provas/{id}/cartoes/envios/{chave}/repetir', [CorrecaoController::class, 'repetirEnvio'])->whereUuid('chave')->name('correcao.envio.repetir');
-    Route::get('/provas/{id}/cartoes/pdf',      [CorrecaoController::class, 'pdf'])->name('correcao.pdf');
+    Route::match(['GET','POST'], '/provas/{id}/cartoes/pdf',      [CorrecaoController::class, 'pdf'])->name('correcao.pdf');
     Route::post('/cartoes/{id}/resolver-ambiguidade', [CorrecaoController::class, 'resolverAmbiguidade'])->name('cartoes.resolver-ambiguidade');
     Route::post('/cartoes/{id}/vincular-aluno',       [CorrecaoController::class, 'vincularAluno'])->name('cartoes.vincular-aluno');
     Route::post('/cartoes/{id}/revisar',              [CorrecaoController::class, 'revisar'])->name('cartoes.revisar');
 
     // Resultados e relatórios (MP-022)
-    Route::get('/provas/{provaId}/resultados/pdf', [ResultadoController::class, 'lote'])->name('resultados.lote');
+    Route::match(['GET','POST'], '/provas/{provaId}/resultados/pdf', [ResultadoController::class, 'lote'])->name('resultados.lote');
     Route::get('/resultados/{alunoId}/{provaId}', [ResultadoController::class, 'show'])->name('resultados.show');
     Route::get('/resultados/{alunoId}/{provaId}/historico', [ResultadoController::class,'historico'])->name('resultados.historico');
-    Route::get('/resultados/{alunoId}/{provaId}/pdf', [ResultadoController::class, 'pdf'])->name('resultados.pdf');
+    Route::match(['GET','POST'], '/resultados/{alunoId}/{provaId}/pdf', [ResultadoController::class, 'pdf'])->name('resultados.pdf');
     Route::get('/relatorios/prova/{id}', [RelatorioController::class, 'prova'])->name('relatorios.prova');
     Route::get('/relatorios/turma/{turmaId}/prova/{provaId}', [RelatorioController::class, 'turmaProva'])->name('relatorios.turmaProva');
     Route::get('/relatorios/turma/{turmaId}', [RelatorioController::class, 'turma'])->name('relatorios.turma');
@@ -297,16 +297,26 @@ $rotasContextuais = static function () {
 
 };
 
-Route::pattern('acesso', '(?:vinculo|pessoal|interno)-[1-9][0-9]{0,17}|sessao');
-Route::middleware('autenticado')->group(function () use ($rotasContextuais) {
+// A navegação usa somente /app; o contexto escolhido permanece exclusivamente na sessão.
+Route::middleware('autenticado')->prefix('app')->group(function () use ($rotasContextuais) {
     Route::post('/vinculos/convite/consultar', [\App\Http\Controllers\ConviteVinculoController::class, 'consultar'])->middleware('throttle:20,1')->name('vinculos.convite.consultar');
     Route::post('/vinculos/convite/responder', [\App\Http\Controllers\ConviteVinculoController::class, 'responder'])->middleware('throttle:10,1')->name('vinculos.convite.responder');
     Route::get('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'index'])->name('vinculos.index');
     Route::post('/vinculos/interno', [\App\Http\Controllers\Auth\VinculoController::class, 'interno'])->middleware('throttle:20,1')->name('vinculos.interno');
+    Route::post('/vinculos/legado', [\App\Http\Controllers\Auth\VinculoController::class, 'legado'])->middleware('throttle:20,1')->name('vinculos.legado');
     Route::post('/vinculos', [\App\Http\Controllers\Auth\VinculoController::class, 'store'])->middleware('throttle:20,1')->name('vinculos.store');
-    Route::get('/trocar-senha',  [PerfilController::class, 'formTrocarSenha'])->name('trocar-senha');
-    Route::put('/trocar-senha',  [PerfilController::class, 'trocarSenha'])->name('trocar-senha.store');
-    Route::prefix('acessos/{acesso}')->group($rotasContextuais);
-    // Não reexecuta ações antigas: o middleware apenas migra GETs válidos.
-    Route::name('legado.')->group($rotasContextuais);
+    Route::get('/trocar-senha', [PerfilController::class, 'formTrocarSenha'])->name('trocar-senha');
+    Route::put('/trocar-senha', [PerfilController::class, 'trocarSenha'])->name('trocar-senha.store');
+    $rotasContextuais();
+});
+Route::middleware('autenticado')->name('legado.')->group(function () use ($rotasContextuais) {
+    Route::match(['GET','POST'], '/vinculos', [\App\Http\Controllers\Auth\VinculoController::class,'index'])->name('vinculos.index');
+    Route::post('/vinculos/interno', [\App\Http\Controllers\Auth\VinculoController::class,'interno'])->name('vinculos.interno');
+    Route::post('/vinculos/legado', [\App\Http\Controllers\Auth\VinculoController::class,'legado'])->name('vinculos.legado');
+    Route::post('/vinculos/convite/consultar', [\App\Http\Controllers\ConviteVinculoController::class,'consultar'])->name('vinculos.convite.consultar');
+    Route::post('/vinculos/convite/responder', [\App\Http\Controllers\ConviteVinculoController::class,'responder'])->name('vinculos.convite.responder');
+    Route::get('/vinculos/convite', [\App\Http\Controllers\ConviteVinculoController::class,'show'])->name('vinculos.convite');
+    Route::match(['GET','PUT'], '/trocar-senha', [PerfilController::class,'formTrocarSenha'])->name('trocar-senha');
+    $rotasContextuais();
+    Route::prefix('acessos/{acesso}')->name('contexto.')->group($rotasContextuais);
 });

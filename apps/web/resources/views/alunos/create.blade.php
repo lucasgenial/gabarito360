@@ -32,7 +32,7 @@
 @endif
 
 <form method="POST" action="{{ route('alunos.store') }}" class="form-container" id="cadastro-aluno" enctype="multipart/form-data">
-  @csrf
+  @csrf <x-revisao-acesso />
 
   {{-- Card lateral de preview --}}
   <aside class="identity-card">

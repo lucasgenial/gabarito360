@@ -24,7 +24,7 @@
       <a href="{{ route('provas.gabarito.edit', $prova['id']) }}" class="btn btn-primary">Editar gabarito →</a>
       <form method="POST" action="{{ route('provas.destroy', $prova['id']) }}"
             onsubmit="return confirm('Excluir esta prova?')" style="display:inline;">
-        @csrf
+        @csrf <x-revisao-acesso />
         @method('DELETE')
         <button type="submit" class="btn btn-ghost" style="color:var(--danger);">Excluir</button>
       </form>
@@ -145,7 +145,7 @@
               <div style="font-size:12px;color:var(--muted);">{{ $t['serie'] }}</div>
             </div>
             @pode('cartao.imprimir')
-            <a href="{{ route('correcao.pdf', $prova['id']) }}?turma_id={{ $t['id'] }}" target="_blank" class="btn btn-sm btn-ghost" title="Cartões-resposta com nome e QR de cada aluno"><x-icone nome="imprimir" /> Cartões</a>
+            <form method="POST" action="{{ route('correcao.pdf', $prova['id']) }}?turma_id={{ $t['id'] }}" class="arquivo-form" target="_blank" rel="noopener">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-sm btn-ghost" title="Cartões-resposta com nome e QR de cada aluno"><x-icone nome="imprimir" /> Cartões</button></form>
             @endpode
             @if(in_array($prova['status'], ['em_correcao', 'corrigida'], true))
               <a href="{{ route('relatorios.turmaProva', [$t['id'], $prova['id']]) }}" class="btn btn-sm btn-ghost">Relatório</a>
@@ -153,7 +153,7 @@
           </div>
         @endforeach
         @pode('cartao.imprimir')
-        <a href="{{ route('correcao.pdf', $prova['id']) }}?brancos=5" target="_blank" class="btn btn-sm btn-ghost" style="margin-top:8px;"><x-icone nome="imprimir" /> 5 cartões em branco</a>
+        <form method="POST" action="{{ route('correcao.pdf', $prova['id']) }}?brancos=5" class="arquivo-form" target="_blank" rel="noopener">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-sm btn-ghost" style="margin-top:8px;"><x-icone nome="imprimir" /> 5 cartões em branco</button></form>
         @endpode
       @else
         <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">
@@ -200,7 +200,7 @@
       <button type="button" class="modal-close" onclick="fecharModal()" aria-label="Fechar edição">&times;</button>
     </div>
     <form method="POST" action="{{ route('provas.update', $prova['id']) }}">
-      @csrf
+      @csrf <x-revisao-acesso />
       @if($curricular??false)@endif
       @method('PUT')
       <div class="modal-body">

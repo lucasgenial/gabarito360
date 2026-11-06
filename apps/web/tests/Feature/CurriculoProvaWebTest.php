@@ -7,12 +7,14 @@ use Tests\TestCase;
 
 class CurriculoProvaWebTest extends TestCase
 {
+    use \Tests\Support\ContextoSelecionado;
     private int $versao=1;
     private bool $bloqueada=false, $falha=false, $corrida=false;
     private bool $semCurriculo=false, $pessoal=false, $leiturasDivergentes=false;
 
     private function preparar(array $permissoes=['prova.criar','prova.editar','prova.ver','turma.ver']): string
     {
+        Http::swap(new \Illuminate\Http\Client\Factory());
         config(['services.api.base_url'=>'http://api.test/api','disciplinas.ativo'=>true]);Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade-ficticia','auth_vinculos'=>true,'auth_nome'=>'Fictício']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
@@ -40,7 +42,7 @@ class CurriculoProvaWebTest extends TestCase
             if($p==='/api/v1/provas' && $r->method()==='POST')return Http::response(['data'=>['id'=>10]],201);
             return Http::response(['data'=>[]]);
         });
-        ContextoWeb::criar($me);
+        $this->selecionarContextoFixture($me);
         return ContextoWeb::referencia($me);
     }
 
@@ -60,15 +62,15 @@ class CurriculoProvaWebTest extends TestCase
 
     public function test_nova_prova_tem_ordem_correta_e_preparacao_sem_gravacao_preserva_dados(): void
     {
-        $ctx=$this->preparar();$this->get('/acessos/'.$ctx.'/provas/nova')->assertOk()->assertSeeInOrder(['Turmas</h2>','Disciplinas da prova</h2>','Dados da prova</h2>'],false)->assertDontSee('editor-grid')->assertSee('Criar prova e preencher gabarito');
-        $this->post('/acessos/'.$ctx.'/provas/preparar',['acao'=>'adicionar','turma_ids'=>[1],'nova_disciplina_id'=>1,'titulo'=>'Rascunho <script>seguro</script>','serie'=>'1','num_questoes'=>30,'gerar_cartao_pdf'=>1])
+        $ctx=$this->preparar();$this->get('/app/provas/nova')->assertOk()->assertSeeInOrder(['Turmas</h2>','Disciplinas da prova</h2>','Dados da prova</h2>'],false)->assertDontSee('editor-grid')->assertSee('Criar prova e preencher gabarito');
+        $this->post('/app/provas/preparar',['acao'=>'adicionar','turma_ids'=>[1],'nova_disciplina_id'=>1,'titulo'=>'Rascunho <script>seguro</script>','serie'=>'1','num_questoes'=>30,'gerar_cartao_pdf'=>1])
             ->assertOk()->assertSee('value="Rascunho &lt;script&gt;seguro&lt;/script&gt;"',false)->assertSee('name="disciplina_ids[]" value="1"',false)->assertSee('value="30"',false)->assertDontSee('<script>seguro</script>',false);
         $this->nenhumaGravacao();
     }
 
     public function test_incompatibilidade_falha_e_remocao_mantem_escolhas_e_acoes_sem_js(): void
     {
-        $ctx=$this->preparar();$url='/acessos/'.$ctx.'/provas/preparar';
+        $ctx=$this->preparar();$url='/app/provas/preparar';
         $d=['acao'=>'opcoes','turma_ids'=>[1,3],'disciplina_ids'=>[2],'titulo'=>'Preenchido'];
         $this->post($url,$d)->assertOk()->assertSee('Precisam de revisão')->assertSee('Confira as atribuições')->assertSee('name="disciplina_ids[]" value="2"',false);
         $this->falha=true;$this->post($url,$d)->assertOk()->assertSee('Não foi possível conferir as opções')->assertSee('data-falha="1"',false)->assertSee('name="disciplina_ids[]" value="2"',false)->assertSee('value="Preenchido"',false);
@@ -79,22 +81,22 @@ class CurriculoProvaWebTest extends TestCase
     public function test_fragmento_leitura_nao_substitui_dados_e_criacao_final_envia_ids_e_booleanos(): void
     {
         $ctx=$this->preparar();
-        $this->withHeader('X-Curriculo-Fragmento','1')->post('/acessos/'.$ctx.'/provas/preparar',['acao'=>'adicionar','turma_ids'=>[1],'nova_disciplina_id'=>1])->assertOk()->assertSee('data-curriculo-editor',false)->assertDontSee('name="titulo"',false);
-        $this->flushHeaders();
-        $this->post('/acessos/'.$ctx.'/provas',['escola_id'=>1,'titulo'=>'Criar','serie'=>'1','formato_avaliacao'=>'gabarito','num_questoes'=>1,'num_alternativas'=>4,'turma_ids'=>[1],'disciplina_ids'=>[1]])->assertRedirectContains('/provas/10/gabarito/editar');
+        $this->withHeader('X-Curriculo-Fragmento','1')->post('/app/provas/preparar',['acao'=>'adicionar','turma_ids'=>[1],'nova_disciplina_id'=>1])->assertOk()->assertSee('data-curriculo-editor',false)->assertDontSee('name="titulo"',false);
+        $this->flushHeaders(); $this->withHeader('X-G360-Revisao', session('auth_contexto_revisao'));
+        $this->post('/app/provas',['escola_id'=>1,'titulo'=>'Criar','serie'=>'1','formato_avaliacao'=>'gabarito','num_questoes'=>1,'num_alternativas'=>4,'turma_ids'=>[1],'disciplina_ids'=>[1]])->assertRedirectContains('/app/provas/10/gabarito/editar');
         Http::assertSent(fn($r)=>$r->method()==='POST' && str_ends_with($r->url(),'/v1/provas') && $r['disciplina_ids']===[1] && !isset($r['disciplina']) && $r['opcao_lingua']===false);
     }
 
     public function test_conflito_preserva_proposta_exige_revisao_e_nao_reenvia_automaticamente(): void
     {
         $ctx=$this->preparar();$d=['turma_ids'=>[3],'disciplina_ids'=>[1],'curriculo_versao'=>0];
-        $url='/acessos/'.$ctx.'/provas/10/curriculo';
+        $url='/app/provas/10/curriculo';
         $this->post($url,$d)->assertConflict()->assertSee('A configuração foi alterada')->assertSee('name="curriculo_versao" value="0"',false)->assertSee('value="3" checked',false);
         $this->nenhumaGravacao();
-        $this->post('/acessos/'.$ctx.'/provas/10/curriculo/preparar',$d+['acao'=>'rever'])->assertOk()->assertSee('Confira as alterações')->assertSee('Turmas atuais')->assertSee('name="curriculo_versao" value="1"',false)->assertSee('name="revisao_pendente" value="1"',false);
+        $this->post('/app/provas/10/curriculo/preparar',$d+['acao'=>'rever'])->assertOk()->assertSee('Confira as alterações')->assertSee('Turmas atuais')->assertSee('name="curriculo_versao" value="1"',false)->assertSee('name="revisao_pendente" value="1"',false);
         $d['curriculo_versao']=1;$d['revisao_pendente']=1;
         $this->from($url)->post($url,$d)->assertUnprocessable()->assertSee('Confira o preenchimento');$this->nenhumaGravacao();
-        $this->post($url,$d+['conferido'=>1])->assertRedirectContains('/provas/10');
+        $this->post($url,$d+['conferido'=>1])->assertRedirectContains('/app/provas/10');
         $this->corrida=true;
         $this->post($url,$d+['conferido'=>1])->assertConflict()->assertSee('Atualizar estado e revisar')->assertSee('name="curriculo_versao" value="1"',false);
     }
@@ -102,25 +104,25 @@ class CurriculoProvaWebTest extends TestCase
     public function test_prova_aplicada_impede_configuracao_e_metadados_nao_enviam_curriculo(): void
     {
         $ctx=$this->preparar();$this->bloqueada=true;
-        $this->get('/acessos/'.$ctx.'/provas/10/curriculo')->assertRedirectContains('/provas/10');
-        $this->get('/acessos/'.$ctx.'/provas/10')->assertOk()->assertSee('Classificação preservada')->assertDontSee('name="disciplina"',false)->assertDontSee('name="turma_ids[]"',false);
-        $this->put('/acessos/'.$ctx.'/provas/10',['titulo'=>'Título novo'])->assertRedirect();
+        $this->get('/app/provas/10/curriculo')->assertRedirectContains('/app/provas/10');
+        $this->get('/app/provas/10')->assertOk()->assertSee('Classificação preservada')->assertDontSee('name="disciplina"',false)->assertDontSee('name="turma_ids[]"',false);
+        $this->put('/app/provas/10',['titulo'=>'Título novo'])->assertRedirect();
         Http::assertSent(fn($r)=>$r->method()==='PUT' && $r->data()===['titulo'=>'Título novo']);
     }
 
     public function test_rota_nova_exige_contexto_capacidade_e_flag(): void
     {
-        $ctx=$this->preparar(['prova.ver']);$this->get('/acessos/'.$ctx.'/provas/nova')->assertForbidden();
-        $this->post('/acessos/'.$ctx.'/provas/preparar',['acao'=>'opcoes'])->assertForbidden();
-        $this->get('/acessos/'.$ctx.'/provas/10/curriculo')->assertForbidden();
-        config(['disciplinas.ativo'=>false]);$this->post('/acessos/'.$ctx.'/provas/preparar')->assertNotFound();
+        $ctx=$this->preparar(['prova.ver']);$this->get('/app/provas/nova')->assertForbidden();
+        $this->post('/app/provas/preparar',['acao'=>'opcoes'])->assertForbidden();
+        $this->get('/app/provas/10/curriculo')->assertForbidden();
+        config(['disciplinas.ativo'=>false]);$this->post('/app/provas/preparar')->assertNotFound();
         $this->nenhumaGravacao();
     }
 
     public function test_revisao_nao_aceita_versao_de_leituras_divergentes(): void
     {
         $ctx=$this->preparar();$this->leiturasDivergentes=true;
-        $this->post('/acessos/'.$ctx.'/provas/10/curriculo/preparar',['acao'=>'rever','curriculo_versao'=>1,'turma_ids'=>[1],'disciplina_ids'=>[1]])
+        $this->post('/app/provas/10/curriculo/preparar',['acao'=>'rever','curriculo_versao'=>1,'turma_ids'=>[1],'disciplina_ids'=>[1]])
             ->assertOk()->assertSee('A configuração foi alterada')->assertDontSee('Confira as alterações')->assertSee('name="curriculo_versao" value="1"',false);
         $this->nenhumaGravacao();
     }
@@ -128,17 +130,17 @@ class CurriculoProvaWebTest extends TestCase
     public function test_copia_sem_curriculo_exige_configuracao_e_pessoal_preserva_tela_anterior(): void
     {
         $ctx=$this->preparar();$this->semCurriculo=true;
-        $this->get('/acessos/'.$ctx.'/provas/10')->assertOk()->assertSee('Configure turmas e disciplinas antes de publicar.');
-        $this->get('/acessos/'.$ctx.'/provas/10/curriculo')->assertOk()->assertSee('name="curriculo_versao" value="0"',false)->assertDontSee('name="disciplina_ids[]"',false);
+        $this->get('/app/provas/10')->assertOk()->assertSee('Configure turmas e disciplinas antes de publicar.');
+        $this->get('/app/provas/10/curriculo')->assertOk()->assertSee('name="curriculo_versao" value="0"',false)->assertDontSee('name="disciplina_ids[]"',false);
         $this->pessoal=true;$ctx=$this->preparar();
-        $this->get('/acessos/'.$ctx.'/provas/nova')->assertOk()->assertSee('editor-grid')->assertSee('name="disciplina"',false)->assertDontSee('data-prova-curriculo',false);
+        $this->get('/app/provas/nova')->assertOk()->assertSee('editor-grid')->assertSee('name="disciplina"',false)->assertDontSee('data-prova-curriculo',false);
         $this->nenhumaGravacao();
     }
 
     public function test_validacao_final_reexibe_erro_inline_sem_redirecionar_para_post_de_preparacao(): void
     {
         $ctx=$this->preparar();
-        $this->from('/acessos/'.$ctx.'/provas/preparar')->post('/acessos/'.$ctx.'/provas',['escola_id'=>1,'titulo'=>'Preservado','serie'=>'1','formato_avaliacao'=>'gabarito','num_questoes'=>0,'num_alternativas'=>4,'turma_ids'=>[1],'disciplina_ids'=>[1]])
+        $this->from('/app/provas/preparar')->post('/app/provas',['escola_id'=>1,'titulo'=>'Preservado','serie'=>'1','formato_avaliacao'=>'gabarito','num_questoes'=>0,'num_alternativas'=>4,'turma_ids'=>[1],'disciplina_ids'=>[1]])
             ->assertUnprocessable()->assertSee('value="Preservado"',false)->assertSee('id="erro-num_questoes"',false)->assertSee('aria-invalid="true"',false)->assertDontSee('validation.min');
         $this->nenhumaGravacao();
     }

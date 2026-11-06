@@ -22,7 +22,17 @@ class VinculoController extends Controller
 
     public function index(Request $request)
     {
-        if (!session('auth_vinculos')) return redirect()->route('painel');
+        if (!session('auth_vinculos')) {
+            $resp = $this->api->identidade()->get('/v1/auth/me');
+            if ($resp->status() === 401) {
+                ContextoWeb::limpar(); $request->session()->invalidate(); $request->session()->regenerateToken();
+                return redirect()->route('login');
+            }
+            $me = $resp->json('data');
+            abort_unless($resp->successful() && is_array($me) && !empty($me['perfil']) && is_array($me['permissoes'] ?? null), 503);
+            return view('auth.vinculo', ['vinculos'=>[], 'internos'=>[], 'automatico'=>false,
+                'legado'=>['nome'=>$me['nome'] ?? session('auth_nome'), 'perfil'=>$me['perfil']]]);
+        }
         $resp = $this->api->identidade()->get('/v1/auth/vinculos');
         if ($resp->status() === 401) {
             $request->session()->invalidate(); $request->session()->regenerateToken();
@@ -37,7 +47,7 @@ class VinculoController extends Controller
             $internos = $resposta->successful() ? ($resposta->json('data') ?? []) : [];
         }
         return view('auth.vinculo', ['vinculos' => $resp->json('data') ?? [], 'internos' => $internos,
-            'automatico' => !$internos && !$request->boolean('trocar') && !session('erro')]);
+            'automatico' => false]);
     }
 
     public function store(Request $request)
@@ -50,9 +60,9 @@ class VinculoController extends Controller
         $dados = $resp->json('data');
         abort_unless(is_array($dados) && !empty($dados['token']) && !empty($dados['perfil']) && is_array($dados['permissoes'] ?? null), 503,'Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.');
         abort_unless((int)($dados['vinculo_id']??0)===(int)$data['vinculo_id'] && ($acesso=ContextoWeb::referencia($dados)),503,'Não foi possível confirmar seu vínculo.');
-        ContextoWeb::criar($dados);
-        if ($request->expectsJson()) return response()->json(['url'=>route('painel',['acesso'=>$acesso])]);
-        return redirect()->route('painel', ['acesso' => $acesso]);
+        $revisao = ContextoWeb::ativar($dados);
+        if ($request->expectsJson()) return response()->json(['url'=>route('painel'), 'revisao'=>$revisao]);
+        return redirect()->route('painel');
     }
 
     public function interno(Request $request)
@@ -66,8 +76,20 @@ class VinculoController extends Controller
         abort_unless(is_array($dados) && ($dados['tipo_contexto'] ?? null) === 'interno'
             && !empty($dados['token']) && !empty($dados['perfil']) && is_array($dados['permissoes'] ?? null), 503,'Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.');
         abort_unless((int)($dados['acesso_interno_id']??0)===(int)$data['acesso_interno_id'] && ($acesso=ContextoWeb::referencia($dados)),503,'Não foi possível confirmar seu acesso.');
-        ContextoWeb::criar($dados);
-        if ($request->expectsJson()) return response()->json(['url'=>route('painel',['acesso'=>$acesso])]);
-        return redirect()->route('painel', ['acesso' => $acesso]);
+        $revisao = ContextoWeb::ativar($dados);
+        if ($request->expectsJson()) return response()->json(['url'=>route('painel'), 'revisao'=>$revisao]);
+        return redirect()->route('painel');
     }
+    public function legado(Request $request)
+    {
+        abort_if(session('auth_vinculos'), 404);
+        $resp = $this->api->identidade()->get('/v1/auth/me');
+        if (in_array($resp->status(), [401, 403], true)) return $this->falhaTroca($request, false, $resp->status());
+        $me = $resp->json('data');
+        abort_unless($resp->successful() && is_array($me) && !empty($me['perfil']) && is_array($me['permissoes'] ?? null), 503);
+        $revisao = ContextoWeb::ativarLegado($me);
+        if ($request->expectsJson()) return response()->json(['url'=>route('painel'), 'revisao'=>$revisao]);
+        return redirect()->route('painel');
+    }
+
 }

@@ -7,6 +7,7 @@ use Tests\TestCase;
 
 class TrocaContextoModalTest extends TestCase
 {
+    use \Tests\Support\ContextoSelecionado;
     private array $atual;
 
     private function preparar(bool $interno=false): string
@@ -18,7 +19,7 @@ class TrocaContextoModalTest extends TestCase
         $this->atual=['token'=>'contexto-atual-secreto','vinculo_id'=>11,'perfil'=>'professor','permissoes'=>['prova.ver','gabarito.ver'],
             'espaco'=>['id'=>1,'tipo'=>'escola','nome'=>'Escola A']];
         if ($interno) $this->atual=['token'=>'contexto-atual-secreto','tipo_contexto'=>'interno','acesso_interno_id'=>1,'perfil'=>'suporte','permissoes'=>[]];
-        return ContextoWeb::criar($this->atual);
+        return $this->selecionarContextoFixture($this->atual);
     }
 
     private function opcoes(): array
@@ -46,7 +47,7 @@ class TrocaContextoModalTest extends TestCase
     public function test_vinculo_unico_nao_renderiza_icone_nem_modal(): void
     {
         $ctx=$this->preparar();$this->api([$this->opcoes()[0]]);
-        $this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/referencia-visual')->assertOk()->assertSee('Meu espaço')
+        $this->get('/app/referencia-visual')->assertOk()->assertSee('Meu espaço')
             ->assertDontSee('id="contexto-trocar"',false)->assertDontSee('id="troca-contexto-modal"',false);
         Http::assertSentCount(2);
     }
@@ -54,7 +55,7 @@ class TrocaContextoModalTest extends TestCase
     public function test_modal_preserva_identidade_atual_csrf_e_nao_expoe_tokens(): void
     {
         $ctx=$this->preparar();$this->api($this->opcoes());
-        $r=$this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/referencia-visual')->assertOk()->assertSee('id="contexto-trocar"',false)
+        $r=$this->get('/app/referencia-visual')->assertOk()->assertSee('id="contexto-trocar"',false)
             ->assertSee('aria-haspopup="dialog"',false)->assertSee('id="troca-contexto-modal"',false)
             ->assertSee('Atual')->assertSee('Escola &lt;teste&gt; B',false)->assertSee('data-sem-contexto',false)
             ->assertDontSee('contexto-atual-secreto')->assertDontSee('Bearer identidade');
@@ -69,16 +70,17 @@ class TrocaContextoModalTest extends TestCase
     public function test_acesso_interno_unico_e_alternativa_escolar_sao_contados_separadamente(): void
     {
         $ctx=$this->preparar(true);$this->api([],[['id'=>1,'perfil'=>'suporte']]);
-        $this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/painel')->assertOk()->assertDontSee('id="contexto-trocar"',false);
+        $this->get('/app/painel')->assertOk()->assertDontSee('id="contexto-trocar"',false);
+        $this->withHeader('X-G360-Revisao', session('auth_contexto_revisao'));
         Http::swap(new \Illuminate\Http\Client\Factory());
         $this->api([$this->opcoes()[0]],[['id'=>1,'perfil'=>'suporte']]);
-        $this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/painel')->assertOk()->assertSee('Trocar acesso')->assertSee('Equipe Gabarito360')->assertSee('Escola A');
+        $this->get('/app/painel')->assertOk()->assertSee('Trocar acesso')->assertSee('Equipe Gabarito360')->assertSee('Escola A');
     }
 
     public function test_falha_de_consulta_nao_inventa_alternativas_e_apresenta_orientacao(): void
     {
         $ctx=$this->preparar();$this->api([],[],503);
-        $this->get('/acessos/'.ContextoWeb::referencia($this->atual).'/referencia-visual')->assertOk()->assertDontSee('id="contexto-trocar"',false)
+        $this->get('/app/referencia-visual')->assertOk()->assertDontSee('id="contexto-trocar"',false)
             ->assertSee('Não foi possível verificar outros acessos.');
     }
 
@@ -90,20 +92,21 @@ class TrocaContextoModalTest extends TestCase
             return Http::response(['data'=>['token'=>'novo-token-secreto','vinculo_id'=>22,'perfil'=>'professor','permissoes'=>[],
                 'espaco'=>['id'=>2,'tipo'=>'escola','nome'=>'Escola B']]],201);
         });
-        $r=$this->postJson('/vinculos',['vinculo_id'=>22])->assertOk()->assertDontSee('novo-token-secreto');
-        $this->assertSame('/acessos/vinculo-22/painel',parse_url($r->json('url'),PHP_URL_PATH));
+        $r=$this->postJson('/app/vinculos',['vinculo_id'=>22])->assertOk()->assertDontSee('novo-token-secreto');
+        $this->assertSame('/app/painel',parse_url($r->json('url'),PHP_URL_PATH));
         $this->assertNull(parse_url($r->json('url'),PHP_URL_QUERY));
         $this->assertStringNotContainsString($ctx,$r->json('url'));
-        $this->assertSame('contexto-atual-secreto',ContextoWeb::obter($ctx)['token']);
+        $this->assertNull(ContextoWeb::obter($ctx));
         $this->assertSame('novo-token-secreto',ContextoWeb::resolverReferencia('vinculo-22')['dados']['token']);
         $this->assertSame('identidade',session('auth_token'));
+        $this->withHeader('X-G360-Revisao', session('auth_contexto_revisao'));
         Http::swap(new \Illuminate\Http\Client\Factory());
         Http::fake(['*'=>Http::response(['message'=>'revogado'],403)]);
-        $this->postJson('/vinculos',['vinculo_id'=>22])->assertStatus(409)->assertJsonPath('message','Este vínculo não está disponível. Atualize a página para conferir seus acessos.');
-        $this->assertSame('contexto-atual-secreto',ContextoWeb::obter($ctx)['token']);
+        $this->postJson('/app/vinculos',['vinculo_id'=>22])->assertStatus(409)->assertJsonPath('message','Este vínculo não está disponível. Atualize a página para conferir seus acessos.');
+        $this->assertNull(ContextoWeb::obter($ctx));
     }
 
-    public function test_selecao_interna_json_revalida_sem_sobrescrever_o_acesso_da_outra_aba(): void
+    public function test_selecao_interna_json_revalida_substitui_acesso_ativo_e_invalida_contexto_anterior(): void
     {
         $ctx=$this->preparar(true);
         Http::fake(function($r){
@@ -112,28 +115,30 @@ class TrocaContextoModalTest extends TestCase
             return Http::response(['data'=>['token'=>'interno-novo-secreto','tipo_contexto'=>'interno','acesso_interno_id'=>2,
                 'perfil'=>'desenvolvedor','permissoes'=>[]]],201);
         });
-        $r=$this->postJson('/vinculos/interno',['acesso_interno_id'=>2])->assertOk()->assertDontSee('interno-novo-secreto');
-        $this->assertSame('/acessos/interno-2/painel',parse_url($r->json('url'),PHP_URL_PATH));
+        $r=$this->postJson('/app/vinculos/interno',['acesso_interno_id'=>2])->assertOk()->assertDontSee('interno-novo-secreto');
+        $this->assertSame('/app/painel',parse_url($r->json('url'),PHP_URL_PATH));
         $this->assertNull(parse_url($r->json('url'),PHP_URL_QUERY));
         $this->assertStringNotContainsString($ctx,$r->json('url'));
         $this->assertSame('interno-novo-secreto',ContextoWeb::resolverReferencia('interno-2')['dados']['token']);
-        $this->assertSame('contexto-atual-secreto',ContextoWeb::obter($ctx)['token']);
+        $this->assertNull(ContextoWeb::obter($ctx));
+        $this->withHeader('X-G360-Revisao', session('auth_contexto_revisao'));
         Http::swap(new \Illuminate\Http\Client\Factory());
         Http::fake(['*'=>Http::response([],403)]);
-        $this->postJson('/vinculos/interno',['acesso_interno_id'=>2])->assertStatus(409);
-        $this->assertSame('contexto-atual-secreto',ContextoWeb::obter($ctx)['token']);
+        $this->postJson('/app/vinculos/interno',['acesso_interno_id'=>2])->assertStatus(409);
+        $this->assertNull(ContextoWeb::obter($ctx));
     }
 
     public function test_falha_de_servico_nao_afirma_que_troca_foi_recusada(): void
     {
         $ctx=$this->preparar();
         Http::fake(['*'=>Http::response([],503)]);
-        $this->postJson('/vinculos',['vinculo_id'=>22])->assertStatus(503)
+        $this->postJson('/app/vinculos',['vinculo_id'=>22])->assertStatus(503)
             ->assertJsonPath('message','Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.');
         $this->assertSame('contexto-atual-secreto',ContextoWeb::obter($ctx)['token']);
+        $this->withHeader('X-G360-Revisao', session('auth_contexto_revisao'));
         Http::swap(new \Illuminate\Http\Client\Factory());
         Http::fake(fn()=>throw new \Illuminate\Http\Client\ConnectionException('Simulação local'));
-        $this->postJson('/vinculos',['vinculo_id'=>22])->assertStatus(503)
+        $this->postJson('/app/vinculos',['vinculo_id'=>22])->assertStatus(503)
             ->assertJsonPath('message','Não foi possível confirmar a troca. Atualize a página antes de tentar novamente.');
         $this->assertSame('contexto-atual-secreto',ContextoWeb::obter($ctx)['token']);
     }

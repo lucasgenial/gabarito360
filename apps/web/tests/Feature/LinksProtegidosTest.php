@@ -9,7 +9,7 @@ class LinksProtegidosTest extends TestCase
     public function test_gets_com_segredos_legados_sao_limpos_sem_consulta_nem_acao(): void
     {
         Http::preventStrayRequests();
-        foreach (['/redefinir-senha', '/convite', '/confirmar-email', '/vinculos/convite'] as $url) {
+        foreach (['/redefinir-senha', '/convite', '/confirmar-email', '/app/vinculos/convite'] as $url) {
             $this->get($url.'?token='.str_repeat('a',64).'&email=pessoa%40example.test')
                 ->assertStatus(400);
         }

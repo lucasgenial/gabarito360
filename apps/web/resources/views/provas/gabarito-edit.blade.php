@@ -103,11 +103,11 @@
 
 {{-- Formulários ocultos para submit via JS --}}
 <form id="form-salvar" method="POST" action="{{ route('provas.gabarito.salvar', $prova['id']) }}" style="display:none;">
-  @csrf
+  @csrf <x-revisao-acesso />
   <div id="inputs-salvar"></div>
 </form>
 <form id="form-publicar" method="POST" action="{{ route('provas.gabarito.publicar', $prova['id']) }}" style="display:none;">
-  @csrf
+  @csrf <x-revisao-acesso />
 </form>
 
 <div style="height:48px;"></div>

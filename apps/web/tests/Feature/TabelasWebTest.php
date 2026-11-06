@@ -3,21 +3,25 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\AcessoAtivoLegado;
 
 class TabelasWebTest extends TestCase
 {
+    use AcessoAtivoLegado;
+
     protected function setUp(): void
     {
         parent::setUp();
         config(['services.api.base_url'=>'http://api.test/api']);
         Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'ficticio','auth_perfil'=>'admin_rede','auth_nome'=>'Teste']);
+        $this->selecionarAcessoLegado('admin_rede', ['aluno.ver', 'turma.ver', 'prova.ver', 'usuario.ver']);
     }
 
     public function test_falha_na_api_nao_e_apresentada_como_lista_vazia(): void
     {
-        Http::fake(['*'=>Http::response(['message'=>'Indisponível'],503)]);
-        foreach (['/alunos','/turmas','/provas','/membros'] as $url) {
+        $this->apiLegada(['*'=>Http::response(['message'=>'Indisponível'],503)]);
+        foreach (['/app/alunos','/app/turmas','/app/provas','/app/membros'] as $url) {
             $this->get($url)->assertOk()->assertSee('Não foi possível carregar')
                 ->assertDontSee('Nenhum aluno encontrado')->assertDontSee('Nenhuma turma encontrada')
                 ->assertDontSee('Nenhuma prova encontrada')->assertDontSee('Nenhum membro encontrado')
@@ -27,11 +31,11 @@ class TabelasWebTest extends TestCase
 
     public function test_filtro_sem_resultado_nao_sugere_cadastrar_primeiro_registro(): void
     {
-        Http::fake(['*'=>Http::response(['data'=>['alunos'=>[],'turmas'=>[],'provas'=>[],
+        $this->apiLegada(['*'=>Http::response(['data'=>['alunos'=>[],'turmas'=>[],'provas'=>[],
             'usuarios'=>[],'totais'=>[],'kpis'=>[]]])]);
-        foreach (['/alunos?busca=termo-sem-resultado','/turmas?busca=termo-sem-resultado',
-            '/provas?busca=termo-sem-resultado','/membros?busca=termo-sem-resultado',
-            '/alunos?ativo=0','/turmas?ativo=0'] as $url) {
+        foreach (['/app/alunos?busca=termo-sem-resultado','/app/turmas?busca=termo-sem-resultado',
+            '/app/provas?busca=termo-sem-resultado','/app/membros?busca=termo-sem-resultado',
+            '/app/alunos?ativo=0','/app/turmas?ativo=0'] as $url) {
             $this->get($url)->assertOk()->assertSee('Limpar')
                 ->assertSee('Ajuste ou limpe os filtros')
                 ->assertDontSee('Cadastre o primeiro aluno')->assertDontSee('Crie a primeira prova')
@@ -43,10 +47,10 @@ class TabelasWebTest extends TestCase
     {
         $alunos=[];
         for ($i=1;$i<=25;$i++) $alunos[]=['id'=>$i,'nome'=>'Aluno <teste> '.$i,'matricula'=>'F'.$i,'ativo'=>true,'turma_nome'=>'Turma A','turma_serie'=>'1º'];
-        Http::fake(['*/v1/alunos*'=>Http::response(['data'=>['alunos'=>$alunos,'kpis'=>['total_alunos'=>25]]]),
+        $this->apiLegada(['*/v1/alunos*'=>Http::response(['data'=>['alunos'=>$alunos,'kpis'=>['total_alunos'=>25]]]),
             '*/v1/turmas*'=>Http::response(['data'=>['turmas'=>[]]]),
             '*/v1/auth/me'=>Http::response(['data'=>['perfil'=>'admin_rede','titular'=>false]])]);
-        $html=$this->get('/alunos?busca=Aluno')->assertOk()->assertSee('Aluno &lt;teste&gt; 25',false)->getContent();
+        $html=$this->get('/app/alunos?busca=Aluno')->assertOk()->assertSee('Aluno &lt;teste&gt; 25',false)->getContent();
         $doc=new \DOMDocument(); @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);
         $xp=new \DOMXPath($doc);
         $this->assertSame(25,$xp->query('//table[contains(@class,"tabela-padrao")]/tbody/tr')->length);
@@ -59,11 +63,11 @@ class TabelasWebTest extends TestCase
 
     public function test_acoes_post_de_equipe_mantem_alvo_csrf_e_estados(): void
     {
-        $this->withSession(['auth_permissoes'=>['usuario.ver','usuario.gerir']]);
+        $this->selecionarAcessoLegado('admin_rede', ['usuario.ver', 'usuario.gerir']);
         $membros=[];
         foreach (['ativo','suspenso','pendente'] as $i=>$situacao) $membros[]=['id'=>$i+1,'vinculo_id'=>$i+10,'nome'=>'Pessoa '.$i,'email'=>'teste'.$i.'@example.test','perfil'=>'professor','ativo'=>true,'situacao'=>$situacao];
-        Http::fake(['*'=>Http::response(['data'=>['usuarios'=>$membros,'totais'=>['professor'=>3]]])]);
-        $html=$this->get('/membros')->assertOk()->assertSee('Suspender vínculo')->assertSee('Reativar vínculo')->getContent();
+        $this->apiLegada(['*'=>Http::response(['data'=>['usuarios'=>$membros,'totais'=>['professor'=>3]]])]);
+        $html=$this->get('/app/membros')->assertOk()->assertSee('Suspender vínculo')->assertSee('Reativar vínculo')->getContent();
         $doc=new \DOMDocument(); @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$html);$xp=new \DOMXPath($doc);
         $this->assertSame(3,$xp->query('//td[@data-rotulo="Ações"]//a[contains(@href,"/editar")]')->length);
         $this->assertSame(3,$xp->query('//td[@data-rotulo="Ações"]//a[contains(@href,"/permissoes")]')->length);

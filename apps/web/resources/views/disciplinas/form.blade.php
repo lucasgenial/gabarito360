@@ -30,7 +30,7 @@
 @endunless
 @if($disciplina || $selecionada || ($f['origem']??'')==='propria')
 <form method="POST" action="{{ $disciplina?route('disciplinas.update',$disciplina['id']):route('disciplinas.store') }}" class="card card-pad dc1-stack">
-  @csrf @if($disciplina)@method('PUT')<input type="hidden" name="versao" value="{{ old('versao',$disciplina['versao']) }}">@endif
+  @csrf <x-revisao-acesso /> @if($disciplina)@method('PUT')<input type="hidden" name="versao" value="{{ old('versao',$disciplina['versao']) }}">@endif
   @include('disciplinas._retorno')
   @if(!$disciplina && $selecionada)<input type="hidden" name="referencia" value="{{ $selecionada['chave'] }}">@endif
   <h2>Dados na escola</h2>

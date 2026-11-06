@@ -25,7 +25,7 @@
 @elseif($previa)
 <section class="card card-pad pedidos-bloco"><h2>Arquivo disponível</h2><p class="pedidos-ref">{{ $previa['referencia'] }}</p><p>Campos: {{ implode(', ',$previa['campos']) }}</p>
 <p>Expira em {{ \Illuminate\Support\Carbon::parse($previa['expira_em'])->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }} (Brasília).</p>
-<a class="btn btn-primary" href="{{ route('pedidos.exportacoes.arquivo',['id'=>$previa['referencia']]) }}">Baixar arquivo JSON</a><p>O acesso será conferido novamente ao baixar.</p></section>
+<form method="POST" action="{{ route('pedidos.exportacoes.arquivo',['id'=>$previa['referencia']]) }}" class="arquivo-form">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-primary">Baixar arquivo JSON</button></form><p>O acesso será conferido novamente ao baixar.</p></section>
 @endif
 <section class="card card-pad pedidos-bloco"><h2>{{ $gestor?'Revogar autorização':'Gerar arquivo autorizado' }}</h2>
 <p>{{ $gestor?'Use a referência e a versão da autorização que deseja revogar. O histórico será preservado.':'Informe a autorização fornecida pelo administrador da rede ou proprietário do espaço. Nenhum campo adicional será incluído.' }}</p>

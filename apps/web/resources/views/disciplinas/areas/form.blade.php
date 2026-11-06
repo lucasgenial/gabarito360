@@ -5,7 +5,7 @@
 <x-pagina :titulo="$area?'Editar área':'Adicionar área'"><x-slot:sub>Organização das disciplinas.</x-slot:sub></x-pagina>
 @include('disciplinas._base')
 <form class="card card-pad dc1-stack" method="POST" action="{{ $area?route('areas.update',$area['id']):route('areas.store') }}">
-  @csrf @include('disciplinas._retorno') @if($area)@method('PUT')<input type="hidden" name="versao" value="{{ old('versao',$area['versao']) }}">@endif
+  @csrf <x-revisao-acesso /> @include('disciplinas._retorno') @if($area)@method('PUT')<input type="hidden" name="versao" value="{{ old('versao',$area['versao']) }}">@endif
   <div class="field"><label for="area-nome">Nome da área <span aria-hidden="true">*</span></label><input class="input" id="area-nome" name="nome" required maxlength="100" value="{{ old('nome',$area['nome']??'') }}" @error('nome') aria-invalid="true" aria-describedby="dc1-erro-nome" @enderror>@include('disciplinas._erro',['campo'=>'nome'])</div>
   <div class="dc1-grade">
     <div class="field"><label for="area-sigla">Sigla <span class="field-help">(opcional)</span></label><input class="input" id="area-sigla" name="sigla" maxlength="20" value="{{ old('sigla',$area['sigla']??'') }}" @error('sigla') aria-invalid="true" aria-describedby="dc1-erro-sigla" @enderror>@include('disciplinas._erro',['campo'=>'sigla'])</div>

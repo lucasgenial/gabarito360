@@ -6,7 +6,7 @@
 <x-aviso>Esta consulta não autoriza nem inicia uma cópia. Os textos precisam de revisão antes das decisões de origem e destino.</x-aviso>
 @include('copias._materiais',['materiais'=>$dados['materiais']])
 <form method="POST" action="{{ route('copias.material.preparar') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf
+  @csrf <x-revisao-acesso />
   <input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   @foreach($dados['materiais'] as $item)<input type="hidden" name="provas[]" value="{{ $item['origem_id'] }}">@endforeach
   <div class="field"><label for="codigo">Código fornecido pelo destinatário</label><input class="input" name="codigo" id="codigo" required minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></div>

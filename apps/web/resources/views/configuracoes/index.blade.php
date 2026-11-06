@@ -40,7 +40,7 @@
   </div>
   <div class="section-body">
     <form method="POST" action="{{ route('configuracoes.update') }}">
-      @csrf
+      @csrf <x-revisao-acesso />
       @method('PUT')
       <input type="hidden" name="rede_id" value="{{ $config['rede_id'] }}" />
       <div class="form-row">
