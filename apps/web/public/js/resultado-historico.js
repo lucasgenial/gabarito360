@@ -1,17 +1,17 @@
 window.iniciarHistoricoResultado=function(base){
   const root=document.getElementById('historico-tentativas'),qtd=document.getElementById('resultado-tentativas-total'),carga=G360Carga(root);
-  function carregar(alvo,navegar=false){
+  function carregar(alvo,navegar=false,voltar=null){
     return carga.executar(()=>G360BuscarJSON(alvo),d=>{
       if(typeof d.html!=='string'||!Number.isFinite(d.total))throw new Error('Histórico indisponível');
       qtd.textContent=d.total+' '+(d.total===1?'leitura registrada':'leituras registradas');root.hidden=d.total<=1;
       if(d.total<=1)return;
       root.querySelector('[data-carga-conteudo]').innerHTML=d.html;iniciarHistoricoDocumento();
-      if(navegar)requestAnimationFrame(()=>{const foco=document.getElementById('tentativa-detalhe-titulo')||document.getElementById('historico-titulo');foco?.focus({preventScroll:true});(document.getElementById('tentativa-detalhe')||foco)?.scrollIntoView({block:'start'});});
+      if(navegar)requestAnimationFrame(()=>{const acionador=voltar?[...root.querySelectorAll('[data-historico-leitura]')].find(b=>b.dataset.historicoLeitura===voltar):null;const foco=acionador||document.getElementById('tentativa-detalhe-titulo')||document.getElementById('historico-titulo');foco?.focus({preventScroll:true});(document.getElementById('tentativa-detalhe')||foco)?.scrollIntoView({block:'start'});});
     });
   }
   root.addEventListener('click',e=>{
     const b=e.target.closest('[data-historico-recurso]');if(!b||root.getAttribute('aria-busy')==='true')return;
-    e.preventDefault();carregar(JSON.parse(b.dataset.historicoRecurso),true);
+    e.preventDefault();carregar(JSON.parse(b.dataset.historicoRecurso),true,b.dataset.historicoVoltar||null);
   });
   carregar(base);
 };

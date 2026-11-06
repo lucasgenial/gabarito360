@@ -19,3 +19,13 @@ Código novo fica em arquivos JavaScript externos. HTML fornece atributos e dado
 Filtros, buscas e paginação não são confundidos com autorização. O validador público de documentos preserva códigos públicos de conferência e QR codes existentes. Assets estáticos versionados não são recursos escolares privados. Caminhos REST internos da API permanecem inalterados.
 
 Consulta prévia UI/UX aprovada em `ur4-direcao-design.md`; orientação de segurança em `ur4-motor-bff-revisao-previa.md`, ambos em `operacao-20261102`. Não substituem testes e revisão final da implementação.
+
+## Verificação da implementação
+
+A suíte Web local passou com 285 testes e 9.309 asserções. A emissão transversal cobre 119 operações parametrizadas e 123 pares operação/verbo, tanto em documento completo quanto em fragmento HTML. Essa verificação confere os destinos e as referências; não substitui as verificações de autorização dos controladores e da API.
+
+Os 34 testes Node e os sete ensaios Chromium do job de telas passaram localmente. Foram preservados os cenários de contexto antigo, CSRF, duas abas, histórico, atualização sem repetição de alterações, falha de leitura, retorno de foco e conteúdo privado. A conferência no Chrome do usuário validou duas turmas fictícias no mesmo endereço, edição independente e atualização, além do modal com JavaScript externo.
+
+O parecer `ur4-design-final.md` aprovou o motor e o piloto de Turmas em desktop e celular, incluindo carregamento, erro, recuperação, saída sem JavaScript e teclado. O complemento de foco do histórico foi aprovado separadamente. O alcance visual não equivale a uma inspeção manual de todos os perfis e módulos.
+
+CI, comparação dos dados e arquivos, publicação e observação operacional na homologação continuam gates de entrega. A produção permanece fora desta autorização.
