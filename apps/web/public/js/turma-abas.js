@@ -46,7 +46,12 @@
   });
   selecionar(secaoHash() || nav.dataset.secaoInicial);
   const painelAtivo=[...paineis.values()].find(p=>!p.hidden);
-  painelAtivo?.querySelector('[aria-invalid="true"]')?.focus();
+  const erro=painelAtivo?.querySelector('[aria-invalid="true"]');
+  if(erro){
+    const focar=()=>requestAnimationFrame(()=>{if(!painelAtivo.hidden)erro.focus();});
+    if(document.readyState==='complete')focar();
+    else window.addEventListener('load',focar,{once:true});
+  }
   window.addEventListener('hashchange',()=>selecionar(secaoHash()||nav.dataset.secaoInicial,false,false));
   window.addEventListener('resize',()=>selecionar(abas.find(a=>a.getAttribute('aria-selected')==='true')?.dataset.turmaAba,false,false));
 })();
