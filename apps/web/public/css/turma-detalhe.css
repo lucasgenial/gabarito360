@@ -17,3 +17,5 @@
 .tela-turma .tu1-ajuda p{margin-block:8px}
 .tela-turma .tu1-catalogo .field{min-width:0;flex:1}
 @media(max-width:600px){.tela-turma .tu1-abas{margin-bottom:16px}.tela-turma .tu1-abas a{padding-inline:12px}.tela-turma .tu1-acoes{align-items:stretch}.tela-turma .tu1-acoes .field{flex-basis:100%}}
+
+.tu1-atribuicao{border-top:1px solid var(--border);margin-top:24px;padding-top:24px}.tu1-filtros-painel{margin-block:16px}.tu1-grafico{display:grid;gap:0}.tu1-grafico-linha{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,1fr);gap:24px;padding-block:16px;border-bottom:1px solid var(--border)}.tu1-grafico-valor{font-weight:700;margin-bottom:8px}.tu1-grafico-trilho{height:12px;background:var(--bg);border-radius:6px;overflow:hidden}.tu1-grafico-trilho span{display:block;height:100%;background:var(--accent);border-radius:6px}.tu1-documento{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-top:24px}.tu1-documento .field{flex:1;min-width:180px}.tu1-documento button{min-height:44px}@media(max-width:600px){.tu1-grafico-linha{grid-template-columns:1fr;gap:8px}.tu1-documento .field{flex-basis:100%}}

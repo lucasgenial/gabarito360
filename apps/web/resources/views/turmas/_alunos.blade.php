@@ -1,3 +1,5 @@
+@php($pedagogico=!\App\Support\Acesso::administrativo())
+@php($gestorAluno=in_array(\App\Support\Acesso::perfil(),['coordenador','dir_escolar','vice_dir_escolar','secretario_escolar'],true))
 <div class="card">
 <div class="card-pad">
 {{-- Seção de alunos --}}
@@ -27,8 +29,8 @@
       <tr>
         <th scope="col">Aluno</th>
         <th scope="col">Matrícula</th>
-        <th scope="col">Média geral</th>
-        <th scope="col">Provas</th>
+        @if($pedagogico)<th scope="col">Média geral</th>
+        <th scope="col">Provas</th>@endif
         <th scope="col">Status</th>
         <th scope="col">Ações</th>
       </tr>
@@ -43,8 +45,8 @@
             </div>
           </div></td>
           <td style="font-family:var(--font-mono);" data-rotulo="Matrícula"><div class="tabela-valor">{{ $a['matricula'] ?? '—' }}</div></td>
-          <td style="font-family:var(--font-mono);" data-rotulo="Média geral"><div class="tabela-valor">{{ ($a['media_geral'] ?? null) !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</div></td>
-          <td style="font-family:var(--font-mono);" data-rotulo="Provas"><div class="tabela-valor">{{ $a['total_provas'] ?? 0 }}</div></td>
+          @if($pedagogico)<td style="font-family:var(--font-mono);" data-rotulo="Média geral"><div class="tabela-valor">{{ ($a['media_geral'] ?? null) !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</div></td>
+          <td style="font-family:var(--font-mono);" data-rotulo="Provas"><div class="tabela-valor">{{ $a['total_provas'] ?? 0 }}</div></td>@endif
           <td data-rotulo="Status"><div class="tabela-valor">
             @if($a['ativo'] ?? true)
               <span class="badge badge-success badge-dot">Ativo</span>
@@ -52,11 +54,17 @@
               <span class="badge badge-danger badge-dot">Inativo</span>
             @endif
           </div></td>
-          <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a></div></td>
+          <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor tu1-acoes"><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
+          @if($gestorAluno)
+          @pode('aluno.gerir')<a class="btn btn-sm btn-secondary" href="{{ route('alunos.edit',$a['id']) }}">Editar<span class="sr-only"> {{ $a['nome'] }}</span></a>
+          @if($a['ativo'])<a class="btn btn-sm btn-secondary" href="{{ route('alunos.transferencia',$a['id']) }}">Transferir<span class="sr-only"> {{ $a['nome'] }} entre turmas</span></a>@endif @endpode
+          @pode('aluno.desativar')<form method="POST" action="{{ route('alunos.toggle',$a['id']) }}" data-turma-confirmar="{{ $a['ativo']?'Desativar':'Ativar' }} {{ $a['nome'] }}? O histórico será preservado.">@csrf <x-revisao-acesso /><input type="hidden" name="esperado_ativo" value="{{ (int)$a['ativo'] }}"><button class="btn btn-sm btn-secondary" @if($a['ativo']) style="color:var(--danger);border-color:var(--danger)" @endif type="submit">{{ $a['ativo']?'Desativar':'Ativar' }}<span class="sr-only"> {{ $a['nome'] }}</span></button></form>@endpode
+          @endif
+          </div></td>
         </tr>
       @empty
         <tr id="empty-row">
-          <td colspan="6" style="text-align:center;padding:48px 20px;color:var(--muted);">
+          <td colspan="{{ $pedagogico?6:4 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="aluno" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhum aluno matriculado</div>
             <p>Os alunos aparecerão aqui após o cadastro no módulo de Alunos.</p>

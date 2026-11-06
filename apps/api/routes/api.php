@@ -225,6 +225,7 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}',         [AlunoController::class, 'show'])->middleware('permissao:aluno.ver');
             Route::put('{id}',         [AlunoController::class, 'update'])->middleware('permissao:aluno.gerir');
             Route::post('{id}/toggle', [AlunoController::class, 'toggle'])->middleware('permissao:aluno.desativar');
+            Route::post('{id}/transferencias-turma', [AlunoController::class, 'transferir'])->middleware('permissao:aluno.gerir');
             // Resultado individual (MP-022)
             Route::get('{id}/resultados/{provaId}', [ResultadoController::class, 'show'])->middleware('permissao:resultado.ver');
             Route::get('{id}/resultados/{provaId}/pdf', [ResultadoController::class, 'pdf'])->middleware('permissao:resultado.compartilhar');
@@ -245,6 +246,8 @@ Route::prefix('v1')->group(function () {
         Route::prefix('turmas')->group(function () {
             Route::get('/',            [TurmaController::class, 'index'])->middleware('permissao:turma.ver');
             Route::post('/',           [TurmaController::class, 'store'])->middleware('permissao:turma.gerir');
+            Route::get('{id}/painel', [\App\Http\Controllers\Api\PainelTurmaController::class,'show'])->middleware('permissao:relatorio.turma');
+            Route::get('{id}/painel/pdf', [\App\Http\Controllers\Api\PainelTurmaController::class,'pdf'])->middleware(['permissao:relatorio.turma','throttle:5,1']);
             Route::get('{id}',         [TurmaController::class, 'show'])->middleware('permissao:turma.ver');
             Route::put('{id}',         [TurmaController::class, 'update'])->middleware('permissao:turma.gerir');
             Route::post('{id}/toggle', [TurmaController::class, 'toggle'])->middleware('permissao:turma.desativar');

@@ -28,6 +28,7 @@ class TurmaOrganizacaoWebTest extends TestCase
             $dados=match($p){
                 '/api/v1/auth/me'=>$this->me,
                 '/api/v1/auth/vinculos'=>[],
+                '/api/v1/alunos/1'=>['id'=>1,'nome'=>'Aluno fictício','matricula'=>'F1','turma_id'=>14,'turma_nome'=>'Turma A','ativo'=>true,'turma'=>['id'=>14,'escola_id'=>5]],
                 '/api/v1/turmas/14','/api/v1/turmas/15'=>['id'=>(int)basename($p),'nome'=>str_ends_with($p,'14')?'Turma A':'Turma B','serie'=>'3ª série','turno'=>'tarde','escola_id'=>5,'ano_letivo'=>2026,'ativo'=>true,'media_turma'=>null,'total_alunos'=>0,'total_provas'=>0,'alunos'=>[],'provas'=>[]],
                 '/api/v1/turmas/14/disciplinas','/api/v1/turmas/15/disciplinas'=>['componentes'=>[],'gerir'=>$this->me['perfil']==='coordenador','atribuir'=>$this->me['perfil']==='coordenador'],
                 '/api/v1/disciplinas'=>['disciplinas'=>[['id'=>31,'nome'=>'Matemática <teste>','ativo'=>true]],'gerir'=>true],
@@ -44,7 +45,7 @@ class TurmaOrganizacaoWebTest extends TestCase
         $r=$this->consultarTela('/app/turmas/14?secao=disciplinas&catalogo_busca=mat&catalogo_pagina=2')->assertOk()
             ->assertSee('data-secao-inicial="disciplinas"',false)->assertSee('Disciplina do catálogo da escola')
             ->assertSee('Página 2 de 3')->assertSee('Matemática &lt;teste&gt;',false)->assertDontSee('Matemática <teste>',false)
-            ->assertSee('Adicionar à turma')->assertSee('Conceder acesso')->assertSee('Saiba mais sobre disciplinas');
+            ->assertSee('Adicionar à turma')->assertSee('Nenhum professor disponível')->assertSee('Saiba mais sobre disciplinas');
         foreach(['visao-geral','alunos','disciplinas','provas','acesso']as$secao)$r->assertSee('data-turma-painel="'.$secao.'"',false);
         Http::assertSent(fn($r)=>parse_url($r->url(),PHP_URL_PATH)==='/api/v1/disciplinas' && $r['busca']==='mat' && (int)$r['page']===2 && (int)$r['ativo']===1 && !$r->offsetExists('secao'));
         Http::assertNotSent(fn($r)=>$r->method()!=='GET');
@@ -103,5 +104,31 @@ class TurmaOrganizacaoWebTest extends TestCase
         $this->alterarRecurso('POST','/app/turmas/14/professores',['usuario_id'=>2,'vinculo_id'=>9,'_retorno_tela'=>$b['referencia']])
             ->assertRetornoTela('/app/turmas/14?secao=acesso');
         Http::assertNotSent(fn($r)=>$r->method()==='POST' && $r->data()!==['usuario_id'=>2,'vinculo_id'=>9]);
+    }
+
+    public function test_cadastro_aluno_volta_para_aba_alunos_e_preview_sem_javascript_inline(): void
+    {
+        $this->preparar();
+        $r=$this->consultarTela('/app/alunos/novo?turma_id=14')->assertOk()->assertSee('aluno-cadastro.js')->assertDontSee('oninput=',false)->assertDontSee('onchange=',false);
+        $r->assertDestinoRecurso('turmas.show',['id'=>14],['secao'=>'alunos']);
+        $this->alterarRecurso('POST','/app/alunos',['turma_id'=>14,'nome'=>'Aluno fictício','matricula'=>'F1','data_nascimento'=>'2010-01-01'])->assertRetornoTela('/app/turmas/14?secao=alunos');
+    }
+
+    public function test_edicao_turma_em_pagina_completa_sem_modal_e_erros_retornam_formulario(): void
+    {
+        $this->preparar();
+        $this->consultarTela('/app/turmas/14')->assertOk()->assertDontSee('id="modal-editar"',false)->assertDestinoRecurso('turmas.edit',['id'=>14]);
+        $this->consultarTela('/app/turmas/14/editar')->assertOk()->assertSee('Salvar alterações')->assertSee('name="ano_letivo"',false)->assertDontSee('role="dialog"',false);
+        $this->alterarRecurso('PUT','/app/turmas/14',['nome'=>'','serie'=>'3','turno'=>'tarde'])->assertRetornoTela('/app/turmas/14/editar')->assertSessionHasErrors('nome');
+    }
+
+    public function test_editar_aluno_tem_retorno_a_turma_e_transferencia_recusa_professor(): void
+    {
+        $this->preparar();
+        $this->consultarTela('/app/alunos/1/editar')->assertOk()->assertSee('Salvar alterações')->assertDestinoRecurso('turmas.show',['id'=>14],['secao'=>'alunos']);
+        $this->alterarRecurso('PUT','/app/alunos/1',['nome'=>'','matricula'=>'F1','voltar_turma'=>1])->assertRetornoTela('/app/alunos/1/editar')->assertSessionHasErrors('nome');
+        $this->preparar('professor');
+        $this->consultarTela('/app/alunos/1/transferir')->assertForbidden();
+        $this->alterarRecurso('POST','/app/alunos/1/transferencias-turma',['turma_id'=>15])->assertForbidden();
     }
 }
