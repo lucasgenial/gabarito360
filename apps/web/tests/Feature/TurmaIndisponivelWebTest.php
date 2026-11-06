@@ -5,9 +5,11 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Tests\Support\AcessoAtivoLegado;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class TurmaIndisponivelWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use AcessoAtivoLegado;
 
     protected function setUp(): void
@@ -24,7 +26,7 @@ class TurmaIndisponivelWebTest extends TestCase
             $tentativas[] = [$r->method(), parse_url($r->url(), PHP_URL_PATH)];
             throw new ConnectionException('diagnostico-privado');
         });
-        $this->get('/app/turmas/14')->assertStatus(503)->assertHeader('Retry-After', '30')
+        $this->consultarTela('/app/turmas/14')->assertStatus(503)->assertHeader('Retry-After', '30')
             ->assertSee('Não foi possível carregar esta turma agora')->assertSee('Tentar novamente')
             ->assertSee('Voltar às turmas')->assertDontSee('diagnostico-privado')
             ->assertDontSee('Desempenho médio')->assertDontSee('Nenhum aluno');
@@ -37,7 +39,7 @@ class TurmaIndisponivelWebTest extends TestCase
     public function test_resposta_temporariamente_indisponivel_nao_vira_turma_inexistente(): void
     {
         $this->apiLegada(['*' => Http::response(['message' => 'diagnostico-privado'], 503)]);
-        $this->get('/app/turmas/14')->assertStatus(503)->assertSee('Tente novamente')
+        $this->consultarTela('/app/turmas/14')->assertStatus(503)->assertSee('Tente novamente')
             ->assertDontSee('diagnostico-privado')->assertDontSee('Turma não encontrada');
         Http::assertSentCount(2);
     }
@@ -45,7 +47,7 @@ class TurmaIndisponivelWebTest extends TestCase
     public function test_turma_nao_encontrada_mantem_404_sem_oferecer_retry_de_indisponibilidade(): void
     {
         $this->apiLegada(['*' => Http::response(['message' => 'Não encontrada'], 404)]);
-        $this->get('/app/turmas/14')->assertNotFound()->assertDontSee('Tentar novamente');
+        $this->consultarTela('/app/turmas/14')->assertNotFound()->assertDontSee('Tentar novamente');
         Http::assertSentCount(2);
     }
 }

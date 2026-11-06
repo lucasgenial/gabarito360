@@ -33,7 +33,7 @@
   }
   window.LeitorCartao=class {
     constructor(root,opcoes={}) {
-      this.root=root;this.sequencia=0;this.url=null;this.pdf=null;this.pagina=1;this.zoom=1;
+      this.root=root;this.sequencia=0;this.url=null;this.chaveDocumento=null;this.pdf=null;this.pagina=1;this.zoom=1;
       this.controles=opcoes.controles!==false;this.largura=opcoes.ajuste==='largura';
       root.classList.add('rev-leitor');
       root.innerHTML='<div class="rev-leitor-ferramentas" aria-label="Controles do PDF">'
@@ -64,22 +64,23 @@
     limpar() {
       this.sequencia++;this.abort?.abort();this.tarefa?.cancel();
       if(this.carga)this.carga.destroy().catch(()=>{});else this.pdf?.destroy().catch(()=>{});
-      this.pdf=null;this.carga=null;this.url=null;this.folha.hidden=true;this.canvas.width=this.canvas.height=0;
+      this.pdf=null;this.carga=null;this.url=null;this.chaveDocumento=null;this.folha.hidden=true;this.canvas.width=this.canvas.height=0;
       this.erro.hidden=true;this.estado.hidden=false;this.estado.textContent='Selecione um cartão para visualizar.';this.botoes(false);
       this.root.querySelector('[data-paginas]').hidden=true;this.area.setAttribute('aria-busy','false');
       this.ferramentas.hidden=!this.controles;
     }
     async carregar(url,forcar=false) {
-      if(url===this.url&&!forcar)return;
+      const chave=typeof url==='object'&&url!==null?JSON.stringify([url.url,url.referencia,url.metodo]):url;
+      if(chave===this.chaveDocumento&&!forcar)return;
       const repetindo=this.erro.contains(document.activeElement);
-      this.limpar();if(!url)return;this.url=url;
+      this.limpar();if(!url)return;this.url=url;this.chaveDocumento=chave;
       const seq=this.sequencia;this.abort=new AbortController();
       this.estado.innerHTML='<div class="g360-carregando g360-carregando-pagina"><div class="g360-carga-marca"><span class="g360-marca-carregando" aria-hidden="true"></span><span>Carregando cartão em PDF…</span></div><div class="g360-skeleton" aria-hidden="true"><i></i><i></i><i></i></div></div>';this.area.setAttribute('aria-busy','true');
       if(repetindo)this.area.focus({preventScroll:true});
       try {
         const timeout=setTimeout(()=>this.abort?.abort(),25000);
         let blob;
-        try {const r=await fetch(url,{credentials:'same-origin',cache:'no-store',signal:this.abort.signal});if(!r.ok)throw new Error('Cartão indisponível');blob=await r.blob();}
+        try {const r=await G360Requisicao(url,{credentials:'same-origin',cache:'no-store',signal:this.abort.signal});if(!r.ok)throw new Error('Cartão indisponível');blob=await r.blob();}
         finally {clearTimeout(timeout);}
         if(seq!==this.sequencia)return;
         const {pdfjs,lib}=await bibliotecas(),bytes=await converter(blob,lib);

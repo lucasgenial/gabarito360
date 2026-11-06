@@ -3,10 +3,12 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 use Tests\Support\AcessoAtivoLegado;
 
 class SiglaInstituicaoWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use AcessoAtivoLegado;
 
     private function preparar(): void
@@ -29,13 +31,14 @@ class SiglaInstituicaoWebTest extends TestCase
     public function test_formulario_edita_sigla_opcional_com_escape(): void
     {
         $this->preparar();
-        $this->get('/app/escolas/1/editar')->assertOk()->assertSee('Sigla (opcional)')->assertSee('name="sigla"',false)->assertSee('CE&quot;&lt;script&gt;',false);
+        $html=$this->consultarTela('/app/escolas/1/editar')->assertOk()->assertSee('Sigla (opcional)')->assertSee('name="sigla"',false)->getContent();
+        $dom=new \DOMDocument();@$dom->loadHTML($html);$xp=new \DOMXPath($dom);$this->assertSame('CE"<script>',$xp->query('//input[@name="sigla"]')->item(0)->getAttribute('value'));$this->assertSame(0,$xp->query('//script[not(@src) and not(@type="application/json") and contains(text(),"CE")]')->length);
     }
 
     public function test_sigla_chega_na_api_sem_substituir_nome_completo(): void
     {
         $this->preparar();
-        $this->put('/app/escolas/1',['nome'=>'Escola fictícia','sigla'=>'  CE-CAMPO  '])->assertRedirect()->assertSessionHas('sucesso');
+        $this->alterarRecurso('PUT', '/app/escolas/1',['nome'=>'Escola fictícia','sigla'=>'  CE-CAMPO  '])->assertRetornoTela()->assertSessionHas('sucesso');
         Http::assertSent(fn($r)=>$r->method()==='PUT' && $r['sigla']==='CE-CAMPO' && $r['nome']==='Escola fictícia');
     }
 }

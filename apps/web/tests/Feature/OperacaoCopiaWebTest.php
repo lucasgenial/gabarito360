@@ -3,9 +3,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class OperacaoCopiaWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private function preparar(array $permissoes=['copia.autorizar_origem']): array
     {
@@ -36,37 +38,37 @@ class OperacaoCopiaWebTest extends TestCase
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']);
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->operacao()]));
         $url='/app/copias/operacao/'.self::ID;
-        $this->get($url.'?lado=destino')->assertOk()->assertSee('Solicitar processamento')->assertSee('name="_token"',false)
+        $this->consultarTela($url.'?lado=destino')->assertOk()->assertSee('Solicitar processamento')->assertSee('name="_token"',false)
             ->assertSee('name="confirmado"',false)->assertPaginaSemSelecaoPrevia()->assertSee('não apaga cópias já publicadas');
-        $this->post($url.'/solicitar',[])->assertUnprocessable();
-        $this->post($url.'/solicitar',['confirmado'=>1,'ator_id'=>999,'lado'=>'origem'])->assertRedirect();
+        $this->alterarRecurso('POST', $url.'/solicitar',[])->assertUnprocessable();
+        $this->alterarRecurso('POST', $url.'/solicitar',['confirmado'=>1,'ator_id'=>999,'lado'=>'origem'])->assertRetornoTela();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/solicitar') && $r->data()===['confirmado'=>1] && $r->hasHeader('Authorization','Bearer contexto-resultados'));
-        $this->post($url.'/revogar',['lado'=>'destino','confirmado'=>1])->assertRedirect();
+        $this->alterarRecurso('POST', $url.'/revogar',['lado'=>'destino','confirmado'=>1])->assertRetornoTela();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/revogar') && $r->data()===['lado'=>'destino','confirmado'=>1]);
-        $this->post($url.'/revogar',['lado'=>'origem','confirmado'=>1])->assertForbidden();
+        $this->alterarRecurso('POST', $url.'/revogar',['lado'=>'origem','confirmado'=>1])->assertForbidden();
     }
     public function test_bloqueado_orienta_nova_selecao_sem_reabrir(): void
     {
         [$ctx,$me]=$this->preparar(); $d=array_replace($this->operacao('origem'),['estado'=>'bloqueado','execucao_solicitada'=>true,'pode_revogar'=>false]);
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]));
-        $this->get('/app/copias/operacao/'.self::ID.'?lado=origem')->assertOk()->assertSee('Preparar nova solicitação')
+        $this->consultarTela('/app/copias/operacao/'.self::ID.'?lado=origem')->assertOk()->assertSee('Preparar nova solicitação')
             ->assertSee('não duplica a cópia')->assertDontSee('name="confirmado"',false)->assertDontSee('Consultar acervo publicado');
-        $this->post('/app/copias/operacao/'.self::ID.'/solicitar',['confirmado'=>1])->assertForbidden();
+        $this->alterarRecurso('POST', '/app/copias/operacao/'.self::ID.'/solicitar',['confirmado'=>1])->assertForbidden();
     }
     public function test_acervo_exibe_pacote_legado_escapado_sem_formulario(): void
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']);
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:['lote_id'=>self::ID,'publicado_em'=>'2026-11-02 12:00:00','pacote'=>$this->pacote()]]));
-        $this->get('/app/copias/operacao/'.self::ID.'/acervo')->assertOk()->assertSee('Acervo de resultados')->assertSee('Legado sem versão original comprovada')
+        $this->consultarTela('/app/copias/operacao/'.self::ID.'/acervo')->assertOk()->assertSee('Acervo de resultados')->assertSee('Legado sem versão original comprovada')
             ->assertSee('Conferir respostas incluídas')->assertSee('8.00')->assertDontSee('<script>segredo</script>',false)->assertDontSee('name="confirmado"',false);
     }
     public function test_falha_generica_sem_flash_e_flag_fechada(): void
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']);
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'SEGREDO INTERNO'],409));
-        $this->post('/app/copias/operacao/'.self::ID.'/solicitar',['confirmado'=>1,'documento'=>'SEGREDO'])->assertStatus(409)->assertDontSee('SEGREDO');
+        $this->alterarRecurso('POST', '/app/copias/operacao/'.self::ID.'/solicitar',['confirmado'=>1,'documento'=>'SEGREDO'])->assertStatus(409)->assertDontSee('SEGREDO');
         $this->assertStringNotContainsString('SEGREDO',json_encode(session()->all()));
         config(['services.copias.interface_ativa'=>false]);
-        $this->get('/app/copias/operacao/'.self::ID.'?lado=destino')->assertNotFound();
+        $this->consultarTela('/app/copias/operacao/'.self::ID.'?lado=destino')->assertNotFound();
     }
 }

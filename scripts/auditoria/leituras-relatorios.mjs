@@ -9,8 +9,9 @@ try {
   const raster=await imagemRaster(browser);const c = await browser.newContext();
   let ativos=0,pico=0,falhar=true,consultas=[],soltar;
   const pendentes=[];
-  const botao=n=>`<button data-miniatura-cartao="${n}" data-miniatura-versao="1" data-miniatura-url="/app/cartoes/${n}/imagens/miniatura?v=1"><img data-miniatura-imagem><span data-miniatura-carga>Carregando</span><span data-miniatura-erro>Tentar novamente</span></button>`;
-  const thumbs=`<meta name="g360-revisao" content="revisao-ficticia-ci"><script src="/js/contexto-aba.js"></script><main id="root">${Array.from({length:6},(_,n)=>botao(n+1)).join('')}</main><script src="/js/cartoes-miniaturas.js"></script><script>window.thumbs=criarMiniaturasCartoes(document.getElementById('root'),()=>{});thumbs.atualizar();</script>`;
+  const descritor=(n,versao=1)=>({url:'/app/cartoes/miniatura/consultar',pagina:'/app/cartoes/miniatura',referencia:n.toString(16).padStart(48,'0'),metodo:'GET',versao});
+  const botao=n=>`<button data-miniatura-cartao="${n}" data-miniatura-versao="1" data-miniatura-url='${JSON.stringify(descritor(n))}'><img data-miniatura-imagem><span data-miniatura-carga>Carregando</span><span data-miniatura-erro>Tentar novamente</span></button>`;
+  const thumbs=`<meta name="g360-revisao" content="revisao-ficticia-ci"><meta name="csrf-token" content="csrf-ficticio"><script src="/js/contexto-aba.js"></script><main id="root">${Array.from({length:6},(_,n)=>botao(n+1)).join('')}</main><script src="/js/cartoes-miniaturas.js"></script><script>window.thumbs=criarMiniaturasCartoes(document.getElementById('root'),()=>{});thumbs.atualizar();</script>`;
   const validar=`<form id="documento-validacao" action="/validar"><input name="codigo" value="G360-${'A'.repeat(32)}"><input name="_token" value="ficticio"><input id="arquivo-documento" type="file"><button>Conferir</button></form><div id="documento-status" hidden></div><script src="/js/validacao-documento.js"></script>`;
   await c.route('**/*',async r=>{
     const u=new URL(r.request().url());
@@ -18,10 +19,10 @@ try {
     if(u.pathname==='/miniaturas')return r.fulfill({contentType:'text/html',body:thumbs});
     if(u.pathname==='/conferir')return r.fulfill({contentType:'text/html',body:validar});
     if(u.pathname.startsWith('/js/'))return r.fulfill({contentType:'text/javascript',body:readFileSync('apps/web/public'+u.pathname)});
-    if(/^\/app\/cartoes\/\d+\/imagens\/miniatura$/.test(u.pathname)){
-      assert.equal(u.search,'?v=1');assert.equal(r.request().headers()['x-g360-revisao'],'revisao-ficticia-ci');ativos++;pico=Math.max(pico,ativos);
+    if(u.pathname==='/app/cartoes/miniatura/consultar'){
+      assert.equal(u.search,'');assert.equal(r.request().method(),'POST');const dados=r.request().postDataJSON();const numero=parseInt(dados._recurso,16);assert.ok(numero>=1&&numero<=6);assert.equal(dados._token,'csrf-ficticio');assert.equal(r.request().headers()['x-g360-revisao'],'revisao-ficticia-ci');ativos++;pico=Math.max(pico,ativos);
       await new Promise(resolve=>pendentes.push(resolve));ativos--;
-      return r.fulfill(u.pathname==='/app/cartoes/1/imagens/miniatura'&&falhar?{status:503}:{contentType:'image/png',body:raster});
+      return r.fulfill(numero===1&&falhar?{status:503}:{contentType:'image/png',body:raster});
     }
     if(u.pathname==='/validar'){
       consultas.push(r.request().postDataJSON());
@@ -41,7 +42,7 @@ try {
   await p.waitForTimeout(70);pendentes.splice(0).forEach(f=>f());
   await p.waitForFunction(()=>document.querySelectorAll('[data-estado="pronta"]').length===6);
   // Polling com URL renovada reutiliza a mesma versão de imagem já carregada.
-  await p.evaluate(html=>{document.getElementById('root').innerHTML=html;thumbs.atualizar();},Array.from({length:6},(_,n)=>botao(n+1)).join('').replaceAll('?v=1','?v=2'));
+  await p.evaluate(html=>{document.getElementById('root').innerHTML=html;thumbs.atualizar();},Array.from({length:6},(_,n)=>botao(n+1)).join('').replaceAll('\"versao\":1','\"versao\":2'));
   assert.equal(await p.locator('[data-estado="pronta"]').count(),6);assert.equal(ativos,0);
   await p.goto('http://localhost/conferir');
   const bytes=Buffer.from('%PDF-1.4\nArquivo fictício para hash local.');

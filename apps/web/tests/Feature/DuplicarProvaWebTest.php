@@ -3,9 +3,11 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class DuplicarProvaWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\AcessoAtivoLegado;
     private function preparar(bool $elegivel=true): void
     {
@@ -21,7 +23,7 @@ class DuplicarProvaWebTest extends TestCase
     public function test_formulario_explica_copia_escapa_origem_e_preserva_intencao(): void
     {
         $this->preparar();
-        $r=$this->get('/app/provas')->assertOk()->assertSee('Criar cópia')->assertSee('não serão copiados')->assertSee('Matemática &lt;script&gt;',false)
+        $r=$this->consultarTela('/app/provas')->assertOk()->assertSee('Criar cópia')->assertSee('não serão copiados')->assertSee('Matemática &lt;script&gt;',false)
             ->assertSee('aria-label="Versão do software"',false)->assertSee('Versão de testes: INICIAL-V1-T5 · a90fbf51');
         $this->assertStringContainsString('name="chave"',$r->getContent());
         $r->assertSee('aria-haspopup="dialog"',false)->assertSee('id="cp1-modal"',false)->assertSee('Nome da nova prova')->assertDontSee('Ver o que será copiado');
@@ -35,7 +37,7 @@ class DuplicarProvaWebTest extends TestCase
         $this->preparar();
         $this->apiLegada(['*/v1/provas/1/copiar'=>Http::response(['data'=>['id'=>3]],201)]);
         $chave='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
-        $this->post('/app/provas/1/copiar',['titulo'=>'Versão B','chave'=>$chave,'turma_ids'=>[9]])->assertRedirect('/app/provas/3')->assertSessionHas('sucesso');
+        $this->alterarRecurso('POST', '/app/provas/1/copiar',['titulo'=>'Versão B','chave'=>$chave,'turma_ids'=>[9]])->assertRetornoTela('/app/provas/3')->assertSessionHas('sucesso');
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['titulo']==='Versão B' && $r['chave']===$chave && !isset($r['turma_ids']));
     }
 
@@ -43,22 +45,23 @@ class DuplicarProvaWebTest extends TestCase
     {
         $this->preparar();
         $this->apiLegada(['*/v1/provas/1/copiar'=>Http::response(['message'=>'Solicitação conflitante'],409)]);
-        $this->post('/app/provas/1/copiar',['titulo'=>'Versão B','chave'=>'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'])
-            ->assertRedirect('/app/provas')->assertSessionHas('erro','Solicitação conflitante')->assertSessionMissing('sucesso')->assertSessionHasInput('titulo','Versão B')->assertSessionHasInput('origem_id',1);
+        $this->alterarRecurso('POST', '/app/provas/1/copiar',['titulo'=>'Versão B','chave'=>'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'])
+            ->assertRetornoTela('/app/provas')->assertSessionHas('erro','Solicitação conflitante')->assertSessionMissing('sucesso')->assertSessionHasInput('titulo','Versão B')->assertSessionHasInput('origem_id',1);
     }
 
     public function test_origem_nao_elegivel_nao_abre_formulario(): void
     {
         $this->preparar(false);
-        $this->get('/app/provas')->assertOk()->assertDontSee('data-origem="1"',false);
-        $this->get('/app/provas/1/copiar')->assertStatus(405);
+        $this->consultarTela('/app/provas')->assertOk()->assertDontSee('data-origem="1"',false);
+        $this->get('/app/provas/1/copiar')->assertRedirect('/app/painel');
+        Http::assertNotSent(fn($r)=>$r->method()!=='GET');
     }
 
     public function test_nova_avaliacao_mostra_formato_suportado_sem_prometer_editor(): void
     {
         $this->preparar();
         $this->apiLegada(['*/v1/turmas*'=>Http::response(['data'=>['turmas'=>[]]]),'*/v1/escolas*'=>Http::response(['data'=>['escolas'=>[]]])]);
-        $r=$this->get('/app/provas/nova')->assertOk()->assertSee('Formato da avaliação')->assertSee('Gabarito e cartão-resposta')->assertSee('name="formato_avaliacao"',false);
+        $r=$this->consultarTela('/app/provas/nova')->assertOk()->assertSee('Formato da avaliação')->assertSee('Gabarito e cartão-resposta')->assertSee('name="formato_avaliacao"',false);
         if (getenv('G360_CP1_PREVIEW_DIR')) file_put_contents(getenv('G360_CP1_PREVIEW_DIR').'/nova.html',$r->getContent());
     }
 }

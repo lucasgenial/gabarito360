@@ -5,9 +5,11 @@ use App\Services\ApiClient;
 use App\Support\{Acesso,ContextoWeb};
 use Illuminate\Support\Facades\{Http,Route};
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class UrlsContextuaisTest extends TestCase
 {
+    use NavegacaoHttp;
     protected function setUp(): void
     {
         parent::setUp();
@@ -17,8 +19,8 @@ class UrlsContextuaisTest extends TestCase
         $this->withCookie(config('session.cookie'),session()->getId()); $this->withCredentials();
         $this->withHeader('X-G360-Revisao', ContextoWeb::garantirRevisao());
         Route::middleware(['web','autenticado'])->get('/app/teste-ur3/{id}',function(int $id){
-            return response()->json(['id'=>$id,'perfil'=>Acesso::perfil(),'turma'=>route('turmas.show',$id),
-                'resultado'=>route('resultados.show',[$id,4])]);
+            return response()->json(['id'=>$id,'perfil'=>Acesso::perfil(),'turma'=>\App\Support\NavegacaoWeb::destino('turmas.show',[$id]),
+                'resultado'=>\App\Support\NavegacaoWeb::destino('resultados.show',[$id,4])]);
         })->name('teste-ur3');
         Route::middleware(['web','autenticado'])->post('/app/teste-ur3/{id}',function(int $id){
             app(ApiClient::class)->post('/v1/operacao',['id'=>$id]);
@@ -55,9 +57,10 @@ class UrlsContextuaisTest extends TestCase
             $id=$this->ativar($this->dados($v,$v===7?'coordenador':'professor'));
             $r=$this->getJson('/app/teste-ur3/14')->assertOk()->assertJsonPath('id',14)
                 ->assertJsonPath('perfil',$v===7?'coordenador':'professor')->assertDontSee($id)->assertDontSee('segredo-')->assertDontSee('_ctx');
-            $this->assertSame('/app/turmas/14',parse_url($r->json('turma'),PHP_URL_PATH));
-            $this->assertSame('/app/resultados/14/4',parse_url($r->json('resultado'),PHP_URL_PATH));
-            $this->assertNull(parse_url($r->json('turma'),PHP_URL_QUERY));
+            foreach (['turma'=>['nome'=>'turmas.show','id'=>14],'resultado'=>['nome'=>'resultados.show','alunoId'=>14,'provaId'=>4]] as $campo=>$esperado) {
+                $desc=$r->json($campo);$this->assertIsArray($desc);$this->assertStringNotContainsString('/14',$desc['url']);$this->assertNull(parse_url($desc['url'],PHP_URL_QUERY));
+                $alvo=\App\Support\NavegacaoWeb::obter($desc['referencia']);$this->assertSame($esperado['nome'],$alvo['nome']);unset($esperado['nome']);$this->assertEquals($esperado,$alvo['parametros']);
+            }
         }
         $this->assertSame('identidade-ficticia',session('auth_token'));
         $this->assertArrayNotHasKey('acesso',app('url')->getDefaultParameters());
@@ -66,14 +69,12 @@ class UrlsContextuaisTest extends TestCase
     public function test_get_legado_nunca_seleciona_contexto_e_nao_reexecuta_formulario(): void
     {
         $id=ContextoWeb::criar($this->dados(7));
-        $this->get('/turmas/14?_ctx='.$id.'&busca=teste')->assertRedirect('/app/vinculos');
+        $this->verificarRetornoTela($this->get('/turmas/14?_ctx='.$id.'&busca=teste'),'/app/painel');
         $this->assertNull(session('auth_contexto_ativo'));
         $this->ativar($this->dados(8));
-        $r=$this->get('/acessos/vinculo-7/turmas/14?_ctx='.$id.'&busca=teste')->assertRedirect();
-        $this->assertSame('/app/turmas/14',parse_url($r->headers->get('Location'),PHP_URL_PATH));
-        $this->assertStringContainsString('busca=teste',$r->headers->get('Location'));
-        $this->assertStringNotContainsString($id,$r->headers->get('Location'));
-        $this->assertStringNotContainsString('_ctx',$r->headers->get('Location'));
+        $r=$this->get('/acessos/vinculo-7/turmas/14?_ctx='.$id.'&busca=teste');
+        $this->verificarRetornoTela($r,'/app/painel');
+        $this->assertStringNotContainsString($id,$r->getContent());$this->assertStringNotContainsString('_ctx',$r->getContent());
         $this->assertSame(8,ContextoWeb::obter(session('auth_contexto_ativo'))['vinculo_id']);
         $this->put('/turmas/14',['_ctx'=>$id])->assertStatus(409);
         Http::assertNothingSent();
@@ -106,10 +107,8 @@ class UrlsContextuaisTest extends TestCase
     public function test_expiracao_nao_envia_operacao_e_retorno_de_post_e_limpo(): void
     {
         $this->ativar($this->dados(7));$this->api();
-        $r=$this->post('/app/teste-ur3/14')->assertRedirect();
-        $this->assertSame('/app/turmas/14',parse_url($r->headers->get('Location'),PHP_URL_PATH));
-        $this->assertSame('disciplinas',parse_url($r->headers->get('Location'),PHP_URL_FRAGMENT));
-        $this->assertStringNotContainsString('_ctx',$r->headers->get('Location'));
+        $r=$this->post('/app/teste-ur3/14');$this->verificarRetornoTela($r,'/app/turmas/14');
+        $this->assertStringNotContainsString('/app/turmas/14',$r->getContent());$this->assertStringNotContainsString('_ctx',$r->getContent());
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/operacao')&&$r->hasHeader('Authorization','Bearer segredo-7'));
         Http::swap(new \Illuminate\Http\Client\Factory());Http::preventStrayRequests();
         $this->travel(121)->minutes();
@@ -164,7 +163,7 @@ class UrlsContextuaisTest extends TestCase
         $this->withSession(['_token'=>'csrf-ficticio-conhecido']); session()->save();
         $this->post('/app/teste-ur3/14',['_token'=>'incorreto'])->assertStatus(419);
         Http::assertNothingSent();
-        $this->post('/app/teste-ur3/14',['_token'=>'csrf-ficticio-conhecido'])->assertRedirect();
+        $this->verificarRetornoTela($this->post('/app/teste-ur3/14',['_token'=>'csrf-ficticio-conhecido']),'/app/turmas/14');
         Http::assertSentCount(2);
     }
 }

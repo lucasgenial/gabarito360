@@ -15,10 +15,10 @@ function abrir(memoria, responder) {
     setTimeout, clearTimeout, setInterval: fn => { ciclo = fn; },
     sessionStorage: {getItem: k => memoria.get(k) ?? null, setItem: (k, v) => memoria.set(k, v)},
     document: {hidden: true, addEventListener() {}, createElement() {return {style: {}, addEventListener(_, fn) {this.clicar = fn;}};}},
-    fetch: async (url, init) => {chamadas.push({url, init}); const d=responder(url, init); return {ok: !d.__status || d.__status<400, status:d.__status||200, json: async () => d.__body||d};}};
+    G360Requisicao: async (recurso, init) => {assert.equal(typeof recurso,'object');const url=recurso.url;assert.equal(new URL(url,'https://qa.test').search,'');chamadas.push({url, init}); const d=responder(url, init); return {ok: !d.__status || d.__status<400, status:d.__status||200, json: async () => d.__body||d};}};
   vm.runInNewContext(codigo, contexto);
-  const fila = contexto.window.criarFilaCartoes({chaveSessao: 'envios', csrf: 'ficticio', uploadUrl: '/upload',
-    envioUrl: '/envios/__ENVIO__', erroHttp: () => '', reduzir: async f => f, resultado: () => 'Leitura concluída',
+  const fila = contexto.window.criarFilaCartoes({chaveSessao: 'envios', csrf: 'ficticio', uploadUrl: {url:'/upload',referencia:'upload-ficticio'},
+    envioUrl: {url:'/envios/consultar',referencia:'envio-ficticio'}, repetirUrl:{url:'/envios/repetir',referencia:'repetir-ficticio'}, erroHttp: () => '', reduzir: async f => f, resultado: () => 'Leitura concluída',
     linha: () => {const li = {dataset: {}, botoes: [], appendChild(b) {this.botoes.push(b);}}; linhas.push(li); return li;}});
   return {fila, linhas, chamadas, consultar: async () => {contexto.document.hidden = false; await ciclo();}};
 }
@@ -40,6 +40,7 @@ test('erro recuperável permanece após recarga e repete sem novo upload', async
   botao.clicar();
   await new Promise(setImmediate);
   assert.equal(segunda.linhas[0].dataset.processamento, 'na_fila');
+  assert.ok(segunda.chamadas.every(c=>typeof JSON.parse(c.init.body).chave==='string'&&!c.url.includes(JSON.parse(c.init.body).chave)));
   assert.ok(segunda.chamadas.every(c => c.url !== '/upload'));
   estado = 'concluido';
   await segunda.consultar();

@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script src="{{ asset('js/navegacao.js') }}?v={{ @filemtime(public_path('js/navegacao.js')) }}" defer></script>
 <title>@yield('title', 'Gabarito360') — Acesso</title>
 <meta name="description" content="Acesse sua conta no Gabarito360 ou recupere sua senha com segurança.">
 <meta name="robots" content="noindex, nofollow">

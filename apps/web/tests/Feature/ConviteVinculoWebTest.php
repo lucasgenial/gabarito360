@@ -4,9 +4,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class ConviteVinculoWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private string $ctx;
     protected function setUp(): void
@@ -47,15 +49,15 @@ class ConviteVinculoWebTest extends TestCase
                 ['chave'=>'prova.criar','tipo'=>'extra','pode_alterar'=>true]
             ]]]);
         });
-        $this->put('/app/membros/2',['vinculo_id'=>9,'ativo'=>0,'nome'=>'Não deve alterar'])->assertRedirect();
-        $this->put('/app/membros/2/permissoes',['vinculo_id'=>9,'retirar'=>['prova.ver'=>'1'],'conceder'=>['prova.criar'=>'1'],'valida_ate'=>['prova.criar'=>'2027-01-01']])->assertRedirect()->assertSessionHas('sucesso');
+        $this->from('/app/membros/2/editar?vinculo_id=9')->alterarRecurso('PUT', '/app/membros/2',['vinculo_id'=>9,'ativo'=>0,'nome'=>'Não deve alterar'])->assertRetornoTela();
+        $this->alterarRecurso('PUT', '/app/membros/2/permissoes',['vinculo_id'=>9,'retirar'=>['prova.ver'=>'1'],'conceder'=>['prova.criar'=>'1'],'valida_ate'=>['prova.criar'=>'2027-01-01']])->assertRetornoTela()->assertSessionHas('sucesso');
     }
     public function test_lista_e_edicao_exibem_vinculo_sem_campos_de_identidade_editaveis(): void
     {
         $m=['id'=>2,'nome'=>'Pessoa','email'=>'pessoa@example.test','perfil'=>'professor','situacao'=>'convidado','ativo'=>false,'vinculo_id'=>9,'espaco_nome'=>'Escola A','created_at'=>null];
         $this->fake(fn($r)=>Http::response(['data'=>str_contains($r->url(),'/usuarios/2')?$m:['usuarios'=>[$m, array_merge($m,['vinculo_id'=>10,'espaco_nome'=>'Escola B'])],'totais'=>[]]]));
-        $this->get('/app/membros')->assertOk()->assertSee('Vínculo #9')->assertSee('Vínculo #10')->assertSee('vinculo_id=9',false)->assertDontSee('Suspender vínculo');
-        $this->get('/app/membros/2/editar?vinculo_id=9')->assertOk()->assertSee('Gerir vínculo')->assertDontSee('name="email"',false)->assertDontSee('name="password"',false);
+        $this->consultarTela('/app/membros')->assertOk()->assertSee('Vínculo #9')->assertSee('Vínculo #10')->assertDestinoRecurso('membros.edit',['id'=>2],['vinculo_id'=>9])->assertDontSee('Suspender vínculo');
+        $this->consultarTela('/app/membros/2/editar?vinculo_id=9')->assertOk()->assertSee('Gerir vínculo')->assertDontSee('name="email"',false)->assertDontSee('name="password"',false);
     }
     public function test_form_convite_e_envio_generico_usam_contexto(): void
     {
@@ -63,8 +65,8 @@ class ConviteVinculoWebTest extends TestCase
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto'));
             return Http::response(['data'=>str_ends_with($r->url(),'/opcoes')?[['id'=>5,'nome'=>'Escola A','perfis'=>['professor'],'turmas'=>[]]]:['mensagem'=>'Se a conta puder receber este vínculo, o convite será enviado.']],$r->method()==='POST'?202:200);
         });
-        $this->get('/app/membros/convidar-vinculo')->assertOk()->assertSee('Convidar conta existente');
-        $this->post('/app/membros/convidar-vinculo',['email'=>'alvo@example.test','espaco_id'=>5,'perfil'=>'professor'])->assertRedirect()->assertSessionHas('sucesso','Se a conta puder receber este vínculo, o convite será enviado.');
+        $this->consultarTela('/app/membros/convidar-vinculo')->assertOk()->assertSee('Convidar conta existente');
+        $this->alterarRecurso('POST', '/app/membros/convidar-vinculo',['email'=>'alvo@example.test','espaco_id'=>5,'perfil'=>'professor'])->assertRetornoTela()->assertSessionHas('sucesso','Se a conta puder receber este vínculo, o convite será enviado.');
     }
     public function test_consulta_e_resposta_usam_identidade_e_referencia_sem_token_no_html_ou_sessao(): void
     {
@@ -116,8 +118,8 @@ class ConviteVinculoWebTest extends TestCase
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto'));
             return Http::response(['data'=>[]]);
         });
-        $this->post('/app/turmas/1/professores',['usuario_id'=>2,'vinculo_id'=>9])->assertRedirect();
-        $this->delete('/app/turmas/1/professores/2',['vinculo_id'=>9])->assertRedirect();
+        $this->from('/app/turmas/1')->alterarRecurso('POST', '/app/turmas/1/professores',['usuario_id'=>2,'vinculo_id'=>9])->assertRetornoTela();
+        $this->from('/app/turmas/1')->alterarRecurso('DELETE', '/app/turmas/1/professores/2',['vinculo_id'=>9])->assertRetornoTela();
     }
     public function test_codigo_completo_funciona_com_formulario_nativo_sem_segredo_no_html(): void
     {

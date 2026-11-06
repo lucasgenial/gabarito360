@@ -3,9 +3,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class SelecaoCadastroWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private function preparar(array $permissoes=['copia.autorizar_origem']): array
     {
@@ -39,7 +41,7 @@ class SelecaoCadastroWebTest extends TestCase
             }
  $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-cadastro'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->catalogo()]); });
-        $this->get('/app/copias/cadastros?espaco_id=5&turma_id=1')->assertOk()
+        $this->consultarTela('/app/copias/cadastros?espaco_id=5&turma_id=1')->assertOk()
             ->assertSee('name="turmas[]"',false)->assertSee('name="alunos[]"',false)->assertSee('name="_token"',false)->assertDontSee($ctx)->assertDontSee('contexto-cadastro')->assertDontSee('contexto-copia')
             ->assertSee('Próximas turmas')->assertSee('Próximos alunos')->assertSee('não identifica um destinatário real')
             ->assertPaginaSemSelecaoPrevia()->assertDontSee('<script>segredo</script>',false);
@@ -49,9 +51,9 @@ class SelecaoCadastroWebTest extends TestCase
         [$ctx,$me]=$this->preparar();
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/vinculos')?[]:(str_ends_with($r->url(),'/auth/me')?$me:$this->previa($r['tipo_destino']))]));
         $d=['espaco_id'=>5,'tipo_destino'=>'pessoal','turmas'=>[1],'alunos'=>[2],'ator_id'=>99,'destino_espaco_id'=>7];
-        $this->post('/app/copias/cadastros/previa',$d)->assertOk()->assertSee('Simulação para destino pessoal')->assertSee('MAT-2')
+        $this->alterarRecurso('POST', '/app/copias/cadastros/previa',$d)->assertOk()->assertSee('Simulação para destino pessoal')->assertSee('MAT-2')
             ->assertDontSee('Nascimento')->assertDontSee('Autorizar saída')->assertDontSee('<script>segredo</script>',false);
-        $d['tipo_destino']='escola'; $this->post('/app/copias/cadastros/previa',$d)->assertOk()->assertSee('Pendente — não informado')->assertSee('complementação autorizada');
+        $d['tipo_destino']='escola'; $this->alterarRecurso('POST', '/app/copias/cadastros/previa',$d)->assertOk()->assertSee('Pendente — não informado')->assertSee('complementação autorizada');
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['turmas']===[1] && $r['alunos']===[2] && !isset($r['ator_id']) && !isset($r['destino_espaco_id']) && !isset($r['_ctx']));
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/lotes') || str_contains($r->url(),'/aprovar'));
         $this->assertNull(session('_old_input'));
@@ -61,15 +63,15 @@ class SelecaoCadastroWebTest extends TestCase
         [$ctx,$me]=$this->preparar();
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'NOME-PRIVADO-INTERNO'],422));
         $d=['espaco_id'=>5,'tipo_destino'=>'pessoal','alunos'=>[2]];
-        $this->post('/app/copias/cadastros/previa',$d)->assertStatus(422);
-        $this->post('/app/copias/cadastros/previa',$d+['turmas'=>[1]])->assertStatus(422)->assertDontSee('NOME-PRIVADO-INTERNO');
+        $this->alterarRecurso('POST', '/app/copias/cadastros/previa',$d)->assertStatus(422);
+        $this->alterarRecurso('POST', '/app/copias/cadastros/previa',$d+['turmas'=>[1]])->assertStatus(422)->assertDontSee('NOME-PRIVADO-INTERNO');
         $this->assertNull(session('_old_input')); $this->assertStringNotContainsString('NOME-PRIVADO',json_encode(session()->all()));
     }
     public function test_capacidade_flag_e_conexao(): void
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']); Http::fake(['*'=>Http::response(['data'=>$me])]);
-        $this->get('/app/copias/cadastros')->assertForbidden();
-        config(['services.copias.interface_ativa'=>false]); $this->get('/app/copias/cadastros')->assertNotFound();
+        $this->consultarTela('/app/copias/cadastros')->assertForbidden();
+        config(['services.copias.interface_ativa'=>false]); $this->consultarTela('/app/copias/cadastros')->assertNotFound();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/copias'));
     }
     public function test_falha_de_conexao_nao_vira_catalogo_vazio(): void
@@ -84,6 +86,6 @@ class SelecaoCadastroWebTest extends TestCase
             if(str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$me]);
             throw new \Illuminate\Http\Client\ConnectionException('NOME-PRIVADO-INTERNO');
         });
-        $this->get('/app/copias/cadastros')->assertStatus(503)->assertDontSee('NOME-PRIVADO-INTERNO');
+        $this->consultarTela('/app/copias/cadastros')->assertStatus(503)->assertDontSee('NOME-PRIVADO-INTERNO');
     }
 }

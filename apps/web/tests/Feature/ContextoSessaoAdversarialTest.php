@@ -6,10 +6,12 @@ use App\Support\ContextoWeb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{Http,Route};
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 /** Testes adversariais UR3: contrato público, sem overrides do cliente HTTP de testes. */
 class ContextoSessaoAdversarialTest extends TestCase
 {
+    use NavegacaoHttp;
     private const PROBE='/app/_teste-contexto-sessao';
 
     protected function setUp(): void
@@ -114,8 +116,9 @@ class ContextoSessaoAdversarialTest extends TestCase
             route('cartoes.imagem-segura',['id'=>65,'tipo'=>'original']),
             route('resultados.pdf',['alunoId'=>3,'provaId'=>4]),route('correcao.pdf',['id'=>4])];
         foreach($urls as $url) {
-            $this->get($url)->assertStatus(409)->assertDontSee('bytes-ficticios');
-            $this->get($url,['X-G360-Revisao'=>$antiga])->assertStatus(409);
+            $desc=\App\Support\NavegacaoWeb::deUrl($url,'GET',true);$this->assertNotNull($desc);
+            $this->get($desc['pagina'])->assertStatus(409)->assertDontSee('bytes-ficticios');
+            $this->get($desc['pagina'],['X-G360-Revisao'=>$antiga])->assertStatus(409);
         }
         Http::assertNothingSent();
     }
@@ -174,9 +177,9 @@ class ContextoSessaoAdversarialTest extends TestCase
     public function test_get_antigo_nao_seleciona_vinculo_e_post_antigo_nao_e_reexecutado(): void
     {
         $rev=$this->ativar();$this->api();
-        $r=$this->get('/acessos/vinculo-8/turmas')->assertRedirect();
-        $this->assertStringNotContainsString('/acessos/',$r->headers->get('Location'));
-        $this->assertStringNotContainsString('vinculo-8',$r->headers->get('Location'));
+        $r=$this->get('/acessos/vinculo-8/turmas');$this->verificarRetornoTela($r,'/app/turmas');
+        $this->assertStringNotContainsString('/acessos/',$r->getContent());
+        $this->assertStringNotContainsString('vinculo-8',$r->getContent());
         $this->postJson('/acessos/vinculo-8/turmas',['_revisao'=>$rev])->assertStatus(409);
         Http::assertNothingSent();
         $this->getJson(self::PROBE,['X-G360-Revisao'=>$rev])->assertOk()->assertJsonPath('espaco',13);

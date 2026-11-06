@@ -13,6 +13,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton('url', function ($app) {
+            $routes=$app['router']->getRoutes();$app->instance('routes',$routes);
+            return new \App\Routing\GeradorUrl($routes,$app->rebinding('request',function($app,$request){$app['url']->setRequest($request);}),$app['config']['app.asset_url']);
+        });
         $this->app->extend('log', fn ($original, $app) => new \App\Logging\GerenciadorProtegido($app));
         //
     }

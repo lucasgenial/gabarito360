@@ -22,7 +22,7 @@
     <h1 class="page-title">{{ $prova['titulo'] }}</h1>
     <p class="page-sub">{{ $prova['disciplina'] }} · {{ implode(' · ', array_column($prova['turmas'] ?? [], 'nome')) }}{{ $prova['data_aplicacao'] ? ' · aplicado em ' . \Carbon\Carbon::parse($prova['data_aplicacao'])->format('d/m/Y') : '' }}</p>
   </div>
-  <button class="btn btn-ghost" id="btn-upload" onclick="abrirUpload()">Envio manual</button>
+  <button class="btn btn-ghost" id="btn-upload" data-correcao-acao="abrir-upload">Envio manual</button>
 </div>
 
 @php
@@ -39,14 +39,14 @@
       <div style="font-size:12px;color:var(--muted);">{{ $podeMexer ? 'Você (supervisão) ainda pode excluir e incluir correções.' : 'Para enviar, excluir ou alterar cartões, peça à coordenação para reabrir.' }}</div>
     </div>
     @pode('correcao.reabrir')
-      <form method="POST" action="{{ route('correcao.reabrir', $prova['id']) }}" onsubmit="return confirm('Reabrir a correção? Professores e corretores voltam a poder enviar, excluir e alterar.')">
+      <form method="POST" action="{{ route('correcao.reabrir', $prova['id']) }}" data-correcao-confirmar="Reabrir a correção? Professores e corretores voltam a poder enviar, excluir e alterar.">
         @csrf <x-revisao-acesso /><button type="submit" class="btn btn-secondary"><x-icone nome="cadeado" /> Reabrir correção</button>
       </form>
     @endpode
   @else
     <div style="flex:1;min-width:220px;font-size:14px;"><b>Correção aberta</b><div style="font-size:12px;color:var(--muted);">Ao terminar, feche a correção para evitar alterações.</div></div>
     @pode('correcao.fechar')
-      <form method="POST" action="{{ route('correcao.fechar', $prova['id']) }}" onsubmit="return confirm('Fechar a correção? Depois disso só a coordenação/direção poderá alterar, excluir, incluir ou reabrir.')">
+      <form method="POST" action="{{ route('correcao.fechar', $prova['id']) }}" data-correcao-confirmar="Fechar a correção? Depois disso só a coordenação/direção poderá alterar, excluir, incluir ou reabrir.">
         @csrf <x-revisao-acesso /><button type="submit" class="btn btn-secondary"><x-icone nome="cadeado" /> Fechar correção</button>
       </form>
     @endpode
@@ -98,9 +98,9 @@
   <div data-carga-conteudo hidden><ul class="corr-list" id="corr-lista"></ul></div><p data-carga-feedback role="status"></p>
 </div>
 
-<div class="g360-modal" id="foto-modal" onclick="if (event.target === this) fecharModal('foto-modal')">
+<div class="g360-modal" id="foto-modal" data-correcao-fundo-foto>
   <div class="caixa">
-    <div class="row-between" style="margin-bottom:10px;"><b id="foto-titulo"></b><button type="button" class="btn btn-sm btn-ghost" onclick="fecharModal('foto-modal')">✕</button></div>
+    <div class="row-between" style="margin-bottom:10px;"><b id="foto-titulo"></b><button type="button" class="btn btn-sm btn-ghost" data-correcao-acao="fechar-foto">✕</button></div>
     <img id="foto-img" class="foto-img" alt="Foto do cartão-resposta" onerror="if (this.getAttribute('src')) { this.style.display = 'none'; document.getElementById('foto-erro').style.display = 'block'; }">
     <p id="foto-erro" style="display:none;">Não foi possível abrir a foto. Feche e tente de novo.</p>
   </div>
@@ -117,7 +117,7 @@
   <div class="modal" style="background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 24px 64px rgba(0,0,0,.22);width:100%;max-width:480px;">
     <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border-soft);display:flex;align-items:center;justify-content:space-between;">
       <h2 style="font-size:17px;font-weight:700;">Enviar cartão-resposta</h2>
-      <button type="button" onclick="fecharUpload()" style="width:32px;height:32px;border-radius:50%;background:none;border:0;cursor:pointer;font-size:20px;color:var(--muted);">&times;</button>
+      <button type="button" data-correcao-acao="fechar-upload" style="width:32px;height:32px;border-radius:50%;background:none;border:0;cursor:pointer;font-size:20px;color:var(--muted);">&times;</button>
     </div>
     <form method="POST" action="{{ route('correcao.upload', $prova['id']) }}" enctype="multipart/form-data">
       @csrf <x-revisao-acesso />
@@ -138,7 +138,7 @@
         </div>
       </div>
       <div style="padding:14px 22px;border-top:1px solid var(--border-soft);display:flex;justify-content:flex-end;gap:10px;">
-        <button type="button" class="btn btn-ghost" onclick="fecharUpload()">Cancelar</button>
+        <button type="button" class="btn btn-ghost" data-correcao-acao="fechar-upload">Cancelar</button>
         <button type="submit" class="btn btn-primary">Enviar para leitura</button>
       </div>
     </form>
@@ -151,173 +151,7 @@
 @include('correcao._retirar')
 @push('scripts')
 <script src="{{ asset('js/cartoes-miniaturas.js') }}?v={{ filemtime(public_path('js/cartoes-miniaturas.js')) }}"></script>
-<script>
-var STATUS_URL = '{{ route('correcao.status', $prova['id'], false) }}';
-var CARTOES_URL = '/cartoes';
-var LISTA_URL = '{{ route('correcao.cartoes', $prova['id'], false) }}';
-var PROVA_ID = {{ (int) $prova['id'] }};
-var PODE_EXCLUIR = {{ $podeMexer ? 'true' : 'false' }};
-var NOTA_MAX = {{ (float) ($prova['nota_maxima'] ?? 10) }};
-
-// ---------- Alunos corrigidos ----------
-var corrDados = [], corrAssinatura = '';
-var miniaturasCartoes = criarMiniaturasCartoes(document.getElementById('corr-lista'), verFoto);
-function escH(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
-function fmtNota(n) { return Number(n).toFixed(1).replace('.', ','); }
-var cargaCartoes=G360Carga(document.getElementById('corrigidos'));
-function carregarCorrigidos(silenciosa=false) {
-  return cargaCartoes.executar(()=>G360BuscarJSON(LISTA_URL),function(d){
-    if(!Array.isArray(d.cartoes))throw new Error('Lista indisponível');
-    var lista=d.cartoes,assin=JSON.stringify(lista);document.getElementById('corr-busca').disabled=false;
-    if(assin===corrAssinatura)return;corrAssinatura=assin;corrDados=lista;desenharCorrigidos();
-    if(lista.some(c=>!c.aluno_id))carregarAlunos();
-  },{silenciosa});
-}
-function desenharCorrigidos() {
-  var termo = (document.getElementById('corr-busca').value || '').toLowerCase();
-  var itens = corrDados.filter(function (c) {
-    return !termo || (c.aluno_nome || 'aluno não identificado').toLowerCase().indexOf(termo) >= 0 || String(c.matricula || '').indexOf(termo) >= 0;
-  });
-  document.getElementById('corr-qtd').textContent = corrDados.length;
-  var ul = document.getElementById('corr-lista');
-  if (!itens.length) {
-    ul.innerHTML = '<li style="color:var(--muted);font-size:13px;">' + (corrDados.length ? 'Nenhum aluno encontrado.' : 'Nenhum cartão recebido ainda.') + '</li>';
-    miniaturasCartoes.atualizar();
-    return;
-  }
-  ul.innerHTML = itens.map(function (c) {
-    var nome = c.aluno_nome ? escH(c.aluno_nome) : '<span style="color:var(--danger)">Aluno não identificado</span>';
-    var sub = [c.turma, c.matricula, c.lingua ? (c.lingua === 'ESP' ? 'Espanhol' : 'Inglês') : null].filter(Boolean).map(escH).join(' · ');
-    var st = c.status === 'lido' ? '<span class="badge badge-success">lido</span>'
-      : c.status === 'ambiguo' ? '<span class="badge badge-warn">' + c.ambiguas + ' p/ revisar</span>'
-      : '<span class="badge badge-muted">lendo</span>';
-    var nota = (c.nota_final !== null && c.nota_final !== undefined)
-      ? '<div class="corr-nota ' + (Number(c.nota_final) >= NOTA_MAX * 0.6 ? 'corr-nota-aprovada' : 'corr-nota-reprovada') + '">' + fmtNota(c.nota_final) + '</div>'
-        + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
-      : '';
-    var foto = c.miniatura_url
-      ? '<button type="button" class="corr-thumb corr-miniatura" data-miniatura-cartao="' + c.id + '" data-miniatura-versao="' + escH(c.tentativa_numero || c.created_at || '') + '" data-miniatura-url="' + escH(c.miniatura_url) + '" aria-busy="true" aria-label="Carregando miniatura do cartão-resposta" disabled>'
-        + '<img data-miniatura-imagem alt="" hidden>'
-        + '<span class="corr-miniatura-carga" data-miniatura-carga aria-hidden="true"><span class="g360-marca-carregando" aria-hidden="true"></span><i></i><i></i></span>'
-        + '<span class="corr-miniatura-erro" data-miniatura-erro hidden>Foto indisponível<b>Tentar novamente</b></span></button>'
-      : '<div class="corr-thumb corr-miniatura-ausente">Sem miniatura disponível</div>';
-    var acoes = c.tem_imagem ? '<button type="button" class="btn btn-sm btn-ghost" onclick="verFoto(' + c.id + ')">Ver foto</button>' : '';
-    if (c.aluno_id && c.nota_final !== null && c.nota_final !== undefined) {
-      acoes += '<a class="btn btn-sm btn-secondary" href="/resultados/' + c.aluno_id + '/' + PROVA_ID + '?from=correcao">Acertos e erros</a>';
-    }
-    if (!c.aluno_id && typeof seletorAluno === 'function' && typeof ALUNOS !== 'undefined' && ALUNOS.length) acoes += seletorAluno(c.id);
-    if (PODE_EXCLUIR && c.status === 'lido') acoes += '<a class="btn btn-sm btn-ghost" href="/provas/' + PROVA_ID + '/revisao?cartao=' + c.id + '">Revisar leitura</a>';
-    if (PODE_EXCLUIR) acoes += '<button type="button" class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="excluirCorrecao(' + c.id + ')">Retirar correção</button>';
-    return '<li class="corr-item">' + foto + '<div class="corr-info"><b>' + nome + '</b><div style="color:var(--muted);">' + sub + '</div>'
-      + '<div style="margin-top:4px;">' + st + '</div><div class="corr-acoes">' + acoes + '</div></div><div>' + nota + '</div></li>';
-  }).join('');
-  miniaturasCartoes.atualizar();
-}
-function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
-function fecharModal(id) { document.getElementById(id).style.display = 'none'; if (id === 'foto-modal') document.getElementById('foto-img').src = ''; }
-function verFoto(id) {
-  var c = corrDados.filter(function (x) { return x.id === id; })[0] || {};
-  document.getElementById('foto-titulo').textContent = (c.aluno_nome || 'Aluno não identificado') + (c.turma ? ' · ' + c.turma : '');
-  document.getElementById('foto-erro').style.display = 'none';
-  document.getElementById('foto-img').style.display = '';
-  window.g360ImagemContextual(document.getElementById('foto-img'), c.foto_url || (CARTOES_URL + '/' + id + '/imagem')).catch(function(){document.getElementById('foto-img').style.display='none';document.getElementById('foto-erro').style.display='block';});
-  abrirModal('foto-modal');
-}
-async function excluirCorrecao(id) {
-  var c = corrDados.filter(function (x) { return x.id === id; })[0] || {};
-  var retirada;try{retirada=await confirmarRetiradaCartao(id,c.aluno_nome||'Cartão-resposta');}catch(e){alert(e.message);return;}
-  if(!retirada)return;
-  fetch(CARTOES_URL + '/' + id, { method: 'DELETE', credentials: 'same-origin',body:JSON.stringify(retirada), headers: { 'Content-Type':'application/json','Accept': 'application/json', 'X-CSRF-TOKEN': CSRF } })
-    .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-    .then(function (res) {
-      if (!res.ok) { alert(res.j.erro || 'Não foi possível excluir.'); return; }
-      corrAssinatura = ''; carregarCorrigidos(); atualizar();window.G360Toast?.sucesso('Correção retirada. Os registros anteriores foram preservados no histórico.');
-    });
-}
-document.getElementById('corr-busca').addEventListener('input', desenharCorrigidos);
-document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fecharModal('foto-modal'); } });
-carregarCorrigidos();
-setInterval(function () { if (!document.hidden) carregarCorrigidos(true); }, 20000);
-var CSRF = '{{ csrf_token() }}';
-
-var promessaAlunos;
-function carregarAlunos(){
-  if(promessaAlunos)return promessaAlunos;
-  var estado=document.getElementById('upload-alunos-estado'),select=document.getElementById('upload-aluno');estado.textContent='Carregando alunos…';select.disabled=true;
-  promessaAlunos=G360BuscarJSON(@json(route('correcao.alunos',$prova['id'],false))).then(function(d){
-    ALUNOS=d.alunos.map(a=>({id:a.id,nome:a.nome,turma:a.turma_nome||''}));
-    ALUNOS.forEach(a=>{var o=document.createElement('option');o.value=a.id;o.textContent=a.nome;select.append(o);});
-    estado.textContent='';select.disabled=false;desenharCorrigidos();return ALUNOS;
-  }).catch(function(){promessaAlunos=null;estado.textContent='Não foi possível carregar os alunos. Você pode enviar sem identificar e vincular depois. ';var b=document.createElement('button');b.type='button';b.className='btn btn-secondary btn-sm';b.textContent='Tentar novamente';b.onclick=carregarAlunos;estado.append(b);});
-  return promessaAlunos;
-}
-function abrirUpload() { document.getElementById('modal-upload').style.display = 'flex';carregarAlunos(); }
-function fecharUpload() { document.getElementById('modal-upload').style.display = 'none'; }
-
-function tempoRelativo(iso) {
-  if (!iso) return '';
-  var diffMs = Date.now() - new Date(iso).getTime();
-  var min = Math.floor(diffMs / 60000);
-  if (min < 1) return 'agora mesmo';
-  if (min < 60) return 'há ' + min + ' minuto' + (min > 1 ? 's' : '');
-  var h = Math.floor(min / 60);
-  return 'há ' + h + ' hora' + (h > 1 ? 's' : '');
-}
-
-function renderEstado(data) {
-  if(!Number.isFinite(data.esperados)||!Number.isFinite(data.concluidos))throw new Error('Indicadores indisponíveis');
-  var pct=data.percentual_concluido;
-  document.getElementById('v-pct').textContent=pct===null?'—':new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(pct)+'%';
-  [['concluidos','concluidos'],['esperados','esperados'],['sem-cartao','sem_cartao'],['processando','em_processamento'],['revisao','alunos_revisao'],['total','cartoes_recebidos']].forEach(x=>document.getElementById('v-'+x[0]).textContent=data[x[1]]);
-  document.getElementById('v-progresso-resumo').textContent=data.esperados?data.concluidos+' de '+data.esperados+' alunos com correção concluída.':'Sem alunos previstos.';
-  document.getElementById('v-pendencias-tecnicas').textContent=[data.falhas?data.falhas+' aluno(s) com leitura não concluída.':'',data.nao_identificados?data.nao_identificados+' cartão(ões) sem aluno identificado.':''].filter(Boolean).join(' ');
-  document.getElementById('bar').style.width=(pct??0)+'%';
-  var progresso=document.querySelector('.progress-track');if(pct===null)progresso.removeAttribute('aria-valuenow');else progresso.setAttribute('aria-valuenow',pct);
-  var aviso=document.getElementById('aviso-concluida');
-  if(data.concluida&&!aviso){aviso=document.createElement('span');aviso.id='aviso-concluida';aviso.className='badge badge-success';aviso.textContent='Todos os alunos previstos têm resultado concluído';document.getElementById('v-progresso-resumo').append(' ',aviso);}
-  if(!data.concluida)aviso?.remove();
-}
-
-function renderAmbiguidades(lista) {
-  var alunos = {};
-  lista.forEach(function (a) { alunos[a.cartao_id] = true; });
-  var botao = document.getElementById('btn-revisar');
-  document.getElementById('ambig-resumo').textContent = lista.length
-    ? lista.length + ' questões de ' + Object.keys(alunos).length + ' cartão(ões) aguardam sua decisão.'
-    : 'Nenhuma pendência de revisão.';
-  if (botao) {
-    botao.textContent = 'Revisar leituras (' + lista.length + ')';
-    botao.style.display = lista.length ? '' : 'none';
-  }
-}
-
-function renderAtividade(recentes) {
-  var ul = document.getElementById('activity-list');
-  ul.innerHTML = '';
-  if (!recentes.length) {
-    ul.innerHTML = '<li style="border:0;color:var(--muted);">Nenhum cartão processado ainda.</li>';
-    return;
-  }
-  recentes.forEach(function (r) {
-    var li = document.createElement('li');
-    var nome = r.aluno_nome || 'Aluno não identificado';
-    var nota = r.nota_final !== null ? parseFloat(r.nota_final).toFixed(1).replace('.', ',') : '—';
-    li.innerHTML = '<div class="act-ico" style="background:var(--success-light);color:var(--success);">✓</div><div><b>' + escH(nome) + '</b> — nota ' + nota + '<div class="act-time">' + tempoRelativo(r.updated_at) + '</div></div>';
-    ul.appendChild(li);
-  });
-}
-
-var cargaProgresso=G360Carga(document.getElementById('regiao-progresso'));
-document.getElementById('regiao-progresso').addEventListener('g360:carga',function(e){
-  if(e.detail.estado!=='erro')return;
-  if(!e.detail.anterior){document.getElementById('ambig-resumo').textContent='Revisões indisponíveis no momento. Tente novamente nos indicadores.';document.getElementById('activity-list').textContent='Atividade indisponível no momento. Tente novamente nos indicadores.';}
-});
-function atualizar(silenciosa=false) {
-  return cargaProgresso.executar(()=>G360BuscarJSON(STATUS_URL),function(data){renderEstado(data);renderAmbiguidades(data.ambiguidades||[]);renderAtividade(data.recentes||[]);},{silenciosa});
-}
-
-atualizar();
-setInterval(function () { if (!document.hidden) atualizar(true); }, 10000);
-
-</script>
+@php($g360Config = ['status'=>\App\Support\NavegacaoWeb::destino('correcao.status',[$prova['id']]),'cartoes'=>\App\Support\NavegacaoWeb::destino('correcao.cartoes',[$prova['id']]),'alunos'=>\App\Support\NavegacaoWeb::destino('correcao.alunos',[$prova['id']]),'provaId'=>$prova['id'],'podeExcluir'=>$podeMexer,'notaMax'=>$prova['nota_maxima']??10,'csrf'=>csrf_token()])
+<script type="application/json" id="correcao-acompanhamento-config">@json($g360Config)</script>
+<script src="{{ asset('js/correcao-acompanhamento.js') }}?v={{ filemtime(public_path('js/correcao-acompanhamento.js')) }}"></script>
 @endpush

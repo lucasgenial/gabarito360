@@ -3,9 +3,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class CopiasWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private function preparar(string $perfil='dir_escolar'): array
     {
@@ -35,7 +37,7 @@ class CopiasWebTest extends TestCase
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-copia'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->dados()]);
         });
-        $r=$this->get('/app/copias?lado=origem&espaco_id=5');
+        $r=$this->consultarTela('/app/copias?lado=origem&espaco_id=5');
         $r->assertOk()->assertSee('Histórico de resultados')->assertSee('Publicado; confirmação dos registros pendente')
             ->assertSee('20 de 20')->assertSee('Atualizar acompanhamento')->assertDontSee('_ctx')->assertDontSee($ctx)->assertDontSee('contexto-cadastro')->assertDontSee('contexto-copia')
             ->assertDontSee('<script>segredo</script>',false)->assertSee('&lt;script&gt;',false)->assertDontSee('Autorizar transferência');
@@ -51,14 +53,14 @@ class CopiasWebTest extends TestCase
     public function test_papel_negado_mesmo_com_capacidade_e_flag_desligada(): void
     {
         [$ctx,$me]=$this->preparar('professor'); Http::fake(['*'=>Http::response(['data'=>$me])]);
-        $this->get('/app/copias')->assertForbidden(); Http::assertNotSent(fn($r)=>str_contains($r->url(),'/v1/copias'));
-        config(['services.copias.interface_ativa'=>false]); $this->get('/app/copias')->assertNotFound();
+        $this->consultarTela('/app/copias')->assertForbidden(); Http::assertNotSent(fn($r)=>str_contains($r->url(),'/v1/copias'));
+        config(['services.copias.interface_ativa'=>false]); $this->consultarTela('/app/copias')->assertNotFound();
     }
     public function test_indisponibilidade_nao_vira_lista_vazia_nem_expoe_erro(): void
     {
         [$ctx,$me]=$this->preparar();
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'SEGREDO-INTERNO'],500));
-        $this->get('/app/copias')->assertStatus(503)->assertDontSee('SEGREDO-INTERNO')->assertDontSee('Nenhuma solicitação encontrada');
+        $this->consultarTela('/app/copias')->assertStatus(503)->assertDontSee('SEGREDO-INTERNO')->assertDontSee('Nenhuma solicitação encontrada');
         Http::fake(function($r) use($me) {
             // O seletor compartilhado consulta opções pela identidade, não pelo token contextual.
             if ($r->method()==='GET' && preg_match('~/auth/(vinculos|acessos-internos)$~',$r->url())) {
@@ -69,13 +71,13 @@ class CopiasWebTest extends TestCase
             if (str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$me]);
             throw new \Illuminate\Http\Client\ConnectionException('SEGREDO-CONEXAO');
         });
-        $this->get('/app/copias')->assertStatus(503)->assertDontSee('SEGREDO-CONEXAO');
+        $this->consultarTela('/app/copias')->assertStatus(503)->assertDontSee('SEGREDO-CONEXAO');
     }
     public function test_estado_vazio_e_direcao_destino(): void
     {
         [$ctx,$me]=$this->preparar(); $dados=$this->dados(); $dados['lado']='destino';
         $dados['lista']=['data'=>[],'total'=>0,'current_page'=>1,'last_page'=>1];
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$dados]));
-        $this->get('/app/copias?lado=destino')->assertOk()->assertSee('Nenhuma solicitação encontrada')->assertSee('registra sua decisão');
+        $this->consultarTela('/app/copias?lado=destino')->assertOk()->assertSee('Nenhuma solicitação encontrada')->assertSee('registra sua decisão');
     }
 }

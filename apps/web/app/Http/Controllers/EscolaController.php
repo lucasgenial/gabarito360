@@ -140,8 +140,11 @@ class EscolaController extends Controller
     {
         $inep = preg_replace('/\D/', '', (string) $request->query('inep'));
         $resp = $this->api->get("/v1/censo/escolas/{$inep}");
-
-        return response()->json($resp->json(), $resp->status());
+        $dados=$resp->json();
+        if (is_array($dados) && !empty($dados['data']['ja_cadastrada']['id'])) {
+            $dados['data']['ja_cadastrada']['_recursos']['abrir']=\App\Support\NavegacaoWeb::destino('escolas.show',['id'=>$dados['data']['ja_cadastrada']['id']]);
+        }
+        return response()->json($dados, $resp->status());
     }
 
     /** Escolas do Censo pelo nome (para quem não sabe o INEP). */
