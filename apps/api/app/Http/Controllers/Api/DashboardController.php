@@ -285,9 +285,10 @@ class DashboardController extends Controller
     {
         $consulta = new ConsultasPedagogicas($request->user());
         $usuario = $request->user();
-        if ($escolha = $this->escolha($request, $consulta, 'escola')) return $escolha;
+        $opcoes = $this->referencias($consulta, 'escola');
+        if ($escolha = $this->escolha($request, $consulta, 'escola', $opcoes)) return $escolha;
 
-        $escolaId = Instituicoes::selecionarReferencia($request, 'escola', $this->referencias($consulta, 'escola')->pluck('id')->all());
+        $escolaId = Instituicoes::selecionarReferencia($request, 'escola', $opcoes->pluck('id')->all());
 
         if (!$escolaId) {
             return ApiResponse::forbidden('Usuário não vinculado a nenhuma escola.');
@@ -298,12 +299,6 @@ class DashboardController extends Controller
         // KPIs
         $provasAndamento = $consulta->modelo(Prova::class)->where('escola_id', $escolaId)
             ->whereIn('status', ['publicada', 'em_correcao'])
-            ->count();
-
-        $cartoesAmbiguos = $consulta->tabela('cartoes')
-            ->joinSub($consulta->tabela('provas'), 'provas', 'cartoes.prova_id', '=', 'provas.id')
-            ->where('provas.escola_id', $escolaId)
-            ->where('cartoes.status', 'ambiguo')
             ->count();
 
         $cartoesTotal = $consulta->tabela('cartoes')
@@ -341,38 +336,8 @@ class DashboardController extends Controller
             )
             ->orderByDesc('provas.updated_at')
             ->limit(8)
-            ->get()
-            ->map(function ($p) use ($consulta) {
-                $turmas = $consulta->tabela('prova_turmas')
-                    ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
-                    ->where('prova_turmas.prova_id', $p->id)
-                    ->pluck('turmas.nome')
-                    ->implode(', ');
-
-                $totalAlunos = $consulta->tabela('prova_turmas')
-                    ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
-                    ->where('prova_turmas.prova_id', $p->id)
-                    ->where('alunos.ativo', true)
-                    ->count();
-
-                $cartoesLidos = $consulta->tabela('cartoes')
-                    ->where('prova_id', $p->id)
-                    ->where('status', 'lido')
-                    ->count();
-
-                return [
-                    'id'             => $p->id,
-                    'disciplina'     => $p->disciplina,
-                    'titulo'         => $p->titulo,
-                    'professor'      => $p->professor_nome,
-                    'turmas'         => $turmas ?: '—',
-                    'turmas_lista'   => $this->turmasDaProva($consulta, $p->id),
-                    'total_alunos'   => $totalAlunos,
-                    'cartoes_lidos'  => $cartoesLidos,
-                    'status'         => $p->status,
-                    'data_aplicacao' => $p->data_aplicacao,
-                ];
-            });
+            ->get();
+        $provas = $this->complementarProvasCoordenador($consulta, $provas);
 
         // Alunos em atenção (os 5 com menor média)
         $alunosAtencao = $consulta->tabela('notas')
@@ -413,6 +378,39 @@ class DashboardController extends Controller
             'provas'         => $provas,
             'alunos_atencao' => $alunosAtencao,
             'agenda'         => $agenda,
+        ]);
+    }
+
+    /** Quatro consultas auxiliares no máximo, sem materializar alunos/cartões inteiros. */
+    private function complementarProvasCoordenador(ConsultasPedagogicas $consulta, \Illuminate\Support\Collection $provas): \Illuminate\Support\Collection
+    {
+        if ($provas->isEmpty()) return $provas;
+        $ids = $provas->pluck('id')->all();
+        // O texto original não tem ORDER BY; a lista usa a collation/ordenação do banco.
+        // Manter as duas projeções separadas, sem impor uma ordem nova ao contrato.
+        $nomes = $consulta->tabela('prova_turmas')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+            ->whereIn('prova_turmas.prova_id', $ids)
+            ->get(['prova_turmas.prova_id', 'turmas.nome'])->groupBy('prova_id');
+        $listas = $consulta->tabela('prova_turmas')
+            ->joinSub($consulta->tabela('turmas'), 'turmas', 'prova_turmas.turma_id', '=', 'turmas.id')
+            ->whereIn('prova_turmas.prova_id', $ids)->orderBy('turmas.nome')
+            ->get(['prova_turmas.prova_id', 'turmas.id', 'turmas.nome'])->groupBy('prova_id');
+        $totais = $consulta->tabela('prova_turmas')
+            ->joinSub($consulta->tabela('alunos'), 'alunos', 'alunos.turma_id', '=', 'prova_turmas.turma_id')
+            ->whereIn('prova_turmas.prova_id', $ids)->where('alunos.ativo', true)
+            ->groupBy('prova_turmas.prova_id')->select('prova_turmas.prova_id')->selectRaw('COUNT(*) as total')->get()->keyBy('prova_id');
+        $lidos = $consulta->tabela('cartoes')->whereIn('prova_id', $ids)->where('status', 'lido')
+            ->groupBy('prova_id')->select('prova_id')->selectRaw('COUNT(*) as total')->get()->keyBy('prova_id');
+
+        return $provas->map(fn ($p) => [
+            'id' => $p->id, 'disciplina' => $p->disciplina, 'titulo' => $p->titulo,
+            'professor' => $p->professor_nome,
+            'turmas' => ($nomes->get($p->id)?->pluck('nome')->implode(', ')) ?: '—',
+            'turmas_lista' => ($listas->get($p->id) ?? collect())->map(fn ($t) => ['id'=>(int)$t->id,'nome'=>$t->nome])->values()->all(),
+            'total_alunos' => (int) ($totais->get($p->id)?->total ?? 0),
+            'cartoes_lidos' => (int) ($lidos->get($p->id)?->total ?? 0),
+            'status' => $p->status, 'data_aplicacao' => $p->data_aplicacao,
         ]);
     }
 
@@ -864,10 +862,10 @@ class DashboardController extends Controller
         return $q->whereIn('id', $ids)->orderBy('nome')->get(['id', 'nome']);
     }
 
-    private function escolha(Request $request, ConsultasPedagogicas $consulta, string $tipo): ?JsonResponse
+    private function escolha(Request $request, ConsultasPedagogicas $consulta, string $tipo, ?\Illuminate\Support\Collection $opcoes = null): ?JsonResponse
     {
         if (!Espacos::ativo() || $request->has($tipo.'_id')) return null;
-        $opcoes = $this->referencias($consulta, $tipo);
+        $opcoes ??= $this->referencias($consulta, $tipo);
         return $opcoes->count() > 1
             ? ApiResponse::error('Selecione o contexto da consulta.', ['selecao' => ['campo' => $tipo.'_id', 'opcoes' => $opcoes]], 422)
             : null;
