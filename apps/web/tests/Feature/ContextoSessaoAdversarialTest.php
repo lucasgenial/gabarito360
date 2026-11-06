@@ -143,18 +143,24 @@ class ContextoSessaoAdversarialTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_contexto_cacheado_de_outra_identidade_nao_e_adotado_mesmo_com_revisao_igual(): void
+    public function test_contexto_de_outra_identidade_encerra_sessao_mesmo_com_revisao_igual(): void
     {
-        $rev=$this->ativar();$this->withSession(['auth_token'=>'identidade-de-outra-conta']);$this->api();
-        $this->postJson(self::PROBE,['_revisao'=>$rev])->assertStatus(409);
-        Http::assertNothingSent();
+        $rev=$this->ativar();$this->withSession(['auth_token'=>'identidade-de-outra-conta']);
+        Http::fake(fn($r)=>Http::response(['data'=>[]]));
+        $this->postJson(self::PROBE,['_revisao'=>$rev])->assertUnauthorized()->assertJsonPath('login_necessario',true)
+            ->assertSessionMissing('auth_token')->assertSessionMissing('auth_contexto_ativo');
+        Http::assertSentCount(1);
+        Http::assertSent(fn($r)=>str_ends_with($r->url(),'/auth/logout') && $r->hasHeader('Authorization','Bearer identidade-de-outra-conta'));
+        Http::assertNotSent(fn($r)=>str_ends_with($r->url(),'/operacao-adversarial'));
     }
 
     public function test_revogacao_api_impede_efeito_mesmo_com_revisao_atual(): void
     {
         $rev=$this->ativar();$this->api(statusMe:403);
-        $this->postJson(self::PROBE,['_revisao'=>$rev])->assertStatus(409);
-        Http::assertSentCount(1);
+        $this->postJson(self::PROBE,['_revisao'=>$rev])->assertUnauthorized()->assertJsonPath('login_necessario',true)
+            ->assertSessionMissing('auth_token')->assertSessionMissing('auth_contexto_ativo');
+        Http::assertSentCount(2);
+        Http::assertSent(fn($r)=>str_ends_with($r->url(),'/auth/logout') && $r->hasHeader('Authorization','Bearer identidade-ficticia'));
         Http::assertNotSent(fn($r)=>str_ends_with($r->url(),'/operacao-adversarial'));
     }
 
