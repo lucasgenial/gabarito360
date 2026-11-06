@@ -38,11 +38,17 @@
     history.replaceState(null,'',location.pathname);
   }
   root.G360Navegacao={abrir,descritor,limparEntradaDeAcesso};
-  function erro(caixa,mensagem,repetir,acesso=false) {
+  function erro(caixa,mensagem,repetir,acesso=false,codigo=null) {
+    document.documentElement.classList.remove('entrada-vinculo');
+    const marca=caixa.querySelector('.estado-marca');
+    caixa.classList.remove('estado-conteudo--carregando');
+    caixa.classList.add('estado-conteudo');
     caixa.replaceChildren();caixa.setAttribute('aria-busy','false');caixa.setAttribute('role','alert');caixa.tabIndex=-1;
+    if(marca)caixa.append(marca);
+    if(Number.isInteger(codigo)) { const c=document.createElement('p');c.className='estado-codigo';c.textContent=String(codigo);caixa.append(c); }
     const h=document.createElement('h1');h.textContent='Não foi possível abrir esta tela';
-    const p=document.createElement('p');p.textContent=mensagem;caixa.append(h,p);
-    const acoes=document.createElement('div');acoes.className='contexto-aviso-acoes';caixa.append(acoes);
+    const p=document.createElement('p');p.className='estado-mensagem';p.textContent=mensagem;caixa.append(h,p);
+    const acoes=document.createElement('div');acoes.className='estado-acoes';caixa.append(acoes);
     if (acesso) {
       const a=document.createElement('a');a.href='/app/painel';a.dataset.navegacaoIniciarAtual='1';a.className='btn btn-primary';a.textContent='Abrir painel atual';acoes.append(a);caixa.focus();return;
     }
@@ -69,6 +75,8 @@
       const tipo=r.headers.get('Content-Type')||'';
       // Recuperar somente a leitura inicial; nunca reaplicar formulários ou arquivos.
       if (r.status===401 || r.status===419) { limparEntradaDeAcesso();location.assign('/login');return; }
+      if (r.status>=500) { erro(shell.querySelector('[data-navegacao-status]'),'O serviço está temporariamente indisponível. Tente novamente.',true,false,r.status);return; }
+      if (r.status===429) { erro(shell.querySelector('[data-navegacao-status]'),'Aguarde um pouco antes de tentar novamente.',false,false,429);return; }
       if (!tipo.toLowerCase().includes('text/html')) {
         let dados=null;
         if (tipo.toLowerCase().includes('application/json')) { try { dados=await r.json(); } catch (_) {} }
@@ -78,9 +86,9 @@
         if (r.status===409 && dados?.selecionar_vinculo) { location.assign('/app/vinculos');return; }
         erro(shell.querySelector('[data-navegacao-status]'),'Confira seu acesso e abra o registro novamente pela lista.',r.status>=500);return;
       }
-      if (r.status>=500) { erro(shell.querySelector('[data-navegacao-status]'),'O serviço está temporariamente indisponível. Tente novamente.',true);return; }
       const html=await r.text();
       if (!/<html[\s>]/i.test(html)) throw new Error('Resposta incompatível.');
+      document.documentElement.classList.remove('entrada-vinculo');
       document.open();document.write(html);document.close();
     } catch (_) { erro(shell.querySelector('[data-navegacao-status]'),'Não foi possível carregar as informações. Tente novamente.',true); }
     finally { clearTimeout(timer); }

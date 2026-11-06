@@ -1,4 +1,7 @@
 var correcao_acompanhamentoConfig = JSON.parse(document.getElementById('correcao-acompanhamento-config').textContent);
+document.getElementById('foto-img')?.addEventListener('error',function(){
+  if(this.getAttribute('src')) { this.style.display='none';document.getElementById('foto-erro').style.display='block'; }
+});
 
 var STATUS_URL = correcao_acompanhamentoConfig.status;
 window.g360RecursosCartoes = window.g360RecursosCartoes || new Map();
