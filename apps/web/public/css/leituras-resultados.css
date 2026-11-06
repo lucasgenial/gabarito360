@@ -13,6 +13,7 @@
 .tela-correcao .corr-miniatura-atualizar { flex:none; color:var(--accent); }
 .tela-correcao .corr-miniatura-ausente { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; text-align:center; font-size:11px; line-height:1.25; padding:4px; cursor:default; }
 @media(prefers-reduced-motion:reduce){.tela-correcao .corr-miniatura-carga .g360-marca-carregando{animation:none;}}
+@media(max-width:400px){.tela-correcao .corr-list{grid-template-columns:minmax(0,1fr);}}
 .leitura-observacao { white-space:pre-line; overflow-wrap:anywhere; }
 .leitura-cabecalho { display:grid; gap:10px; margin-block:12px 18px; }
 .leitura-cabecalho > button { justify-self:start; }
