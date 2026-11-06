@@ -39,8 +39,8 @@ class SolicitacoesCatalogoWebTest extends TestCase
         $this->get('/app/instituicoes/solicitacoes')->assertOk()->assertSee('Solicitar cadastro')->assertSee('Próxima');
         $this->get('/app/instituicoes/solicitacoes/nova')->assertOk()->assertSee('name="chave"',false)->assertSee('data-catalogo-localizacao',false)->assertDontSee('Registrar revisão cadastral');
         $this->get('/app/instituicoes/solicitacoes/'.self::ID)->assertOk()->assertSee('Enviar complementação')->assertDontSee('<script>fictícia</script>',false)->assertDontSee('Cadastrar nova referência e aprovar');
-        $this->post('/app/instituicoes/solicitacoes',['chave'=>self::ED,'cadastro'=>['nome'=>'Fictícia']])->assertRedirect();
-        Http::assertSent(fn($r)=>$r->method()==='POST' && str_ends_with($r->url(),'/catalogo/minhas-solicitacoes') && $r['chave']===self::ED && !isset($r['_ctx']) && !isset($r['_token']) && $r->hasHeader('Authorization','Bearer token-ficticio'));
+        $this->post('/app/instituicoes/solicitacoes',['chave'=>self::ED,'cadastro'=>['nome'=>'Fictícia'],'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')])->assertRedirect();
+        Http::assertSent(fn($r)=>$r->method()==='POST' && str_ends_with($r->url(),'/catalogo/minhas-solicitacoes') && $r['chave']===self::ED && !isset($r['_ctx']) && !isset($r['_revisao']) && !isset($r['_token']) && $r->hasHeader('Authorization','Bearer token-ficticio'));
     }
     public function test_suporte_tem_fila_busca_e_cadastro_com_fonte_explicita(): void {
         [$ctx,$me]=$this->preparar('suporte');$this->fake($me);
@@ -86,4 +86,18 @@ class SolicitacoesCatalogoWebTest extends TestCase
         $this->get('/app/catalogo/atendimento/buscar?tipo=escola')->assertStatus(422)->assertSee('Consultar catálogo institucional')->assertSee('Código incompatível com a fonte.')->assertSee('name="tipo"',false);
         $this->get('/app/catalogo/atendimento/buscar?namespace=inep_escola&codigo=ABC')->assertStatus(422)->assertSee('value="ABC"',false)->assertSee('aria-invalid="true"',false);
     }
+    public function test_formulario_ssr_catalogo_envia_somente_negocio_com_csrf_real(): void {
+        [$ctx,$me]=$this->preparar();$this->fake($me);
+        $html=$this->get('/app/instituicoes/solicitacoes/nova')->assertOk()->getContent();
+        preg_match('/name="_token" value="([^"]+)"/',$html,$csrf);
+        preg_match('/name="_revisao" value="([^"]+)"/',$html,$rev);
+        $this->assertNotEmpty($csrf[1]);$this->assertNotEmpty($rev[1]);
+        $this->flushHeaders();$this->app->instance('env','local');
+        $d=['chave'=>self::ED,'cadastro'=>['nome'=>'Fictícia'],'_token'=>$csrf[1],'_revisao'=>$rev[1]];
+        $this->post('/app/instituicoes/solicitacoes',array_replace($d,['_token'=>'invalido']))->assertStatus(419);
+        Http::assertNotSent(fn($r)=>$r->method()==='POST');
+        $this->post('/app/instituicoes/solicitacoes',$d)->assertRedirect();
+        Http::assertSent(fn($r)=>$r->method()==='POST' && $r->data()===['chave'=>self::ED,'cadastro'=>['nome'=>'Fictícia']]);
+    }
+
 }

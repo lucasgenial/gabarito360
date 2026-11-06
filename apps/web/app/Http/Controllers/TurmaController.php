@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\ApiClient;
 use Illuminate\Http\Request;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\View\View;
 
 class TurmaController extends Controller
@@ -53,9 +54,15 @@ class TurmaController extends Controller
         return redirect()->route('turmas.index')->with('sucesso', 'Turma criada.');
     }
 
-    public function show(int $id): View
+    public function show(int $id): View|\Illuminate\Http\Response
     {
-        $resp = $this->api->get("/v1/turmas/{$id}");
+        try {
+            $resp = $this->api->get("/v1/turmas/{$id}");
+        } catch (ConnectionException) {
+            return $this->indisponivel();
+        }
+
+        if ($resp->serverError() || $resp->status() === 429) return $this->indisponivel();
 
         if ($resp->failed()) {
             abort(404, 'Turma não encontrada.');
@@ -88,6 +95,11 @@ class TurmaController extends Controller
             'todosProfessores' => $todosProfessores,
             'dc1Visivel' => $dc1Visivel, 'dc1Dados' => $dc1Dados, 'dc1Erro' => $dc1Erro, 'dc1Retorno' => $dc1Retorno,
         ]);
+    }
+
+    private function indisponivel(): \Illuminate\Http\Response
+    {
+        return response()->view('turmas.indisponivel', [], 503)->header('Retry-After', '30');
     }
 
     public function vincularProfessor(Request $request, int $id)

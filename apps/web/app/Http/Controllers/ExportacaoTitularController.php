@@ -39,14 +39,14 @@ final class ExportacaoTitularController extends Controller
         abort_unless(in_array($acao,['conceder','revogar','gerar'],true),404);$this->autorizar($acao!=='gerar');
         $base=$this->validar($r->only('envio','referencia','confirmado'),['envio'=>'required|string|size:48','referencia'=>'required|uuid','confirmado'=>'required|accepted']);
         $d=null;
-        if ($r->boolean('repetir')) abort_if(array_diff(array_keys($r->all()),['_token','_ctx','envio','referencia','confirmado','repetir']),422);
+        if ($r->boolean('repetir')) abort_if(array_diff(array_keys($r->all()),['_token','_revisao','envio','referencia','confirmado','repetir']),422);
         else {
             $regras=['versao'=>'required|integer|min:1'];
             if ($acao!=='gerar') $regras+=['motivo'=>'required|string|min:5|max:500'];
             if ($acao==='conceder') $regras+=['aluno_id'=>'required|integer|min:1','sujeito_versao'=>'required|integer|min:1',
                 'destinatario_acesso_id'=>'required|integer|min:1','campos'=>'required|array|min:1|max:2','campos.*'=>'required|distinct|in:nome,matricula',
                 'valida_ate'=>'required|date_format:Y-m-d\TH:i','evidencia_referencia'=>'required|string|min:5|max:500'];
-            abort_if(array_diff(array_keys($r->all()),array_merge(array_keys($regras),['_token','_ctx','envio','referencia','confirmado','repetir'])),422);
+            abort_if(array_diff(array_keys($r->all()),array_merge(array_keys($regras),['_token','_revisao','envio','referencia','confirmado','repetir'])),422);
             $d=$this->validar($r->only(array_values(array_filter(array_keys($regras),fn($k)=>!str_contains($k,'.')))),$regras);
             if ($acao==='conceder') {$d['valida_ate']=Carbon::createFromFormat('Y-m-d\TH:i',$d['valida_ate'],'America/Sao_Paulo')->seconds(0)->utc()->toIso8601String();sort($d['campos']);}
             // Referência é parte do payload idempotente para tickets de alvo informado pelo usuário.
@@ -58,7 +58,7 @@ final class ExportacaoTitularController extends Controller
     }
     public function arquivo(Request $r,string $id)
     {
-        $this->autorizar(false);abort_unless($r->isMethod('GET'),405);
+        $this->autorizar(false);abort_unless($r->isMethod('GET') || $r->isMethod('POST'),405);
         try {$res=$this->api->get('/v1/pedidos-titulares/exportacoes/'.$id.'/arquivo');}catch(\Illuminate\Http\Client\ConnectionException){abort(503,'Arquivo indisponível.');}
         abort_unless($res->successful(),in_array($res->status(),[401,403,404,409,429],true)?$res->status():503,'Arquivo indisponível.');
         abort_unless(strlen($res->body())<=16384 && str_contains($res->header('Content-Type'),'application/json'),503);
