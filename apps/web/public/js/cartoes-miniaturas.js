@@ -14,6 +14,7 @@ window.criarMiniaturasCartoes = function (root, abrir) {
     r.botao.setAttribute('aria-label', valor === 'erro'
       ? 'Foto indisponível. Tentar carregar a miniatura novamente'
       : valor === 'pronta' ? 'Abrir foto do cartão-resposta' : 'Carregando miniatura do cartão-resposta');
+    r.botao.title = valor === 'erro' ? 'Tentar carregar a miniatura novamente' : valor === 'pronta' ? 'Abrir foto do cartão-resposta' : 'Carregando miniatura do cartão-resposta';
   }
   function proxima() {
     while (ativos < 4 && fila.length) {

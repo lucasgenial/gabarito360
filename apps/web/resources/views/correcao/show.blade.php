@@ -12,6 +12,8 @@
 @endsection
 
 @push('styles')
+<link rel="preload" href="{{ asset('brand/gabarito360-icon.svg') }}" as="image" type="image/svg+xml">
+<link rel="preload" href="{{ asset('brand/gabarito360-icon-dark.svg') }}" as="image" type="image/svg+xml">
 <link rel="stylesheet" href="{{ asset('css/leituras-resultados.css') }}?v={{ filemtime(public_path('css/leituras-resultados.css')) }}">
 @endpush
 
