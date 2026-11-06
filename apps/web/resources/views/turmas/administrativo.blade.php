@@ -15,7 +15,7 @@
   <p>Status: {{ $turma['ativo'] ? 'Ativa' : 'Inativa' }}</p>
   @if(\App\Support\Acesso::pode('turma.gerir'))
   <form method="POST" action="{{ route('turmas.update', $turma['id']) }}">
-    @csrf @method('PUT')
+    @csrf <x-revisao-acesso /> @method('PUT')
     <div class="form-row-2">
       <div class="field"><label for="nome">Nome da turma</label><input class="input" id="nome" name="nome" required maxlength="50" value="{{ old('nome', $turma['nome']) }}"></div>
       <div class="field"><label for="serie">Série</label><input class="input" id="serie" name="serie" required maxlength="50" value="{{ old('serie', $turma['serie']) }}"></div>
@@ -31,7 +31,7 @@
   @endif
   @if(\App\Support\Acesso::pode('turma.desativar'))
   <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}" style="margin-top:16px;">
-    @csrf <button class="btn btn-secondary" type="submit">{{ $turma['ativo'] ? 'Desativar turma' : 'Ativar turma' }}</button>
+    @csrf <x-revisao-acesso /> <button class="btn btn-secondary" type="submit">{{ $turma['ativo'] ? 'Desativar turma' : 'Ativar turma' }}</button>
   </form>
   @endif
 </section>

@@ -6,7 +6,7 @@
 @include('copias._pacote-resultados',['pacote'=>$dados['pacote']])
 @if($dados['lado']==='origem' && !$dados['evidencia_registrada'])
 <form method="POST" action="{{ route('copias.resultado.evidencia',['id'=>$dados['lote_id']]) }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="conteudo_digest" value="{{ $dados['conteudo_digest'] }}">
+  @csrf <x-revisao-acesso /><input type="hidden" name="conteudo_digest" value="{{ $dados['conteudo_digest'] }}">
   <input type="hidden" name="valida_ate" value="{{ $validade }}">
   <h2>Evidência aplicável à transferência</h2>
   <div class="field"><label for="documento">Texto da evidência</label><textarea class="input" id="documento" name="documento" rows="8" maxlength="65536" required autocomplete="off"></textarea></div>
@@ -31,7 +31,7 @@
 </section>
 @else
 <form method="POST" action="{{ route('copias.resultado.aprovar',['id'=>$dados['lote_id']]) }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="lado" value="{{ $dados['lado'] }}">
+  @csrf <x-revisao-acesso /><input type="hidden" name="lado" value="{{ $dados['lado'] }}">
   <input type="hidden" name="conteudo_digest" value="{{ $dados['conteudo_digest'] }}"><input type="hidden" name="valida_ate" value="{{ $validade }}">
 
   <p>Autorização válida até {{ \Carbon\Carbon::parse($validade,'UTC')->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }} (horário de Brasília).</p>

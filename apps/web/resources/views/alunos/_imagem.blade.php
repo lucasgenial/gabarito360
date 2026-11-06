@@ -9,7 +9,7 @@
  <p id="imagem-aluno-sucesso" role="status" hidden></p>
  <div id="imagem-aluno-preview" class="imagem-modal-preview" aria-label="Prévia da imagem"></div>
  <form id="imagem-aluno-form" method="POST" action="{{ $rascunho ? '#' : route('alunos.imagem', $aluno['id']) }}" enctype="multipart/form-data">
- @csrf
+ @csrf <x-revisao-acesso />
  <fieldset class="imagem-modal-tipos"><legend class="sr-only">Escolha a imagem</legend><label><input type="radio" name="tipo" value="avatar"> Avatar</label><label><input type="radio" name="tipo" value="foto"> Foto</label></fieldset>
  <div id="imagem-aluno-avatares"><x-seletor-avatar :direto="true" titulo="Escolha um avatar" :nome="$aluno['nome']??old('nome','Novo aluno')" :avatar-id="$imagemInicial['avatar_id']" preview-id="imagem-aluno-avatar-preview" /></div>
  <div id="imagem-aluno-foto" class="field">
@@ -37,7 +37,7 @@
  var editor=new G360PreparoFoto({input:arquivo,camera:camera,root:document.getElementById('imagem-aluno-editor'),error:mostrarErro,change:atualizar,start:function(){cancelar.textContent='Cancelar';erro.hidden=true;sucesso.hidden=true;}});
  function renderizar(local,d,tamanho){
   var span=document.createElement('span');span.className='avatar-aluno avatar-aluno--azul avatar-aluno--'+tamanho;span.setAttribute('aria-hidden','true');
-  if(d.tem_foto&&d.foto_url){var url=new URL(d.foto_url,location.href);if(url.origin!==location.origin&&url.protocol!=='blob:')throw new Error('Imagem indisponível.');var img=document.createElement('img');img.src=url.href;img.alt='';img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:inherit;';span.append(img);}
+  if(d.tem_foto&&d.foto_url){var url=new URL(d.foto_url,location.href);if(url.origin!==location.origin&&url.protocol!=='blob:')throw new Error('Imagem indisponível.');var img=document.createElement('img');if(url.protocol==='blob:')img.src=url.href;else img.dataset.imagemContextual=url.href;img.alt='';img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:inherit;';span.append(img);}
   else{var id=Number(d.avatar_id);if(id>=1&&id<=36){span.classList.add('avatar-aluno--imagem');span.style.setProperty('--avatar-x',((id-1)%6)*20+'%');span.style.setProperty('--avatar-y',Math.floor((id-1)/6)*20+'%');}var iniciais=document.createElement('span');iniciais.className='avatar-iniciais';iniciais.textContent=local.dataset.iniciais||document.querySelector('[data-imagem-aluno]')?.dataset.iniciais||'?';span.append(iniciais);}
   local.replaceChildren(span);
  }

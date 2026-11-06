@@ -83,6 +83,64 @@ class ContextoWeb
         }
         Cache::forget(self::chave($id));
     }
+    /** Ativa somente a resposta autenticada da API; nunca recebe autorização do navegador. */
+    public static function ativar(array $dados): string
+    {
+        $anterior = session('auth_contexto_ativo');
+        $id = self::criar($dados);
+        $revisao = Str::random(40);
+        session(['auth_contexto_ativo' => $id, 'auth_contexto_revisao' => $revisao]);
+        if (is_string($anterior)) self::esquecer($anterior);
+        return $revisao;
+    }
+
+    public static function ativarLegado(array $me): string
+    {
+        abort_if(session('auth_vinculos'), 404);
+        return self::ativar([
+            'tipo_contexto' => 'legado', 'token' => self::identidade(),
+            'perfil' => $me['perfil'], 'permissoes' => $me['permissoes'],
+        ]);
+    }
+
+    public static function limpar(): void
+    {
+        if (is_string($id = session('auth_contexto_ativo'))) self::esquecer($id);
+        session()->forget(['auth_contexto_ativo', 'auth_contexto_revisao']);
+    }
+
+    public static function garantirRevisao(): ?string
+    {
+        if (!session('auth_token')) return null;
+        if (!is_string(session('auth_contexto_revisao'))) session(['auth_contexto_revisao' => Str::random(40)]);
+        return session('auth_contexto_revisao');
+    }
+
+    /** Snapshot por requisição; alterações de sessão posteriores não trocam a autoridade em uso. */
+    public static function capturar(\Illuminate\Http\Request $request): void
+    {
+        if ($request->attributes->has('g360_snapshot')) return;
+        $request->attributes->set('g360_snapshot', true);
+        $request->attributes->set('g360_identidade', session('auth_token'));
+        $request->attributes->set('g360_revisao', self::garantirRevisao());
+        $id = session('auth_contexto_ativo');
+        $dados = is_string($id) ? self::obter($id) : null;
+        // Nunca atravessar a fronteira entre os regimes com um contexto de sessão antigo.
+        if ($dados && ((($dados['tipo_contexto'] ?? null) === 'legado') === (bool) session('auth_vinculos'))) $dados = null;
+        $request->attributes->set('vinculo_contexto', $dados);
+        $request->attributes->set('vinculo_handle', $dados ? $id : null);
+    }
+
+    public static function identidade(): ?string
+    {
+        return request()->attributes->has('g360_snapshot') ? request()->attributes->get('g360_identidade') : session('auth_token');
+    }
+
+    public static function revisao(): ?string
+    {
+        return request()->attributes->has('g360_snapshot') ? request()->attributes->get('g360_revisao') : self::garantirRevisao();
+    }
+
     public static function atual(): ?array { return request()->attributes->get('vinculo_contexto'); }
     public static function id(): ?string { return request()->attributes->get('vinculo_handle'); }
 }

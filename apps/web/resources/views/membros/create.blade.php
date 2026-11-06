@@ -27,7 +27,7 @@
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 <form method="POST" action="{{ route('membros.store') }}" class="member-layout" id="member-form">
-  @csrf
+  @csrf <x-revisao-acesso />
 
   {{-- Preview lateral --}}
   <aside class="identity-card">

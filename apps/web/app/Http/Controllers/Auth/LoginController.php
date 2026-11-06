@@ -13,7 +13,7 @@ class LoginController extends Controller
     public function index(Request $request)
     {
         if (session('auth_token')) {
-            return redirect()->route($request->boolean('retorno_convite') ? 'vinculos.convite' : 'painel');
+            return redirect()->route($request->boolean('retorno_convite') ? 'vinculos.convite' : 'vinculos.index');
         }
 
         return view('auth.login');
@@ -38,6 +38,7 @@ class LoginController extends Controller
         }
 
         $data = $response->json('data');
+        \App\Support\ContextoWeb::limpar();
         $request->session()->regenerate();
 
         session([
@@ -54,7 +55,7 @@ class LoginController extends Controller
         ]);
 
         if ($request->boolean('retorno_convite')) return redirect()->route(($data['trocar_senha'] ?? false) ? 'trocar-senha' : 'vinculos.convite', ['retorno_convite' => 1]);
-        return redirect()->route('painel');
+        return redirect()->route(($data['trocar_senha'] ?? false) ? 'trocar-senha' : 'vinculos.index');
     }
 
     public function showEsqueciSenha()
@@ -165,6 +166,7 @@ class LoginController extends Controller
         try { $this->api->identidade()->post('/v1/auth/logout'); }
         catch (\Illuminate\Http\Client\ConnectionException) { /* A saída local independe da disponibilidade da API. */ }
         finally {
+            \App\Support\ContextoWeb::limpar();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
         }

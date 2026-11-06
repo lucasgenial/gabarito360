@@ -6,7 +6,7 @@
 @section('content')
 <x-pagina :titulo="$p?'Configurar turmas e disciplinas':'Criar prova'"><x-slot:sub>{{ $p?$p['titulo']:'Selecione as turmas e as disciplinas antes de preencher os dados da prova.' }}</x-slot:sub></x-pagina>
 <form method="POST" action="{{ $p?route('provas.curriculo.salvar',$p['id']):route('provas.store') }}" class="pc-form dc1-stack" data-prova-curriculo>
-  @csrf
+  @csrf <x-revisao-acesso />
 
   @if($errors->any() || $mensagens->any())<x-aviso tipo="erro"><strong>Confira o preenchimento.</strong><ul>@foreach(array_unique(array_merge($errors->all(),$mensagens->all())) as $erro)<li>{{ $erro }}</li>@endforeach</ul></x-aviso>@endif
   @include('provas.curriculo._editor')

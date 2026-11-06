@@ -40,14 +40,14 @@
     </div>
     @pode('correcao.reabrir')
       <form method="POST" action="{{ route('correcao.reabrir', $prova['id']) }}" onsubmit="return confirm('Reabrir a correção? Professores e corretores voltam a poder enviar, excluir e alterar.')">
-        @csrf<button type="submit" class="btn btn-secondary"><x-icone nome="cadeado" /> Reabrir correção</button>
+        @csrf <x-revisao-acesso /><button type="submit" class="btn btn-secondary"><x-icone nome="cadeado" /> Reabrir correção</button>
       </form>
     @endpode
   @else
     <div style="flex:1;min-width:220px;font-size:14px;"><b>Correção aberta</b><div style="font-size:12px;color:var(--muted);">Ao terminar, feche a correção para evitar alterações.</div></div>
     @pode('correcao.fechar')
       <form method="POST" action="{{ route('correcao.fechar', $prova['id']) }}" onsubmit="return confirm('Fechar a correção? Depois disso só a coordenação/direção poderá alterar, excluir, incluir ou reabrir.')">
-        @csrf<button type="submit" class="btn btn-secondary"><x-icone nome="cadeado" /> Fechar correção</button>
+        @csrf <x-revisao-acesso /><button type="submit" class="btn btn-secondary"><x-icone nome="cadeado" /> Fechar correção</button>
       </form>
     @endpode
   @endif
@@ -120,7 +120,7 @@
       <button type="button" onclick="fecharUpload()" style="width:32px;height:32px;border-radius:50%;background:none;border:0;cursor:pointer;font-size:20px;color:var(--muted);">&times;</button>
     </div>
     <form method="POST" action="{{ route('correcao.upload', $prova['id']) }}" enctype="multipart/form-data">
-      @csrf
+      @csrf <x-revisao-acesso />
       <input type="hidden" name="envio_id" value="{{ \Illuminate\Support\Str::uuid() }}">
       <div style="padding:22px;display:flex;flex-direction:column;gap:14px;">
         <div class="field">
@@ -220,7 +220,7 @@ function verFoto(id) {
   document.getElementById('foto-titulo').textContent = (c.aluno_nome || 'Aluno não identificado') + (c.turma ? ' · ' + c.turma : '');
   document.getElementById('foto-erro').style.display = 'none';
   document.getElementById('foto-img').style.display = '';
-  document.getElementById('foto-img').src = c.foto_url || (CARTOES_URL + '/' + id + '/imagem');
+  window.g360ImagemContextual(document.getElementById('foto-img'), c.foto_url || (CARTOES_URL + '/' + id + '/imagem')).catch(function(){document.getElementById('foto-img').style.display='none';document.getElementById('foto-erro').style.display='block';});
   abrirModal('foto-modal');
 }
 async function excluirCorrecao(id) {

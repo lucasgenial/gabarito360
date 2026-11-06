@@ -20,6 +20,7 @@ window.criarMiniaturasCartoes = function (root, abrir) {
       const r = fila.shift();
       if (registros.get(r.chave) !== r || !r.botao.isConnected) continue;
       ativos++;
+      const abortar = new AbortController();
       let finalizada = false;
       const terminar = ok => {
         if (finalizada) return;
@@ -28,14 +29,15 @@ window.criarMiniaturasCartoes = function (root, abrir) {
         if (registros.get(r.chave) === r && r.botao.isConnected) estado(r, ok ? 'pronta' : 'erro');
         proxima();
       };
-      const timer = setTimeout(() => { r.img.removeAttribute('src'); terminar(false); }, 25000);
-      r.cancelar = () => { r.img.onload = r.img.onerror = null; r.img.removeAttribute('src'); terminar(false); };
+      const timer = setTimeout(() => { abortar.abort(); r.img.removeAttribute('src'); terminar(false); }, 25000);
+      r.cancelar = () => { abortar.abort(); r.img.onload = r.img.onerror = null; r.img.removeAttribute('src'); terminar(false); };
       r.img.onload = () => {
         if (r.img.decode) r.img.decode().then(() => terminar(true), () => terminar(false));
         else terminar(r.img.naturalWidth > 0);
       };
       r.img.onerror = () => terminar(false);
-      r.img.src = r.url;
+      if (typeof window.g360ImagemContextual === 'function') window.g360ImagemContextual(r.img, r.url, {signal: abortar.signal}).catch(() => terminar(false));
+      else terminar(false);
     }
   }
   function atualizar() {

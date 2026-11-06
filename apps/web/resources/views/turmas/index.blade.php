@@ -135,7 +135,7 @@
       <button type="button" class="modal-close" onclick="fecharModal('modal-criar')">&times;</button>
     </div>
     <form method="POST" action="{{ route('turmas.store') }}">
-      @csrf
+      @csrf <x-revisao-acesso />
       <div class="modal-body">
         <div class="form-row-2">
           <div class="field" style="grid-column:1/-1">

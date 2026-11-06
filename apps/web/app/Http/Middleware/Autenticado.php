@@ -15,6 +15,8 @@ class Autenticado
             return redirect()->route('login')->with('erro', 'Faça login para continuar.');
         }
 
+        if ($request->routeIs('legado.*') && !$request->isMethod('GET')) return RevisaoAcesso::recusar($request);
+
         if (session('auth_trocar_senha') && !$request->routeIs('trocar-senha', 'trocar-senha.store')) {
             return redirect()->route('trocar-senha');
         }

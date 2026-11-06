@@ -7,6 +7,7 @@ use Tests\TestCase;
 
 class ImagemAlunoWebTest extends TestCase
 {
+    use \Tests\Support\ContextoSelecionado;
     private function contexto(bool $editar=true,bool $limite=false): string
     {
         config(['services.api.base_url'=>'http://api.test/api']);Http::preventStrayRequests();
@@ -23,32 +24,32 @@ class ImagemAlunoWebTest extends TestCase
             if(str_ends_with($r->url(),'/turmas'))return Http::response(['data'=>['turmas'=>[]]]);
             return Http::response(['data'=>[]]);
         });
-        ContextoWeb::criar($d);return ContextoWeb::referencia($d);
+        $this->selecionarContextoFixture($d);return ContextoWeb::referencia($d);
     }
     public function test_imagem_aluno_so_pode_ser_alterada_por_quem_edita_o_cadastro(): void
     {
         $id=$this->contexto(false);
-        $this->get('/acessos/'.$id.'/alunos/7')->assertOk()->assertDontSee('data-abrir-imagem-aluno',false)->assertDontSee('id="imagem-aluno-modal"',false);
-        $this->postJson('/acessos/'.$id.'/alunos/7/imagem',['tipo'=>'avatar','avatar_id'=>8])->assertForbidden();
+        $this->get('/app/alunos/7')->assertOk()->assertDontSee('data-abrir-imagem-aluno',false)->assertDontSee('id="imagem-aluno-modal"',false);
+        $this->postJson('/app/alunos/7/imagem',['tipo'=>'avatar','avatar_id'=>8])->assertForbidden();
         Http::assertNotSent(fn($r)=>str_ends_with($r->url(),'/alunos/7/imagem'));
     }
     public function test_modal_existente_tem_camera_e_arquivo_e_retorno_json_privado(): void
     {
         $id=$this->contexto();
-        $this->get('/acessos/'.$id.'/alunos/7')->assertOk()->assertSee('Imagem de Aluno fictício')->assertSee('Salvar imagem')->assertSee('capture="user"',false)->assertSee('Escolher arquivo');
-        $this->postJson('/acessos/'.$id.'/alunos/7/imagem',['tipo'=>'foto','foto'=>UploadedFile::fake()->image('ficticio.jpg')])
+        $this->get('/app/alunos/7')->assertOk()->assertSee('Imagem de Aluno fictício')->assertSee('Salvar imagem')->assertSee('capture="user"',false)->assertSee('Escolher arquivo');
+        $this->postJson('/app/alunos/7/imagem',['tipo'=>'foto','foto'=>UploadedFile::fake()->image('ficticio.jpg')])
             ->assertOk()->assertJsonPath('data.tem_foto',true)->assertJsonMissingPath('data.token')->assertJsonMissingPath('data.foto_path');
-        $this->get('/acessos/'.$id.'/alunos/7/foto')->assertOk()->assertHeader('Cache-Control','no-store, private');
+        $this->get('/app/alunos/7/foto')->assertOk()->assertHeader('Cache-Control','no-store, private');
     }
     public function test_foto_do_novo_aluno_e_encaminhada_junto_ao_cadastro(): void
     {
         $id=$this->contexto();
-        $this->post('/acessos/'.$id.'/alunos',['nome'=>'Aluno fictício','matricula'=>'IMG-7','turma_id'=>1,'data_nascimento'=>'2010-01-01','foto'=>UploadedFile::fake()->image('ficticio.jpg')])->assertRedirect();
+        $this->post('/app/alunos',['nome'=>'Aluno fictício','matricula'=>'IMG-7','turma_id'=>1,'data_nascimento'=>'2010-01-01','foto'=>UploadedFile::fake()->image('ficticio.jpg')])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/alunos')&&$r->method()==='POST'&&str_contains($r->body(),'name="foto"'));
     }
     public function test_limite_real_da_imagem_mantem_prazo_e_erro_em_portugues():void
     {
         $id=$this->contexto(true,true);
-        $this->postJson('/acessos/'.$id.'/alunos/7/imagem',['tipo'=>'avatar','avatar_id'=>8])->assertStatus(429)->assertHeader('Retry-After','9')->assertJsonPath('retry_after',9)->assertJsonMissingPath('data.foto_url')->assertJsonPath('message','Muitas tentativas seguidas. Aguarde alguns instantes e tente novamente.');
+        $this->postJson('/app/alunos/7/imagem',['tipo'=>'avatar','avatar_id'=>8])->assertStatus(429)->assertHeader('Retry-After','9')->assertJsonPath('retry_after',9)->assertJsonMissingPath('data.foto_url')->assertJsonPath('message','Muitas tentativas seguidas. Aguarde alguns instantes e tente novamente.');
     }
 }

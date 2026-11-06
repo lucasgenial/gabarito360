@@ -19,14 +19,15 @@ class ContextoPorAbaTest extends TestCase
             'auth_permissoes' => [], 'auth_nome' => 'Pessoa fictícia']);
         $this->withCookie(config('session.cookie'), session()->getId());
         $this->withCredentials();
-        Route::middleware(['web', 'autenticado'])->get('/acessos/{acesso}/teste-contexto', function () {
+        $this->withHeader('X-G360-Revisao', ContextoWeb::garantirRevisao());
+        Route::middleware(['web', 'autenticado'])->get('/app/teste-contexto', function () {
             return response()->json(['perfil' => Acesso::perfil(), 'permissoes' => Acesso::permissoes()]);
         });
-        Route::middleware(['web', 'autenticado'])->post('/acessos/{acesso}/teste-contexto', function () {
+        Route::middleware(['web', 'autenticado'])->post('/app/teste-contexto', function () {
             app(ApiClient::class)->post('/v1/operacao');
             return redirect('/teste-contexto');
         });
-        Route::middleware(['web', 'autenticado'])->get('/acessos/{acesso}/teste-pdf', function () {
+        Route::middleware(['web', 'autenticado'])->get('/app/teste-pdf', function () {
             $r = app(ApiClient::class)->getArquivo('/v1/arquivo');
             return response($r->body())->header('Content-Type', 'application/pdf');
         });
@@ -44,63 +45,71 @@ class ContextoPorAbaTest extends TestCase
         return ['vinculo_id' => $token === 'token-b' ? 2 : 1, 'token' => $token, 'perfil' => $perfil, 'permissoes' => ['prova.ver'], 'espaco' => ['id' => 1, 'nome' => 'Escola fictícia', 'tipo' => 'escola']];
     }
 
-    private function url(string $path, string $id): string
+    private function ativar(array $dados): string
     {
-        return '/acessos/'.ContextoWeb::referencia(ContextoWeb::obter($id)).$path;
+        $revision = ContextoWeb::ativar($dados);
+        $this->withHeader('X-G360-Revisao', $revision);
+        session()->save();
+        return session('auth_contexto_ativo');
     }
 
-    public function test_dois_contextos_usam_tokens_e_permissoes_independentes_sem_mudar_sessao(): void
+    private function url(string $path, string $id): string { return '/app'.$path; }
+
+    public function test_um_contexto_ativo_troca_autoridade_e_recusa_acao_da_tela_anterior(): void
     {
-        $a = ContextoWeb::criar($this->dados('token-a', 'dir_escolar'));
-        $b = ContextoWeb::criar($this->dados('token-b'));
-        $this->fingir(fn ($r) => Http::response(['data' => $this->dados('omitido', $r->hasHeader('Authorization', 'Bearer token-a') ? 'dir_escolar' : 'professor')]));
-        $this->getJson($this->url('/teste-contexto',$a))->assertOk()->assertJsonPath('perfil', 'dir_escolar');
-        $this->getJson($this->url('/teste-contexto',$b))->assertOk()->assertJsonPath('perfil', 'professor');
-        $this->getJson($this->url('/teste-contexto',$a))->assertOk()->assertJsonPath('perfil', 'dir_escolar');
+        $this->ativar($this->dados('token-a', 'dir_escolar'));
+        $velha = session('auth_contexto_revisao');
+        $this->fingir(fn ($r) => Http::response(['data' => $this->dados($r->hasHeader('Authorization', 'Bearer token-a') ? 'token-a' : 'token-b', $r->hasHeader('Authorization', 'Bearer token-a') ? 'dir_escolar' : 'professor')]));
+        $this->getJson('/app/teste-contexto')->assertOk()->assertJsonPath('perfil', 'dir_escolar');
+        $this->ativar($this->dados('token-b'));
+        $nova = session('auth_contexto_revisao');
+        $this->withHeader('X-G360-Revisao', $velha)->postJson('/app/teste-contexto')->assertStatus(409);
+        Http::assertSentCount(1);
+        $this->withHeader('X-G360-Revisao', $nova)->getJson('/app/teste-contexto')->assertOk()->assertJsonPath('perfil', 'professor');
         $this->assertSame('identidade', session('auth_token'));
         $this->assertNull(session('auth_perfil'));
         $this->assertSame([], session('auth_permissoes'));
-        Http::assertSentCount(3);
+        Http::assertSentCount(2);
     }
 
     public function test_contexto_ausente_invalido_de_outra_sessao_e_expirado_nao_envia_operacao(): void
     {
-        $this->get('/painel')->assertOk()->assertSee('Escolha seu acesso');
+        $this->get('/app/painel')->assertRedirect('/app/vinculos');
         $this->postJson('/provas')->assertStatus(409);
-        $this->postJson('/acessos/vinculo-999/teste-contexto')->assertStatus(409);
-        $id = ContextoWeb::criar($this->dados('privado'));
+        $this->postJson('/acessos/vinculo-999/turmas')->assertStatus(409);
+        $id = $this->ativar($this->dados('privado'));
         $this->withSession(['auth_token' => 'outra-identidade']); session()->save();
-        $this->postJson('/acessos/vinculo-1/teste-contexto')->assertStatus(409);
+        $this->postJson('/app/teste-contexto')->assertStatus(409);
         $this->withSession(['auth_token' => 'identidade']); session()->save();
         $this->travel(121)->minutes();
-        $this->postJson('/acessos/vinculo-1/teste-contexto')->assertStatus(409);
+        $this->postJson('/app/teste-contexto')->assertStatus(409);
         Http::assertNothingSent();
     }
 
     public function test_revogacao_nao_reexecuta_post_e_falha_api_nao_apaga_contexto(): void
     {
-        $id = ContextoWeb::criar($this->dados('revogado'));
+        $id = $this->ativar($this->dados('revogado'));
         $this->fingir(['*' => Http::response(['message' => 'Indisponível'], 403)]);
-        $this->postJson('/acessos/vinculo-1/teste-contexto')->assertStatus(409)->assertJsonPath('selecionar_vinculo', true);
+        $this->postJson('/app/teste-contexto')->assertStatus(409)->assertJsonPath('selecionar_vinculo', true);
         $this->assertNull(ContextoWeb::obter($id));
         Http::assertSentCount(1);
-        $id2 = ContextoWeb::criar($this->dados('temporario'));
+        $id2 = $this->ativar($this->dados('temporario'));
         $this->fingir(['*' => Http::response([], 503)]);
         $this->getJson($this->url('/teste-contexto',$id2))->assertStatus(503);
         $this->assertNotNull(ContextoWeb::obter($id2));
     }
 
-    public function test_form_ajax_download_e_redirect_preservam_token_da_aba(): void
+    public function test_form_ajax_download_e_redirect_preservam_snapshot_ativo(): void
     {
-        $id = ContextoWeb::criar($this->dados('token-pdf'));
+        $id = $this->ativar($this->dados('token-pdf'));
         $this->fingir(function ($r) {
             $this->assertTrue($r->hasHeader('Authorization', 'Bearer token-pdf'));
             if (str_ends_with($r->url(), '/arquivo')) return Http::response('%PDF-ficticio', 200, ['Content-Type' => 'application/pdf']);
             return Http::response(['data' => $this->dados('omitido')]);
         });
         $r=$this->post($this->url('/teste-contexto',$id))->assertRedirect();
-        $this->assertSame('/acessos/vinculo-1/teste-contexto',parse_url($r->headers->get('Location'),PHP_URL_PATH));
-        $this->getJson($this->url('/teste-contexto',$id), ['X-G360-Acesso' => 'vinculo-1'])->assertOk();
+        $this->assertSame('/app/teste-contexto',parse_url($r->headers->get('Location'),PHP_URL_PATH));
+        $this->getJson($this->url('/teste-contexto',$id))->assertOk();
         $this->get($this->url('/teste-pdf',$id))->assertOk()->assertHeader('Content-Type', 'application/pdf')->assertSee('%PDF-ficticio');
     }
 
@@ -108,17 +117,17 @@ class ContextoPorAbaTest extends TestCase
     {
         $item = ['id' => 1, 'perfil' => 'professor', 'espaco' => ['nome' => 'Escola fictícia']];
         $this->fingir(['*' => Http::response(['data' => [$item, array_merge($item, ['id' => 2])]])]);
-        $this->get('/vinculos')->assertOk()->assertSee('Escolha seu vínculo')->assertDontSee('id="vinculo-unico"', false);
+        $this->get('/app/vinculos')->assertOk()->assertSee('Escolha seu vínculo')->assertDontSee('id="vinculo-unico"', false);
         $this->fingir(['*' => Http::response(['data' => [$item]])]);
-        $this->get('/vinculos')->assertOk()->assertSee('id="vinculo-unico"', false);
-        $this->get('/vinculos?trocar=1')->assertOk()->assertDontSee('id="vinculo-unico"', false);
+        $this->get('/app/vinculos')->assertOk()->assertDontSee('id="vinculo-unico"', false);
+        $this->get('/app/vinculos?trocar=1')->assertOk()->assertDontSee('id="vinculo-unico"', false);
         $this->fingir(['*' => Http::response(['data' => []])]);
-        $this->get('/vinculos')->assertOk()->assertSee('Nenhum vínculo disponível');
+        $this->get('/app/vinculos')->assertOk()->assertSee('Nenhum vínculo disponível');
         $this->fingir(['*' => Http::response(['data' => $this->dados('segredo-nao-publicar')], 201)]);
-        $r = $this->post('/vinculos', ['vinculo_id' => 1])->assertRedirect();
+        $r = $this->post('/app/vinculos', ['vinculo_id' => 1])->assertRedirect();
         $this->assertStringNotContainsString('segredo-nao-publicar', $r->headers->get('Location'));
         $this->assertStringNotContainsString('_ctx',$r->headers->get('Location'));
-        $this->assertSame('/acessos/vinculo-1/painel',parse_url($r->headers->get('Location'),PHP_URL_PATH));
+        $this->assertSame('/app/painel',parse_url($r->headers->get('Location'),PHP_URL_PATH));
         $this->assertSame('segredo-nao-publicar', ContextoWeb::resolverReferencia('vinculo-1')['dados']['token']);
         $this->assertSame('identidade', session('auth_token'));
         Http::assertSent(fn ($r) => $r->hasHeader('Authorization', 'Bearer identidade'));
@@ -126,7 +135,7 @@ class ContextoPorAbaTest extends TestCase
 
     public function test_menu_e_topo_usam_contexto_e_logout_usa_identidade(): void
     {
-        $id = ContextoWeb::criar($this->dados('contextual'));
+        $id = $this->ativar($this->dados('contextual'));
         $this->fingir(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/vinculos') ? [
             ['id'=>1,'perfil'=>'professor','espaco'=>['id'=>1,'tipo'=>'escola','nome'=>'Escola fictícia']],
             ['id'=>2,'perfil'=>'professor','espaco'=>['id'=>2,'tipo'=>'escola','nome'=>'Outra escola']],

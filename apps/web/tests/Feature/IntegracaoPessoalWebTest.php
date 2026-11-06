@@ -29,13 +29,15 @@ class IntegracaoPessoalWebTest extends TestCase
             return Http::response(['data'=>['professor'=>['nome'=>'Pessoa fictícia','espaco_nome'=>'Meu espaço pessoal','total_turmas'=>0],
                 'kpis'=>['minhas_provas'=>0,'cartoes_corrigir'=>0,'minhas_turmas'=>0,'media_turmas'=>null], 'provas'=>[]]]);
         });
-        $this->get('/vinculos')->assertOk()->assertSee('Professor autônomo')->assertSee('Escola fictícia');
-        $destino=$this->post('/vinculos',['vinculo_id'=>1])->assertRedirect()->headers->get('Location');
-        $this->assertSame(route('painel',['acesso'=>'pessoal-1']),$destino);
+        $this->get('/app/vinculos')->assertOk()->assertSee('Professor autônomo')->assertSee('Escola fictícia');
+        $this->withHeader('X-G360-Revisao', ContextoWeb::garantirRevisao()); session()->save();
+        $destino=$this->post('/app/vinculos',['vinculo_id'=>1])->assertRedirect()->headers->get('Location');
+        $this->assertSame(route('painel',[]),$destino);
         $this->assertNull(parse_url($destino,PHP_URL_QUERY));
+        $this->withHeader('X-G360-Revisao', session('auth_contexto_revisao'));
         $this->get($destino)->assertOk()->assertSee('Meu espaço pessoal')->assertSee('Minhas provas')
-            ->assertDontSee('Administrador da Rede')->assertDontSee('href="'.route('escolas.index',['acesso'=>'pessoal-1']).'"',false)
-            ->assertDontSee('href="'.route('membros.index',['acesso'=>'pessoal-1']).'"',false);
+            ->assertDontSee('Administrador da Rede')->assertDontSee('href="'.route('escolas.index',[]).'"',false)
+            ->assertDontSee('href="'.route('membros.index',[]).'"',false);
         $this->assertSame(['Painel','Corrigir','Provas','Turmas'],array_column(Acesso::menuCelular()['barra'],'rotulo'));
         $this->assertContains('Alunos',array_column(Acesso::menu(),'rotulo'));
         $this->assertSame('identidade',session('auth_token'));

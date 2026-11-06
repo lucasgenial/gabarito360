@@ -13,14 +13,14 @@
     <div class="ic-marca"><x-marca variant="horizontal" size="sm" theme="light" /><span>Uso autônomo</span></div>
   @endif
   <div class="ic-topo">
-    @if($esquerda)<img class="ic-logo" src="{{ $esquerda }}" alt="{{ $comRede ? 'Logo da rede' : 'Logo da escola' }}">
+    @if($esquerda)<img class="ic-logo" data-imagem-contextual="{{ $esquerda }}" alt="{{ $comRede ? 'Logo da rede' : 'Logo da escola' }}">
     @else<div class="ic-logo ic-espaco" aria-hidden="true"></div>@endif
     <div class="ic-textos">
       @if(!$autonomo && !empty($cab['rede']))<div class="ic-rede">{{ $cab['rede'] }}</div>@endif
       <div class="ic-escola">{{ $autonomo ? 'Espaço pessoal: ' : '' }}{{ $cab['nome'] ?? '' }}</div>
       @if(!empty($cab['detalhe']))<div class="ic-detalhe">{{ $cab['detalhe'] }}</div>@endif
     </div>
-    @if($direita)<img class="ic-logo" src="{{ $direita }}" alt="Logo da escola">
+    @if($direita)<img class="ic-logo" data-imagem-contextual="{{ $direita }}" alt="Logo da escola">
     @else<div class="ic-logo ic-espaco" aria-hidden="true"></div>@endif
   </div>
   <div class="ic-faixa"><span>{{ $titulo }}</span>@if(!empty($subtitulo))<span class="ic-subtitulo">{{ $subtitulo }}</span>@endif</div>

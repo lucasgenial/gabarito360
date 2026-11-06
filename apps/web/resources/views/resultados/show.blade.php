@@ -64,9 +64,9 @@
   @if(!empty($dados['cartao_foto_url']))<button type="button" class="btn btn-secondary res-acao" id="doc-abrir" aria-label="Cartão resposta" title="Cartão resposta"><x-icone nome="prova"/><span class="res-acao-texto">Cartão resposta</span><span class="res-legenda" aria-hidden="true">Cartão resposta</span></button>@endif
   <details class="res-menu-relatorio" id="res-menu-relatorio"><summary class="btn btn-secondary res-acao" aria-label="Relatório" title="Relatório"><x-icone nome="grafico"/><span class="res-acao-texto">Relatório</span><span class="res-legenda" aria-hidden="true">Relatório</span></summary>
     <div class="res-opcoes-relatorio">
-      <a class="btn btn-ghost" href="{{ $urlImpressao }}" target="_blank" rel="noopener" title="Abrir o PDF emitido para impressão"><x-icone nome="imprimir"/>Imprimir relatório {{ $pedagogico ? 'do professor' : 'do aluno' }}</a>
-      <a class="btn btn-ghost" href="{{ $urlPdfAluno }}&amp;baixar=1"><x-icone nome="prova"/>Baixar relatório do aluno</a>
-      @if($pedagogico)<a class="btn btn-ghost" href="{{ $urlPdfProfessor }}&amp;baixar=1"><x-icone nome="prova"/>Baixar relatório do professor</a>@endif
+      <form method="POST" action="{{ $urlImpressao }}" class="arquivo-form" target="_blank" rel="noopener">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-ghost" title="Abrir o PDF emitido para impressão"><x-icone nome="imprimir"/>Imprimir relatório {{ $pedagogico ? 'do professor' : 'do aluno' }}</button></form>
+      <form method="POST" action="{{ $urlPdfAluno }}&amp;baixar=1" class="arquivo-form">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-ghost"><x-icone nome="prova"/>Baixar relatório do aluno</button></form>
+      @if($pedagogico)<form method="POST" action="{{ $urlPdfProfessor }}&amp;baixar=1" class="arquivo-form">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-ghost"><x-icone nome="prova"/>Baixar relatório do professor</button></form>@endif
       <button type="button" class="btn btn-ghost" id="btn-whats"><x-icone nome="compartilhar"/>Compartilhar relatório do aluno</button>
     </div>
   </details>

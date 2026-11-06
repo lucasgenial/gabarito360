@@ -8,4 +8,4 @@
   $avatar = filter_var($avatarId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 36]]) ?: null;
 @endphp
 <span {{ $attributes->class(['avatar-aluno', 'avatar-aluno--'.$cor, 'avatar-aluno--'.$tamanho, 'avatar-aluno--imagem' => $avatar !== null]) }}
-      @if($avatar) style="--avatar-x:{{ (($avatar - 1) % 6) * 20 }}%;--avatar-y:{{ intdiv($avatar - 1, 6) * 20 }}%" @endif aria-hidden="true">@if($temFoto && $alunoId)<img src="{{ route('alunos.foto',['id'=>$alunoId,'v'=>$imagemVersao]) }}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">@else<span class="avatar-iniciais">{{ $iniciais }}</span>@endif</span>
+      @if($avatar) style="--avatar-x:{{ (($avatar - 1) % 6) * 20 }}%;--avatar-y:{{ intdiv($avatar - 1, 6) * 20 }}%" @endif aria-hidden="true">@if($temFoto && $alunoId)<img data-imagem-avatar data-imagem-contextual="{{ route('alunos.foto',['id'=>$alunoId,'v'=>$imagemVersao]) }}" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:inherit;"><span class="avatar-iniciais" aria-hidden="true">{{ $iniciais }}</span>@else<span class="avatar-iniciais">{{ $iniciais }}</span>@endif</span>

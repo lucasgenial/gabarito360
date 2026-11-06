@@ -14,7 +14,7 @@
     @if($dados['gerir'])
       @if($a['ativo'] && count($opcoes))
       <form method="POST" action="{{ route('areas.vincular',['id'=>$a['id']]) }}" class="dc1-vincular-area" data-dc1-envio>
-        @csrf @include('disciplinas._retorno')<input type="hidden" name="versao" value="{{ $a['versao'] }}">
+        @csrf <x-revisao-acesso /> @include('disciplinas._retorno')<input type="hidden" name="versao" value="{{ $a['versao'] }}">
         <div class="field"><label for="area-disciplina">Disciplina</label><select class="select" id="area-disciplina" name="disciplina_selecao" required @if(session('foco_area')==='area-disciplina') data-dc1-foco @endif @error('disciplina_selecao') aria-invalid="true" aria-describedby="dc1-erro-disciplina_selecao" @enderror><option value="">Selecione uma disciplina</option>@foreach($opcoes as $d)<option value="{{ $d['id'].':'.$d['versao'] }}" @selected(old('disciplina_selecao')===$d['id'].':'.$d['versao'])>{{ $d['nome'] }}{{ $d['sigla']?' · '.$d['sigla']:'' }}</option>@endforeach</select>@include('disciplinas._erro',['campo'=>'disciplina_selecao'])</div>
         <button type="submit" class="btn btn-primary">Vincular</button>
       </form>
@@ -27,7 +27,7 @@
       <div class="dc1-vinculo-data">Data da vinculação: @if($p['vinculado_em'])@php($inicio=\Carbon\CarbonImmutable::parse($p['vinculado_em'],'UTC')->setTimezone('America/Sao_Paulo'))<time datetime="{{ $inicio->toIso8601String() }}">{{ $inicio->format('d/m/Y · H:i') }}</time>@else<span>Não registrada</span>@endif</div>
       @if($p['desvinculado_em'])@php($fim=\Carbon\CarbonImmutable::parse($p['desvinculado_em'],'UTC')->setTimezone('America/Sao_Paulo'))<div class="dc1-vinculo-data">Data da desvinculação: <time datetime="{{ $fim->toIso8601String() }}">{{ $fim->format('d/m/Y · H:i') }}</time></div>@endif
     </td><td class="tabela-acoes">
-      @if($dados['gerir'] && $p['ativo'])<form method="POST" action="{{ route('areas.desvincular',['id'=>$a['id']]) }}" data-dc1-envio>@csrf @include('disciplinas._retorno')<input type="hidden" name="versao" value="{{ $a['versao'] }}"><input type="hidden" name="disciplina_id" value="{{ $p['disciplina_id'] }}"><input type="hidden" name="disciplina_versao" value="{{ $p['disciplina_versao'] }}"><input type="hidden" name="vinculo_id" value="{{ $p['id'] }}"><button class="btn btn-secondary btn-sm" id="desvincular-{{ $p['id'] }}" type="submit" aria-label="Desvincular {{ $p['nome'] }} desta área">Desvincular</button></form>
+      @if($dados['gerir'] && $p['ativo'])<form method="POST" action="{{ route('areas.desvincular',['id'=>$a['id']]) }}" data-dc1-envio>@csrf <x-revisao-acesso /> @include('disciplinas._retorno')<input type="hidden" name="versao" value="{{ $a['versao'] }}"><input type="hidden" name="disciplina_id" value="{{ $p['disciplina_id'] }}"><input type="hidden" name="disciplina_versao" value="{{ $p['disciplina_versao'] }}"><input type="hidden" name="vinculo_id" value="{{ $p['id'] }}"><button class="btn btn-secondary btn-sm" id="desvincular-{{ $p['id'] }}" type="submit" aria-label="Desvincular {{ $p['nome'] }} desta área">Desvincular</button></form>
       @else<span aria-label="Sem ações disponíveis">—</span>@endif
     </td></tr>
     @empty<tr><td colspan="2"><div class="dc1-vazio"><h3>Nenhuma disciplina vinculada</h3><p>{{ $dados['gerir']?'Selecione uma disciplina acima para iniciar.':'Consulte a coordenação sobre as disciplinas disponíveis no seu vínculo.' }}</p></div></td></tr>@endforelse

@@ -23,7 +23,7 @@
     <button class="btn btn-secondary" onclick="abrirModal()">Editar turma</button>
     <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}"
           onsubmit="return confirm('{{ $turma['ativo'] ? 'Desativar' : 'Ativar' }} esta turma?')">
-      @csrf
+      @csrf <x-revisao-acesso />
       <button type="submit" class="btn {{ $turma['ativo'] ? 'btn-ghost' : 'btn-secondary' }}"
               style="color:{{ $turma['ativo'] ? 'var(--danger)' : 'var(--success)' }};{{ $turma['ativo'] ? 'border-color:var(--danger);' : '' }}">
         {{ $turma['ativo'] ? 'Desativar' : 'Ativar' }}
@@ -210,7 +210,7 @@
   @pode('turma.vincular_professor')
   <form method="POST" action="{{ route('turmas.professores.store', $turma['id']) }}"
         style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-    @csrf
+    @csrf <x-revisao-acesso />
     <select class="select" name="usuario_id" id="professor-selecionado" aria-label="Professor para acesso à turma" required style="flex:1;min-width:200px;">
       <option value="">— Selecione um professor —</option>
       @foreach($todosProfessores as $p)
@@ -257,7 +257,7 @@
               @pode('turma.vincular_professor')<form method="POST"
                     action="{{ route('turmas.professores.destroy', array_filter(['id' => $turma['id'], 'uid' => $p['id'], 'vinculo_id' => $p['vinculo_id'] ?? null])) }}"
                     onsubmit="return confirm('Desvincular {{ $p['nome'] }} desta turma?')">
-                @csrf
+                @csrf <x-revisao-acesso />
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-ghost"
                         style="color:var(--danger);border-color:var(--danger);">Desvincular</button>
@@ -285,7 +285,7 @@
       <button type="button" class="modal-close" onclick="fecharModal()">&times;</button>
     </div>
     <form method="POST" action="{{ route('turmas.update', $turma['id']) }}">
-      @csrf
+      @csrf <x-revisao-acesso />
       @method('PUT')
       <div class="modal-body">
         <div class="form-row-2">

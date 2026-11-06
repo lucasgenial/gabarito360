@@ -1540,3 +1540,11 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 #retirar-modal .btn-danger:disabled { opacity:.65; cursor:wait; }
 
 .tentativa-lista { margin-block:16px; }
+/* Ações de arquivo preservam a composição dos botões e enviam a revisão por POST. */
+.arquivo-form { display: contents; }
+.contexto-aviso-acoes { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+@media (max-width:640px) {
+  .contexto-aviso-acoes { flex-direction:column; }
+  .contexto-aviso-acoes > .btn { width:100%; min-height:44px; }
+  .vinculo-opcao .btn, .vinculo-card > form .btn, .troca-contexto-modal .btn { min-height:44px; }
+}

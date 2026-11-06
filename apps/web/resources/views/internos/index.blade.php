@@ -16,7 +16,7 @@
 <section class="card card-pad internos-bloco">
   <h2>Conceder acesso</h2>
   <form class="internos-form" method="POST" action="{{ route('internos.store') }}">
-    @csrf
+    @csrf <x-revisao-acesso />
     <div class="form-group"><label for="email">E-mail da conta existente</label><input class="input" id="email" name="email" type="email" required maxlength="254"></div>
     <div class="form-group"><label for="perfil">Perfil</label><select class="input" id="perfil" name="perfil"><option value="suporte">Suporte</option><option value="financeiro">Financeiro</option></select></div>
     <div class="form-group"><label for="fim">Válido até (opcional, fim do dia em Brasília)</label><input class="input" id="fim" name="fim_em" type="date"></div>
@@ -29,7 +29,7 @@
 <section class="card card-pad internos-bloco">
   <h3>{{ $a['nome'] }} · {{ \App\Support\Acesso::rotulo($a['perfil']) }}</h3>
   <form class="internos-form" method="POST" action="{{ route('internos.update',$a['id']) }}">
-    @csrf @method('PUT')
+    @csrf <x-revisao-acesso /> @method('PUT')
     <input type="hidden" name="versao_autorizacao" value="{{ $a['versao_autorizacao'] }}">
     <div class="form-group"><label for="situacao-{{ $a['id'] }}">Situação</label><select class="input" id="situacao-{{ $a['id'] }}" name="situacao"><option value="ativo" @selected($a['situacao']==='ativo')>Ativo</option><option value="suspenso" @selected($a['situacao']==='suspenso')>Suspenso</option></select></div>
     <div class="form-group"><label for="fim-{{ $a['id'] }}">Válido até (opcional, fim do dia em Brasília)</label><input class="input" id="fim-{{ $a['id'] }}" name="fim_em" type="date" value="{{ $a['fim_em'] ? \Illuminate\Support\Carbon::parse($a['fim_em'],'UTC')->timezone('America/Sao_Paulo')->format('Y-m-d') : '' }}"></div>

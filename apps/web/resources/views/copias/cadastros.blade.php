@@ -26,7 +26,7 @@
 </section>
 @if($dados['turma'])
 <form method="POST" action="{{ route('copias.cadastros.previa') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
+  @csrf <x-revisao-acesso /><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   <h2>{{ $dados['turma']['nome'] }}</h2>
   <p><label><input type="checkbox" name="turmas[]" value="{{ $dados['turma']['id'] }}" required> Incluir esta turma na prévia.</label></p>
   <p>Marque somente os alunos que deseja incluir. A turma precisa ser confirmada mesmo quando houver alunos selecionados. Também é possível conferir apenas a turma.</p>

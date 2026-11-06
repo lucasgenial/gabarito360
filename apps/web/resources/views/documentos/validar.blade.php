@@ -8,7 +8,7 @@
   <p>Consulte o código do relatório. Para conferir também se o PDF foi alterado, selecione o arquivo.</p>
   <details class="orientacao"><summary>Saiba mais +</summary><p>O código confirma o registro de emissão. Somente a comparação do arquivo confirma sua integridade. O PDF permanece no seu dispositivo: enviamos apenas seu resumo digital, sem o conteúdo. Este selo é emitido pelo sistema e não substitui uma assinatura pessoal com certificado. Relatórios antigos sem código não podem ser conferidos aqui.</p></details>
   <form id="documento-validacao" action="{{ route('documentos.conferir') }}" method="post">
-    @csrf
+    @csrf <x-revisao-acesso />
     <div class="form-group"><label for="codigo-documento">Código do documento</label><input class="form-control" id="codigo-documento" name="codigo" value="{{ $codigo }}" required maxlength="37" pattern="[Gg]360-[a-fA-F0-9]{32}" autocomplete="off" spellcheck="false" aria-describedby="codigo-ajuda"><small id="codigo-ajuda">Começa com G360- e está no rodapé do PDF.</small></div>
     <div class="form-group"><label for="arquivo-documento">PDF para comparar <span>(opcional)</span></label><small id="arquivo-ajuda">Até 50 MB. O arquivo será conferido no seu dispositivo.</small><input class="form-control" id="arquivo-documento" type="file" accept="application/pdf,.pdf" aria-describedby="arquivo-ajuda"></div>
     <button type="submit" class="btn btn-primary">Conferir documento</button>

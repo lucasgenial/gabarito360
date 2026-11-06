@@ -117,7 +117,7 @@
   @endif
 
   <form method="POST" action="{{ route('checkout.store') }}">
-    @csrf
+    @csrf <x-revisao-acesso />
 
     @if($plano)
       {{-- Plano já pré-selecionado via query string --}}

@@ -66,7 +66,7 @@
           @endpode
           @pode('cartao.imprimir')
             @foreach($p['turmas_lista'] ?? [] as $t)
-              <a class="btn btn-secondary" target="_blank" href="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $t['id'] }}" title="Cartões-resposta com nome e QR"><x-icone nome="imprimir" /> {{ $t['nome'] }}</a>
+              <form method="POST" action="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $t['id'] }}" class="arquivo-form" target="_blank" rel="noopener">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-secondary" title="Cartões-resposta com nome e QR"><x-icone nome="imprimir" /> {{ $t['nome'] }}</button></form>
             @endforeach
           @endpode
           @if(in_array($p['status'], ['em_correcao', 'corrigida'], true))

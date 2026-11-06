@@ -9,7 +9,7 @@
 <section class="card card-pad">
  <h2>Localizar usuário na instituição</h2>
  <p>Encerrar a função anterior permite uma nova função de outro grupo. Manter os dois grupos exige chamado e liberação específica. Esta configuração não cria vínculos nem concede permissões.</p>
- <form method="POST" action="{{ route('funcoes.consultar') }}">@csrf
+ <form method="POST" action="{{ route('funcoes.consultar') }}">@csrf <x-revisao-acesso />
   <div class="form-row-2"><div class="field"><label for="funcao-escola">Instituição</label><select class="select" id="funcao-escola" name="espaco_id" required><option value="">Selecione</option>@foreach($escolas as $e)<option value="{{ $e['id'] }}" @selected((string)old('espaco_id',$dados['espaco_id']??'')===(string)$e['id'])>{{ $e['nome'] }}</option>@endforeach</select></div>
   <div class="field"><label for="funcao-email">E-mail da conta</label><input class="input" id="funcao-email" name="email" type="email" required autocomplete="off"></div></div>
   <button class="btn btn-primary" type="submit">Consultar usuário</button>
@@ -21,7 +21,7 @@
  <p>{{ collect($escolas)->firstWhere('id',$dados['espaco_id'])['nome']??'Instituição selecionada' }}</p>
  <ul>@foreach($dados['vinculos']??[] as $v)<li>{{ \App\Support\Acesso::rotulo($v['perfil']) }} — {{ ucfirst($v['situacao']) }}</li>@endforeach</ul>
  <p>Exceção atual: <strong>{{ $dados['permitir']?'Permitida':'Bloqueada' }}</strong>. Revogar a exceção pode bloquear vínculos incompatíveis até que a instituição encerre um deles.</p>
- <form method="POST" action="{{ route('funcoes.salvar') }}">@csrf
+ <form method="POST" action="{{ route('funcoes.salvar') }}">@csrf <x-revisao-acesso />
   <input type="hidden" name="usuario_id" value="{{ $dados['usuario']['id'] }}"><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}"><input type="hidden" name="versao" value="{{ $dados['versao'] }}">
   <div class="field"><label for="excecao-permitir">Funções de grupos diferentes na mesma instituição</label><select class="select" id="excecao-permitir" name="permitir"><option value="0" @selected(!$dados['permitir'])>Bloquear a exceção</option><option value="1" @selected($dados['permitir'])>Permitir mediante chamado</option></select></div>
   <div class="form-row-2"><div class="field"><label for="excecao-chamado">Referência do chamado</label><input class="input" id="excecao-chamado" name="chamado" required minlength="3" maxlength="80" value="{{ old('chamado',$dados['chamado']) }}"></div><div class="field"><label for="excecao-motivo">Motivo da autorização ou revogação</label><textarea class="input" id="excecao-motivo" name="motivo" required minlength="10" maxlength="500">{{ old('motivo',$dados['motivo']) }}</textarea></div></div>

@@ -1,6 +1,6 @@
 <dialog id="cp1-modal" class="cp1-modal" aria-labelledby="cp1-modal-titulo" aria-describedby="cp1-modal-resumo">
   <form method="POST" class="cp1-formulario" id="cp1-formulario">
-    @csrf
+    @csrf <x-revisao-acesso />
     <h2 id="cp1-modal-titulo">Copiar prova</h2>
     <p>Origem: <strong id="cp1-modal-origem"></strong></p>
     <p id="cp1-modal-resumo">Será criado um rascunho independente com as configurações e o gabarito. A original permanece igual.</p>

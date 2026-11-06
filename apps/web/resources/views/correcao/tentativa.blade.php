@@ -25,13 +25,13 @@
   @php($pendencias=collect($dados['leituras'])->where('ambigua',true)->count())
   @if($pendencias)<x-aviso tipo="atencao">Esta leitura tem {{ $pendencias }} questões para revisão. Se aplicar esta leitura, a nova nota ficará pendente até resolver essas questões. O resultado anterior continuará preservado no histórico.</x-aviso>@endif
   <form method="POST" action="{{ route('correcao.tentativa.aplicar',$dados['id']) }}" class="tentativa-confirmacao">
-    @csrf<h3>Aplicar nova leitura</h3><p>O resultado vigente será atualizado com esta leitura. A foto, a nota e as revisões anteriores permanecem no histórico.</p>
+    @csrf <x-revisao-acesso /><h3>Aplicar nova leitura</h3><p>O resultado vigente será atualizado com esta leitura. A foto, a nota e as revisões anteriores permanecem no histórico.</p>
     <label for="tentativa-motivo">Motivo da nova leitura</label><textarea id="tentativa-motivo" class="input" name="motivo" minlength="10" maxlength="500" required>{{ old('motivo') }}</textarea>
     <label><input type="checkbox" name="confirmar" value="1" required @checked(old('confirmar'))> Conferi a foto e autorizo aplicar esta leitura no lugar da correção vigente.</label>
     <button type="submit" class="btn btn-primary">Aplicar nova leitura</button>
   </form>
   @endif
-  @if($dados['pode_descartar'])<form method="POST" action="{{ route('correcao.tentativa.descartar',$dados['id']) }}" class="tentativa-descartar">@csrf<button type="submit" class="btn btn-secondary">Descartar leitura e manter correção atual</button></form>@endif
+  @if($dados['pode_descartar'])<form method="POST" action="{{ route('correcao.tentativa.descartar',$dados['id']) }}" class="tentativa-descartar">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-secondary">Descartar leitura e manter correção atual</button></form>@endif
   <h3 class="tentativa-titulo-historico">Registro de ações</h3>
   @foreach($dados['eventos'] as $e)
     <details class="tentativa-evento"><summary>{{ ['vigente'=>'Leitura registrada','registro_anterior'=>'Registro anterior preservado','aguardando_confirmacao'=>'Nova foto aguardando confirmação','aplicada'=>'Nova leitura aplicada','revisada'=>'Revisão manual','vinculada'=>'Aluno vinculado','substituida'=>'Correção substituída','excluida'=>'Correção retirada','recusada'=>'Foto recusada','descartada'=>'Leitura descartada'][$e['acao']]??'Registro preservado' }} · {{ \Carbon\Carbon::parse($e['ocorrido_em'],'UTC')->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</summary>

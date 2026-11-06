@@ -46,7 +46,7 @@
       @endif
 
       <form method="POST" action="{{ route('redefinir-senha.store') }}" novalidate>
-        @csrf
+        @csrf <x-revisao-acesso />
         <div class="field"><label for="redefinir-email">E-mail</label><input class="input" type="email" id="redefinir-email" name="email" value="{{ old('email') }}" required maxlength="190" autocomplete="email" aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" aria-describedby="redefinir-email-erro">@error('email')<span id="redefinir-email-erro" role="alert" class="field-error">{{ $message }}</span>@enderror</div>
         <div class="field"><label for="redefinir-codigo">Código de recuperação</label><input class="input" type="text" id="redefinir-codigo" name="token" required minlength="64" maxlength="64" autocomplete="one-time-code" autocapitalize="none" spellcheck="false" aria-describedby="redefinir-codigo-erro redefinir-codigo-ajuda" aria-invalid="{{ $errors->has('token') ? 'true' : 'false' }}"><p class="field-help" id="redefinir-codigo-ajuda">Copie os 64 caracteres da mensagem. O código vale por 60 minutos.</p>@error('token')<span id="redefinir-codigo-erro" role="alert" class="field-error">{{ $message }}</span>@enderror</div>
 

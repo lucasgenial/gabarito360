@@ -5,7 +5,7 @@
 @endsection
 @section('content')
 <x-pagina titulo="Área interna do Gabarito360">
-  <x-slot:sub>Olá, {{ session('auth_nome') }}. Você está atuando como {{ \App\Support\Acesso::rotulo() }} nesta aba.</x-slot:sub>
+  <x-slot:sub>Olá, {{ session('auth_nome') }}. Você está atuando como {{ \App\Support\Acesso::rotulo() }}.</x-slot:sub>
 </x-pagina>
 <section class="card card-pad">
   @if(\App\Support\Acesso::pode('cliente.ver'))<p><a class="btn btn-primary" href="{{ route('clientes.index') }}">Gerenciar clientes</a></p>@endif
