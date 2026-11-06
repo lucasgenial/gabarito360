@@ -1,7 +1,7 @@
   <div class="leitura-cabecalho">
   <div class="row-between"><h3 id="tentativa-detalhe-titulo" tabindex="-1">Leitura {{ $dados['numero'] }}</h3><span class="badge badge-muted">{{ ['vigente'=>'Vigente','aguardando_confirmacao'=>'Aguardando confirmação','substituida'=>'Anterior','excluida'=>'Retirada','recusada'=>'Foto recusada','descartada'=>'Descartada'][$dados['estado']]??'Registro preservado' }}</span></div>
   <p>{{ $dados['autor_nome'] }} · {{ \Carbon\Carbon::parse($dados['ocorrido_em'],'UTC')->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</p>
-  @if($dados['tem_imagem'])<button type="button" class="btn btn-secondary" data-historico-imagem="{{ route('correcao.tentativa.imagem',$dados['id'],false) }}" data-historico-contexto="{{ $dados['aluno_nome'] }} · Leitura {{ $dados['numero'] }}">Ver cartão preservado</button>@endif
+  @if($dados['tem_imagem'])<button type="button" class="btn btn-secondary" data-historico-imagem="{{ json_encode(\App\Support\NavegacaoWeb::destino('correcao.tentativa.imagem',[$dados['id']])) }}" data-historico-contexto="{{ $dados['aluno_nome'] }} · Leitura {{ $dados['numero'] }}">Ver cartão preservado</button>@endif
   <details><summary>Saiba mais sobre a preservação</summary><p>A foto recebida, as leituras e os eventos desta leitura ficam preservados. O resumo de integridade da imagem é {{ $dados['imagem_sha256']??'indisponível' }}. O arquivo é verificado ao abrir. O histórico não oferece edição de eventos finalizados.</p></details>
   </div>
   @include('correcao._leitura-questoes',['dados'=>$dados])

@@ -20,9 +20,9 @@
     @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}"><x-icone nome="grafico" /> Acompanhar correção</a>@endpode
     @pode('resultado.ver')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}"><x-icone nome="grafico" /> Relatório da turma</a>@endpode
     @pode('turma.gerir')
-    <button class="btn btn-secondary" onclick="abrirModal()">Editar turma</button>
+    <button class="btn btn-secondary" data-turma-abrir="modal-editar">Editar turma</button>
     <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}"
-          onsubmit="return confirm('{{ $turma['ativo'] ? 'Desativar' : 'Ativar' }} esta turma?')">
+          data-turma-confirmar="{{ $turma['ativo'] ? 'Desativar' : 'Ativar' }} esta turma?">
       @csrf <x-revisao-acesso />
       <button type="submit" class="btn {{ $turma['ativo'] ? 'btn-ghost' : 'btn-secondary' }}"
               style="color:{{ $turma['ativo'] ? 'var(--danger)' : 'var(--success)' }};{{ $turma['ativo'] ? 'border-color:var(--danger);' : '' }}">
@@ -77,7 +77,7 @@
   <div style="position:relative;flex:1;min-width:200px;">
     <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input id="aluno-search" class="input" type="search" placeholder="Buscar aluno por nome…"
-           style="padding-left:36px;" oninput="filtrarAlunos(this.value)" />
+           style="padding-left:36px;" data-turma-filtrar-alunos />
   </div>
   <a href="{{ route('alunos.create', ['turma_id' => $turma['id']]) }}" class="btn btn-primary btn-sm">+ Adicionar aluno</a>
 </div>
@@ -256,7 +256,7 @@
             <td style="text-align:right;" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
               @pode('turma.vincular_professor')<form method="POST"
                     action="{{ route('turmas.professores.destroy', array_filter(['id' => $turma['id'], 'uid' => $p['id'], 'vinculo_id' => $p['vinculo_id'] ?? null])) }}"
-                    onsubmit="return confirm('Desvincular {{ $p['nome'] }} desta turma?')">
+                    data-turma-confirmar="Desvincular {{ $p['nome'] }} desta turma?">
                 @csrf <x-revisao-acesso />
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-ghost"
@@ -282,7 +282,7 @@
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-head">
       <h2>Editar turma</h2>
-      <button type="button" class="modal-close" onclick="fecharModal()">&times;</button>
+      <button type="button" class="modal-close" data-turma-fechar="modal-editar">&times;</button>
     </div>
     <form method="POST" action="{{ route('turmas.update', $turma['id']) }}">
       @csrf <x-revisao-acesso />
@@ -323,7 +323,7 @@
         </div>
       </div>
       <div class="modal-foot">
-        <button type="button" class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+        <button type="button" class="btn btn-ghost" data-turma-fechar="modal-editar">Cancelar</button>
         <button type="submit" class="btn btn-primary">Salvar alterações</button>
       </div>
     </form>
@@ -333,43 +333,10 @@
 <div style="height:48px;"></div>
 @endsection
 
-@push('scripts')
-<script>
-var modal = document.getElementById('modal-editar');
 
-function abrirModal() {
-  modal.classList.add('open');
-  modal.setAttribute('aria-hidden','false');
-  document.body.style.overflow = 'hidden';
-}
-function fecharModal() {
-  modal.classList.remove('open');
-  modal.setAttribute('aria-hidden','true');
-  document.body.style.overflow = '';
-}
-modal.addEventListener('click', function(e){ if(e.target===modal) fecharModal(); });
-document.addEventListener('keydown', function(e){ if(e.key==='Escape') fecharModal(); });
 
-function filtrarAlunos(q) {
-  var termo = q.toLowerCase().trim();
-  var rows  = document.querySelectorAll('#alunos-tbody tr[data-nome]');
-  var visiveis = 0;
-  rows.forEach(function(row) {
-    var show = !termo || row.dataset.nome.includes(termo);
-    row.style.display = show ? '' : 'none';
-    if(show) visiveis++;
-  });
-  document.getElementById('no-results').style.display = (visiveis === 0 && termo) ? 'block' : 'none';
-}
-</script>
-@endpush
+
 
 @push('scripts')
-<script>
-const professorEscolhido = document.getElementById('professor-selecionado'), professorVinculo = document.getElementById('professor-vinculo');
-if (professorEscolhido && professorVinculo) {
- const atualizarVinculo = () => professorVinculo.value = professorEscolhido.selectedOptions[0]?.dataset.vinculo || '';
- professorEscolhido.addEventListener('change', atualizarVinculo); atualizarVinculo();
-}
-</script>
+<script src="{{ asset('js/turmas.js') }}?v={{ filemtime(public_path('js/turmas.js')) }}" defer></script>
 @endpush

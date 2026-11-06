@@ -2,7 +2,7 @@ import {chromium} from 'playwright-core';
 import {readFileSync,mkdirSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
-import {paginaRevisao,imagemRaster} from './revisao-modal-fixture.mjs';
+import {paginaRevisao,imagemRaster,recursoTeste} from './revisao-modal-fixture.mjs';
 const require=createRequire(import.meta.url),{PDFDocument}=require('../../apps/web/public/js/libs/pdf-lib-1.17.1/pdf-lib.min.js');
 const doc=await PDFDocument.create();doc.addPage([200,300]);doc.addPage([300,200]);const pdfTeste=Buffer.from(await doc.save());
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true});
@@ -14,16 +14,16 @@ try {
   if(u.pathname.startsWith('/js/')||u.pathname==='/css/app.css') {
    assert.ok(!u.pathname.includes('..'));return route.fulfill({contentType:u.pathname.endsWith('.css')?'text/css':'text/javascript',body:readFileSync('apps/web/public'+u.pathname)});
   }
-  if(u.pathname.endsWith('/imagens/endireitada')) {
-   assert.equal(req.headers()['x-g360-revisao'],'revisao-ficticia-ci');assert.equal(u.search,'');
+  if(u.pathname==='/app/cartoes/endireitada/consultar') {
+   assert.equal(req.method(),'POST');assert.equal(req.postDataJSON()._token,'csrf-ficticio');assert.equal(req.headers()['x-g360-revisao'],'revisao-ficticia-ci');assert.equal(u.search,'');
    if(modoRecorte==='lento')await new Promise(r=>liberarRecorte=r);
    return route.fulfill(modoRecorte==='erro'?{status:403,json:{message:'Recusada'}}:modoRecorte==='mime'?{contentType:'text/html',body:'Não é imagem'}:{contentType:'image/png',body:raster});
   }
-  if(u.pathname.endsWith('/imagens/original')) {
-   assert.equal(req.headers()['x-g360-revisao'],'revisao-ficticia-ci');fotos.push(req.url());if(modo==='lento')await new Promise(r=>liberarImagem=r);
+  if(u.pathname==='/app/cartoes/original/consultar') {
+   assert.equal(req.method(),'POST');assert.equal(req.postDataJSON()._token,'csrf-ficticio');assert.equal(req.headers()['x-g360-revisao'],'revisao-ficticia-ci');fotos.push(req.url());if(modo==='lento')await new Promise(r=>liberarImagem=r);
    return route.fulfill(modo==='erro'?{status:403,json:{message:'Indisponível'}}:modo==='pdf'?{contentType:'application/pdf',body:pdfTeste}:{contentType:'image/png',body:raster});
   }
-  if(req.method()==='POST'){posts.push(req.postDataJSON());if(modo==='salvando')await new Promise(r=>liberarResposta=r);return route.fulfill({json:{cartao_status:'lido'}});}
+  if(req.method()==='POST'){assert.ok(['/app/cartoes/revisar/consultar','/app/cartoes/ambiguidades/consultar'].includes(u.pathname));assert.equal(u.search,'');assert.equal(req.postDataJSON()._token,'csrf-ficticio');posts.push(req.postDataJSON());if(modo==='salvando')await new Promise(r=>liberarResposta=r);return route.fulfill({json:{cartao_status:'lido'}});}
   if(u.pathname==='/revisao')return route.fulfill({contentType:'text/html',body:paginaRevisao({tema:u.searchParams.get('tema'),semFoto:u.searchParams.has('semfoto')})});
   return route.abort();
  });
@@ -55,7 +55,7 @@ try {
  if(saida)await page.screenshot({path:saida+'/desktop1440.png'});
  await page.getByRole('button',{name:'Pular',exact:true}).click();await pronto();assert.equal(fotos.length,1,'Mesma pessoa não recarrega documento');
  modo='lento';await page.getByRole('button',{name:'Pular',exact:true}).click();await page.getByText('Carregando cartão em PDF…').waitFor();assert.equal(await canvas.count(),0);
- modo='sucesso';await page.getByRole('button',{name:'Pular',exact:true}).click();await pronto();liberarImagem();await pronto();assert.equal(await page.evaluate(()=>leitor.url.includes('/65/')),true);
+ modo='sucesso';await page.getByRole('button',{name:'Pular',exact:true}).click();await pronto();liberarImagem();await pronto();assert.equal(await page.evaluate(ref=>leitor.url.referencia===ref,recursoTeste(65,'original').referencia),true);
  for(const [width,height,tema] of [[2560,1263,'light'],[1099,900,'light'],[390,844,'light'],[320,740,'dark']]) {
   await page.setViewportSize({width,height});await page.goto('http://g360.test/revisao?tema='+tema);
   assert.equal(await preview.getByRole('img',{name:'Linha da questão 1 no cartão'}).isVisible(),true);

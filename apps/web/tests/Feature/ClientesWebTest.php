@@ -4,9 +4,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class ClientesWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private function preparar(string $perfil='financeiro', bool $interno=true): array
     {
@@ -42,29 +44,29 @@ class ClientesWebTest extends TestCase
                 default=>$this->fail('Consulta inesperada: '.$path),
             };
         });
-        $this->get('/app/painel')->assertOk()->assertSee('Gerenciar clientes')->assertDontSee('Acessos internos');
-        $this->get('/app/clientes')->assertOk()->assertSee('Cliente fictício')->assertDontSee('teste@example.test')->assertDontSee('comercial-token');
-        $this->get('/app/clientes/novo')->assertOk()->assertSee('Referência contratual')->assertSee('Salvar cadastro');
-        $this->post('/app/clientes',['nome'=>'Cliente fictício','tipo'=>'escola','modalidade'=>'teste','situacao'=>'suspenso'])
-            ->assertRedirect(route('clientes.show',['id'=>8]))->assertSessionHas('sucesso');
+        $this->consultarTela('/app/painel')->assertOk()->assertSee('Gerenciar clientes')->assertDontSee('Acessos internos');
+        $this->consultarTela('/app/clientes')->assertOk()->assertSee('Cliente fictício')->assertDontSee('teste@example.test')->assertDontSee('comercial-token');
+        $this->consultarTela('/app/clientes/novo')->assertOk()->assertSee('Referência contratual')->assertSee('Salvar cadastro');
+        $this->alterarRecurso('POST', '/app/clientes',['nome'=>'Cliente fictício','tipo'=>'escola','modalidade'=>'teste','situacao'=>'suspenso'])
+            ->assertRetornoTela(route('clientes.show',['id'=>8]))->assertSessionHas('sucesso');
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['nome']==='Cliente fictício' && !isset($r['situacao']) && !isset($r['_ctx']));
-        $this->get('/app/clientes/8')->assertOk()->assertSee('teste@example.test')->assertSee('Espaço fictício')->assertSee('Ativo: 2');
-        $this->put('/app/clientes/8',['nome'=>'Cliente editado','modalidade'=>'presenteado'])->assertRedirect()->assertSessionHas('sucesso');
+        $this->consultarTela('/app/clientes/8')->assertOk()->assertSee('teste@example.test')->assertSee('Espaço fictício')->assertSee('Ativo: 2');
+        $this->alterarRecurso('PUT', '/app/clientes/8',['nome'=>'Cliente editado','modalidade'=>'presenteado'])->assertRetornoTela()->assertSessionHas('sucesso');
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/usuarios') || str_contains($r->url(),'/alunos'));
     }
     public function test_papel_escolar_nao_ganha_acesso_mesmo_com_permissao_injetada(): void
     {
         [$id,$dados]=$this->preparar('dir_escolar',false);
         Http::fake(['*'=>Http::response(['data'=>$dados])]);
-        foreach (['/app/clientes','/app/clientes/novo','/app/clientes/8'] as $url) $this->get($url)->assertForbidden();
-        $this->post('/app/clientes',[])->assertForbidden();
+        foreach (['/app/clientes','/app/clientes/novo','/app/clientes/8'] as $url) $this->consultarTela($url)->assertForbidden();
+        $this->alterarRecurso('POST', '/app/clientes',[])->assertForbidden();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/v1/clientes'));
     }
     public function test_erro_de_validacao_preserva_formulario_sem_expor_resposta_interna(): void
     {
         [$id,$dados]=$this->preparar();
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me') ? Http::response(['data'=>$dados]) : Http::response(['message'=>'SEGREDO-INTERNO'],422));
-        $this->from('/app/clientes/novo')->post('/app/clientes',['nome'=>'Teste','contato_email'=>'invalido'])->assertRedirect()->assertSessionHas('erro')->assertSessionHasInput('nome','Teste');
+        $this->from('/app/clientes/novo')->alterarRecurso('POST', '/app/clientes',['nome'=>'Teste','contato_email'=>'invalido'])->assertRetornoTela()->assertSessionHas('erro')->assertSessionHasInput('nome','Teste');
         $this->assertStringNotContainsString('SEGREDO-INTERNO',session('erro'));
     }
 }

@@ -20,24 +20,7 @@
   </form>
 </dialog>
 @push('scripts')
-<script>
-(function () {
-  var modal = document.getElementById('cp1-modal'), formulario = document.getElementById('cp1-formulario');
-  if (!modal || !formulario) return;
-  var tentativa = @json(old('origem_id')), tituloAnterior = @json(old('titulo')), chaveAnterior = @json(old('chave'));
-  function abrir(botao, recuperar) {
-    formulario.action = botao.dataset.acao;
-    document.getElementById('cp1-modal-origem').textContent = botao.dataset.titulo;
-    document.getElementById('cp1-origem-id').value = botao.dataset.origem;
-    document.getElementById('cp1-chave').value = recuperar && chaveAnterior ? chaveAnterior : botao.dataset.chave;
-    document.getElementById('cp1-novo-titulo').value = recuperar && tituloAnterior !== null ? tituloAnterior : Array.from(botao.dataset.titulo).slice(0,240).join('') + ' — cópia';
-    modal.showModal();
-  }
-  document.querySelectorAll('[data-copiar-prova]').forEach(function (botao) {
-    botao.addEventListener('click', function () { abrir(botao, String(tentativa) === botao.dataset.origem); });
-    if (tentativa !== null && String(tentativa) === botao.dataset.origem) abrir(botao,true);
-  });
-  document.getElementById('cp1-cancelar').addEventListener('click',function () { modal.close(); });
-})();
-</script>
+@php($g360Config = ['tentativa'=>old('origem_id'),'titulo'=>old('titulo'),'chave'=>old('chave')])
+<script type="application/json" id="prova-copiar-config">@json($g360Config)</script>
+<script src="{{ asset('js/prova-copiar.js') }}?v={{ filemtime(public_path('js/prova-copiar.js')) }}"></script>
 @endpush

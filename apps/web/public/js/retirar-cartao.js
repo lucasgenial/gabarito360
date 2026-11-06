@@ -1,7 +1,7 @@
-window.confirmarRetiradaCartao=async function(id,nome){
+window.confirmarRetiradaCartao=async function(descritor,nome){
   if(confirmarRetiradaCartao.ocupada)return null;confirmarRetiradaCartao.ocupada=true;
   try{
-  var r=await fetch('/cartoes/'+id+'/retirada',{credentials:'same-origin',headers:{Accept:'application/json'}}),d=await r.json();
+  var r=await G360Requisicao(descritor,{credentials:'same-origin',headers:{Accept:'application/json'}}),d=await r.json();
   if(!r.ok)throw new Error(d.erro||'Não foi possível conferir a correção atual.');
   var modal=document.getElementById('retirar-modal'),form=document.getElementById('retirar-form'),origem=document.activeElement;
   form.reset();document.getElementById('retirar-aluno').textContent=nome||'Cartão-resposta';

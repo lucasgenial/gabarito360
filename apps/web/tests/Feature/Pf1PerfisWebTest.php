@@ -3,9 +3,11 @@ namespace Tests\Feature;
 use App\Support\{Acesso,ContextoWeb};
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class Pf1PerfisWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private function contexto(string $perfil,array $permissoes): string
     {
@@ -33,22 +35,22 @@ class Pf1PerfisWebTest extends TestCase
     public function test_auxiliar_tem_interface_administrativa_sem_acoes_proibidas():void
     {
         $id=$this->contexto('auxiliar_secretaria',['escola.ver','turma.ver','aluno.ver','aluno.gerir']);
-        $this->get('/app/painel')->assertOk()->assertSee('Secretaria escolar')->assertSee('Ver alunos')->assertSee('Auxiliar de secretaria');
-        $this->get('/app/turmas')->assertOk()->assertDontSee('Desempenho médio')->assertDontSee('Nova turma');
-        $this->get('/app/turmas/1')->assertOk()->assertDontSee('Salvar alterações')->assertDontSee('Desativar turma')->assertDontSee('Vincular professor');
-        $this->get('/app/alunos')->assertOk()->assertSee('Cadastrar aluno')->assertDontSee('Importar');
-        foreach(['/app/provas','/app/membros','/app/relatorios/escola'] as $r)$this->get($r)->assertForbidden();
+        $this->consultarTela('/app/painel')->assertOk()->assertSee('Secretaria escolar')->assertSee('Ver alunos')->assertSee('Auxiliar de secretaria');
+        $this->consultarTela('/app/turmas')->assertOk()->assertDontSee('Desempenho médio')->assertDontSee('Nova turma');
+        $this->consultarTela('/app/turmas/1')->assertOk()->assertDontSee('Salvar alterações')->assertDontSee('Desativar turma')->assertDontSee('Vincular professor');
+        $this->consultarTela('/app/alunos')->assertOk()->assertSee('Cadastrar aluno')->assertDontSee('Importar');
+        foreach(['/app/provas','/app/membros','/app/relatorios/escola'] as $r)$this->consultarTela($r)->assertForbidden();
     }
     public function test_vice_sem_concessao_nao_mostra_gestao_da_equipe():void
     {
         $id=$this->contexto('vice_dir_escolar',['usuario.ver']);
-        $this->get('/app/membros')->assertOk()->assertSee('Vice-diretor escolar')->assertSee('Auxiliar de secretaria')->assertSee('Auxiliar fictício')->assertDontSee('Suspender vínculo')->assertDontSee('Novo Membro')->assertDontSee('>Editar<',false);
+        $this->consultarTela('/app/membros')->assertOk()->assertSee('Vice-diretor escolar')->assertSee('Auxiliar de secretaria')->assertSee('Auxiliar fictício')->assertDontSee('Suspender vínculo')->assertDontSee('Novo Membro')->assertDontSee('>Editar<',false);
         $this->assertSame([],Acesso::perfisGeridos());
     }
     public function test_vice_com_concessao_so_mostra_acoes_de_subordinados():void
     {
         $id=$this->contexto('vice_dir_escolar',['usuario.ver','usuario.gerir']);
-        $this->get('/app/membros')->assertOk()->assertSee('Suspender vínculo')->assertSee('Novo Membro')->assertSee('>Editar<',false);
+        $this->consultarTela('/app/membros')->assertOk()->assertSee('Suspender vínculo')->assertSee('Novo Membro')->assertSee('>Editar<',false);
         $this->assertNotContains('vice_dir_escolar',Acesso::perfisGeridos());
         $this->assertContains('auxiliar_secretaria',Acesso::perfisGeridos());
     }

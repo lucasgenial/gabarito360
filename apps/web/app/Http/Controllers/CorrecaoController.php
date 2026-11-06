@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\ApiClient;
+use App\Support\NavegacaoWeb;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -97,7 +98,7 @@ class CorrecaoController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json(
-                $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível enviar o cartão.'] : $resp->json('data'),
+                $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível enviar o cartão.'] : $this->decorarRecursos($resp->json('data') ?? [], $provaId),
                 $resp->status()
             );
         }
@@ -114,14 +115,14 @@ class CorrecaoController extends Controller
     {
         $resp = $this->api->get("/v1/provas/{$provaId}/cartoes/envios/{$chave}");
 
-        return response()->json($resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível acompanhar o envio.'] : $resp->json('data'), $resp->status());
+        return response()->json($resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível acompanhar o envio.'] : $this->decorarRecursos($resp->json('data') ?? [], $provaId), $resp->status());
     }
 
     public function repetirEnvio(int $provaId, string $chave)
     {
         $resp = $this->api->post("/v1/provas/{$provaId}/cartoes/envios/{$chave}/repetir");
 
-        return response()->json($resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível repetir a leitura.'] : $resp->json('data'), $resp->status());
+        return response()->json($resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível repetir a leitura.'] : $this->decorarRecursos($resp->json('data') ?? [], $provaId), $resp->status());
     }
 
     public function fechar(int $provaId)
@@ -147,7 +148,7 @@ class CorrecaoController extends Controller
     {
         $resp = $this->api->get("/v1/provas/{$provaId}/cartoes");
 
-        return response()->json($resp->failed() ? ['cartoes' => []] : $resp->json('data'), $resp->failed() ? $resp->status() : 200);
+        return response()->json($resp->failed() ? ['cartoes' => []] : $this->decorarRecursos($resp->json('data') ?? [], $provaId), $resp->failed() ? $resp->status() : 200);
     }
 
     /** Foto do cartão, repassada da API (não fica em URL pública). */
@@ -188,7 +189,7 @@ class CorrecaoController extends Controller
         $resp = $this->api->put("/v1/cartoes/{$cartaoId}/vincular-aluno", $request->only('aluno_id'));
 
         return response()->json(
-            $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível vincular o aluno.'] : $resp->json('data'),
+            $resp->failed() ? ['erro' => $resp->json('message') ?? 'Não foi possível vincular o aluno.'] : $this->decorarRecursos($resp->json('data') ?? []),
             $resp->failed() ? 422 : 200
         );
     }
@@ -223,7 +224,7 @@ class CorrecaoController extends Controller
 
         $fila = $this->api->get("/v1/provas/{$provaId}/revisao", array_filter(['cartao' => $request->integer('cartao')]));
 
-        return view('correcao.revisao', ['prova' => $prova->json('data'), 'itens' => $fila->json('data.itens') ?? []]);
+        return view('correcao.revisao', ['prova' => $prova->json('data'), 'itens' => $this->decorarRecursos($fila->json('data.itens') ?? [], $provaId)]);
     }
 
     public function resolverAmbiguidade(Request $request, int $cartaoId)
@@ -263,4 +264,28 @@ class CorrecaoController extends Controller
 
         return back()->with('sucesso', 'Leitura revisada.');
     }
+    /** Decora exclusivamente o contrato BFF para os consumidores; a API permanece independente. */
+    private function decorarRecursos(array $dados, ?int $provaId = null, bool $cartao = false): array
+    {
+        foreach ($dados as $campo => $valor) {
+            if (is_array($valor)) $dados[$campo] = $this->decorarRecursos($valor, $provaId, $campo === 'cartoes' || ($cartao && is_int($campo)));
+        }
+        $id = $dados['cartao_id'] ?? ($cartao || isset($dados['processamento'], $dados['id']) || array_key_exists('acertos', $dados) ? ($dados['id'] ?? null) : null);
+        if (is_numeric($id) && (int)$id > 0) {
+            $r = [];
+            foreach (['retirada','excluir','vincular-aluno','revisar','resolver-ambiguidade'] as $acao) $r[$acao] = NavegacaoWeb::destino('cartoes.'.$acao, ['id'=>(int)$id]);
+            $r['imagem'] = NavegacaoWeb::destino('cartoes.imagem', ['id'=>(int)$id]);
+            if ($provaId) {
+                $r['revisao'] = NavegacaoWeb::destino('correcao.revisao', ['id'=>$provaId,'cartao'=>(int)$id]);
+                if (!empty($dados['aluno_id'])) $r['resultado'] = NavegacaoWeb::destino('resultados.show', [$dados['aluno_id'],$provaId,'from'=>'correcao']);
+            }
+            $dados['_recursos'] = $r;
+            foreach (['foto_url'=>'original','miniatura_url'=>'miniatura','endireitada_url'=>'endireitada'] as $campo=>$tipo) {
+                if (!empty($dados[$campo])) $dados[$campo] = NavegacaoWeb::destino('cartoes.imagem-segura', ['id'=>(int)$id,'tipo'=>$tipo]);
+            }
+        }
+        if (is_string($dados['tentativa_id'] ?? null)) $dados['_recursos']['tentativa'] = NavegacaoWeb::destino('correcao.tentativa', ['id'=>$dados['tentativa_id']]);
+        return $dados;
+    }
+
 }

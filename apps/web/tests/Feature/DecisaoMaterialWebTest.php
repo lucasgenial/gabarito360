@@ -3,9 +3,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class DecisaoMaterialWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private function preparar(array $permissoes=['copia.autorizar_origem']): array
     {
@@ -45,11 +47,11 @@ class DecisaoMaterialWebTest extends TestCase
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'
                 ?['codigo'=>$code,'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino'=>['nome'=>'Meu espaço']]:$this->catalogo())]);
         });
-        $this->get('/app/copias/receber-material')->assertOk()->assertSee('Gerar código de destino')->assertSee('name="_token"',false);
-        $this->post('/app/copias/receber-material',['espaco_id'=>5,'vinculo_id'=>99])->assertOk()->assertSee($code)->assertSee('não autoriza a entrada');
+        $this->consultarTela('/app/copias/receber-material')->assertOk()->assertSee('Gerar código de destino')->assertSee('name="_token"',false);
+        $this->alterarRecurso('POST', '/app/copias/receber-material',['espaco_id'=>5,'vinculo_id'=>99])->assertOk()->assertSee($code)->assertSee('não autoriza a entrada');
         $this->assertNull(session('_old_input')); $this->assertStringNotContainsString($code,json_encode(session()->all()));
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r->data()===['espaco_id'=>5]);
-        $this->post('/app/copias/materiais/abrir',['lote_id'=>$this->decisao()['lote_id']])->assertRedirect(route('copias.material.decisao',['id'=>$this->decisao()['lote_id'],'lado'=>'destino',]));
+        $this->alterarRecurso('POST', '/app/copias/materiais/abrir',['lote_id'=>$this->decisao()['lote_id']])->assertRetornoTela(route('copias.material.decisao',['id'=>$this->decisao()['lote_id'],'lado'=>'destino',]));
     }
     public function test_confirmacao_destino_escape_e_criacao_sem_autorizar(): void
     {
@@ -65,11 +67,11 @@ class DecisaoMaterialWebTest extends TestCase
             return Http::response(['data'=>str_ends_with($r->url(),'/preparar')?['previa'=>$prev,'recebimento'=>[
                 'destino'=>['nome'=>'Destino <script>segredo</script>','tipo'=>'pessoal'],'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino_digest'=>str_repeat('d',64)]]:['lote_id'=>$this->decisao()['lote_id']]]);
         });
-        $this->post('/app/copias/materiais/preparar',['espaco_id'=>5,'provas'=>[2],'codigo'=>$code])->assertOk()
+        $this->alterarRecurso('POST', '/app/copias/materiais/preparar',['espaco_id'=>5,'provas'=>[2],'codigo'=>$code])->assertOk()
             ->assertSee('Preparar solicitação')->assertSee('name="confirmado"',false)->assertSee('name="_token"',false)->assertDontSee($ctx)->assertDontSee('contexto-cadastro')->assertDontSee('contexto-copia')
             ->assertDontSee('<script>segredo</script>',false)->assertDontSee('Autorizar saída');
-        $this->post('/app/copias/materiais/lotes',['espaco_id'=>5,'provas'=>[2],'codigo'=>$code,'confirmado'=>1,
-            'chave'=>$this->decisao()['lote_id'],'conteudo_digest'=>str_repeat('c',64),'destino_digest'=>str_repeat('d',64),'ator_id'=>99])->assertRedirect();
+        $this->alterarRecurso('POST', '/app/copias/materiais/lotes',['espaco_id'=>5,'provas'=>[2],'codigo'=>$code,'confirmado'=>1,
+            'chave'=>$this->decisao()['lote_id'],'conteudo_digest'=>str_repeat('c',64),'destino_digest'=>str_repeat('d',64),'ator_id'=>99])->assertRetornoTela();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/lotes') && !isset($r['ator_id']) && !isset($r['_ctx']) && $r['codigo']===$code);
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'aprovar') || str_contains($r->url(),'executar'));
         $this->assertStringNotContainsString($code,json_encode(session()->all()));
@@ -84,33 +86,33 @@ class DecisaoMaterialWebTest extends TestCase
                 return Http::response(['data'=>[]]);
             }
  return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
-        $this->get('/app/copias/materiais/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Registrar revisão')->assertDontSee('Autorizar saída')->assertDontSee('<script>segredo</script>',false);
-        $this->post('/app/copias/materiais/lotes/'.$id.'/revisar',['conteudo_digest'=>$d['conteudo_digest'],'sem_dados_pessoais'=>1])->assertRedirect();
+        $this->consultarTela('/app/copias/materiais/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Registrar revisão')->assertDontSee('Autorizar saída')->assertDontSee('<script>segredo</script>',false);
+        $this->alterarRecurso('POST', '/app/copias/materiais/lotes/'.$id.'/revisar',['conteudo_digest'=>$d['conteudo_digest'],'sem_dados_pessoais'=>1])->assertRetornoTela();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/aprovar'));
         $d['revisado']=true;
-        $this->get('/app/copias/materiais/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Autorizar saída')->assertDontSee('Autorizar entrada');
-        $this->post('/app/copias/materiais/lotes/'.$id.'/aprovar',['lado'=>'origem','conteudo_digest'=>$d['conteudo_digest'],
-            'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z'),'confirmado'=>1])->assertRedirect();
+        $this->consultarTela('/app/copias/materiais/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Autorizar saída')->assertDontSee('Autorizar entrada');
+        $this->alterarRecurso('POST', '/app/copias/materiais/lotes/'.$id.'/aprovar',['lado'=>'origem','conteudo_digest'=>$d['conteudo_digest'],
+            'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z'),'confirmado'=>1])->assertRetornoTela();
         $d['aprovado']=true;
-        $this->get('/app/copias/materiais/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Referência para compartilhar')->assertDontSee('Autorizar saída');
+        $this->consultarTela('/app/copias/materiais/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Referência para compartilhar')->assertDontSee('Autorizar saída');
         $d=$this->decisao('destino',true); $d['saida_valida_ate']=now()->utc()->addMinutes(10)->format('Y-m-d H:i:s');
-        $this->get('/app/copias/materiais/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('Autorizar entrada')->assertDontSee('Autorizar saída')->assertDontSee('Registrar revisão');
+        $this->consultarTela('/app/copias/materiais/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('Autorizar entrada')->assertDontSee('Autorizar saída')->assertDontSee('Registrar revisão');
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'executar'));
     }
     public function test_validacao_e_falha_api_nao_gravam_codigo_em_flash(): void
     {
         [$ctx,$me]=$this->preparar(); $code=str_repeat('b',64);
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'SEGREDO-INTERNO-'.$code],409));
-        $this->post('/app/copias/materiais/preparar',['codigo'=>$code])->assertStatus(422)->assertDontSee($code);
-        $this->post('/app/copias/materiais/preparar',['codigo'=>$code,'espaco_id'=>5,'provas'=>[2]])->assertStatus(409)->assertDontSee($code)->assertDontSee('SEGREDO-INTERNO');
+        $this->alterarRecurso('POST', '/app/copias/materiais/preparar',['codigo'=>$code])->assertStatus(422)->assertDontSee($code);
+        $this->alterarRecurso('POST', '/app/copias/materiais/preparar',['codigo'=>$code,'espaco_id'=>5,'provas'=>[2]])->assertStatus(409)->assertDontSee($code)->assertDontSee('SEGREDO-INTERNO');
         $this->assertNull(session('_old_input')); $this->assertStringNotContainsString($code,json_encode(session()->all()));
     }
     public function test_papel_e_flag_restringem_acesso(): void
     {
         [$ctx,$me]=$this->preparar(); Http::fake(['*'=>Http::response(['data'=>$me])]);
-        $this->get('/app/copias/receber-material')->assertForbidden();
+        $this->consultarTela('/app/copias/receber-material')->assertForbidden();
         config(['services.copias.interface_ativa'=>false]);
-        $this->post('/app/copias/materiais/preparar',[])->assertNotFound();
+        $this->alterarRecurso('POST', '/app/copias/materiais/preparar',[])->assertNotFound();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/copias'));
     }
 }

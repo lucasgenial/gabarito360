@@ -14,7 +14,7 @@ window.criarFilaCartoes = function (opcoes) {
   async function pedir(url, init) {
     var controlador = new AbortController(), timer = setTimeout(function () { controlador.abort(); }, 30000);
     try {
-      var r = await fetch(url, Object.assign({credentials: 'same-origin', signal: controlador.signal,
+      var r = await G360Requisicao(url, Object.assign({credentials: 'same-origin', signal: controlador.signal,
         headers: {'Accept': 'application/json', 'X-CSRF-TOKEN': opcoes.csrf}}, init));
       var dados;
       try { dados = await r.json(); } catch (_) {
@@ -43,13 +43,13 @@ window.criarFilaCartoes = function (opcoes) {
       if (d.processamento === 'erro' && d.pode_repetir) acompanhar(chave, li);
       else { ativos.delete(chave); guardar(); }
       texto(li, d.mensagem || 'Não foi possível concluir esta leitura. Fotografe novamente.');
-      if(d.processamento==='aguardando_confirmacao'&&opcoes.tentativaUrl&&/^[0-9a-f-]{36}$/i.test(d.resultado?.tentativa_id||'')){
-        var link=document.createElement('a');link.className='btn btn-secondary';link.textContent='Conferir nova leitura';
-        link.href=opcoes.tentativaUrl.replace('__TENTATIVA__',encodeURIComponent(d.resultado.tentativa_id));li.appendChild(link);
+      if(d.processamento==='aguardando_confirmacao'&&d.resultado?._recursos?.tentativa){
+        var link=document.createElement('button');link.type='button';link.className='btn btn-secondary';link.textContent='Conferir nova leitura';
+        link.addEventListener('click',()=>G360Navegacao.abrir(d.resultado._recursos.tentativa));li.appendChild(link);
       }
     }
     if (d.pode_repetir) botao(li, 'Tentar leitura novamente', async function () {
-      try { mostrar(chave, li, await pedir(opcoes.envioUrl.replace('__ENVIO__', chave) + '/repetir', {method: 'POST'})); }
+      try { mostrar(chave, li, await pedir(opcoes.repetirUrl, {body:JSON.stringify({chave:chave})})); }
       catch (e) { texto(li, 'Não foi possível confirmar o reprocessamento. Acompanhando o envio…'); acompanhar(chave, li); }
     });
     if(opcoes.resumo)opcoes.resumo();
@@ -61,7 +61,7 @@ window.criarFilaCartoes = function (opcoes) {
     async function proximo() {
       while (fila.length) {
         var item = fila.shift(), chave = item[0], li = item[1];
-        try { mostrar(chave, li, await pedir(opcoes.envioUrl.replace('__ENVIO__', chave))); }
+        try { mostrar(chave, li, await pedir(opcoes.envioUrl, {body:JSON.stringify({chave:chave})})); }
         catch (e) {
           texto(li, (e.status === 401 || e.status === 419) ? opcoes.erroHttp(e.status) : 'Aguardando conexão para acompanhar a leitura.');
           if ([401, 403, 404, 419].includes(e.status)) {

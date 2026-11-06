@@ -5,10 +5,12 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 use Tests\Support\AcessoAtivoLegado;
 
 class AlunosAvatarTest extends TestCase
 {
+    use NavegacaoHttp;
     use AcessoAtivoLegado;
 
     protected function setUp(): void
@@ -37,9 +39,9 @@ class AlunosAvatarTest extends TestCase
         $this->withSession(['auth_token'=>'ficticio']);
         foreach (['POST'=>'/app/alunos','PUT'=>'/app/alunos/7'] as $metodo=>$url) {
             foreach (($metodo==='PUT'?['foto'=>UploadedFile::fake()->image('foto.jpg'),'foto_path'=>'alunos/foto.jpg']:['foto_path'=>'alunos/foto.jpg']) as $campo=>$valor) {
-                $this->{strtolower($metodo)}($url,['nome'=>'Aluno fictício','matricula'=>'FICTICIO-7',
+                $this->from($metodo==='PUT'?'/app/alunos/7':'/app/alunos/novo')->alterarRecurso($metodo,$url,['nome'=>'Aluno fictício','matricula'=>'FICTICIO-7',
                     'turma_id'=>1,'data_nascimento'=>'2010-01-01',$campo=>$valor])
-                    ->assertRedirect()->assertSessionHasErrors($campo);
+                    ->assertRetornoTela()->assertSessionHasErrors($campo);
             }
         }
         $this->assertNenhumaOperacaoDeNegocioEnviada();
@@ -49,7 +51,7 @@ class AlunosAvatarTest extends TestCase
     {
         Http::preventStrayRequests();
         $this->apiLegada(['*'=>Http::response(['data'=>['turmas'=>[]]])]);
-        $this->withSession(['auth_token'=>'ficticio'])->get('/app/alunos/novo')->assertOk()
+        $this->withSession(['auth_token'=>'ficticio'])->consultarTela('/app/alunos/novo')->assertOk()
             ->assertSee('id="preview-avatar"',false)->assertSee('Usar esta imagem')->assertSee('Tirar foto')->assertSee('Escolher arquivo')->assertSee('capture="user"',false);
     }
 
@@ -58,7 +60,7 @@ class AlunosAvatarTest extends TestCase
         Http::preventStrayRequests();
         $this->apiLegada(['*'=>Http::response(['data'=>['turmas'=>[]]])]);
         $html=$this->withSession(['auth_token'=>'ficticio','_old_input'=>['avatar_id'=>36]])
-            ->get('/app/alunos/novo')->assertOk()->getContent();
+            ->consultarTela('/app/alunos/novo')->assertOk()->getContent();
         $d=new \DOMDocument();@$d->loadHTML($html);$x=new \DOMXPath($d);
         $this->assertSame(37,$x->query('//dialog[@id="imagem-aluno-modal"]//input[@name="avatar_id"]')->length);
         $this->assertSame(1,$x->query('//main//input[@name="avatar_id" and @value="36" and @checked]')->length);
@@ -76,16 +78,16 @@ class AlunosAvatarTest extends TestCase
         $this->apiLegada(['*'=>Http::response(['data'=>['id'=>7]],200)]);
         $this->withSession(['auth_token'=>'ficticio']);
         $dados=['nome'=>'Aluno fictício','matricula'=>'FICTICIO-7','turma_id'=>1,'data_nascimento'=>'2010-01-01'];
-        $this->post('/app/alunos',$dados+['avatar_id'=>'36'])->assertRedirect();
+        $this->alterarRecurso('POST', '/app/alunos',$dados+['avatar_id'=>'36'])->assertRetornoTela();
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['avatar_id']==='36');
-        $this->put('/app/alunos/7',$dados+['avatar_id'=>''])->assertRedirect();
+        $this->alterarRecurso('PUT', '/app/alunos/7',$dados+['avatar_id'=>''])->assertRetornoTela();
         Http::assertSent(fn($r)=>$r->method()==='PUT' && array_key_exists('avatar_id',$r->data()) && $r['avatar_id']===null);
     }
 
     public function test_web_rejeita_avatar_fora_do_catalogo(): void
     {
         Http::preventStrayRequests();
-        $this->withSession(['auth_token'=>'ficticio'])->put('/app/alunos/7',[
+        $this->withSession(['auth_token'=>'ficticio'])->alterarRecurso('PUT', '/app/alunos/7',[
             'nome'=>'Aluno fictício','matricula'=>'FICTICIO-7','avatar_id'=>37,
         ])->assertSessionHasErrors('avatar_id');
         $this->assertNenhumaOperacaoDeNegocioEnviada();

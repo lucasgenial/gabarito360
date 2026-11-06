@@ -15,6 +15,9 @@ class Autenticado
             return redirect()->route('login')->with('erro', 'Faça login para continuar.');
         }
 
+        if ($request->route()->getAction('ur4_legado') || ($request->routeIs('legado.*') && array_diff(array_keys($request->route()->parameters()),['acesso']))) {
+            return $request->isMethod('GET') && !$request->expectsJson() ? redirect('/app/painel') : RevisaoAcesso::recusar($request);
+        }
         if ($request->routeIs('legado.*') && !$request->isMethod('GET')) return RevisaoAcesso::recusar($request);
 
         if (session('auth_trocar_senha') && !$request->routeIs('trocar-senha', 'trocar-senha.store')) {

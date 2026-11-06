@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 use Tests\Support\AcessoAtivoLegado;
 
 class CartaoResultadoWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use AcessoAtivoLegado;
 
     protected function setUp(): void
@@ -30,7 +32,7 @@ class CartaoResultadoWebTest extends TestCase
     public function test_resultado_oferece_painel_sob_demanda_e_modal_sem_nova_aba(): void
     {
         $this->fingirResultado();
-        $this->get('/app/resultados/1/4?from=correcao')->assertOk()->assertSee('Cartão resposta')->assertSee('doc-painel')->assertSee('doc-modal')->assertSee('painel-cartao.js')->assertSee('Histórico de leituras do cartão-resposta')
+        $this->consultarTela('/app/resultados/1/4?from=correcao')->assertOk()->assertSee('Cartão resposta')->assertSee('doc-painel')->assertSee('doc-modal')->assertSee('painel-cartao.js')->assertSee('Histórico de leituras do cartão-resposta')
             ->assertSee('Carregando leituras…')->assertDontSee('Retirar correção')->assertDontSee('Revisar leitura')->assertSee('Relatório')->assertSee('Caminho da página')->assertSee('aria-current="page"', false);
         Http::assertNotSent(fn ($r) => str_contains($r->url(), '/tentativas'));
     }
@@ -38,7 +40,7 @@ class CartaoResultadoWebTest extends TestCase
     public function test_resultado_sem_autorizacao_de_foto_nao_oferece_leitor(): void
     {
         $this->apiLegada(['*' => Http::response(['data' => $this->resultado(null)])]);
-        $this->get('/app/resultados/1/4')->assertOk()->assertDontSee('doc-painel')->assertDontSee('Visualizar cartão-resposta');
+        $this->consultarTela('/app/resultados/1/4')->assertOk()->assertDontSee('doc-painel')->assertDontSee('Visualizar cartão-resposta');
     }
 
     public function test_foto_antiga_inadequada_mostra_aviso_sem_alterar_o_resultado(): void
@@ -46,13 +48,13 @@ class CartaoResultadoWebTest extends TestCase
         $d = $this->resultado('/foto-autorizada.jpg');
         $d['qualidade_foto'] = ['aprovada' => false, 'mensagem' => 'Marcador incompleto.'];
         $this->apiLegada(['*' => Http::response(['data' => $d])]);
-        $this->get('/app/resultados/1/4')->assertOk()->assertSee('Marcador incompleto.')->assertSee('As respostas e a nota já registradas foram preservadas.')->assertSee('5,0');
+        $this->consultarTela('/app/resultados/1/4')->assertOk()->assertSee('Marcador incompleto.')->assertSee('As respostas e a nota já registradas foram preservadas.')->assertSee('5,0');
     }
 
     public function test_retirada_encaminha_motivo_versao_e_contexto_para_api(): void
     {
         $this->apiLegada(['*' => Http::response(['data' => ['excluido' => true]])]);
-        $this->deleteJson('/app/cartoes/65', ['motivo' => 'Retirada documentada de teste', 'versao' => str_repeat('a', 64)])->assertOk();
+        $this->alterarRecursoJson('DELETE', '/app/cartoes/65', ['motivo' => 'Retirada documentada de teste', 'versao' => str_repeat('a', 64)])->assertOk();
         Http::assertSent(fn ($r) => $r->method() === 'DELETE' && $r['motivo'] === 'Retirada documentada de teste' && $r['versao'] === str_repeat('a', 64) && $r->hasHeader('Authorization', 'Bearer ficticio'));
     }
 
@@ -76,10 +78,10 @@ class CartaoResultadoWebTest extends TestCase
     public function test_historico_paginado_permanece_no_resultado_e_filtra_o_aluno(): void
     {
         $this->fingirResultado();
-        $r = $this->getJson('/app/resultados/1/4/historico?tentativas_pagina=2')->assertOk()->assertJsonPath('total', 3);
+        $r = $this->consultarJson('/app/resultados/1/4/historico?tentativas_pagina=2')->assertOk()->assertJsonPath('total', 3);
         $this->assertStringContainsString('tabela-padrao', $r->json('html'));
-        $this->assertStringContainsString('tentativas_pagina=1', $r->json('html'));
-        $this->assertStringContainsString('tentativas_pagina=3', $r->json('html'));
+        \Illuminate\Testing\TestResponse::fromBaseResponse(response($r->json('html')))->assertDestinoRecurso('resultados.historico',['alunoId'=>1,'provaId'=>4],['tentativas_pagina'=>1]);
+        \Illuminate\Testing\TestResponse::fromBaseResponse(response($r->json('html')))->assertDestinoRecurso('resultados.historico',['alunoId'=>1,'provaId'=>4],['tentativas_pagina'=>3]);
         $this->assertStringNotContainsString('/historico?', $r->json('html'));
         Http::assertSent(fn ($r) => str_contains($r->url(), '/v1/provas/4/tentativas') && (int) $r['aluno_id'] === 1 && (int) $r['page'] === 2);
     }
@@ -87,14 +89,14 @@ class CartaoResultadoWebTest extends TestCase
     public function test_falha_no_historico_nao_vira_zero_nem_oculta_nota(): void
     {
         $this->fingirResultado(true);
-        $this->get('/app/resultados/1/4')->assertOk()->assertSee('Carregando leituras…')->assertSee('5,0')->assertDontSee('0 leituras registradas');
-        $this->getJson('/app/resultados/1/4/historico')->assertStatus(503);
+        $this->consultarTela('/app/resultados/1/4')->assertOk()->assertSee('Carregando leituras…')->assertSee('5,0')->assertDontSee('0 leituras registradas');
+        $this->consultarJson('/app/resultados/1/4/historico')->assertStatus(503);
     }
 
     public function test_detalhe_de_outro_aluno_nao_e_atribuido_ao_resultado_atual(): void
     {
         $this->fingirResultado(false, ['aluno_id' => 2, 'prova' => ['id' => 4]]);
-        $this->getJson('/app/resultados/1/4/historico?tentativa=9d166f17-9d1e-44b7-9719-28452a5c156b')->assertNotFound();
+        $this->consultarJson('/app/resultados/1/4/historico?tentativa=9d166f17-9d1e-44b7-9719-28452a5c156b')->assertNotFound();
     }
 
     public function test_uma_leitura_nao_exibe_historico_e_docente_mantem_itens_coloridos_sem_tabela(): void
@@ -103,7 +105,7 @@ class CartaoResultadoWebTest extends TestCase
         $d['folha'][0]['turma']=['acertos'=>2,'total'=>3,'percentual'=>66.7];
         $d['folha'][0]['geral']=['acertos'=>6,'total'=>8,'percentual'=>75];
         $this->apiLegada(['*'=>Http::response(['data'=>$d])]);
-        $this->get('/app/resultados/1/4')->assertOk()->assertSee('res-q correta',false)->assertSee('66,7%')->assertSee('75,0%')
+        $this->consultarTela('/app/resultados/1/4')->assertOk()->assertSee('res-q correta',false)->assertSee('66,7%')->assertSee('75,0%')
             ->assertDontSee('historico-tentativas')->assertDontSee('<table',false)->assertDontSee('resultado-historico.js');
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/tentativas'));
     }
@@ -117,7 +119,7 @@ class CartaoResultadoWebTest extends TestCase
             'linhas'=>[['numero_questao'=>1,'leitura'=>'A','resposta'=>'B','resposta_registrada'=>true,
                 'observacao'=>'Revisão humana por Pessoa fictícia em 05/11/2026 09:00:00 -03:00',
                 'referencia_preservada'=>true,'situacao'=>'correta','leitura_situacao'=>'incorreta','gabarito'=>'B','modificada'=>true,'intervencao_humana'=>true]]]);
-        $r=$this->getJson('/app/resultados/1/4/historico?tentativa='.$id)->assertOk();
+        $r=$this->consultarJson('/app/resultados/1/4/historico?tentativa='.$id)->assertOk();
         $this->assertStringContainsString('res-q correta',$r->json('html'));
         $this->assertStringContainsString('Resposta modificada',$r->json('html'));
         $this->assertStringContainsString('Leitura automática',$r->json('html'));
@@ -129,26 +131,26 @@ class CartaoResultadoWebTest extends TestCase
     {
         $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
         $this->apiLegada(['*' => Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4], 'aplicada' => true]])]);
-        $this->post('/app/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'tentativas_pagina' => 2, 'motivo' => 'Nova leitura conferida no teste', 'confirmar' => 1, 'retorno' => 'https://externo.test'])->assertRedirect(route('resultados.show', [1, 4, 'tentativa' => $id, 'tentativas_pagina' => 2]).'#tentativa-detalhe');
+        $this->alterarRecurso('POST', '/app/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'tentativas_pagina' => 2, 'motivo' => 'Nova leitura conferida no teste', 'confirmar' => 1, 'retorno' => 'https://externo.test'])->assertRetornoTela(route('resultados.show', [1, 4, 'tentativa' => $id, 'tentativas_pagina' => 2]).'#tentativa-detalhe');
     }
 
     public function test_flash_tem_fallback_seguro_e_solid_toast_sem_conteudo_html_executavel(): void
     {
         $this->fingirResultado();
-        $this->withSession(['sucesso' => 'Registro salvo <script>alert(1)</script>'])->get('/app/resultados/1/4')->assertOk()->assertSee('notificacoes.js')->assertSee('g360-notificacoes-iniciais')->assertSee('data-g360-flash="sucesso"', false)->assertDontSee('<script>alert(1)</script>', false);
+        $this->withSession(['sucesso' => 'Registro salvo <script>alert(1)</script>'])->consultarTela('/app/resultados/1/4')->assertOk()->assertSee('notificacoes.js')->assertSee('g360-notificacoes-iniciais')->assertSee('data-g360-flash="sucesso"', false)->assertDontSee('<script>alert(1)</script>', false);
     }
 
     public function test_aplicar_com_ambiguidades_abre_revisao_sem_tentar_abrir_resultado_ainda_inexistente(): void
     {
         $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
         $this->apiLegada(['*' => Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4], 'aplicada' => true, 'status' => 'ambiguo', 'prova_id' => 4, 'cartao_id' => 66]])]);
-        $this->post('/app/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Foto nova conferida para teste', 'confirmar' => 1])->assertRedirect(route('correcao.revisao', [4, 'cartao' => 66]))->assertSessionHas('info', 'Nova tentativa aplicada. Revise as questões pendentes.');
+        $this->alterarRecurso('POST', '/app/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Foto nova conferida para teste', 'confirmar' => 1])->assertRetornoTela(route('correcao.revisao', [4, 'cartao' => 66]))->assertSessionHas('info', 'Nova tentativa aplicada. Revise as questões pendentes.');
     }
 
     public function test_conflito_integrado_volta_ao_resultado_canonico_e_preserva_motivo(): void
     {
         $id = '9d166f17-9d1e-44b7-9719-28452a5c156b';
         $this->apiLegada(fn ($r) => $r->method() === 'GET' ? Http::response(['data' => ['aluno_id' => 1, 'prova' => ['id' => 4]]]) : Http::response(['message' => 'Correção alterada.'], 409));
-        $this->from('/app/resultados/1/4/historico')->post('/app/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Motivo documentado de teste', 'confirmar' => 1])->assertRedirect(route('resultados.show', [1, 4, 'tentativa' => $id, 'tentativas_pagina' => 1]).'#tentativa-detalhe')->assertSessionHasErrors('tentativa')->assertSessionHasInput('motivo', 'Motivo documentado de teste');
+        $this->from('/app/resultados/1/4/historico')->alterarRecurso('POST', '/app/tentativas/'.$id.'/aplicar', ['integrada' => 1, 'motivo' => 'Motivo documentado de teste', 'confirmar' => 1])->assertRetornoTela(route('resultados.show', [1, 4, 'tentativa' => $id, 'tentativas_pagina' => 1]).'#tentativa-detalhe')->assertSessionHasErrors('tentativa')->assertSessionHasInput('motivo', 'Motivo documentado de teste');
     }
 }

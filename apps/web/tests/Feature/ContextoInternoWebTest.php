@@ -4,9 +4,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class ContextoInternoWebTest extends TestCase
 {
+    use NavegacaoHttp;
     protected function setUp(): void
     {
         parent::setUp();
@@ -59,10 +61,10 @@ class ContextoInternoWebTest extends TestCase
             $this->assertStringEndsWith('/auth/me',$r->url());
             return Http::response(['data'=>$this->dados()]);
         });
-        $this->get('/app/painel')->assertOk()->assertSee('Área interna do Gabarito360')->assertSee('Financeiro')
+        $this->consultarTela('/app/painel')->assertOk()->assertSee('Área interna do Gabarito360')->assertSee('Financeiro')
             ->assertDontSee('token-interno-secreto')->assertDontSee('href="'.route('provas.index').'"',false)->assertDontSee('Assinatura e cobrança');
-        $this->get('/app/perfil')->assertOk()->assertSee('Financeiro')->assertDontSee('token-interno-secreto');
-        foreach (['provas','alunos','turmas','configuracoes'] as $url) $this->get('/app/'.$url)->assertForbidden();
+        $this->consultarTela('/app/perfil')->assertOk()->assertSee('Financeiro')->assertDontSee('token-interno-secreto');
+        foreach (['provas','alunos','turmas','configuracoes'] as $url) $this->consultarTela('/app/'.$url)->assertForbidden();
     }
 
     public function test_troca_interna_invalida_tela_anterior_e_revogacao_exige_nova_selecao(): void

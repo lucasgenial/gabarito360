@@ -46,7 +46,7 @@ window.criarMiniaturasCartoes = function (root, abrir) {
       const url = botao.dataset.miniaturaUrl;
       // A assinatura pode ser renovada no polling sem que a foto tenha mudado.
       // Somente a chave de cache ignora query; o carregamento usa a URL integral, sem modificá-la.
-      const chave = botao.dataset.miniaturaCartao + '|' + botao.dataset.miniaturaVersao + '|' + url.split('?')[0];
+      const chave = botao.dataset.miniaturaCartao + '|' + botao.dataset.miniaturaVersao;
       presentes.add(chave);
       const anterior = registros.get(chave);
       if (anterior) { anterior.url = url; if (anterior.botao !== botao) botao.replaceWith(anterior.botao); return; }

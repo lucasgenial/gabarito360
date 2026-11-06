@@ -1,5 +1,9 @@
 # Orientações do projeto
 
+## JavaScript da aplicação
+
+Decisão explícita do responsável em 06/11/2026: manter o JavaScript executável em arquivos externos bem definidos, com funções e responsabilidades claras. Não adicionar lógica executável em `<script>` inline nem atributos de evento como `onclick` e `onsubmit` nas views. Transmitir apenas dados de configuração por atributos `data-*` ou blocos não executáveis `application/json`, com o escape apropriado; conectar os eventos nos arquivos JavaScript. Ao alterar uma tela com lógica embutida, migrar as interações afetadas e preservar o comportamento, a validação, o CSRF e a acessibilidade.
+
 ## UI, UX e Product Design
 
 Regra solicitada pelo responsável em03/11/2026: toda alteração que afete interface, experiência, navegação, formulários ou textos de interação exige aprovação explícita do usuário **ou de um agente especializado em UI/UX e Product Design** antes de ser considerada concluída ou integrada.
