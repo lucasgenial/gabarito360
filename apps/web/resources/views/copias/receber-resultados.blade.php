@@ -5,7 +5,7 @@
 @include('copias._recebimento-guia')
 <x-aviso>O código informa o nome e o tipo do espaço. Ele não autoriza a entrada dos resultados. Compartilhe-o somente com quem preparará a solicitação.</x-aviso>
 <form method="POST" action="{{ route('copias.resultado.emitir') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf
+  @csrf <x-revisao-acesso />
   <h2>1. Gerar o código para quem envia</h2><p>Selecione o espaço que receberá a cópia. Gerar o código ainda não autoriza a entrada de dados.</p><div class="field"><label for="espaco_id">Espaço que receberá os resultados</label><select class="select" name="espaco_id" id="espaco_id" required @disabled(!$dados['espacos'])>
     @foreach($dados['espacos'] as $e)<option value="{{ $e['id'] }}" @selected($dados['espaco_id']===$e['id'])>{{ $e['nome'] }}</option>@endforeach
   </select></div>
@@ -20,7 +20,7 @@
 </section>
 @endif
 <form method="POST" action="{{ route('copias.resultado.abrir') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf
+  @csrf <x-revisao-acesso />
   <h2>2. Conferir uma solicitação</h2><p>Depois de autorizar a saída, a origem fornecerá a referência. Confira os resultados antes de autorizar sua entrada.</p>
   <div class="field"><label for="lote_id">Referência da solicitação</label><input class="input" id="lote_id" name="lote_id" required maxlength="36" autocomplete="off" spellcheck="false"></div>
   <button class="btn btn-secondary" type="submit">Conferir resultados recebidos</button>

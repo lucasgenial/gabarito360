@@ -35,7 +35,7 @@
 </div>
 
 <form method="POST" action="{{ route('provas.store') }}" class="editor-grid">
-  @csrf
+  @csrf <x-revisao-acesso />
 
   {{-- Sidebar de preview --}}
   <aside class="sticky">

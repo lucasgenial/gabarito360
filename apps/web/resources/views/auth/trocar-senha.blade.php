@@ -13,7 +13,7 @@
     <p class="convite-texto">Sua escola pediu que você crie uma nova senha antes de continuar.</p>
 
     <form method="POST" action="{{ route('trocar-senha.store') }}">
-      @csrf
+      @csrf <x-revisao-acesso />
         @if(request()->boolean('retorno_convite'))<input type="hidden" name="retorno_convite" value="1">@endif
       @method('PUT')
 
@@ -35,7 +35,7 @@
     </form>
 
     <form method="POST" action="{{ route('logout') }}" class="convite-recusar">
-      @csrf
+      @csrf <x-revisao-acesso />
       <button type="submit" class="btn btn-ghost btn-block">Sair</button>
     </form>
   </div>

@@ -3,21 +3,25 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\AcessoAtivoLegado;
 
 class ResultadosLoteWebTest extends TestCase
 {
+    use AcessoAtivoLegado;
+
     protected function setUp(): void
     {
         parent::setUp();
         config(['services.api.base_url'=>'http://api.test/api']);
         Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'ficticio']);
+        $this->selecionarAcessoLegado('coordenador', ['resultado.ver', 'prova.ver']);
     }
 
     public function test_download_encaminha_turma_e_entrega_pdf_privado(): void
     {
-        Http::fake(['*'=>Http::response('%PDF-ficticio',200,['Content-Type'=>'application/pdf'])]);
-        $this->get('/provas/7/resultados/pdf?turma_id=3')->assertOk()
+        $this->apiLegada(['*'=>Http::response('%PDF-ficticio',200,['Content-Type'=>'application/pdf'])]);
+        $this->get('/app/provas/7/resultados/pdf?turma_id=3')->assertOk()
             ->assertHeader('Content-Type','application/pdf')
             ->assertHeader('Content-Disposition','attachment; filename="resultados-prova-7-turma-3.pdf"');
         Http::assertSent(fn($r)=>str_contains($r->url(),'/api/v1/provas/7/resultados/pdf?turma_id=3') && $r->hasHeader('Authorization','Bearer ficticio'));
@@ -25,9 +29,10 @@ class ResultadosLoteWebTest extends TestCase
 
     public function test_erro_da_api_nao_vira_pdf_e_filtro_invalido_nao_faz_requisicao(): void
     {
-        Http::fake(['*'=>Http::response(['message'=>'Nenhum resultado disponível.'],422)]);
-        $this->getJson('/provas/7/resultados/pdf')->assertUnprocessable();
-        $this->getJson('/provas/7/resultados/pdf?turma_id=abc')->assertUnprocessable();
-        Http::assertSentCount(1);
+        $this->apiLegada(['*'=>Http::response(['message'=>'Nenhum resultado disponível.'],422)]);
+        $this->getJson('/app/provas/7/resultados/pdf')->assertUnprocessable();
+        $this->getJson('/app/provas/7/resultados/pdf?turma_id=abc')->assertUnprocessable();
+        $this->assertCount(1, Http::recorded(fn ($r) => parse_url($r->url(), PHP_URL_PATH) !== '/api/v1/auth/me'));
+        Http::assertNotSent(fn ($r) => str_contains($r->url(), 'turma_id=abc'));
     }
 }

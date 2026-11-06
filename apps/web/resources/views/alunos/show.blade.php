@@ -45,7 +45,7 @@
     @pode('aluno.gerir')<button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>@endpode
     @pode('aluno.desativar')<form method="POST" action="{{ route('alunos.toggle', $aluno['id']) }}"
           onsubmit="return confirm('{{ $aluno['ativo'] ? 'Desativar' : 'Ativar' }} este aluno?')">
-      @csrf
+      @csrf <x-revisao-acesso />
       <button type="submit" class="btn btn-ghost"
               style="color:{{ $aluno['ativo'] ? 'var(--danger)' : 'var(--success)' }};{{ $aluno['ativo'] ? 'border-color:var(--danger);' : '' }}">
         {{ $aluno['ativo'] ? 'Desativar' : 'Ativar' }}
@@ -104,7 +104,7 @@
       <button type="button" class="modal-close" onclick="fecharModal()">&times;</button>
     </div>
     <form method="POST" action="{{ route('alunos.update', $aluno['id']) }}">
-      @csrf
+      @csrf <x-revisao-acesso />
       @method('PUT')
       <div class="modal-body">
         <div class="form-row-2">

@@ -13,7 +13,7 @@
     @if(!$convite)
       <p class="convite-texto">Informe o e-mail que recebeu o convite e cole o código completo da mensagem.</p>
       <form method="POST" action="{{ route('convite.conferir') }}">
-        @csrf
+        @csrf <x-revisao-acesso />
         <div class="field"><label for="convite-email">E-mail</label><input class="input" id="convite-email" type="email" name="email" value="{{ old('email') }}" required maxlength="190" autocomplete="email" aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}" aria-describedby="convite-email-erro">@error('email')<span id="convite-email-erro" role="alert" class="field-error">{{ $message }}</span>@enderror</div>
         <div class="field"><label for="convite-codigo">Código do convite</label><input class="input" id="convite-codigo" type="text" name="token" required minlength="64" maxlength="64" autocomplete="one-time-code" autocapitalize="none" spellcheck="false" aria-describedby="convite-codigo-erro convite-codigo-ajuda" aria-invalid="{{ $errors->has('token') ? 'true' : 'false' }}"><p class="field-help" id="convite-codigo-ajuda">Copie os 64 caracteres recebidos por e-mail.</p>@error('token')<span id="convite-codigo-erro" role="alert" class="field-error">{{ $message }}</span>@enderror</div>
         <button class="btn btn-primary btn-block" type="submit">Conferir convite</button>
@@ -29,7 +29,7 @@
       </dl>
 
       <form method="POST" action="{{ route('redefinir-senha.store') }}">
-        @csrf
+        @csrf <x-revisao-acesso />
         <input type="hidden" name="token" value="{{ $token }}">
         <input type="hidden" name="email" value="{{ $email }}">
 
@@ -50,7 +50,7 @@
       </form>
 
       <form method="POST" action="{{ route('convite.recusar') }}" class="convite-recusar">
-        @csrf
+        @csrf <x-revisao-acesso />
         <input type="hidden" name="token" value="{{ $token }}">
         <input type="hidden" name="email" value="{{ $email }}">
         <button type="submit" class="btn btn-ghost btn-block">Recusar convite</button>

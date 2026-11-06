@@ -28,7 +28,7 @@
 @endif
 @if($dados['pode_solicitar'])
 <form method="POST" action="{{ route('copias.solicitar',['id'=>$dados['lote_id']]) }}" class="card card-pad" style="margin-top:20px;">
-  @csrf
+  @csrf <x-revisao-acesso />
 
   <p>O sistema conferirá novamente as decisões, o conteúdo e os registros antes de processar. A publicação pode ocorrer em etapas.</p>
   <p><label><input type="checkbox" name="confirmado" value="1" required> Confirmo o pedido de processamento neste destino.</label></p>
@@ -37,7 +37,7 @@
 @endif
 @if($dados['pode_revogar'])
 <form method="POST" action="{{ route('copias.revogar',['id'=>$dados['lote_id']]) }}" class="card card-pad" style="margin-top:20px;">
-  @csrf
+  @csrf <x-revisao-acesso />
   <input type="hidden" name="lado" value="{{ $dados['lado'] }}">
   <p>A revogação interrompe o que ainda não foi publicado. Ela não apaga cópias já publicadas; uma publicação em andamento pode terminar antes da revogação.</p>
   <p><label><input type="checkbox" name="confirmado" value="1" required> Confirmo a revogação por este espaço e compreendo que ela não desfaz publicações.</label></p>

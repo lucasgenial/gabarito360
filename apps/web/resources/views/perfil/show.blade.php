@@ -60,7 +60,7 @@
       </div>
       <div class="section-body">
         <form method="POST" action="{{ route('perfil.update') }}">
-          @csrf
+          @csrf <x-revisao-acesso />
           @method('PUT')
           <div class="form-grid-2">
             <div class="field">
@@ -96,7 +96,7 @@
       </div>
       <div class="section-body">
         <form method="POST" action="{{ route('perfil.senha') }}">
-          @csrf
+          @csrf <x-revisao-acesso />
           @method('PUT')
           <div class="field">
             <label for="senha-atual">Senha atual *</label>
@@ -114,7 +114,7 @@
         </form>
 
         <form method="POST" action="{{ route('perfil.email') }}" style="margin-top:28px;">
-          @csrf
+          @csrf <x-revisao-acesso />
           <h2 style="font-size:18px;margin-bottom:4px;">Trocar e-mail</h2>
           <p style="margin-bottom:14px;color:var(--muted);font-size:14px;">O e-mail atual segue valendo até você confirmar o novo pelo link enviado.</p>
           <div class="field">

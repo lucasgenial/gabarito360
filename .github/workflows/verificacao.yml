@@ -138,6 +138,13 @@ jobs:
       - run: composer install --no-interaction --no-progress
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
+      - name: Conferir exclusão real entre processos da sessão web
+        if: matrix.app == 'web'
+        working-directory: ${{ github.workspace }}
+        run: |
+          TASK_QA_UR3=$(mktemp -d /tmp/g360-ur3-ci-XXXXXX)
+          ln -s "$GITHUB_WORKSPACE/apps/web/vendor" "$TASK_QA_UR3/vendor"
+          python3 scripts/auditoria/mutex-sessao-adversarial.py --qa "$TASK_QA_UR3" --middleware "$GITHUB_WORKSPACE/apps/web/app/Http/Middleware/SerializarSessao.php"
 
   integridade-mariadb:
     runs-on: ubuntu-latest

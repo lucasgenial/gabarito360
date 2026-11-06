@@ -115,7 +115,7 @@ function escH(t) { var d = document.createElement('div'); d.textContent = t == n
 
 function recorteHtml(q) {
   if (!q.endireitada_url) {
-    return q.foto_url ? '<img class="rev-foto" src="' + escH(q.foto_url) + '" alt="Foto do cartão" draggable="false">' : '';
+    return q.foto_url ? '<img class="rev-foto" data-imagem-contextual="' + escH(q.foto_url) + '" alt="Foto do cartão" draggable="false">' : '';
   }
   var r = q.recorte;
   // Mostra só a linha da questão: a foto endireitada tem sempre a mesma geometria da folha
@@ -161,7 +161,7 @@ function desenhar() {
     + '<p class="rev-teclas">Teclado: A a ' + ALTERNATIVAS[ALTERNATIVAS.length - 1] + ' respondem, 0 deixa em branco e X anula.</p></div></div>';
   restringirCopiaImagem(document.getElementById('rev-previa'));
   sincronizarDocumento();
-  if (FILA[1] && FILA[1].endireitada_url) new Image().src = FILA[1].endireitada_url;
+  // O próximo cartão será buscado com a revisão desta tela quando for aberto.
 }
 
 function escolher(alternativa) {

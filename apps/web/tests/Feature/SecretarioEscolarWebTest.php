@@ -7,6 +7,7 @@ use Tests\TestCase;
 
 class SecretarioEscolarWebTest extends TestCase
 {
+    use \Tests\Support\ContextoSelecionado;
     public function test_painel_e_turma_administrativos_nao_consultam_dados_pedagogicos(): void
     {
         config(['services.api.base_url'=>'http://api.test/api']);
@@ -15,7 +16,7 @@ class SecretarioEscolarWebTest extends TestCase
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
         $dados=['vinculo_id'=>1,'tipo_contexto'=>'vinculo','token'=>'token-escolar','perfil'=>'secretario_escolar','espaco'=>['id'=>1,'tipo'=>'escola','nome'=>'Escola fictícia'],
             'permissoes'=>['escola.ver','turma.ver','turma.gerir','turma.desativar','aluno.ver','aluno.gerir','aluno.importar','aluno.desativar']];
-        ContextoWeb::criar($dados);$id=ContextoWeb::referencia($dados);
+        $this->selecionarContextoFixture($dados);$id=ContextoWeb::referencia($dados);
         $turma=['id'=>1,'nome'=>'Turma fictícia','serie'=>'4','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'escola_nome'=>'Escola fictícia','total_alunos'=>1,
             'alunos'=>[['id'=>1,'nome'=>'Aluno fictício','matricula'=>'A1','ativo'=>true]]];
         Http::fake(function ($r) use ($dados,$turma) {
@@ -35,14 +36,14 @@ class SecretarioEscolarWebTest extends TestCase
                 default=>$this->fail('Consulta inesperada: '.$path),
             };
         });
-        $this->get('/acessos/'.$id.'/painel')->assertOk()->assertSee('Secretaria escolar')->assertSee('Ver alunos')->assertDontSee('Relatórios');
+        $this->get('/app/painel')->assertOk()->assertSee('Secretaria escolar')->assertSee('Ver alunos')->assertDontSee('Relatórios');
         $this->assertSame(['Painel','Turmas','Alunos'],array_column(Acesso::menuCelular()['barra'],'rotulo'));
-        $this->get('/acessos/'.$id.'/turmas')->assertOk()->assertSee('Turma fictícia')->assertDontSee('Desempenho médio');
-        $this->get('/acessos/'.$id.'/turmas/1')->assertOk()->assertSee('Aluno fictício')->assertSee('Salvar alterações')->assertDontSee('Média')->assertDontSee('Vincular professor');
-        $this->put('/acessos/'.$id.'/turmas/1',['nome'=>'Turma editada','serie'=>'4','turno'=>'tarde','ano_letivo'=>2026])->assertRedirect()->assertSessionHas('sucesso');
-        $this->get('/acessos/'.$id.'/provas')->assertForbidden();
-        $this->get('/acessos/'.$id.'/membros')->assertForbidden();
-        $this->get('/acessos/'.$id.'/acessos-internos')->assertForbidden();
+        $this->get('/app/turmas')->assertOk()->assertSee('Turma fictícia')->assertDontSee('Desempenho médio');
+        $this->get('/app/turmas/1')->assertOk()->assertSee('Aluno fictício')->assertSee('Salvar alterações')->assertDontSee('Média')->assertDontSee('Vincular professor');
+        $this->put('/app/turmas/1',['nome'=>'Turma editada','serie'=>'4','turno'=>'tarde','ano_letivo'=>2026])->assertRedirect()->assertSessionHas('sucesso');
+        $this->get('/app/provas')->assertForbidden();
+        $this->get('/app/membros')->assertForbidden();
+        $this->get('/app/acessos-internos')->assertForbidden();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/dashboard/') || str_contains($r->url(),'/professores') || str_contains($r->url(),'/usuarios'));
     }
 }

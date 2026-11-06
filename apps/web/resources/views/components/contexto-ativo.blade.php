@@ -2,7 +2,7 @@
 @php
   $interno = \App\Support\Acesso::interno();
   $pessoal = ($contexto['espaco']['tipo'] ?? '') === 'pessoal';
-  $nome = $interno ? 'Equipe Gabarito360' : ($pessoal ? 'Pessoal' : $contexto['espaco']['nome']);
+  $nome = $interno ? 'Equipe Gabarito360' : ($pessoal ? 'Pessoal' : ($contexto['espaco']['nome'] ?? 'Acesso da conta'));
   $rotulo = $interno ? 'Área de acesso' : match($contexto['espaco']['tipo'] ?? '') {
     'escola'=>'Minha escola', 'rede'=>'Minha rede', 'nucleo'=>'Meu núcleo',
     'secretaria'=>'Minha secretaria', 'pessoal'=>'Tipo de espaço', default=>'Espaço ativo',

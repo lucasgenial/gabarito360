@@ -19,13 +19,13 @@ class BreadcrumbsTest extends TestCase
 
     public function test_origem_validada_preserva_contexto_e_nao_usa_endereco_arbitrario(): void
     {
-        session(['auth_permissoes' => ['correcao.acompanhar', 'resultado.ver', 'turma.ver']]);
+        request()->attributes->set('vinculo_contexto', ['perfil'=>'professor', 'permissoes'=>['correcao.acompanhar', 'resultado.ver', 'turma.ver']]);
         $r = $this->requisicao('resultados.show', '?from=correcao');
-        app('url')->defaults(['acesso'=>'vinculo-7']);
+        app('url')->defaults([]);
         $dados = ['prova' => ['id' => 4, 'titulo' => 'Prova fictícia'], 'aluno' => ['turma_id' => 7, 'turma_nome' => 'Turma fictícia']];
         $t = Breadcrumbs::itens($r, $dados);
         $this->assertSame(['Início', 'Correção da prova', 'Resultado'], array_column($t, 'rotulo'));
-        $this->assertStringContainsString('/acessos/vinculo-7/', $t[1]['url']);
+        $this->assertStringContainsString('/app/', $t[1]['url']);
         $this->assertStringNotContainsString('_ctx', $t[1]['url']);
         $t = Breadcrumbs::itens($this->requisicao('resultados.show', '?from=https://externo.test'), $dados);
         $this->assertSame('Turma fictícia', $t[1]['rotulo']);
@@ -34,7 +34,7 @@ class BreadcrumbsTest extends TestCase
 
     public function test_relatorio_da_turma_usa_turma_autorizada_e_nao_id_da_query(): void
     {
-        session(['auth_permissoes' => ['resultado.ver']]);
+        request()->attributes->set('vinculo_contexto', ['perfil'=>'professor', 'permissoes'=>['resultado.ver']]);
         $t = Breadcrumbs::itens($this->requisicao('resultados.show', '?from=rel-turma&turma=999'), ['prova' => ['id' => 4], 'aluno' => ['turma_id' => 7]]);
         $this->assertSame(route('relatorios.turmaProva', [7, 4]), $t[1]['url']);
     }
