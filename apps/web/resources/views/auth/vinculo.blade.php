@@ -1,7 +1,7 @@
 @extends('layouts.auth', ['semMenuPublico' => true])
 @section('title', !empty($internos) ? 'Escolha seu acesso' : 'Escolha seu vínculo')
 @section('content')
-<main class="vinculo-pagina">
+<main class="vinculo-pagina" data-selecao-acesso>
   <a class="brand" href="{{ route('home') }}"><x-marca /></a>
   <section class="card vinculo-card" aria-labelledby="vinculo-titulo">
     <h1 id="vinculo-titulo">{{ !empty($internos) ? 'Escolha seu acesso' : 'Escolha seu vínculo' }}</h1>
