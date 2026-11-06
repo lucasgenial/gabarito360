@@ -14,15 +14,15 @@ final class RecursoNavegacao
         if (!session('auth_token')) return ($r->expectsJson() || $r->ajax())
             ? response()->json(['message'=>'Entre novamente para continuar.','login_necessario'=>true],401) : redirect('/login');
         if ($r->isMethod('GET') && !$rota->getAction('ur4_consulta')) {
-            // A identidade pode continuar válida após expirar o cache do vínculo.
-            // Escolher novamente o acesso antes de emitir uma estrutura sem autoridade.
-            if (!ContextoWeb::atual()) return redirect()->route('vinculos.index');
+            if (!ContextoWeb::atual()) return ContextoWeb::temSelecao()
+                ? \App\Support\SessaoWeb::encerrar($r) : redirect()->route('vinculos.index');
             if ($r->query->count()) return response()->view('navegacao.selecionar',['meta'=>$meta],409);
             if ($meta['binario'] || $meta['dados']) return response()->json(['message'=>'Abra este recurso pela tela correspondente.'],409);
             return response()->view('navegacao.estrutura',['meta'=>$meta]);
         }
         if ($r->query->count()) return response()->json(['message'=>'Envie a seleção no corpo da requisição.'],422);
         if (!ContextoWeb::atual()) {
+            if (ContextoWeb::temSelecao()) return \App\Support\SessaoWeb::encerrar($r);
             if ($r->expectsJson() || $r->ajax()) return response()->json([
                 'message'=>'Escolha novamente seu vínculo.', 'selecionar_vinculo'=>true, 'url'=>route('vinculos.index'),
             ],409);

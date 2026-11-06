@@ -24,6 +24,15 @@ class ContextoWeb
     public static function obter(?string $id): ?array
     {
         if (!$id || !preg_match('/^[A-Za-z0-9]{48}$/D', $id)) return null;
+        if ($id === session('auth_contexto_ativo') && session()->has('auth_contexto_dados')) {
+            try {
+                $envelope = json_decode(Crypt::decryptString(session('auth_contexto_dados')), true, 512, JSON_THROW_ON_ERROR);
+                if (($envelope['handle'] ?? null) !== $id || ($envelope['sessao'] ?? null) !== session()->getId()
+                    || !hash_equals($envelope['identidade'] ?? '', hash('sha256', (string) session('auth_token')))) return null;
+                return is_array($envelope['dados'] ?? null) ? $envelope['dados'] : null;
+            } catch (\Throwable) { return null; }
+        }
+        if ($id === session('auth_contexto_ativo') && session()->has('auth_contexto_versao')) return null;
         $valor = Cache::get(self::chave($id));
         if (!$valor) return null;
         try { return json_decode(Crypt::decryptString($valor), true, 512, JSON_THROW_ON_ERROR); }
@@ -32,6 +41,7 @@ class ContextoWeb
 
     public static function renovar(string $id, array $dados): void
     {
+        if ($id === session('auth_contexto_ativo')) self::guardarNaSessao($id, $dados);
         Cache::put(self::chave($id), Crypt::encryptString(json_encode($dados, JSON_THROW_ON_ERROR)), now()->addMinutes(config('session.lifetime')));
         self::registrarReferencia($id, $dados);
     }
@@ -82,6 +92,7 @@ class ContextoWeb
             Cache::forget(self::chave('referencia:'.$ref));
         }
         Cache::forget(self::chave($id));
+        if ($id === session('auth_contexto_ativo')) session()->forget('auth_contexto_dados');
     }
     /** Ativa somente a resposta autenticada da API; nunca recebe autorização do navegador. */
     public static function ativar(array $dados): string
@@ -90,6 +101,7 @@ class ContextoWeb
         $id = self::criar($dados);
         $revisao = Str::random(40);
         session(['auth_contexto_ativo' => $id, 'auth_contexto_revisao' => $revisao]);
+        self::guardarNaSessao($id, $dados);
         if (is_string($anterior)) self::esquecer($anterior);
         return $revisao;
     }
@@ -106,7 +118,7 @@ class ContextoWeb
     public static function limpar(): void
     {
         if (is_string($id = session('auth_contexto_ativo'))) self::esquecer($id);
-        session()->forget(['auth_contexto_ativo', 'auth_contexto_revisao']);
+        session()->forget(['auth_contexto_ativo', 'auth_contexto_revisao', 'auth_contexto_dados', 'auth_contexto_versao']);
     }
 
     public static function garantirRevisao(): ?string
@@ -125,6 +137,8 @@ class ContextoWeb
         $request->attributes->set('g360_revisao', self::garantirRevisao());
         $id = session('auth_contexto_ativo');
         $dados = is_string($id) ? self::obter($id) : null;
+        // Migração de sessões existentes: o vínculo acompanha a sessão, sem relógio próprio.
+        if ($dados && !session()->has('auth_contexto_dados')) self::guardarNaSessao($id, $dados);
         // Nunca atravessar a fronteira entre os regimes com um contexto de sessão antigo.
         if ($dados && ((($dados['tipo_contexto'] ?? null) === 'legado') === (bool) session('auth_vinculos'))) $dados = null;
         $request->attributes->set('vinculo_contexto', $dados);
@@ -143,4 +157,16 @@ class ContextoWeb
 
     public static function atual(): ?array { return request()->attributes->get('vinculo_contexto'); }
     public static function id(): ?string { return request()->attributes->get('vinculo_handle'); }
+    public static function temSelecao(): bool
+    {
+        return session()->has('auth_contexto_ativo') || session()->has('auth_contexto_versao') || session()->has('auth_contexto_dados');
+    }
+
+    private static function guardarNaSessao(string $id, array $dados): void
+    {
+        abort_if(config('session.driver') === 'cookie',503,'A sessão autenticada exige armazenamento no servidor.');
+        session(['auth_contexto_versao' => 1, 'auth_contexto_dados' => Crypt::encryptString(json_encode([
+            'handle' => $id, 'sessao' => session()->getId(), 'identidade' => hash('sha256', (string) session('auth_token')), 'dados' => $dados,
+        ], JSON_THROW_ON_ERROR))]);
+    }
 }

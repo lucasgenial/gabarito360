@@ -28,8 +28,7 @@ class ContextoPorAba
         try { $resp = app(ApiClient::class)->get('/v1/auth/me'); }
         catch (\Illuminate\Http\Client\ConnectionException) { abort(503, 'Não foi possível conferir seu acesso. Tente novamente.'); }
         if (in_array($resp->status(), [401, 403], true)) {
-            ContextoWeb::limpar();
-            return $this->selecionar($request);
+            return \App\Support\SessaoWeb::encerrar($request);
         }
         abort_unless($resp->successful(), 503, 'Não foi possível conferir seu acesso. Tente novamente.');
         $me = $resp->json('data');
@@ -93,6 +92,7 @@ class ContextoPorAba
 
     private function selecionar(Request $r)
     {
+        if (ContextoWeb::temSelecao()) return \App\Support\SessaoWeb::encerrar($r);
         if ($r->expectsJson() || $r->ajax()) return response()->json(['message' => 'Escolha novamente seu vínculo.', 'selecionar_vinculo' => true, 'url' => route('vinculos.index')], 409);
         return redirect()->route('vinculos.index')->with('erro', 'Escolha seu vínculo para continuar.');
     }

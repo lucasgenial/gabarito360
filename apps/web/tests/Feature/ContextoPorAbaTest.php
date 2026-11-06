@@ -74,7 +74,7 @@ class ContextoPorAbaTest extends TestCase
         Http::assertSentCount(2);
     }
 
-    public function test_contexto_ausente_invalido_de_outra_sessao_e_expirado_nao_envia_operacao(): void
+    public function test_contexto_ausente_nao_seleciona_e_outra_identidade_encerra_sessao(): void
     {
         $this->get('/app/painel')->assertRedirect('/app/vinculos')->assertDontSee('data-navegacao-estrutura',false);
         $this->consultarTela('/app/painel')->assertRedirect('/app/vinculos');
@@ -82,20 +82,38 @@ class ContextoPorAbaTest extends TestCase
         $this->postJson('/acessos/vinculo-999/turmas')->assertStatus(409);
         $id = $this->ativar($this->dados('privado'));
         $this->withSession(['auth_token' => 'outra-identidade']); session()->save();
-        $this->postJson('/app/teste-contexto')->assertStatus(409);
-        $this->withSession(['auth_token' => 'identidade']); session()->save();
+        $this->fingir(['*' => Http::response([], 200)]);
+        $this->postJson('/app/teste-contexto')->assertUnauthorized()->assertJsonPath('login_necessario', true)
+            ->assertSessionMissing('auth_token')->assertSessionMissing('auth_contexto_ativo');
+        Http::assertSentCount(1);
+        Http::assertSent(fn ($r) => str_ends_with($r->url(), '/auth/logout') && $r->hasHeader('Authorization', 'Bearer outra-identidade'));
+        Http::assertNotSent(fn ($r) => str_ends_with($r->url(), '/operacao'));
+    }
+
+    public function test_contexto_ativo_acompanha_sessao_sem_ttl_independente(): void
+    {
+        $id = $this->ativar($this->dados('persistente'));
         $this->travel(121)->minutes();
-        $this->postJson('/app/teste-contexto')->assertStatus(409);
-        Http::assertNothingSent();
+        $this->fingir(['*' => Http::response(['data' => $this->dados('persistente')])]);
+        $this->getJson('/app/teste-contexto')->assertOk()->assertJsonPath('perfil', 'professor');
+        $this->assertSame('persistente', ContextoWeb::obter($id)['token']);
+        $this->assertSame('identidade', session('auth_token'));
+        Http::assertSentCount(1);
     }
 
     public function test_revogacao_nao_reexecuta_post_e_falha_api_nao_apaga_contexto(): void
     {
         $id = $this->ativar($this->dados('revogado'));
         $this->fingir(['*' => Http::response(['message' => 'Indisponível'], 403)]);
-        $this->postJson('/app/teste-contexto')->assertStatus(409)->assertJsonPath('selecionar_vinculo', true);
+        $this->postJson('/app/teste-contexto')->assertUnauthorized()->assertJsonPath('login_necessario', true)
+            ->assertSessionMissing('auth_token')->assertSessionMissing('auth_contexto_ativo');
         $this->assertNull(ContextoWeb::obter($id));
-        Http::assertSentCount(1);
+        Http::assertSentCount(2);
+        Http::assertSent(fn ($r) => str_ends_with($r->url(), '/auth/logout') && $r->hasHeader('Authorization', 'Bearer identidade'));
+        Http::assertNotSent(fn ($r) => str_ends_with($r->url(), '/operacao'));
+        // Um novo login é necessário antes de testar uma indisponibilidade transitória.
+        $this->withSession(['auth_token' => 'identidade', 'auth_vinculos' => true]);
+        $this->withCookie(config('session.cookie'), session()->getId());
         $id2 = $this->ativar($this->dados('temporario'));
         $this->fingir(['*' => Http::response([], 503)]);
         $this->getJson($this->url('/teste-contexto',$id2))->assertStatus(503);
