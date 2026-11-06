@@ -1,4 +1,5 @@
 <div data-transferencia-conteudo class="formulario-escolar">
+<p><strong>Aluno:</strong> {{ $aluno['nome'] }}<br><strong>Origem:</strong> {{ $aluno['turma_nome'] }}</p>
 <p>O histórico do aluno será preservado.</p>
 <details class="tu1-ajuda"><summary>Saiba mais sobre a transferência</summary><p>A mudança vale a partir da confirmação. As provas, notas e imagens anteriores permanecem ligadas à turma em que foram aplicadas. A operação registra o responsável, o momento e o motivo da mudança.</p></details>
 @if(count($turmas))
