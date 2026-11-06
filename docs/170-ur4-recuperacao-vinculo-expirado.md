@@ -6,6 +6,8 @@ O GET inicial mostrava a estrutura do painel mesmo quando a identidade continuav
 
 A correção verifica o contexto antes de emitir a estrutura ou resolver a referência, preservando a ordem CSRF→revisão→contexto→alvo→autorização. Leituras sem acesso seguem para a seleção explícita de vínculo;401/419 conduzem ao login fixo sem reenviar operações. Revisão antiga mantém409 e oferece somente a seleção de vínculo. Nenhum URL arbitrário devolvido por JSON é seguido e nenhum perfil é escolhido automaticamente.
 
+A tela de seleção descarta a transição abandonada e o estado da entrada atual do histórico. A troca confirmada pelo modal faz o mesmo somente na aba que a solicitou. Não substitui a revisão de formulários antigos, não limpa as outras entradas nem renova referências de outros acessos.
+
 O processamento das URLs também repetia a compilação do catálogo para cada link. A compilação passa a ocorrer uma vez por Request, guardando apenas metadados e regex. O cache não contém identificadores de recurso, consultas, referências, identidade ou permissões e não atravessa requisições.
 
 | Parte interna | Verificação exigida |

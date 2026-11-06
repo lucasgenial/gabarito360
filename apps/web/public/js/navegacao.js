@@ -33,7 +33,11 @@
     history.pushState(estado,'',d.pagina);
     location.reload(); // GET real: atualizar/voltar nunca repete o POST da operação.
   }
-  root.G360Navegacao={abrir,descritor};
+  function limparEntradaDeAcesso() {
+    try { sessionStorage.removeItem(CHAVE); } catch (_) {}
+    history.replaceState(null,'',location.pathname);
+  }
+  root.G360Navegacao={abrir,descritor,limparEntradaDeAcesso};
   function erro(caixa,mensagem,repetir,acesso=false) {
     caixa.replaceChildren();caixa.setAttribute('aria-busy','false');caixa.setAttribute('role','alert');caixa.tabIndex=-1;
     const h=document.createElement('h1');h.textContent='Não foi possível abrir esta tela';
@@ -82,6 +86,7 @@
     finally { clearTimeout(timer); }
   }
   function iniciar() {
+    if (document.querySelector('[data-selecao-acesso]')) limparEntradaDeAcesso();
     const ponte=document.querySelector('[data-navegacao-redirecionar]');
     if (ponte) {
       try { const d=descritor(ponte.dataset.recurso);sessionStorage.setItem(CHAVE,JSON.stringify({destino:d,revisao:revisao()}));location.replace(d.pagina); }
