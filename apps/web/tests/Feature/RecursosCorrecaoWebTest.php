@@ -60,6 +60,9 @@ final class RecursosCorrecaoWebTest extends TestCase
             $r=$this->withHeader('X-G360-Hidratar','1')->post($d['url'],['_recurso'=>$d['referencia'],'_revisao'=>ContextoWeb::revisao()])->assertOk();
             $r->assertSee($js.'.js')->assertDontSee('var CARTOES_URL',false);
             $dom=new \DOMDocument();@$dom->loadHTML($r->getContent());$xp=new \DOMXPath($dom);$cfg=$xp->query('//script[@id="'.$js.'-config"]')->item(0);
+            $this->assertStringContainsString($rota==='correcao.show'?'tela-correcao':'tela-revisao',$dom->getElementsByTagName('body')->item(0)->getAttribute('class'));
+            $this->assertStringStartsWith('<!doctype html>',strtolower(ltrim($r->getContent())));
+            if($rota==='correcao.show')$this->assertSame(1,$xp->query('//body//dialog[@id="retirar-modal"]')->length);
             $this->assertNotNull($cfg);$this->assertSame('application/json',$cfg->getAttribute('type'));$config=json_decode($cfg->textContent,true,512,JSON_THROW_ON_ERROR);$this->assertIsArray($config);
             if($rota==='correcao.revisao')$this->assertSame(65,NavegacaoWeb::obter($config['itens'][0]['foto_url']['referencia'])['parametros']['id']);
         }
