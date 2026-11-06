@@ -38,7 +38,7 @@
 @if($errors->any())<x-aviso tipo="erro">Confira os campos destacados abaixo.</x-aviso>@endif
 
 <form method="POST" action="{{ $novo ? route('escolas.store') : route('escolas.update', $e['id']) }}" class="esc-form" id="esc-form">
-  @csrf
+  @csrf <x-revisao-acesso />
   @unless($novo) @method('PUT') @endunless
 
   {{-- 1. Censo Escolar --}}

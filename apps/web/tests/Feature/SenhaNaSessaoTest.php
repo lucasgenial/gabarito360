@@ -11,16 +11,19 @@ class SenhaNaSessaoTest extends TestCase
     {
         Http::preventStrayRequests();
 
-        $response = $this->withSession([
+        $this->withSession([
             'auth_token' => 'token-ficticio',
             'auth_trocar_senha' => true,
-        ])->from('/trocar-senha')->put('/trocar-senha', [
+        ]);
+        $this->withHeader('X-G360-Revisao', \App\Support\ContextoWeb::garantirRevisao()); session()->save();
+        $this->withCookie(config('session.cookie'), session()->getId())->withCredentials();
+        $response = $this->from('/app/trocar-senha')->put('/app/trocar-senha', [
             'senha_atual' => 'senha-antiga-ficticia',
             'password' => 'senha-nova-ficticia',
             'password_confirmation' => 'confirmacao-diferente',
         ]);
 
-        $response->assertRedirect('/trocar-senha')
+        $response->assertRedirect('/app/trocar-senha')
             ->assertSessionHasErrors('password')
             ->assertSessionHas('auth_trocar_senha', true);
 

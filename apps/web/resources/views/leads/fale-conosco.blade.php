@@ -15,7 +15,7 @@
   @error('lead')<x-aviso tipo="erro">{{ $message }}</x-aviso>@enderror
 
   <form method="POST" action="{{ route('leads.store') }}">
-    @csrf
+    @csrf <x-revisao-acesso />
     @if($plano)<input type="hidden" name="plano_id" value="{{ $plano['id'] }}">@endif
 
     {{-- Armadilha para robôs: fica fora da tela e sem tabulação --}}

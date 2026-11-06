@@ -108,7 +108,7 @@ class Acesso
 
     public static function perfil(): ?string
     {
-        return session('auth_vinculos') ? (ContextoWeb::atual()['perfil'] ?? null) : session('auth_perfil');
+        return ContextoWeb::atual()['perfil'] ?? null;
     }
 
     public static function administrativo(): bool
@@ -138,15 +138,7 @@ class Acesso
      */
     public static function permissoes(): array
     {
-        if (session('auth_vinculos')) return ContextoWeb::atual()['permissoes'] ?? [];
-        $lista = session('auth_permissoes');
-        if (!is_array($lista) && session('auth_token')) {
-            $resp  = app(\App\Services\ApiClient::class)->get('/v1/auth/me');
-            $lista = $resp->successful() ? ($resp->json('data.permissoes') ?? []) : [];
-            session(['auth_permissoes' => $lista]);
-        }
-
-        return is_array($lista) ? $lista : [];
+        return ContextoWeb::atual()['permissoes'] ?? [];
     }
 
     /** Chave do catálogo (docs/03 v2), ex.: pode('cartao.enviar'). A API confere de novo. */

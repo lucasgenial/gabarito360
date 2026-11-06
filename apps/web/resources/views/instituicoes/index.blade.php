@@ -16,7 +16,7 @@
     @unless($r['elegivel_atualmente'])<p>Referência histórica: consulte a situação atual antes de um novo uso.</p>@endunless
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;">
       @if($r['situacao']==='ativa' && \App\Support\Acesso::pode('catalogo.referencia_pessoal.gerir'))
-        <form method="POST" action="{{ route('instituicoes.arquivar',$r['id']) }}">@csrf<input type="hidden" name="versao" value="{{ $r['versao'] }}"><button class="btn btn-secondary" type="submit">Arquivar referência</button></form>
+        <form method="POST" action="{{ route('instituicoes.arquivar',$r['id']) }}">@csrf <x-revisao-acesso /><input type="hidden" name="versao" value="{{ $r['versao'] }}"><button class="btn btn-secondary" type="submit">Arquivar referência</button></form>
       @endif
       @if($r['situacao']==='arquivada' || !$r['edicao_corrente'])<a class="btn btn-ghost" href="{{ route('instituicoes.buscar',['namespace'=>$r['instituicao']['namespace'],'codigo'=>$r['instituicao']['codigo'],'situacao'=>'todas']) }}">Conferir no catálogo</a>@endif
     </div>

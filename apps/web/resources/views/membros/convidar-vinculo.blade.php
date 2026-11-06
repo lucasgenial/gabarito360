@@ -5,7 +5,7 @@
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 @if($errors->any())<x-aviso tipo="erro">Confira o e-mail, a instituição e a função escolhidos.</x-aviso>@endif
 <form method="POST" action="{{ route('membros.convite-vinculo.store') }}" class="card card-pad">
-@csrf
+@csrf <x-revisao-acesso />
 <div class="field"><label for="email">E-mail da conta</label><input class="input" type="email" name="email" id="email" value="{{ old('email') }}" required autocomplete="email"></div>
 <div class="field"><label for="espaco">Instituição</label><select class="select" id="espaco" name="espaco_id" required><option value="">Escolha</option>@foreach($opcoes as $o)<option value="{{ $o['id'] }}" @selected(old('espaco_id') == $o['id'])>{{ $o['nome'] }}</option>@endforeach</select></div>
 <div class="field"><label for="perfil">Função</label><select class="select" id="perfil" name="perfil" required disabled><option value="">Escolha a instituição</option></select></div>

@@ -230,4 +230,8 @@ return [
 
     'serialization' => 'json',
 
+    // Requer armazenamento persistente compartilhado por todos os workers do mesmo host.
+    'context_lock_topology' => env('SESSION_CONTEXT_LOCK_TOPOLOGY', 'single-host-shared-filesystem'),
+    'context_lock_path' => storage_path('framework/context-session-locks'),
+
 ];

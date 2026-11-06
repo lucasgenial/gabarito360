@@ -6,13 +6,14 @@ use Tests\TestCase;
 
 class SelecaoMaterialWebTest extends TestCase
 {
+    use \Tests\Support\ContextoSelecionado;
     private function preparar(array $permissoes=['copia.autorizar_origem']): array
     {
         config(['services.api.base_url'=>'http://api.test/api','services.copias.interface_ativa'=>true]); Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade','auth_vinculos'=>true,'auth_nome'=>'Fictício']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
         $me=['vinculo_id'=>7,'token'=>'contexto-material','tipo_contexto'=>'vinculo','perfil'=>'dir_escolar','espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola fictícia'],'permissoes'=>$permissoes];
-        return [ContextoWeb::criar($me),$me];
+        return [$this->selecionarContextoFixture($me),$me];
     }
     private function catalogo(): array
     {
@@ -39,9 +40,9 @@ class SelecaoMaterialWebTest extends TestCase
             $this->assertTrue($r->hasHeader('Authorization','Bearer contexto-material'));
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'?$this->previa():$this->catalogo())]);
         });
-        $this->get('/acessos/vinculo-7/copias/materiais')->assertOk()->assertSee('Conferir prévia')->assertSee('name="provas[]"',false)
+        $this->get('/app/copias/materiais')->assertOk()->assertSee('Conferir prévia')->assertSee('name="provas[]"',false)
             ->assertSee('name="_token"',false)->assertDontSee($ctx)->assertDontSee('contexto-cadastro')->assertDontSee('contexto-copia')->assertPaginaSemSelecaoPrevia()->assertDontSee('<script>segredo</script>',false);
-        $this->post('/acessos/vinculo-7/copias/materiais/previa',['espaco_id'=>5,'provas'=>[2],'destino_espaco_id'=>7,'vinculo_id'=>4])
+        $this->post('/app/copias/materiais/previa',['espaco_id'=>5,'provas'=>[2],'destino_espaco_id'=>7,'vinculo_id'=>4])
             ->assertOk()->assertSee('Esta consulta não autoriza nem inicia uma cópia')->assertSee('Conferir gabarito')
             ->assertSee('10.00')->assertDontSee('<script>segredo</script>',false)->assertDontSee('Aprovar cópia');
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['provas']===[2] && !isset($r['_ctx']) && !isset($r['destino_espaco_id']) && !isset($r['vinculo_id']));
@@ -50,15 +51,15 @@ class SelecaoMaterialWebTest extends TestCase
     {
         [$ctx,$me]=$this->preparar();
         Http::fake(fn($r)=>$r->method()==='POST'?Http::response(['message'=>'SEGREDO-INTERNO'],422):Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$this->catalogo()]));
-        $this->post('/acessos/vinculo-7/copias/materiais/previa',['espaco_id'=>5,'provas'=>[2]])->assertStatus(422)
+        $this->post('/app/copias/materiais/previa',['espaco_id'=>5,'provas'=>[2]])->assertStatus(422)
             ->assertSee('Confira a seleção')->assertSee('Conferir prévia')->assertDontSee('SEGREDO-INTERNO');
     }
     public function test_capacidade_destino_nao_libera_origem_e_flag_fecha_tela(): void
     {
         [$ctx,$me]=$this->preparar(['copia.autorizar_destino']); Http::fake(['*'=>Http::response(['data'=>$me])]);
-        $this->get('/acessos/vinculo-7/copias/materiais')->assertForbidden();
+        $this->get('/app/copias/materiais')->assertForbidden();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/copias/materiais'));
-        config(['services.copias.interface_ativa'=>false]); $this->get('/acessos/vinculo-7/copias/materiais')->assertNotFound();
+        config(['services.copias.interface_ativa'=>false]); $this->get('/app/copias/materiais')->assertNotFound();
     }
     public function test_falha_de_conexao_nao_vira_previa_ou_vaza_dados(): void
     {
@@ -73,6 +74,6 @@ class SelecaoMaterialWebTest extends TestCase
             if (str_ends_with($r->url(),'/auth/me')) return Http::response(['data'=>$me]);
             throw new \Illuminate\Http\Client\ConnectionException('SEGREDO-CONEXAO');
         });
-        $this->post('/acessos/vinculo-7/copias/materiais/previa',['espaco_id'=>5,'provas'=>[2]])->assertStatus(503)->assertDontSee('SEGREDO-CONEXAO');
+        $this->post('/app/copias/materiais/previa',['espaco_id'=>5,'provas'=>[2]])->assertStatus(503)->assertDontSee('SEGREDO-CONEXAO');
     }
 }

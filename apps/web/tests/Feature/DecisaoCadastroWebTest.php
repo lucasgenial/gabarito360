@@ -6,13 +6,14 @@ use Tests\TestCase;
 
 class DecisaoCadastroWebTest extends TestCase
 {
+    use \Tests\Support\ContextoSelecionado;
     private function preparar(array $permissoes=['copia.autorizar_origem']): array
     {
         config(['services.api.base_url'=>'http://api.test/api','services.copias.interface_ativa'=>true]); Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade','auth_vinculos'=>true,'auth_nome'=>'Fictício']);
         $this->withCookie(config('session.cookie'),session()->getId())->withCredentials();
         $me=['vinculo_id'=>7,'token'=>'contexto-cadastro','tipo_contexto'=>'vinculo','perfil'=>'dir_escolar','espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola'],'permissoes'=>$permissoes];
-        return [ContextoWeb::criar($me),$me];
+        return [$this->selecionarContextoFixture($me),$me];
     }
     private function catalogo(): array
     {
@@ -47,11 +48,11 @@ class DecisaoCadastroWebTest extends TestCase
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'?[
                 'codigo'=>$code,'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino'=>['nome'=>'Escola']]:$this->catalogo())]);
         });
-        $this->get('/acessos/vinculo-7/copias/receber-cadastro')->assertOk()->assertSee('Receber cadastro')->assertSee('name="_token"',false);
-        $this->post('/acessos/vinculo-7/copias/receber-cadastro',['espaco_id'=>5])->assertOk()->assertSee($code);
+        $this->get('/app/copias/receber-cadastro')->assertOk()->assertSee('Receber cadastro')->assertSee('name="_token"',false);
+        $this->post('/app/copias/receber-cadastro',['espaco_id'=>5])->assertOk()->assertSee($code);
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/cadastros/recebimentos') && $r->data()===['espaco_id'=>5]);
         $this->assertStringNotContainsString($code,json_encode(session()->all()));
-        $this->post('/acessos/vinculo-7/copias/cadastros/abrir',['lote_id'=>$this->decisao()['lote_id']])->assertRedirect(route('copias.cadastro.decisao',['id'=>$this->decisao()['lote_id'],'lado'=>'destino','acesso'=>'vinculo-7']));
+        $this->post('/app/copias/cadastros/abrir',['lote_id'=>$this->decisao()['lote_id']])->assertRedirect(route('copias.cadastro.decisao',['id'=>$this->decisao()['lote_id'],'lado'=>'destino',]));
     }
     public function test_confirmar_tipo_real_e_criar_sem_autorizar(): void
     {
@@ -59,9 +60,9 @@ class DecisaoCadastroWebTest extends TestCase
         Http::fake(fn($r)=>Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:(str_ends_with($r->url(),'/preparar')?[
             'previa'=>$prev,'recebimento'=>['destino'=>['nome'=>'Destino <script>segredo</script>','tipo'=>'escola'],'destino_digest'=>str_repeat('d',64),'valida_ate'=>now()->addMinutes(15)->toISOString()]]:['lote_id'=>$this->decisao()['lote_id']])]));
         $d=['espaco_id'=>5,'turmas'=>[1],'alunos'=>[2],'codigo'=>str_repeat('a',64),'tipo_destino'=>'pessoal','ator_id'=>99];
-        $this->post('/acessos/vinculo-7/copias/cadastros/preparar',$d)->assertOk()->assertSee('Tipo real do destino: escolar')->assertSee('Pendente — não informado')
+        $this->post('/app/copias/cadastros/preparar',$d)->assertOk()->assertSee('Tipo real do destino: escolar')->assertSee('Pendente — não informado')
             ->assertSee('name="confirmado"',false)->assertDontSee('<script>segredo</script>',false);
-        $this->post('/acessos/vinculo-7/copias/cadastros/lotes',$d+['chave'=>$this->decisao()['lote_id'],'destino_digest'=>str_repeat('d',64),'conteudo_digest'=>str_repeat('c',64),'confirmado'=>1])->assertRedirect();
+        $this->post('/app/copias/cadastros/lotes',$d+['chave'=>$this->decisao()['lote_id'],'destino_digest'=>str_repeat('d',64),'conteudo_digest'=>str_repeat('c',64),'confirmado'=>1])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/lotes') && !isset($r['tipo_destino']) && !isset($r['ator_id']) && !isset($r['_ctx']) && $r['turmas']===[1]);
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/aprovar') || str_contains($r->url(),'/evidencia'));
     }
@@ -75,18 +76,18 @@ class DecisaoCadastroWebTest extends TestCase
                 return Http::response(['data'=>[]]);
             }
  return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
-        $this->get('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Registrar evidência')->assertSee('name="_token"',false)
+        $this->get('/app/copias/cadastros/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Registrar evidência')->assertSee('name="_token"',false)
             ->assertDontSee($ctx)->assertDontSee('contexto-cadastro')->assertDontSee('contexto-copia')->assertDontSee('Autorizar saída do cadastro')->assertDontSee('<script>segredo</script>',false);
-        $this->post('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'/evidencia',['conteudo_digest'=>$d['conteudo_digest'],'documento'=>'DOCUMENTO-RESTRITO',
+        $this->post('/app/copias/cadastros/lotes/'.$id.'/evidencia',['conteudo_digest'=>$d['conteudo_digest'],'documento'=>'DOCUMENTO-RESTRITO',
             'confirmado'=>1,'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z')])->assertRedirect();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/aprovar'));
         $this->assertStringNotContainsString('DOCUMENTO-RESTRITO',json_encode(session()->all()));
         $d=$this->decisao('origem',true);
-        $this->get('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Autorizar saída do cadastro')->assertDontSee('name="documento"',false);
-        $this->post('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'/aprovar',['lado'=>'origem','conteudo_digest'=>$d['conteudo_digest'],'confirmado'=>1,
+        $this->get('/app/copias/cadastros/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Autorizar saída do cadastro')->assertDontSee('name="documento"',false);
+        $this->post('/app/copias/cadastros/lotes/'.$id.'/aprovar',['lado'=>'origem','conteudo_digest'=>$d['conteudo_digest'],'confirmado'=>1,
             'valida_ate'=>now()->utc()->addMinutes(30)->format('Y-m-d\TH:i:s\Z')])->assertRedirect();
         $d['decisao_registrada']=true; $d['decisao_valida']=true; $d['valida_ate']=now()->addHour()->toISOString();
-        $this->get('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Referência para compartilhar')->assertDontSee('Autorizar saída do cadastro');
+        $this->get('/app/copias/cadastros/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Referência para compartilhar')->assertDontSee('Autorizar saída do cadastro');
     }
     public function test_destino_concilia_e_conflito_impede_botao(): void
     {
@@ -99,25 +100,25 @@ class DecisaoCadastroWebTest extends TestCase
                 return Http::response(['data'=>[]]);
             }
  return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
-        $this->get('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('Conferência no destino')->assertSee('Autorizar entrada do cadastro')
+        $this->get('/app/copias/cadastros/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('Conferência no destino')->assertSee('Autorizar entrada do cadastro')
             ->assertSee('name="conciliacao_digest"',false)->assertDontSee('name="documento"',false)->assertDontSee('Autorizar saída do cadastro');
-        $this->post('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'/aprovar',['lado'=>'destino','conteudo_digest'=>$d['conteudo_digest'],
+        $this->post('/app/copias/cadastros/lotes/'.$id.'/aprovar',['lado'=>'destino','conteudo_digest'=>$d['conteudo_digest'],
             'conciliacao_digest'=>$d['conciliacao']['digest'],'confirmado'=>1,'valida_ate'=>now()->utc()->addMinutes(5)->format('Y-m-d\TH:i:s\Z')])->assertRedirect();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/aprovar') && $r['lado']==='destino' && $r['conciliacao_digest']===str_repeat('d',64));
         $d['conciliacao']['sem_bloqueios']=false; $d['conciliacao']['itens'][1]['codigo']='conflito_matricula';
-        $this->get('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('matrícula já existente')->assertDontSee('Autorizar entrada do cadastro');
+        $this->get('/app/copias/cadastros/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('matrícula já existente')->assertDontSee('Autorizar entrada do cadastro');
     }
     public function test_falhas_nao_expoem_documento_codigo_nem_dados_internos(): void
     {
         [$ctx,$me]=$this->preparar(); $id=$this->decisao()['lote_id'];
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'DOCUMENTO-RESTRITO'],409));
         $e=['documento'=>'DOCUMENTO-RESTRITO','conteudo_digest'=>str_repeat('c',64),'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z')];
-        $this->post('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'/evidencia',$e)->assertStatus(422)->assertDontSee('DOCUMENTO-RESTRITO');
-        $this->post('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'/evidencia',$e+['confirmado'=>1])->assertStatus(409)->assertDontSee('DOCUMENTO-RESTRITO');
-        $this->post('/acessos/vinculo-7/copias/cadastros/preparar',['codigo'=>str_repeat('a',64)])->assertStatus(422);
+        $this->post('/app/copias/cadastros/lotes/'.$id.'/evidencia',$e)->assertStatus(422)->assertDontSee('DOCUMENTO-RESTRITO');
+        $this->post('/app/copias/cadastros/lotes/'.$id.'/evidencia',$e+['confirmado'=>1])->assertStatus(409)->assertDontSee('DOCUMENTO-RESTRITO');
+        $this->post('/app/copias/cadastros/preparar',['codigo'=>str_repeat('a',64)])->assertStatus(422);
         $this->assertNull(session('_old_input')); $this->assertStringNotContainsString('DOCUMENTO-RESTRITO',json_encode(session()->all()));
         $this->assertStringNotContainsString(str_repeat('a',64),json_encode(session()->all()));
-        $this->get('/acessos/vinculo-7/copias/receber-cadastro')->assertForbidden();
-        config(['services.copias.interface_ativa'=>false]); $this->get('/acessos/vinculo-7/copias/cadastros/lotes/'.$id.'?lado=origem')->assertNotFound();
+        $this->get('/app/copias/receber-cadastro')->assertForbidden();
+        config(['services.copias.interface_ativa'=>false]); $this->get('/app/copias/cadastros/lotes/'.$id.'?lado=origem')->assertNotFound();
     }
 }

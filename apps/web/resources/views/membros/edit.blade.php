@@ -32,7 +32,7 @@
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 
 <form method="POST" action="{{ route('membros.update', $membro['id']) }}" class="member-layout">
-  @csrf
+  @csrf <x-revisao-acesso />
   @method('PUT')
 
   {{-- Identidade lateral --}}
@@ -212,15 +212,15 @@
 </form>
 
 <form id="reenviar-convite" method="POST" action="{{ route('membros.convite', $membro['id']) }}">
-  @csrf
+  @csrf <x-revisao-acesso />
 </form>
 
 <form id="enviar-link-senha" method="POST" action="{{ route('membros.link-senha', $membro['id']) }}">
-  @csrf
+  @csrf <x-revisao-acesso />
 </form>
 
 <form id="alternar-acesso" method="POST" action="{{ route('membros.toggle', $membro['id']) }}">
-  @csrf
+  @csrf <x-revisao-acesso />
 </form>
 
 <div style="height:48px"></div>

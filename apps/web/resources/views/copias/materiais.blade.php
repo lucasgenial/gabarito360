@@ -15,7 +15,7 @@
   </select></div><button class="btn btn-secondary" type="submit">Ver materiais deste espaço</button>
 </form>
 <form method="POST" action="{{ route('copias.materiais.previa') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
+  @csrf <x-revisao-acesso /><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   <p>A seleção usa apenas os itens desta página. Trocar a página ou o espaço inicia uma nova seleção.</p>
   <div style="overflow-x:auto;"><x-tabela :integrada="true" titulo="Selecionar provas" modo="selecao"><table class="tabela-padrao table"><caption style="text-align:left;">{{ $lista['total'] }} prova(s) disponíveis neste espaço</caption>
     <thead><tr><th scope="col">Selecionar</th><th scope="col">Prova</th><th scope="col">Disciplina</th><th scope="col">Série</th><th scope="col">Questões</th></tr></thead>

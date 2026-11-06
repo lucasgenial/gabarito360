@@ -208,7 +208,7 @@
         <a href="{{ route('leads.index') }}" class="btn btn-outline">Conversar sobre troca de plano</a>
         <form method="POST" action="{{ route('assinatura.cancelar') }}"
           onsubmit="return confirm('Tem certeza que deseja cancelar a assinatura? O acesso será suspenso imediatamente.')">
-          @csrf
+          @csrf <x-revisao-acesso />
           <button type="submit" class="btn" style="background:var(--color-danger-01);color:var(--color-danger-04);border-color:var(--color-danger-02)">
             Cancelar assinatura
           </button>

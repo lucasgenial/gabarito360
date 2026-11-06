@@ -144,7 +144,7 @@
           <td style="text-align:right;white-space:nowrap;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
             @if($p['status'] === 'rascunho' && ($p['pode_editar'] ?? true) && \App\Support\Acesso::pode('prova.editar'))
               <form method="POST" action="{{ route('provas.publicar', $p['id']) }}" style="display:inline;">
-                @csrf
+                @csrf <x-revisao-acesso />
                 <button type="submit" class="btn btn-sm btn-secondary" title="Publicar">Publicar</button>
               </form>
             @endif

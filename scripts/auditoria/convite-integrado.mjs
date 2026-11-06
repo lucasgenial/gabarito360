@@ -18,11 +18,11 @@ try {
   }
   async function escolher(p, id) {
     await p.locator('form').filter({has:p.locator(`input[name="vinculo_id"][value="${id}"]`)}).getByRole('button').click();
-    await p.waitForURL(u=>u.pathname===`/acessos/vinculo-${id}/painel`);
+    await p.waitForURL(u=>u.pathname==='/app/painel');
     assert.equal(new URL(p.url()).search,'');
   }
   const conta = await contexto(), p = await conta.newPage();
-  await p.goto(`${base}/vinculos/convite`);
+  await p.goto(`${base}/app/vinculos/convite`);
   await p.getByRole('link',{name:'Entrar na minha conta'}).waitFor();
   assert.equal(new URL(p.url()).hash,'');
   assert.equal(await p.evaluate(()=>sessionStorage.getItem('g360-convite-vinculo')),null);
@@ -34,26 +34,33 @@ try {
   assert.equal(new URL(p.url()).search,''); assert.equal(new URL(p.url()).hash,'');
   assert.ok(!(await p.content()).includes(c.token));
   if (process.env.PREVIEW_DIR) await p.screenshot({path:process.env.PREVIEW_DIR+'/convite-aceite.png',fullPage:true});
-  await p.getByRole('button',{name:'Aceitar vínculo'}).click(); await p.waitForURL('**/vinculos?trocar=1');
-  await escolher(p,c.vinculo_id); const primeiro = new URL(p.url()).pathname.split('/')[2];
-  const segunda = await conta.newPage(); await segunda.goto(base+'/vinculos?trocar=1'); await escolher(segunda,3);
-  assert.notEqual(new URL(segunda.url()).pathname.split('/')[2],primeiro);
-  await p.reload(); assert.equal(new URL(p.url()).pathname.split('/')[2],primeiro);
+  await p.getByRole('button',{name:'Aceitar vínculo'}).click(); await p.waitForURL('**/app/vinculos?trocar=1');
+  await escolher(p,c.vinculo_id);
   assert.ok((await p.locator('.contexto-dados').textContent()).includes('Coordenador'));
+  const primeiraRevisao=await p.locator('meta[name="g360-revisao"]').getAttribute('content');
+  const segunda = await conta.newPage(); await segunda.goto(base+'/app/vinculos?trocar=1'); await escolher(segunda,3);
+  assert.notEqual(await segunda.locator('meta[name="g360-revisao"]').getAttribute('content'),primeiraRevisao);
+  // A seleção da segunda aba muda a sessão; a tela antiga não pode agir como o novo perfil.
+  assert.equal(await p.evaluate(async()=>{const r=await fetch('/app/painel',{headers:{Accept:'application/json'}});return r.status;}),409);
+  await p.reload();assert.equal(new URL(p.url()).pathname,'/app/painel');
+  assert.ok((await p.locator('.contexto-dados').textContent()).includes('Professor'));
   assert.ok((await segunda.locator('.contexto-dados').textContent()).includes('Professor'));
+  // Voltar ao vínculo que será suspenso para testar revogação real da autoridade ativa.
+  await p.goto(base+'/app/vinculos?trocar=1');await escolher(p,c.vinculo_id);
   const gestao = await contexto(), g = await gestao.newPage(); await g.goto(base+'/login'); await login(g,'1@example.test');
-  await g.waitForURL('**/vinculos'); await escolher(g,1);
-  const acesso = new URL(g.url()).pathname.split('/')[2];
-  await g.goto(base+'/acessos/'+acesso+'/membros'); assert.ok((await g.textContent('body')).includes('Vínculo #'+c.vinculo_id));
-  await g.goto(`${base}/acessos/${acesso}/membros/2/editar?vinculo_id=${c.vinculo_id}`);
+  await g.waitForURL('**/app/vinculos'); await escolher(g,1);
+  await g.goto(base+'/app/membros'); assert.ok((await g.textContent('body')).includes('Vínculo #'+c.vinculo_id));
+  await g.goto(`${base}/app/membros/2/editar?vinculo_id=${c.vinculo_id}`);
   await g.locator('#ativo').selectOption('0'); await g.getByRole('button',{name:'Salvar acesso'}).click();
   await g.getByText('Acesso deste vínculo atualizado.').waitFor();
-  await p.reload(); await p.waitForURL('**/vinculos');
+  await p.reload(); await p.waitForURL('**/app/vinculos');
+  await segunda.reload();await segunda.waitForURL('**/app/vinculos');
+  await escolher(segunda,3);
   await segunda.reload(); assert.ok((await segunda.locator('.contexto-dados').textContent()).includes('Professor'));
-  await g.goto(base+'/acessos/'+acesso+'/membros/convidar-vinculo');
+  await g.goto(base+'/app/membros/convidar-vinculo');
   await g.locator('#email').fill('2@example.test'); await g.locator('#espaco').selectOption('5'); await g.locator('#perfil').selectOption('aplicador');
   if (process.env.PREVIEW_DIR) await g.screenshot({path:process.env.PREVIEW_DIR+'/convite-envio.png',fullPage:true});
   await g.getByRole('button',{name:'Enviar convite'}).click();
   await g.getByText('Se a conta puder receber este vínculo, o convite será enviado.').waitFor();
-  console.log('OK: página fixa → login → código por POST → consulta → aceite → duas abas → suspensão isolada → envio de novo convite, com API/web reais.');
+  console.log('OK UR3: página fixa → login → código por POST → aceite → seleção global em duas abas → ação antiga409 → suspensão do vínculo ativo → seleção do vínculo remanescente → novo convite, com API/web locais reais.');
 } finally { await browser.close(); }

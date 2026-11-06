@@ -21,7 +21,7 @@
 </section>
 <a class="btn btn-secondary" style="margin-top:20px;" href="{{ route('copias.resultados',['espaco_id'=>$dados['espaco_id']]) }}">Voltar e fazer nova seleção</a>
 <form method="POST" action="{{ route('copias.resultado.preparar') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
+  @csrf <x-revisao-acesso /><input type="hidden" name="espaco_id" value="{{ $dados['espaco_id'] }}">
   @foreach($dados['resultados'] as $r)<input type="hidden" name="notas[]" value="{{ $r['id'] }}">@endforeach
   <div class="field"><label for="codigo">Código de resultados fornecido pelo destinatário</label><input class="input" id="codigo" name="codigo" required minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></div>
   @include('copias._codigo-destino',['modalidade'=>'resultado'])

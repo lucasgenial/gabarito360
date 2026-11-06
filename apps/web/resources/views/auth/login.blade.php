@@ -51,7 +51,7 @@
 
       {{-- Login --}}
       <form id="pane-login" method="POST" action="{{ route('login.store') }}" novalidate>
-        @csrf
+        @csrf <x-revisao-acesso />
         @if(request()->boolean('retorno_convite'))<input type="hidden" name="retorno_convite" value="1">@endif
         <div class="field">
           <label for="email">E-mail</label>

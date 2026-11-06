@@ -51,7 +51,7 @@
       @endif
 
       <form method="POST" action="{{ route('esqueci-senha.store') }}" novalidate>
-        @csrf
+        @csrf <x-revisao-acesso />
         <div class="field">
           <label for="email">E-mail institucional</label>
           <div class="input-icon">

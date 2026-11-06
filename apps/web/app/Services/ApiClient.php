@@ -5,7 +5,6 @@ namespace App\Services;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Session;
 use GuzzleHttp\Psr7\Utils;
 
 class ApiClient
@@ -31,7 +30,7 @@ class ApiClient
             ->acceptJson()
             ->timeout(15);
 
-        if ($token = (!$this->usarIdentidade ? (\App\Support\ContextoWeb::atual()['token'] ?? null) : null) ?? Session::get('auth_token')) {
+        if ($token = (!$this->usarIdentidade ? (\App\Support\ContextoWeb::atual()['token'] ?? null) : null) ?? \App\Support\ContextoWeb::identidade()) {
             $request = $request->withToken($token);
         }
 

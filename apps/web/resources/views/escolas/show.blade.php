@@ -115,13 +115,13 @@
       <div class="info-card">
         <h3>Logo e relatório</h3>
         <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px;">
-          <img src="{{ route('escolas.logo', $escola['id']) }}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';"
+          <img data-imagem-contextual="{{ route('escolas.logo', $escola['id']) }}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';"
                style="width:72px;height:72px;object-fit:contain;border:1px solid var(--border-soft);border-radius:8px;background:#fff;">
           <div style="display:none;width:72px;height:72px;place-items:center;border:1px dashed var(--border);border-radius:8px;font-size:11px;color:var(--muted);text-align:center;">sem logo</div>
           <div style="flex:1;min-width:200px;">
             @pode('escola.logo')
             <form method="POST" action="{{ route('escolas.logo.enviar', $escola['id']) }}" enctype="multipart/form-data" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-              @csrf
+              @csrf <x-revisao-acesso />
               <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required class="input" style="max-width:260px;">
               <button type="submit" class="btn btn-secondary btn-sm">Enviar logo</button>
             </form>
@@ -130,7 +130,7 @@
             @pode('rede.logo')
             @if(!empty($escola['rede_id']))
             <form method="POST" action="{{ route('redes.logo.enviar', $escola['rede_id']) }}" enctype="multipart/form-data" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;">
-              @csrf
+              @csrf <x-revisao-acesso />
               <span style="font-size:13px;font-weight:600;">Logo do ente{{ !empty($escola['rede_nome']) ? ' (' . $escola['rede_nome'] . ')' : '' }}:</span>
               <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required class="input" style="max-width:240px;">
               <button type="submit" class="btn btn-secondary btn-sm">Enviar logo do ente</button>
@@ -310,7 +310,7 @@
           @pode('escola.desativar')
           <form method="POST" action="{{ route('escolas.toggle', $escola['id']) }}"
                 onsubmit="return confirm('{{ $escola['ativo'] ? 'Desativar' : 'Ativar' }} esta escola?')">
-            @csrf
+            @csrf <x-revisao-acesso />
             <button type="submit" class="btn btn-sm"
                     style="width:100%;color:{{ $escola['ativo'] ? 'var(--danger)' : 'var(--success)' }};border-color:{{ $escola['ativo'] ? 'var(--danger)' : 'var(--success)' }};background:transparent;">
               {{ $escola['ativo'] ? 'Desativar escola' : 'Ativar escola' }}

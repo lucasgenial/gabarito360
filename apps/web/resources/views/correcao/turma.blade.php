@@ -67,7 +67,7 @@
         </div>
         <div class="acoes">
           @pode('cartao.enviar')<a class="btn btn-sm btn-primary" href="{{ route('correcao.show', $p['id']) }}#camera"><x-icone nome="camera" /> Corrigir</a>@endpode
-          @pode('cartao.imprimir')<a class="btn btn-sm btn-secondary" target="_blank" href="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $turma['id'] }}"><x-icone nome="imprimir" /> Cartões</a>@endpode
+          @pode('cartao.imprimir')<form method="POST" action="{{ route('correcao.pdf', $p['id']) }}?turma_id={{ $turma['id'] }}" class="arquivo-form" target="_blank" rel="noopener">@csrf <x-revisao-acesso /><button type="submit" class="btn btn-sm btn-secondary"><x-icone nome="imprimir" /> Cartões</button></form>@endpode
           <a class="btn btn-sm btn-ghost" href="{{ route('correcao.show', $p['id']) }}">Acompanhar</a>
           @if($p['lidos'] > 0)
             <a class="btn btn-sm btn-ghost" href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}"><x-icone nome="grafico" /> Relatório</a>

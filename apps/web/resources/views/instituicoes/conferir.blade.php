@@ -10,7 +10,7 @@
   @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
   @if($errors->any())<x-aviso tipo="erro">Confirme a declaração para adicionar a instituição.</x-aviso>@endif
   @if($e['elegivel'] && \App\Support\Acesso::pode('catalogo.referencia_pessoal.gerir'))
-  <form method="POST" action="{{ route('instituicoes.selecionar') }}">@csrf
+  <form method="POST" action="{{ route('instituicoes.selecionar') }}">@csrf <x-revisao-acesso />
     <input type="hidden" name="unidade_id" value="{{ $e['unidade_id'] }}"><input type="hidden" name="edicao_id" value="{{ $e['edicao_id'] }}">
     <label style="display:flex;gap:10px;align-items:flex-start;margin:20px 0;"><input type="checkbox" name="confirmacao" value="1" required>Confirmo esta instituição como referência de atuação no meu espaço pessoal.</label>
     <button class="btn btn-primary" type="submit">Adicionar às minhas instituições</button>

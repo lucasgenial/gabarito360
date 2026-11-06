@@ -8,7 +8,7 @@
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 <form method="POST" action="{{ $cliente ? route('clientes.update',$cliente['id']) : route('clientes.store') }}" class="card card-pad" style="margin-top:20px;">
-@csrf @if($cliente) @method('PUT') @endif
+@csrf <x-revisao-acesso /> @if($cliente) @method('PUT') @endif
 <fieldset style="border:0;padding:0;" @disabled(!\App\Support\Acesso::pode('cliente.gerir'))>
 <legend>Dados comerciais</legend>
 <div class="form-row-2">

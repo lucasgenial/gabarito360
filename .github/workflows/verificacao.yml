@@ -83,7 +83,7 @@ jobs:
       - run: python3 -m pip install -r apps/api/omr/requirements.txt pypdf
       - run: python3 scripts/tests/test_resultados_pdf.py
       - run: python3 scripts/tests/test_qualidade_omr.py
-      - run: node --test scripts/tests/cartoes-fila.test.mjs scripts/tests/catalogo-instituicoes.test.mjs scripts/tests/catalogo-cadastro.test.mjs scripts/tests/preparo-foto-codecs.test.mjs scripts/tests/preparo-foto-geometria.test.mjs scripts/tests/preparo-foto-cancelamento.test.mjs
+      - run: node --test scripts/tests/cartoes-fila.test.mjs scripts/tests/catalogo-instituicoes.test.mjs scripts/tests/catalogo-cadastro.test.mjs scripts/tests/preparo-foto-codecs.test.mjs scripts/tests/preparo-foto-geometria.test.mjs scripts/tests/preparo-foto-cancelamento.test.mjs scripts/tests/contexto-sessao.test.mjs
       - run: npm install --prefix scripts/auditoria --ignore-scripts --no-package-lock --no-audit --no-fund
       - run: node scripts/auditoria/contexto-abas.mjs
         env:
@@ -138,6 +138,13 @@ jobs:
       - run: composer install --no-interaction --no-progress
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
+      - name: Conferir exclusão real entre processos da sessão web
+        if: matrix.app == 'web'
+        working-directory: ${{ github.workspace }}
+        run: |
+          TASK_QA_UR3=$(mktemp -d /tmp/g360-ur3-ci-XXXXXX)
+          ln -s "$GITHUB_WORKSPACE/apps/web/vendor" "$TASK_QA_UR3/vendor"
+          python3 scripts/auditoria/mutex-sessao-adversarial.py --qa "$TASK_QA_UR3" --middleware "$GITHUB_WORKSPACE/apps/web/app/Http/Middleware/SerializarSessao.php"
 
   integridade-mariadb:
     runs-on: ubuntu-latest

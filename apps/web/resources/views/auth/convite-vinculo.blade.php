@@ -14,7 +14,7 @@
   @elseif(empty($convite))
     <p>Você está usando a conta <strong>{{ session('auth_email') }}</strong>.</p>
     <form method="POST" action="{{ route('vinculos.convite.consultar') }}">
-      @csrf
+      @csrf <x-revisao-acesso />
       <div class="field"><label for="vinculo-codigo">Código do convite</label><input class="input" id="vinculo-codigo" type="text" name="codigo" required maxlength="84" autocomplete="one-time-code" autocapitalize="none" spellcheck="false" aria-describedby="vinculo-codigo-erro vinculo-codigo-ajuda" aria-invalid="{{ $errors->has('codigo') ? 'true' : 'false' }}"><p class="field-help" id="vinculo-codigo-ajuda">Cole o código completo recebido no e-mail.</p>@error('codigo')<span id="vinculo-codigo-erro" role="alert" class="field-error">Não foi possível conferir o código. Copie-o completo ou peça um novo convite.</span>@enderror</div>
       <button class="btn btn-primary btn-block" type="submit">Conferir convite</button>
     </form>
@@ -29,12 +29,12 @@
     </dl>
     <p>O aceite adiciona este vínculo à sua conta e preserva sua senha e seus outros vínculos.</p>
     <form method="POST" action="{{ route('vinculos.convite.responder') }}">
-      @csrf<input type="hidden" name="referencia" value="{{ $referencia }}">
+      @csrf <x-revisao-acesso /><input type="hidden" name="referencia" value="{{ $referencia }}">
       <button class="btn btn-primary" name="aceitar" value="1" type="submit">Aceitar vínculo</button>
       <button class="btn btn-outline" name="aceitar" value="0" type="submit">Recusar convite</button>
     </form>
   @endif
-  @if(session('auth_token'))<form method="POST" action="{{ route('logout') }}">@csrf<button class="btn btn-ghost" type="submit">Sair desta conta</button></form>@endif
+  @if(session('auth_token'))<form method="POST" action="{{ route('logout') }}">@csrf <x-revisao-acesso /><button class="btn btn-ghost" type="submit">Sair desta conta</button></form>@endif
 </section></main>
 <script src="{{ asset('js/convite-vinculo.js') }}?v={{ @filemtime(public_path('js/convite-vinculo.js')) }}"></script>
 @endsection

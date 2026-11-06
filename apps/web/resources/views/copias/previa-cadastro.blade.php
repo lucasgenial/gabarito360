@@ -5,7 +5,7 @@
 <x-aviso>Esta prévia não identifica um destinatário, não autoriza nem inicia uma cópia. A solicitação ainda exigirá evidência aplicável e decisões separadas de origem e destino.</x-aviso>
 @include('copias._cadastro')
 <form method="POST" action="{{ route('copias.cadastro.preparar') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf<input type="hidden" name="espaco_id" value="{{ $dados['origem_espaco_id'] }}">
+  @csrf <x-revisao-acesso /><input type="hidden" name="espaco_id" value="{{ $dados['origem_espaco_id'] }}">
   @foreach($dados['turmas'] as $t)<input type="hidden" name="turmas[]" value="{{ $t['origem_id'] }}">@endforeach
   @foreach($dados['alunos'] as $a)<input type="hidden" name="alunos[]" value="{{ $a['origem_id'] }}">@endforeach
   <div class="field"><label for="codigo">Código de cadastro fornecido pelo destinatário</label><input class="input" id="codigo" name="codigo" required minlength="64" maxlength="64" autocomplete="off" spellcheck="false"></div>

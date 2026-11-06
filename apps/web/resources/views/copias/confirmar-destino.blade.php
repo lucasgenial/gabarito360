@@ -8,7 +8,7 @@
 </section>
 @include('copias._materiais',['materiais'=>$dados['previa']['materiais']])
 <form method="POST" action="{{ route('copias.material.criar') }}" class="card card-pad" style="margin-top:20px;">
-  @csrf
+  @csrf <x-revisao-acesso />
   <input type="hidden" name="codigo" value="{{ $codigo }}"><input type="hidden" name="chave" value="{{ $chave }}">
   <input type="hidden" name="espaco_id" value="{{ $dados['previa']['espaco_id'] }}">
   <input type="hidden" name="destino_digest" value="{{ $dados['recebimento']['destino_digest'] }}">
