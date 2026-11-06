@@ -30,7 +30,7 @@ try{
   if(u.pathname==='/app/vinculos/selecionar'){assert.equal(d._revisao,ativa);ativa='epoca-ficticia-c';modoSessao='ok';return route.fulfill({contentType:'text/html',body:'<!doctype html><html><head><script src="/fixture/acesso-confirmado.js"></script></head><body>Acesso confirmado</body></html>'});}
   if(d._revisao!==ativa||(r.headers()['x-g360-revisao']&&r.headers()['x-g360-revisao']!==ativa))return route.fulfill({status:409,json:{acesso_alterado:true}});
   if(modoSessao==='sem-contexto')return route.fulfill({status:409,json:{selecionar_vinculo:true,url:'https://example.invalid/ignorar'}});
-  if(modoSessao==='expirada')return route.fulfill({status:401,json:{login_necessario:true,url:'https://example.invalid/ignorar'}});
+  if(modoSessao==='expirada'||modoSessao==='contexto-irrecuperavel')return route.fulfill({status:401,json:{login_necessario:true,url:'https://example.invalid/ignorar'}});
   if(modoSessao==='csrf-expirado')return route.fulfill({status:419,contentType:'text/html',body:'<!doctype html><html><body>Page expired</body></html>'});
   if(modoSessao==='ambos')return route.fulfill({status:409,json:{acesso_alterado:true,selecionar_vinculo:true}});
   const alvo=d._recurso||(u.pathname===painel.url?D:C);assert.ok([A,B,C,D].includes(alvo));const des=alvo===D?painel:alvo===C?index:destino(alvo);
@@ -52,14 +52,16 @@ try{
  const nativePosts=requests.filter(r=>r.nativo&&r.metodo==='POST').length;assert.equal(nativePosts,1);
  await nova.reload();await titulo(nova,'Turma B');assert.equal(requests.filter(r=>r.nativo&&r.metodo==='POST').length,nativePosts);
  const vazia=await pagina();await vazia.goto('http://g360.test/app/turmas/detalhes');await vazia.getByText('Abra este registro pela lista para continuar.',{exact:true}).waitFor();
- const n=requests.length;ativa=E2;await b.reload();await b.getByText('Seu acesso ativo mudou. Esta tela não foi aberta. Selecione o vínculo para continuar.',{exact:true}).waitFor();await b.getByRole('link',{name:'Selecionar vínculo',exact:true}).waitFor();assert.equal(b.url(),'http://g360.test/app/turmas/detalhes');
+ const n=requests.length;ativa=E2;await b.reload();await b.getByText('O acesso foi alterado em outra aba. Esta ação não foi executada.',{exact:true}).waitFor();await b.getByRole('link',{name:'Abrir painel atual',exact:true}).waitFor();assert.equal(b.url(),'http://g360.test/app/turmas/detalhes');
  assert.equal(requests.slice(n).filter(r=>r.metodo==='POST').at(-1).d._revisao,E1,'Shell nova não renova época antiga');
  assert.equal(await b.locator('h1').textContent(),'Não foi possível abrir esta tela');
+ await b.getByRole('link',{name:'Abrir painel atual',exact:true}).click();await titulo(b,'Painel da escola');assert.equal(b.url(),'http://g360.test/app/painel');assert.equal(await b.evaluate(()=>history.state.ur4.revisao),E2,'Clique explícito abandona intenção antiga e abre painel atual');
  const nativoAntes=requests.filter(r=>r.nativo&&r.metodo==='POST').length;
  modoSessao='sem-contexto';const semContexto=await pagina();await semContexto.goto('http://g360.test/app/turmas');await titulo(semContexto,'Escolha seu vínculo');assert.equal(semContexto.url(),'http://g360.test/app/vinculos');
+ modoSessao='contexto-irrecuperavel';const perda=await pagina();await perda.goto('http://g360.test/app/turmas');await titulo(perda,'Acesso ao sistema');assert.equal(perda.url(),'http://g360.test/login');
  modoSessao='expirada';const expirada=await pagina();await expirada.goto('http://g360.test/app/turmas');await titulo(expirada,'Acesso ao sistema');assert.equal(expirada.url(),'http://g360.test/login');
  modoSessao='csrf-expirado';const csrfExpirado=await pagina();await csrfExpirado.goto('http://g360.test/app/turmas');await titulo(csrfExpirado,'Acesso ao sistema');assert.equal(csrfExpirado.url(),'http://g360.test/login');
- modoSessao='ambos';const conflito=await pagina();await conflito.goto('http://g360.test/app/turmas');await conflito.getByRole('link',{name:'Selecionar vínculo',exact:true}).waitFor();assert.equal(conflito.url(),'http://g360.test/app/turmas');
+ modoSessao='ambos';const conflito=await pagina();await conflito.goto('http://g360.test/app/turmas');await conflito.getByRole('link',{name:'Abrir painel atual',exact:true}).waitFor();assert.equal(conflito.url(),'http://g360.test/app/turmas');
  assert.equal(requests.filter(r=>r.nativo&&r.metodo==='POST').length,nativoAntes,'Recuperação não repete formulário nem arquivo');
  // O302 real é coberto porPHP/CUA; a ponte fictícia evita DNS do redirect não interceptado pelo Playwright.
  modoSessao='ok';const recuperar=await pagina();
@@ -73,7 +75,7 @@ try{
  console.log('Recuperação: painel aberto após uma seleção');
  assert.equal(recuperar.url(),'http://g360.test/app/painel');assert.equal(requests.filter(r=>r.path==='/app/vinculos/selecionar').length,selecoesAntes+1,'Uma única seleção recupera o painel');
  assert.equal(await recuperar.evaluate(()=>history.state.ur4.revisao),'epoca-ficticia-c');
- await b.reload();await b.getByRole('link',{name:'Selecionar vínculo',exact:true}).waitFor();assert.equal(b.url(),'http://g360.test/app/turmas/detalhes');
+ await a.reload();await a.getByRole('link',{name:'Abrir painel atual',exact:true}).waitFor();assert.equal(a.url(),'http://g360.test/app/turmas/detalhes');
  assert.equal(requests.filter(r=>r.path===destino(B).url).at(-1).d._revisao,E1,'Recuperar uma aba não autoriza nem renova a outra');
  for(const r of requests){assert.ok(!r.path.includes(A)&&!r.path.includes(B));assert.ok(!r.path.includes('token'));}assert.deepEqual(erros,[]);
  console.log('UR4:2abas, refresh/back/forward sem replay, ponte nova aba GET real, falta de seleção e stale409: OK.');

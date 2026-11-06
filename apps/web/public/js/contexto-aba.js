@@ -27,8 +27,9 @@
     const texto = document.createElement('p'); texto.textContent = 'Seu acesso ativo mudou. Esta ação não foi executada.'; caixa.append(texto);
     const ajuda = document.createElement('p'); ajuda.textContent = 'Confira o espaço e o perfil antes de continuar. O que você digitou nesta tela não foi reenviado.'; caixa.append(ajuda);
     const acoes = document.createElement('div'); acoes.className = 'contexto-aviso-acoes'; caixa.append(acoes);
-    [['/app/painel', 'Abrir painel atual'], ['/app/vinculos', 'Selecionar outro acesso']].forEach(([href, nome]) => {
+    [['/app/painel', 'Abrir painel atual']].forEach(([href, nome]) => {
       const a = document.createElement('a'); a.href = href; a.className = 'btn btn-secondary'; a.textContent = nome; acoes.append(a);
+      a.dataset.navegacaoIniciarAtual = '1';
     });
     (document.querySelector('main') || document.body).prepend(caixa);
     caixa.focus({ preventScroll: false });
@@ -85,11 +86,12 @@
     const pedido = input instanceof Request ? new Request(novo, input) : novo;
     return fetchOriginal(pedido, config).then(r => {
       if (contextual && invalidado && r.ok) return conflito();
+      // A estrutura inicial apresenta seu próprio estado; não duplicar o aviso.
+      if (headers.has('X-G360-Hidratar')) return r;
       if ([401, 409].includes(r.status)) r.clone().json().then(d => {
         if (d.selecionar_vinculo || d.acesso_alterado) aviso();
         if (d.login_necessario) {
-          const a = document.createElement('a'); a.href = '/login'; a.textContent = 'Sua sessão expirou. Entrar novamente'; a.className = 'g-aviso atencao';
-          if (!document.getElementById('sessao-expirada')) { a.id = 'sessao-expirada'; document.body.prepend(a); }
+          invalidado = true;root.G360Navegacao?.limparEntradaDeAcesso();location.assign('/login');
         }
       }).catch(() => {});
       return r;

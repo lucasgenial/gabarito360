@@ -87,32 +87,46 @@ class UrlsContextuaisTest extends TestCase
         $this->getJson('/app/teste-ur3/14',['X-G360-Acesso'=>'vinculo-8'])->assertStatus(409);
         $this->getJson('/app/teste-ur3/14?_ctx='.$id)->assertStatus(409);
         $this->postJson('/app/teste-ur3/14',['_revisao'=>'revisao-divergente'])->assertStatus(409);
-        $this->withSession(['auth_token'=>'outra-identidade']);session()->save();
-        $this->getJson('/app/teste-ur3/14')->assertStatus(409);
         Http::assertNothingSent();
+        $this->withSession(['auth_token'=>'outra-identidade']);session()->save();
+        Http::fake(['*'=>Http::response(['data'=>[]])]);
+        $this->getJson('/app/teste-ur3/14')->assertUnauthorized()->assertJsonPath('login_necessario',true)
+            ->assertSessionMissing('auth_token')->assertSessionMissing('auth_contexto_ativo');
+        Http::assertSentCount(1);
+        Http::assertSent(fn($r)=>str_ends_with($r->url(),'/auth/logout')&&$r->hasHeader('Authorization','Bearer outra-identidade'));
+        Http::assertNotSent(fn($r)=>str_ends_with($r->url(),'/operacao'));
     }
 
     public function test_revalida_revogacao_e_indisponibilidade_sem_fallback(): void
     {
         $id=$this->ativar($this->dados(7));
         Http::fake(['*'=>Http::response([],403)]);
-        $this->getJson('/app/teste-ur3/14')->assertStatus(409);
+        $this->getJson('/app/teste-ur3/14')->assertUnauthorized()->assertJsonPath('login_necessario',true)
+            ->assertSessionMissing('auth_token')->assertSessionMissing('auth_contexto_ativo');
         $this->assertNull(ContextoWeb::obter($id));
+        Http::assertSentCount(2);
+        Http::assertSent(fn($r)=>str_ends_with($r->url(),'/auth/logout')&&$r->hasHeader('Authorization','Bearer identidade-ficticia'));
+        Http::assertNotSent(fn($r)=>str_ends_with($r->url(),'/operacao'));
+        $this->withSession(['auth_token'=>'identidade-ficticia','auth_vinculos'=>true]);
+        $this->withCookie(config('session.cookie'),session()->getId());
         $id=$this->ativar($this->dados(8));
         Http::swap(new \Illuminate\Http\Client\Factory());Http::preventStrayRequests();Http::fake(['*'=>Http::response([],503)]);
         $this->getJson('/app/teste-ur3/14')->assertStatus(503);
         $this->assertNotNull(ContextoWeb::obter($id));
     }
 
-    public function test_expiracao_nao_envia_operacao_e_retorno_de_post_e_limpo(): void
+    public function test_contexto_sem_ttl_proprio_e_retorno_de_post_e_limpo(): void
     {
         $this->ativar($this->dados(7));$this->api();
         $r=$this->post('/app/teste-ur3/14');$this->verificarRetornoTela($r,'/app/turmas/14');
         $this->assertStringNotContainsString('/app/turmas/14',$r->getContent());$this->assertStringNotContainsString('_ctx',$r->getContent());
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/operacao')&&$r->hasHeader('Authorization','Bearer segredo-7'));
         Http::swap(new \Illuminate\Http\Client\Factory());Http::preventStrayRequests();
-        $this->travel(121)->minutes();
-        $this->postJson('/app/teste-ur3/14')->assertStatus(409);Http::assertNothingSent();
+        $this->travel(121)->minutes();$this->api();
+        $r=$this->post('/app/teste-ur3/14');$this->verificarRetornoTela($r,'/app/turmas/14');
+        Http::assertSentCount(2);
+        Http::assertSent(fn($r)=>str_ends_with($r->url(),'/operacao')&&$r->hasHeader('Authorization','Bearer segredo-7'));
+        $this->assertSame('identidade-ficticia',session('auth_token'));
     }
 
     public function test_selecao_por_post_devolve_rota_fixa_e_nova_revisao_sem_credenciais(): void
