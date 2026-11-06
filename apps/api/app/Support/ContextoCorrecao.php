@@ -71,7 +71,10 @@ class ContextoCorrecao
             $q->whereIn('cartoes.espaco_id', Espacos::ids($ator))
                 ->whereExists(fn ($p) => $p->selectRaw('1')->from('provas as dona')
                     ->whereColumn('dona.id', 'cartoes.prova_id')->whereColumn('dona.espaco_id', 'cartoes.espaco_id'))
-                ->where(fn ($a) => $a->whereNull('cartoes.aluno_id')->orWhereIn('cartoes.aluno_id', Escopo::alunos($ator)->select('alunos.id')));
+                ->where(function($a)use($ator){
+                    $a->whereNull('cartoes.aluno_id')->orWhereIn('cartoes.aluno_id', Escopo::alunos($ator)->select('alunos.id'));
+                    if($ator->perfil==='professor')$a->orWhereIn('cartoes.turma_aplicacao_id',Escopo::turmaIds($ator)??[]);
+                });
             $q->where(fn ($a) => $a->whereNull('cartoes.aluno_id')->orWhereExists(fn ($s) => $s->selectRaw('1')->from('alunos as vinculado')
                 ->join('prova_turmas as pt', fn ($j) => $j->whereRaw('pt.turma_id = COALESCE(cartoes.turma_aplicacao_id, vinculado.turma_id)'))
                 ->whereColumn('vinculado.id', 'cartoes.aluno_id')->whereColumn('vinculado.espaco_id', 'cartoes.espaco_id')

@@ -1,0 +1,8 @@
+.formulario-escolar{width:100%;min-width:0}
+.formulario-escolar .form-row-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.formulario-escolar .field{min-width:0}
+.formulario-escolar .form-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:24px}
+.formulario-escolar .form-actions .btn{min-height:44px}
+.formulario-escolar details{margin-block:16px}
+.formulario-escolar .input,.formulario-escolar .select{max-width:100%;width:100%}
+@media(max-width:640px){.formulario-escolar .form-row-2{grid-template-columns:minmax(0,1fr)}.formulario-escolar .form-actions{gap:12px}}

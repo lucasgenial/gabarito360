@@ -82,6 +82,7 @@ jobs:
       - run: node scripts/notificacoes/build.mjs && git diff --exit-code -- apps/web/public/js/notificacoes.js apps/web/public/js/libs/solid-js apps/web/public/js/libs/solid-toast
       - run: python3 -m pip install -r apps/api/omr/requirements.txt pypdf
       - run: python3 scripts/tests/test_resultados_pdf.py
+      - run: python3 scripts/tests/test_painel_turma_pdf.py
       - run: python3 scripts/tests/test_qualidade_omr.py
       - run: node --test scripts/tests/cartoes-fila.test.mjs scripts/tests/catalogo-instituicoes.test.mjs scripts/tests/catalogo-cadastro.test.mjs scripts/tests/preparo-foto-codecs.test.mjs scripts/tests/preparo-foto-geometria.test.mjs scripts/tests/preparo-foto-cancelamento.test.mjs scripts/tests/contexto-sessao.test.mjs scripts/tests/requisicao-recursos.test.mjs scripts/tests/contexto-reset.test.mjs
       - run: npm install --prefix scripts/auditoria --ignore-scripts --no-package-lock --no-audit --no-fund

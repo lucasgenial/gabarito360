@@ -146,8 +146,8 @@ class RelatorioController extends Controller
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
-        $alunos = $consulta->tabela('alunos')->where(fn ($q) => $q->where('turma_id', $turmaId)
-            ->when(\App\Support\EspacoPessoal::doAtor($request->user()), fn ($h) => $h->orWhereIn('id', $consulta->tabela('notas')->where('turma_id', $turmaId)->select('aluno_id'))))->where('ativo', true)
+        $alunos = DB::table('alunos')->where(fn ($q) => $q->whereIn('id',$consulta->tabela('alunos')->where('turma_id',$turmaId)->where('ativo',true)->select('alunos.id'))
+            ->orWhereIn('id', $consulta->tabela('notas')->where('turma_id', $turmaId)->select('aluno_id')))
             ->orderBy('nome')->get(['id', 'nome', 'matricula']);
         $provas = $this->provasDaTurma($request, $turmaId);
 
@@ -227,13 +227,13 @@ class RelatorioController extends Controller
 
         $provas = $this->provasDaTurma($request, (int) $aluno->turma_id);
         $pessoal = \App\Support\EspacoPessoal::doAtor($request->user());
-        if ($pessoal) {
+        {
             $historicas = Escopo::provas($request->user())->whereIn('provas.id', $consulta->tabela('notas')->where('aluno_id', $alunoId)->select('prova_id'))
                 ->whereIn('status', ['publicada', 'em_correcao', 'corrigida'])->get();
             $provas = $provas->concat($historicas)->unique('id')->sortBy('disciplina')->values();
         }
         $linhas = $provas->map(function ($p) use ($aluno, $consulta, $pessoal) {
-            $turmaNota = $pessoal ? ($consulta->tabela('notas')->where('prova_id', $p->id)->where('aluno_id', $aluno->id)->value('turma_id') ?? $aluno->turma_id) : $aluno->turma_id;
+            $turmaNota = $consulta->tabela('notas')->where('prova_id', $p->id)->where('aluno_id', $aluno->id)->value('turma_id') ?? $aluno->turma_id;
             $daTurma = $consulta->tabela('notas')->where('prova_id', $p->id)->where('turma_id', $turmaNota)
                 ->orderByDesc('nota_final')->get(['aluno_id', 'nota_final', 'acertos', 'total_questoes']);
             $minha = $daTurma->firstWhere('aluno_id', $aluno->id);

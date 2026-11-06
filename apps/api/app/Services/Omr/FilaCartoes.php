@@ -48,6 +48,8 @@ class FilaCartoes
             }
             try {
                 $envio = DB::transaction(function () use ($usuario, $provaId, $chave, $chaveCliente, $caminho, $alunoId, $espaco, $qualidade) {
+                    if (Espacos::ativo()) DB::table('espacos')->where('id',$espaco)->lockForUpdate()->first();
+                    if ($alunoId && Espacos::ativo()) abort_unless(ContextoCorrecao::alunos(\App\Models\Prova::findOrFail($provaId),$usuario)->where('alunos.id',$alunoId)->exists(),404);
                     if ($chaveCliente !== null) \App\Support\ContextoVinculo::resolver($usuario);
                     $cartao = new Cartao(['prova_id' => $provaId, 'aluno_id' => $alunoId,
                         'imagem_url' => $caminho, 'status' => 'pendente']);
@@ -83,6 +85,7 @@ class FilaCartoes
         }
         return Cache::lock("cartao-envio:{$envio->espaco_id}:{$envio->usuario_id}:{$envio->chave}", 30)->block(3, function () use ($envio, $usuario) {
             $novo = DB::transaction(function () use ($envio, $usuario) {
+                if (Espacos::ativo()) DB::table('espacos')->where('id',$envio->espaco_id)->lockForUpdate()->first();
                 $atual = CartaoEnvio::whereKey($envio->id)->lockForUpdate()->firstOrFail();
                 if ($usuario) $atual->exigirContexto($usuario);
                 if (! $atual->podeRepetir()) {

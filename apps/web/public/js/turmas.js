@@ -47,7 +47,14 @@
     }
   });
   document.querySelectorAll('[data-turma-confirmar]').forEach(form => {
-    form.addEventListener('submit', e => { if (!window.confirm(form.dataset.turmaConfirmar)) e.preventDefault(); });
+    form.addEventListener('submit', e => {
+      let mensagem=form.dataset.turmaConfirmar;
+      if(form.hasAttribute('data-turma-transferencia')) {
+        const destino=form.querySelector('[name="turma_id"]').selectedOptions[0]?.textContent.trim();
+        mensagem=`Transferir ${form.dataset.aluno} de ${form.dataset.origem} para ${destino}? O histórico será preservado.`;
+      }
+      if (!window.confirm(mensagem)) e.preventDefault();
+    });
   });
   const filtro = document.querySelector('[data-turma-filtrar-alunos]');
   filtro?.addEventListener('input', () => {

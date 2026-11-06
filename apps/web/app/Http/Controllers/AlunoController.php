@@ -71,7 +71,7 @@ class AlunoController extends Controller
         }
 
         $turmaId = $request->input('turma_id');
-        return redirect()->route('turmas.show', $turmaId)
+        return redirect()->route('turmas.show', ['id'=>$turmaId, 'secao'=>'alunos'])
             ->with('sucesso', 'Aluno cadastrado.');
     }
 
@@ -94,7 +94,7 @@ class AlunoController extends Controller
     public function update(Request $request, int $id)
     {
         $this->validarMinimo($request);
-        $request->validate([
+        try { $request->validate([
             'avatar_id' => 'sometimes|nullable|integer|between:1,36',
             'foto' => 'prohibited',
             'foto_path' => 'prohibited',
@@ -102,7 +102,7 @@ class AlunoController extends Controller
             'matricula' => 'required|string|max:20',
             'cpf'       => 'sometimes|string|nullable',
             'genero'    => 'sometimes|in:M,F,O|nullable',
-        ]);
+        ]); } catch (\Illuminate\Validation\ValidationException $e) { if($request->boolean('voltar_turma'))$e->redirectTo(route('alunos.edit',$id)); throw $e; }
 
         $dados = $request->only(
             'avatar_id','turma_id','nome','matricula','data_nascimento','genero','nome_responsavel'
@@ -115,23 +115,34 @@ class AlunoController extends Controller
         $resp = $this->api->put("/v1/alunos/{$id}", $dados);
 
         if ($resp->failed()) {
-            return back()->withInput()
+            return ($request->boolean('voltar_turma')?redirect()->route('alunos.edit',$id):back())->withInput()->withErrors($resp->json('errors')??[])
                 ->with('erro', $resp->json('message') ?? 'Não foi possível atualizar o aluno.');
         }
 
+        if($request->boolean('voltar_turma')) {
+            $atual=$this->api->get("/v1/alunos/$id");
+            if($atual->successful()) return redirect()->route('turmas.show',['id'=>$atual->json('data.turma_id'),'secao'=>'alunos'])->with('sucesso','Aluno atualizado.');
+        }
         return redirect()->route('alunos.show', $id)->with('sucesso', 'Aluno atualizado.');
     }
 
     public function toggle(int $id)
     {
-        $resp = $this->api->post("/v1/alunos/{$id}/toggle");
+        $d=request()->validate(['esperado_ativo'=>'sometimes|boolean']);
+        $resp = $this->api->post("/v1/alunos/{$id}/toggle",$d);
+        $origem=request()->attributes->get('ur4_retorno');
+        $retorno=null;
+        if(($origem['nome']??null)==='turmas.show'){
+            $a=$this->api->get("/v1/alunos/$id");
+            if($a->successful()&&(int)$a->json('data.turma_id')===(int)($origem['parametros']['id']??0))$retorno=redirect()->route('turmas.show',['id'=>$a->json('data.turma_id'),'secao'=>'alunos']);
+        }
 
         if ($resp->failed()) {
-            return back()->with('erro', 'Não foi possível alterar o status do aluno.');
+            return ($retorno??back())->with('erro', $resp->json('message')??'Não foi possível alterar o status do aluno.');
         }
 
         $status = $resp->json('data.ativo') ? 'ativado' : 'desativado';
-        return back()->with('sucesso', "Aluno {$status}.");
+        return ($retorno??back())->with('sucesso', "Aluno {$status}.");
     }
 
     public function imagem(Request $r, int $id)
@@ -164,5 +175,40 @@ class AlunoController extends Controller
     {
         if (\App\Support\Acesso::pessoal()) $request->validate(array_fill_keys(
             array_diff(['cpf', 'data_nascimento', 'genero', 'nome_responsavel', 'foto', 'foto_path'], $aceitarRetrato ? ['foto'] : []), 'prohibited'));
+    }
+
+    public function edit(int $id): View
+    {
+        abort_unless(\App\Support\Acesso::pode('aluno.gerir'),403);
+        $r=$this->api->get("/v1/alunos/$id"); abort_unless($r->successful(),$r->serverError()?503:404);
+        return view('alunos.edit',['aluno'=>$r->json('data')]);
+    }
+
+    private function autorizarTransferencia(): void
+    {
+        abort_unless(in_array(\App\Support\Acesso::perfil(),['coordenador','dir_escolar','vice_dir_escolar','secretario_escolar'],true)&&\App\Support\Acesso::pode('aluno.gerir'),403);
+    }
+
+    public function transferencia(int $id): View
+    {
+        $this->autorizarTransferencia();
+        $a=$this->api->get("/v1/alunos/$id"); abort_unless($a->successful(),$a->serverError()?503:404);
+        $aluno=$a->json('data');
+        $t=$this->api->get('/v1/turmas',['ativo'=>1,'escola_id'=>$aluno['turma']['escola_id']??0]);
+        abort_unless($t->successful(),503,'Não foi possível consultar as turmas.');
+        $turmas=collect($t->json('data.turmas')??[])->filter(fn($v)=>(int)$v['escola_id']===(int)($aluno['turma']['escola_id']??0)&&(int)$v['id']!==(int)$aluno['turma_id'])->values()->all();
+        return view('alunos.transferencia',compact('aluno','turmas'));
+    }
+
+    public function transferir(Request $r,int $id)
+    {
+        $this->autorizarTransferencia();
+        try{$d=$r->validate(['turma_id'=>'required|integer|min:1','turma_origem_id'=>'required|integer|min:1','chave'=>'required|uuid','motivo'=>'required|string|min:5|max:500']);}
+        catch(\Illuminate\Validation\ValidationException $e){$e->redirectTo(route('alunos.transferencia',$id));throw $e;}
+        try{$resp=$this->api->post("/v1/alunos/$id/transferencias-turma",$d);}
+        catch(\Illuminate\Http\Client\ConnectionException){return redirect()->route('alunos.transferencia',$id)->withInput()->with('erro','Não foi possível confirmar a transferência. Confira a turma atual antes de tentar novamente.');}
+        abort_if(in_array($resp->status(),[403,404],true),$resp->status());
+        if($resp->failed())return redirect()->route('alunos.transferencia',$id)->withInput()->withErrors($resp->json('errors')??[])->with('erro',$resp->json('message')??'Não foi possível transferir.');
+        return redirect()->route('turmas.show',['id'=>$d['turma_id'],'secao'=>'alunos'])->with('sucesso','Aluno transferido. Os resultados anteriores permanecem na turma de aplicação.');
     }
 }
