@@ -21,6 +21,24 @@ class NavegacaoIntegracaoWebTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_textos_de_negocio_nao_sao_convertidos_em_destinos_de_navegacao(): void
+    {
+        $texto='/app/turmas/14';
+        $entrada=['nome'=>$texto,'titulo'=>$texto,'observacao'=>'<b>Texto literal</b>',
+            'filhos'=>[['nome'=>$texto]],'url'=>$texto,'foto_url'=>$texto,'url_arquivo'=>$texto,'fotoUrl'=>$texto];
+        $r=request();$r->setLaravelSession(session()->driver());
+        $resposta=app(\App\Http\Middleware\RespostaNavegacao::class)->converter($r,response()->json($entrada));
+        $dados=json_decode($resposta->getContent(),true,512,JSON_THROW_ON_ERROR);
+        foreach(['nome','titulo','observacao','filhos'] as $campo)$this->assertSame($entrada[$campo],$dados[$campo]);
+        foreach(['url','foto_url','url_arquivo','fotoUrl'] as $campo){
+            $this->assertSame('/app/turmas/detalhes',$dados[$campo]['pagina']);
+            $alvo=NavegacaoWeb::obter($dados[$campo]['referencia']);
+            $this->assertSame('turmas.show',$alvo['nome']);
+            $this->assertSame('14',(string)$alvo['parametros']['id']);
+        }
+        Http::assertNothingSent();
+    }
+
     public function test_hidratacao_chega_ao_controller_e_preserva_falha_temporaria(): void
     {
         $this->apiLegada(['*'=>Http::response(['message'=>'privado'],503)]);

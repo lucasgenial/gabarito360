@@ -22,7 +22,7 @@ Consulta prévia UI/UX aprovada em `ur4-direcao-design.md`; orientação de segu
 
 ## Verificação da implementação
 
-A suíte Web local passou com 285 testes e 9.309 asserções. A emissão transversal cobre 119 operações parametrizadas e 123 pares operação/verbo, tanto em documento completo quanto em fragmento HTML. Essa verificação confere os destinos e as referências; não substitui as verificações de autorização dos controladores e da API.
+A suíte Web local passou com 286 testes e 9.326 asserções. A emissão transversal cobre 119 operações parametrizadas e 123 pares operação/verbo, tanto em documento completo quanto em fragmento HTML. Essa verificação confere os destinos e as referências; não substitui as verificações de autorização dos controladores e da API.
 
 Os 34 testes Node e os sete ensaios Chromium do job de telas passaram localmente. Foram preservados os cenários de contexto antigo, CSRF, duas abas, histórico, atualização sem repetição de alterações, falha de leitura, retorno de foco e conteúdo privado. A conferência no Chrome do usuário validou duas turmas fictícias no mesmo endereço, edição independente e atualização, além do modal com JavaScript externo.
 

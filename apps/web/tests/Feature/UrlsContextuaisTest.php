@@ -19,8 +19,8 @@ class UrlsContextuaisTest extends TestCase
         $this->withCookie(config('session.cookie'),session()->getId()); $this->withCredentials();
         $this->withHeader('X-G360-Revisao', ContextoWeb::garantirRevisao());
         Route::middleware(['web','autenticado'])->get('/app/teste-ur3/{id}',function(int $id){
-            return response()->json(['id'=>$id,'perfil'=>Acesso::perfil(),'turma'=>route('turmas.show',$id),
-                'resultado'=>route('resultados.show',[$id,4])]);
+            return response()->json(['id'=>$id,'perfil'=>Acesso::perfil(),'turma'=>\App\Support\NavegacaoWeb::destino('turmas.show',[$id]),
+                'resultado'=>\App\Support\NavegacaoWeb::destino('resultados.show',[$id,4])]);
         })->name('teste-ur3');
         Route::middleware(['web','autenticado'])->post('/app/teste-ur3/{id}',function(int $id){
             app(ApiClient::class)->post('/v1/operacao',['id'=>$id]);

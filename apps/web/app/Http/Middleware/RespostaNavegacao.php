@@ -49,7 +49,8 @@ final class RespostaNavegacao
         foreach ($dados as $campo => &$v) {
             if (is_array($v)) $v=$this->dados($v);
             elseif ($campo === 'html' && is_string($v)) $v=$this->html($v,request(),true);
-            elseif (is_string($v) && ($d=NavegacaoWeb::deUrl($v))) $v=$d;
+            elseif (is_string($campo) && ($campo==='url' || str_starts_with($campo,'url_') || str_ends_with($campo,'_url') || str_ends_with($campo,'Url'))
+                && is_string($v) && ($d=NavegacaoWeb::deUrl($v))) $v=$d;
         }
         return $dados;
     }
