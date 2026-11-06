@@ -6,3 +6,5 @@
 .formulario-escolar details{margin-block:16px}
 .formulario-escolar .input,.formulario-escolar .select{max-width:100%;width:100%}
 @media(max-width:640px){.formulario-escolar .form-row-2{grid-template-columns:minmax(0,1fr)}.formulario-escolar .form-actions{gap:12px}}
+
+.tu1-grupo{border:0;padding:0;margin:0 0 24px;min-width:0}.tu1-grupo legend{font-weight:700;font-size:1.05rem;border-bottom:1px solid var(--border);padding:0 0 12px;margin-bottom:20px;width:100%}.tu1-grupo textarea{resize:vertical;min-height:104px}

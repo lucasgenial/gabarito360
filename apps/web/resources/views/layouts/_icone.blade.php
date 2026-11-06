@@ -15,6 +15,18 @@
   @case('lixeira')<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>@break
   @case('cadeado')<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>@break
   @case('compartilhar')<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 11l7.4-4M8.3 13l7.4 4"/>@break
+  @case('editar')<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z"/>@break
+  @case('adicionar')<path d="M12 5v14M5 12h14"/>@break
+  @case('voltar')<path d="m10 5-7 7 7 7M3 12h18"/>@break
+  @case('fechar')<path d="m6 6 12 12M6 18 18 6"/>@break
+  @case('confirmar')<path d="m5 12 4 4L19 6"/>@break
+  @case('salvar')<path d="M4 3h13l4 4v14H3V3zM7 3v6h9V3M7 21v-8h10v8"/>@break
+  @case('transferir')<path d="M3 7h17l-4-4M21 17H4l4 4M20 7l-4 4M4 17l4-4"/>@break
+  @case('filtro')<path d="M3 4h18l-7 8v7l-4 2v-9z"/>@break
+  @case('limpar')<path d="m4 16 9-12 8 6-9 12H8zM13 22h8M9 10l8 6"/>@break
+  @case('ver')<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>@break
+  @case('situacao')<path d="M12 2v10M6 5a9 9 0 1 0 12 0"/>@break
+  @case('pdf')<path d="M14 2H5v20h14V7zM14 2v6h5M8 13h8M8 17h5"/>@break
   @default<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>
 @endswitch
 </svg>

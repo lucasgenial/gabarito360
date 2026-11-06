@@ -37,7 +37,7 @@
       @endforeach
     </select></div>
     @if(session('auth_vinculos'))<input type="hidden" name="vinculo_id" id="professor-vinculo">@endif
-    <button type="submit" class="btn btn-primary btn-sm">Conceder acesso</button>
+    <button type="submit" class="btn btn-primary btn-sm"><x-icone nome="adicionar" /> Conceder acesso</button>
   </form>
   @else<p class="field-help">Nenhum professor disponível para receber acesso neste momento. Confira os vínculos ativos na equipe e os acessos já concedidos abaixo.</p>@endif
   @endpode
@@ -77,7 +77,7 @@
                 @csrf <x-revisao-acesso />
                 @method('DELETE')
                 <button type="submit" class="btn btn-sm btn-ghost"
-                        style="color:var(--danger);border-color:var(--danger);">Retirar acesso</button>
+                        style="color:var(--danger);border-color:var(--danger);"><x-icone nome="cadeado" /> Retirar acesso</button>
               </form>@endpode
             </div></td>
           </tr>

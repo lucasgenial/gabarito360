@@ -116,8 +116,8 @@
 
     <div class="form-actions">
       <a href="{{ $turma_id ? route('turmas.show', ['id'=>$turma_id,'secao'=>'alunos']) : route('turmas.index') }}"
-         class="btn btn-secondary">Cancelar</a>
-      <button type="submit" class="btn btn-primary">Salvar Cadastro</button>
+         class="btn btn-secondary"><x-icone nome="fechar" /> Cancelar</a>
+      <button type="submit" class="btn btn-primary"><x-icone nome="salvar" /> Salvar Cadastro</button>
     </div>
   </div>
 </form>

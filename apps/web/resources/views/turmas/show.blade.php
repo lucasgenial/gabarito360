@@ -18,13 +18,13 @@
       <b>{{ $turma['total_alunos'] ?? 0 }}</b> aluno(s) · {{ $turma['ano_letivo'] }} · {{ $turma['ativo'] ? 'Ativa' : 'Inativa' }}
       @if(!empty($turma['escola_nome'])) · {{ $turma['escola_nome'] }}@endif</x-slot:sub>
     @pode('turma.gerir')
-    <a class="btn btn-secondary" href="{{ route('turmas.edit',$turma['id']) }}">Editar turma</a>
+    <a class="btn btn-secondary" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /> Editar turma</a>
     <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}"
           data-turma-confirmar="{{ $turma['ativo'] ? 'Desativar' : 'Ativar' }} esta turma?">
       @csrf <x-revisao-acesso />
       <button type="submit" class="btn {{ $turma['ativo'] ? 'btn-ghost' : 'btn-secondary' }}"
               style="color:{{ $turma['ativo'] ? 'var(--danger)' : 'var(--success)' }};{{ $turma['ativo'] ? 'border-color:var(--danger);' : '' }}">
-        {{ $turma['ativo'] ? 'Desativar' : 'Ativar' }}
+        <x-icone nome="situacao" /> {{ $turma['ativo'] ? 'Desativar' : 'Ativar' }}
       </button>
     </form>
     @endpode

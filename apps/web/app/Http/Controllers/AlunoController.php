@@ -197,17 +197,24 @@ class AlunoController extends Controller
         $t=$this->api->get('/v1/turmas',['ativo'=>1,'escola_id'=>$aluno['turma']['escola_id']??0]);
         abort_unless($t->successful(),503,'Não foi possível consultar as turmas.');
         $turmas=collect($t->json('data.turmas')??[])->filter(fn($v)=>(int)$v['escola_id']===(int)($aluno['turma']['escola_id']??0)&&(int)$v['id']!==(int)$aluno['turma_id'])->values()->all();
-        return view('alunos.transferencia',compact('aluno','turmas'));
+        return view(request()->header('X-G360-Modal')==='transferencia' ? 'alunos._transferencia-form' : 'alunos.transferencia',compact('aluno','turmas'));
     }
 
     public function transferir(Request $r,int $id)
     {
         $this->autorizarTransferencia();
         try{$d=$r->validate(['turma_id'=>'required|integer|min:1','turma_origem_id'=>'required|integer|min:1','chave'=>'required|uuid','motivo'=>'required|string|min:5|max:500']);}
-        catch(\Illuminate\Validation\ValidationException $e){$e->redirectTo(route('alunos.transferencia',$id));throw $e;}
+        catch(\Illuminate\Validation\ValidationException $e){if($r->expectsJson())return response()->json(['message'=>'Confira os campos informados.','errors'=>$e->errors()],422);$e->redirectTo(route('alunos.transferencia',$id));throw $e;}
         try{$resp=$this->api->post("/v1/alunos/$id/transferencias-turma",$d);}
-        catch(\Illuminate\Http\Client\ConnectionException){return redirect()->route('alunos.transferencia',$id)->withInput()->with('erro','Não foi possível confirmar a transferência. Confira a turma atual antes de tentar novamente.');}
+        catch(\Illuminate\Http\Client\ConnectionException){if($r->expectsJson())return response()->json(['message'=>'Não foi possível confirmar. Confira a turma atual antes de reenviar.','resultado_incerto'=>true],503);return redirect()->route('alunos.transferencia',$id)->withInput()->with('erro','Não foi possível confirmar a transferência. Confira a turma atual antes de tentar novamente.');}
         abort_if(in_array($resp->status(),[403,404],true),$resp->status());
+        if($r->expectsJson()){
+            if($resp->failed())return response()->json(['message'=>$resp->json('message')??'Não foi possível transferir.','errors'=>$resp->json('errors')??[]],$resp->status());
+            session()->flash('sucesso','Aluno transferido. O histórico anterior foi preservado.');
+            $destino=\App\Support\NavegacaoWeb::individualizar(\App\Support\NavegacaoWeb::destino('turmas.show',['id'=>$d['turma_id'],'secao'=>'alunos']));
+            \App\Support\NavegacaoWeb::guardarMensagens($destino['referencia']);
+            return response()->json(['destino'=>$destino]);
+        }
         if($resp->failed())return redirect()->route('alunos.transferencia',$id)->withInput()->withErrors($resp->json('errors')??[])->with('erro',$resp->json('message')??'Não foi possível transferir.');
         return redirect()->route('turmas.show',['id'=>$d['turma_id'],'secao'=>'alunos'])->with('sucesso','Aluno transferido. Os resultados anteriores permanecem na turma de aplicação.');
     }
