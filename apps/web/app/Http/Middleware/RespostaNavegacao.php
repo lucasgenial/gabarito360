@@ -32,8 +32,9 @@ final class RespostaNavegacao
         if (str_contains($tipo,'application/json')) {
             $dados=json_decode($resposta->getContent(),true);
             if (is_array($dados)) $resposta->setContent(json_encode($this->dados($dados),JSON_THROW_ON_ERROR));
-        } elseif (str_contains($tipo,'text/html') && str_contains($resposta->getContent(),'<html')) {
-            $resposta->setContent($this->html($resposta->getContent(),$r));
+        } elseif (str_contains($tipo,'text/html')) {
+            $conteudo=$resposta->getContent();
+            $resposta->setContent($this->html($conteudo,$r,!preg_match('/<html[\s>]/i',$conteudo)));
         }
         if ($destino=NavegacaoWeb::atual($r)) {
             $resposta->headers->set('X-G360-Recurso',$destino['referencia']);

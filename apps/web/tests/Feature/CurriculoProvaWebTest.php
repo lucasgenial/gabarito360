@@ -89,6 +89,25 @@ class CurriculoProvaWebTest extends TestCase
         Http::assertSent(fn($r)=>$r->method()==='POST' && str_ends_with($r->url(),'/v1/provas') && $r['disciplina_ids']===[1] && !isset($r['disciplina']) && $r['opcao_lingua']===false);
     }
 
+    public function test_fragmento_curricular_reemite_acoes_fixas_com_o_mesmo_alvo(): void
+    {
+        $this->preparar();
+        $resposta=$this->withHeader('X-Curriculo-Fragmento','1')->alterarRecurso('POST', '/app/provas/10/curriculo/preparar',[
+            'acao'=>'opcoes','turma_ids'=>[1],'disciplina_ids'=>[1],'curriculo_versao'=>1,
+        ])->assertOk()->assertSee('data-curriculo-editor',false)->assertDontSee('/app/provas/10/',false);
+        $dom=new \DOMDocument();@$dom->loadHTML($resposta->getContent());
+        $botoes=(new \DOMXPath($dom))->query('//button[@formaction]');
+        $this->assertGreaterThan(0,$botoes->length);
+        foreach($botoes as $botao){
+            $destino=json_decode($botao->getAttribute('data-recurso'),true,512,JSON_THROW_ON_ERROR);
+            $this->assertSame($destino['url'],$botao->getAttribute('formaction'));
+            $dados=\App\Support\NavegacaoWeb::obter($destino['referencia']);
+            $this->assertSame('provas.curriculo.preparar',$dados['nome']);
+            $this->assertSame('10',(string)$dados['parametros']['id']);
+        }
+        $this->nenhumaGravacao();
+    }
+
     public function test_conflito_preserva_proposta_exige_revisao_e_nao_reenvia_automaticamente(): void
     {
         $ctx=$this->preparar();$d=['turma_ids'=>[3],'disciplina_ids'=>[1],'curriculo_versao'=>0];

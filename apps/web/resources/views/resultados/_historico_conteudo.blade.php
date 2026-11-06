@@ -14,7 +14,7 @@
             <div class="exam-meta">{{ $t['autor_nome'] }} · {{ \Carbon\Carbon::parse($t['ocorrido_em'],'UTC')->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</div>
             @if(!empty($t['motivo']))<div>Motivo: {{ $t['motivo'] }}</div>@endif
             @if(isset($t['nota_final']))<div>Nota preservada: {{ number_format((float)$t['nota_final'],1,',','.') }}</div>@endif
-          </td><td class="tabela-acoes" data-rotulo="Ações"><button type="button" class="btn btn-secondary" data-historico-recurso="{{ json_encode($urlHistorico(['tentativa'=>$t['id']])) }}" @if(($tentativa['id']??null)===$t['id']) aria-current="true" @endif>Conferir leitura</button></td></tr>
+          </td><td class="tabela-acoes" data-rotulo="Ações"><button type="button" class="btn btn-secondary" data-historico-leitura="{{ $t['id'] }}" data-historico-recurso="{{ json_encode($urlHistorico(['tentativa'=>$t['id']])) }}" @if(($tentativa['id']??null)===$t['id']) aria-current="true" @endif>Conferir leitura</button></td></tr>
         @empty<tr><td colspan="2">Nenhuma leitura arquivada para este aluno nesta prova.</td></tr>@endforelse
       </tbody></table>
     </x-tabela>
