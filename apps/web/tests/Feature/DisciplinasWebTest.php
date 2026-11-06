@@ -74,7 +74,7 @@ class DisciplinasWebTest extends TestCase
         $this->consultarTela('/app/turmas/1/disciplinas/1')->assertOk()->assertSee('Nenhum professor indicado nesta disciplina')->assertSee('Adicionar à disciplina')->assertSee('Gerir acesso à turma')->assertDontSee('Confirmar atribuição');
         $elegiveis = [['vinculo_id' => 3, 'nome' => 'Professor fictício']];
         $this->consultarTela('/app/turmas/1/disciplinas/1?rascunho_inicio=2026-12-01&rascunho_papel=codocencia')->assertOk()->assertSee('Confirmar atribuição')->assertSee('value="2026-12-01"', false)
-            ->assertSee('A partir desta data, o professor não atua mais')->assertSee('Nenhuma opção encerra automaticamente');
+            ->assertSee('A partir desta data, o professor não atua mais')->assertSee('Nenhuma atuação permite sobreposição');
     }
 
     public function test_conflito_preserva_rascunho_e_reexige_confirmacao_com_versao_atual(): void

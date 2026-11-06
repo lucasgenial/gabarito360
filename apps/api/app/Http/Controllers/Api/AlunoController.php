@@ -138,7 +138,7 @@ class AlunoController extends Controller
         if ($pessoal) {
             app(\App\Services\AtualizarAlunoPessoal::class)->executar($request->user(), $id, EspacoPessoal::dadosMinimos($data));
         } else {
-            $aluno->update($data);
+            app(\App\Services\MovimentarAlunoTurma::class)->executar($request->user(),$id,$data);
         }
 
         return ApiResponse::success($aluno->fresh());
@@ -152,11 +152,24 @@ class AlunoController extends Controller
             return ApiResponse::notFound('Aluno não encontrado.');
         }
 
-        $aluno->update(['ativo' => !$aluno->ativo]);
+        $esperado=$request->validate(['esperado_ativo'=>'sometimes|boolean']);
+        \Illuminate\Support\Facades\DB::transaction(function()use($aluno,$esperado){
+            $atual=Aluno::whereKey($aluno->id)->lockForUpdate()->firstOrFail();
+            if(array_key_exists('esperado_ativo',$esperado))abort_unless((bool)$atual->ativo===(bool)$esperado['esperado_ativo'],409,'O status do aluno mudou. Atualize os dados antes de confirmar.');
+            $atual->update(['ativo'=>!$atual->ativo]); $aluno->setRawAttributes($atual->getAttributes(),true);
+        });
 
         return ApiResponse::success(
             ['ativo' => $aluno->ativo],
             $aluno->ativo ? 'Aluno ativado.' : 'Aluno desativado.'
         );
+    }
+
+    public function transferir(Request $request,int $id): JsonResponse
+    {
+        abort_unless(\App\Services\MovimentarAlunoTurma::autorizado($request->user()),403);
+        $d=$request->validate(['turma_id'=>'required|integer|min:1','turma_origem_id'=>'required|integer|min:1','chave'=>'required|uuid','motivo'=>'required|string|min:5|max:500']);
+        app(\App\Services\MovimentarAlunoTurma::class)->executar($request->user(),$id,['turma_id'=>$d['turma_id']],$d);
+        return ApiResponse::success(['transferido'=>true],'Aluno transferido. Histórico preservado.');
     }
 }

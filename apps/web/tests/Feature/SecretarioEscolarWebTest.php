@@ -41,7 +41,8 @@ class SecretarioEscolarWebTest extends TestCase
         $this->consultarTela('/app/painel')->assertOk()->assertSee('Secretaria escolar')->assertSee('Ver alunos')->assertDontSee('Relatórios');
         $this->assertSame(['Painel','Turmas','Alunos'],array_column(Acesso::menuCelular()['barra'],'rotulo'));
         $this->consultarTela('/app/turmas')->assertOk()->assertSee('Turma fictícia')->assertDontSee('Desempenho médio');
-        $this->consultarTela('/app/turmas/1')->assertOk()->assertSee('Aluno fictício')->assertSee('Salvar alterações')->assertDontSee('Média')->assertDontSee('Vincular professor');
+        $this->consultarTela('/app/turmas/1')->assertOk()->assertSee('Aluno fictício')->assertSee('Editar turma')->assertSee('Transferir')->assertDontSee('Média')->assertDontSee('Vincular professor');
+        $this->consultarTela('/app/turmas/1/editar')->assertOk()->assertSee('Salvar alterações')->assertDontSee('modal-editar');
         $this->alterarRecurso('PUT', '/app/turmas/1',['nome'=>'Turma editada','serie'=>'4','turno'=>'tarde','ano_letivo'=>2026])->assertRetornoTela()->assertSessionHas('sucesso');
         $this->consultarTela('/app/provas')->assertForbidden();
         $this->consultarTela('/app/membros')->assertForbidden();

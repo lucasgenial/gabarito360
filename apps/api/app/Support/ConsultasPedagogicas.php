@@ -70,7 +70,10 @@ class ConsultasPedagogicas
                     ->where(fn ($a) => $a->whereNull('cartoes.aluno_id')->orWhereExists(fn ($s) => $s->selectRaw('1')->from('alunos as ca')
                         ->join('prova_turmas as ct', fn ($j) => $j->whereRaw('ct.turma_id = COALESCE(cartoes.turma_aplicacao_id, ca.turma_id)'))->whereColumn('ca.id', 'cartoes.aluno_id')
                         ->whereColumn('ca.espaco_id', 'cartoes.espaco_id')->whereColumn('ct.espaco_id', 'cartoes.espaco_id')
-                        ->whereColumn('ct.prova_id', 'cartoes.prova_id')->whereIn('ca.id', $this->tabela('alunos')->select('alunos.id'))));
+                        ->whereColumn('ct.prova_id', 'cartoes.prova_id')->where(function($acesso){
+                            $acesso->whereIn('ca.id',$this->tabela('alunos')->select('alunos.id'));
+                            if($this->ator->perfil==='professor') $acesso->orWhereIn('cartoes.turma_aplicacao_id',$this->tabela('turmas')->select('turmas.id'));
+                        })));
             case 'notas':
                 return $q->whereIn('notas.cartao_id', $this->tabela('cartoes')->select('cartoes.id'))
                     ->whereExists(fn ($n) => $n->selectRaw('1')->from('cartoes as nc')->join('alunos as na', 'na.id', '=', 'nc.aluno_id')

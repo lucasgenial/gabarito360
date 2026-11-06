@@ -62,10 +62,10 @@ class ContextoPorAba
             $permissao = match ($request->route()->getName()) {
                 'painel', 'perfil', 'perfil.update', 'perfil.senha', 'perfil.email', 'perfil.imagem', 'perfil.foto' => null,
                 'turmas.index', 'turmas.show' => 'turma.ver',
-                'turmas.store', 'turmas.update' => 'turma.gerir',
+                'turmas.store', 'turmas.update', 'turmas.edit' => 'turma.gerir',
                 'turmas.toggle' => 'turma.desativar',
                 'alunos.index', 'alunos.show', 'alunos.foto' => 'aluno.ver',
-                'alunos.create', 'alunos.store', 'alunos.update', 'alunos.imagem' => 'aluno.gerir',
+                'alunos.create', 'alunos.store', 'alunos.update', 'alunos.imagem', 'alunos.edit', 'alunos.transferencia', 'alunos.transferir' => 'aluno.gerir',
                 'alunos.toggle' => 'aluno.desativar',
                 default => false,
             };

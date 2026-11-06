@@ -65,7 +65,7 @@ class DisciplinasTest extends TestCase
         $this->assertDatabaseCount('docente_atribuicoes', 0);
     }
 
-    public function test_atribuicao_idempotente_sobreposicao_e_codocencia_explicita(): void
+    public function test_atribuicao_idempotente_e_exclusiva_em_todos_os_papeis(): void
     {
         [$d, $c] = $this->preparar(); $p = $this->pedido();
         $a = $this->postJson("/api/v1/turmas/1/disciplinas/$c/atribuicoes", $p)->assertCreated()->json('data.id');
@@ -75,8 +75,8 @@ class DisciplinasTest extends TestCase
         $this->postJson("/api/v1/disciplinas/$d/professores", ['vinculo_id' => 5, 'ativo' => true])->assertOk();
         DB::table('vinculo_turmas')->insert(['vinculo_id' => 5, 'espaco_id' => 5, 'turma_id' => 1]);
         $this->postJson("/api/v1/turmas/1/disciplinas/$c/atribuicoes", $this->pedido(['vinculo_id' => 5, 'versao' => 2]))->assertUnprocessable();
-        $this->postJson("/api/v1/turmas/1/disciplinas/$c/atribuicoes", $this->pedido(['vinculo_id' => 5, 'versao' => 2, 'papel' => 'codocencia']))->assertCreated();
-        $this->assertDatabaseCount('docente_atribuicoes', 2);
+        foreach(['codocencia','substituicao'] as $papel) $this->postJson("/api/v1/turmas/1/disciplinas/$c/atribuicoes", $this->pedido(['vinculo_id' => 5, 'versao' => 2, 'papel' => $papel]))->assertUnprocessable()->assertJsonValidationErrors('inicio_em');
+        $this->assertDatabaseCount('docente_atribuicoes', 1);
         $this->putJson("/api/v1/disciplinas/$d", ['nome' => 'Matemática', 'ativo' => false, 'versao' => 1])->assertUnprocessable();
         $this->postJson("/api/v1/disciplinas/$d/professores", ['vinculo_id' => 3, 'ativo' => false, 'versao' => 1])->assertUnprocessable();
     }
@@ -94,6 +94,21 @@ class DisciplinasTest extends TestCase
         $this->entrar(1, 4);
         $this->getJson('/api/v1/disciplinas')->assertOk()->assertJsonCount(2, 'data.disciplinas')->assertJsonPath('data.gerir', false);
         $this->postJson("/api/v1/turmas/1/disciplinas/$c/atribuicoes", $this->pedido())->assertForbidden();
+    }
+
+    public function test_periodos_adjacentes_e_mesmo_professor_em_disciplinas_distintas(): void
+    {
+        [$d,$c]=$this->preparar();
+        $this->postJson("/api/v1/turmas/1/disciplinas/$c/atribuicoes",$this->pedido(['fim_em'=>'2026-11-06']))->assertCreated();
+        $outra=$this->disciplina('Física');
+        $this->postJson("/api/v1/disciplinas/$outra/professores",['vinculo_id'=>3,'ativo'=>true])->assertOk();
+        $c2=$this->postJson('/api/v1/turmas/1/disciplinas',['disciplina_id'=>$outra])->assertCreated()->json('data.id');
+        $this->postJson("/api/v1/turmas/1/disciplinas/$c2/atribuicoes",$this->pedido())->assertCreated();
+        $this->postJson("/api/v1/disciplinas/$d/professores",['vinculo_id'=>5,'ativo'=>true])->assertOk();
+        DB::table('vinculo_turmas')->insert(['vinculo_id'=>5,'espaco_id'=>5,'turma_id'=>1]);
+        $this->postJson("/api/v1/turmas/1/disciplinas/$c/atribuicoes",$this->pedido(['vinculo_id'=>5,'inicio_em'=>'2026-11-06','versao'=>2]))->assertCreated();
+        $this->getJson('/api/v1/turmas/1/disciplinas')->assertOk()->assertJsonCount(3,'data.opcoes_atribuicao')->assertJsonMissingPath('data.opcoes_atribuicao.0.email');
+        $this->assertDatabaseCount('docente_atribuicoes',3);
     }
 
     public function test_vigencia_retirada_e_bloqueio_do_modulo_sao_respeitados(): void

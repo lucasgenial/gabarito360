@@ -43,7 +43,7 @@ class TurmaController extends Controller
         ]);
 
         $resp = $this->api->post('/v1/turmas', $request->only(
-            'escola_id','nome','serie','turno','ano_letivo'
+            'escola_id','nome','serie','turno','ano_letivo','sala','capacidade','etapa_ensino','observacoes'
         ));
 
         if ($resp->failed()) {
@@ -82,10 +82,6 @@ class TurmaController extends Controller
                     $acessoErro = $acessoErro || $r->failed(); $todosProfessores = $r->successful() ? ($r->json('data.usuarios') ?? []) : [];
                 }
             } catch (ConnectionException) { $acessoErro = true; }
-            if (\App\Support\Acesso::pode('turma.gerir')) {
-                try { $r = $this->api->get('/v1/escolas'); $escolasErro = $r->failed(); $escolas = $r->json('data.escolas') ?? []; }
-                catch (ConnectionException) { $escolasErro = true; }
-            }
         }
 
         $dc1Visivel = config('disciplinas.ativo') && session('auth_vinculos') && (\App\Support\ContextoWeb::atual()['espaco']['tipo'] ?? '') === 'escola'
@@ -102,17 +98,29 @@ class TurmaController extends Controller
             } catch (\Illuminate\Http\Client\ConnectionException) { $dc1Erro = true; }
         }
 
-        $catalogo = []; $catalogoMeta = []; $catalogoErro = false;
-        if (!$dc1Erro && ($dc1Dados['gerir'] ?? false) && \App\Support\Acesso::perfil() === 'coordenador' && \App\Support\Acesso::pode('disciplina.gerir')) {
-            try {
-                $r = $this->api->get('/v1/disciplinas', ['ativo'=>1,'busca'=>$filtros['catalogo_busca']??'', 'page'=>$filtros['catalogo_pagina']??1]);
-                $catalogoErro = $r->failed();
-                if (!$catalogoErro) { $catalogo = $r->json('data.disciplinas') ?? []; $catalogoMeta = $r->json('meta') ?? []; }
-            } catch (ConnectionException) { $catalogoErro = true; }
+        $opcoesDocentes=null; $opcoesDocentesErro=false;
+        if (!$dc1Erro && ($dc1Dados['atribuir']??false) && \App\Support\Acesso::perfil()==='coordenador' && \App\Support\Acesso::pode('disciplina.gerir')) {
+            try { $r=$this->api->get("/v1/turmas/$id/vinculo-docente/opcoes"); $opcoesDocentesErro=$r->failed(); if(!$opcoesDocentesErro)$opcoesDocentes=$r->json('data'); }
+            catch(ConnectionException){$opcoesDocentesErro=true;}
         }
 
+        $painel=null; $painelErro=false; $painelErros=[]; $painelAplicado=[];
+        if (\App\Support\Acesso::pode('relatorio.turma')) {
+            $regras=$this->regrasFiltrosPainel();
+            $v=\Illuminate\Support\Facades\Validator::make(request()->only(array_keys($regras)),$regras);
+            if($v->fails()){
+                $painelErros=$v->errors()->toArray();
+                $anterior=request('painel_anterior',[]);
+                $anterior=\Illuminate\Support\Facades\Validator::make(is_array($anterior)?$anterior:[],$regras);
+                $painelAplicado=$anterior->fails()?[]:$anterior->validated();
+            }else{$painelAplicado=$v->validated();}
+            $recorte=$this->mapearFiltrosPainel($painelAplicado);
+            try { $r=$this->api->get("/v1/turmas/$id/painel",$recorte); $painelErro=$r->failed(); if(!$painelErro)$painel=$r->json('data'); }
+            catch(ConnectionException){$painelErro=true;}
+        }
         return view('turmas.show', [
-            'secaoInicial'=>$filtros['secao']??'visao-geral', 'catalogo'=>$catalogo,'catalogoMeta'=>$catalogoMeta,'catalogoErro'=>$catalogoErro,'catalogoBusca'=>$filtros['catalogo_busca']??'',
+            'painel'=>$painel,'painelErro'=>$painelErro,'painelErros'=>$painelErros,'painelAplicado'=>$painelAplicado,
+            'secaoInicial'=>$filtros['secao']??'visao-geral', 'opcoesDocentes'=>$opcoesDocentes,'opcoesDocentesErro'=>$opcoesDocentesErro,
             'acessoErro'=>$acessoErro,'escolasErro'=>$escolasErro,
             'turma'            => $resp->json('data'),
             'escolas'          => $escolas,
@@ -168,22 +176,74 @@ class TurmaController extends Controller
     public function update(Request $request, int $id)
     {
         if (\App\Support\Acesso::pessoal()) $request->validate(['escola_id'=>'prohibited']);
-        $request->validate([
+        try { $request->validate([
             'nome'  => 'required|string|max:50',
             'serie' => 'required|string|max:50',
-            'turno' => 'required|string',
-        ]);
+            'turno' => 'required|in:manha,tarde,noite,integral',
+            'ano_letivo'=>'sometimes|integer|min:2020|max:2099',
+            'sala'=>'sometimes|nullable|string|max:50',
+            'capacidade'=>'sometimes|nullable|integer|min:1|max:1000',
+            'etapa_ensino'=>'sometimes|nullable|in:educacao_infantil,ensino_fundamental,ensino_medio,educacao_profissional,ensino_superior,eja,outra',
+            'observacoes'=>'sometimes|nullable|string|max:1000',
+        ]); } catch (\Illuminate\Validation\ValidationException $e) { $e->redirectTo(route('turmas.edit',$id));throw $e; }
 
         $resp = $this->api->put("/v1/turmas/{$id}", $request->only(
-            'escola_id','nome','serie','turno','ano_letivo'
+            'escola_id','nome','serie','turno','ano_letivo','sala','capacidade','etapa_ensino','observacoes'
         ));
 
         if ($resp->failed()) {
-            return back()->withInput()
+            return redirect()->route('turmas.edit',$id)->withInput()->withErrors($resp->json('errors')??[])
                 ->with('erro', $resp->json('message') ?? 'Não foi possível atualizar a turma.');
         }
 
         return redirect()->route('turmas.show', $id)->with('sucesso', 'Turma atualizada.');
+    }
+
+    public function edit(int $id): View
+    {
+        abort_unless(\App\Support\Acesso::pode('turma.gerir'), 403);
+        $r = $this->api->get("/v1/turmas/{$id}");
+        abort_unless($r->successful(), $r->serverError() ? 503 : 404);
+        return view('turmas.edit', ['turma'=>$r->json('data')]);
+    }
+
+    public function atribuir(Request $request, int $id)
+    {
+        abort_unless(\App\Support\Acesso::perfil()==='coordenador' && \App\Support\Acesso::pode('disciplina.gerir') && \App\Support\Acesso::pode('turma.vincular_professor'),403);
+        $retorno = ['id'=>$id,'secao'=>'disciplinas'];
+        try { $d=$request->validate(['disciplina_id'=>'required|integer|min:1','professor_vinculo_id'=>'required|integer|min:1','chave_idempotencia'=>'required|uuid']); }
+        catch (\Illuminate\Validation\ValidationException $e) { $e->redirectTo(route('turmas.show',$retorno)); throw $e; }
+        try { $r=$this->api->post("/v1/turmas/$id/vinculos-docentes",$d); }
+        catch (ConnectionException) { return redirect()->route('turmas.show',$retorno)->withInput()->with('erro','Não foi possível confirmar a atribuição. Confira o histórico antes de reenviar.'); }
+        abort_if(in_array($r->status(),[403,404],true),$r->status());
+        if ($r->failed()) return redirect()->route('turmas.show',$retorno)->withInput()->withErrors($r->json('errors')??[])->with('erro',$r->json('message')??'Não foi possível registrar a atribuição.');
+        return redirect()->route('turmas.show',$retorno)->with('sucesso','Professor atribuído à disciplina nesta turma.');
+    }
+
+    private function regrasFiltrosPainel(): array
+    {
+        return ['painel_disciplina'=>'nullable|integer|min:1','painel_professor'=>'nullable|integer|min:1','painel_inicio'=>'nullable|date_format:Y-m-d','painel_fim'=>'nullable|date_format:Y-m-d|after_or_equal:painel_inicio'];
+    }
+
+    private function mapearFiltrosPainel(array $d): array
+    {
+        $mapa=['painel_disciplina'=>'disciplina_id','painel_professor'=>'professor_id','painel_inicio'=>'inicio','painel_fim'=>'fim'];$saida=[];
+        foreach($d as $k=>$v)if(isset($mapa[$k])&&$v!==null&&$v!=='')$saida[$mapa[$k]]=$v;
+        return $saida;
+    }
+
+    private function filtrosPainel(Request $r): array
+    {
+        return $this->mapearFiltrosPainel($r->validate($this->regrasFiltrosPainel()));
+    }
+
+    public function painelPdf(Request $r,int $id)
+    {
+        abort_unless(\App\Support\Acesso::pode('relatorio.turma'),403);
+        $d=$this->filtrosPainel($r)+$r->validate(['orientacao'=>'required|in:retrato,paisagem']);
+        $resp=$this->api->getArquivo("/v1/turmas/$id/painel/pdf",$d);
+        abort_unless($resp->successful()&&str_contains((string)$resp->header('Content-Type'),'pdf'),$resp->failed()?$resp->status():502,'Não foi possível gerar o documento.');
+        return response($resp->body(),200,['Content-Type'=>'application/pdf','Content-Disposition'=>($r->boolean('baixar')?'attachment':'inline').'; filename="painel-turma.pdf"','Cache-Control'=>'private, no-store','X-Content-Type-Options'=>'nosniff']);
     }
 
     public function toggle(int $id)

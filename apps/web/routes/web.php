@@ -218,6 +218,9 @@ $rotasContextuais = static function () {
     Route::get('/alunos',              [AlunoController::class, 'index'])->name('alunos.index');
     Route::get('/alunos/novo',         [AlunoController::class, 'create'])->name('alunos.create');
     Route::post('/alunos',             [AlunoController::class, 'store'])->name('alunos.store');
+    Route::get('/alunos/{id}/editar', [AlunoController::class, 'edit'])->name('alunos.edit');
+    Route::get('/alunos/{id}/transferir', [AlunoController::class, 'transferencia'])->name('alunos.transferencia');
+    Route::post('/alunos/{id}/transferencias-turma', [AlunoController::class, 'transferir'])->name('alunos.transferir');
     Route::get('/alunos/{id}',         [AlunoController::class, 'show'])->name('alunos.show');
     Route::put('/alunos/{id}',         [AlunoController::class, 'update'])->name('alunos.update');
     Route::post('/alunos/{id}/toggle', [AlunoController::class, 'toggle'])->name('alunos.toggle');
@@ -225,6 +228,9 @@ $rotasContextuais = static function () {
     // Turmas (MP-016) + Vínculo professor (MP-018)
     Route::get('/turmas',                              [TurmaController::class, 'index'])->name('turmas.index');
     Route::post('/turmas',                             [TurmaController::class, 'store'])->name('turmas.store');
+    Route::match(['GET','POST'],'/turmas/{id}/painel/pdf', [TurmaController::class,'painelPdf'])->name('turmas.painelPdf');
+    Route::post('/turmas/{id}/atribuicoes',            [TurmaController::class, 'atribuir'])->name('turmas.atribuir');
+    Route::get('/turmas/{id}/editar',                  [TurmaController::class, 'edit'])->name('turmas.edit');
     Route::get('/turmas/{id}',                         [TurmaController::class, 'show'])->name('turmas.show');
     Route::put('/turmas/{id}',                         [TurmaController::class, 'update'])->name('turmas.update');
     Route::post('/turmas/{id}/toggle',                 [TurmaController::class, 'toggle'])->name('turmas.toggle');

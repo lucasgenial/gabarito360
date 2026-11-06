@@ -476,4 +476,18 @@ class CartoesFilaTest extends TestCase
         $this->assertSame('recusado',$e->fresh()->status);$this->assertDatabaseCount('notas',0);$this->assertDatabaseCount('cartao_respostas',0);
     }
 
+
+    public function test_nova_tentativa_preserva_turma_historica_apos_mudanca_de_turma(): void
+    {
+        $antigo=$this->enviar(aluno:$this->aluno);$this->job($antigo)->handle($this->driver(),app(ImagensCartao::class));
+        Cartao::findOrFail($antigo->cartao_id)->forceFill(['turma_aplicacao_id'=>$this->turma])->save();
+        $destino=DB::table('turmas')->insertGetId(['escola_id'=>$this->prova->escola_id,'nome'=>'3B','serie'=>'3','turno'=>'tarde','ano_letivo'=>2026]);
+        DB::table('alunos')->where('id',$this->aluno)->update(['turma_id'=>$destino]);
+        DB::table('prova_turmas')->insert(['prova_id'=>$this->prova->id,'turma_id'=>$destino]);
+        $novo=$this->enviar(aluno:$this->aluno);$this->job($novo)->handle($this->driver(),app(ImagensCartao::class));
+        $this->aplicarTentativa($novo->fresh()->resultado['tentativa_id'])->assertOk();
+        $this->assertDatabaseHas('cartoes',['aluno_id'=>$this->aluno,'turma_aplicacao_id'=>$this->turma]);
+        $this->assertDatabaseHas('notas',['aluno_id'=>$this->aluno,'turma_id'=>$this->turma]);
+        $this->assertDatabaseMissing('notas',['aluno_id'=>$this->aluno,'turma_id'=>$destino]);
+    }
 }
