@@ -138,15 +138,7 @@
 @endsection
 
 @push('scripts')
-<script>
-(function () {
-  var chk = document.getElementById('so-falta');
-  if (!chk) return;
-  chk.addEventListener('change', function () {
-    document.querySelectorAll('.quadro tbody tr').forEach(function (tr) {
-      tr.style.display = chk.checked && tr.dataset.falta !== '1' ? 'none' : '';
-    });
-  });
-})();
-</script>
+@php($g360Config = [])
+<script type="application/json" id="correcao-turma-config">@json($g360Config)</script>
+<script src="{{ asset('js/correcao-turma.js') }}?v={{ filemtime(public_path('js/correcao-turma.js')) }}"></script>
 @endpush

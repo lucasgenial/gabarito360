@@ -320,3 +320,5 @@ Route::middleware('autenticado')->name('legado.')->group(function () use ($rotas
     $rotasContextuais();
     Route::prefix('acessos/{acesso}')->name('contexto.')->group($rotasContextuais);
 });
+
+\App\Support\RotasNavegacao::configurar(app('router'));

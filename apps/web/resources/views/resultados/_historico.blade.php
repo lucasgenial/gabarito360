@@ -7,5 +7,7 @@
 @push('scripts')
 @if(empty($dados['cartao_foto_url']))<script src="{{ asset('js/leitor-cartao.js') }}?v={{ filemtime(public_path('js/leitor-cartao.js')) }}"></script>@endif
 <script src="{{ asset('js/resultado-historico.js') }}?v={{ filemtime(public_path('js/resultado-historico.js')) }}"></script>
-<script>iniciarHistoricoResultado(@json(route('resultados.historico',[$aluno['id'],$prova['id']])));</script>
+@php($historicoRecurso = \App\Support\NavegacaoWeb::destino('resultados.historico',[$aluno['id'],$prova['id']]+request()->only('tentativa','tentativas_pagina')))
+<script type="application/json" id="resultado-historico-config">@json($historicoRecurso)</script>
+<script src="{{ asset('js/resultado-historico-iniciar.js') }}?v={{ filemtime(public_path('js/resultado-historico-iniciar.js')) }}"></script>
 @endpush

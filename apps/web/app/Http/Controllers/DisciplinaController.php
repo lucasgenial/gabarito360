@@ -191,8 +191,13 @@ class DisciplinaController extends Controller
     {
         if (!$r->boolean('rever')) return null;
         $this->autorizar(true);
-        $d = session()->pull($this->chaveRascunho('/'.$r->path()), []);
+        $d = session()->pull($this->chaveRascunho($r->attributes->get('ur4_caminho_original','/'.$r->path())), []);
         session()->forget('conflito_dc1');
-        return redirect()->to($r->fullUrlWithoutQuery('rever'))->withInput($d)->with('sucesso', 'Estado atualizado. Confira seu preenchimento e confirme novamente.');
+        $destino = $r->fullUrlWithoutQuery('rever');
+        if ($recurso = $r->attributes->get('ur4_dados')) {
+            unset($recurso['consulta']['rever']);
+            $destino = \App\Support\NavegacaoWeb::original($recurso);
+        }
+        return redirect()->to($destino)->withInput($d)->with('sucesso', 'Estado atualizado. Confira seu preenchimento e confirme novamente.');
     }
 }

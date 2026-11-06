@@ -7,9 +7,11 @@ use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class ContextoPorAbaTest extends TestCase
 {
+    use NavegacaoHttp;
     protected function setUp(): void
     {
         parent::setUp();
@@ -74,7 +76,8 @@ class ContextoPorAbaTest extends TestCase
 
     public function test_contexto_ausente_invalido_de_outra_sessao_e_expirado_nao_envia_operacao(): void
     {
-        $this->get('/app/painel')->assertRedirect('/app/vinculos');
+        $this->get('/app/painel')->assertOk()->assertSee('data-navegacao-estrutura',false);
+        $this->consultarTela('/app/painel')->assertRedirect('/app/vinculos');
         $this->postJson('/provas')->assertStatus(409);
         $this->postJson('/acessos/vinculo-999/turmas')->assertStatus(409);
         $id = $this->ativar($this->dados('privado'));
@@ -140,7 +143,7 @@ class ContextoPorAbaTest extends TestCase
             ['id'=>1,'perfil'=>'professor','espaco'=>['id'=>1,'tipo'=>'escola','nome'=>'Escola fictícia']],
             ['id'=>2,'perfil'=>'professor','espaco'=>['id'=>2,'tipo'=>'escola','nome'=>'Outra escola']],
         ] : $this->dados('omitido')]));
-        $this->get($this->url('/referencia-visual',$id))->assertOk()->assertSee('Trocar vínculo')->assertSee('Escola fictícia')->assertDontSee('contextual');
+        $this->consultarTela($this->url('/referencia-visual',$id))->assertOk()->assertSee('Trocar vínculo')->assertSee('Escola fictícia')->assertDontSee('contextual');
         $this->post('/logout')->assertRedirect('/login')->assertSessionMissing('auth_token');
         Http::assertSent(fn ($r) => str_ends_with($r->url(), '/auth/logout') && $r->hasHeader('Authorization', 'Bearer identidade'));
     }

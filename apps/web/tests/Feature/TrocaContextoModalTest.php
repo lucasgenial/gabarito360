@@ -4,9 +4,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class TrocaContextoModalTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private array $atual;
 
@@ -47,7 +49,7 @@ class TrocaContextoModalTest extends TestCase
     public function test_vinculo_unico_nao_renderiza_icone_nem_modal(): void
     {
         $ctx=$this->preparar();$this->api([$this->opcoes()[0]]);
-        $this->get('/app/referencia-visual')->assertOk()->assertSee('Meu espaço')
+        $this->consultarTela('/app/referencia-visual')->assertOk()->assertSee('Meu espaço')
             ->assertDontSee('id="contexto-trocar"',false)->assertDontSee('id="troca-contexto-modal"',false);
         Http::assertSentCount(2);
     }
@@ -55,7 +57,7 @@ class TrocaContextoModalTest extends TestCase
     public function test_modal_preserva_identidade_atual_csrf_e_nao_expoe_tokens(): void
     {
         $ctx=$this->preparar();$this->api($this->opcoes());
-        $r=$this->get('/app/referencia-visual')->assertOk()->assertSee('id="contexto-trocar"',false)
+        $r=$this->consultarTela('/app/referencia-visual')->assertOk()->assertSee('id="contexto-trocar"',false)
             ->assertSee('aria-haspopup="dialog"',false)->assertSee('id="troca-contexto-modal"',false)
             ->assertSee('Atual')->assertSee('Escola &lt;teste&gt; B',false)->assertSee('data-sem-contexto',false)
             ->assertDontSee('contexto-atual-secreto')->assertDontSee('Bearer identidade');
@@ -70,17 +72,17 @@ class TrocaContextoModalTest extends TestCase
     public function test_acesso_interno_unico_e_alternativa_escolar_sao_contados_separadamente(): void
     {
         $ctx=$this->preparar(true);$this->api([],[['id'=>1,'perfil'=>'suporte']]);
-        $this->get('/app/painel')->assertOk()->assertDontSee('id="contexto-trocar"',false);
+        $this->consultarTela('/app/painel')->assertOk()->assertDontSee('id="contexto-trocar"',false);
         $this->withHeader('X-G360-Revisao', session('auth_contexto_revisao'));
         Http::swap(new \Illuminate\Http\Client\Factory());
         $this->api([$this->opcoes()[0]],[['id'=>1,'perfil'=>'suporte']]);
-        $this->get('/app/painel')->assertOk()->assertSee('Trocar acesso')->assertSee('Equipe Gabarito360')->assertSee('Escola A');
+        $this->consultarTela('/app/painel')->assertOk()->assertSee('Trocar acesso')->assertSee('Equipe Gabarito360')->assertSee('Escola A');
     }
 
     public function test_falha_de_consulta_nao_inventa_alternativas_e_apresenta_orientacao(): void
     {
         $ctx=$this->preparar();$this->api([],[],503);
-        $this->get('/app/referencia-visual')->assertOk()->assertDontSee('id="contexto-trocar"',false)
+        $this->consultarTela('/app/referencia-visual')->assertOk()->assertDontSee('id="contexto-trocar"',false)
             ->assertSee('Não foi possível verificar outros acessos.');
     }
 

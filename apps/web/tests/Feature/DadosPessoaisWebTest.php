@@ -4,9 +4,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class DadosPessoaisWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private string $ctx;
     protected function setUp(): void
@@ -42,13 +44,13 @@ class DadosPessoaisWebTest extends TestCase
     {
         $this->fake();
         foreach (['/app/alunos/novo','/app/alunos/1'] as $path) {
-            $r=$this->get($path)->assertOk();
+            $r=$this->consultarTela($path)->assertOk();
             if ($dir=getenv('T3B_PREVIEW_DIR')) file_put_contents($dir.'/'.str_replace('/','-',trim($path,'/')).'.html',$r->getContent());
             foreach (['cpf','data_nascimento','genero','nome_responsavel'] as $campo) $r->assertDontSee('name="'.$campo.'"',false);
             $r->assertSee('name="turma_id"',false)->assertSee('name="avatar_id"',false);
         }
         foreach (['/app/turmas','/app/turmas/1','/app/provas/nova'] as $path) {
-            $r=$this->get($path)->assertOk()->assertDontSee('name="escola_id"',false);
+            $r=$this->consultarTela($path)->assertOk()->assertDontSee('name="escola_id"',false);
             if ($path==='/app/turmas/1') $r->assertDontSee('Vincular professor')->assertDontSee('id="professor-selecionado"',false);
             if ($dir=getenv('T3B_PREVIEW_DIR')) file_put_contents($dir.'/'.str_replace('/','-',trim($path,'/')).'.html',$r->getContent());
         }
@@ -57,11 +59,11 @@ class DadosPessoaisWebTest extends TestCase
     public function test_envio_minimo_e_rejeicao_antes_de_enviar_dados_excessivos(): void
     {
         $this->fake();
-        $this->post('/app/alunos',['nome'=>'Aluno','matricula'=>'A-1','turma_id'=>1,'avatar_id'=>2])->assertRedirect()->assertSessionHas('sucesso');
+        $this->alterarRecurso('POST', '/app/alunos',['nome'=>'Aluno','matricula'=>'A-1','turma_id'=>1,'avatar_id'=>2])->assertRetornoTela()->assertSessionHas('sucesso');
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/alunos') && $r->data()===['avatar_id'=>2,'turma_id'=>1,'nome'=>'Aluno','matricula'=>'A-1']);
-        $this->post('/app/alunos',['nome'=>'Aluno','matricula'=>'A-2','turma_id'=>1,'cpf'=>'12345678901'])->assertSessionHasErrors('cpf');
+        $this->alterarRecurso('POST', '/app/alunos',['nome'=>'Aluno','matricula'=>'A-2','turma_id'=>1,'cpf'=>'12345678901'])->assertSessionHasErrors('cpf');
         Http::assertNotSent(fn($r)=>isset($r['cpf']));
-        $this->post('/app/turmas',['nome'=>'Turma','serie'=>'3','turno'=>'tarde','ano_letivo'=>2026])->assertRedirect()->assertSessionHas('sucesso');
+        $this->alterarRecurso('POST', '/app/turmas',['nome'=>'Turma','serie'=>'3','turno'=>'tarde','ano_letivo'=>2026])->assertRetornoTela()->assertSessionHas('sucesso');
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/turmas') && $r->method()==='POST' && !isset($r['escola_id']));
     }
 }

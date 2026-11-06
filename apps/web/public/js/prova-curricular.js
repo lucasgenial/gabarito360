@@ -17,7 +17,9 @@
     const status = editor.querySelector('[data-curriculo-status]');
     if (status) status.textContent = 'Conferindo disciplinas e turmas…';
     try {
-      const resposta = await fetch(botao.formAction, { method: 'POST', body: dados, credentials: 'same-origin', signal: controle.signal, headers: {'X-Curriculo-Fragmento': '1', Accept: 'text/html'} });
+      dados.delete('_recurso');
+      const recurso=JSON.parse(botao.dataset.recurso||form.dataset.recurso);
+      const resposta = await G360Requisicao(recurso, { method: 'POST', body: dados, credentials: 'same-origin', signal: controle.signal, headers: {'X-Curriculo-Fragmento': '1', Accept: 'text/html'} });
       const texto = await resposta.text();
       if (ordem !== sequencia) return;
       const doc = new DOMParser().parseFromString(texto, 'text/html');

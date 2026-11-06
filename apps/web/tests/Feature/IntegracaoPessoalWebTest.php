@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Support\{Acesso, ContextoWeb};
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class IntegracaoPessoalWebTest extends TestCase
 {
+    use NavegacaoHttp;
     public function test_selecao_pessoal_abre_painel_e_menu_sem_poderes_institucionais(): void
     {
         config(['services.api.base_url'=>'http://api.test/api']);
@@ -35,7 +37,7 @@ class IntegracaoPessoalWebTest extends TestCase
         $this->assertSame(route('painel',[]),$destino);
         $this->assertNull(parse_url($destino,PHP_URL_QUERY));
         $this->withHeader('X-G360-Revisao', session('auth_contexto_revisao'));
-        $this->get($destino)->assertOk()->assertSee('Meu espaço pessoal')->assertSee('Minhas provas')
+        $this->consultarTela($destino)->assertOk()->assertSee('Meu espaço pessoal')->assertSee('Minhas provas')
             ->assertDontSee('Administrador da Rede')->assertDontSee('href="'.route('escolas.index',[]).'"',false)
             ->assertDontSee('href="'.route('membros.index',[]).'"',false);
         $this->assertSame(['Painel','Corrigir','Provas','Turmas'],array_column(Acesso::menuCelular()['barra'],'rotulo'));

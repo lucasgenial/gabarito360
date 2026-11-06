@@ -3,9 +3,11 @@ namespace Tests\Feature;
 use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class DecisaoResultadosWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private function preparar(array $permissoes=['copia.autorizar_origem']): array
     {
@@ -45,11 +47,11 @@ class DecisaoResultadosWebTest extends TestCase
             return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:($r->method()==='POST'?[
                 'codigo'=>$code,'valida_ate'=>now()->addMinutes(15)->toISOString(),'destino'=>['nome'=>'Destino']]:['espacos'=>[['id'=>5,'nome'=>'Destino']],'espaco_id'=>5])]);
         });
-        $this->get('/app/copias/receber-resultados')->assertOk()->assertSee('Receber resultados')->assertSee('name="_token"',false);
-        $this->post('/app/copias/receber-resultados',['espaco_id'=>5])->assertOk()->assertSee($code);
+        $this->consultarTela('/app/copias/receber-resultados')->assertOk()->assertSee('Receber resultados')->assertSee('name="_token"',false);
+        $this->alterarRecurso('POST', '/app/copias/receber-resultados',['espaco_id'=>5])->assertOk()->assertSee($code);
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/resultados/recebimentos') && $r->data()===['espaco_id'=>5]);
         $this->assertStringNotContainsString($code,json_encode(session()->all()));
-        $this->post('/app/copias/resultados/abrir',['lote_id'=>$this->decisao()['lote_id']])->assertRedirect();
+        $this->alterarRecurso('POST', '/app/copias/resultados/abrir',['lote_id'=>$this->decisao()['lote_id']])->assertRetornoTela();
     }
     public function test_pacote_completo_e_tres_confirmacoes_antes_de_criar(): void
     {
@@ -58,12 +60,12 @@ class DecisaoResultadosWebTest extends TestCase
             'espaco_id'=>5,'notas'=>[1],'dependencias'=>$deps,'pacote'=>$this->pacote(),'conteudo_digest'=>str_repeat('c',64),
             'recebimento'=>['destino'=>['nome'=>'Destino','tipo'=>'pessoal'],'destino_digest'=>str_repeat('d',64),'valida_ate'=>now()->addMinutes(15)->toISOString()]]:['lote_id'=>$this->decisao()['lote_id']])]));
         $d=['espaco_id'=>5,'notas'=>[1],'codigo'=>str_repeat('a',64),'tipo_destino'=>'escola','ator_id'=>99];
-        $this->post('/app/copias/resultados/preparar',$d)->assertOk()->assertSee('Conferir respostas incluídas')->assertSee('Conferir gabarito')
+        $this->alterarRecurso('POST', '/app/copias/resultados/preparar',$d)->assertOk()->assertSee('Conferir respostas incluídas')->assertSee('Conferir gabarito')
             ->assertSee('8.00')->assertSee('10.00')->assertSee('Dependências incluídas')->assertSee('name="confirmado"',false)
             ->assertSee('name="dependencias_confirmadas"',false)->assertSee('name="legado_reconhecido"',false)
             ->assertPaginaSemSelecaoPrevia()->assertDontSee('<script>segredo</script>',false);
-        $this->post('/app/copias/resultados/lotes',$d+['chave'=>$this->decisao()['lote_id'],'dependencias'=>$deps,'destino_digest'=>str_repeat('d',64),'conteudo_digest'=>str_repeat('c',64),
-            'confirmado'=>1,'dependencias_confirmadas'=>1,'legado_reconhecido'=>1])->assertRedirect();
+        $this->alterarRecurso('POST', '/app/copias/resultados/lotes',$d+['chave'=>$this->decisao()['lote_id'],'dependencias'=>$deps,'destino_digest'=>str_repeat('d',64),'conteudo_digest'=>str_repeat('c',64),
+            'confirmado'=>1,'dependencias_confirmadas'=>1,'legado_reconhecido'=>1])->assertRetornoTela();
         Http::assertSent(fn($r)=>str_ends_with($r->url(),'/lotes') && $r['dependencias']===$deps && !isset($r['ator_id']) && !isset($r['tipo_destino']));
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/aprovar'));
     }
@@ -77,19 +79,19 @@ class DecisaoResultadosWebTest extends TestCase
                 return Http::response(['data'=>[]]);
             }
  return Http::response(['data'=>str_ends_with($r->url(),'/auth/me')?$me:$d]); });
-        $this->get('/app/copias/resultados/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('name="documento"',false)->assertSee('name="guarda"',false)
+        $this->consultarTela('/app/copias/resultados/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('name="documento"',false)->assertSee('name="guarda"',false)
             ->assertSee('name="preservacao"',false)->assertSee('name="legado_reconhecido"',false)->assertSee('não substitui o prazo de guarda contratual')->assertDontSee('Autorizar saída dos resultados');
-        $this->post('/app/copias/resultados/lotes/'.$id.'/evidencia',['conteudo_digest'=>$d['conteudo_digest'],
+        $this->alterarRecurso('POST', '/app/copias/resultados/lotes/'.$id.'/evidencia',['conteudo_digest'=>$d['conteudo_digest'],
             'documento'=>'DOC-RESTRITO','guarda'=>'GUARDA-RESTRITA','preservacao'=>'PRESERVACAO-RESTRITA','confirmado'=>1,'legado_reconhecido'=>1,
-            'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z')])->assertRedirect();
+            'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z')])->assertRetornoTela();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/aprovar'));
         foreach(['DOC-RESTRITO','GUARDA-RESTRITA','PRESERVACAO-RESTRITA'] as $t) $this->assertStringNotContainsString($t,json_encode(session()->all()));
         $d=$this->decisao('origem',true);
-        $this->get('/app/copias/resultados/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Autorizar saída dos resultados')->assertDontSee('name="documento"',false);
-        $this->post('/app/copias/resultados/lotes/'.$id.'/aprovar',['lado'=>'origem','conteudo_digest'=>$d['conteudo_digest'],
-            'confirmado'=>1,'legado_reconhecido'=>1,'valida_ate'=>now()->utc()->addMinutes(30)->format('Y-m-d\TH:i:s\Z')])->assertRedirect();
+        $this->consultarTela('/app/copias/resultados/lotes/'.$id.'?lado=origem')->assertOk()->assertSee('Autorizar saída dos resultados')->assertDontSee('name="documento"',false);
+        $this->alterarRecurso('POST', '/app/copias/resultados/lotes/'.$id.'/aprovar',['lado'=>'origem','conteudo_digest'=>$d['conteudo_digest'],
+            'confirmado'=>1,'legado_reconhecido'=>1,'valida_ate'=>now()->utc()->addMinutes(30)->format('Y-m-d\TH:i:s\Z')])->assertRetornoTela();
         $d=$this->decisao('destino',true); $d['saida_valida_ate']=now()->utc()->addMinutes(10)->format('Y-m-d H:i:s');
-        $this->get('/app/copias/resultados/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('Autorizar entrada dos resultados')->assertSee('name="legado_reconhecido"',false)
+        $this->consultarTela('/app/copias/resultados/lotes/'.$id.'?lado=destino')->assertOk()->assertSee('Autorizar entrada dos resultados')->assertSee('name="legado_reconhecido"',false)
             ->assertSee('Conferir respostas incluídas')->assertDontSee('name="guarda"',false)->assertDontSee('Autorizar saída dos resultados');
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'executar'));
     }
@@ -99,10 +101,10 @@ class DecisaoResultadosWebTest extends TestCase
         Http::fake(fn($r)=>str_ends_with($r->url(),'/auth/me')?Http::response(['data'=>$me]):Http::response(['message'=>'DOC-RESTRITO GUARDA-RESTRITA'],409));
         $d=['conteudo_digest'=>str_repeat('c',64),'documento'=>'DOC-RESTRITO','guarda'=>'GUARDA-RESTRITA','preservacao'=>'PRESERVACAO-RESTRITA',
             'confirmado'=>1,'valida_ate'=>now()->utc()->addHour()->format('Y-m-d\TH:i:s\Z')];
-        $this->post('/app/copias/resultados/lotes/'.$id.'/evidencia',$d)->assertStatus(422);
-        $this->post('/app/copias/resultados/lotes/'.$id.'/evidencia',$d+['legado_reconhecido'=>1])->assertStatus(409)->assertDontSee('DOC-RESTRITO')->assertDontSee('GUARDA-RESTRITA');
+        $this->alterarRecurso('POST', '/app/copias/resultados/lotes/'.$id.'/evidencia',$d)->assertStatus(422);
+        $this->alterarRecurso('POST', '/app/copias/resultados/lotes/'.$id.'/evidencia',$d+['legado_reconhecido'=>1])->assertStatus(409)->assertDontSee('DOC-RESTRITO')->assertDontSee('GUARDA-RESTRITA');
         $this->assertNull(session('_old_input')); foreach(['DOC-RESTRITO','GUARDA-RESTRITA','PRESERVACAO-RESTRITA'] as $t) $this->assertStringNotContainsString($t,json_encode(session()->all()));
-        $this->get('/app/copias/receber-resultados')->assertForbidden();
-        config(['services.copias.interface_ativa'=>false]); $this->get('/app/copias/resultados/lotes/'.$id.'?lado=origem')->assertNotFound();
+        $this->consultarTela('/app/copias/receber-resultados')->assertForbidden();
+        config(['services.copias.interface_ativa'=>false]); $this->consultarTela('/app/copias/resultados/lotes/'.$id.'?lado=origem')->assertNotFound();
     }
 }

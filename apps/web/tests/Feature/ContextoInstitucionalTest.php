@@ -4,10 +4,12 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 use Tests\Support\AcessoAtivoLegado;
 
 class ContextoInstitucionalTest extends TestCase
 {
+    use NavegacaoHttp;
     use AcessoAtivoLegado;
 
     protected function setUp(): void
@@ -25,10 +27,10 @@ class ContextoInstitucionalTest extends TestCase
             if (isset($r['listar_redes'])) return Http::response(['data' => ['redes' => [['id' => 1, 'nome' => 'Rede A'], ['id' => 2, 'nome' => 'Rede B']]]]);
             return Http::response(['data' => ['rede_id' => 2, 'nome' => 'Rede B', 'meta_media' => 7, 'meta_minima' => 6, 'limiar_seges_min' => 30]]);
         });
-        $this->get('/app/configuracoes')->assertOk()->assertSee('Selecione a rede')->assertDontSee('Salvar configurações');
-        $this->get('/app/configuracoes?rede_id=2')->assertOk()->assertSee('name="rede_id" value="2"', false);
-        $this->post('/app/configuracoes', ['_method' => 'PUT', 'rede_id' => 2, 'meta_media' => 8, 'meta_minima' => 6, 'limiar_seges_min' => 30])
-            ->assertRedirect('/app/configuracoes?rede_id=2');
+        $this->consultarTela('/app/configuracoes')->assertOk()->assertSee('Selecione a rede')->assertDontSee('Salvar configurações');
+        $this->consultarTela('/app/configuracoes?rede_id=2')->assertOk()->assertSee('name="rede_id" value="2"', false);
+        $this->alterarRecurso('PUT', '/app/configuracoes', [ 'rede_id' => 2, 'meta_media' => 8, 'meta_minima' => 6, 'limiar_seges_min' => 30])
+            ->assertRetornoTela('/app/configuracoes?rede_id=2');
         Http::assertSent(fn ($r) => $r->method() === 'PUT' && (int) $r['rede_id'] === 2);
         $this->assertNull(session('rede_id'));
     }
@@ -36,17 +38,17 @@ class ContextoInstitucionalTest extends TestCase
     public function test_destino_revogado_na_api_nao_exibe_configuracao_nem_salva(): void
     {
         $this->apiLegada(['*' => Http::response(['message' => 'Não encontrado.'], 404)]);
-        $this->get('/app/configuracoes?rede_id=2')->assertUnprocessable();
-        $this->from('/app/configuracoes?rede_id=2')->put('/app/configuracoes', ['rede_id' => 2, 'meta_media' => 8, 'meta_minima' => 6, 'limiar_seges_min' => 30])
-            ->assertRedirect('/app/configuracoes?rede_id=2')->assertSessionHas('erro');
+        $this->consultarTela('/app/configuracoes?rede_id=2')->assertUnprocessable();
+        $this->from('/app/configuracoes?rede_id=2')->alterarRecurso('PUT', '/app/configuracoes', ['rede_id' => 2, 'meta_media' => 8, 'meta_minima' => 6, 'limiar_seges_min' => 30])
+            ->assertRetornoTela('/app/configuracoes?rede_id=2')->assertSessionHas('erro');
     }
 
     public function test_painel_solicita_escolha_e_envia_id_da_url_sem_estado_global(): void
     {
         $this->selecionarAcessoLegado('dir_escolar', []);
         $this->apiLegada(fn ($r) => Http::response(['data' => ['selecao' => ['campo' => 'escola_id', 'opcoes' => [['id' => 1, 'nome' => 'Escola A'], ['id' => 2, 'nome' => 'Escola B']]]]], 422));
-        $this->get(route('painel'))->assertOk()->assertSee('Selecionar contexto')->assertSee('name="escola_id"', false);
-        $this->get(route('painel', ['escola_id' => 2]))->assertOk();
+        $this->consultarTela(route('painel'))->assertOk()->assertSee('Selecionar contexto')->assertSee('name="escola_id"', false);
+        $this->consultarTela(route('painel', ['escola_id' => 2]))->assertOk();
         Http::assertSent(fn ($r) => (int) ($r['escola_id'] ?? 0) === 2);
         $this->assertNull(session('escola_id'));
     }

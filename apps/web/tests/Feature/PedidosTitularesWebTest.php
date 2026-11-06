@@ -4,9 +4,11 @@ use App\Support\ContextoWeb;
 use Illuminate\Support\Facades\{Http,Cache,Crypt};
 use Illuminate\Http\Client\ConnectionException;
 use Tests\TestCase;
+use Tests\Support\NavegacaoHttp;
 
 class PedidosTitularesWebTest extends TestCase
 {
+    use NavegacaoHttp;
     use \Tests\Support\ContextoSelecionado;
     private string $ref='11111111-1111-4111-8111-111111111111';
     protected function setUp(): void
@@ -52,7 +54,7 @@ class PedidosTitularesWebTest extends TestCase
     }
     private function ticket(string $ctx,int $pos=0): string
     {
-        $html=$this->get('/app/pedidos-titulares/'.$this->ref)->assertOk()->getContent();
+        $html=$this->consultarTela('/app/pedidos-titulares/'.$this->ref)->assertOk()->getContent();
         preg_match_all('/name="envio" value="([a-zA-Z0-9]{48})"/',$html,$m);return $m[1][$pos];
     }
     private function dados(string $ctx,string $ticket): array
@@ -62,21 +64,21 @@ class PedidosTitularesWebTest extends TestCase
     public function test_listagem_detalhe_escape_contexto_e_formulario_de_abertura(): void
     {
         $this->simular();$ctx=$this->selecionarContextoFixture($this->contexto());
-        $this->get('/app/pedidos-titulares')->assertOk()->assertSee('Pedidos de titulares')->assertSee('Próxima')->assertDontSee('Abrir protocolo');
-        $this->get('/app/pedidos-titulares/'.$this->ref)->assertOk()->assertSee('&lt;script&gt;segredo()',false)
+        $this->consultarTela('/app/pedidos-titulares')->assertOk()->assertSee('Pedidos de titulares')->assertSee('Próxima')->assertDontSee('Abrir protocolo');
+        $this->consultarTela('/app/pedidos-titulares/'.$this->ref)->assertOk()->assertSee('&lt;script&gt;segredo()',false)
             ->assertDontSee('<script>segredo()',false)->assertDontSee('token-interno')->assertSee('name="_token"',false)->assertDontSee('name="_ctx"',false);
         $this->simular('desenvolvedor');$dev=$this->selecionarContextoFixture($this->contexto('desenvolvedor'));
-        $this->get('/app/pedidos-titulares/novo?cliente_id=1')->assertOk()->assertSee('Registrar e atribuir')->assertSee('Suporte fictício');
+        $this->consultarTela('/app/pedidos-titulares/novo?cliente_id=1')->assertOk()->assertSee('Registrar e atribuir')->assertSee('Suporte fictício');
     }
     public function test_financeiro_flag_e_abertura_suporte_sao_negados(): void
     {
         $this->simular('financeiro');$ctx=$this->selecionarContextoFixture($this->contexto('financeiro'));
-        $this->get('/app/painel')->assertOk()->assertDontSee('Pedidos de titulares');
-        $this->get('/app/pedidos-titulares')->assertForbidden();
-        $this->post('/app/pedidos-titulares',[])->assertForbidden();
+        $this->consultarTela('/app/painel')->assertOk()->assertDontSee('Pedidos de titulares');
+        $this->consultarTela('/app/pedidos-titulares')->assertForbidden();
+        $this->alterarRecurso('POST', '/app/pedidos-titulares',[])->assertForbidden();
         $this->simular();$ctx=$this->selecionarContextoFixture($this->contexto());
-        $this->get('/app/pedidos-titulares/novo')->assertForbidden();
-        config(['services.pedidos.interface_ativa'=>false]);$this->get('/app/pedidos-titulares')->assertNotFound();
+        $this->consultarTela('/app/pedidos-titulares/novo')->assertForbidden();
+        config(['services.pedidos.interface_ativa'=>false]);$this->consultarTela('/app/pedidos-titulares')->assertNotFound();
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'/pedidos-titulares'));
     }
     public function test_timeout_repete_mesmo_payload_e_uuid_sem_flash_ou_novo_envio_apos_sucesso(): void
@@ -84,11 +86,11 @@ class PedidosTitularesWebTest extends TestCase
         $tentativas=[];
         $this->simular(post:function($r) use (&$tentativas){$tentativas[]=$r->data();if(count($tentativas)===1)throw new ConnectionException('canario-secreto');return Http::response(['data'=>['referencia'=>$this->ref,'situacao'=>'aguardando_informacao','versao'=>3]]);});
         $ctx=$this->selecionarContextoFixture($this->contexto());$ticket=$this->ticket($ctx);$url='/app/pedidos-titulares/'.$this->ref.'/triagem';
-        $this->post($url,$this->dados($ctx,$ticket))->assertStatus(503)->assertSee('Repetir o mesmo envio')->assertDontSee('canario-secreto')->assertDontSee('Motivo reservado fictício')->assertSessionMissing('_old_input');
+        $this->alterarRecurso('POST', $url,$this->dados($ctx,$ticket))->assertStatus(503)->assertSee('Repetir o mesmo envio')->assertDontSee('canario-secreto')->assertDontSee('Motivo reservado fictício')->assertSessionMissing('_old_input');
         $repetir=['envio'=>$ticket,'confirmado'=>1,'repetir'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];
-        $this->post($url,$repetir)->assertRedirect(route('pedidos.show',['id'=>$this->ref,]));
+        $this->alterarRecurso('POST', $url,$repetir)->assertRetornoTela(route('pedidos.show',['id'=>$this->ref,]));
         $this->assertCount(2,$tentativas);$this->assertSame($tentativas[0],$tentativas[1]);$this->assertArrayNotHasKey('_ctx',$tentativas[0]);$this->assertArrayNotHasKey('envio',$tentativas[0]);$this->assertArrayNotHasKey('_revisao',$tentativas[0]);$this->assertArrayNotHasKey('_token',$tentativas[0]);
-        $this->post($url,$repetir)->assertRedirect();$this->assertCount(2,$tentativas);
+        $this->alterarRecurso('POST', $url,$repetir)->assertRetornoTela();$this->assertCount(2,$tentativas);
         $key='l4-envio:'.hash('sha256',session()->getId().'|identidade|'.$ctx.'|'.$ticket);
         $registro=json_decode(Crypt::decryptString(Cache::get($key)),true);
         $this->assertNull($registro['payload']);$this->assertSame($this->ref,$registro['recibo']['referencia']);
@@ -97,55 +99,53 @@ class PedidosTitularesWebTest extends TestCase
     {
         $posts=0;$this->simular(post:function()use(&$posts){$posts++;throw new ConnectionException('Falha fictícia');});
         $ctx=$this->selecionarContextoFixture($this->contexto());$ticket=$this->ticket($ctx);$url='/app/pedidos-titulares/'.$this->ref.'/triagem';
-        $d=$this->dados($ctx,$ticket);$this->post($url,$d)->assertStatus(503);
-        $this->post($url,array_replace($d,['motivo'=>'Outro motivo']))->assertStatus(409);
+        $d=$this->dados($ctx,$ticket);$this->alterarRecurso('POST', $url,$d)->assertStatus(503);
+        $this->alterarRecurso('POST', $url,array_replace($d,['motivo'=>'Outro motivo']))->assertStatus(409);
         $outro=$this->selecionarContextoFixture(array_replace($this->contexto(),['acesso_interno_id'=>3]));
         $this->simular(post:function()use(&$posts){$posts++;throw new ConnectionException('Falha fictícia');},acesso:3);
-        $repetir=['envio'=>$ticket,'confirmado'=>1,'repetir'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];$this->post('/app/pedidos-titulares/'.$this->ref.'/triagem',$repetir)->assertStatus(419);
-        $this->post('/app/pedidos-titulares/'.$this->ref.'/decisao',$repetir)->assertStatus(419);
-        $this->travel(16)->minutes();$this->post($url,$repetir)->assertStatus(419);$this->travelBack();$this->assertSame(1,$posts);
+        $repetir=['envio'=>$ticket,'confirmado'=>1,'repetir'=>1,'_token'=>session()->token(),'_revisao'=>session('auth_contexto_revisao')];$this->alterarRecurso('POST', '/app/pedidos-titulares/'.$this->ref.'/triagem',$repetir)->assertStatus(419);
+        $this->alterarRecurso('POST', '/app/pedidos-titulares/'.$this->ref.'/decisao',$repetir)->assertStatus(419);
+        $this->travel(16)->minutes();$this->alterarRecurso('POST', $url,$repetir)->assertStatus(419);$this->travelBack();$this->assertSame(1,$posts);
     }
     public function test_validade_brasilia_e_campos_sensiveis_nao_vao_ao_flash(): void
     {
         $this->simular();$ctx=$this->selecionarContextoFixture($this->contexto());$ticket=$this->ticket($ctx,1);
         $v=['envio'=>$ticket,'confirmado'=>1,'versao'=>2,'tipo'=>'identidade','metodo'=>'conferencia_documental',
             'evidencia_referencia'=>'Evidência fictícia privada','valida_ate'=>'2026-12-01T10:30','motivo'=>'Conferência fictícia'];
-        $this->post('/app/pedidos-titulares/'.$this->ref.'/verificacoes',$v)->assertRedirect()->assertSessionMissing('_old_input');
+        $this->alterarRecurso('POST', '/app/pedidos-titulares/'.$this->ref.'/verificacoes',$v)->assertRetornoTela()->assertSessionMissing('_old_input');
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['valida_ate']==='2026-12-01T13:30:00+00:00');
-        $this->post('/app/pedidos-titulares/'.$this->ref.'/verificacoes',array_replace($v,['valida_ate'=>'invalida']))->assertStatus(422)->assertDontSee('Evidência fictícia privada')->assertSessionMissing('_old_input');
+        $this->alterarRecurso('POST', '/app/pedidos-titulares/'.$this->ref.'/verificacoes',array_replace($v,['valida_ate'=>'invalida']))->assertStatus(422)->assertDontSee('Evidência fictícia privada')->assertSessionMissing('_old_input');
     }
     public function test_abertura_retorna_recibo_sem_expor_relato_ou_redirecionar_para_detalhe(): void
     {
         $this->simular('desenvolvedor');$ctx=$this->selecionarContextoFixture($this->contexto('desenvolvedor'));
-        $html=$this->get('/app/pedidos-titulares/novo?cliente_id=1')->assertOk()->getContent();
+        $html=$this->consultarTela('/app/pedidos-titulares/novo?cliente_id=1')->assertOk()->getContent();
         preg_match('/name="envio" value="([a-zA-Z0-9]{48})"/',$html,$m);
         $dados=['envio'=>$m[1],'confirmado'=>1,'cliente_id'=>1,'espaco_id'=>1,'responsavel_acesso_id'=>2,
             'tipo'=>'acesso','identificacao_declarada'=>'Identificação privada fictícia','relato'=>'Relato privado fictício','motivo'=>'Abertura fictícia'];
-        $this->post('/app/pedidos-titulares',$dados)->assertOk()->assertSee($this->ref)->assertDontSee('Relato privado fictício')->assertSessionMissing('_old_input');
+        $this->alterarRecurso('POST', '/app/pedidos-titulares',$dados)->assertOk()->assertSee($this->ref)->assertDontSee('Relato privado fictício')->assertSessionMissing('_old_input');
         Http::assertSent(fn($r)=>$r->method()==='POST' && $r['responsavel_acesso_id']===2 && !isset($r['_ctx']));
     }
     public function test_csrf_rejeita_mutacao_sem_token(): void
     {
         $this->simular();$ctx=$this->selecionarContextoFixture($this->contexto());
         $this->app['env']='production';
-        try {$this->post('/app/pedidos-titulares/'.$this->ref.'/triagem',[])->assertStatus(419);}
+        $destino=\App\Support\NavegacaoWeb::destino('pedidos.alterar',['id'=>$this->ref,'acao'=>'triagem']);
+        try {$this->post($destino['url'],['_recurso'=>$destino['referencia'],'_revisao'=>session('auth_contexto_revisao')])->assertStatus(419);}
         finally {$this->app['env']='testing';}
         Http::assertNothingSent();
     }
     public function test_envio_ssr_com_csrf_real_e_revisao_nao_amplia_whitelist(): void
     {
         $this->simular();$ctx=$this->selecionarContextoFixture($this->contexto());
-        $html=$this->get('/app/pedidos-titulares/'.$this->ref)->assertOk()->getContent();
-        preg_match('/name="envio" value="([a-zA-Z0-9]{48})"/',$html,$ticket);
-        preg_match('/name="_token" value="([^"]+)"/',$html,$csrf);
-        preg_match('/name="_revisao" value="([^"]+)"/',$html,$rev);
-        $d=$this->dados($ctx,$ticket[1])+['_token'=>$csrf[1],'_revisao'=>$rev[1]];
-        $this->flushHeaders();$this->app->instance('env','local');
-        $url='/app/pedidos-titulares/'.$this->ref.'/triagem';
+        $html=$this->consultarTela('/app/pedidos-titulares/'.$this->ref)->assertOk()->getContent();
+        $form=$this->extrairFormularioRecurso($html,'pedidos.alterar',['id'=>$this->ref,'acao'=>'triagem']);$campos=$form['campos'];$this->assertNotEmpty($campos['envio']);
+        $d=$this->dados($ctx,$campos['envio'])+$campos;
+        $this->flushHeaders();$this->app->instance('env','local');$url=$form['url'];
         $this->post($url,array_replace($d,['_token'=>'csrf-invalido']))->assertStatus(419);
         $this->post($url,$d+['campo_inesperado'=>'nao-enviar'])->assertStatus(422);
         Http::assertNotSent(fn($r)=>$r->method()==='POST');
-        $this->post($url,$d)->assertRedirect();
+        $this->post($url,$d)->assertRetornoTela('/app/pedidos-titulares/'.$this->ref);
         Http::assertSent(fn($r)=>$r->method()==='POST' && !isset($r['_revisao']) && !isset($r['_token']) && $r['situacao']==='aguardando_informacao');
     }
 

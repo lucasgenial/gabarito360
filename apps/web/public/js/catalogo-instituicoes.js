@@ -24,10 +24,9 @@
     if (ferramentas) ferramentas.hidden = !uf.value;
     if (!uf.value) { limpar(); municipio.disabled = true; status.textContent = 'Escolha uma UF para localizar municípios.'; return; }
     municipio.disabled = true; status.textContent = 'Carregando municípios…';
-    var url = new URL(form.dataset.municipios, location.origin);
-    url.searchParams.set('uf', uf.value); url.searchParams.set('busca', busca.value.trim()); url.searchParams.set('page', String(p));
+    var recurso=JSON.parse(form.dataset.municipios),dados={uf:uf.value,busca:busca.value.trim(),page:p};
     try {
-      var resposta = await fetch(url, {headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}, credentials: 'same-origin'});
+      var resposta = await G360Requisicao(recurso, {body:JSON.stringify(dados),headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}, credentials: 'same-origin'});
       if (!resposta.ok) throw new Error('indisponivel');
       var dados = await resposta.json();
       if (seq !== sequencia) return;
