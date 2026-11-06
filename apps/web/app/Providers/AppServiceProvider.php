@@ -29,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
         // @pode('cartao.enviar') ... @endpode — esconde ações que o perfil não tem (doc 03)
         Blade::if('pode', fn (string $acao) => Acesso::pode($acao));
         \Illuminate\Support\Facades\View::composer('layouts.app',function ($view) {
-            $view->with('opcoesTroca',app(\App\Support\OpcoesTrocaContexto::class)->obter());
+            $view->with('opcoesTroca',!empty($view->getData()['navegacaoEstrutura'])
+                ? ['opcoes'=>[],'disponivel'=>false,'erro'=>false]
+                : app(\App\Support\OpcoesTrocaContexto::class)->obter());
         });
 
         // Datas em português (nomes de mês e dia em translatedFormat)

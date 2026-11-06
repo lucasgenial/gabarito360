@@ -101,7 +101,7 @@
 <div class="g360-modal" id="foto-modal" data-correcao-fundo-foto>
   <div class="caixa">
     <div class="row-between" style="margin-bottom:10px;"><b id="foto-titulo"></b><button type="button" class="btn btn-sm btn-ghost" data-correcao-acao="fechar-foto">✕</button></div>
-    <img id="foto-img" class="foto-img" alt="Foto do cartão-resposta" onerror="if (this.getAttribute('src')) { this.style.display = 'none'; document.getElementById('foto-erro').style.display = 'block'; }">
+    <img id="foto-img" class="foto-img" alt="Foto do cartão-resposta">
     <p id="foto-erro" style="display:none;">Não foi possível abrir a foto. Feche e tente de novo.</p>
   </div>
 </div>
@@ -146,9 +146,9 @@
 </div>
 
 <div style="height:48px"></div>
+@include('correcao._retirar')
 @endsection
 
-@include('correcao._retirar')
 @push('scripts')
 <script src="{{ asset('js/cartoes-miniaturas.js') }}?v={{ filemtime(public_path('js/cartoes-miniaturas.js')) }}"></script>
 @php($g360Config = ['status'=>\App\Support\NavegacaoWeb::destino('correcao.status',[$prova['id']]),'cartoes'=>\App\Support\NavegacaoWeb::destino('correcao.cartoes',[$prova['id']]),'alunos'=>\App\Support\NavegacaoWeb::destino('correcao.alunos',[$prova['id']]),'provaId'=>$prova['id'],'podeExcluir'=>$podeMexer,'notaMax'=>$prova['nota_maxima']??10,'csrf'=>csrf_token()])

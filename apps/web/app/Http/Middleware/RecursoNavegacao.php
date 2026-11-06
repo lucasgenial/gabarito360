@@ -18,7 +18,7 @@ final class RecursoNavegacao
                 ? \App\Support\SessaoWeb::encerrar($r) : redirect()->route('vinculos.index');
             if ($r->query->count()) return response()->view('navegacao.selecionar',['meta'=>$meta],409);
             if ($meta['binario'] || $meta['dados']) return response()->json(['message'=>'Abra este recurso pela tela correspondente.'],409);
-            return response()->view('navegacao.estrutura',['meta'=>$meta]);
+            return response()->view('navegacao.estrutura',['meta'=>$meta,'navegacaoEstrutura'=>true]);
         }
         if ($r->query->count()) return response()->json(['message'=>'Envie a seleção no corpo da requisição.'],422);
         if (!ContextoWeb::atual()) {

@@ -5,6 +5,7 @@
   <a class="brand" href="{{ route('home') }}"><x-marca /></a>
   <section class="card vinculo-card" aria-labelledby="vinculo-titulo">
     <h1 id="vinculo-titulo">{{ !empty($internos) ? 'Escolha seu acesso' : 'Escolha seu vínculo' }}</h1>
+    <p class="field-error" role="alert" tabindex="-1" data-entrada-erro hidden></p>
     <p>Olá, {{ session('auth_nome') }}. Selecione onde deseja trabalhar.</p>
     @if(session('sucesso'))<p role="status">{{ session('sucesso') }}</p>@endif
     @if(session('erro'))<p role="alert">{{ session('erro') }}</p>@endif
@@ -46,3 +47,4 @@
   </section>
 </main>
 @endsection
+@push('scripts')<script src="{{ asset('js/entrada-vinculo.js') }}?v={{ filemtime(public_path('js/entrada-vinculo.js')) }}"></script>@endpush

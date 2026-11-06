@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="{{ asset('css/tabelas.css') }}?v={{ @filemtime(public_path('css/tabelas.css')) }}" />
 @stack('styles')
 {{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
-<script>try { if (localStorage.getItem('g360-menu') === 'recolhido') document.documentElement.classList.add('menu-recolhido'); } catch (e) {}</script>
+<script src="{{ asset('js/layout-preferencias.js') }}?v={{ filemtime(public_path('js/layout-preferencias.js')) }}"></script>
 @include('layouts._marca-head')
 </head>
 <body class="area-logada {{ config('release.sha') ? 'com-release' : '' }} @yield('tela')">
@@ -148,32 +148,19 @@
   </div>
 </div>
 @endif
-<script>
-(function () {
-  var f = document.getElementById('nav-folha'), b = document.querySelector('.nav-inferior-mais');
-  if (!f || !b) return;
-  function abrir(sim) { f.hidden = !sim; b.setAttribute('aria-expanded', sim ? 'true' : 'false'); document.body.style.overflow = sim ? 'hidden' : ''; }
-  b.addEventListener('click', function () { abrir(f.hidden); });
-  f.querySelectorAll('[data-fechar]').forEach(function (x) { x.addEventListener('click', function () { abrir(false); }); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') abrir(false); });
-})();
-</script>
+
 @endif
 
-<script>
-// Recolher/expandir o menu lateral; a preferência fica neste navegador
-document.getElementById('menu-recolher').addEventListener('click', function () {
-  var r = document.documentElement.classList.toggle('menu-recolhido');
-  try { localStorage.setItem('g360-menu', r ? 'recolhido' : 'aberto'); } catch (e) {}
-});
-</script>
+
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
 <script src="{{ asset('js/carregamento.js') }}?v={{ @filemtime(public_path('js/carregamento.js')) }}"></script>
+<script src="{{ asset('js/entrada-vinculo.js') }}?v={{ filemtime(public_path('js/entrada-vinculo.js')) }}"></script>
 @if($vinculoAtual && $opcoesTroca['disponivel']) @include('layouts._troca-contexto') @endif
-<script>window.addEventListener('beforeprint', function () { document.querySelectorAll('details').forEach(function (d) { d.open = true; }); });</script>
+
 <script src="{{ asset('js/tabelas.js') }}?v={{ @filemtime(public_path('js/tabelas.js')) }}"></script>
 @stack('scripts')
 @include('layouts._imagem-usuario')
 @include('layouts._notificacoes')
+<script src="{{ asset('js/layout-interacoes.js') }}?v={{ filemtime(public_path('js/layout-interacoes.js')) }}"></script>
 </body>
 </html>
