@@ -14,6 +14,7 @@ var NOTA_MAX = correcao_acompanhamentoConfig.notaMax;
 var corrDados = [], corrAssinatura = '';
 var miniaturasCartoes = criarMiniaturasCartoes(document.getElementById('corr-lista'), verFoto);
 function escH(t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
+function escA(t) { return escH(t).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function fmtNota(n) { return Number(n).toFixed(1).replace('.', ','); }
 var cargaCartoes=G360Carga(document.getElementById('corrigidos'));
 function carregarCorrigidos(silenciosa=false) {
@@ -48,7 +49,7 @@ function desenharCorrigidos() {
         + '<div style="font-size:11px;color:var(--muted);text-align:right;">' + c.acertos + '/' + c.total_questoes + '</div>'
       : '';
     var foto = c.miniatura_url
-      ? '<button type="button" class="corr-thumb corr-miniatura" data-miniatura-cartao="' + c.id + '" data-miniatura-versao="' + escH(c.tentativa_numero || c.created_at || '') + '" data-miniatura-url="' + escH(JSON.stringify(c.miniatura_url)) + '" aria-busy="true" aria-label="Carregando miniatura do cartão-resposta" disabled>'
+      ? '<button type="button" class="corr-thumb corr-miniatura" data-miniatura-cartao="' + c.id + '" data-miniatura-versao="' + escA(c.tentativa_numero || c.created_at || '') + '" data-miniatura-url="' + escA(JSON.stringify(c.miniatura_url)) + '" aria-busy="true" aria-label="Carregando miniatura do cartão-resposta" disabled>'
         + '<img data-miniatura-imagem alt="" hidden>'
         + '<span class="corr-miniatura-carga" data-miniatura-carga aria-hidden="true"><span class="g360-marca-carregando" aria-hidden="true"></span><i></i><i></i></span>'
         + '<span class="corr-miniatura-erro" data-miniatura-erro hidden>Foto indisponível<b>Tentar novamente</b></span></button>'
