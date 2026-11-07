@@ -25,6 +25,7 @@
   @case('filtro')<path d="M3 4h18l-7 8v7l-4 2v-9z"/>@break
   @case('limpar')<path d="m4 16 9-12 8 6-9 12H8zM13 22h8M9 10l8 6"/>@break
   @case('ver')<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>@break
+  @case('arquivo')<path d="M4 8h16v13H4zM3 3h18v5H3zM9 12h6"/>@break
   @case('situacao')<path d="M12 2v10M6 5a9 9 0 1 0 12 0"/>@break
   @case('pdf')<path d="M14 2H5v20h14V7zM14 2v6h5M8 13h8M8 17h5"/>@break
   @default<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>

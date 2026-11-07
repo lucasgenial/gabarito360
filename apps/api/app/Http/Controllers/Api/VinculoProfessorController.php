@@ -77,12 +77,13 @@ class VinculoProfessorController extends Controller
             ->exists();
 
         if (!$existe) {
-            DB::table('usuario_escopos')->insert([
-                'usuario_id'  => $data['usuario_id'],
-                'escopo_tipo' => 'turma',
-                'escopo_id'   => $turmaId,
-                'created_at'  => now(),
-            ]);
+            DB::transaction(function()use($request,$turmaId,$data){
+                DB::table('usuarios')->where('id',$request->user()->id)->lockForUpdate()->first();
+                if(Espacos::ativo())DB::table('espacos')->whereIn('id',Espacos::ids($request->user()))->orderBy('id')->lockForUpdate()->get();
+                $atual=Escopo::turmas($request->user())->lockForUpdate()->findOrFail($turmaId);
+                abort_unless($atual->ativo,422,'Desarquive a turma antes de criar um novo vínculo.');
+                DB::table('usuario_escopos')->insert(['usuario_id'=>$data['usuario_id'],'escopo_tipo'=>'turma','escopo_id'=>$turmaId,'created_at'=>now()]);
+            });
         }
 
         return ApiResponse::success(['vinculado' => true], null, 201);
@@ -148,6 +149,8 @@ class VinculoProfessorController extends Controller
     private function alterarContextual(Request $request, int $turmaId, int $pessoa, bool $adicionar): JsonResponse
     {
         return DB::transaction(function () use ($request, $turmaId, $pessoa, $adicionar) {
+            DB::table('usuario_vinculos')->where('id',$request->user()->vinculoContextoId())->lockForUpdate()->first();
+            DB::table('espacos')->whereIn('id',Espacos::ids($request->user()))->orderBy('id')->lockForUpdate()->get();
             $turma = $this->turmaNoEscopo($request, $turmaId);
             abort_unless($turma, 404, 'Turma não encontrada.');
             $v = GestaoVinculos::alvo($request, $pessoa, lock: true);
@@ -155,7 +158,11 @@ class VinculoProfessorController extends Controller
             abort_unless($v->situacao === 'ativo' && $v->inicio_em <= now() && (!$v->fim_em || $v->fim_em > now()), 422, 'Vínculo indisponível.');
             $chave = ['vinculo_id' => $v->id, 'espaco_id' => $v->espaco_id, 'turma_id' => $turmaId];
             $existe = DB::table('vinculo_turmas')->where($chave)->exists();
-            if ($adicionar && !$existe) DB::table('vinculo_turmas')->insert($chave);
+            if ($adicionar && !$existe) {
+                $atual=Escopo::turmas($request->user())->lockForUpdate()->findOrFail($turmaId);
+                abort_unless($atual->ativo,422,'Desarquive a turma antes de criar um novo vínculo.');
+                DB::table('vinculo_turmas')->insert($chave);
+            }
             if (!$adicionar && $existe) DB::table('vinculo_turmas')->where($chave)->delete();
             if ($existe !== $adicionar) GestaoVinculos::evento($v, $request->user(), $adicionar ? 'turma_adicionada' : 'turma_removida', 'turma:'.$turmaId);
             return ApiResponse::success([$adicionar ? 'vinculado' : 'removido' => true, 'vinculo_id' => $v->id], null, $adicionar ? 201 : 200);

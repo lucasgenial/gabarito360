@@ -49,7 +49,7 @@ class ImportarProvas extends Command
                 : (Espacos::ativo() ? (new ConsultasPedagogicas($ator))->tabela('turmas') : DB::table('turmas'));
             $turmaIds = $turmas->where('escola_id', $escolaId)
                 ->when($this->option('ano'), fn ($q, $a) => $q->where('ano_letivo', $a))
-                ->whereIn('nome', $nomes)->pluck('id')->all();
+                ->whereIn('nome', $nomes)->where('ativo',true)->pluck('id')->all();
             if (!$nomes || count($turmaIds) !== count($nomes)) {
                 $this->error('Turmas não encontradas na escola: ' . implode(',', $nomes));
                 return self::FAILURE;
@@ -59,13 +59,19 @@ class ImportarProvas extends Command
                 $this->info('Simulação: '.count($spec['provas']).' provas válidas; nada gravado.');
                 return self::SUCCESS;
             }
-            DB::transaction(function () use ($spec, $escolaId, $usuarioId, $turmaIds, $contexto, $meta) {
+            DB::transaction(function () use ($spec, $escolaId, $usuarioId, $turmaIds, $contexto, $meta,$ator) {
+                if(Espacos::ativo()){
+                    if($ator->vinculoContextoId())DB::table('usuario_vinculos')->where('id',$ator->vinculoContextoId())->lockForUpdate()->first();
+                    else DB::table('usuarios')->where('id',$usuarioId)->lockForUpdate()->first();
+                    DB::table('espacos')->where('id',$meta['espaco_id'])->lockForUpdate()->first();
+                }
                 DB::table('escolas')->where('id', $escolaId)->lockForUpdate()->firstOrFail();
                 $contexto();
                 if (Espacos::ativo()) {
-                    $turmasAtuais = (new ConsultasPedagogicas(Usuario::findOrFail($usuarioId)))->tabela('turmas')->where('escola_id', $escolaId)->whereIn('id', $turmaIds)->lockForUpdate()->get();
+                    $turmasAtuais = (new ConsultasPedagogicas($ator))->tabela('turmas')->where('escola_id', $escolaId)->whereIn('id', $turmaIds)->where('ativo',true)->lockForUpdate()->get();
                     abort_unless($turmasAtuais->count() === count($turmaIds), 409);
                 }
+                abort_if(DB::table('turmas')->whereIn('id',$turmaIds)->where('ativo',false)->lockForUpdate()->exists(),409,'Desarquive as turmas antes de importar provas.');
                 foreach ($spec['provas'] as $p) {
                     $gab = $p['gabarito'];
                     $n = strlen($gab);

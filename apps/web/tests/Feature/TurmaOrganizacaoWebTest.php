@@ -12,6 +12,7 @@ class TurmaOrganizacaoWebTest extends TestCase
     use ContextoSelecionado,NavegacaoHttp;
     private array $me;
     private string $falha='';
+    private ?array $respostaArquivamento=null;
 
     protected function preparar(string $perfil='coordenador'): void
     {
@@ -24,11 +25,13 @@ class TurmaOrganizacaoWebTest extends TestCase
         $this->selecionarContextoFixture($this->me);
         Http::fake(function($r){
             $p=parse_url($r->url(),PHP_URL_PATH);
+            if($r->method()==='PUT'&&str_ends_with($p,'/arquivamento'))return Http::response(['data'=>$this->respostaArquivamento??['ativo'=>false,'arquivado'=>true,'versao'=>1,'alterado'=>true,'repetido'=>false]]);
+            if($p==='/api/v1/turmas/14/painel/pdf')return Http::response('%PDF-1.7 documento fictício',200,['Content-Type'=>'application/pdf']);
             if($p===$this->falha)throw new ConnectionException('diagnostico-privado');
             $dados=match($p){
                 '/api/v1/auth/me'=>$this->me,
                 '/api/v1/auth/vinculos'=>[],
-                '/api/v1/turmas/14/painel'=>['kpis'=>['alunos'=>2,'avaliacoes'=>1,'resultados'=>1,'acerto_pct'=>80],'recorte'=>['disciplina'=>'Todas','professor'=>'Todos'],'opcoes'=>['disciplinas'=>[],'professores'=>[]],'avaliacoes'=>[]],
+                '/api/v1/turmas/14/painel'=>['kpis'=>['alunos'=>2,'avaliacoes'=>1,'resultados'=>1,'acerto_pct'=>80],'recorte'=>['disciplina'=>'Todas','professor'=>'Todos'],'opcoes'=>['disciplinas'=>[],'professores'=>[]],'avaliacoes'=>[],'analise'=>['alunos'=>['disponivel'=>true,'atencao'=>['total'=>6,'items'=>array_map(fn($i)=>['nome'=>'Fictício <'.$i.'>','resultados'=>1,'base_valida'=>1,'recuperacao'=>1,'media_pct'=>40],range(1,6))],'dentro_criterio'=>['total'=>0,'items'=>[]],'destaques'=>['total'=>0,'items'=>[],'empate_no_corte'=>false]]]],
                 '/api/v1/turmas'=>['turmas'=>[['id'=>14,'escola_id'=>5,'nome'=>'Turma A','serie'=>'3','ano_letivo'=>2026],['id'=>15,'escola_id'=>5,'nome'=>'Turma B','serie'=>'3','ano_letivo'=>2026]]],
                 '/api/v1/alunos/1'=>['id'=>1,'nome'=>'Aluno fictício','matricula'=>'F1','turma_id'=>14,'turma_nome'=>'Turma A','ativo'=>true,'turma'=>['id'=>14,'escola_id'=>5]],
                 '/api/v1/turmas/14','/api/v1/turmas/15'=>['id'=>(int)basename($p),'nome'=>str_ends_with($p,'14')?'Turma A':'Turma B','serie'=>'3ª série','turno'=>'tarde','escola_id'=>5,'ano_letivo'=>2026,'ativo'=>true,'media_turma'=>null,'total_alunos'=>0,'total_provas'=>0,'alunos'=>[],'provas'=>[]],
@@ -177,6 +180,84 @@ class TurmaOrganizacaoWebTest extends TestCase
         $this->assertSame('Aluno transferido. O histórico anterior foi preservado.',session('sucesso'));
         Http::assertSent(fn($r)=>parse_url($r->url(),PHP_URL_PATH)==='/api/v1/alunos/1/transferencias-turma'&&$r['motivo']==='Solicitação de teste'&&!$r->offsetExists('_token'));
         $this->alterarRecursoJson('POST','/app/alunos/1/transferencias-turma',['turma_id'=>15])->assertUnprocessable()->assertJsonValidationErrors(['motivo','chave','turma_origem_id']);
+    }
+
+    public function test_painel_sem_recorte_tem_graficos_e_acoes_sem_card_de_instrucoes(): void
+    {
+        $this->preparar();
+        $this->consultarTela('/app/turmas/14')->assertOk()->assertSee('turma-graficos.js')
+            ->assertSee('Distribuição dos acertos')->assertSee('Mediana')->assertSee('data-documento-abrir="pdf"',false)
+            ->assertDontSee('Dados filtrados')->assertDontSee('Saiba mais sobre os indicadores')->assertDontSee('Desativar')
+            ->assertDontSee('Arquivar turma'); // Gerir não concede a permissão extra de arquivar.
+    }
+
+    public function test_analise_de_uma_avaliacao_nao_aparece_como_filtro_global(): void
+    {
+        $this->preparar();
+        $this->consultarTela('/app/turmas/14?painel_avaliacao=8')->assertOk()->assertDontSee('Dados filtrados');
+        Http::assertSent(fn($r)=>parse_url($r->url(),PHP_URL_PATH)==='/api/v1/turmas/14/painel'&&$r['analise_prova_id']==8);
+    }
+
+    public function test_documento_transmite_disposicao_e_modo_explicitos_pelo_corpo(): void
+    {
+        $this->preparar();
+        foreach(['retrato','paisagem'] as $orientacao)foreach([0,1] as $baixar){
+            $r=$this->alterarRecurso('POST','/app/turmas/14/painel/pdf',['orientacao'=>$orientacao,'baixar'=>$baixar,'painel_avaliacao'=>8]);
+            $r->assertOk()->assertHeader('Content-Type','application/pdf')->assertHeader('Content-Disposition',($baixar?'attachment':'inline').'; filename="painel-turma.pdf"');
+            Http::assertSent(fn($r)=>parse_url($r->url(),PHP_URL_PATH)==='/api/v1/turmas/14/painel/pdf'&&$r['orientacao']===$orientacao&&$r['analise_prova_id']==8&&!$r->offsetExists('baixar'));
+        }
+        $this->alterarRecurso('POST','/app/turmas/14/painel/pdf',['orientacao'=>'invalida'])->assertSessionHasErrors('orientacao');
+    }
+
+    public function test_arquivamento_bff_exige_permissao_e_envia_somente_estado_versionado(): void
+    {
+        $this->preparar();
+        $d=['arquivado'=>true,'esperado_ativo'=>true,'versao'=>0,'chave'=>'11111111-1111-4111-8111-111111111111'];
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d)->assertForbidden();
+        $this->me['permissoes'][]='turma.desativar';$this->selecionarContextoFixture($this->me);
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d+['usuario_id'=>99,'token'=>'nao-repassar'])->assertRetornoTela('/app/turmas/14?secao=visao-geral');
+        Http::assertSent(fn($r)=>$r->method()==='PUT'&&parse_url($r->url(),PHP_URL_PATH)==='/api/v1/turmas/14/arquivamento'&&$r->data()===$d);
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',['arquivado'=>true])->assertSessionHasErrors(['versao','chave','esperado_ativo']);
+    }
+
+    public function test_secretaria_pode_arquivar_somente_com_permissao_e_bff_recusa_resposta_incoerente(): void
+    {
+        $this->preparar('secretario_escolar');
+        $this->me['permissoes']=['turma.ver','aluno.ver','turma.desativar','aluno.desativar'];$this->selecionarContextoFixture($this->me);
+        $d=['arquivado'=>true,'esperado_ativo'=>true,'versao'=>0,'chave'=>'11111111-1111-4111-8111-111111111111'];
+        foreach(['/app/turmas/14/arquivamento','/app/alunos/1/arquivamento']as$url){
+            $destino=str_contains($url,'/turmas/')?'/app/turmas/14?secao=visao-geral':'/app/alunos/1';
+            $this->alterarRecurso('PUT',$url,$d)->assertRetornoTela($destino)->assertSessionHas('sucesso','O registro foi arquivado. O histórico foi preservado.');
+            foreach([[],['ativo'=>false,'arquivado'=>false,'versao'=>1,'alterado'=>true,'repetido'=>false],['ativo'=>false,'arquivado'=>true,'versao'=>'1','alterado'=>true,'repetido'=>false]]as$estado){
+                session()->forget('sucesso');$this->respostaArquivamento=$estado;
+                $this->alterarRecurso('PUT',$url,$d)->assertRetornoTela($destino)->assertSessionHas('erro','Não foi possível confirmar a resposta do arquivamento. Confira o estado atual antes de reenviar.')->assertSessionMissing('sucesso');
+            }
+            $this->respostaArquivamento=null;
+        }
+        $this->me['perfil']='auxiliar_secretaria';$this->me['permissoes']=['turma.ver','aluno.ver'];$this->selecionarContextoFixture($this->me);
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d)->assertForbidden();
+        $this->alterarRecurso('PUT','/app/alunos/1/arquivamento',$d)->assertForbidden();
+    }
+
+    public function test_acoes_tem_cores_textos_modal_proprio_e_acompanhamento_sem_diretiva_exposta():void
+    {
+        $this->preparar();$this->me['permissoes'][]='turma.desativar';$this->selecionarContextoFixture($this->me);
+        $this->consultarTela('/app/turmas/14')->assertOk()->assertSee('tu1r3-acao-editar')->assertSee('Editar turma')
+            ->assertSee('data-arquivamento-modal',false)->assertSee('Arquivar turma')->assertSee('Alunos no recorte')
+            ->assertSee('Ver todos (6)')->assertSee('Fictício &lt;1&gt;',false)->assertDontSee('@if(',false)
+            ->assertDontSee('Acerto por questão')->assertDontSee('window.confirm',false);
+    }
+
+    public function test_arquivamento_retorna_destino_explicito_sem_depender_de_referer_ou_url_anterior():void
+    {
+        $this->preparar();$this->me['permissoes']=array_merge($this->me['permissoes'],['turma.desativar','aluno.desativar']);$this->selecionarContextoFixture($this->me);
+        session(['_previous'=>['url'=>'http://localhost/app/favicon-16x16.png']]);
+        $d=['arquivado'=>true,'esperado_ativo'=>true,'versao'=>0,'chave'=>'11111111-1111-4111-8111-111111111111'];
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d)->assertRetornoTela('/app/turmas/14?secao=visao-geral');
+        $origem=\App\Support\NavegacaoWeb::destino('turmas.show',['id'=>14,'secao'=>'alunos']);
+        $this->alterarRecurso('PUT','/app/alunos/1/arquivamento',$d+['_retorno_tela'=>$origem['referencia']])->assertRetornoTela('/app/turmas/14?secao=alunos');
+        $this->respostaArquivamento=[];
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d)->assertRetornoTela('/app/turmas/14?secao=visao-geral')->assertSessionHas('erro');
     }
 
 }

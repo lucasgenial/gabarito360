@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\DB;
 /** Autorização específica para agregados da mesma prova; não libera registros individuais. */
 class EstatisticasQuestoes
 {
-    public function calcular(Usuario $ator, Prova $prova): array
+    public function calcular(Usuario $ator, Prova $prova,bool $historico=false): array
     {
         abort_unless(!in_array($ator->perfil, ['aluno', 'aplicador']) && Permissao::pode($ator, 'relatorio.prova')
-            && Escopo::provaComConteudo($ator, $prova->id), 403);
+            && ($historico?Escopo::provaHistoricaComConteudo($ator,$prova->id):Escopo::provaComConteudo($ator,$prova->id)), 403);
         $notas = DB::table('notas as n')->join('cartoes as c', 'c.id', '=', 'n.cartao_id')
             ->join('alunos as a', 'a.id', '=', 'n.aluno_id')
             ->join('turmas as t', 't.id', '=', 'n.turma_id')

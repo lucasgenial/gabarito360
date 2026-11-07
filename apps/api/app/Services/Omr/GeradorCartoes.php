@@ -28,7 +28,7 @@ class GeradorCartoes
 
         $alunos = ContextoCorrecao::alunos($prova, $ator)
             ->whereIn('alunos.turma_id', $turmaIds)
-            ->where('alunos.ativo', true)
+            ->where('alunos.ativo', true)->where('turmas.ativo',true)
             ->orderBy('turmas.nome')
             ->orderBy('alunos.nome')
             ->get(['alunos.id', 'alunos.nome', 'alunos.matricula', 'turmas.nome as turma'])

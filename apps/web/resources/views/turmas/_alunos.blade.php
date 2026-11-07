@@ -49,16 +49,16 @@
           <td style="font-family:var(--font-mono);" data-rotulo="Provas"><div class="tabela-valor">{{ $a['total_provas'] ?? 0 }}</div></td>@endif
           <td data-rotulo="Status"><div class="tabela-valor">
             @if($a['ativo'] ?? true)
-              <span class="badge badge-success badge-dot">Ativo</span>
+              <span class="badge badge-success badge-dot">Em uso</span>
             @else
-              <span class="badge badge-danger badge-dot">Inativo</span>
+              <span class="badge badge-danger badge-dot">Cadastro arquivado</span>
             @endif
           </div></td>
           <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor tu1-acoes"><a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver</a>
           @if($gestorAluno)
           @pode('aluno.gerir')<a class="btn btn-sm btn-secondary" href="{{ route('alunos.edit',$a['id']) }}"><x-icone nome="editar" /> Editar<span class="sr-only"> {{ $a['nome'] }}</span></a>
           @if($a['ativo'])<a class="btn btn-sm btn-secondary" href="{{ route('alunos.transferencia',$a['id']) }}" data-transferencia-abrir><x-icone nome="transferir" /> Transferir<span class="sr-only"> {{ $a['nome'] }} entre turmas</span></a>@endif @endpode
-          @pode('aluno.desativar')<form method="POST" action="{{ route('alunos.toggle',$a['id']) }}" data-turma-confirmar="{{ $a['ativo']?'Desativar':'Ativar' }} {{ $a['nome'] }}? O histórico será preservado.">@csrf <x-revisao-acesso /><input type="hidden" name="esperado_ativo" value="{{ (int)$a['ativo'] }}"><button class="btn btn-sm btn-secondary" @if($a['ativo']) style="color:var(--danger);border-color:var(--danger)" @endif type="submit"><x-icone nome="situacao" /> {{ $a['ativo']?'Desativar':'Ativar' }}<span class="sr-only"> {{ $a['nome'] }}</span></button></form>@endpode
+          @pode('aluno.desativar')<x-arquivamento tipo="alunos" :registro="$a" />@endpode
           @endif
           </div></td>
         </tr>
