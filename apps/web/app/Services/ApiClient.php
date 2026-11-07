@@ -11,6 +11,25 @@ class ApiClient
 {
     private string $baseUrl;
     private bool $usarIdentidade = false;
+    private bool $seguirRedirecionamentos = true;
+    private ?int $turmaPainel = null;
+
+    /** Seletor do recurso autorizado na referência Web; a API sempre revalida o acesso. */
+    public function noPainelDaTurma(?int $turma): self
+    {
+        if ($turma !== null && $turma < 1) throw new \InvalidArgumentException('Turma inválida.');
+        $copia = clone $this;
+        $copia->turmaPainel = $turma;
+        return $copia;
+    }
+
+    /** Contratos JSON fechados não devem reenviar autoridade a um destino redirecionado. */
+    public function semRedirecionamentos(): self
+    {
+        $copia = clone $this;
+        $copia->seguirRedirecionamentos = false;
+        return $copia;
+    }
 
     public function identidade(): self
     {
@@ -28,11 +47,14 @@ class ApiClient
     {
         $request = Http::baseUrl($this->baseUrl)
             ->acceptJson()
-            ->timeout(15);
+            ->timeout(15)
+            ->withOptions(['allow_redirects'=>$this->seguirRedirecionamentos]);
 
         if ($token = (!$this->usarIdentidade ? (\App\Support\ContextoWeb::atual()['token'] ?? null) : null) ?? \App\Support\ContextoWeb::identidade()) {
             $request = $request->withToken($token);
         }
+
+        if ($this->turmaPainel !== null) $request = $request->withHeaders(['X-G360-Painel-Turma'=>(string)$this->turmaPainel]);
 
         return $request;
     }

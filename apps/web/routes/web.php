@@ -227,6 +227,8 @@ $rotasContextuais = static function () {
     Route::post('/alunos/{id}/toggle', [AlunoController::class, 'toggle'])->name('alunos.toggle');
 
     // Turmas (MP-016) + Vínculo professor (MP-018)
+    Route::get('/paineis/preferencias/{painel}/{turmaId?}', [\App\Http\Controllers\PreferenciasPainelController::class,'consultar'])->whereNumber('turmaId')->name('paineis.preferencias.consultar');
+    Route::put('/paineis/preferencias/{painel}/{turmaId?}', [\App\Http\Controllers\PreferenciasPainelController::class,'salvar'])->whereNumber('turmaId')->name('paineis.preferencias.salvar');
     Route::get('/turmas',                              [TurmaController::class, 'index'])->name('turmas.index');
     Route::post('/turmas',                             [TurmaController::class, 'store'])->name('turmas.store');
     Route::match(['GET','POST'],'/turmas/{id}/painel/pdf', [TurmaController::class,'painelPdf'])->name('turmas.painelPdf');

@@ -1,0 +1,1 @@
+{"private":true,"type":"module","scripts":{"build":"node build.mjs"},"dependencies":{"@calendarjs/ce":"1.1.0","lemonadejs":"5.3.6"},"devDependencies":{"esbuild":"0.28.2"}}

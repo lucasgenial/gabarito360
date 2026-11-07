@@ -1,117 +1,100 @@
-/* Gráficos do Gabarito360 sobre o ECharts. Cada <div data-grafico> traz os dados em JSON (docs/27). */
+/* Gráficos JSON sobre o ECharts. Os gráficos específicos da turma mantêm seu renderer próprio. */
 (function () {
-  var graficos = [];
-
-  function token(nome) {
-    return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
-  }
-
-  function fonte() {
-    return getComputedStyle(document.body).fontFamily;
-  }
-
-  // Números no formato brasileiro: 3,2 e 45%
+  'use strict';
+  if (window.G360Graficos) { window.G360Graficos.iniciar(); return; }
+  var graficos = [], quadro = 0;
+  function token(nome) { return getComputedStyle(document.documentElement).getPropertyValue(nome).trim(); }
+  function fonte() { return getComputedStyle(document.body).fontFamily; }
   function texto(d, v) {
     if (v === null || v === undefined || v === '-') return '—';
-    if (d.formato === 'nota') return Number(v).toFixed(1).replace('.', ',');
-    if (d.formato === 'pct') return v + '%';
-    return String(v);
+    var n = Number(v);
+    if (!Number.isFinite(n)) return String(v);
+    return n.toLocaleString('pt-BR', { maximumFractionDigits: d.formato === 'nota' ? 1 : 2, minimumFractionDigits: d.formato === 'nota' ? 1 : 0 }) + (d.formato === 'pct' ? '%' : '');
   }
-
   function dica(d, itens) {
-    var titulo = (d.prefixo || '') + itens[0].axisValue;
-    return itens.reduce(function (html, i) {
+    if (!itens.length) return '';
+    var linhas = [String(d.prefixo || '') + String(itens[0].axisValue)];
+    itens.forEach(function (i) {
       var v = i.value && typeof i.value === 'object' ? i.value.value : i.value;
-      return html + '<br>' + i.marker + (d.series.length > 1 ? i.seriesName + ': ' : '') + '<b>' + texto(d, v) + '</b>';
-    }, '<b>' + titulo + '</b>');
+      linhas.push((d.series.length > 1 ? i.seriesName + ': ' : '') + texto(d, v));
+    });
+    if (d.numeradores && d.numeradores[itens[0].dataIndex] !== undefined) linhas.push((d.rotulo_numerador || 'Quantidade') + ': ' + d.numeradores[itens[0].dataIndex]);
+    if (d.bases && d.bases[itens[0].dataIndex] !== undefined) linhas.push('Base: ' + d.bases[itens[0].dataIndex] + ' ' + (d.unidade_base || 'registros'));
+    return linhas.join('\n');
   }
-
-  function opcoes(d) {
-    var tinta = token('--fg-2'), apagado = token('--muted'), linha = token('--border-soft');
-    var paleta = [1, 2, 3, 4, 5].map(function (n) { return token('--serie-' + n); });
-    var varias = d.series.length > 1;
+  function opcoes(g) {
+    var d = g.dados, tinta = token('--fg-2') || token('--fg'), apagado = token('--muted'), linha = token('--border-soft');
+    var varias = d.series.length > 1, horizontal = !!d.horizontal || (g.el.clientWidth < 420 && d.categorias.length > 2);
+    var valor = { type: 'value', interval: d.formato === 'pct' && g.el.clientWidth < 420 ? 50 : undefined, max: d.maximo === undefined ? null : d.maximo, minInterval: d.inteiros ? 1 : 0,
+      axisLabel: { color: apagado, fontSize: 11, formatter: d.formato === 'pct' ? '{value}%' : '{value}' }, splitLine: { lineStyle: { color: linha } } };
+    var categorias = { type: 'category', data: d.categorias, inverse: horizontal,
+      axisTick: { show: false }, axisLine: { lineStyle: { color: token('--border') } },
+      axisLabel: { color: apagado, fontSize: 11, formatter: function(v,i){ return d.rotulos_curtos && d.rotulos_curtos[i] !== undefined ? d.rotulos_curtos[i] : v; }, width: horizontal ? (g.el.clientWidth < 420 ? 86 : 140) : undefined,
+        overflow: horizontal ? 'truncate' : undefined, interval: horizontal ? 0 : (d.intervalo === undefined ? 'auto' : d.intervalo), hideOverlap: !horizontal && d.intervalo !== 0 } };
     return {
-      animation: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      animationDuration: 300,
-      color: paleta,
+      animation: !window.matchMedia('(prefers-reduced-motion: reduce)').matches, animationDuration: 250,
+      color: [1, 2, 3, 4, 5].map(function (n) { return token('--serie-' + n); }),
       textStyle: { fontFamily: fonte(), color: tinta },
-      grid: { left: 8, right: 8, top: varias ? 36 : 20, bottom: 8, containLabel: true },
-      legend: varias ? { top: 0, left: 0, textStyle: { color: tinta }, itemWidth: 12, itemHeight: 12 } : { show: false },
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow', shadowStyle: { color: linha, opacity: 0.5 } },
-        backgroundColor: token('--surface'),
-        borderColor: token('--border'),
-        textStyle: { color: token('--fg'), fontFamily: fonte() },
-        confine: true,
-        formatter: function (itens) { return dica(d, itens); }
-      },
-      xAxis: {
-        type: 'category',
-        data: d.categorias,
-        axisTick: { show: false },
-        axisLine: { lineStyle: { color: token('--border') } },
-        axisLabel: { color: apagado, fontSize: d.intervalo === 0 ? 11 : 12, interval: d.intervalo === undefined ? 'auto' : d.intervalo, hideOverlap: d.intervalo !== 0 }
-      },
-      yAxis: {
-        type: 'value',
-        max: d.maximo === undefined ? null : d.maximo,
-        minInterval: d.inteiros ? 1 : 0,
-        axisLabel: { color: apagado, fontSize: 12, formatter: d.formato === 'pct' ? '{value}%' : '{value}' },
-        splitLine: { lineStyle: { color: linha } }
-      },
+      aria: { enabled: true, decal: { show: varias }, label: { description: g.descricao + '. Os valores completos estão na alternativa textual acessível.' } },
+      grid: { left: 4, right: horizontal ? 42 : 8, top: 16, bottom: varias ? 48 : 8, containLabel: true },
+      legend: varias ? { bottom: 0, left: 0, type: 'plain', textStyle: { color: tinta }, itemWidth: 12, itemHeight: 12 } : { show: false },
+      tooltip: { trigger: 'axis', renderMode: 'richText', confine: true, axisPointer: { type: 'shadow' },
+        backgroundColor: token('--surface'), borderColor: token('--border'), textStyle: { color: token('--fg'), fontFamily: fonte() },
+        formatter: function (itens) { return dica(d, Array.isArray(itens) ? itens : [itens]); } },
+      xAxis: horizontal ? valor : categorias, yAxis: horizontal ? categorias : valor,
       series: d.series.map(function (s) {
-        return {
-          name: s.nome,
-          type: 'bar',
-          barMaxWidth: 40,
-          barGap: '10%',
-          itemStyle: { borderRadius: [4, 4, 0, 0] },
-          label: {
-            show: !!d.rotulos, position: 'top', color: tinta, fontSize: 12, fontWeight: 600,
-            formatter: function (p) { return texto(d, p.value); }
-          },
-          data: s.valores.map(function (v, i) {
-            var cor = s.cores && s.cores[i];
-            return cor ? { value: v, itemStyle: { color: token(cor) } } : v;
-          })
-        };
+        return { name: s.nome, type: 'bar', barMaxWidth: varias ? 22 : 36, barGap: '15%',
+          itemStyle: { borderRadius: horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0] },
+          label: { show: !!d.rotulos, position: horizontal ? 'right' : 'top', color: tinta, fontSize: 11, fontWeight: 600,
+            formatter: function (p) { return texto(d, p.value); } },
+          data: s.valores.map(function (v, i) { var cor = s.cores && s.cores[i]; return cor ? { value: v, itemStyle: { color: token(cor) } } : v; }) };
       })
     };
   }
-
-  // viewBox: permite que o CSS de impressão escale o desenho inteiro para a folha
   function ajustarEscala(g) {
     var svg = g.el.querySelector('svg');
-    if (svg) svg.setAttribute('viewBox', '0 0 ' + g.instancia.getWidth() + ' ' + g.instancia.getHeight());
+    if (svg && g.instancia) svg.setAttribute('viewBox', '0 0 ' + g.instancia.getWidth() + ' ' + g.instancia.getHeight());
   }
-
-  function desenhar(g) {
-    g.instancia.setOption(opcoes(g.dados), true);
-    ajustarEscala(g);
+  function desenhar(g, completo) {
+    if (!g.el.isConnected || !g.el.clientWidth || !g.el.clientHeight || !window.echarts) return;
+    if (!g.instancia) { g.instancia = window.echarts.getInstanceByDom(g.el) || window.echarts.init(g.el, null, { renderer: 'svg' }); completo = true; }
+    var estreito = g.el.clientWidth < 420;
+    if (completo || estreito !== g.estreito) { g.instancia.setOption(opcoes(g), true); g.estreito = estreito; }
+    g.instancia.resize(); ajustarEscala(g);
   }
-
+  function agendar(completo) {
+    if (completo) graficos.forEach(function (g) { g.reconstruir = true; });
+    if (quadro) return;
+    quadro = requestAnimationFrame(function () {
+      quadro = 0;
+      graficos = graficos.filter(function (g) {
+        if (!g.el.isConnected) { if (g.instancia) g.instancia.dispose(); if (resize) resize.unobserve(g.el); return false; }
+        desenhar(g, g.reconstruir); g.reconstruir = false; return true;
+      });
+    });
+  }
+  var resize = window.ResizeObserver ? new ResizeObserver(function () { agendar(false); }) : null;
   function iniciar() {
-    Array.prototype.forEach.call(document.querySelectorAll('[data-grafico]'), function (el) {
-      var g = { el: el, dados: JSON.parse(el.getAttribute('data-grafico')), instancia: echarts.init(el, null, { renderer: 'svg' }) };
-      graficos.push(g);
-      desenhar(g);
+    if (!window.echarts) return;
+    document.querySelectorAll('.grafico[data-grafico]').forEach(function (el) {
+      if (graficos.some(function (g) { return g.el === el; })) return;
+      var d;
+      try { d = JSON.parse(el.getAttribute('data-grafico')); } catch (_) { return; }
+      if (!d || !Array.isArray(d.categorias) || !Array.isArray(d.series) || !d.series.every(function (s) { return Array.isArray(s.valores); })) return;
+      var g = { el: el, dados: d, descricao: (el.getAttribute('aria-label') || 'Gráfico').replace(/[.\s]+$/g, ''), instancia: null, reconstruir: true }; graficos.push(g);
+      if (resize) resize.observe(el);
     });
-    if (!graficos.length) return;
-
-    if (window.ResizeObserver) {
-      var aoRedimensionar = new ResizeObserver(function () { graficos.forEach(function (g) { g.instancia.resize(); ajustarEscala(g); }); });
-      graficos.forEach(function (g) { aoRedimensionar.observe(g.el); });
-    }
-    // Troca de tema: as cores vêm dos tokens do CSS
-    new MutationObserver(function () { graficos.forEach(desenhar); })
-      .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    // O SVG escala para a folha pelo CSS: redesenhar aqui cortava o gráfico em A4
-    window.addEventListener('beforeprint', function () {
-      graficos.forEach(function (g) { g.instancia.setOption({ animation: false }); });
-    });
+    agendar(false);
   }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
-  else iniciar();
+  window.G360Graficos = { iniciar: iniciar };
+  new MutationObserver(function () { agendar(true); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-tema'] });
+  // Abrir uma aba, mudar disposição ou inserir conteúdo torna elegível um gráfico antes oculto.
+  new MutationObserver(function (mudancas) {
+    if (mudancas.some(function (m) { return m.type === 'childList' && Array.from(m.addedNodes).some(function (n) { return n.nodeType === 1 && (n.matches('.grafico[data-grafico]') || n.querySelector('.grafico[data-grafico]')); }); })) iniciar();
+    if (mudancas.some(function (m) { return m.type === 'attributes' && m.attributeName === 'hidden'; })) agendar(false);
+  }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
+  document.addEventListener('g360:painel-redimensionado', function () { agendar(false); });
+  window.addEventListener('resize', function () { agendar(false); });
+  window.addEventListener('beforeprint', function () { graficos.forEach(function (g) { if (g.instancia) g.instancia.setOption({ animation: false }); }); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })();
