@@ -40,10 +40,10 @@ class AppServiceProvider extends ServiceProvider
             return \Illuminate\Cache\RateLimiting\Limit::perMinute($limite)->by(($r->user()?->id??$r->ip()).'|'.$r->route()->uri().'|'.$r->method());
         });
         // A cota de emissão não compartilha o contador numérico das consultas.
-        // Trocar perfil na mesma escola não reinicia o limite do mesmo usuário.
+        // Throttle antecede o contexto de vínculo: usar apenas a identidade autenticada.
+        // Trocar perfil ou escola não reinicia as cinco emissões do mesmo usuário.
         \Illuminate\Support\Facades\RateLimiter::for('painel-turma-pdf',function(\Illuminate\Http\Request $r){
-            $u=$r->user();$v=\App\Support\ContextoVinculo::resolver($u);
-            return \Illuminate\Cache\RateLimiting\Limit::perMinute(5)->by($u->id.'|'.$v->espaco_id);
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(5)->by((string)$r->user()->id);
         });
         \Illuminate\Support\Facades\Gate::define('gerir-clientes', fn (\App\Models\Usuario $u) => \App\Support\ContextoInterno::pode($u, 'cliente.gerir'));
         $this->app->extend('queue.failer', function ($original, $app) {

@@ -49,15 +49,31 @@ class PainelTurmaLimitePdfTest extends TestCase
         $this->getJson('/api/v1/turmas/1/painel/pdf')->assertOk();
     }
 
-    public function test_cota_e_do_usuario_e_espaco_sem_reiniciar_na_troca_de_perfil():void
+    public function test_cota_do_usuario_nao_reinicia_na_troca_de_perfil_ou_escola():void
     {
         for($i=0;$i<5;$i++)$this->getJson('/api/v1/turmas/1/painel/pdf')->assertOk();
         $this->como(1,4); // Mesmo usuário/escola, outro perfil: conserva a cota.
         $this->getJson('/api/v1/turmas/1/painel/pdf')->assertTooManyRequests();
-        $this->como(1,2); // Mesmo usuário, escola distinta: outra cota.
-        $this->getJson('/api/v1/turmas/2/painel/pdf')->assertOk();
+        $this->como(1,2); // Mesmo usuário, outra escola: conserva a cota global de emissão.
+        $this->getJson('/api/v1/turmas/2/painel/pdf')->assertTooManyRequests();
         $this->como(2,3); // Outro usuário na escola original: outra cota.
         $this->getJson('/api/v1/turmas/1/painel/pdf')->assertOk();
+    }
+
+    public function test_bearer_real_resolve_contexto_depois_do_limite_e_conserva_cinco_emissoes():void
+    {
+        $u=Usuario::findOrFail(1); // Identidade crua, sem noVinculo e sem actingAs nesta requisição.
+        $this->assertNull($u->vinculoContextoId());
+        $pai=$u->createToken('identidade')->accessToken;
+        $token=$u->createToken('vinculo-contexto',['vinculo:1','identidade:'.$pai->id])->plainTextToken;
+        $chamar=function(string $url)use($token){
+            app('auth')->forgetGuards();
+            return $this->getJson($url,['Authorization'=>'Bearer '.$token]);
+        };
+        for($i=0;$i<20;$i++)$chamar('/api/v1/disciplinas/opcoes')->assertOk();
+        for($i=0;$i<5;$i++)$chamar('/api/v1/turmas/1/painel/pdf')->assertOk()->assertHeader('Content-Type','application/pdf');
+        $chamar('/api/v1/turmas/1/painel/pdf')->assertTooManyRequests()->assertHeader('Retry-After');
+        $this->assertDatabaseCount('documento_emissoes',5);
     }
 
     private function como(int $usuario,int $vinculo):void
