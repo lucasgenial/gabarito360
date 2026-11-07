@@ -52,7 +52,7 @@
 @if($erroLista)
 <x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
 @else
-  @if(!\App\Support\Acesso::administrativo())<details class="paineis-tabela-alternativa"><summary>Exibir como tabela</summary>@endif
+  @if(!\App\Support\Acesso::administrativo())<details class="paineis-tabela-alternativa"><summary>Tabela com ordenação e paginação</summary>@endif
   <x-tabela :integrada="true" titulo="Turmas" :completa="true">
 <table class="table tabela-padrao" id="turmas-table">
     <caption class="sr-only">Turmas</caption>

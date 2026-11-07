@@ -10,18 +10,20 @@ class PaineisTurmasWebTest extends TestCase
 {
     use ContextoSelecionado,NavegacaoHttp;
 
-    private function preparar(string $perfil, mixed $total=3, int $status=200): void
+    private function preparar(string $perfil, mixed $total=3, int $status=200, ?array $permissoes=null): void
     {
         config(['services.api.base_url'=>'http://api.test/api']);
         Http::swap(new \Illuminate\Http\Client\Factory);
         Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'ficticio','auth_vinculos'=>true,'auth_nome'=>'Pessoa fictícia']);
         $me=['vinculo_id'=>7,'tipo_contexto'=>'vinculo','token'=>'contexto-ficticio','perfil'=>$perfil,
-            'permissoes'=>['turma.ver','aluno.ver','relatorio.turma'],'espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola fictícia']];
+            'permissoes'=>$permissoes??['turma.ver','aluno.ver','relatorio.turma'],'espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola fictícia']];
         $this->selecionarContextoFixture($me);
         Http::fake(function($r)use($me,$total,$status){
             $path=parse_url($r->url(),PHP_URL_PATH);
             if($path==='/api/v1/auth/me')return Http::response(['data'=>$me]);
+            if($path==='/api/v1/turmas/14')return Http::response(['data'=>['id'=>14,'nome'=>'Turma fictícia','serie'=>'3ª série','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'total_alunos'=>3,
+                'alunos'=>[['id'=>8,'nome'=>'Nome nominal fictício','matricula'=>'FICTICIA','ativo'=>true]],'provas'=>[]]]);
             if($path==='/api/v1/turmas')return Http::response(['data'=>['turmas'=>[['id'=>14,'nome'=>'Turma <fictícia>','serie'=>'3ª série','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'total_alunos'=>$total,'avatar_id'=>1,'media_turma'=>987.6]],'kpis'=>['total_alunos'=>999]]],$status);
             return Http::response(['data'=>[]]);
         });
@@ -31,7 +33,7 @@ class PaineisTurmasWebTest extends TestCase
     {
         $this->preparar('professor');
         $r=$this->consultarTela('/app/turmas')->assertOk()->assertSee('Turma &lt;fictícia&gt;',false)
-            ->assertSee('cadastros ativos nas turmas deste recorte')->assertSee('Exibir como tabela')
+            ->assertSee('cadastros ativos nas turmas deste recorte')->assertSee('Tabela com ordenação e paginação')
             ->assertSee('data-ordenar="texto"',false)->assertSee('painel-turma-registro',false)
             ->assertSee('data-painel-modelo="comparacao-turmas"',false)->assertDontSee('987,6')->assertDontSee('999');
         $this->assertStringNotContainsString('Turma <fictícia>',$r->getContent());
@@ -56,5 +58,15 @@ class PaineisTurmasWebTest extends TestCase
         $this->consultarTela('/app/turmas')->assertOk()->assertDontSee('Contagem de cadastros indisponível')->assertSee('cadastros ativos nas turmas deste recorte');
         $this->preparar('professor',0,503);
         $this->consultarTela('/app/turmas')->assertOk()->assertSee('Listagem temporariamente indisponível')->assertDontSee('painel-turma-registro',false);
+    }
+
+    public function test_permissao_retirada_nao_e_apresentada_como_zero_ou_lista_vazia(): void
+    {
+        $this->preparar('professor',3,200,['turma.ver']);
+        $this->consultarTela('/app/turmas/14')->assertOk()->assertDontSee('Nome nominal fictício')
+            ->assertDontSee('Nenhum aluno matriculado')->assertDontSee('Nenhuma prova aplicada')->assertDontSee('Média geral');
+        $this->preparar('professor',3,200,['turma.ver','aluno.ver']);
+        $this->consultarTela('/app/turmas/14')->assertOk()->assertSee('Nome nominal fictício')
+            ->assertDontSee('Média geral')->assertDontSee('data-rotulo="Provas"',false);
     }
 }
