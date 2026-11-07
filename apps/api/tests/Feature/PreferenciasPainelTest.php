@@ -350,4 +350,50 @@ class PreferenciasPainelTest extends TestCase
         $this->putJson('/api/v1/paineis/preferencias/turma',$this->pedido(extra:['layouts'=>['desktop'=>[$this->widget('turma-cadastro','resumo',w:3,h:5)]]]),['X-G360-Painel-Turma'=>'1'])->assertUnprocessable();
         $this->assertDatabaseCount('preferencias_paineis',0);
     }
+    public function test_opcoes_visuais_opcionais_persistem_false_e_replay_sem_alterar_legado():void
+    {
+        $w=$this->widget('distribuicao-acertos',h:12)+['altura_desejada'=>10,'fixo'=>true,'altura_livre'=>false,'orientacao'=>'horizontal'];
+        $p=$this->pedido(extra:['layouts'=>['desktop'=>[$w]]]);$headers=['X-G360-Painel-Turma'=>'1'];
+        $this->putJson('/api/v1/paineis/preferencias/turma',$p,$headers)->assertOk()->assertJsonPath('data.layouts.desktop.0',$w);
+        $this->getJson('/api/v1/paineis/preferencias/turma',$headers)->assertOk()->assertJsonPath('data.layouts.desktop.0',$w);
+        $this->putJson('/api/v1/paineis/preferencias/turma',$p,$headers)->assertOk()->assertJsonPath('data.repetido',true);
+        foreach(['fixo'=>false,'altura_livre'=>true,'orientacao'=>'vertical'] as $key=>$value){
+            $changed=$p;$changed['layouts']['desktop'][0][$key]=$value;
+            $this->putJson('/api/v1/paineis/preferencias/turma',$changed,$headers)->assertConflict();
+        }
+        $updated=$w;$updated['fixo']=false;$updated['altura_livre']=true;$updated['orientacao']='vertical';
+        $this->putJson('/api/v1/paineis/preferencias/turma',$this->pedido(1,['layouts'=>['desktop'=>[$updated]]]),$headers)->assertOk()
+            ->assertJsonPath('data.layouts.desktop.0.fixo',false)->assertJsonPath('data.layouts.desktop.0.altura_livre',true)->assertJsonPath('data.layouts.desktop.0.orientacao','vertical');
+        $this->putJson('/api/v1/paineis/preferencias/turma',$p,$headers)->assertOk()->assertJsonPath('data.repetido',true)->assertJsonPath('data.layouts.desktop.0',$w);
+        $this->getJson('/api/v1/paineis/preferencias/turma',$headers)->assertOk()->assertJsonPath('data.layouts.desktop.0',$updated);
+        $legacy=$this->widget('distribuicao-acertos',h:12);
+        $this->putJson('/api/v1/paineis/preferencias/turma',$this->pedido(2,['layouts'=>['desktop'=>[$legacy]]]),$headers)->assertOk()->assertJsonPath('data.layouts.desktop.0',$legacy);
+        $this->assertSame(['id','section','x','y','w','h'],array_keys(json_decode(DB::table('preferencias_paineis')->value('desktop'),true)[0]));
+    }
+
+    public function test_opcoes_visuais_estritas_nao_relaxam_catalogo_limites_ou_colisoes():void
+    {
+        $h=['X-G360-Painel-Turma'=>'1'];$base=$this->widget('distribuicao-acertos',h:12);$cases=[];
+        foreach(['fixo','altura_livre'] as $key)foreach([0,1,'false',null,[]] as $value)$cases[]=[$base+[$key=>$value]];
+        foreach([null,false,'diagonal',[]] as $value)$cases[]=[$base+['orientacao'=>$value]];
+        $cases[]=[$this->widget('situacoes-registradas',h:12)+['orientacao'=>'horizontal']];
+        $cases[]=[$base+['fixo'=>true,'campo_desconhecido'=>false]];
+        $cases[]=[$base+['fixo'=>true,'altura_livre'=>true],$this->widget('resultados-avaliacao',h:12)+['fixo'=>true,'altura_livre'=>true]];
+        $cases[]=[array_replace($base,['h'=>7,'fixo'=>true,'altura_livre'=>true])];
+        foreach($cases as $widgets)$this->putJson('/api/v1/paineis/preferencias/turma',$this->pedido(extra:['layouts'=>['desktop'=>$widgets]]),$h)->assertUnprocessable();
+        $this->assertDatabaseCount('preferencias_paineis',0);$this->assertDatabaseCount('preferencias_painel_eventos',0);
+    }
+
+    public function test_opcoes_visuais_ficam_ocultas_quando_capacidade_e_retirada_sem_reescrever_mapa():void
+    {
+        $h=['X-G360-Painel-Turma'=>'1'];$w=$this->widget('periodos-escolares','planejamento',h:12)+['fixo'=>false,'altura_livre'=>true,'orientacao'=>'vertical'];
+        $this->putJson('/api/v1/paineis/preferencias/turma',$this->pedido(extra:['layouts'=>['desktop'=>[$w]]]),$h)->assertOk();
+        $raw=DB::table('preferencias_paineis')->value('desktop');
+        DB::table('vinculo_permissoes')->insert(['vinculo_id'=>1,'permissao'=>'relatorio.turma','efeito'=>'retirar']);
+        $this->getJson('/api/v1/paineis/preferencias/turma',$h)->assertOk()->assertJsonCount(0,'data.layouts.desktop')->assertDontSee('periodos-escolares');
+        $this->assertSame($raw,DB::table('preferencias_paineis')->value('desktop'));
+        DB::table('vinculo_permissoes')->where('vinculo_id',1)->where('permissao','relatorio.turma')->delete();
+        $this->getJson('/api/v1/paineis/preferencias/turma',$h)->assertOk()->assertJsonPath('data.layouts.desktop.0',$w);
+    }
+
 }

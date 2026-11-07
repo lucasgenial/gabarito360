@@ -174,3 +174,18 @@ Implementação da limpeza concluída em fonte: títulos e conteúdo útil; desc
 Após as publicaçõesPR211/212 (homologação31286c3), o responsável revogou a obrigação de preencher toda a linha e solicitou publicação imediata da correção na homologação para seus testes. Préconsulta UI/UX aprovou preservar a largura escolhida quando soma≤12, sem esticar vizinhos nem um widget isolado; reduzir somente por excesso real e respeitar mínimos/quebra. Alturas uniformes, KPIs fixos, seções, persistência e mobile permanecem. Não alterar API, dados ou schema.
 
 Causa isolada: widths() distribuía toda a sobra e normalizeRows() rejeitava linha que não completasse12. Correção local retira essa distribuição e admite sobra. Casos de regressão incluem widget6 isolado e4+4 após salvar/reabrir, resize4→6 sem alterar irmão4, excesso, altura desejada e remoção de linhas vazias. Situação desta fonte: implementação e11 testesNode aprovados; revisão independente, CI, integração e publicação do novo candidato ainda pendentes. A aprovação/publicação31286c3 é histórica e não aprova automaticamente o delta.
+
+## Incremento posterior — controles e acompanhamento, em execução
+
+Base: main9b65b47 / árvore homologada6444f2c. Consulta prévia UI/UX e Product Design registrada em07/11/2026 antes da implementação. O responsável solicitou controles evidentes, altura independente, fixação, H/V, paleta contextual e reunião dos recursos pedagógicos; não autorizou remover Organizar/Salvar nem publicar em produção.
+
+| Entrega | Situação atual | Critério de conclusão |
+|---|---|---|
+| Grip e resize proporcional | Implementação integrada | Botão44px; glyph22/16; teclado/foco e revisão independente |
+| Fixação e altura independente | Implementação e testes em validação | Âncoraimutável, solver semcolisões, legado preservado, save/reload |
+| H/V e paleta dos gráficos | Implementação integrada | CincoIDs, séries/bases iguais, contraste, responsivo |
+| Acompanhamento da turma | Implementação integrada | Modelospedagógicos agrupados, administrativoisolado, semLeiturasdos cartões |
+| API/BFF aditivos | Testes focais aprovados; revisão independente pendente | Boolestrito, enum/allowlist, hash/replay, ACL/CSRF intactos |
+| Publicação e conferência | Pendente | CI5checks, revisões independentes, merge e homologação protegida, zeroDDL |
+
+As demonstrações continuam Em breve/Dados demonstrativos. Esta entrega altera organização e apresentação, não conclui metas, conselho, agenda ou habilidades operacionais. Preservar os gabaritos, todas as tabelas/arquivos e a produção.

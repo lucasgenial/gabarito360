@@ -53,9 +53,6 @@ $analiseGraficos=array_intersect_key($analise,array_flip(['distribuicao_acertos'
 <x-painel-widget id="situacoes-registradas" titulo="Situações registradas" :w="6" :h="9" secao="analises" :demo="false" class="painel-widget-grafico">@if($painelIndisponivel)<p class="painel-widget-indisponivel">Dados temporariamente indisponíveis. Atualize a página para tentar novamente.</p>@else<span class="painel-valores-acessiveis">Critério de cada avaliação · {{ $situacoes['total']??0 }} resultados concluídos.</span><div class="tu1r3-grafico" data-grafico="situacoes" role="img" aria-label="Situações registradas nos resultados"></div><div class="painel-valores-acessiveis"><ul><li>Dentro do critério: {{ $situacoes['dentro_criterio']??0 }}</li><li>Indicação de recuperação: {{ $situacoes['indicacao_recuperacao']??0 }}</li><li>Outras situações: {{ $situacoes['outros']??0 }}</li></ul></div>@endif</x-painel-widget>
 </x-painel-secao>
 </div>
-@if($acompanhamento)
-<div class="card card-pad tu1r3-leituras"><h2>Leituras dos cartões</h2><div class="tu1r3-pendencias">@foreach(['revisao'=>'Precisam de revisão','processamento'=>'Em processamento','falhas'=>'Falhas','nao_identificados'=>'Não identificados','aguardando_leitura'=>'Aguardando leitura'] as $campo=>$rotulo)<span><strong>{{ $acompanhamento[$campo]??0 }}</strong> {{ $rotulo }}</span>@endforeach</div></div>
-@endif
 @include('turmas._painel_documento')
 @endif
 @push('scripts')<script src="{{ asset('js/turma-painel.js') }}?v={{ filemtime(public_path('js/turma-painel.js')) }}" defer></script><script src="{{ asset('js/turma-graficos.js') }}?v={{ filemtime(public_path('js/turma-graficos.js')) }}" defer></script>@endpush
