@@ -18,7 +18,7 @@ class TurmaController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $consulta = new ConsultasPedagogicas($request->user());
+        $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $ids   = Escopo::turmaIds($request->user());
         $query = Escopo::turmas($request->user());
 
@@ -38,13 +38,13 @@ class TurmaController extends Controller
         }
 
         if ($request->has('ativo')) {
-            $query->where('ativo', (bool) $request->query('ativo'));
+            $query->where('ativo', $request->boolean('ativo'));
         }
 
-        $turmas = $query->with('escola:id,nome,nucleo_id')
-            ->orderBy('nome')
-            ->get()
-            ->map(function (Turma $t) use ($consulta, $request) {
+        $lista = $query->with('escola:id,nome,nucleo_id')->orderBy('nome')->get();
+        $versoes = app(\App\Services\ArquivamentoCadastro::class)->versoes('turma',$lista->modelKeys());
+        $turmas = $lista->map(function (Turma $t) use ($consulta, $request, $versoes) {
+                $t->setAttribute('arquivamento',app(\App\Services\ArquivamentoCadastro::class)->estado($t,$versoes[$t->id]??0));
                 $totalAlunos = $consulta->tabela('alunos')
                     ->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))
                     ->where('ativo', true)
@@ -99,17 +99,20 @@ class TurmaController extends Controller
             'observacoes' => 'sometimes|nullable|string|max:1000',
         ]);
 
-        $turma = new Turma($data);
-        if (Espacos::ativo()) $turma->forceFill(Espacos::autoria($pessoal ?? Espacos::daEscola($request->user(), (int) $data['escola_id']), $request->user()));
-        if ($pessoal) $turma->forceFill(['escola_id'=>null, 'espaco_tipo'=>'pessoal']);
-        $turma->save();
+        $turma = app(\App\Services\ArquivamentoCadastro::class)->criar($request->user(),'turma',$data,function($valores)use($pessoal,$request){
+            $turma = new Turma($valores);
+            if (Espacos::ativo()) $turma->forceFill(Espacos::autoria($pessoal ?? Espacos::daEscola($request->user(), (int)$valores['escola_id']),$request->user()));
+            if ($pessoal) $turma->forceFill(['escola_id'=>null,'espaco_tipo'=>'pessoal']);
+            $turma->save();return $turma;
+        });
+        $turma->setAttribute('arquivamento',app(\App\Services\ArquivamentoCadastro::class)->estado($turma));
 
         return ApiResponse::success($turma, null, 201);
     }
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $consulta = new ConsultasPedagogicas($request->user());
+        $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $query = Escopo::turmas($request->user())->with('escola:id,nome,nucleo_id');
 
         $turma = $query->find($id);
@@ -118,9 +121,11 @@ class TurmaController extends Controller
             return ApiResponse::notFound('Turma não encontrada.');
         }
 
+        $turma->setAttribute('arquivamento',app(\App\Services\ArquivamentoCadastro::class)->estado($turma));
         if (\App\Support\PerfisEscolares::administrativo($request->user()->perfil)) {
             $alunos = $consulta->tabela('alunos')->where('turma_id', $id)->where('espaco_id', $turma->espaco_id)
                 ->orderBy('nome')->get(['id', 'nome', 'avatar_id', 'imagem_versao', 'foto_path', 'matricula', 'ativo'])->map(function($a){$a->tem_foto=!empty($a->foto_path);unset($a->foto_path);return $a;});
+            $this->estadosDosAlunos($alunos);
             return ApiResponse::success(array_merge($turma->toArray(), [
                 'escola_nome' => $turma->escola?->nome, 'total_alunos' => $alunos->where('ativo', true)->count(), 'alunos' => $alunos,
             ]));
@@ -132,6 +137,7 @@ class TurmaController extends Controller
             ->select('id', 'nome', 'avatar_id', 'imagem_versao', 'foto_path', 'matricula', 'data_nascimento', 'ativo')
             ->get();
 
+        $this->estadosDosAlunos($alunos);
         // Construir o mesmo escopo completo uma vez por requisição. Os clones mantêm
         // todos os filtros de integridade/autorização, inclusive o histórico do aluno.
         $notas = $consulta->tabela('notas')
@@ -184,6 +190,12 @@ class TurmaController extends Controller
         ]));
     }
 
+    private function estadosDosAlunos(\Illuminate\Support\Collection $alunos): void
+    {
+        $versoes=app(\App\Services\ArquivamentoCadastro::class)->versoes('aluno',$alunos->pluck('id')->all());
+        foreach($alunos as $a)$a->arquivamento=['arquivado'=>!(bool)$a->ativo,'versao'=>$versoes[$a->id]??0];
+    }
+
     public function update(Request $request, int $id): JsonResponse
     {
         $turma = Escopo::turmas($request->user())->find($id);
@@ -208,24 +220,14 @@ class TurmaController extends Controller
         if (isset($data['escola_id'])) {
             abort_unless((int) $data['escola_id'] === (int) $turma->escola_id, 422, 'Transferência entre escolas exige procedimento próprio.');
         }
-        $turma->update($data);
-
-        return ApiResponse::success($turma->fresh());
+        $turma = app(\App\Services\ArquivamentoCadastro::class)->atualizar($request->user(),'turma',$id,$data);
+        return ApiResponse::success(array_merge($turma->toArray(),['arquivamento'=>app(\App\Services\ArquivamentoCadastro::class)->estado($turma)]));
     }
 
     public function toggle(Request $request, int $id): JsonResponse
     {
-        $turma = Escopo::turmas($request->user())->find($id);
-
-        if (!$turma) {
-            return ApiResponse::notFound('Turma não encontrada.');
-        }
-
-        $turma->update(['ativo' => !$turma->ativo]);
-
-        return ApiResponse::success(
-            ['ativo' => $turma->ativo],
-            $turma->ativo ? 'Turma ativada.' : 'Turma desativada.'
-        );
+        $d=$request->validate(['esperado_ativo'=>'sometimes|boolean','versao'=>'sometimes|integer|min:0','chave'=>'sometimes|uuid']);
+        $estado=app(\App\Services\ArquivamentoCadastro::class)->toggleLegado($request->user(),'turma',$id,$d);
+        return ApiResponse::success($estado,$estado['ativo']?'Turma ativada.':'Turma desativada.');
     }
 }

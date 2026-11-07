@@ -72,9 +72,9 @@
           <td data-rotulo="Série"><div class="tabela-valor">{{ $a['turma_serie'] ?? '—' }}</div></td>
           <td data-rotulo="Status"><div class="tabela-valor">
             @if($a['ativo'])
-              <span class="badge badge-success badge-dot">Ativo</span>
+              <span class="badge badge-success badge-dot">Em uso</span>
             @else
-              <span class="badge badge-danger badge-dot">Inativo</span>
+              <span class="badge badge-danger badge-dot">Cadastro arquivado</span>
             @endif
           </div></td>
           <td style="text-align:right;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">

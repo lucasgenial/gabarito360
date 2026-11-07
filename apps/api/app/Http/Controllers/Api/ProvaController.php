@@ -213,6 +213,7 @@ class ProvaController extends Controller
 
         $prova = app(CurriculoProva::class)->transacionar($usuario,function () use ($data, $usuario, $turmaIds, $pessoal,$curricular,$disciplinaIds) {
             $curriculo=app(CurriculoProva::class); $curriculo->travar($usuario);
+            app(\App\Services\ArquivamentoCadastro::class)->exigirTurmasAtivas($usuario,$turmaIds);
             $prova = new Prova($data);
             $prova->forceFill(\App\Support\AutoriaProva::capturar($usuario));
             if (Espacos::ativo()) $prova->forceFill(Espacos::autoria($pessoal ?? Espacos::daEscola($usuario, (int) $data['escola_id']), $usuario));
@@ -310,6 +311,7 @@ class ProvaController extends Controller
         }
         app(CurriculoProva::class)->transacionar($request->user(),function () use ($prova, $id, $data, $turmaIds, $request,$alterarCurriculo,$disciplinaIds,$versao) {
             $curriculo=app(CurriculoProva::class); $curriculo->travar($request->user());
+            if($turmaIds!==null)app(\App\Services\ArquivamentoCadastro::class)->exigirTurmasAtivas($request->user(),$turmaIds,$id);
             // Serializa edição das associações e preserva autoria de vínculos mantidos.
             DB::table('provas')->where('id', $id)->lockForUpdate()->first();
             $prova=Escopo::provaEditavel($request->user(),$id); abort_unless($prova,404);

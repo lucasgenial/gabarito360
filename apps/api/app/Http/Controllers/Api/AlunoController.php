@@ -30,13 +30,13 @@ class AlunoController extends Controller
         }
 
         if ($request->has('ativo')) {
-            $query->where('ativo', (bool) $request->query('ativo'));
+            $query->where('ativo', $request->boolean('ativo'));
         }
 
-        $alunos = $query->with('turma:id,nome,serie,escola_id')
-            ->orderBy('nome')
-            ->get()
-            ->map(fn (Aluno $a) => array_merge($a->toArray(), [
+        $lista = $query->with('turma:id,nome,serie,escola_id')->orderBy('nome')->get();
+        $versoes=app(\App\Services\ArquivamentoCadastro::class)->versoes('aluno',$lista->modelKeys());
+        $alunos = $lista->map(fn (Aluno $a) => array_merge($a->toArray(), [
+                'arquivamento'=>app(\App\Services\ArquivamentoCadastro::class)->estado($a,$versoes[$a->id]??0),
                 'turma_nome' => $a->turma?->nome,
                 'turma_serie'=> $a->turma?->serie,
             ]));
@@ -76,7 +76,8 @@ class AlunoController extends Controller
         $foto = $request->hasFile('foto') ? app(\App\Services\ImagemPerfil::class)->guardar($request->file('foto'), 'alunos/fotos') : null;
         unset($data['foto']);
         try {
-            $aluno = \Illuminate\Support\Facades\DB::transaction(function () use ($data,$pessoal,$turma,$request,$foto) {
+            $aluno = app(\App\Services\ArquivamentoCadastro::class)->criar($request->user(),'aluno',$data,function($data)use($pessoal,$turma,$request,$foto){
+                Escopo::turmas($request->user())->where('ativo',true)->findOrFail($turma->id);
                 $aluno = new Aluno($pessoal ? EspacoPessoal::dadosMinimos($data) : $data);
                 if (Espacos::ativo()) $aluno->forceFill(Espacos::autoria((int) $turma->espaco_id, $request->user()));
                 if ($pessoal) $aluno->forceFill(['espaco_tipo'=>'pessoal']);
@@ -86,7 +87,7 @@ class AlunoController extends Controller
             });
         } catch (\Throwable $e) { if ($foto) \Illuminate\Support\Facades\Storage::disk('local')->delete($foto); throw $e; }
 
-        return ApiResponse::success($aluno->load('turma:id,nome,serie'), null, 201);
+        return ApiResponse::success(array_merge($aluno->load('turma:id,nome,serie')->toArray(),['arquivamento'=>app(\App\Services\ArquivamentoCadastro::class)->estado($aluno)]),null,201);
     }
 
     public function show(Request $request, int $id): JsonResponse
@@ -100,6 +101,7 @@ class AlunoController extends Controller
         }
 
         return ApiResponse::success(array_merge($aluno->toArray(), [
+            'arquivamento'=>app(\App\Services\ArquivamentoCadastro::class)->estado($aluno),
             'turma_nome'  => $aluno->turma?->nome,
             'turma_serie' => $aluno->turma?->serie,
         ]));
@@ -135,34 +137,18 @@ class AlunoController extends Controller
             abort_unless((int) $destino->escola_id === (int) $origem->escola_id, 422, 'Transferência entre escolas exige procedimento próprio.');
             if (Espacos::ativo()) abort_unless((int) $destino->espaco_id === (int) $aluno->espaco_id, 422);
         }
-        if ($pessoal) {
-            app(\App\Services\AtualizarAlunoPessoal::class)->executar($request->user(), $id, EspacoPessoal::dadosMinimos($data));
-        } else {
-            app(\App\Services\MovimentarAlunoTurma::class)->executar($request->user(),$id,$data);
-        }
-
-        return ApiResponse::success($aluno->fresh());
+        $aluno=app(\App\Services\ArquivamentoCadastro::class)->atualizar($request->user(),'aluno',$id,$data,function($registro,$dados)use($pessoal,$request,$id){
+            if($pessoal)app(\App\Services\AtualizarAlunoPessoal::class)->executar($request->user(),$id,EspacoPessoal::dadosMinimos($dados));
+            else app(\App\Services\MovimentarAlunoTurma::class)->executar($request->user(),$id,$dados);
+        });
+        return ApiResponse::success(array_merge($aluno->toArray(),['arquivamento'=>app(\App\Services\ArquivamentoCadastro::class)->estado($aluno)]));
     }
 
     public function toggle(Request $request, int $id): JsonResponse
     {
-        $aluno = Escopo::alunos($request->user())->find($id);
-
-        if (!$aluno) {
-            return ApiResponse::notFound('Aluno não encontrado.');
-        }
-
-        $esperado=$request->validate(['esperado_ativo'=>'sometimes|boolean']);
-        \Illuminate\Support\Facades\DB::transaction(function()use($aluno,$esperado){
-            $atual=Aluno::whereKey($aluno->id)->lockForUpdate()->firstOrFail();
-            if(array_key_exists('esperado_ativo',$esperado))abort_unless((bool)$atual->ativo===(bool)$esperado['esperado_ativo'],409,'O status do aluno mudou. Atualize os dados antes de confirmar.');
-            $atual->update(['ativo'=>!$atual->ativo]); $aluno->setRawAttributes($atual->getAttributes(),true);
-        });
-
-        return ApiResponse::success(
-            ['ativo' => $aluno->ativo],
-            $aluno->ativo ? 'Aluno ativado.' : 'Aluno desativado.'
-        );
+        $d=$request->validate(['esperado_ativo'=>'sometimes|boolean','versao'=>'sometimes|integer|min:0','chave'=>'sometimes|uuid']);
+        $estado=app(\App\Services\ArquivamentoCadastro::class)->toggleLegado($request->user(),'aluno',$id,$d);
+        return ApiResponse::success($estado,$estado['ativo']?'Aluno ativado.':'Aluno desativado.');
     }
 
     public function transferir(Request $request,int $id): JsonResponse

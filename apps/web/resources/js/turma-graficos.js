@@ -1,0 +1,55 @@
+import {init,use} from 'echarts/core';
+import {BarChart,PieChart} from 'echarts/charts';
+import {GridComponent,TooltipComponent,LegendComponent,DataZoomComponent,AriaComponent,TitleComponent} from 'echarts/components';
+import {SVGRenderer} from 'echarts/renderers';
+use([BarChart,PieChart,GridComponent,TooltipComponent,LegendComponent,DataZoomComponent,AriaComponent,TitleComponent,SVGRenderer]);
+
+// Dados vêm do DTO autorizado do painel. Nenhuma consulta direta ou mudança de escopo no cliente.
+const raiz=document.querySelector('[data-painel-graficos]');
+if(raiz){
+ let dados;try{dados=JSON.parse(raiz.dataset.painelDados);}catch{dados={};}
+ const analise=dados.analise||{}, graficos=new Map();let ordemOriginal=false;
+ const percentual=v=>v==null?'Sem percentual':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+ const cor=nome=>getComputedStyle(raiz).getPropertyValue(nome).trim();
+ const cores=()=>[cor('--serie-1'),cor('--serie-2'),cor('--serie-3'),cor('--serie-4'),cor('--serie-5')];
+ function vazio(elemento,mensagem){elemento.textContent=mensagem;elemento.classList.add('tu1r3-grafico-vazio');}
+ function opcoes(tipo){
+  const paleta=cores(),texto=cor('--muted'),borda=cor('--border-soft');
+  const comum={animation:!matchMedia('(prefers-reduced-motion: reduce)').matches,color:paleta,textStyle:{fontFamily:'Figtree, sans-serif',color:texto},aria:{enabled:true,label:{description:'Painel de indicadores da turma. Os valores e a base de cálculo estão disponíveis em Consultar valores, abaixo de cada gráfico.'}},tooltip:{trigger:'axis',renderMode:'richText',confine:true},grid:{left:44,right:22,top:30,bottom:54,containLabel:true}};
+  const numerico={type:'value',min:0,max:100,interval:raiz.clientWidth<600?50:20,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:borda}}};
+  if(tipo==='distribuicao'){
+   const faixas=analise.distribuicao_acertos?.faixas||[];
+   const itens=faixas.length===10?Array.from({length:5},(_,i)=>({label:i===4?'80–100%':(i*20)+'–<'+((i+1)*20)+'%',total:Number(faixas[i*2].total)+Number(faixas[i*2+1].total)})):faixas;
+   if(!(analise.distribuicao_acertos?.total>0))return null;
+   if(raiz.clientWidth<600)return {...comum,grid:{left:4,right:32,top:20,bottom:34,containLabel:true},xAxis:{type:'value',minInterval:1,name:'Resultados',nameLocation:'middle',nameGap:26,splitLine:{lineStyle:{color:borda}}},yAxis:{type:'category',inverse:true,data:itens.map(i=>i.label),axisLabel:{fontSize:11},axisTick:{show:false}},series:[{name:'Resultados',type:'bar',data:itens.map(i=>i.total),barMaxWidth:26,itemStyle:{borderRadius:[0,4,4,0]},label:{show:true,position:'right',formatter:p=>p.value||'',color:texto}}]};
+   return {...comum,xAxis:{type:'category',data:itens.map(i=>i.label),axisLabel:{interval:0,rotate:0,fontSize:11},axisTick:{show:false}},yAxis:{type:'value',minInterval:1,name:'Resultados',splitLine:{lineStyle:{color:borda}}},series:[{name:'Resultados',type:'bar',data:itens.map(i=>i.total),barMaxWidth:36,itemStyle:{borderRadius:[5,5,0,0]},label:{show:true,position:'top',formatter:p=>p.value||'',color:texto}}]};
+  }
+  if(tipo==='avaliacoes'){
+   const itens=analise.por_avaliacao||[];if(!itens.some(i=>i.n>0))return null;
+   return {...comum,grid:{left:4,right:48,top:25,bottom:54,containLabel:true},legend:{bottom:0,textStyle:{color:texto}},xAxis:numerico,yAxis:{type:'category',inverse:true,data:itens.map(i=>i.titulo+' · n='+i.n),axisLabel:{width:raiz.clientWidth<600?80:130,overflow:'truncate',fontSize:11},axisTick:{show:false}},series:[{name:'Média',type:'bar',barMaxWidth:17,data:itens.map(i=>i.media_pct),itemStyle:{borderRadius:[0,4,4,0]},label:{show:true,position:'right',formatter:p=>percentual(p.value),color:texto}},{name:'Mediana',type:'bar',barMaxWidth:17,data:itens.map(i=>i.mediana_pct),itemStyle:{borderRadius:[0,4,4,0]},label:{show:true,position:'right',formatter:p=>percentual(p.value),color:texto}}],...(itens.length>5?{dataZoom:[{type:'inside',yAxisIndex:0,startValue:0,endValue:4},{type:'slider',yAxisIndex:0,width:12,right:0,startValue:0,endValue:4}]}:{})};
+  }
+  if(tipo==='situacoes'){
+   const s=dados.situacoes||{};if(!(s.total>0))return null;
+   return {...comum,title:{text:String(s.total),subtext:'resultados',left:'center',top:'31%',textStyle:{color:cor('--fg'),fontSize:27,fontWeight:700},subtextStyle:{color:texto,fontSize:12}},color:[cor('--success'),paleta[2],cor('--muted')],tooltip:{trigger:'item',renderMode:'richText',confine:true,formatter:'{b}: {c} ({d}%)'},legend:{bottom:0,selectedMode:false,textStyle:{color:texto},itemGap:14},series:[{type:'pie',radius:['43%','65%'],center:['50%','42%'],avoidLabelOverlap:true,label:{show:true,position:'inside',formatter:p=>p.value?p.value:'',color:'#fff',fontWeight:700},data:[{name:'Dentro do critério',value:s.dentro_criterio||0},{name:'Indicação de recuperação',value:s.indicacao_recuperacao||0},{name:'Outras situações',value:s.outros||0}]}]};
+  }
+  const q=analise.questoes||{};if(!q.disponivel||!q.items?.length)return null;
+  const itens=[...q.items].sort(ordemOriginal?(a,b)=>a.numero-b.numero:(a,b)=>(a.pct??101)-(b.pct??101)||a.numero-b.numero);
+  return {...comum,grid:{left:32,right:52,top:10,bottom:25,containLabel:true},xAxis:numerico,yAxis:{type:'category',inverse:true,data:itens.map(i=>'Q'+i.numero+' · n='+i.base+(i.anulada?' · anulada':i.pct==null?' · sem base':'')),axisTick:{show:false}},tooltip:{trigger:'axis',renderMode:'richText',confine:true,formatter:params=>{const i=itens[params[0]?.dataIndex];return i?'Questão '+i.numero+'\n'+(i.anulada?'Anulada':percentual(i.pct))+' · '+i.acertos+'/'+i.base+' acertos\nSem registro: '+i.sem_registro:'';}},dataZoom:itens.length>8?[{type:'inside',yAxisIndex:0,startValue:0,endValue:7},{type:'slider',yAxisIndex:0,width:12,right:0,startValue:0,endValue:7}]:[],series:[{name:'Acerto',type:'bar',barMaxWidth:22,data:itens.map(i=>i.anulada?null:i.pct),itemStyle:{color:paleta[1],borderRadius:[0,4,4,0]},label:{show:true,position:'right',formatter:p=>percentual(p.value),color:texto}}]};
+ }
+ function renderizar(elemento){
+  if(!elemento.clientWidth)return;
+  let g=graficos.get(elemento);const config=opcoes(elemento.dataset.grafico);
+  if(!config){if(g){g.dispose();graficos.delete(elemento);}vazio(elemento,elemento.dataset.grafico==='questoes'?'Sem análise de questões disponível neste recorte.':'Ainda não há resultados para este gráfico.');return;}
+  if(!g){elemento.textContent='';elemento.classList.remove('tu1r3-grafico-vazio');g=init(elemento,null,{renderer:'svg'});graficos.set(elemento,g);}
+  for(const eixo of ['xAxis','yAxis'])if(config[eixo]){
+   const valores=Array.isArray(config[eixo])?config[eixo]:[config[eixo]];
+   valores.forEach(a=>{a.axisLabel={...a.axisLabel,color:cor('--muted')};a.nameTextStyle={color:cor('--muted')};a.axisLine={lineStyle:{color:cor('--border')}};});
+  }
+  g.setOption(config,true);g.resize();
+ }
+ const elementos=[...raiz.querySelectorAll('[data-grafico]')];
+ const resize=new ResizeObserver(entradas=>entradas.forEach(e=>renderizar(e.target)));elementos.forEach(e=>resize.observe(e));
+ const tema=new MutationObserver(()=>elementos.forEach(renderizar));tema.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','data-tema','class','style']});
+ document.querySelector('[data-questoes-ordem]')?.addEventListener('click',e=>{ordemOriginal=!ordemOriginal;e.currentTarget.textContent=ordemOriginal?'Ordenar por menor acerto':'Ordenar por número';e.currentTarget.setAttribute('aria-pressed',String(ordemOriginal));document.querySelector('[data-questoes-legenda]').textContent=ordemOriginal?'Ordem das questões · base de cada questão exibida no gráfico.':'Questões com menor acerto primeiro · base de cada questão exibida no gráfico.';renderizar(raiz.querySelector('[data-grafico="questoes"]'));});
+ window.addEventListener('pagehide',()=>{resize.disconnect();tema.disconnect();graficos.forEach(g=>g.dispose());});
+}

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Process;
 
 class PainelTurmaController extends Controller
 {
-    private function filtros(Request $r): array { return $r->validate(['disciplina_id'=>'nullable|integer|min:1','professor_id'=>'nullable|integer|min:1','inicio'=>'nullable|date_format:Y-m-d','fim'=>'nullable|date_format:Y-m-d|after_or_equal:inicio']); }
+    private function filtros(Request $r): array { return $r->validate(['disciplina_id'=>'nullable|integer|min:1','professor_id'=>'nullable|integer|min:1','inicio'=>'nullable|date_format:Y-m-d','fim'=>'nullable|date_format:Y-m-d|after_or_equal:inicio','analise_prova_id'=>'nullable|integer|min:1']); }
     public function show(Request $r,int $id) { return ApiResponse::success(app(PainelTurma::class)->montar($r->user(),$id,$this->filtros($r))); }
     public function pdf(Request $r,int $id)
     {

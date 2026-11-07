@@ -107,11 +107,11 @@ class TurmaController extends Controller
         $painel=null; $painelErro=false; $painelErros=[]; $painelAplicado=[];
         if (\App\Support\Acesso::pode('relatorio.turma')) {
             $regras=$this->regrasFiltrosPainel();
-            $v=\Illuminate\Support\Facades\Validator::make(request()->only(array_keys($regras)),$regras);
+            $v=\Illuminate\Support\Facades\Validator::make(request()->only(array_keys($regras)),$regras,$this->mensagensFiltrosPainel());
             if($v->fails()){
                 $painelErros=$v->errors()->toArray();
                 $anterior=request('painel_anterior',[]);
-                $anterior=\Illuminate\Support\Facades\Validator::make(is_array($anterior)?$anterior:[],$regras);
+                $anterior=\Illuminate\Support\Facades\Validator::make(is_array($anterior)?$anterior:[],$regras,$this->mensagensFiltrosPainel());
                 $painelAplicado=$anterior->fails()?[]:$anterior->validated();
             }else{$painelAplicado=$v->validated();}
             $recorte=$this->mapearFiltrosPainel($painelAplicado);
@@ -222,19 +222,24 @@ class TurmaController extends Controller
 
     private function regrasFiltrosPainel(): array
     {
-        return ['painel_disciplina'=>'nullable|integer|min:1','painel_professor'=>'nullable|integer|min:1','painel_inicio'=>'nullable|date_format:Y-m-d','painel_fim'=>'nullable|date_format:Y-m-d|after_or_equal:painel_inicio'];
+        return ['painel_avaliacao'=>'nullable|integer|min:1','painel_disciplina'=>'nullable|integer|min:1','painel_professor'=>'nullable|integer|min:1','painel_inicio'=>'nullable|date_format:Y-m-d','painel_fim'=>'nullable|date_format:Y-m-d|after_or_equal:painel_inicio'];
+    }
+
+    private function mensagensFiltrosPainel(): array
+    {
+        return ['*.integer'=>'Escolha uma opção válida.','*.min'=>'Escolha uma opção válida.','*.date_format'=>'Informe uma data válida.','painel_fim.after_or_equal'=>'A data final deve ser igual ou posterior à data inicial.'];
     }
 
     private function mapearFiltrosPainel(array $d): array
     {
-        $mapa=['painel_disciplina'=>'disciplina_id','painel_professor'=>'professor_id','painel_inicio'=>'inicio','painel_fim'=>'fim'];$saida=[];
+        $mapa=['painel_avaliacao'=>'analise_prova_id','painel_disciplina'=>'disciplina_id','painel_professor'=>'professor_id','painel_inicio'=>'inicio','painel_fim'=>'fim'];$saida=[];
         foreach($d as $k=>$v)if(isset($mapa[$k])&&$v!==null&&$v!=='')$saida[$mapa[$k]]=$v;
         return $saida;
     }
 
     private function filtrosPainel(Request $r): array
     {
-        return $this->mapearFiltrosPainel($r->validate($this->regrasFiltrosPainel()));
+        return $this->mapearFiltrosPainel($r->validate($this->regrasFiltrosPainel(),$this->mensagensFiltrosPainel()));
     }
 
     public function painelPdf(Request $r,int $id)
@@ -244,6 +249,24 @@ class TurmaController extends Controller
         $resp=$this->api->getArquivo("/v1/turmas/$id/painel/pdf",$d);
         abort_unless($resp->successful()&&str_contains((string)$resp->header('Content-Type'),'pdf'),$resp->failed()?$resp->status():502,'Não foi possível gerar o documento.');
         return response($resp->body(),200,['Content-Type'=>'application/pdf','Content-Disposition'=>($r->boolean('baixar')?'attachment':'inline').'; filename="painel-turma.pdf"','Cache-Control'=>'private, no-store','X-Content-Type-Options'=>'nosniff']);
+    }
+
+    /** Estado explícito, revisão monotônica e recibo idempotente; toggle é só compatibilidade. */
+    public function arquivamento(Request $r, int $id)
+    {
+        abort_unless(\App\Support\Acesso::pode('turma.desativar'),403);
+        $d=$r->validate(['arquivado'=>'required|boolean','esperado_ativo'=>'required|boolean','versao'=>'required|integer|min:0','chave'=>'required|uuid','motivo'=>'nullable|string|max:500']);
+        try { $resp=$this->api->put("/v1/turmas/{$id}/arquivamento",$d); }
+        catch (ConnectionException) { return back()->with('erro','Não foi possível confirmar o arquivamento. Confira o estado atual antes de reenviar.'); }
+        abort_if(in_array($resp->status(),[403,404],true),$resp->status());
+        if($resp->failed())return back()->with('erro',$resp->json('message')??'Não foi possível confirmar o arquivamento. Atualize a página.');
+        $estado=$resp->json('data');
+        if(!is_array($estado)||!is_bool($estado['ativo']??null)||!is_bool($estado['arquivado']??null)
+            ||$estado['ativo']===$estado['arquivado']||!is_int($estado['versao']??null)||$estado['versao']<0
+            ||!is_bool($estado['alterado']??null)||!is_bool($estado['repetido']??null)){
+            return back()->with('erro','Não foi possível confirmar a resposta do arquivamento. Confira o estado atual antes de reenviar.');
+        }
+        return back()->with('sucesso',$resp->json('data.arquivado')?'O registro foi arquivado. O histórico foi preservado.':'O registro foi desarquivado.');
     }
 
     public function toggle(int $id)

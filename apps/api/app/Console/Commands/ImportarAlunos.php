@@ -13,6 +13,8 @@ class ImportarAlunos extends Command
 {
     protected $signature = 'g360:importar-alunos {escola_id} {arquivo}
         {--serie=} {--turno=manha} {--ano=} {--usuario=} {--vinculo=} {--espaco=} {--aplicar}';
+    private const RECUSAS = ['importacao_turma_arquivada'=>'Desarquive a turma antes de importar alunos.','importacao_aluno_arquivado'=>'Desarquive o cadastro do aluno pelo fluxo próprio antes de importar.','importacao_transferencia_implicita'=>'A importação não transfere alunos entre turmas. Utilize a transferência de turma.'];
+
     protected $description = 'Importa alunos e turmas de CSV CLASS;NAME;MATRICULA no destino autorizado';
 
     public function handle(): int
@@ -48,13 +50,17 @@ class ImportarAlunos extends Command
                     foreach ($existentes->get() as $aluno) {
                         $turma = DB::table('turmas')->where('id', $aluno->turma_id)->first();
                         abort_unless($turma && (int) $turma->escola_id === $escola, 409);
+                        abort_unless($aluno->ativo,409,'importacao_aluno_arquivado');
                         if (Espacos::ativo()) abort_unless((int) $aluno->espaco_id === $meta['espaco_id'] && (int) $turma->espaco_id === $meta['espaco_id'], 409);
                     }
                     $turmas = DB::table('turmas')->where('escola_id', $escola)->where('nome', $r['CLASS'])->where('ano_letivo', $ano)->get();
                     abort_if($turmas->count() > 1, 409);
+                    if($turmas->isNotEmpty())abort_unless($turmas->first()->ativo,409,'importacao_turma_arquivada');
+                    foreach($existentes->get() as $aluno)abort_unless($turmas->count()===1 && (int)$aluno->turma_id===(int)$turmas->first()->id,409,'importacao_transferencia_implicita');
                     if (Espacos::ativo() && $turmas->isNotEmpty()) {
                         abort_unless((int) $turmas->first()->espaco_id === $meta['espaco_id'], 409);
                         $ator = \App\Models\Usuario::findOrFail((int) $this->option('usuario'));
+                        if($this->option('vinculo')!==null)$ator=$ator->noVinculo((int)$this->option('vinculo'));
                         abort_unless(in_array((int) $turmas->first()->id, \App\Support\Escopo::turmaIds($ator) ?? [], true), 404);
                     }
                 }
@@ -65,6 +71,11 @@ class ImportarAlunos extends Command
                 return self::SUCCESS;
             }
             DB::transaction(function () use ($escola, $dados, $ano, $meta, $contexto, $validar) {
+                if(Espacos::ativo()){
+                    if($this->option('vinculo')!==null)DB::table('usuario_vinculos')->where('id',(int)$this->option('vinculo'))->lockForUpdate()->first();
+                    else DB::table('usuarios')->where('id',(int)$this->option('usuario'))->lockForUpdate()->first();
+                    DB::table('espacos')->where('id',$meta['espaco_id'])->lockForUpdate()->first();
+                }
                 DB::table('escolas')->where('id', $escola)->lockForUpdate()->firstOrFail();
                 $contexto(); $validar();
                 foreach ($dados as $r) {
@@ -75,15 +86,15 @@ class ImportarAlunos extends Command
                     $q = DB::table('alunos')->where('matricula', $r['MATRICULA']);
                     if (Espacos::ativo()) $q->where('espaco_id', $meta['espaco_id']);
                     $existente = $q->first();
-                    $atualizacao = ['turma_id' => $turmaId, 'nome' => $r['NAME'], 'ativo' => true, 'updated_at' => now()];
+                    $atualizacao = ['turma_id' => $turmaId, 'nome' => $r['NAME'], 'updated_at' => now()];
                     if ($existente) $q->update($atualizacao);
-                    else DB::table('alunos')->insert($atualizacao + ['matricula' => $r['MATRICULA'], 'created_at' => now()] + $meta);
+                    else DB::table('alunos')->insert($atualizacao + ['matricula' => $r['MATRICULA'], 'ativo'=>true, 'created_at' => now()] + $meta);
                 }
             });
             $this->info(count($dados).' linhas importadas no destino.');
             return self::SUCCESS;
         } catch (\Throwable $e) {
-            $this->error('Importação recusada. Confira contexto, permissões, formato e conflitos; nenhuma linha foi aplicada.');
+            $this->error(self::RECUSAS[$e->getMessage()]??'Importação recusada. Confira contexto, permissões, formato e conflitos; nenhuma linha foi aplicada.');
             return self::FAILURE;
         }
     }

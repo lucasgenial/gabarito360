@@ -98,8 +98,8 @@ class CartaoController extends Controller
         $request->validate(array_fill_keys(['ator','vinculo','espaco','acesso','signature','expires','token','_ctx'], 'prohibited'));
         $ator = $request->user();
         abort_unless($ator && $ator->ativo && $ator->perfil !== 'aplicador' && Permissao::pode($ator, 'correcao.acompanhar'), 404);
-        $cartao = ContextoCorrecao::cartoes($ator)->find($id);
-        abort_unless(ContextoCorrecao::cartaoValido($cartao) && $this->encontrarProva($request, $cartao->prova_id), 404);
+        $cartao = ContextoCorrecao::cartoes($ator,historico:true)->find($id);
+        abort_unless(ContextoCorrecao::cartaoValido($cartao) && Escopo::provaHistoricaComConteudo($ator,$cartao->prova_id), 404);
         $relativo = $tipo === 'original' ? $cartao?->imagem_url : ImagensCartao::disponivel($id, $tipo, $cartao?->espaco_id);
         $caminho = $cartao && $relativo ? Storage::disk('public')->path($relativo) : null;
         if (!$caminho || !is_file($caminho)) return ApiResponse::notFound('Imagem não encontrada.');

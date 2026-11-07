@@ -21,7 +21,7 @@ class TentativaCartaoController extends Controller
 {
     public function index(Request $r, int $id)
     {
-        $p = Escopo::prova($r->user(), $id);
+        $p = Escopo::provaHistoricaComConteudo($r->user(),$id);
         abort_unless($p && $r->user()->perfil !== 'aplicador', 404);
         $d = $r->validate(['aluno_id' => 'nullable|integer|min:1', 'page' => 'nullable|integer|min:1']);
         $alunos = ContextoCorrecao::alunos($p, $r->user())->pluck('alunos.id');
@@ -53,7 +53,7 @@ class TentativaCartaoController extends Controller
     {
         $t = DB::table('cartao_tentativas')->find($id);
         abort_unless($t, 404);
-        $p = $h->exigirAcesso($r->user(), $t);
+        $p = $h->exigirAcesso($r->user(),$t,historico:true);
         $d = $h->dados($t);
         $eventos = DB::table('cartao_tentativa_eventos')->where('tentativa_id', $id)->orderBy('id')->get();
         $ultima = $eventos->last();
@@ -69,8 +69,8 @@ class TentativaCartaoController extends Controller
             'tem_imagem' => (bool) $t->imagem_path, 'imagem_sha256' => $t->imagem_sha256, 'qualidade' => $d['cartao']['qualidade'] ?? null,
             'leituras' => $d['leituras_propostas'] ?? $d['respostas'] ?? [], 'nota' => $d['nota'] ?? null,
             'linhas' => app(\App\Services\Omr\QuadroLeituras::class)->montar($d, $snapshots),
-            'pode_aplicar' => $proposta && Permissao::pode($r->user(), 'correcao.alterar') && ! Correcao::bloqueio($r->user(), $p),
-            'pode_descartar' => $proposta && Permissao::pode($r->user(), 'correcao.alterar') && ! Correcao::bloqueio($r->user(), $p),
+            'pode_aplicar' => $proposta && Escopo::prova($r->user(),$p->id) && Permissao::pode($r->user(), 'correcao.alterar') && ! Correcao::bloqueio($r->user(), $p),
+            'pode_descartar' => $proposta && Escopo::prova($r->user(),$p->id) && Permissao::pode($r->user(), 'correcao.alterar') && ! Correcao::bloqueio($r->user(), $p),
             'eventos' => $eventos->map(function ($e) use ($autores) {
                 $snap = json_decode(Crypt::decryptString($e->dados), true, 512, JSON_THROW_ON_ERROR);
 
@@ -84,7 +84,7 @@ class TentativaCartaoController extends Controller
     {
         $t = DB::table('cartao_tentativas')->find($id);
         abort_unless($t, 404);
-        $h->exigirAcesso($r->user(), $t);
+        $h->exigirAcesso($r->user(),$t,historico:true);
         $d = Storage::disk('local');
         abort_unless($t->imagem_path && $d->exists($t->imagem_path), 404);
         $p = $d->path($t->imagem_path);
