@@ -1555,3 +1555,6 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 @media(max-width:600px){.g-pagina-identidade{align-items:flex-start;gap:12px}}
 .g-pagina-identidade .imagem-perfil-abrir{margin:0;flex:0 0 auto}
 .g-pagina-identidade>[data-imagem-turma]{flex:0 0 auto}
+.turma-imagem-edicao{display:flex;align-items:center;gap:16px;margin-block:12px 20px}
+.turma-imagem-edicao .imagem-perfil-abrir{margin:0;flex:0 0 auto}
+.turma-imagem-edicao>div{min-width:0}
