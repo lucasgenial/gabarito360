@@ -223,6 +223,7 @@ $rotasContextuais = static function () {
     Route::post('/alunos/{id}/transferencias-turma', [AlunoController::class, 'transferir'])->name('alunos.transferir');
     Route::get('/alunos/{id}',         [AlunoController::class, 'show'])->name('alunos.show');
     Route::put('/alunos/{id}',         [AlunoController::class, 'update'])->name('alunos.update');
+    Route::put('/alunos/{id}/arquivamento', [AlunoController::class, 'arquivamento'])->name('alunos.arquivamento');
     Route::post('/alunos/{id}/toggle', [AlunoController::class, 'toggle'])->name('alunos.toggle');
 
     // Turmas (MP-016) + Vínculo professor (MP-018)
@@ -233,6 +234,7 @@ $rotasContextuais = static function () {
     Route::get('/turmas/{id}/editar',                  [TurmaController::class, 'edit'])->name('turmas.edit');
     Route::get('/turmas/{id}',                         [TurmaController::class, 'show'])->name('turmas.show');
     Route::put('/turmas/{id}',                         [TurmaController::class, 'update'])->name('turmas.update');
+    Route::put('/turmas/{id}/arquivamento', [TurmaController::class, 'arquivamento'])->name('turmas.arquivamento');
     Route::post('/turmas/{id}/toggle',                 [TurmaController::class, 'toggle'])->name('turmas.toggle');
     Route::post('/turmas/{id}/professores',            [TurmaController::class, 'vincularProfessor'])->name('turmas.professores.store');
     Route::delete('/turmas/{id}/professores/{uid}',    [TurmaController::class, 'desvincularProfessor'])->name('turmas.professores.destroy');

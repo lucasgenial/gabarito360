@@ -37,13 +37,13 @@ class ResultadoController extends Controller
         if($dados instanceof JsonResponse)return $dados;
         $c=\App\Models\Cartao::find($dados['cartao_id']);$dados['qualidade_foto']=$c?->qualidade;
         $dados['historico_permitido']=$c && \App\Support\Permissao::pode($request->user(),'correcao.acompanhar')
-            && ContextoCorrecao::cartoes($request->user())->whereKey($c->id)->exists();
+            && ContextoCorrecao::cartoes($request->user(),historico:true)->whereKey($c->id)->exists();
         $dados['total_leituras'] = $dados['historico_permitido'] ? DB::table('cartao_tentativas')
             ->where('prova_id', $provaId)->where('aluno_id', $alunoId)->where('espaco_id', $c->espaco_id)->count() : null;
         $dados['historico_permitido'] = $dados['historico_permitido'] && $dados['total_leituras'] > 1;
         $dados['tentativa_numero']=$c?->tentativa_id?DB::table('cartao_tentativas')->where('id',$c->tentativa_id)->value('numero'):null;
         $dados['cartao_foto_url']=$c?->imagem_url&&\App\Support\Permissao::pode($request->user(),'correcao.acompanhar')
-            &&ContextoCorrecao::cartoes($request->user())->whereKey($c->id)->exists()?app(\App\Services\Omr\ImagensCartao::class)->url($c->id,'original',$request->user()):null;
+            &&ContextoCorrecao::cartoes($request->user(),historico:true)->whereKey($c->id)->exists()?app(\App\Services\Omr\ImagensCartao::class)->url($c->id,'original',$request->user(),historico:true):null;
         if(!empty($dados['cartao_foto_url'])&&empty($dados['qualidade_foto'])&&$c?->imagem_url){
             try{$dados['qualidade_foto']=app(\App\Services\Omr\QualidadeCartao::class)->avaliar(\Illuminate\Support\Facades\Storage::disk('public')->path($c->imagem_url));}
             catch(\Throwable){$dados['qualidade_foto']=['aprovada'=>null,'codigo'=>'indisponivel','mensagem'=>'Não foi possível verificar a qualidade desta foto agora.'];}
@@ -104,9 +104,9 @@ class ResultadoController extends Controller
         $request->validate(['turma_id' => 'nullable|integer|min:1']);
         abort_if(in_array($request->user()->perfil, ['aluno', 'aplicador']), 403);
         $versao = ContextoCorrecao::versaoAcesso($request->user());
-        $prova = Escopo::provaComConteudo($request->user(), $provaId);
+        $prova = Escopo::provaHistoricaComConteudo($request->user(), $provaId);
         abort_unless($prova, 404, 'Prova não encontrada.');
-        $consulta = new \App\Support\ConsultasPedagogicas($request->user());
+        $consulta = new \App\Support\ConsultasPedagogicas($request->user(),historico:true);
         $turma = $request->filled('turma_id') ? (int) $request->query('turma_id') : null;
         if ($turma) abort_unless(Escopo::turmas($request->user())->whereKey($turma)->exists(), 404, 'Turma não encontrada.');
         $ids = $consulta->tabela('notas')->where('prova_id', $provaId)
@@ -176,13 +176,13 @@ class ResultadoController extends Controller
         $individual = ContextoVinculo::presente($request->user()) && $request->user()->perfil === 'aluno';
         $prova = $individual
             ? Prova::query()->where('espaco_id', ContextoVinculo::resolver($request->user())->espaco_id)->find($provaId)
-            : Escopo::provaComConteudo($request->user(), $provaId);
+            : Escopo::provaHistoricaComConteudo($request->user(), $provaId);
         if ($individual && !ContextoCorrecao::provaValida($prova)) $prova = null;
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
         }
 
-        $historica = Espacos::ativo() ? (new \App\Support\ConsultasPedagogicas($request->user()))->tabela('notas')->where('aluno_id',$alunoId)->where('prova_id',$provaId)->first() : null;
+        $historica = Espacos::ativo() ? (new \App\Support\ConsultasPedagogicas($request->user(),historico:true))->tabela('notas')->where('aluno_id',$alunoId)->where('prova_id',$provaId)->first() : null;
         $aluno = Escopo::alunos($request->user())->with('turma:id,nome,serie')->find($alunoId);
         if(!$aluno && $historica) $aluno=\App\Models\Aluno::where('espaco_id',$prova->espaco_id)->with('turma:id,nome,serie')->find($alunoId);
         if (!$aluno) {
@@ -191,7 +191,7 @@ class ResultadoController extends Controller
 
         $pessoal = \App\Support\EspacoPessoal::doAtor($request->user());
         if (Espacos::ativo() && !$pessoal && !$historica && !ContextoCorrecao::alunos($prova, $individual ? null : $request->user())->where('alunos.id', $alunoId)->exists()) return ApiResponse::notFound('Resultado não encontrado.');
-        $notas = $pessoal ? (new \App\Support\ConsultasPedagogicas($request->user()))->tabela('notas')
+        $notas = $pessoal ? (new \App\Support\ConsultasPedagogicas($request->user(),historico:true))->tabela('notas')
             : ContextoCorrecao::filtrar(DB::table('notas'), $prova->espaco_id);
         $nota = $notas->where('aluno_id', $alunoId)->where('prova_id', $provaId)->first();
         if (!$nota) {
@@ -250,7 +250,7 @@ class ResultadoController extends Controller
             $chave = 'resultado_estatisticas_'.$provaId;
             $stats = $request->attributes->get($chave);
             if ($stats === null) {
-                $stats = app(\App\Services\Omr\EstatisticasQuestoes::class)->calcular($request->user(), $prova);
+                $stats = app(\App\Services\Omr\EstatisticasQuestoes::class)->calcular($request->user(), $prova,historico:true);
                 $request->attributes->set($chave, $stats);
             }
             foreach ($folha as &$q) {

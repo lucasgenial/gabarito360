@@ -16,12 +16,10 @@
 <section id="visao-geral" data-turma-painel="visao-geral" class="tu1-painel" aria-label="Visão geral">
 <section class="card card-pad">
   <h2>Dados da turma</h2>
-  <p>Status: {{ $turma['ativo'] ? 'Ativa' : 'Inativa' }}</p>
+  <p>Status: {{ $turma['ativo'] ? 'Em uso' : 'Arquivada' }}</p>
   @pode('turma.gerir')<a class="btn btn-secondary" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /> Editar turma</a>@endpode
   @if(\App\Support\Acesso::pode('turma.desativar'))
-  <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}" style="margin-top:16px;">
-    @csrf <x-revisao-acesso /> <button class="btn btn-secondary" type="submit"><x-icone nome="situacao" /> {{ $turma['ativo'] ? 'Desativar turma' : 'Ativar turma' }}</button>
-  </form>
+  <x-arquivamento tipo="turmas" :registro="$turma" />
   @endif
 </section>
 </section>

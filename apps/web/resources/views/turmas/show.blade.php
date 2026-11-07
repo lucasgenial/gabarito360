@@ -15,20 +15,28 @@
 <x-pagina titulo="{{ $turma['nome'] }}">
   <x-slot:sub>{{ $turma['serie'] }} ·
       {{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$turma['turno']] ?? $turma['turno'] }} ·
-      <b>{{ $turma['total_alunos'] ?? 0 }}</b> aluno(s) · {{ $turma['ano_letivo'] }} · {{ $turma['ativo'] ? 'Ativa' : 'Inativa' }}
+      <b>{{ $turma['total_alunos'] ?? 0 }}</b> aluno(s) · {{ $turma['ano_letivo'] }} · {{ $turma['ativo'] ? 'Em uso' : 'Arquivada' }}
       @if(!empty($turma['escola_nome'])) · {{ $turma['escola_nome'] }}@endif</x-slot:sub>
+    @if($painel)
+    <button class="btn btn-secondary tu1-icone-acao" type="button" data-painel-abrir aria-label="Filtrar indicadores" title="Filtrar indicadores"><x-icone nome="filtro" /></button>
+    <button class="btn btn-secondary tu1-icone-acao" type="button" data-documento-abrir="imprimir" aria-label="Imprimir painel da turma" title="Imprimir painel da turma"><x-icone nome="imprimir" /></button>
+    <button class="btn btn-secondary tu1-icone-acao" type="button" data-documento-abrir="pdf" aria-label="Gerar PDF do painel da turma" title="Gerar PDF do painel da turma"><x-icone nome="pdf" /></button>
+    @endif
     @pode('turma.gerir')
-    <a class="btn btn-secondary" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /> Editar turma</a>
-    <form method="POST" action="{{ route('turmas.toggle', $turma['id']) }}"
-          data-turma-confirmar="{{ $turma['ativo'] ? 'Desativar' : 'Ativar' }} esta turma?">
-      @csrf <x-revisao-acesso />
-      <button type="submit" class="btn {{ $turma['ativo'] ? 'btn-ghost' : 'btn-secondary' }}"
-              style="color:{{ $turma['ativo'] ? 'var(--danger)' : 'var(--success)' }};{{ $turma['ativo'] ? 'border-color:var(--danger);' : '' }}">
-        <x-icone nome="situacao" /> {{ $turma['ativo'] ? 'Desativar' : 'Ativar' }}
-      </button>
-    </form>
+    <a class="btn btn-secondary tu1-icone-acao" aria-label="Editar turma" title="Editar turma" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /></a>
+    @endpode
+    @pode('turma.desativar')<x-arquivamento tipo="turmas" :registro="$turma" :icone-somente="true" />
     @endpode
 </x-pagina>
+@php
+$recortes=[];
+if(!empty($painelAplicado['painel_disciplina']))$recortes[]='Disciplina: '.($painel['recorte']['disciplina']??'');
+if(!empty($painelAplicado['painel_professor']))$recortes[]='Professor autor: '.($painel['recorte']['professor']??'');
+if(!empty($painelAplicado['painel_inicio']))$recortes[]='A partir de '.\Carbon\Carbon::parse($painelAplicado['painel_inicio'])->format('d/m/Y');
+if(!empty($painelAplicado['painel_fim']))$recortes[]='Até '.\Carbon\Carbon::parse($painelAplicado['painel_fim'])->format('d/m/Y');
+@endphp
+@if($recortes)<p class="tu1r3-recorte"><em>Dados filtrados · {{ implode(' · ',$recortes) }}</em></p>@endif
+
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif

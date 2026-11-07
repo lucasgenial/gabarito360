@@ -145,9 +145,9 @@ class HistoricoCartao
         });
     }
 
-    public function exigirAcesso(Usuario $u, object $t): Prova
+    public function exigirAcesso(Usuario $u, object $t,bool $historico=false): Prova
     {
-        $p = Escopo::prova($u, $t->prova_id);
+        $p = $historico?Escopo::provaHistoricaComConteudo($u,$t->prova_id):Escopo::prova($u,$t->prova_id);
         abort_unless($p && (int) $p->espaco_id === (int) $t->espaco_id && $u->perfil !== 'aplicador' && Permissao::pode($u, 'correcao.acompanhar'), 404);
         if ($t->aluno_id) {
             abort_unless(ContextoCorrecao::alunos($p, $u)->where('alunos.id', $t->aluno_id)->exists(), 404);

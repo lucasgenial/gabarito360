@@ -12,8 +12,8 @@ final class PainelTurma
     {
         abort_unless(Permissao::pode($u,'relatorio.turma')&&!PerfisEscolares::administrativo($u->perfil),403);
         $turma=Escopo::turmas($u)->findOrFail($id);
-        $consulta=new ConsultasPedagogicas($u);
-        $base=Escopo::provas($u)->whereIn('provas.id',$consulta->tabela('prova_turmas')->where('turma_id',$id)->select('prova_id'))
+        $consulta=new ConsultasPedagogicas($u,historico:true);
+        $base=Escopo::provasHistoricas($u)->whereIn('provas.id',$consulta->tabela('prova_turmas')->where('turma_id',$id)->select('prova_id'))
             ->whereIn('provas.status',['publicada','em_correcao','corrigida'])
             ->where(fn($q)=>$q->whereDate('provas.data_aplicacao','<=',now('America/Sao_Paulo')->toDateString())
                 ->orWhere(fn($s)=>$s->whereNull('provas.data_aplicacao')->whereIn('provas.status',['em_correcao','corrigida'])));
@@ -32,7 +32,7 @@ final class PainelTurma
         }
         if(!empty($filtros['inicio']))$base->whereDate('provas.data_aplicacao','>=',$filtros['inicio']);
         if(!empty($filtros['fim']))$base->whereDate('provas.data_aplicacao','<=',$filtros['fim']);
-        $provas=$base->orderBy('provas.data_aplicacao')->orderBy('provas.id')->get(['provas.id','provas.titulo','provas.disciplina','provas.data_aplicacao','provas.nota_maxima']);
+        $provas=$base->orderBy('provas.data_aplicacao')->orderBy('provas.id')->get(['provas.id','provas.espaco_id','provas.opcao_lingua','provas.titulo','provas.disciplina','provas.data_aplicacao','provas.nota_maxima']);
         // Uma nota antiga não torna concluído um cartão vigente que voltou à revisão.
         // O join é 1:1 pela PK do cartão, sem multiplicar resultados por áreas/disciplinas.
         $notas=$consulta->tabela('notas')->where('notas.turma_id',$id)->whereIn('notas.prova_id',$provas->pluck('id'))
@@ -75,6 +75,7 @@ final class PainelTurma
                 'leituras_revisao'=>$acompanhamento['revisao']??null],
             'situacoes_resultados'=>$this->situacoes($total,(int)$agrupadas->sum('dentro_criterio'),(int)$agrupadas->sum('indicacao_recuperacao')),
             'acompanhamento'=>$acompanhamento,
+            'analise'=>(new AnalisePainelTurma)->montar($u,$consulta,$notas,$provas,$total,$filtros['analise_prova_id']??null),
             'avaliacoes'=>$avaliacoes];
     }
 

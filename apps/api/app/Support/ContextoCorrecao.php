@@ -64,9 +64,9 @@ class ContextoCorrecao
                     ->whereRaw('prova_turmas.turma_id = COALESCE(?, alunos.turma_id)', [$cartao->turma_aplicacao_id]))->exists());
     }
 
-    public static function cartoes(Usuario $ator)
+    public static function cartoes(Usuario $ator,bool $historico=false)
     {
-        $q = Cartao::query()->whereIn('prova_id', Escopo::provas($ator)->select('provas.id'));
+        $q = Cartao::query()->whereIn('prova_id', ($historico?Escopo::provasHistoricas($ator):Escopo::provas($ator))->select('provas.id'));
         if (Espacos::ativo()) {
             $q->whereIn('cartoes.espaco_id', Espacos::ids($ator))
                 ->whereExists(fn ($p) => $p->selectRaw('1')->from('provas as dona')

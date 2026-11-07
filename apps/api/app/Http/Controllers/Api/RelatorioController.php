@@ -16,7 +16,7 @@ class RelatorioController extends Controller
 {
     private function encontrarProva(Request $request, int $provaId): ?Prova
     {
-        return Escopo::provaComConteudo($request->user(), $provaId);
+        return Escopo::provaHistoricaComConteudo($request->user(), $provaId);
     }
 
     private function metaRede(ConsultasPedagogicas $consulta, ?int $escolaId): float
@@ -90,7 +90,7 @@ class RelatorioController extends Controller
 
     public function prova(Request $request, int $id): JsonResponse
     {
-        $consulta = new ConsultasPedagogicas($request->user());
+        $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $prova = $this->encontrarProva($request, $id);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
@@ -112,7 +112,7 @@ class RelatorioController extends Controller
 
     public function turmaProva(Request $request, int $turmaId, int $provaId): JsonResponse
     {
-        $consulta = new ConsultasPedagogicas($request->user());
+        $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $prova = $this->encontrarProva($request, $provaId);
         if (!$prova) {
             return ApiResponse::notFound('Prova não encontrada.');
@@ -140,7 +140,7 @@ class RelatorioController extends Controller
      */
     public function turma(Request $request, int $turmaId): JsonResponse
     {
-        $consulta = new ConsultasPedagogicas($request->user());
+        $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $turma = $this->turmaNoEscopo($request, $turmaId);
         if (!$turma) {
             return ApiResponse::notFound('Turma não encontrada.');
@@ -218,7 +218,7 @@ class RelatorioController extends Controller
     /** Boletim do aluno: todas as provas da turma, nota, média e posição na turma. */
     public function aluno(Request $request, int $alunoId): JsonResponse
     {
-        $consulta = new ConsultasPedagogicas($request->user());
+        $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $aluno = $consulta->tabela('alunos')->where('id', $alunoId)->first(['id', 'nome', 'matricula', 'turma_id', 'nome_responsavel']);
         $turma = $aluno ? $this->turmaNoEscopo($request, (int) $aluno->turma_id) : null;
         if (!$aluno || !$turma) {
@@ -228,7 +228,7 @@ class RelatorioController extends Controller
         $provas = $this->provasDaTurma($request, (int) $aluno->turma_id);
         $pessoal = \App\Support\EspacoPessoal::doAtor($request->user());
         {
-            $historicas = Escopo::provas($request->user())->whereIn('provas.id', $consulta->tabela('notas')->where('aluno_id', $alunoId)->select('prova_id'))
+            $historicas = Escopo::provasHistoricas($request->user())->whereIn('provas.id', $consulta->tabela('notas')->where('aluno_id', $alunoId)->select('prova_id'))
                 ->whereIn('status', ['publicada', 'em_correcao', 'corrigida'])->get();
             $provas = $provas->concat($historicas)->unique('id')->sortBy('disciplina')->values();
         }
@@ -278,7 +278,7 @@ class RelatorioController extends Controller
     /** Turma dentro do escopo do usuário (com o nome da escola), ou null. */
     private function turmaNoEscopo(Request $request, int $turmaId): ?object
     {
-        $consulta = new ConsultasPedagogicas($request->user());
+        $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $usuario = $request->user();
         $ids     = Escopo::turmaIds($usuario);
         if (in_array($usuario->perfil, ['aplicador', 'aluno'], true) || ($ids !== null && !in_array($turmaId, $ids, true))) {
@@ -293,8 +293,8 @@ class RelatorioController extends Controller
     /** Provas da turma já aplicáveis e visíveis ao usuário, por disciplina. */
     private function provasDaTurma(Request $request, int $turmaId)
     {
-        $consulta = new ConsultasPedagogicas($request->user());
-        return Escopo::provas($request->user())
+        $consulta = new ConsultasPedagogicas($request->user(),historico:true);
+        return Escopo::provasHistoricas($request->user())
             ->joinSub($consulta->tabela('prova_turmas'), 'prova_turmas', 'prova_turmas.prova_id', '=', 'provas.id')
             ->where('prova_turmas.turma_id', $turmaId)
             ->whereIn('provas.status', ['publicada', 'em_correcao', 'corrigida'])
