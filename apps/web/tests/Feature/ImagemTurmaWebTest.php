@@ -32,7 +32,7 @@ class ImagemTurmaWebTest extends TestCase
                 return Http::response(['data'=>$this->estado,'message'=>'Falha fictícia'],$this->status,['Retry-After'=>'9']);
             }
             if($p==='/api/v1/turmas/14/foto')return Http::response('webp-ficticio',$this->status,['Content-Type'=>$this->mime]);
-            if($p==='/api/v1/turmas/14')return Http::response(['data'=>['id'=>14,'nome'=>'Turma <fictícia>','escola_nome'=>'Escola fictícia','serie'=>'3','ano_letivo'=>2026,'ativo'=>true,'alunos'=>[],'total_alunos'=>0,'avatar_id'=>null,'tem_foto'=>true,'imagem_versao'=>1]]);
+            if($p==='/api/v1/turmas/14')return Http::response(['data'=>['id'=>14,'nome'=>'Turma <fictícia>','escola_nome'=>'Escola fictícia','serie'=>'3','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'alunos'=>[],'total_alunos'=>0,'avatar_id'=>null,'tem_foto'=>true,'imagem_versao'=>1]]);
             return Http::response(['data'=>[]]);
         });
         $this->selecionarContextoFixture($this->me);
@@ -54,6 +54,24 @@ class ImagemTurmaWebTest extends TestCase
         $f=$this->extrairFormularioRecurso($r->getContent(),'turmas.imagem',['id'=>14]);
         $this->assertSame('turmas.imagem',NavegacaoWeb::obter($f['destino']['referencia'])['nome']);
         $this->assertStringNotContainsString('/14',$f['url']);$this->assertStringNotContainsString('?',$f['url']);
+    }
+
+    public function test_editar_turma_inclui_imagem_e_formularios_independentes_sem_url_de_recurso(): void
+    {
+        $this->contexto();
+        $r=$this->consultarTela('/app/turmas/14/editar')->assertOk()
+            ->assertSee('Imagem da turma')->assertSee('Alterar imagem')->assertSee('A imagem é salva separadamente.')
+            ->assertSee('id="imagem-turma-modal"',false)->assertSee('data-imagem-turma-confirmacao',false);
+        $doc=new \DOMDocument();@$doc->loadHTML('<?xml encoding="UTF-8">'.$r->getContent());
+        $xpath=new \DOMXPath($doc);
+        $this->assertSame(0,$xpath->query('//form//form')->length);
+        $this->assertSame(1,$xpath->query('//form[@data-formulario-validado]')->length);
+        $this->assertSame(0,$xpath->query('//form[@data-formulario-validado]//input[@name="avatar_id" or @name="foto"]')->length);
+        $this->assertSame(36,$xpath->query('//form[@id="imagem-turma-form"]//input[@name="avatar_id" and @value!=""]')->length);
+        $f=$this->extrairFormularioRecurso($r->getContent(),'turmas.imagem',['id'=>14]);
+        $this->assertStringNotContainsString('/14',$f['url']);
+        $this->withSession(['_old_input'=>['nome'=>'Nome ainda não salvo']]);
+        $this->consultarTela('/app/turmas/14/editar')->assertOk()->assertSee('value="Nome ainda não salvo"',false);
     }
 
     public function test_foto_encaminha_so_arquivo_e_tipo_com_bearer_servidor_e_json_projetado(): void
