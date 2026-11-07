@@ -215,7 +215,7 @@ class TurmaOrganizacaoWebTest extends TestCase
         $d=['arquivado'=>true,'esperado_ativo'=>true,'versao'=>0,'chave'=>'11111111-1111-4111-8111-111111111111'];
         $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d)->assertForbidden();
         $this->me['permissoes'][]='turma.desativar';$this->selecionarContextoFixture($this->me);
-        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d+['usuario_id'=>99,'token'=>'nao-repassar'])->assertRedirect();
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d+['usuario_id'=>99,'token'=>'nao-repassar'])->assertRetornoTela('/app/turmas/14?secao=visao-geral');
         Http::assertSent(fn($r)=>$r->method()==='PUT'&&parse_url($r->url(),PHP_URL_PATH)==='/api/v1/turmas/14/arquivamento'&&$r->data()===$d);
         $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',['arquivado'=>true])->assertSessionHasErrors(['versao','chave','esperado_ativo']);
     }
@@ -226,10 +226,11 @@ class TurmaOrganizacaoWebTest extends TestCase
         $this->me['permissoes']=['turma.ver','aluno.ver','turma.desativar','aluno.desativar'];$this->selecionarContextoFixture($this->me);
         $d=['arquivado'=>true,'esperado_ativo'=>true,'versao'=>0,'chave'=>'11111111-1111-4111-8111-111111111111'];
         foreach(['/app/turmas/14/arquivamento','/app/alunos/1/arquivamento']as$url){
-            $this->alterarRecurso('PUT',$url,$d)->assertRedirect()->assertSessionHas('sucesso','O registro foi arquivado. O histórico foi preservado.');
+            $destino=str_contains($url,'/turmas/')?'/app/turmas/14?secao=visao-geral':'/app/alunos/1';
+            $this->alterarRecurso('PUT',$url,$d)->assertRetornoTela($destino)->assertSessionHas('sucesso','O registro foi arquivado. O histórico foi preservado.');
             foreach([[],['ativo'=>false,'arquivado'=>false,'versao'=>1,'alterado'=>true,'repetido'=>false],['ativo'=>false,'arquivado'=>true,'versao'=>'1','alterado'=>true,'repetido'=>false]]as$estado){
                 session()->forget('sucesso');$this->respostaArquivamento=$estado;
-                $this->alterarRecurso('PUT',$url,$d)->assertRedirect()->assertSessionHas('erro','Não foi possível confirmar a resposta do arquivamento. Confira o estado atual antes de reenviar.')->assertSessionMissing('sucesso');
+                $this->alterarRecurso('PUT',$url,$d)->assertRetornoTela($destino)->assertSessionHas('erro','Não foi possível confirmar a resposta do arquivamento. Confira o estado atual antes de reenviar.')->assertSessionMissing('sucesso');
             }
             $this->respostaArquivamento=null;
         }
@@ -245,6 +246,18 @@ class TurmaOrganizacaoWebTest extends TestCase
             ->assertSee('data-arquivamento-modal',false)->assertSee('Arquivar turma')->assertSee('Alunos no recorte')
             ->assertSee('Ver todos (6)')->assertSee('Fictício &lt;1&gt;',false)->assertDontSee('@if(',false)
             ->assertDontSee('Acerto por questão')->assertDontSee('window.confirm',false);
+    }
+
+    public function test_arquivamento_retorna_destino_explicito_sem_depender_de_referer_ou_url_anterior():void
+    {
+        $this->preparar();$this->me['permissoes']=array_merge($this->me['permissoes'],['turma.desativar','aluno.desativar']);$this->selecionarContextoFixture($this->me);
+        session(['_previous'=>['url'=>'http://localhost/app/favicon-16x16.png']]);
+        $d=['arquivado'=>true,'esperado_ativo'=>true,'versao'=>0,'chave'=>'11111111-1111-4111-8111-111111111111'];
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d)->assertRetornoTela('/app/turmas/14?secao=visao-geral');
+        $origem=\App\Support\NavegacaoWeb::destino('turmas.show',['id'=>14,'secao'=>'alunos']);
+        $this->alterarRecurso('PUT','/app/alunos/1/arquivamento',$d+['_retorno_tela'=>$origem['referencia']])->assertRetornoTela('/app/turmas/14?secao=alunos');
+        $this->respostaArquivamento=[];
+        $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d)->assertRetornoTela('/app/turmas/14?secao=visao-geral')->assertSessionHas('erro');
     }
 
 }

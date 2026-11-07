@@ -132,18 +132,20 @@ class AlunoController extends Controller
     public function arquivamento(Request $r, int $id)
     {
         abort_unless(\App\Support\Acesso::pode('aluno.desativar'),403);
+        $origem=$r->attributes->get('ur4_retorno');
+        $retorno=(($origem['nome']??null)==='turmas.show'&&(int)($origem['parametros']['id']??0)>0)?redirect()->route('turmas.show',['id'=>(int)$origem['parametros']['id'],'secao'=>'alunos']):redirect()->route('alunos.show',$id);
         $d=$r->validate(['arquivado'=>'required|boolean','esperado_ativo'=>'required|boolean','versao'=>'required|integer|min:0','chave'=>'required|uuid','motivo'=>'nullable|string|max:500']);
         try { $resp=$this->api->put("/v1/alunos/{$id}/arquivamento",$d); }
-        catch (ConnectionException) { return back()->with('erro','Não foi possível confirmar o arquivamento. Confira o estado atual antes de reenviar.'); }
+        catch (ConnectionException) { return $retorno->with('erro','Não foi possível confirmar o arquivamento. Confira o estado atual antes de reenviar.'); }
         abort_if(in_array($resp->status(),[403,404],true),$resp->status());
-        if($resp->failed())return back()->with('erro',$resp->json('message')??'Não foi possível confirmar o arquivamento. Atualize a página.');
+        if($resp->failed())return $retorno->with('erro',$resp->json('message')??'Não foi possível confirmar o arquivamento. Atualize a página.');
         $estado=$resp->json('data');
         if(!is_array($estado)||!is_bool($estado['ativo']??null)||!is_bool($estado['arquivado']??null)
             ||$estado['ativo']===$estado['arquivado']||!is_int($estado['versao']??null)||$estado['versao']<0
             ||!is_bool($estado['alterado']??null)||!is_bool($estado['repetido']??null)){
-            return back()->with('erro','Não foi possível confirmar a resposta do arquivamento. Confira o estado atual antes de reenviar.');
+            return $retorno->with('erro','Não foi possível confirmar a resposta do arquivamento. Confira o estado atual antes de reenviar.');
         }
-        return back()->with('sucesso',$resp->json('data.arquivado')?'O registro foi arquivado. O histórico foi preservado.':'O registro foi desarquivado.');
+        return $retorno->with('sucesso',$resp->json('data.arquivado')?'O registro foi arquivado. O histórico foi preservado.':'O registro foi desarquivado.');
     }
 
     public function toggle(int $id)
