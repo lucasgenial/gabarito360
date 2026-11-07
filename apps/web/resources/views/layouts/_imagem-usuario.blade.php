@@ -10,7 +10,7 @@
  <form id="imagem-usuario-form" method="POST" action="{{ route('perfil.imagem') }}" enctype="multipart/form-data">
  @csrf <x-revisao-acesso />
  <fieldset class="imagem-modal-tipos"><legend class="sr-only">Escolha a imagem</legend><label><input type="radio" name="tipo" value="avatar"> Avatar</label><label><input type="radio" name="tipo" value="foto"> Foto</label></fieldset>
- <div id="imagem-usuario-avatares"><x-seletor-avatar :direto="true" titulo="Escolha um avatar" :nome="session('auth_nome','Usuário')" :avatar-id="session('auth_avatar_id')" preview-id="imagem-avatar-preview" /></div>
+ <div id="imagem-usuario-avatares"><x-seletor-avatar catalogo="educadores" :direto="true" titulo="Escolha um avatar" :nome="session('auth_nome','Usuário')" :avatar-id="session('auth_avatar_id')" preview-id="imagem-avatar-preview" /></div>
  <div id="imagem-usuario-foto" class="field">
  <div id="imagem-usuario-origem" class="imagem-modal-acoes foto-origem"><button type="button" class="btn btn-secondary" data-camera>Tirar foto</button><button type="button" class="btn btn-secondary" data-arquivo>Escolher arquivo</button></div>
  <input hidden type="file" id="imagem-usuario-arquivo" name="foto" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif,.dng">
