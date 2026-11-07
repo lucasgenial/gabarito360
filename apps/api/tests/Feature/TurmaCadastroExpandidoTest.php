@@ -1,13 +1,12 @@
 <?php
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class TurmaCadastroExpandidoTest extends TestCase
 {
-    use RefreshDatabase, \Tests\Support\CenarioDisciplinas;
+    use \Tests\Support\BancoCurriculoDescartavel, \Tests\Support\CenarioDisciplinas;
 
     public function test_campos_opcionais_persistem_sem_mudar_escola_ou_dados_anteriores(): void
     {

@@ -18,14 +18,14 @@
       <b>{{ $turma['total_alunos'] ?? 0 }}</b> aluno(s) · {{ $turma['ano_letivo'] }} · {{ $turma['ativo'] ? 'Em uso' : 'Arquivada' }}
       @if(!empty($turma['escola_nome'])) · {{ $turma['escola_nome'] }}@endif</x-slot:sub>
     @if($painel)
-    <button class="btn btn-secondary tu1-icone-acao" type="button" data-painel-abrir aria-label="Filtrar indicadores" title="Filtrar indicadores"><x-icone nome="filtro" /></button>
-    <button class="btn btn-secondary tu1-icone-acao" type="button" data-documento-abrir="imprimir" aria-label="Imprimir painel da turma" title="Imprimir painel da turma"><x-icone nome="imprimir" /></button>
-    <button class="btn btn-secondary tu1-icone-acao" type="button" data-documento-abrir="pdf" aria-label="Gerar PDF do painel da turma" title="Gerar PDF do painel da turma"><x-icone nome="pdf" /></button>
+    <button class="btn btn-secondary tu1-icone-acao tu1r3-acao tu1r3-acao-filtro" type="button" data-painel-abrir aria-label="Filtrar indicadores" title="Filtrar indicadores"><x-icone nome="filtro" /></button>
+    <button class="btn btn-secondary tu1-icone-acao tu1r3-acao tu1r3-acao-imprimir" type="button" data-documento-abrir="imprimir" aria-label="Imprimir painel da turma" title="Imprimir painel da turma"><x-icone nome="imprimir" /></button>
+    <button class="btn btn-secondary tu1-icone-acao tu1r3-acao tu1r3-acao-pdf" type="button" data-documento-abrir="pdf" aria-label="Gerar PDF do painel da turma" title="Gerar PDF do painel da turma"><x-icone nome="pdf" /></button>
     @endif
     @pode('turma.gerir')
-    <a class="btn btn-secondary tu1-icone-acao" aria-label="Editar turma" title="Editar turma" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /></a>
+    <a class="btn btn-secondary tu1r3-acao tu1r3-acao-editar" aria-label="Editar turma" title="Editar turma" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /> Editar turma</a>
     @endpode
-    @pode('turma.desativar')<x-arquivamento tipo="turmas" :registro="$turma" :icone-somente="true" />
+    @pode('turma.desativar')<x-arquivamento tipo="turmas" :registro="$turma" />
     @endpode
 </x-pagina>
 @php

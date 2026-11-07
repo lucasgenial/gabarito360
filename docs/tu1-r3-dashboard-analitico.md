@@ -47,3 +47,13 @@ Retomada autorizada em07/11/2026. Implementação mantém os campos anteriores d
 - Revisões cruzadas de segurança e Product Design registradas na operação local. O aceite visual exige as evidências atuais de desktop/celular e os documentos regenerados; a limitação do controle nativo do Chrome não autoriza afirmar testes que não ocorreram.
 
 A publicação será exclusivamente na homologação, após CI/merge. O operador fixa host, banco, release de origem e manifesto Git; rejeita caches/ambiente no pacote, valida backup e hashes dos dados antes da única migração aditiva, e compara todos os dados e arquivos anteriores antes de reabrir o tráfego. Nenhuma exclusão/backfill/alteração de produção é autorizada nesta entrega.
+
+## Ajustes solicitados durante a conferência
+
+Em07/11 o responsável aprovou a composição e solicitou cores semânticas, texto em Editar/Arquivar turma e modal próprio, sem confirmação nativa. O quarto quadro passa a acompanhar alunos: atenção por indicação de recuperação registrada, dentro do critério somente quando todos os resultados estão aprovados, e Top5 dos maiores acertos médios válidos. A análise por questão continua disponível nos resultados da prova; seus campos anteriores na API são preservados. Nomes/resultados dependem das permissões correspondentes e do mesmo escopo já autorizado.
+
+Empates conservam posição e o corte do Top5 informa outros empatados; atenção permite expandir a lista. O documento atual preserva geração e orientações. O refinamento de diagramação e sua adequação ao novo acompanhamento nominal serão tratados após a aprovação final das telas, conforme orientação posterior do responsável.
+
+A suíte MariaDB identificou transações artificiais de RefreshDatabase incompatíveis com a garantia de transação própria do serviço. Seis suítes passam a BancoCurriculoDescartavel, já utilizado nos testes de concorrência: mesmas assertivas, commits reais, sem bypass nem afrouxamento de proteção no código de produção.
+
+TU-IMG é uma entrega posterior:36brasões originais em pixel art para turmas, foto/câmera/recorte e catálogo adulto de educadores para usuários. Avatares de alunos permanecem separados; os professores utilizam a imagem da própria conta. Essa entrega não integra o pacote de publicação TU1-R3.

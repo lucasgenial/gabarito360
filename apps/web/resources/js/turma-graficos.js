@@ -8,7 +8,7 @@ use([BarChart,PieChart,GridComponent,TooltipComponent,LegendComponent,DataZoomCo
 const raiz=document.querySelector('[data-painel-graficos]');
 if(raiz){
  let dados;try{dados=JSON.parse(raiz.dataset.painelDados);}catch{dados={};}
- const analise=dados.analise||{}, graficos=new Map();let ordemOriginal=false;
+ const analise=dados.analise||{}, graficos=new Map();
  const percentual=v=>v==null?'Sem percentual':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
  const cor=nome=>getComputedStyle(raiz).getPropertyValue(nome).trim();
  const cores=()=>[cor('--serie-1'),cor('--serie-2'),cor('--serie-3'),cor('--serie-4'),cor('--serie-5')];
@@ -32,9 +32,7 @@ if(raiz){
    const s=dados.situacoes||{};if(!(s.total>0))return null;
    return {...comum,title:{text:String(s.total),subtext:'resultados',left:'center',top:'31%',textStyle:{color:cor('--fg'),fontSize:27,fontWeight:700},subtextStyle:{color:texto,fontSize:12}},color:[cor('--success'),paleta[2],cor('--muted')],tooltip:{trigger:'item',renderMode:'richText',confine:true,formatter:'{b}: {c} ({d}%)'},legend:{bottom:0,selectedMode:false,textStyle:{color:texto},itemGap:14},series:[{type:'pie',radius:['43%','65%'],center:['50%','42%'],avoidLabelOverlap:true,label:{show:true,position:'inside',formatter:p=>p.value?p.value:'',color:'#fff',fontWeight:700},data:[{name:'Dentro do critério',value:s.dentro_criterio||0},{name:'Indicação de recuperação',value:s.indicacao_recuperacao||0},{name:'Outras situações',value:s.outros||0}]}]};
   }
-  const q=analise.questoes||{};if(!q.disponivel||!q.items?.length)return null;
-  const itens=[...q.items].sort(ordemOriginal?(a,b)=>a.numero-b.numero:(a,b)=>(a.pct??101)-(b.pct??101)||a.numero-b.numero);
-  return {...comum,grid:{left:32,right:52,top:10,bottom:25,containLabel:true},xAxis:numerico,yAxis:{type:'category',inverse:true,data:itens.map(i=>'Q'+i.numero+' · n='+i.base+(i.anulada?' · anulada':i.pct==null?' · sem base':'')),axisTick:{show:false}},tooltip:{trigger:'axis',renderMode:'richText',confine:true,formatter:params=>{const i=itens[params[0]?.dataIndex];return i?'Questão '+i.numero+'\n'+(i.anulada?'Anulada':percentual(i.pct))+' · '+i.acertos+'/'+i.base+' acertos\nSem registro: '+i.sem_registro:'';}},dataZoom:itens.length>8?[{type:'inside',yAxisIndex:0,startValue:0,endValue:7},{type:'slider',yAxisIndex:0,width:12,right:0,startValue:0,endValue:7}]:[],series:[{name:'Acerto',type:'bar',barMaxWidth:22,data:itens.map(i=>i.anulada?null:i.pct),itemStyle:{color:paleta[1],borderRadius:[0,4,4,0]},label:{show:true,position:'right',formatter:p=>percentual(p.value),color:texto}}]};
+  return null;
  }
  function renderizar(elemento){
   if(!elemento.clientWidth)return;
@@ -50,6 +48,6 @@ if(raiz){
  const elementos=[...raiz.querySelectorAll('[data-grafico]')];
  const resize=new ResizeObserver(entradas=>entradas.forEach(e=>renderizar(e.target)));elementos.forEach(e=>resize.observe(e));
  const tema=new MutationObserver(()=>elementos.forEach(renderizar));tema.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','data-tema','class','style']});
- document.querySelector('[data-questoes-ordem]')?.addEventListener('click',e=>{ordemOriginal=!ordemOriginal;e.currentTarget.textContent=ordemOriginal?'Ordenar por menor acerto':'Ordenar por número';e.currentTarget.setAttribute('aria-pressed',String(ordemOriginal));document.querySelector('[data-questoes-legenda]').textContent=ordemOriginal?'Ordem das questões · base de cada questão exibida no gráfico.':'Questões com menor acerto primeiro · base de cada questão exibida no gráfico.';renderizar(raiz.querySelector('[data-grafico="questoes"]'));});
+
  window.addEventListener('pagehide',()=>{resize.disconnect();tema.disconnect();graficos.forEach(g=>g.dispose());});
 }

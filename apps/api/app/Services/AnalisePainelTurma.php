@@ -7,7 +7,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-/** Agregados do mesmo recorte autorizado; nunca entidades individuais ou opções de gráfico. */
+/** Agregados e acompanhamento nominal no mesmo recorte autorizado, com permissões próprias para nomes/resultados. */
 final class AnalisePainelTurma
 {
     public function montar(Usuario $u,ConsultasPedagogicas $consulta,Builder $notas,Collection $provas,int $total,?int $selecao):array
@@ -28,7 +28,24 @@ final class AnalisePainelTurma
         $porAvaliacao=$provas->map(fn($p)=>['avaliacao_id'=>(int)$p->id,'titulo'=>$p->titulo]+$this->resumo($grupos->get($p->id),$medianas->get($p->id)?->mediana))->values()->all();
         return ['resumo'=>$this->resumo($global,$mediana),
             'distribuicao_acertos'=>['faixas'=>$faixas,'total'=>(int)$global->n,'percentuais_excluidos'=>$total-(int)$global->n],
-            'por_avaliacao'=>$porAvaliacao,'questoes'=>$this->questoes($u,$consulta,$notas,$provas,$selecao)];
+            'alunos'=>$this->alunos($u,$notas),'por_avaliacao'=>$porAvaliacao,'questoes'=>$this->questoes($u,$consulta,$notas,$provas,$selecao)];
+    }
+
+    private function alunos(Usuario $u,Builder $notas):array
+    {
+        $permitido=Permissao::pode($u,'aluno.ver')&&Permissao::pode($u,'resultado.ver')&&!in_array($u->perfil,['aluno','aplicador']);
+        $vazio=['total'=>0,'items'=>[]];
+        if(!$permitido)return ['disponivel'=>false,'atencao'=>$vazio,'dentro_criterio'=>$vazio,'destaques'=>$vazio+['empate_no_corte'=>false]];
+        $q=(clone $notas)->join('alunos as painel_pessoa',function($j){$j->on('painel_pessoa.id','=','notas.aluno_id');if(\App\Support\Espacos::ativo())$j->on('painel_pessoa.espaco_id','=','notas.espaco_id');})
+            ->select('notas.aluno_id','painel_pessoa.nome')->groupBy('notas.aluno_id','painel_pessoa.nome')
+            ->selectRaw("COUNT(*) as resultados, SUM(CASE WHEN notas.status_aprovacao = 'recuperacao' THEN 1 ELSE 0 END) as recuperacao, SUM(CASE WHEN notas.status_aprovacao = 'aprovado' THEN 1 ELSE 0 END) as aprovados, SUM(CASE WHEN notas.total_questoes > 0 AND notas.acertos >= 0 AND notas.acertos <= notas.total_questoes THEN 1 ELSE 0 END) as base_valida, AVG(CASE WHEN notas.total_questoes > 0 AND notas.acertos >= 0 AND notas.acertos <= notas.total_questoes THEN 100.0*notas.acertos/notas.total_questoes ELSE NULL END) as media");
+        $todos=$q->get()->map(fn($a)=>['aluno_id'=>(int)$a->aluno_id,'nome'=>$a->nome,'resultados'=>(int)$a->resultados,'base_valida'=>(int)$a->base_valida,'recuperacao'=>(int)$a->recuperacao,'aprovados'=>(int)$a->aprovados,'media_pct'=>$a->media===null?null:round((float)$a->media,1)]);
+        $ordenar=fn($a,$b)=>strcmp(mb_strtolower($a['nome']),mb_strtolower($b['nome']))?:$a['aluno_id']<=>$b['aluno_id'];
+        $atencao=$todos->filter(fn($a)=>$a['recuperacao']>0)->sort(fn($a,$b)=>$b['recuperacao']<=>$a['recuperacao']?:($a['media_pct']??101)<=>($b['media_pct']??101)?:$ordenar($a,$b))->values();
+        $criterio=$todos->filter(fn($a)=>$a['resultados']>0&&$a['aprovados']===$a['resultados'])->sort($ordenar)->values();
+        $ranking=$todos->filter(fn($a)=>$a['base_valida']>0)->sort(fn($a,$b)=>$b['media_pct']<=>$a['media_pct']?:$ordenar($a,$b))->values();
+        $anterior=null;$posicao=0;$items=[];foreach($ranking as$i=>$a){if($anterior===null||$a['media_pct']!==$anterior)$posicao=$i+1;$anterior=$a['media_pct'];$a['posicao']=$posicao;if($i<5)$items[]=$a;}
+        return ['disponivel'=>true,'base'=>'resultados_finais_da_turma','atencao'=>['total'=>$atencao->count(),'items'=>$atencao->all()],'dentro_criterio'=>['total'=>$criterio->count(),'items'=>$criterio->all()],'destaques'=>['total'=>$ranking->count(),'items'=>$items,'empate_no_corte'=>$ranking->count()>5&&$ranking[4]['media_pct']===$ranking[5]['media_pct']]];
     }
 
     private function medianas(Builder $valores,bool $porProva):Collection

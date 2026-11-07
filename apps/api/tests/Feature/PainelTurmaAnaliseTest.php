@@ -93,4 +93,16 @@ class PainelTurmaAnaliseTest extends TestCase
         $this->getJson('/api/v1/turmas/1/painel?analise_prova_id=1')->assertUnprocessable();
         $this->getJson('/api/v1/turmas/2/painel')->assertNotFound();
     }
+    public function test_alunos_separam_criterio_atencao_e_destaques_com_empates_sem_inventar_diagnostico():void
+    {
+        $this->prova();foreach([10,9,9,8,7,7,1]as$i=>$n)$this->resultado($i+1,$n);
+        DB::table('notas')->whereIn('aluno_id',[5,6,7])->update(['status_aprovacao'=>'recuperacao']);
+        $r=$this->getJson('/api/v1/turmas/1/painel')->assertOk();
+        $r->assertJsonPath('data.analise.alunos.disponivel',true)->assertJsonPath('data.analise.alunos.atencao.total',3)
+            ->assertJsonPath('data.analise.alunos.dentro_criterio.total',4)->assertJsonCount(5,'data.analise.alunos.destaques.items')
+            ->assertJsonPath('data.analise.alunos.destaques.items.0.posicao',1)->assertJsonPath('data.analise.alunos.destaques.items.1.posicao',2)
+            ->assertJsonPath('data.analise.alunos.destaques.items.2.posicao',2)->assertJsonPath('data.analise.alunos.destaques.items.3.posicao',4)
+            ->assertJsonPath('data.analise.alunos.destaques.empate_no_corte',true);
+    }
+
 }

@@ -3,7 +3,6 @@ namespace Tests\Feature;
 
 use App\Models\Usuario;
 use App\Support\Permissao;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\Sanctum;
@@ -11,7 +10,7 @@ use Tests\TestCase;
 
 class SecretarioEscolarTest extends TestCase
 {
-    use RefreshDatabase;
+    use \Tests\Support\BancoCurriculoDescartavel;
     protected function setUp(): void
     {
         parent::setUp();
