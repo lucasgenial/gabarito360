@@ -133,7 +133,7 @@ class PreferenciasPainelTest extends TestCase
     public function test_geometrias_invalidas_colisao_html_ids_estranhos_e_autoridade_nao_sao_persistidos(): void
     {
         $base=$this->widget();
-        $invalidos=[array_replace($base,['x'=>-1]),array_replace($base,['x'=>12]),array_replace($base,['y'=>199]),array_replace($base,['w'=>1]),array_replace($base,['h'=>9]),array_replace($base,['x'=>'0']),array_replace($base,['section'=>'ensino']),array_replace($base,['id'=>'<script>']),array_replace($base,['nome'=>'Dado proibido']),array_replace($base,['x'=>[]])];
+        $invalidos=[array_replace($base,['x'=>-1]),array_replace($base,['x'=>12]),array_replace($base,['y'=>199]),array_replace($base,['w'=>1]),array_replace($base,['h'=>7]),array_replace($base,['x'=>'0']),array_replace($base,['section'=>'ensino']),array_replace($base,['id'=>'<script>']),array_replace($base,['nome'=>'Dado proibido']),array_replace($base,['x'=>[]])];
         foreach($invalidos as $w) $this->putJson('/api/v1/paineis/preferencias/turmas',$this->pedido(extra:['layouts'=>['desktop'=>[$w]]]))->assertUnprocessable();
         $this->putJson('/api/v1/paineis/preferencias/turmas',$this->pedido(extra:['layouts'=>['desktop'=>[$base,$base]]]))->assertUnprocessable();
         $this->putJson('/api/v1/paineis/preferencias/turmas',$this->pedido(extra:['layouts'=>['desktop'=>[$base,$this->widget('comparacao-turmas',x:2,h:12)]]]))->assertUnprocessable();
@@ -192,13 +192,28 @@ class PreferenciasPainelTest extends TestCase
     public function test_catalogo_nao_contem_dados_ou_demos_e_respeita_conjuncoes_e_limites(): void
     {
         $r=$this->getJson('/api/v1/paineis/preferencias/turma',['X-G360-Painel-Turma'=>'1'])->assertOk();
+        $this->assertSame(['alunos-destaques','alunos-atencao'],array_slice(array_column($r->json('data.catalogo'),'id'),0,2));
+        $this->assertSame(['alunos-destaques','alunos-atencao'],array_slice(array_column($r->json('data.padrao.desktop'),'id'),0,2));
+        foreach(array_slice($r->json('data.catalogo'),0,2) as $alunos){
+            $this->assertSame('estudantes',$alunos['section']);
+            $this->assertSame([10,12,20,6],[$alunos['desktop']['minH'],$alunos['desktop']['defaultH'],$alunos['desktop']['maxH'],$alunos['desktop']['defaultW']]);
+        }
+        $this->putJson('/api/v1/paineis/preferencias/turma',$this->pedido(extra:['layouts'=>['desktop'=>[$this->widget('alunos-recorte',h:12)]]]),['X-G360-Painel-Turma'=>'1'])->assertUnprocessable();
         foreach($r->json('data.catalogo') as $widget) {
             $this->assertSame(['id','section','desktop','mobile'],array_keys($widget));
             $this->assertSame(12,$widget['mobile']['minW']);$this->assertSame(12,$widget['mobile']['maxW']);
+            if(in_array($widget['id'],['distribuicao-acertos','resultados-avaliacao','situacoes-registradas','periodos-escolares','habilidades','reavaliacoes'],true))foreach(['desktop','mobile'] as $modo){
+                $this->assertSame([8,9,20],[$widget[$modo]['minH'],$widget[$modo]['defaultH'],$widget[$modo]['maxH']]);
+            }
+            if(in_array($widget['id'],['agenda-pedagogica','agenda-administrativa','proximos-compromissos'],true))$this->assertSame([12,14],[$widget['desktop']['minH'],$widget['desktop']['defaultH']]);
         }
         DB::table('vinculo_permissoes')->insert(['vinculo_id'=>1,'permissao'=>'resultado.ver','efeito'=>'retirar']);
         $r=$this->getJson('/api/v1/paineis/preferencias/turma',['X-G360-Painel-Turma'=>'1'])->assertOk();
-        $this->assertNotContains('alunos-recorte',array_column($r->json('data.catalogo'),'id'));
+        foreach(['alunos-destaques','alunos-atencao','alunos-recorte'] as $id)$this->assertNotContains($id,array_column($r->json('data.catalogo'),'id'));
+        DB::table('vinculo_permissoes')->where('vinculo_id',1)->where('permissao','resultado.ver')->delete();
+        DB::table('vinculo_permissoes')->insert(['vinculo_id'=>1,'permissao'=>'aluno.ver','efeito'=>'retirar']);
+        $r=$this->getJson('/api/v1/paineis/preferencias/turma',['X-G360-Painel-Turma'=>'1'])->assertOk();
+        foreach(['alunos-destaques','alunos-atencao'] as $id)$this->assertNotContains($id,array_column($r->json('data.catalogo'),'id'));
         $this->getJson('/api/v1/paineis/preferencias/outro')->assertNotFound();
     }
 
@@ -250,7 +265,7 @@ class PreferenciasPainelTest extends TestCase
 
     public function test_altura_desejada_recusa_tipos_invalidos_fora_limites_e_campos_nao_previstos(): void
     {
-        foreach([10,17,11.5,'11',null,[],false]as$altura){
+        foreach([7,17,11.5,'11',null,[],false]as$altura){
             $w=$this->widget(h:16)+['altura_desejada'=>$altura];
             $this->putJson('/api/v1/paineis/preferencias/turmas',$this->pedido(extra:['layouts'=>['desktop'=>[$w]]]))->assertUnprocessable();
         }

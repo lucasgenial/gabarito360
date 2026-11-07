@@ -8,7 +8,7 @@ Contrato aditivo, sem alteração dos endpoints de turmas, resultados ou relató
 
 A chave de armazenamento é usuário + vínculo + espaço + perfil ativo + painel + recurso, derivados do contexto revalidado. Para `turma`, o header técnico `X-G360-Painel-Turma` é obrigatório e contém um único ID inteiro positivo canônico; a API autoriza essa turma por `Escopo::turmas` antes de consultar preferências. Para `turmas`, o header é proibido e o recurso é o contexto agregado. IDs inválidos recebem422; turma fora do alcance recebe404. O header seleciona um recurso, não concede autoridade. Uma turma, vínculo ou perfil não reutiliza a configuração de outro. O BFF deriva o header exclusivamente do alvo da referência UR4 validada, sem usar seleção global de turma, corpo ou header arbitrário do navegador. Assim, duas abas de turmas distintas permanecem independentes. Campos de autoridade no corpo e parâmetros de query são recusados422.
 
-Catálogo técnico finito: IDs e seções acordados com o BFF, sem títulos, nomes, notas, exemplos ou endpoints. Os modelos pedagógicos exigem `relatorio.turma` e têm veto de secretário/auxiliar; `alunos-recorte` exige também `aluno.ver` e `resultado.ver`; conselho exige `turma.vincular_professor`; documentos administrativos exigem `aluno.ver`. Persistir um ID não concede permissão. GET filtra IDs que deixaram de ser autorizados; PUT recusa IDs não autorizados. Não há nova permissão nem mudança da matriz existente.
+Catálogo técnico finito: IDs e seções acordados com o BFF, sem títulos, nomes, notas, exemplos ou endpoints. Os modelos pedagógicos exigem `relatorio.turma` e têm veto de secretário/auxiliar; os dois widgets `alunos-destaques` e `alunos-atencao`, na seção `estudantes`, exigem também `aluno.ver` e `resultado.ver` e têm veto de aluno/aplicador. Conselho exige `turma.vincular_professor`; documentos administrativos exigem `aluno.ver`. Persistir um ID não concede permissão. GET filtra IDs que deixaram de ser autorizados, inclusive o antigo `alunos-recorte`, sem regravar o mapa armazenado; PUT recusa IDs não autorizados. Não há nova permissão nem mudança da matriz existente.
 
 ## Resposta
 
@@ -21,10 +21,10 @@ Envelope padrão `data` (catálogo e padrão abaixo são recortes ilustrativos; 
   "layouts": {"desktop": [], "mobile": []},
   "catalogo": [{
     "id": "cadastros-turno", "section": "analises",
-    "desktop": {"minW": 4, "maxW": 12, "minH": 11, "maxH": 20, "defaultW": 6, "defaultH": 11},
-    "mobile": {"minW": 12, "maxW": 12, "minH": 11, "maxH": 20, "defaultW": 12, "defaultH": 11}
+    "desktop": {"minW": 4, "maxW": 12, "minH": 8, "maxH": 20, "defaultW": 6, "defaultH": 9},
+    "mobile": {"minW": 12, "maxW": 12, "minH": 8, "maxH": 20, "defaultW": 12, "defaultH": 9}
   }],
-  "padrao": {"desktop": [{"id":"cadastros-turno","section":"analises","x":0,"y":0,"w":6,"h":12,"altura_desejada":11}]},
+  "padrao": {"desktop": [{"id":"cadastros-turno","section":"analises","x":0,"y":0,"w":12,"h":9,"altura_desejada":9}]},
   "origem_disposicao": "perfil",
   "repetido": false
 }
@@ -42,13 +42,15 @@ Um mapa desktop pessoal não vazio, após filtrar os IDs atualmente autorizados,
 {
   "versao": 0, "chave": "4ea91eba-b8cf-4bed-84a3-077c050ac18b", "acao": "salvar",
   "apresentacao": "cards",
-  "layouts": {"desktop": [{"id":"cadastros-turno", "section":"analises", "x":0, "y":0, "w":6, "h":11}]}
+  "layouts": {"desktop": [{"id":"cadastros-turno", "section":"analises", "x":0, "y":0, "w":12, "h":9}]}
 }
 ```
 
 `apresentacao` e `layouts` são opcionais, mas pelo menos um deve ser enviado em salvar. Apresentação aceita somente `tabela|cards`. Em layouts, enviar somente os dispositivos a alterar: mapa mobile omitido é preservado, e vice-versa. Um mapa enviado substitui o mapa daquele dispositivo. A API não reorganiza componentes: preserva a ordem e as coordenadas finais enviadas. A nova política visual GridStack permite movimentar vizinhos, uniformizar alturas da linha e remover linhas vazias; o cliente envia o mapa final completo dessas mudanças, sujeito à validação de limites e colisões.
 
-Cada geometria contém os seis campos obrigatórios `id, section, x, y, w, h` e pode incluir apenas o campo técnico opcional `altura_desejada`. Números são inteiros JSON, sem coerção de strings. Até64 widgets por dispositivo, IDs únicos, seção fixa de cada widget, grade de12 colunas e200 linhas por seção. Colisões na mesma seção são recusadas. Larguras/alturas devem respeitar o catálogo; mobile tem largura12 fixa. Limites desktop dos componentes editáveis: largura4..12 e altura máxima20; gráficos reais têm mínima/padrão11, os cinco modelos gráficos têm mínima/padrão12; alunos-recorte tem altura mínima10/padrão12. As três agendas (`agenda-pedagogica`, `proximos-compromissos`, `agenda-administrativa`) têm altura mínima12 e padrão14, inclusive nos limites técnicos mobile. Outros componentes têm mínima7/padrão9. KPIs e turma-cadastro permanecem fora desta geometria editável. O cliente pode reorganizar as caixas conforme a política atual de linhas, sem atravessar a seção de cada ID; a API aceita somente o estado final válido, sem normalizar ou corrigir silenciosamente o pedido.
+Cada geometria contém os seis campos obrigatórios `id, section, x, y, w, h` e pode incluir apenas o campo técnico opcional `altura_desejada`. Números são inteiros JSON, sem coerção de strings. Até64 widgets por dispositivo, IDs únicos, seção fixa de cada widget, grade de12 colunas e200 linhas por seção. Colisões na mesma seção são recusadas. Larguras/alturas devem respeitar o catálogo; mobile tem largura12 fixa. Limites desktop dos componentes editáveis: largura4..12 e altura máxima20; gráficos reais e demonstrativos têm altura mínima8/padrão9; `alunos-destaques` e `alunos-atencao` têm altura mínima10/padrão12. As três agendas (`agenda-pedagogica`, `proximos-compromissos`, `agenda-administrativa`) têm altura mínima12 e padrão14, inclusive nos limites técnicos mobile. Outros componentes têm mínima7/padrão9. KPIs e turma-cadastro permanecem fora desta geometria editável. O cliente pode reorganizar as caixas conforme a política atual de linhas, sem atravessar a seção de cada ID; a API aceita somente o estado final válido, sem normalizar ou corrigir silenciosamente o pedido.
+
+O padrão individual dispõe a seção `estudantes` após o resumo fixo e antes das análises: são dois widgets independentes, sem abas. Mantêm o Top5 e a lista de atenção fornecidos pelo DTO existente, sem mudar cálculos, fórmulas ou relatórios. Preferências parciais não removem componentes: o consumidor completa os IDs autorizados ausentes pelo padrão atual do perfil. No agregado, a relação operacional Tabela/Cards precede as análises. Os widgets mostram títulos autoexplicativos e conteúdo útil, sem subtítulos ou parágrafos de orientação; bases e critérios permanecem nos tooltips e alternativas acessíveis, e os exemplos conservam identificação compacta no cabeçalho.
 
 
 `h` é a altura **efetiva** ocupada na grade depois de uniformizar a linha. `altura_desejada`, quando presente, guarda a intenção individual do usuário para que um componente menor não perca essa informação ao compartilhar a linha com outro mais alto. Exige inteiro JSON e `minH <= altura_desejada <= h <= maxH` do widget/dispositivo. Não é CSS, HTML, autorização ou dado pedagógico. É persistido no mesmo JSON e recibo, sem coluna SQL/migração adicional. Repetir a chave com altura desejada diferente é outro pedido e recebe409. A ausência mantém exatamente o payload legado de seis campos; o cliente usa `h` como fallback, sem a API inventar o campo. A API não infere grupos/linhas nem muda vizinhos por conta própria.

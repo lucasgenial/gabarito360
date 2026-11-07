@@ -97,3 +97,8 @@
 @media(max-width:500px){.painel-grafico-paginas p{flex-basis:100%;text-align:center;order:-1}.painel-grafico-paginas .btn{flex:1}}
 @media(prefers-reduced-motion:reduce){.painel-widget,.painel-widget-corpo{scroll-behavior:auto;animation:none;transition:none}}
 @media print{[data-widget-id][data-demo=true],.painel-grafico-paginas,.painel-relacao-cabecalho [role=group]{display:none!important}.painel-secao-grade{display:block}.painel-widget{height:auto!important;break-inside:avoid}.painel-widget-corpo{overflow:visible}[data-painel-lista] .tabela-padrao tbody tr[hidden]{display:none!important}}
+.painel-widget-identificacao{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;min-width:0;flex:1 1 auto}
+.painel-widget-identificacao h3{flex:1 1 auto}
+.painel-widget-selos{display:flex;align-items:center;flex-wrap:wrap;gap:4px;flex:0 1 auto}
+.painel-widget-selos .badge{font-size:11px;line-height:1.3;padding:3px 6px;white-space:nowrap}
+.painel-aluno-base{display:block;margin-top:4px;font-size:.75rem;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}

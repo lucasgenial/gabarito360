@@ -11,12 +11,7 @@
 @section('content')
 
 <x-pagina titulo="Turmas">
-  <x-slot:sub>@if($erroLista)Listagem temporariamente indisponível
-  @else
-  {{ $haFiltros?'Turmas no recorte selecionado':'Turmas do espaço atual' }}
-  @endif
-  </x-slot:sub>
-    @pode('aluno.importar')<span class="field-help">Importação por planilha em breve.</span>@endpode
+
     @pode('turma.gerir')<button class="btn btn-primary" data-turma-abrir="modal-criar">+ Nova turma</button>@endpode
 </x-pagina>
 
@@ -45,7 +40,6 @@
 </form>
 @include('turmas._organizar_painel',['paginaPainel'=>'turmas'])
 @include('turmas._resumo_cadastral')
-@include('turmas._modelos',['paginaModelos'=>'turmas','gruposExibidos'=>['analises']])
 
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
@@ -121,6 +115,7 @@
 
 
 
+@include('turmas._modelos',['paginaModelos'=>'turmas','gruposExibidos'=>['analises']])
 @include('turmas._modelos',['paginaModelos'=>'turmas','gruposExibidos'=>['planejamento','ensino','decisoes','administrativo']])
 
 {{-- Modal: criar turma --}}

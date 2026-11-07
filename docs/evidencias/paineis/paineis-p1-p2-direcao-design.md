@@ -1,5 +1,7 @@
 # Painéis P1/P2 — direção prévia de UI/UX e Product Design
 
+> Registro histórico da consulta inicial. As decisões posteriores em docs180 e docs177/179 prevalecem: tabela inicial com alternância Cards, exemplos identificados, GridStack com persistência por escopo e perfil, resumo fixo e dois widgets nominais independentes na seção estudantes. Os widgets atuais têm título + conteúdo útil, sem os textos auxiliares previstos inicialmente. Esta direção antiga não constitui aprovação visual do novo candidato.
+
 07/11/2026. **APROVADA a direção abaixo para implementação incremental de P1/P2.** Não é aceite visual de telas futuras nem conclusão funcional de agenda, períodos, participação, habilidades ou motores avançados. Não editei app/Git nem operei navegador/servidor.
 
 ## Leitura e referência preservada
