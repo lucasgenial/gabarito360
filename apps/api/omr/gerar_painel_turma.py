@@ -51,7 +51,7 @@ def gerar(d):
     small=ParagraphStyle('pequeno',parent=normal,fontSize=8,leading=11)
     title=ParagraphStyle('titulo',parent=normal,fontName='Raleway-Bold',fontSize=16,leading=20,alignment=1)
     p=lambda text,style=normal: Paragraph(escape(str(text)),style)
-    turma=d['turma']; k=d['kpis']; f=d.get('filtros',{}); rec=d['recorte']
+    turma=d['turma']; k=d['kpis']; f=d.get('filtros') or {}; rec=d['recorte']
     # Mede o cabeçalho real antes de definir a área de conteúdo.
     import io
     measure=Canvas(io.BytesIO(),pagesize=size)
