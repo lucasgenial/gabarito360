@@ -89,14 +89,22 @@ def gerar(d):
            p('Aplicação: '+(date(f.get('inicio')) or 'Início do histórico')+' a '+(date(f.get('fim')) or 'Hoje'),small),Spacer(1,5*mm)]
     if analise:
         faixa='—' if resumo.get('min_pct') is None else pct(resumo['min_pct'])+' a '+pct(resumo['max_pct'])
-        cards=Table([[p(t,small) for t in ('Avaliações aplicadas','Resultados concluídos','Alunos com resultado')],
-                     [p(k['avaliacoes']),p(k['resultados']),p(k.get('alunos_com_resultado','—'))],
-                     [p(t,small) for t in ('Acerto médio','Mediana do acerto','Faixa observada')],
-                     [p(pct(k['acerto_pct'])),p(pct(resumo.get('mediana_pct'))),p(faixa)]],colWidths=[usable/3]*3)
+        colunas=6 if d.get('orientacao')=='paisagem' else 3
+        largura=usable/colunas
+        metricas=[('Avaliações aplicadas',k['avaliacoes'],NAVY),('Resultados concluídos',k['resultados'],TEAL),
+                  ('Alunos com resultado',k.get('alunos_com_resultado','—'),NAVY),('Acerto médio',pct(k['acerto_pct']),NAVY),
+                  ('Mediana do acerto',pct(resumo.get('mediana_pct')),TEAL),('Faixa observada',faixa,AMBER)]
+        blocos=[]
+        for rotulo,valor,cor in metricas:
+            estilo=ParagraphStyle('valor',parent=normal,fontName='Raleway-Bold',fontSize=11 if rotulo=='Faixa observada' else 19,leading=23,textColor=cor)
+            card=Table([[p(rotulo,small)],[p(valor,estilo)]],colWidths=[largura-4*mm])
+            card.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,-1),HexColor('#f1f5fa')),('LINEABOVE',(0,0),(-1,0),2,cor),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),8),('RIGHTPADDING',(0,0),(-1,-1),8),('TOPPADDING',(0,0),(-1,-1),6),('BOTTOMPADDING',(0,0),(-1,-1),6)]))
+            blocos.append(card)
+        cards=Table([blocos[i:i+colunas] for i in range(0,6,colunas)],colWidths=[largura]*colunas)
     else:
         cards=Table([[p('Avaliações aplicadas',small),p('Resultados disponíveis',small),p('Acerto médio',small),p('Leituras para revisão',small)],
                      [p(k['avaliacoes']),p(k['resultados']),p(pct(k['acerto_pct'])),p(k.get('leituras_revisao') if k.get('leituras_revisao') is not None else '—')]],colWidths=[usable/4]*4)
-    cards.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,-1),HexColor('#eef3fa')),('BOX',(0,0),(-1,-1),.5,HexColor('#d5dfeb')),('VALIGN',(0,0),(-1,-1),'TOP'),('PADDING',(0,0),(-1,-1),8)]))
+    cards.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0),('TOPPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),6)]))
     sub=ParagraphStyle('sub',parent=normal,fontName='Raleway-Bold',fontSize=11,keepWithNext=True)
     story += [cards,Spacer(1,2*mm),p(f"Matrícula atual: {k['alunos']} alunos ativos. Resultados com percentual válido: {k.get('resultados_com_percentual', k['resultados'])}.",small)]
     if 'alunos_com_resultado' in k:
@@ -115,7 +123,7 @@ def gerar(d):
             altura=68*faixa['total']/maior;x=i*bw+3
             chart.add(Rect(x,22,bw-6,max(.5,altura),fillColor=BLUE if faixa['total'] else HexColor('#eef2f8'),strokeColor=None))
             chart.add(String(x+(bw-6)/2,27+altura,str(faixa['total']),fontName='Raleway-Bold',fontSize=8,fillColor=NAVY,textAnchor='middle'))
-            chart.add(String(x+(bw-6)/2,8,faixa['label'],fontName='Raleway-Regular',fontSize=6,fillColor=GRAY,textAnchor='middle'))
+            chart.add(String(x+(bw-6)/2,8,faixa['label'].replace('–','-'),fontName='Raleway-Regular',fontSize=8,fillColor=GRAY,textAnchor='middle'))
         story += [chart,p(f"Base: {distribuicao['total']} resultados com percentual válido. Excluídos da distribuição: {distribuicao['percentuais_excluidos']}. Faixas descritivas, sem classificação de aprendizagem.",small)]
         desvio=resumo.get('desvio_pct')
         story += [p('Desvio padrão populacional: '+('—' if desvio is None else str(desvio).replace('.',',')+' pontos percentuais')+'. Cada resultado tem o mesmo peso.',small)]
@@ -142,16 +150,16 @@ def gerar(d):
     estatisticas=analise.get('por_avaliacao') or []
     for indice,a in enumerate(d['avaliacoes']):
         est=estatisticas[indice] if indice<len(estatisticas) else None
-        drawing=Drawing(usable*.23-16,64 if est else 38)
+        drawing=Drawing(usable*.23-16,49 if est else 38)
         value=a['acerto_pct']; barw=usable*.23-16
         drawing.add(Rect(0,0,barw,5,fillColor=HexColor('#e4eaf3'),strokeColor=None))
         if value is not None: drawing.add(Rect(0,0,barw*max(0,min(100,value))/100,5,fillColor=BLUE,strokeColor=None))
         drawing.add(String(0,12,pct(value),fontName='Raleway-Bold',fontSize=9,fillColor=NAVY))
         drawing.add(String(0,26,f"Base: {a.get('resultados_com_percentual',a['corrigidos'])} resultados",fontName='Raleway-Regular',fontSize=7,fillColor=GRAY))
         if est:
-            drawing.add(String(0,40,'Mediana: '+pct(est.get('mediana_pct')),fontName='Raleway-Regular',fontSize=7,fillColor=NAVY))
-            intervalo='—' if est.get('min_pct') is None else pct(est['min_pct'])+' a '+pct(est['max_pct'])
-            drawing.add(String(0,52,'Faixa: '+intervalo,fontName='Raleway-Regular',fontSize=7,fillColor=GRAY))
+            drawing.add(String(0,38,'Mediana: '+pct(est.get('mediana_pct')),fontName='Raleway-Regular',fontSize=7,fillColor=TEAL))
+            if est.get('mediana_pct') is not None:
+                drawing.add(Rect(0,44,barw*max(0,min(100,est['mediana_pct']))/100,3,fillColor=TEAL,strokeColor=None))
         resultado=[p(a['corrigidos'],small)]
         if a.get('situacoes'):
             s=a['situacoes']
@@ -161,29 +169,29 @@ def gerar(d):
     table=Table(rows,colWidths=[usable*.43,usable*.20,usable*.14,usable*.23],repeatRows=1,hAlign='LEFT')
     table.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),HexColor('#e4eaf3')),('VALIGN',(0,0),(-1,-1),'TOP'),('LINEBELOW',(0,0),(-1,-1),.4,HexColor('#d5dfeb')),('PADDING',(0,0),(-1,-1),7)]))
     story += [table,Spacer(1,4*mm),p('Acerto médio: média dos percentuais de acerto dos resultados válidos de cartões lidos. Cada resultado tem o mesmo peso; provas diferentes não são uma medida de evolução. Sem resultado ou sem questões válidas: sem percentual. O filtro de disciplina seleciona avaliações vinculadas à disciplina, sem dividir o resultado da prova em áreas.',small)]
-    questoes=analise.get('questoes')
-    if questoes is not None:
-        story += [Spacer(1,5*mm),p('Acerto por questão',sub),Spacer(1,2*mm)]
-        if not questoes.get('disponivel'):
-            story += [p('Análise de questões indisponível neste perfil.',small)]
-        elif not questoes.get('items'):
-            story += [p('Nenhuma questão disponível para a avaliação selecionada.',small)]
-        else:
-            story += [p(questoes['titulo'],lead),p('Somente resultados finais desta turma; gabarito conforme a opção de língua do cartão. Questões anuladas não recebem percentual.',leadsmall),Spacer(1,2*mm)]
-            qr=[[p(t,small) for t in ('Questão','Acertos / base','Percentual de acerto','Registros')]]
-            for item in questoes['items']:
-                valor=item['pct']; largura=usable*.32-16; grafico=Drawing(largura,26)
-                grafico.add(Rect(0,0,largura,5,fillColor=HexColor('#e4eaf3'),strokeColor=None))
-                if valor is not None:grafico.add(Rect(0,0,largura*max(0,min(100,valor))/100,5,fillColor=BLUE,strokeColor=None))
-                grafico.add(String(0,13,'Anulada' if item['anulada'] else pct(valor),fontName='Raleway-Bold',fontSize=8,fillColor=NAVY))
-                detalhes=f"Sem registro: {item['sem_registro']} · Em branco: {item['brancas']}"
-                if item.get('ambiguas'):detalhes+=f" · Ambíguas: {item['ambiguas']}"
-                if len(item.get('por_lingua',[]))>1:
-                    detalhes+=' · '+ '; '.join(f"{l['lingua']}: {l['acertos']}/{l['base']}" for l in item['por_lingua'])
-                qr.append([p(item['numero'],small),p(f"{item['acertos']} / {item['base']}",small),grafico,p(detalhes,small)])
-            qt=Table(qr,colWidths=[usable*.12,usable*.18,usable*.32,usable*.38],repeatRows=1,hAlign='LEFT')
-            qt.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),HexColor('#e4eaf3')),('VALIGN',(0,0),(-1,-1),'TOP'),('LINEBELOW',(0,0),(-1,-1),.4,HexColor('#d5dfeb')),('PADDING',(0,0),(-1,-1),7)]))
-            story += [qt]
+    alunos=analise.get('alunos') or {}
+    story += [Spacer(1,5*mm),p('Alunos no recorte',sub)]
+    if not alunos.get('disponivel'):
+        story += [p('O acompanhamento nominal não está disponível neste perfil.',normal)]
+    else:
+        grupos=[('atencao','Indicação de acompanhamento','Ao menos um resultado com indicação de recuperação registrada.',HexColor('#fff4e3')),
+                ('dentro_criterio','Dentro do critério','Todos os resultados do aluno no recorte estão registrados como aprovados.',HexColor('#edf6ef')),
+                ('destaques','Top 5 - Maiores acertos médios','Médias com quantidades diferentes de resultados não são uma comparação de proficiência.',HexColor('#eef3fa'))]
+        for chave,titulo_grupo,descricao,fundo in grupos:
+            grupo=alunos.get(chave) or {}; itens=grupo.get('items') or []
+            story += [Spacer(1,4*mm),p(titulo_grupo,sub),p(descricao,leadsmall),Spacer(1,2*mm)]
+            linhas=[[p('Aluno / resultados no recorte',small),p('Acerto médio',small)]]
+            for a in itens:
+                nome=(str(a['posicao'])+'º - ' if chave=='destaques' else '')+a['nome']
+                dados=f"{a['resultados']} resultado(s) - {a['base_valida']} com percentual válido"
+                if chave=='atencao':dados+=f" - {a['recuperacao']} com indicação de recuperação"
+                linhas.append([[p(nome),p(dados,small)],p(pct(a['media_pct']))])
+            if not itens:linhas.append([p('Nenhum aluno neste grupo no recorte selecionado.',small),''])
+            tabela=Table(linhas,colWidths=[usable*.77,usable*.23],repeatRows=1,hAlign='LEFT')
+            tabela.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),fundo),('ROWBACKGROUNDS',(0,1),(-1,-1),[white,HexColor('#fafbfd')]),('LINEBELOW',(0,0),(-1,-1),.4,HexColor('#d5dfeb')),('VALIGN',(0,0),(-1,-1),'TOP'),('PADDING',(0,0),(-1,-1),7)]))
+            story += [tabela]
+            if chave=='destaques' and grupo.get('empate_no_corte'):
+                story += [p('Há outros alunos empatados nesta posição.',small)]
     doc.build(story,onFirstPage=page,onLaterPages=page,canvasmaker=Numerado)
 
 
