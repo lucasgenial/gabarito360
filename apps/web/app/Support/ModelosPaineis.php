@@ -9,7 +9,7 @@ final class ModelosPaineis
 
     /**
      * Recebe somente o perfil e as permissões do contexto autenticado atual.
-     * Recursos ativados sairão deste catálogo: ausência de registros será vazio, não modelo.
+     * Ao ativar uma fonte, preservar ID e posição do bloco; ausência de registros será vazio, não modelo.
      */
     public static function para(string $pagina, string $perfil, array $permissoes): array
     {
