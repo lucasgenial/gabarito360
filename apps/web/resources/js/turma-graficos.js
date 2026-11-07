@@ -31,6 +31,7 @@ if(raiz){
  function opcoes(tipo,elemento){
   const paleta=cores(),texto=cor('--muted'),borda=cor('--border-soft');
   const comum={animation:!matchMedia('(prefers-reduced-motion: reduce)').matches,color:paleta,textStyle:{fontFamily:'Figtree, sans-serif',color:texto},aria:{enabled:true,label:{description:'Painel de indicadores da turma. Os valores completos e a base de cálculo estão na alternativa textual acessível de cada gráfico.'}},tooltip:{trigger:'axis',renderMode:'richText',confine:true},grid:{left:44,right:22,top:30,bottom:54,containLabel:true}};
+  if(tipo==='distribuicao'){comum.tooltip.formatter=itens=>{const i=itens[0];return i.axisValue+'\nResultados: '+i.value+'\nBase: '+(analise.distribuicao_acertos?.total??0)+' resultados';};}
   const numerico={type:'value',min:0,max:100,interval:elemento.clientWidth<600?50:20,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:borda}}};
   if(tipo==='distribuicao'){
    const faixas=analise.distribuicao_acertos?.faixas||[];
@@ -45,7 +46,7 @@ if(raiz){
   }
   if(tipo==='situacoes'){
    const s=dados.situacoes||{};if(!(s.total>0))return null;
-   return {...comum,title:{text:String(s.total),subtext:'resultados',left:'center',top:'31%',textStyle:{color:cor('--fg'),fontSize:27,fontWeight:700},subtextStyle:{color:texto,fontSize:12}},color:[cor('--success'),paleta[2],cor('--muted')],tooltip:{trigger:'item',renderMode:'richText',confine:true,formatter:'{b}: {c} ({d}%)'},legend:{bottom:0,selectedMode:false,textStyle:{color:texto},itemGap:14},series:[{type:'pie',radius:['43%','65%'],center:['50%','42%'],avoidLabelOverlap:true,label:{show:true,position:'inside',formatter:p=>p.value?p.value:'',color:'#fff',fontWeight:700},data:[{name:'Dentro do critério',value:s.dentro_criterio||0},{name:'Indicação de recuperação',value:s.indicacao_recuperacao||0},{name:'Outras situações',value:s.outros||0}]}]};
+   return {...comum,title:{text:String(s.total),subtext:'resultados',left:'center',top:'31%',textStyle:{color:cor('--fg'),fontSize:27,fontWeight:700},subtextStyle:{color:texto,fontSize:12}},color:[cor('--success'),paleta[2],cor('--muted')],tooltip:{trigger:'item',renderMode:'richText',confine:true,formatter:p=>p.name+': '+p.value+' ('+p.percent+'%)\nBase: '+s.total+' resultados'},legend:{bottom:0,selectedMode:false,textStyle:{color:texto},itemGap:14},series:[{type:'pie',radius:['43%','65%'],center:['50%','42%'],avoidLabelOverlap:true,label:{show:true,position:'inside',formatter:p=>p.value?p.value:'',color:'#fff',fontWeight:700},data:[{name:'Dentro do critério',value:s.dentro_criterio||0},{name:'Indicação de recuperação',value:s.indicacao_recuperacao||0},{name:'Outras situações',value:s.outros||0}]}]};
   }
   return null;
  }

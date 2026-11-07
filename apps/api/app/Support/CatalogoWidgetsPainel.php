@@ -17,8 +17,8 @@ final class CatalogoWidgetsPainel
             $graficoReal=in_array($id,['cadastros-turno','distribuicao-acertos','resultados-avaliacao','situacoes-registradas'],true);
             $graficoDemo=in_array($id,['comparacao-turmas','cobertura-disciplinas','periodos-escolares','habilidades','reavaliacoes'],true);
             $agenda=in_array($id,['agenda-pedagogica','proximos-compromissos','agenda-administrativa'],true);
-            $minH = $kpi ? 4 : ($graficoReal ? 11 : (($graficoDemo || $agenda) ? 12 : ($id === 'alunos-recorte' ? 10 : 7)));
-            $defaultH = $id === 'turma-cadastro' ? 5 : ($kpi ? 4 : ($agenda ? 14 : ($graficoReal ? 11 : ($graficoDemo ? 12 : ($id === 'alunos-recorte' ? 12 : 9)))));
+            $minH = $kpi ? 4 : (($graficoReal || $graficoDemo) ? 8 : ($agenda ? 12 : (in_array($id,['alunos-destaques','alunos-atencao'],true) ? 10 : 7)));
+            $defaultH = $id === 'turma-cadastro' ? 5 : ($kpi ? 4 : ($agenda ? 14 : (($graficoReal || $graficoDemo) ? 9 : (in_array($id,['alunos-destaques','alunos-atencao'],true) ? 12 : 9))));
             $maxH = $id === 'turma-cadastro' ? 12 : ($kpi ? 8 : 20);
             $lista[] = ['id'=>$id, 'section'=>$section,
                 'desktop'=>['minW'=>$kpi ? 2 : 4, 'maxW'=>12, 'minH'=>$minH, 'maxH'=>$maxH, 'defaultW'=>$kpi ? 3 : 6, 'defaultH'=>$defaultH],
@@ -36,9 +36,11 @@ final class CatalogoWidgetsPainel
             if ($admin) $adicionar('turma-cadastro', 'resumo', true);
             if ($pedagogico) {
                 foreach (['kpi-avaliacoes','kpi-resultados','kpi-alunos-resultado','kpi-media','kpi-mediana','kpi-faixa'] as $id) $adicionar($id, 'resumo', true);
-                foreach (['distribuicao-acertos','resultados-avaliacao','situacoes-registradas'] as $id) $adicionar($id, 'analises');
                 if (in_array('aluno.ver', $permissoes, true) && in_array('resultado.ver', $permissoes, true)
-                    && !in_array($ator->perfil, ['aluno','aplicador'], true)) $adicionar('alunos-recorte', 'analises');
+                    && !in_array($ator->perfil, ['aluno','aplicador'], true)) {
+                    foreach (['alunos-destaques','alunos-atencao'] as $id) $adicionar($id, 'estudantes');
+                }
+                foreach (['distribuicao-acertos','resultados-avaliacao','situacoes-registradas'] as $id) $adicionar($id, 'analises');
                 foreach (['periodos-escolares','agenda-pedagogica','devolutivas','participacao','responsabilidade-docente-aplicacao'] as $id) $adicionar($id, 'planejamento');
                 foreach (['habilidades','intervencoes','reavaliacoes'] as $id) $adicionar($id, 'ensino');
                 $adicionar('metas', 'decisoes');

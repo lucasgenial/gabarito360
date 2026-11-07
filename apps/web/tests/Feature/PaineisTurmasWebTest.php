@@ -57,7 +57,7 @@ class PaineisTurmasWebTest extends TestCase
         $this->preparar('professor',0);
         $this->consultarTela('/app/turmas')->assertOk()->assertSee('Cadastros ativos');
         $this->preparar('professor',0,503);
-        $this->consultarTela('/app/turmas')->assertOk()->assertSee('Listagem temporariamente indisponível')->assertDontSee('painel-turma-registro',false);
+        $this->consultarTela('/app/turmas')->assertOk()->assertSee('Não foi possível carregar os registros.')->assertSee('role="alert"',false)->assertDontSee('painel-turma-registro',false);
     }
 
     public function test_permissao_retirada_nao_e_apresentada_como_zero_ou_lista_vazia(): void

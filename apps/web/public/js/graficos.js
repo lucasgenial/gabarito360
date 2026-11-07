@@ -18,6 +18,7 @@
       var v = i.value && typeof i.value === 'object' ? i.value.value : i.value;
       linhas.push((d.series.length > 1 ? i.seriesName + ': ' : '') + texto(d, v));
     });
+    if (d.numeradores && d.numeradores[itens[0].dataIndex] !== undefined) linhas.push((d.rotulo_numerador || 'Quantidade') + ': ' + d.numeradores[itens[0].dataIndex]);
     if (d.bases && d.bases[itens[0].dataIndex] !== undefined) linhas.push('Base: ' + d.bases[itens[0].dataIndex] + ' ' + (d.unidade_base || 'registros'));
     return linhas.join('\n');
   }

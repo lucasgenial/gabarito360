@@ -8,8 +8,8 @@ $titulosGrupos=['analises'=>'Análises entre turmas','planejamento'=>'Planejamen
 @if($itensGrupo->isNotEmpty() || ($grupo==='analises' && isset($graficoTurnos)))
 <x-painel-secao :id="$grupo" :titulo="$tituloGrupo">
 @if($grupo==='analises' && isset($graficoTurnos))
-<x-painel-widget id="cadastros-turno" titulo="Turmas por turno" :w="6" :h="11" secao="analises" :demo="false" class="painel-widget-grafico">
-<p class="field-help">Distribuição cadastral das turmas autorizadas no recorte. Não representa desempenho ou participação em avaliações.</p>
+<x-painel-widget id="cadastros-turno" titulo="Turmas por turno" :w="6" :h="9" secao="analises" :demo="false" class="painel-widget-grafico">
+<span class="painel-valores-acessiveis">Distribuição cadastral das turmas autorizadas no recorte. Não representa desempenho ou participação em avaliações.</span>
 @if($graficoTurnosErro??false)<p role="alert">Não foi possível consultar a distribuição cadastral. Nenhum valor foi substituído por um exemplo.</p>
 @elseif(empty($graficoTurnos['categorias']))<p>Nenhuma turma atende ao recorte selecionado.</p>
 @else
@@ -27,13 +27,16 @@ $tipoDemo=$d['tipo']??null;
 $graficoDemo=$d['grafico']??[];
 if($modelo['id']==='comparacao-turmas'){$graficoDemo['horizontal']=true;$graficoDemo['rotulos_curtos']=array_map(fn($nome)=>preg_replace('/^Turma fictícia /u','',$nome),$graficoDemo['categorias']);}
 if(isset($d['base']['respostas_possiveis'])){$graficoDemo['bases']=$d['base']['respostas_possiveis'];$graficoDemo['unidade_base']='respostas possíveis';}
-$alturaDemo=$tipoDemo==='grafico'?12:($tipoDemo==='agenda'?14:($tipoDemo==='progresso'?10:11));
+elseif(isset($d['base']['aplicacoes_previstas'])){$graficoDemo['bases']=$d['base']['aplicacoes_previstas'];$graficoDemo['unidade_base']='aplicações previstas';}
+if(isset($d['base']['acertos'])){$graficoDemo['numeradores']=$d['base']['acertos'];$graficoDemo['rotulo_numerador']='Acertos';}
+elseif(isset($d['base']['com_evidencia'])){$graficoDemo['numeradores']=$d['base']['com_evidencia'];$graficoDemo['rotulo_numerador']='Com evidência';}
+$alturaDemo=$tipoDemo==='grafico'?9:($tipoDemo==='agenda'?14:($tipoDemo==='progresso'?10:11));
 @endphp
 <x-painel-widget :id="$modelo['id']" :titulo="$modelo['titulo']" :w="6" :h="$alturaDemo" :secao="$grupo" :demo="true" class="painel-widget-demonstracao {{ $tipoDemo==='grafico'?'painel-widget-grafico':'' }}">
 @if(!$d || !($d['demonstrativo']??false))
 <p class="field-help" role="status">Não foi possível apresentar este exemplo ilustrativo.</p>
 @else
-<p class="painel-demo-descricao">{{ $d['descricao'] }}</p>
+<span class="painel-valores-acessiveis">{{ $d['descricao'] }}</span>
 @if($tipoDemo==='grafico')
 <div class="grafico" role="img" aria-label="{{ $d['descricao'] }}" data-grafico="{{ json_encode($graficoDemo,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) }}"></div>
 <div class="painel-valores-acessiveis">
@@ -57,7 +60,7 @@ $alturaDemo=$tipoDemo==='grafico'?12:($tipoDemo==='agenda'?14:($tipoDemo==='prog
 @foreach($d['itens'] as $item)
 <li class="painel-demo-item">
 <div class="painel-demo-data"><time datetime="{{ $item['data'] }}">{{ \Carbon\Carbon::parse($item['data'])->format('d/m') }}</time><span>{{ $item['hora'] }}</span></div>
-<div class="painel-demo-item-conteudo"><strong>{{ $item['titulo'] }}</strong><p>{{ $item['contexto'] }}</p><p class="painel-demo-responsavel">{{ $item['responsavel'] }}</p><span class="painel-demo-situacao">{{ $item['situacao'] }}</span></div>
+<div class="painel-demo-item-conteudo"><strong>{{ $item['titulo'] }}</strong><span class="painel-demo-item-dado">{{ $item['contexto'] }}</span><span class="painel-demo-item-dado painel-demo-responsavel">{{ $item['responsavel'] }}</span><span class="painel-demo-situacao">{{ $item['situacao'] }}</span></div>
 </li>
 @endforeach
 </ol>
