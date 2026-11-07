@@ -12,13 +12,15 @@ final class PreferenciaPainelController extends Controller
     public function show(Request $request, string $painel)
     {
         if ($request->query->count()) throw ValidationException::withMessages(['preferencias'=>'Não envie parâmetros nesta consulta.']);
-        return ApiResponse::success(app(PreferenciasPainel::class)->mostrar($request->user(), $painel))->header('Cache-Control', 'private, no-store');
+        $turmaId=\App\Support\CatalogoPaineis::seletor($request,$painel);
+        return ApiResponse::success(app(PreferenciasPainel::class)->mostrar($request->user(), $painel, $turmaId))->header('Cache-Control', 'private, no-store');
     }
 
     public function update(Request $request, string $painel)
     {
         if ($request->query->count()) throw ValidationException::withMessages(['preferencias'=>'Envie a configuração somente no corpo da requisição.']);
         $pedido = $request->isJson() ? $request->json()->all() : $request->request->all();
-        return ApiResponse::success(app(PreferenciasPainel::class)->gravar($request->user(), $painel, $pedido))->header('Cache-Control', 'private, no-store');
+        $turmaId=\App\Support\CatalogoPaineis::seletor($request,$painel);
+        return ApiResponse::success(app(PreferenciasPainel::class)->gravar($request->user(), $painel, $pedido, $turmaId))->header('Cache-Control', 'private, no-store');
     }
 }

@@ -14,8 +14,11 @@ final class CatalogoWidgetsPainel
         $pedagogico = !$admin && in_array('relatorio.turma', $permissoes, true);
         $lista = [];
         $adicionar = static function (string $id, string $section, bool $kpi = false) use (&$lista): void {
-            $minH = $kpi ? 4 : ($id === 'alunos-recorte' ? 10 : 7);
-            $defaultH = $id === 'turma-cadastro' ? 5 : ($kpi ? 4 : ($id === 'alunos-recorte' ? 12 : 9));
+            $graficoReal=in_array($id,['cadastros-turno','distribuicao-acertos','resultados-avaliacao','situacoes-registradas'],true);
+            $graficoDemo=in_array($id,['comparacao-turmas','cobertura-disciplinas','periodos-escolares','habilidades','reavaliacoes'],true);
+            $agenda=in_array($id,['agenda-pedagogica','proximos-compromissos','agenda-administrativa'],true);
+            $minH = $kpi ? 4 : ($graficoReal ? 11 : (($graficoDemo || $agenda) ? 12 : ($id === 'alunos-recorte' ? 10 : 7)));
+            $defaultH = $id === 'turma-cadastro' ? 5 : ($kpi ? 4 : ($agenda ? 14 : ($graficoReal ? 11 : ($graficoDemo ? 12 : ($id === 'alunos-recorte' ? 12 : 9)))));
             $maxH = $id === 'turma-cadastro' ? 12 : ($kpi ? 8 : 20);
             $lista[] = ['id'=>$id, 'section'=>$section,
                 'desktop'=>['minW'=>$kpi ? 2 : 4, 'maxW'=>12, 'minH'=>$minH, 'maxH'=>$maxH, 'defaultW'=>$kpi ? 3 : 6, 'defaultH'=>$defaultH],
@@ -46,6 +49,7 @@ final class CatalogoWidgetsPainel
             $adicionar('agenda-administrativa', 'administrativo');
             if (in_array('aluno.ver', $permissoes, true)) $adicionar('documentos-administrativos', 'administrativo');
         }
-        return $lista;
+        $fixas=CatalogoPaineis::definicao($painel)['secoes_fixas'];
+        return array_values(array_filter($lista,fn($widget)=>!in_array($widget['section'],$fixas,true)));
     }
 }

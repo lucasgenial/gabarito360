@@ -57,8 +57,8 @@ Route::prefix('v1')->group(function () {
     // Rotas protegidas
     Route::middleware(['auth:sanctum', 'contexto_vinculo', 'senha_trocada'])->group(function () {
         Route::prefix('paineis/preferencias')->middleware(['permissao:turma.ver', 'throttle:preferencias-paineis'])->group(function () {
-            Route::get('{painel}', [\App\Http\Controllers\Api\PreferenciaPainelController::class, 'show'])->whereIn('painel', ['turmas','turma']);
-            Route::put('{painel}', [\App\Http\Controllers\Api\PreferenciaPainelController::class, 'update'])->whereIn('painel', ['turmas','turma']);
+            Route::get('{painel}', [\App\Http\Controllers\Api\PreferenciaPainelController::class, 'show'])->whereIn('painel', \App\Support\CatalogoPaineis::nomes());
+            Route::put('{painel}', [\App\Http\Controllers\Api\PreferenciaPainelController::class, 'update'])->whereIn('painel', \App\Support\CatalogoPaineis::nomes());
         });
         $dc=\App\Http\Controllers\Api\DisciplinaController::class;
         $ac=\App\Http\Controllers\Api\AreaConhecimentoController::class;

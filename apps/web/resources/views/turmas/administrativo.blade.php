@@ -15,14 +15,14 @@
 @php($secoes=['visao-geral'=>'Visão geral'] + (\App\Support\Acesso::pode('aluno.ver')?['alunos'=>'Alunos']:[]))
 @include('turmas._abas')
 <section id="visao-geral" data-turma-painel="visao-geral" class="tu1-painel" aria-label="Visão geral">
-<section class="card card-pad">
-  <h2>Dados da turma</h2>
+@include('turmas._organizar_painel',['paginaPainel'=>'turma','turmaPainel'=>$turma['id']])
+<x-painel-secao id="resumo" titulo="Cadastro da turma"><x-painel-widget id="turma-cadastro" titulo="Dados da turma" secao="resumo" :w="6" :h="5">
   <p>Status: {{ $turma['ativo'] ? 'Em uso' : 'Arquivada' }}</p>
   @pode('turma.gerir')<a class="btn btn-secondary" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /> Editar turma</a>@endpode
   @if(\App\Support\Acesso::pode('turma.desativar'))
   <x-arquivamento tipo="turmas" :registro="$turma" />
   @endif
-</section>
+</x-painel-widget></x-painel-secao>
 @include('turmas._modelos', ['paginaModelos'=>'turma'])
 </section>
 <section id="alunos" data-turma-painel="alunos" class="tu1-painel" aria-label="Alunos">

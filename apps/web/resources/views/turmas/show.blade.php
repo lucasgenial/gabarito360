@@ -46,6 +46,7 @@ if(!empty($painelAplicado['painel_fim']))$recortes[]='Até '.\Carbon\Carbon::par
 @php($secoes = ['visao-geral'=>'Visão geral'] + (\App\Support\Acesso::pode('aluno.ver')?['alunos'=>'Alunos']:[]) + (($dc1Visivel??false)?['disciplinas'=>'Disciplinas e professores']:[]) + (\App\Support\Acesso::pode('prova.ver')?['provas'=>'Provas']:[]) + (!\App\Support\Acesso::pessoal()?['acesso'=>'Acesso à turma']:[]))
 @include('turmas._abas')
 <section class="tu1-painel" id="visao-geral" data-turma-painel="visao-geral" aria-label="Visão geral">
+@include('turmas._organizar_painel',['paginaPainel'=>'turma','turmaPainel'=>$turma['id']])
 @if($painel || ($painelErro??false))@include('turmas._painel')@else
 <div class="kpi-grid"><div class="card kpi"><div class="kpi-label">Alunos ativos</div><div class="kpi-value">{{ $turma['total_alunos'] ?? 0 }}</div></div><div class="card kpi"><div class="kpi-label">Ano letivo</div><div class="kpi-value">{{ $turma['ano_letivo'] }}</div></div></div>
 @endif

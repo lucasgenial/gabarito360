@@ -523,3 +523,14 @@ Migration000005 cria conjuntos por par de edições, relações declaradas com o
 ### CI1-D — referências pessoais canônicas (03/11/2026)
 
 Migration000006 adiciona referencias_instituicoes_pessoais e catalogo_referencia_eventos. Chave única por espaço/unidade; FKs compostas comprovam proprietário pessoal, vínculo original e entrada/unidade/edição escolhidas. Arquivamento preserva a associação; reativação/reconfirmação são explícitas. Identidade da referência não pode ser reatribuída e eventos são append-only. Nenhuma FK acadêmica foi alterada; associação de turmas/disciplinas permanece PA1. A declaração não cria contrato, emprego nem acesso institucional. Ver124.
+
+### P2.11 — preferências genéricas de dashboards (07/11/2026)
+
+Migration aditiva `2026_11_07_000001_registrar_preferencias_paineis` cria somente:
+
+| Tabela | Conteúdo e integridade |
+|---|---|
+| `preferencias_paineis` | Usuário, vínculo, espaço, perfil ativo, painel(64), recurso_tipo(16)/recurso_id nullable e contexto_hash; versão, apresentação, mapas desktop/mobile em JSON e atualizado_em. Unicidade usuário/contexto_hash/painel. Recurso participa do hash e é autorizado antes da consulta/gravação. |
+| `preferencias_painel_eventos` | Preferência, UUID de intenção, hash do pedido, ação, versão, resultado técnico e ocorrido_em; unicidades preferência/chave e preferência/versão, com triggers contra UPDATE/DELETE. |
+
+Geometrias transportam somente id/section/x/y/w/h e altura_desejada opcional, sem HTML, notas, imagens ou conteúdo de widgets. h representa a altura efetiva comum da linha; a demanda individual permite reduzir o maior widget após recarga. Padrões por perfil são configuração versionada de servidor; preferências não concedem permissão nem alteram tabelas escolares. Não há backfill, remoção de gabaritos ou rollback destrutivo. A fonte de migration e os testes não comprovam execução no servidor; publicação exige recibo do operador de homologação e os gates descritos em179.

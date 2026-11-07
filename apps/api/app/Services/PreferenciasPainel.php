@@ -2,7 +2,7 @@
 namespace App\Services;
 
 use App\Models\Usuario;
-use App\Support\{CatalogoWidgetsPainel, ContextoVinculo, Permissao};
+use App\Support\{CatalogoPaineis, CatalogoWidgetsPainel, ContextoVinculo, PadroesPainel, Permissao};
 use Illuminate\Support\Facades\{DB, Validator};
 use Illuminate\Validation\ValidationException;
 
@@ -11,7 +11,7 @@ final class PreferenciasPainel
 {
     use \Illuminate\Database\DetectsConcurrencyErrors;
 
-    private function contexto(Usuario $ator, bool $travar = false): array
+    private function contexto(Usuario $ator, string $painel, ?int $turmaId, bool $travar = false): array
     {
         abort_unless(ContextoVinculo::presente($ator), 403, 'Selecione um vínculo válido.');
         if ($travar) DB::table('usuario_vinculos')->where('id', $ator->vinculoContextoId())->where('usuario_id', $ator->id)->lockForUpdate()->first();
@@ -20,7 +20,8 @@ final class PreferenciasPainel
         Permissao::limparCache();
         $v = ContextoVinculo::resolver($ator);
         abort_unless(Permissao::pode($ator, 'turma.ver'), 403);
-        $dados = ['usuario_id'=>(int)$ator->id, 'vinculo_id'=>(int)$v->id, 'espaco_id'=>(int)$v->espaco_id, 'perfil'=>$v->perfil];
+        $recurso=CatalogoPaineis::recurso($ator,$painel,$turmaId,$travar);
+        $dados = ['usuario_id'=>(int)$ator->id, 'vinculo_id'=>(int)$v->id, 'espaco_id'=>(int)$v->espaco_id, 'perfil'=>$v->perfil]+$recurso;
         return $dados + ['contexto_hash'=>hash('sha256', json_encode($dados, JSON_THROW_ON_ERROR))];
     }
 
@@ -54,13 +55,18 @@ final class PreferenciasPainel
                 $vistos = []; $caixas = [];
                 foreach ($widgets as $i=>$widget) {
                     $campo = 'layouts.'.$dispositivo.'.'.$i;
-                    if (!is_array($widget) || count($widget)!==6 || array_diff(array_keys($widget), ['id','section','x','y','w','h'])) $this->falhar($campo);
+                    if (!is_array($widget) || !in_array(count($widget), [6,7], true)
+                        || array_diff(array_keys($widget), ['id','section','x','y','w','h','altura_desejada'])) $this->falhar($campo);
                     if (!is_string($widget['id'] ?? null) || !isset($porId[$widget['id']]) || isset($vistos[$widget['id']])) $this->falhar($campo.'.id');
                     $item = $porId[$widget['id']]; $limite = $item[$dispositivo];
                     if (($widget['section'] ?? null)!==$item['section']) $this->falhar($campo.'.section');
                     foreach (['x','y','w','h'] as $numero) if (!is_int($widget[$numero] ?? null)) $this->falhar($campo.'.'.$numero);
                     if ($widget['x']<0 || $widget['y']<0 || $widget['x']+$widget['w']>12 || $widget['y']+$widget['h']>200
                         || $widget['w']<$limite['minW'] || $widget['w']>$limite['maxW'] || $widget['h']<$limite['minH'] || $widget['h']>$limite['maxH']) $this->falhar($campo);
+                    // h é a altura efetiva da linha; a intenção individual é técnica e opcional.
+                    // Clientes anteriores continuam com seis campos, sem reescrita ou coerção.
+                    if (array_key_exists('altura_desejada', $widget) && (!is_int($widget['altura_desejada'])
+                        || $widget['altura_desejada']<$limite['minH'] || $widget['altura_desejada']>$widget['h'])) $this->falhar($campo.'.altura_desejada');
                     foreach ($caixas as $outra) if ($outra['section']===$widget['section'] && $widget['x']<$outra['x']+$outra['w'] && $widget['x']+$widget['w']>$outra['x'] && $widget['y']<$outra['y']+$outra['h'] && $widget['y']+$widget['h']>$outra['y']) $this->falhar($campo, 'Os componentes não podem se sobrepor.');
                     $vistos[$widget['id']] = true; $caixas[] = $widget;
                 }
@@ -77,19 +83,21 @@ final class PreferenciasPainel
         return ['versao'=>$registro ? (int)$registro->versao : 0, 'apresentacao'=>$registro?->apresentacao ?? 'tabela', 'layouts'=>$layouts];
     }
 
-    private function filtrar(array $resultado, array $catalogo): array
+    private function filtrar(array $resultado, array $catalogo, string $perfil, string $painel): array
     {
         $ids = array_fill_keys(array_column($catalogo, 'id'), true);
         foreach (['desktop','mobile'] as $d) $resultado['layouts'][$d] = array_values(array_filter($resultado['layouts'][$d], fn ($w)=>isset($ids[$w['id']])));
-        return $resultado + ['catalogo'=>$catalogo, 'repetido'=>false];
+        return $resultado + ['catalogo'=>$catalogo, 'repetido'=>false,
+            'padrao'=>['desktop'=>PadroesPainel::desktop($perfil,$painel,$catalogo)],
+            'origem_disposicao'=>$resultado['layouts']['desktop'] ? 'usuario' : 'perfil'];
     }
 
-    public function mostrar(Usuario $ator, string $painel): array
+    public function mostrar(Usuario $ator, string $painel, ?int $turmaId=null): array
     {
-        $contexto = $this->contexto($ator);
+        $contexto = $this->contexto($ator,$painel,$turmaId);
         $registro = DB::table('preferencias_paineis')->where($contexto)->where('painel', $painel)->first();
-        $this->contexto($ator);
-        return $this->filtrar($this->estado($registro), CatalogoWidgetsPainel::para($ator, $painel));
+        $this->contexto($ator,$painel,$turmaId);
+        return $this->filtrar($this->estado($registro), CatalogoWidgetsPainel::para($ator, $painel),$contexto['perfil'],$painel);
     }
 
     private function canonico(mixed $valor): mixed
@@ -99,10 +107,10 @@ final class PreferenciasPainel
         return array_map(fn ($v)=>$this->canonico($v), $valor);
     }
 
-    public function gravar(Usuario $ator, string $painel, array $pedido): array
+    public function gravar(Usuario $ator, string $painel, array $pedido, ?int $turmaId=null): array
     {
-        $acao = function () use ($ator,$painel,$pedido) {
-            $contexto = $this->contexto($ator, true);
+        $acao = function () use ($ator,$painel,$pedido,$turmaId) {
+            $contexto = $this->contexto($ator,$painel,$turmaId,true);
             $catalogo = CatalogoWidgetsPainel::para($ator, $painel);
             $pedido = $this->validar($pedido, $catalogo);
             $q = DB::table('preferencias_paineis')->where($contexto)->where('painel', $painel);
@@ -115,7 +123,7 @@ final class PreferenciasPainel
             $anterior = DB::table('preferencias_painel_eventos')->where('preferencia_id', $registro->id)->where('chave', $pedido['chave'])->first();
             if ($anterior) {
                 abort_unless(hash_equals($anterior->pedido_hash, $hash), 409, 'Identificador já usado em outra configuração.');
-                return array_replace($this->filtrar(json_decode($anterior->resultado, true, 64, JSON_THROW_ON_ERROR), $catalogo), ['repetido'=>true]);
+                return array_replace($this->filtrar(json_decode($anterior->resultado, true, 64, JSON_THROW_ON_ERROR), $catalogo,$contexto['perfil'],$painel), ['repetido'=>true]);
             }
             abort_unless((int)$registro->versao===$pedido['versao'], 409, 'A organização do painel mudou. Atualize antes de salvar.');
             // Omitir um dispositivo preserva até as caixas temporariamente não autorizadas
@@ -129,11 +137,11 @@ final class PreferenciasPainel
                 else $resultado['layouts'][$alvo]=[];
             }
             $resultado['versao']++;
-            $this->contexto($ator);
+            $this->contexto($ator,$painel,$turmaId);
             DB::table('preferencias_paineis')->where('id', $registro->id)->update(['versao'=>$resultado['versao'], 'apresentacao'=>$resultado['apresentacao'], 'desktop'=>json_encode($resultado['layouts']['desktop'], JSON_THROW_ON_ERROR), 'mobile'=>json_encode($resultado['layouts']['mobile'], JSON_THROW_ON_ERROR), 'atualizado_em'=>now()->utc()]);
             $auditado = array_intersect_key($resultado, array_flip(['versao','apresentacao','layouts']));
             DB::table('preferencias_painel_eventos')->insert(['preferencia_id'=>$registro->id, 'chave'=>$pedido['chave'], 'pedido_hash'=>$hash, 'acao'=>$pedido['acao'], 'versao'=>$resultado['versao'], 'resultado'=>json_encode($auditado, JSON_THROW_ON_ERROR), 'ocorrido_em'=>now()->utc()]);
-            return $this->filtrar($resultado, $catalogo);
+            return $this->filtrar($resultado, $catalogo,$contexto['perfil'],$painel);
         };
         $c = DB::connection();
         if (!in_array($c->getDriverName(), ['mysql','mariadb'], true)) return $c->transaction($acao, 3);
