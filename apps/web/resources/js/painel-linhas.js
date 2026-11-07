@@ -1,9 +1,10 @@
 export const project=n=>({id:n.id,section:n.section,x:n.x,y:n.y,w:n.w,h:n.h,altura_desejada:n.altura_desejada??n.h});
 export function rowsOf(layout){const rows=[];for(const n of [...layout].sort((a,b)=>a.y-b.y||a.x-b.x)){let r=rows.find(r=>r[0].y===n.y);if(!r)rows.push(r=[]);r.push({...n});}return rows;}
 function widths(row,limits,priority){
- const result=new Map(row.map(n=>[n.id,limits.get(n.id).minW]));let free=12-[...result.values()].reduce((a,b)=>a+b,0);if(free<0)throw Error('Limites de largura incompatíveis');
- if(priority&&result.has(priority)){const n=row.find(n=>n.id===priority),cap=limits.get(priority);const add=Math.min(free,Math.max(0,Math.min(cap.maxW,n.w)-result.get(priority)));result.set(priority,result.get(priority)+add);free-=add;}
- while(free){const eligible=row.filter(n=>n.id!==priority&&result.get(n.id)<limits.get(n.id).maxW);if(!eligible.length){const n=row.find(n=>result.get(n.id)<limits.get(n.id).maxW);if(!n)throw Error('Linha sem largura suficiente');result.set(n.id,result.get(n.id)+1);free--;continue;}eligible.sort((a,b)=>(result.get(a.id)/Math.max(1,a.w))-(result.get(b.id)/Math.max(1,b.w)));result.set(eligible[0].id,result.get(eligible[0].id)+1);free--;}
+ const result=new Map(row.map(n=>{const c=limits.get(n.id);return[n.id,Math.max(c.minW,Math.min(c.maxW,n.w))];}));
+ let excess=[...result.values()].reduce((a,b)=>a+b,0)-12;
+ // Espaço livre permanece livre. Só reduzir irmãos quando as larguras não cabem.
+ while(excess>0){const eligible=row.filter(n=>n.id!==priority&&result.get(n.id)>limits.get(n.id).minW);if(!eligible.length)throw Error('Limites de largura incompatíveis');eligible.sort((a,b)=>(result.get(b.id)-limits.get(b.id).minW)-(result.get(a.id)-limits.get(a.id).minW));result.set(eligible[0].id,result.get(eligible[0].id)-1);excess--;}
  return result;
 }
 export function normalizeRows(input,limits,priority=null){
@@ -27,7 +28,7 @@ export function normalizeRows(input,limits,priority=null){
  const out=[];let y=0;
  for(const row of chunks){if(!row.length)continue;for(const n of row){const c=limits.get(n.id);n.altura_desejada=Math.max(c.minH,Math.min(c.maxH,n.altura_desejada??n.h));}
   const h=Math.max(...row.map(n=>n.altura_desejada)),w=widths(row,limits,priority);let x=0;
-  for(const n of row){out.push({...project(n),x,y,w:w.get(n.id),h});x+=w.get(n.id);}if(x!==12)throw Error('Linha incompleta');y+=h;
+  for(const n of row){out.push({...project(n),x,y,w:w.get(n.id),h});x+=w.get(n.id);}if(x>12)throw Error('Linha excede a largura disponível');y+=h;
  }
  if(y>200)throw Error('O conjunto excede a altura disponível');return out;
 }
