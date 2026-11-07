@@ -49,9 +49,11 @@ if(!empty($painelAplicado['painel_fim']))$recortes[]='Até '.\Carbon\Carbon::par
 @if($painel || ($painelErro??false))@include('turmas._painel')@else
 <div class="kpi-grid"><div class="card kpi"><div class="kpi-label">Alunos ativos</div><div class="kpi-value">{{ $turma['total_alunos'] ?? 0 }}</div></div><div class="card kpi"><div class="kpi-label">Ano letivo</div><div class="kpi-value">{{ $turma['ano_letivo'] }}</div></div></div>
 @endif
+@if(\App\Support\Acesso::pode('correcao.acompanhar') || \App\Support\Acesso::pode('relatorio.turma'))
 <div class="card card-pad"><h2>Acompanhamento da turma</h2><p class="field-help">Consulte as correções e os resultados das avaliações desta turma.</p><div class="tu1-acoes">    @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}"><x-icone nome="grafico" /> Acompanhar correção</a>@endpode
-    @pode('resultado.ver')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}"><x-icone nome="grafico" /> Relatório da turma</a>@endpode
+    @pode('relatorio.turma')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}"><x-icone nome="grafico" /> Relatório da turma</a>@endpode
 </div></div>
+@endif
 @include('turmas._modelos', ['paginaModelos'=>'turma'])
 </section>
 <section class="tu1-painel" id="alunos" data-turma-painel="alunos" aria-label="Alunos">@include('turmas._alunos')</section>
