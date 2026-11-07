@@ -24,6 +24,9 @@
 .painel-widget-alunos .tu1r3-alunos-escolhas{flex:0 0 auto;margin:0 0 12px}
 .painel-widget-alunos [data-alunos-lista]:not([hidden]){display:flex;flex-direction:column;min-height:0;flex:1 1 auto}
 .painel-widget-alunos .tu1r3-alunos-lista{max-height:none;min-height:0;overflow:visible}
+.painel-widget-alunos [data-alunos-expandir]{flex:0 0 auto}
+.painel-secao-grade.grid-stack .painel-widget-alunos .painel-widget-corpo{overflow:hidden}
+.painel-secao-grade.grid-stack .painel-widget-alunos .tu1r3-alunos-lista{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
 .painel-widget-alunos .dc1-ajuda{flex:0 0 auto;margin-block:8px}
 .painel-demo-avisos{display:flex;flex:0 0 auto;align-items:center;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:.8rem}
 .painel-demo-avisos p{flex-basis:100%;margin:0;line-height:1.4}
@@ -48,6 +51,7 @@
 .painel-demo-item-conteudo{min-width:0;flex:1 1 auto;overflow-wrap:anywhere}
 .painel-demo-item-conteudo>strong{font-size:.9rem;line-height:1.4}
 .painel-demo-item-conteudo p{margin:6px 0 0;font-size:.8rem;line-height:1.45;color:var(--muted)}
+.painel-demo-item-dado{display:block}
 .painel-demo-item-conteudo .painel-demo-responsavel{font-weight:600}
 .painel-demo-situacao{display:inline-block;margin-top:8px;padding:3px 8px;border:1px solid var(--border);border-radius:4px;color:var(--fg);font-size:.75rem;line-height:1.4;background:var(--surface-2,var(--bg))}
 .painel-demo-valores{width:100%;font-size:.85rem}
