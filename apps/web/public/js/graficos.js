@@ -45,9 +45,9 @@
         formatter: function (itens) { return dica(d, Array.isArray(itens) ? itens : [itens]); } },
       xAxis: horizontal ? valor : categorias, yAxis: horizontal ? categorias : valor,
       series: d.series.map(function (s) {
-        return { name: s.nome, type: 'bar', barMaxWidth: varias ? 22 : 36, barGap: '15%',
+        return { name: s.nome, type: 'bar', barMaxWidth: varias ? 22 : 36, barGap: '15%', labelLayout: { hideOverlap: true },
           itemStyle: { borderRadius: horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0] },
-          label: { show: !!d.rotulos, position: horizontal ? 'right' : 'top', color: tinta, fontSize: 11, fontWeight: 600,
+          label: { show: !!d.rotulos, position: horizontal ? 'right' : 'top', color: tinta, fontSize: 11, fontWeight: 600, padding: [0, 3], backgroundColor: 'transparent',
             formatter: function (p) { return texto(d, p.value); } },
           data: s.valores.map(function (v, i) { var cor = s.cores && s.cores[i]; return cor ? { value: v, itemStyle: { color: localToken(cor) } } : v; }) };
       })

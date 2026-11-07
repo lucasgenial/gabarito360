@@ -2,7 +2,8 @@ import {init,use} from 'echarts/core';
 import {BarChart,PieChart} from 'echarts/charts';
 import {GridComponent,TooltipComponent,LegendComponent,AriaComponent,TitleComponent} from 'echarts/components';
 import {SVGRenderer} from 'echarts/renderers';
-use([BarChart,PieChart,GridComponent,TooltipComponent,LegendComponent,AriaComponent,TitleComponent,SVGRenderer]);
+import {LabelLayout} from 'echarts/features';
+use([BarChart,PieChart,GridComponent,TooltipComponent,LegendComponent,AriaComponent,TitleComponent,SVGRenderer,LabelLayout]);
 
 // Dados vêm do DTO autorizado do painel. Nenhuma consulta direta ou mudança de escopo no cliente.
 const raiz=document.querySelector('[data-painel-graficos]');
@@ -45,7 +46,7 @@ if(raiz){
   if(tipo==='avaliacoes'){
    const itens=recortarAvaliacoes(elemento,horizontal);if(!(analise.por_avaliacao||[]).some(i=>i.n>0))return null;const primeiraOrdem=paginaAvaliacoes.inicio+1;
    const categoria={type:'category',inverse:horizontal,data:itens.map(i=>i.titulo+' · n='+i.n),axisLabel:{width:horizontal?(elemento.clientWidth<600?80:130):Math.max(55,Math.floor((elemento.clientWidth-64)/Math.max(1,itens.length))-14),overflow:'truncate',interval:0,fontSize:11,formatter:(valor,index)=>(primeiraOrdem+index)+' · '+valor},axisTick:{show:false}};
-   return {...comum,grid:{left:4,right:horizontal?48:14,top:25,bottom:54,containLabel:true},legend:{bottom:0,textStyle:{color:texto}},xAxis:horizontal?numerico:categoria,yAxis:horizontal?categoria:numerico,series:[{name:'Média',type:'bar',barMaxWidth:17,data:itens.map(i=>i.media_pct),itemStyle:{borderRadius:horizontal?[0,4,4,0]:[4,4,0,0]},label:{show:true,position:horizontal?'right':'top',formatter:p=>percentual(p.value),color:texto}},{name:'Mediana',type:'bar',barMaxWidth:17,data:itens.map(i=>i.mediana_pct),itemStyle:{borderRadius:horizontal?[0,4,4,0]:[4,4,0,0]},label:{show:true,position:horizontal?'right':'top',formatter:p=>percentual(p.value),color:texto}}]};
+   return {...comum,grid:{left:4,right:horizontal?48:14,top:25,bottom:54,containLabel:true},legend:{bottom:0,textStyle:{color:texto}},xAxis:horizontal?numerico:categoria,yAxis:horizontal?categoria:numerico,series:[{name:'Média',type:'bar',barMaxWidth:17,labelLayout:{hideOverlap:true},data:itens.map(i=>i.media_pct),itemStyle:{borderRadius:horizontal?[0,4,4,0]:[4,4,0,0]},label:{show:true,position:horizontal?'right':'top',padding:[0,3],formatter:p=>percentual(p.value),color:texto}},{name:'Mediana',type:'bar',barMaxWidth:17,labelLayout:{hideOverlap:true},data:itens.map(i=>i.mediana_pct),itemStyle:{borderRadius:horizontal?[0,4,4,0]:[4,4,0,0]},label:{show:true,position:horizontal?'right':'top',padding:[0,3],formatter:p=>percentual(p.value),color:texto}}]};
   }
   if(tipo==='situacoes'){
    const s=dados.situacoes||{};if(!(s.total>0))return null;
