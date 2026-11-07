@@ -177,3 +177,7 @@ Catálogo proposto é referência inicial, não definição obrigatória e compl
 ### Complemento: tempo do fato e tempo do registro
 
 Cada fato histórico deve distinguir ocorrido_em (quando ocorreu pedagogicamente) de registrado_em (quando entrou no sistema), além da versão e autoria. O pacote de corte inclui os fatos aprovados conhecidos naquela versão; lançamento tardio de um fato anterior ao corte gera retificação/delta, não mudança invisível do recibo finalizado. Nomes/disciplinas/turma do contexto histórico são preservados como snapshots mínimos, de modo que uma alteração cadastral atual não reescreva automaticamente documentos antigos.
+
+### Integração com painéis em 07/11/2026
+
+[Plano177](177-plano-paineis-turmas.md) amplia MT1 quanto à elegibilidade por aplicação (P1.4.6/P3.3.5/P4.4) e consome períodos letivos sem confundir enturmação, classificação DC1 e calendário. [Acompanhamento179](179-execucao-paineis-turmas.md) preserva os pacotes deste plano; nenhum modelo de participação equivale a presença ou a conclusão de MT1. As demais pendências CP2/ID1/VI1/TR1/TE1/PA1/L4/T6 continuam no quadro176.

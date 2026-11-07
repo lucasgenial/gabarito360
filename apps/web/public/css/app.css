@@ -1558,3 +1558,29 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .turma-imagem-edicao{display:flex;align-items:center;gap:16px;margin-block:12px 20px}
 .turma-imagem-edicao .imagem-perfil-abrir{margin:0;flex:0 0 auto}
 .turma-imagem-edicao>div{min-width:0}
+
+/* Painéis P2: coleções reais e modelos estáticos autorizados, sem skeleton permanente. */
+.paineis-turmas-colecao{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:16px}
+.painel-turma-registro{display:flex;flex-direction:column;gap:16px;min-width:0}
+.painel-turma-identidade{display:flex;align-items:center;gap:12px;min-width:0}
+.painel-turma-identidade h2{margin:0;font-size:18px;overflow-wrap:anywhere}
+.painel-turma-identidade p,.painel-turma-escola{margin:0;overflow-wrap:anywhere}
+.painel-turma-escola{color:var(--muted);font-size:14px}
+.painel-turma-dados{display:flex;gap:24px;margin:0}
+.painel-turma-dados dt{color:var(--muted);font-size:13px}
+.painel-turma-dados dd{margin:4px 0 0;font-weight:600}
+.painel-turma-rodape{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;flex-wrap:wrap}
+.paineis-planejamento{margin-block:24px}
+.paineis-planejamento>h2{font-size:18px;margin:0 0 16px}
+.paineis-modelos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.painel-modelo{min-width:0}
+.painel-modelo-cabecalho{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.painel-modelo-cabecalho h3{font-size:16px;margin:0}
+.painel-modelo-corpo{display:flex;align-items:center;gap:16px;margin-top:20px}
+.painel-modelo-corpo p{margin:0;color:var(--muted);max-width:65ch}
+.painel-modelo-icone{display:grid;place-items:center;flex:0 0 48px;height:48px;border-radius:var(--radius-md);background:var(--bg);color:var(--accent)}
+.painel-modelo-icone svg{width:28px;height:28px}
+@media(max-width:600px){.paineis-modelos{grid-template-columns:minmax(0,1fr)}.painel-modelo-corpo{gap:12px}.paineis-turmas-colecao{grid-template-columns:minmax(0,1fr)}}
+@media print{.paineis-planejamento{display:none!important}}
+.paineis-tabela-alternativa>summary{cursor:pointer;color:var(--accent);min-height:44px;padding-block:12px;font-weight:600}
+.paineis-tabela-alternativa[open]+.paineis-turmas-colecao{display:none}

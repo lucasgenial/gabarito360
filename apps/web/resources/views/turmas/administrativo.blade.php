@@ -12,7 +12,7 @@
 </x-pagina>
 @if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
-@php($secoes=['visao-geral'=>'Visão geral','alunos'=>'Alunos'])
+@php($secoes=['visao-geral'=>'Visão geral'] + (\App\Support\Acesso::pode('aluno.ver')?['alunos'=>'Alunos']:[]))
 @include('turmas._abas')
 <section id="visao-geral" data-turma-painel="visao-geral" class="tu1-painel" aria-label="Visão geral">
 <section class="card card-pad">
@@ -23,6 +23,7 @@
   <x-arquivamento tipo="turmas" :registro="$turma" />
   @endif
 </section>
+@include('turmas._modelos', ['paginaModelos'=>'turma'])
 </section>
 <section id="alunos" data-turma-painel="alunos" class="tu1-painel" aria-label="Alunos">
 @include('turmas._alunos')
