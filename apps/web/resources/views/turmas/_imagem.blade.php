@@ -3,7 +3,7 @@ $imagemInicial=['avatar_id'=>$turma['avatar_id']??null,'tem_foto'=>(bool)($turma
 @endphp
 <dialog id="imagem-turma-modal" class="troca-contexto-modal imagem-modal" aria-labelledby="imagem-turma-titulo" aria-describedby="imagem-turma-orientacao">
  <div class="troca-contexto-cabecalho"><h2 id="imagem-turma-titulo">Imagem da turma</h2><button class="btn btn-secondary" id="imagem-turma-fechar" type="button" aria-label="Fechar imagem da turma">Fechar</button></div>
- <p id="imagem-turma-orientacao">Escolha um brasão ou uma foto para identificar esta turma. Salve para confirmar.</p>
+ <p id="imagem-turma-orientacao">Escolha um brasão ou uma foto para identificar esta turma. Salve para confirmar.@if($imagemTurmaEdicao??false) A imagem é salva separadamente dos demais dados da turma.@endif</p>
  <p id="imagem-turma-erro" class="field-error" role="alert" tabindex="-1" hidden></p>
  <p id="imagem-turma-sucesso" role="status" hidden></p>
  <div id="imagem-turma-preview" class="imagem-modal-preview" aria-label="Prévia da imagem"></div>

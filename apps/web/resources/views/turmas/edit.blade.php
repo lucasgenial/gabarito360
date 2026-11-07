@@ -8,7 +8,15 @@
 <x-pagina titulo="Editar turma"><x-slot:sub>{{ $turma['nome'] }} · {{ $turma['escola_nome'] ?? 'Meu espaço' }}</x-slot:sub></x-pagina>
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 @if($errors->any())<x-aviso tipo="erro"><ul>@foreach($errors->all() as $erro)<li>{{ $erro }}</li>@endforeach</ul></x-aviso>@endif
-<form data-formulario-validado class="card card-pad formulario-escolar" method="POST" action="{{ route('turmas.update',$turma['id']) }}">
+<div class="card card-pad formulario-escolar">
+<section class="tu1-grupo" aria-labelledby="turma-imagem-titulo">
+<h2 id="turma-imagem-titulo">Imagem da turma</h2>
+<div class="turma-imagem-edicao">
+<button type="button" class="imagem-perfil-abrir" data-abrir-imagem-turma aria-label="Alterar imagem da turma"><x-avatar-turma :turma="$turma" tamanho="lg" /></button>
+<div><button type="button" class="btn btn-secondary" data-abrir-imagem-turma><x-icone nome="editar" /> Alterar imagem</button><p class="field-help">Escolha um brasão ou uma foto. A imagem é salva separadamente.</p><p role="status" data-imagem-turma-confirmacao hidden></p></div>
+</div>
+</section>
+<form data-formulario-validado method="POST" action="{{ route('turmas.update',$turma['id']) }}">
 @csrf <x-revisao-acesso /> @method('PUT')
 <fieldset class="tu1-grupo"><legend>Identificação da turma</legend><div class="form-row-2">
 <div class="field"><label for="nome">Nome da turma *</label><input class="input" id="nome" name="nome" required maxlength="50" value="{{ old('nome',$turma['nome']) }}" @error('nome') aria-invalid="true" aria-describedby="erro-nome" @enderror ><x-erro-campo nome="nome" /></div>
@@ -25,6 +33,8 @@
 
 <div class="form-actions"><a class="btn btn-secondary" href="{{ route('turmas.show',$turma['id']) }}"><x-icone nome="fechar" /> Cancelar</a><button class="btn btn-primary" type="submit"><x-icone nome="salvar" /> Salvar alterações</button></div>
 </form>
+</div>
+@include('turmas._imagem',['imagemTurmaEdicao'=>true])
 @endsection
 
 @push('scripts')<script src="{{ asset('js/formulario-erros.js') }}" defer></script>@endpush
