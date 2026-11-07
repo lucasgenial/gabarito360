@@ -30,7 +30,7 @@
       @if($aluno['turma_nome'] ?? null) · Turma {{ $aluno['turma_nome'] }}@endif
     </p>
     <ul class="info-list">
-      <li><b>Status:</b> {{ $aluno['ativo'] ? 'Ativo' : 'Inativo' }}</li>
+      <li><b>Status:</b> {{ $aluno['ativo'] ? 'Em uso' : 'Cadastro arquivado' }}</li>
       <li><b>Matrícula:</b> {{ $aluno['matricula'] }}</li>
       @if($aluno['data_nascimento'] ?? null)
         <li><b>Nascimento:</b> {{ \Carbon\Carbon::parse($aluno['data_nascimento'])->format('d/m/Y') }}</li>
@@ -43,14 +43,7 @@
   <div style="display:flex;gap:10px;flex-wrap:wrap;">
     @pode('resultado.ver')<a class="btn btn-primary" href="{{ route('relatorios.aluno', $aluno['id']) }}"><x-icone nome="prova" /> Boletim</a>@endpode
     @pode('aluno.gerir')<button class="btn btn-secondary" onclick="abrirModal()">Editar dados</button>@endpode
-    @pode('aluno.desativar')<form method="POST" action="{{ route('alunos.toggle', $aluno['id']) }}"
-          onsubmit="return confirm('{{ $aluno['ativo'] ? 'Desativar' : 'Ativar' }} este aluno?')">
-      @csrf <x-revisao-acesso />
-      <button type="submit" class="btn btn-ghost"
-              style="color:{{ $aluno['ativo'] ? 'var(--danger)' : 'var(--success)' }};{{ $aluno['ativo'] ? 'border-color:var(--danger);' : '' }}">
-        {{ $aluno['ativo'] ? 'Desativar' : 'Ativar' }}
-      </button>
-    </form>@endpode
+    @pode('aluno.desativar')<x-arquivamento tipo="alunos" :registro="$aluno" />@endpode
   </div>
 </div>
 
@@ -70,7 +63,7 @@
       @if($aluno['ativo'])
         <span style="color:var(--success);">Ativo</span>
       @else
-        <span style="color:var(--danger);">Inativo</span>
+        <span style="color:var(--danger);">Cadastro arquivado</span>
       @endif
     </div>
     <div style="font-size:13px;color:var(--muted);margin-top:4px;">Status</div>

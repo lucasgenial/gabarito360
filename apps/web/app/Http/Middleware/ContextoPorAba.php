@@ -63,10 +63,10 @@ class ContextoPorAba
                 'painel', 'perfil', 'perfil.update', 'perfil.senha', 'perfil.email', 'perfil.imagem', 'perfil.foto' => null,
                 'turmas.index', 'turmas.show' => 'turma.ver',
                 'turmas.store', 'turmas.update', 'turmas.edit' => 'turma.gerir',
-                'turmas.toggle' => 'turma.desativar',
+                'turmas.toggle', 'turmas.arquivamento' => 'turma.desativar',
                 'alunos.index', 'alunos.show', 'alunos.foto' => 'aluno.ver',
                 'alunos.create', 'alunos.store', 'alunos.update', 'alunos.imagem', 'alunos.edit', 'alunos.transferencia', 'alunos.transferir' => 'aluno.gerir',
-                'alunos.toggle' => 'aluno.desativar',
+                'alunos.toggle', 'alunos.arquivamento' => 'aluno.desativar',
                 default => false,
             };
             abort_unless($permissao === null || ($permissao !== false && in_array($permissao, $dados['permissoes'], true)), 403);

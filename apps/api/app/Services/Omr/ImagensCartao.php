@@ -147,12 +147,12 @@ class ImagensCartao
     }
 
     /** Emissão individual; consumidores de coleções devem usar urlsDaProva. */
-    public function url(int $cartaoId, string $tipo, ?Usuario $ator = null): string
+    public function url(int $cartaoId, string $tipo, ?Usuario $ator = null,bool $historico=false): string
     {
         abort_if($cartaoId < 1 || !in_array($tipo, self::TIPOS, true), 404);
         if (Espacos::ativo()) {
             abort_unless($ator && $ator->ativo && $ator->perfil !== 'aplicador' && Permissao::pode($ator, 'correcao.acompanhar'), 404);
-            $cartao = ContextoCorrecao::cartoes($ator)->findOrFail($cartaoId);
+            $cartao = ContextoCorrecao::cartoes($ator,$historico)->findOrFail($cartaoId);
             abort_unless(ContextoCorrecao::cartaoValido($cartao), 404);
         }
         return URL::route('cartoes.imagem-autenticada', ['id'=>$cartaoId,'tipo'=>$tipo], false);

@@ -224,6 +224,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/',           [AlunoController::class, 'store'])->middleware('permissao:aluno.gerir');
             Route::get('{id}',         [AlunoController::class, 'show'])->middleware('permissao:aluno.ver');
             Route::put('{id}',         [AlunoController::class, 'update'])->middleware('permissao:aluno.gerir');
+            Route::put('{id}/arquivamento', [\App\Http\Controllers\Api\ArquivamentoCadastroController::class,'aluno'])->middleware('permissao:aluno.desativar');
             Route::post('{id}/toggle', [AlunoController::class, 'toggle'])->middleware('permissao:aluno.desativar');
             Route::post('{id}/transferencias-turma', [AlunoController::class, 'transferir'])->middleware('permissao:aluno.gerir');
             // Resultado individual (MP-022)
@@ -252,6 +253,7 @@ Route::prefix('v1')->group(function () {
             Route::get('{id}/painel/pdf', [\App\Http\Controllers\Api\PainelTurmaController::class,'pdf'])->middleware(['permissao:relatorio.turma','throttle:painel-turma-pdf']);
             Route::get('{id}',         [TurmaController::class, 'show'])->middleware('permissao:turma.ver');
             Route::put('{id}',         [TurmaController::class, 'update'])->middleware('permissao:turma.gerir');
+            Route::put('{id}/arquivamento', [\App\Http\Controllers\Api\ArquivamentoCadastroController::class,'turma'])->middleware('permissao:turma.desativar');
             Route::post('{id}/toggle', [TurmaController::class, 'toggle'])->middleware('permissao:turma.desativar');
             // Vínculos professor ↔ turma (MP-018)
             Route::get('{id}/correcao',                   [AcompanhamentoTurmaController::class, 'show'])->middleware('permissao:correcao.acompanhar');

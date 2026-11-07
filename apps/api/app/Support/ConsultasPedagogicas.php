@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 /** Consultas de leitura com ator explícito; não guarda contexto entre requisições/jobs. */
 class ConsultasPedagogicas
 {
-    public function __construct(public readonly Usuario $ator) {}
+    public function __construct(public readonly Usuario $ator,public readonly bool $historico=false) {}
 
     public function escolasIds(): ?array
     {
@@ -51,7 +51,7 @@ class ConsultasPedagogicas
                 return Espacos::agregadoEscolar($q, 'alunos')->whereIn('alunos.turma_id', $this->tabela('turmas')->select('turmas.id'))
                     ->when($this->ator->perfil === 'aluno', fn ($q) => $q->whereIn('alunos.id', Instituicoes::referencias($this->ator, 'aluno')));
             case 'provas':
-                if (!in_array($this->ator->perfil, ['aluno', 'secretario_educacao'], true)) return $q->whereIn('provas.id', Escopo::provas($this->ator)->select('provas.id'));
+                if (!in_array($this->ator->perfil, ['aluno', 'secretario_educacao'], true)) return $q->whereIn('provas.id', ($this->historico?Escopo::provasHistoricas($this->ator):Escopo::provas($this->ator))->select('provas.id'));
                 $q = Espacos::agregadoEscolar($q, 'provas')->whereIn('provas.escola_id', $this->escolasIds() ?? []);
                 if ($this->ator->perfil === 'aluno') $q->whereExists(fn ($p) => $p->selectRaw('1')->from('prova_turmas as pt')
                     ->whereColumn('pt.prova_id', 'provas.id')->whereColumn('pt.espaco_id', 'provas.espaco_id')

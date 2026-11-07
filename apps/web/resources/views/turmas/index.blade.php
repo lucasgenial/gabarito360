@@ -102,9 +102,9 @@
           <td style="font-family:var(--font-mono);" data-rotulo="Ano letivo"><div class="tabela-valor">{{ $t['ano_letivo'] }}</div></td>
           <td data-rotulo="Status"><div class="tabela-valor">
             @if($t['ativo'])
-              <span class="badge badge-success badge-dot">Ativa</span>
+              <span class="badge badge-success badge-dot">Em uso</span>
             @else
-              <span class="badge badge-danger badge-dot">Inativa</span>
+              <span class="badge badge-danger badge-dot">Arquivada</span>
             @endif
           </div></td>
           <td style="text-align:right;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
