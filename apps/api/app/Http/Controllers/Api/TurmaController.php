@@ -7,6 +7,7 @@ use App\Support\Escopo;
 use App\Support\Espacos;
 use App\Support\EspacoPessoal;
 use App\Support\ConsultasPedagogicas;
+use App\Support\{Permissao,PerfisEscolares};
 use App\Http\Responses\ApiResponse;
 use App\Models\Turma;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +19,7 @@ class TurmaController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $conteudos = $this->conteudos($request);
         $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $ids   = Escopo::turmaIds($request->user());
         $query = Escopo::turmas($request->user());
@@ -43,14 +45,14 @@ class TurmaController extends Controller
 
         $lista = $query->with('escola:id,nome,nucleo_id')->orderBy('nome')->get();
         $versoes = app(\App\Services\ArquivamentoCadastro::class)->versoes('turma',$lista->modelKeys());
-        $turmas = $lista->map(function (Turma $t) use ($consulta, $request, $versoes) {
+        $turmas = $lista->map(function (Turma $t) use ($consulta, $request, $versoes, $conteudos) {
                 $t->setAttribute('arquivamento',app(\App\Services\ArquivamentoCadastro::class)->estado($t,$versoes[$t->id]??0));
                 $totalAlunos = $consulta->tabela('alunos')
                     ->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))
                     ->where('ativo', true)
                     ->count();
 
-                if (\App\Support\PerfisEscolares::administrativo($request->user()->perfil)) return array_merge($t->toArray(), [
+                if (!$conteudos['agregado']) return array_merge($t->toArray(), [
                     'total_alunos' => $totalAlunos, 'escola_nome' => $t->escola?->nome,
                 ]);
 
@@ -112,6 +114,7 @@ class TurmaController extends Controller
 
     public function show(Request $request, int $id): JsonResponse
     {
+        $conteudos = $this->conteudos($request);
         $consulta = new ConsultasPedagogicas($request->user(),historico:true);
         $query = Escopo::turmas($request->user())->with('escola:id,nome,nucleo_id');
 
@@ -122,72 +125,83 @@ class TurmaController extends Controller
         }
 
         $turma->setAttribute('arquivamento',app(\App\Services\ArquivamentoCadastro::class)->estado($turma));
-        if (\App\Support\PerfisEscolares::administrativo($request->user()->perfil)) {
-            $alunos = $consulta->tabela('alunos')->where('turma_id', $id)->where('espaco_id', $turma->espaco_id)
-                ->orderBy('nome')->get(['id', 'nome', 'avatar_id', 'imagem_versao', 'foto_path', 'matricula', 'ativo'])->map(function($a){$a->tem_foto=!empty($a->foto_path);unset($a->foto_path);return $a;});
-            $this->estadosDosAlunos($alunos);
-            return ApiResponse::success(array_merge($turma->toArray(), [
-                'escola_nome' => $turma->escola?->nome, 'total_alunos' => $alunos->where('ativo', true)->count(), 'alunos' => $alunos,
-            ]));
-        }
-
-        $alunos = $consulta->tabela('alunos')
-            ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id))
-            ->orderBy('nome')
-            ->select('id', 'nome', 'avatar_id', 'imagem_versao', 'foto_path', 'matricula', 'data_nascimento', 'ativo')
-            ->get();
+        $cadastros = $consulta->tabela('alunos')
+            ->where('turma_id', $id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id));
+        $campos = ['id', 'nome', 'avatar_id', 'imagem_versao', 'foto_path', 'matricula'];
+        if (!$conteudos['administrativo']) $campos[] = 'data_nascimento';
+        $campos[] = 'ativo';
+        $alunos = $conteudos['nominal'] ? (clone $cadastros)->orderBy('nome')->get($campos) : collect();
+        $totalAlunos = $conteudos['nominal'] ? $alunos->where('ativo', true)->count() : (clone $cadastros)->where('ativo', true)->count();
 
         $this->estadosDosAlunos($alunos);
         // Construir o mesmo escopo completo uma vez por requisição. Os clones mantêm
         // todos os filtros de integridade/autorização, inclusive o histórico do aluno.
-        $notas = $consulta->tabela('notas')
-            ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id));
-        $porAluno = $alunos->isEmpty() ? collect() : (clone $notas)
+        $notas = $conteudos['agregado'] ? $consulta->tabela('notas')
+            ->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $turma->espaco_id)) : null;
+        $porAluno = !$conteudos['resultados'] || $alunos->isEmpty() ? collect() : (clone $notas)
             ->whereIn('aluno_id', $alunos->pluck('id'))
             ->select('aluno_id')->selectRaw('AVG(nota_final) as media_geral, COUNT(*) as total_provas')
             ->groupBy('aluno_id')->get()->keyBy('aluno_id');
-        $alunos->transform(function ($a) use ($porAluno) {
+        $alunos->transform(function ($a) use ($porAluno, $conteudos) {
             $a->tem_foto = !empty($a->foto_path); unset($a->foto_path);
-            $agregado = $porAluno->get($a->id);
-            $a->media_geral = $agregado?->media_geral !== null ? round((float) $agregado->media_geral, 1) : null;
-            $a->total_provas = (int) ($agregado?->total_provas ?? 0);
+            if ($conteudos['resultados']) {
+                $agregado = $porAluno->get($a->id);
+                $a->media_geral = $agregado?->media_geral !== null ? round((float) $agregado->media_geral, 1) : null;
+                $a->total_provas = (int) ($agregado?->total_provas ?? 0);
+            }
             return $a;
         });
-        $totalAlunos = $alunos->where('ativo', true)->count();
         // AVG continua no banco: não recompor a média usando médias arredondadas.
-        $mediaTurma = (clone $notas)->where('turma_id', $id)->avg('nota_final');
+        $mediaTurma = $conteudos['agregado'] ? (clone $notas)->where('turma_id', $id)->avg('nota_final') : null;
 
-        $provas = $consulta->tabela('prova_turmas')
+        $provas = $conteudos['provas'] ? $consulta->tabela('prova_turmas')
             ->joinSub($consulta->tabela('provas'), 'provas', 'prova_turmas.prova_id', '=', 'provas.id')
             ->where('prova_turmas.turma_id', $id)
             ->when(Espacos::ativo(), fn ($q) => $q->where('prova_turmas.espaco_id', $turma->espaco_id)->whereColumn('provas.espaco_id', 'prova_turmas.espaco_id'))
             ->orderByDesc('provas.data_aplicacao')
             ->select('provas.id', 'provas.titulo', 'provas.disciplina', 'provas.status', 'provas.data_aplicacao')
-            ->get();
-        $porProva = $provas->isEmpty() ? collect() : (clone $notas)
+            ->get() : collect();
+        $porProva = !$conteudos['agregado'] || $provas->isEmpty() ? collect() : (clone $notas)
             ->where('turma_id', $id)->whereIn('prova_id', $provas->pluck('id'))
             ->select('prova_id')->selectRaw('AVG(nota_final) as media')
             ->groupBy('prova_id')->get()->keyBy('prova_id');
-        $provas = $provas->map(function ($p) use ($porProva) {
+        $provas = $provas->map(function ($p) use ($porProva, $conteudos) {
             $media = $porProva->get($p->id)?->media;
-            return [
+            $dados = [
                 'id'             => $p->id,
                 'titulo'         => $p->titulo,
                 'disciplina'     => $p->disciplina,
                 'data_aplicacao' => $p->data_aplicacao,
-                'media'          => $media !== null ? round((float) $media, 1) : null,
-                'status'         => $p->status,
             ];
+            if ($conteudos['agregado']) $dados['media'] = $media !== null ? round((float) $media, 1) : null;
+            $dados['status'] = $p->status;
+            return $dados;
         });
 
-        return ApiResponse::success(array_merge($turma->toArray(), [
+        if ($conteudos['administrativo']) return ApiResponse::success(array_merge($turma->toArray(), [
+            'escola_nome'=>$turma->escola?->nome,'total_alunos'=>$totalAlunos,'alunos'=>$alunos,
+        ]));
+        $dados = array_merge($turma->toArray(), [
             'total_alunos'  => $totalAlunos,
             'escola_nome'   => $turma->escola?->nome,
-            'media_turma'   => $mediaTurma !== null ? round((float) $mediaTurma, 1) : null,
-            'total_provas'  => $provas->count(),
-            'alunos'        => $alunos,
-            'provas'        => $provas,
-        ]));
+        ]);
+        if ($conteudos['agregado']) $dados['media_turma'] = $mediaTurma !== null ? round((float) $mediaTurma, 1) : null;
+        if ($conteudos['provas']) $dados['total_provas'] = $provas->count();
+        $dados['alunos'] = $alunos;
+        $dados['provas'] = $provas;
+        return ApiResponse::success($dados);
+    }
+
+    /** Permissão de cadastro não concede agregados, resultados nominais ou provas. Sem cache entre requisições. */
+    private function conteudos(Request $request): array
+    {
+        $administrativo = PerfisEscolares::administrativo($request->user()->perfil);
+        $permissoes = Permissao::efetivas($request->user());
+        $nominal = in_array('aluno.ver',$permissoes,true);
+        $agregado = !$administrativo && in_array('relatorio.turma',$permissoes,true);
+        return ['administrativo'=>$administrativo,'nominal'=>$nominal,'agregado'=>$agregado,
+            'resultados'=>$agregado && $nominal && in_array('resultado.ver',$permissoes,true),
+            'provas'=>!$administrativo && in_array('prova.ver',$permissoes,true)];
     }
 
     private function estadosDosAlunos(\Illuminate\Support\Collection $alunos): void
