@@ -23,7 +23,7 @@ class PaineisTurmasWebTest extends TestCase
             $path=parse_url($r->url(),PHP_URL_PATH);
             if($path==='/api/v1/auth/me')return Http::response(['data'=>$me]);
             if($path==='/api/v1/turmas/14')return Http::response(['data'=>['id'=>14,'nome'=>'Turma fictícia','serie'=>'3ª série','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'total_alunos'=>3,
-                'alunos'=>[['id'=>8,'nome'=>'Nome nominal fictício','matricula'=>'FICTICIA','ativo'=>true]],'provas'=>[]]]);
+                'alunos'=>[['id'=>8,'nome'=>'Nome nominal fictício','matricula'=>'FICTICIA','ativo'=>true]],'provas'=>[['id'=>22,'titulo'=>'Prova fictícia','disciplina'=>'Matemática','data_aplicacao'=>null,'status'=>'corrigida']]]]);
             if($path==='/api/v1/turmas')return Http::response(['data'=>['turmas'=>[['id'=>14,'nome'=>'Turma <fictícia>','serie'=>'3ª série','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'total_alunos'=>$total,'avatar_id'=>1,'media_turma'=>987.6]],'kpis'=>['total_alunos'=>999]]],$status);
             return Http::response(['data'=>[]]);
         });
@@ -68,5 +68,14 @@ class PaineisTurmasWebTest extends TestCase
         $this->preparar('professor',3,200,['turma.ver','aluno.ver']);
         $this->consultarTela('/app/turmas/14')->assertOk()->assertSee('Nome nominal fictício')
             ->assertDontSee('Média geral')->assertDontSee('data-rotulo="Provas"',false);
+    }
+    public function test_relatorio_da_prova_tem_gate_distinto_da_media_consolidada(): void
+    {
+        $this->preparar('professor',3,200,['turma.ver','prova.ver','relatorio.turma']);
+        $r=$this->consultarTela('/app/turmas/14')->assertOk()->assertSee('data-rotulo="Média"',false);
+        $doc=new \DOMDocument();@$doc->loadHTML($r->getContent());
+        $this->assertSame(0,(new \DOMXPath($doc))->query('//a[normalize-space(.)="Relatório"]')->length);
+        $this->preparar('professor',3,200,['turma.ver','prova.ver','relatorio.prova']);
+        $this->consultarTela('/app/turmas/14')->assertOk()->assertDontSee('data-rotulo="Média"',false)->assertDestinoRecurso('relatorios.turmaProva',['turmaId'=>14,'provaId'=>22]);
     }
 }

@@ -43,7 +43,7 @@
           <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
             @if($p['status'] === 'em_correcao' && \App\Support\Acesso::pode('correcao.acompanhar'))
               <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="grafico" /> Acompanhar</a>
-            @elseif($p['status'] === 'corrigida' && \App\Support\Acesso::pode('relatorio.turma'))
+            @elseif($p['status'] === 'corrigida' && \App\Support\Acesso::pode('relatorio.prova'))
               <a href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}" class="btn btn-sm btn-secondary"><x-icone nome="pdf" /> Relatório</a>
             @else
               <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver</a>
