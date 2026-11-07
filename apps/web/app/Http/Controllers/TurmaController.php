@@ -269,6 +269,28 @@ class TurmaController extends Controller
         return back()->with('sucesso',$resp->json('data.arquivado')?'O registro foi arquivado. O histórico foi preservado.':'O registro foi desarquivado.');
     }
 
+    public function imagem(Request $r,int $id)
+    {
+        abort_unless(\App\Support\Acesso::pode('turma.gerir'),403);
+        $r->validate(['tipo'=>'required|in:avatar,foto','avatar_id'=>'nullable|integer|between:1,36','foto'=>'required_if:tipo,foto|file|image|mimes:jpg,jpeg,png,webp|max:2048|dimensions:max_width=4096,max_height=4096']);
+        try{$resp=$r->input('tipo')==='foto'?$this->api->postFile('/v1/turmas/'.$id.'/imagem','foto',$r->file('foto'),['tipo'=>'foto']):$this->api->post('/v1/turmas/'.$id.'/imagem',$r->only('tipo','avatar_id'));}
+        catch(ConnectionException){return response()->json(['message'=>'Não foi possível confirmar a atualização. Atualize a página para conferir.'],503);}
+        if($resp->status()===401)return \App\Support\SessaoWeb::encerrar($r);
+        if($resp->status()===429){$segundos=max(1,min(60,(int)$resp->header('Retry-After')?:60));return response()->json(['message'=>'Muitas tentativas seguidas. Aguarde alguns instantes.'],429)->header('Retry-After',(string)$segundos);}
+        if(!$resp->successful())return response()->json(['message'=>$resp->json('message')??'Não foi possível salvar a imagem.'],$resp->status()>=500?503:($resp->status()===403?403:($resp->status()===404?404:422)));
+        $d=$resp->json('data');
+        if(!is_array($d)||!is_bool($d['tem_foto']??null)||!is_int($d['imagem_versao']??null)||$d['imagem_versao']<1||!array_key_exists('avatar_id',$d)||($d['avatar_id']!==null&&(!is_int($d['avatar_id'])||$d['avatar_id']<1||$d['avatar_id']>36)))return response()->json(['message'=>'Não foi possível confirmar a imagem. Atualize a página para conferir.'],502);
+        $d=array_intersect_key($d,array_flip(['avatar_id','tem_foto','imagem_versao']));$d['foto_url']=\App\Support\NavegacaoWeb::destino('turmas.foto',['id'=>$id,'v'=>$d['imagem_versao']]);
+        return response()->json(['data'=>$d]);
+    }
+    public function foto(int $id)
+    {
+        abort_unless(\App\Support\Acesso::pode('turma.ver'),403);$r=$this->api->getArquivo('/v1/turmas/'.$id.'/foto');
+        if($r->status()===401)return \App\Support\SessaoWeb::encerrar(request());
+        abort_unless($r->successful()&&str_contains(strtolower((string)$r->header('Content-Type')),'image/webp'),$r->status()===403?403:404);
+        return response($r->body(),200,['Content-Type'=>'image/webp','Cache-Control'=>'private, no-store','X-Content-Type-Options'=>'nosniff']);
+    }
+
     public function toggle(int $id)
     {
         $resp = $this->api->post("/v1/turmas/{$id}/toggle");

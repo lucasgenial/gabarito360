@@ -234,6 +234,8 @@ $rotasContextuais = static function () {
     Route::get('/turmas/{id}/editar',                  [TurmaController::class, 'edit'])->name('turmas.edit');
     Route::get('/turmas/{id}',                         [TurmaController::class, 'show'])->name('turmas.show');
     Route::put('/turmas/{id}',                         [TurmaController::class, 'update'])->name('turmas.update');
+    Route::post('/turmas/{id}/imagem', [TurmaController::class, 'imagem'])->name('turmas.imagem');
+    Route::get('/turmas/{id}/foto', [TurmaController::class, 'foto'])->name('turmas.foto');
     Route::put('/turmas/{id}/arquivamento', [TurmaController::class, 'arquivamento'])->name('turmas.arquivamento');
     Route::post('/turmas/{id}/toggle',                 [TurmaController::class, 'toggle'])->name('turmas.toggle');
     Route::post('/turmas/{id}/professores',            [TurmaController::class, 'vincularProfessor'])->name('turmas.professores.store');
