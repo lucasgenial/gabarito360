@@ -249,7 +249,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/',            [TurmaController::class, 'index'])->middleware('permissao:turma.ver');
             Route::post('/',           [TurmaController::class, 'store'])->middleware('permissao:turma.gerir');
             Route::get('{id}/painel', [\App\Http\Controllers\Api\PainelTurmaController::class,'show'])->middleware('permissao:relatorio.turma');
-            Route::get('{id}/painel/pdf', [\App\Http\Controllers\Api\PainelTurmaController::class,'pdf'])->middleware(['permissao:relatorio.turma','throttle:5,1']);
+            Route::get('{id}/painel/pdf', [\App\Http\Controllers\Api\PainelTurmaController::class,'pdf'])->middleware(['permissao:relatorio.turma','throttle:painel-turma-pdf']);
             Route::get('{id}',         [TurmaController::class, 'show'])->middleware('permissao:turma.ver');
             Route::put('{id}',         [TurmaController::class, 'update'])->middleware('permissao:turma.gerir');
             Route::post('{id}/toggle', [TurmaController::class, 'toggle'])->middleware('permissao:turma.desativar');
