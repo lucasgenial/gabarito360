@@ -35,7 +35,11 @@ class PaineisTurmasWebTest extends TestCase
         $r=$this->consultarTela('/app/turmas')->assertOk()->assertSee('Turma &lt;fictícia&gt;',false)
             ->assertSee('Cadastros ativos')->assertSee('data-apresentacao="tabela"',false)
             ->assertSee('data-ordenar="texto"',false)->assertSee('data-lista-modo="cards"',false)
-            ->assertSee('data-widget-id="comparacao-turmas"',false)->assertDontSee('987,6')->assertDontSee('999');
+            ->assertSee('data-widget-id="comparacao-turmas"',false)->assertDontSee('987,6');
+        $dom=new \DOMDocument();@$dom->loadHTML($r->getContent());
+        $cadastros=(new \DOMXPath($dom))->query('//*[@data-widget-id="kpi-cadastros"]//strong')->item(0);
+        $this->assertNotNull($cadastros);
+        $this->assertSame('3',trim($cadastros->textContent),'O KPI deve usar a coleção autorizada, não o total legado999.');
         $this->assertStringNotContainsString('Turma <fictícia>',$r->getContent());
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'agenda')||str_contains($r->url(),'habilidades'));
     }
