@@ -40,14 +40,11 @@
 })();
 
 (function(){
- const raiz=document.querySelector('[data-painel-alunos]');if(!raiz)return;
- raiz.querySelectorAll('[data-alunos-visao]').forEach(b=>b.addEventListener('click',()=>{
-  raiz.querySelectorAll('[data-alunos-visao]').forEach(i=>i.setAttribute('aria-pressed',String(i===b)));
-  raiz.querySelectorAll('[data-alunos-lista]').forEach(s=>s.hidden=s.dataset.alunosLista!==b.dataset.alunosVisao);
- }));
- raiz.querySelectorAll('[data-alunos-expandir]').forEach(b=>b.addEventListener('click',()=>{
-  const aberto=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!aberto));
-  b.closest('section').querySelectorAll('[data-alunos-item]').forEach((e,i)=>e.hidden=aberto&&i>=5);
-  if(!b.dataset.rotulo)b.dataset.rotulo=b.textContent;b.textContent=aberto?b.dataset.rotulo:'Mostrar cinco';
- }));
+ document.querySelectorAll('[data-painel-alunos]').forEach(raiz=>{
+  raiz.querySelectorAll('[data-alunos-expandir]').forEach(b=>b.addEventListener('click',()=>{
+   const aberto=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!aberto));
+   raiz.querySelectorAll('[data-alunos-item]').forEach((e,i)=>e.hidden=aberto&&i>=5);
+   if(!b.dataset.rotulo)b.dataset.rotulo=b.textContent;b.textContent=aberto?b.dataset.rotulo:'Mostrar cinco';
+  }));
+ });
 })();

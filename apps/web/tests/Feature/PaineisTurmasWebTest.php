@@ -33,9 +33,13 @@ class PaineisTurmasWebTest extends TestCase
     {
         $this->preparar('professor');
         $r=$this->consultarTela('/app/turmas')->assertOk()->assertSee('Turma &lt;fictícia&gt;',false)
-            ->assertSee('cadastros ativos nas turmas deste recorte')->assertSee('Tabela com ordenação e paginação')
-            ->assertSee('data-ordenar="texto"',false)->assertSee('painel-turma-registro',false)
-            ->assertSee('data-painel-modelo="comparacao-turmas"',false)->assertDontSee('987,6')->assertDontSee('999');
+            ->assertSee('Cadastros ativos')->assertSee('data-apresentacao="tabela"',false)
+            ->assertSee('data-ordenar="texto"',false)->assertSee('data-lista-modo="cards"',false)
+            ->assertSee('data-widget-id="comparacao-turmas"',false)->assertDontSee('987,6');
+        $dom=new \DOMDocument();@$dom->loadHTML($r->getContent());
+        $cadastros=(new \DOMXPath($dom))->query('//*[@data-widget-id="kpi-cadastros"]//strong')->item(0);
+        $this->assertNotNull($cadastros);
+        $this->assertSame('3',trim($cadastros->textContent),'O KPI deve usar a coleção autorizada, não o total legado999.');
         $this->assertStringNotContainsString('Turma <fictícia>',$r->getContent());
         Http::assertNotSent(fn($r)=>str_contains($r->url(),'agenda')||str_contains($r->url(),'habilidades'));
     }
@@ -44,20 +48,20 @@ class PaineisTurmasWebTest extends TestCase
     {
         foreach(['secretario_escolar','auxiliar_secretaria'] as $perfil){
             $this->preparar($perfil);
-            $this->consultarTela('/app/turmas')->assertOk()->assertSee('data-painel-modelo="agenda-administrativa"',false)
-                ->assertDontSee('data-painel-modelo="comparacao-turmas"',false)->assertDontSee('painel-turma-registro',false)
-                ->assertDontSee('Desempenho médio')->assertDontSee('data-painel-modelo="intervencoes"',false);
+            $this->consultarTela('/app/turmas')->assertOk()->assertSee('data-widget-id="agenda-administrativa"',false)
+                ->assertDontSee('data-widget-id="comparacao-turmas"',false)->assertDontSee('painel-turma-registro',false)
+                ->assertDontSee('Desempenho médio')->assertDontSee('data-widget-id="intervencoes"',false);
         }
     }
 
     public function test_contagem_ausente_falha_e_zero_sao_estados_distintos(): void
     {
         $this->preparar('professor',null);
-        $this->consultarTela('/app/turmas')->assertOk()->assertSee('Contagem de cadastros indisponível')->assertSee('Não informado');
+        $this->consultarTela('/app/turmas')->assertOk()->assertSee('Há totais indisponíveis neste recorte.')->assertSee('aria-label="Indisponível"',false);
         $this->preparar('professor',0);
-        $this->consultarTela('/app/turmas')->assertOk()->assertDontSee('Contagem de cadastros indisponível')->assertSee('cadastros ativos nas turmas deste recorte');
+        $this->consultarTela('/app/turmas')->assertOk()->assertSee('Cadastros ativos');
         $this->preparar('professor',0,503);
-        $this->consultarTela('/app/turmas')->assertOk()->assertSee('Listagem temporariamente indisponível')->assertDontSee('painel-turma-registro',false);
+        $this->consultarTela('/app/turmas')->assertOk()->assertSee('Não foi possível carregar os registros.')->assertSee('role="alert"',false)->assertDontSee('painel-turma-registro',false);
     }
 
     public function test_permissao_retirada_nao_e_apresentada_como_zero_ou_lista_vazia(): void

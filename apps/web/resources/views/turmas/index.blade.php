@@ -11,20 +11,10 @@
 @section('content')
 
 <x-pagina titulo="Turmas">
-  <x-slot:sub>@if($erroLista)Listagem temporariamente indisponível
-  @else
-  <b>{{ count($turmas) }}</b> turma(s) ·
-      @if($totalCadastros!==null)<b>{{ $totalCadastros }}</b> cadastros ativos nas turmas deste recorte @else Contagem de cadastros indisponível @endif
-  @endif
-  </x-slot:sub>
-    @pode('aluno.importar')<span class="field-help">Importação por planilha em breve.</span>@endpode
+
     @pode('turma.gerir')<button class="btn btn-primary" data-turma-abrir="modal-criar">+ Nova turma</button>@endpode
 </x-pagina>
 
-@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
-@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
-
-<section class="card card-pad tabela-lista-principal tabela-principal-integrada">
 {{-- Filtros --}}
 <form method="GET" class="filtros-cel tabela-filtros-principal" action="{{ route('turmas.index') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
   <div style="position:relative;flex:1;min-width:200px;">
@@ -43,17 +33,26 @@
   <input class="input" type="number" name="ano_letivo" aria-label="Filtrar por ano letivo" placeholder="Ano letivo"
          value="{{ $ano_letivo }}" style="width:130px;" min="2020" max="2099" />
   <button type="submit" class="btn btn-secondary">Filtrar</button>
+  <a href="#relacao-turmas" class="btn btn-ghost">Ir para turmas</a>
   @if($haFiltros)
     <a href="{{ route('turmas.index') }}" class="btn btn-ghost">Limpar</a>
   @endif
 </form>
+@include('turmas._organizar_painel',['paginaPainel'=>'turmas'])
+@include('turmas._resumo_cadastral')
+
+@if(session('sucesso'))<x-aviso tipo="sucesso">{{ session('sucesso') }}</x-aviso>@endif
+@if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
+
+<section id="relacao-turmas" class="card card-pad tabela-lista-principal tabela-principal-integrada">
+
 
 {{-- Tabela --}}
 @if($erroLista)
 <x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
 @else
-  @if(!\App\Support\Acesso::administrativo())<details class="paineis-tabela-alternativa"><summary>Tabela com ordenação e paginação</summary>@endif
-  <x-tabela :integrada="true" titulo="Turmas" :completa="true">
+  <div class="painel-relacao-cabecalho"><h2>Turmas</h2><div role="group" aria-label="Apresentação das turmas"><button type="button" class="btn btn-secondary" data-lista-modo="tabela" aria-pressed="true"><x-icone nome="prova" /> Tabela</button><button type="button" class="btn btn-secondary" data-lista-modo="cards" aria-pressed="false"><x-icone nome="turma" /> Cards</button></div></div>
+  <x-tabela :integrada="true" titulo="Turmas" :completa="true" data-painel-lista data-apresentacao="tabela">
 <table class="table tabela-padrao" id="turmas-table">
     <caption class="sr-only">Turmas</caption>
     <thead>
@@ -110,11 +109,14 @@
     </tbody>
   </table>
 </x-tabela>
-  @if(!\App\Support\Acesso::administrativo())</details>@include('turmas._colecao')@endif
+
 @endif
 </section>
 
-@include('turmas._modelos', ['paginaModelos'=>'turmas'])
+
+
+@include('turmas._modelos',['paginaModelos'=>'turmas','gruposExibidos'=>['analises']])
+@include('turmas._modelos',['paginaModelos'=>'turmas','gruposExibidos'=>['planejamento','ensino','decisoes','administrativo']])
 
 {{-- Modal: criar turma --}}
 @pode('turma.gerir')
