@@ -9,7 +9,8 @@ return new class extends Migration {
         Schema::create('preferencias_paineis', function (Blueprint $t) {
             $t->id();
             foreach (['usuario_id','vinculo_id','espaco_id'] as $c) $t->unsignedBigInteger($c);
-            $t->string('perfil', 50); $t->string('painel', 10); $t->char('contexto_hash', 64);
+            $t->string('perfil', 50); $t->string('painel', 64); $t->char('contexto_hash', 64);
+            $t->string('recurso_tipo', 16); $t->unsignedBigInteger('recurso_id')->nullable();
             $t->unsignedInteger('versao')->default(0); $t->string('apresentacao', 10)->default('tabela');
             $t->longText('desktop'); $t->longText('mobile'); $t->dateTime('atualizado_em', 6);
             $t->unique(['usuario_id','contexto_hash','painel'], 'preferencias_paineis_contexto');

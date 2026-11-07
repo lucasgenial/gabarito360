@@ -13,9 +13,12 @@ class TurmaController extends Controller
 
     public function index(Request $request): View
     {
-        $resp = $this->api->get('/v1/turmas', $request->only('busca', 'escola_id', 'ano_letivo', 'ativo'));
+        $resp = null;
+        try { $resp = $this->api->get('/v1/turmas', $request->only('busca', 'escola_id', 'ano_letivo', 'ativo')); }
+        catch (ConnectionException) { /* Manter a casca e os estados indisponíveis, sem totais inventados. */ }
+        $consultaConcluida = $resp?->successful() === true;
 
-        $turmas  = $resp->successful() ? $resp->json('data.turmas') : [];
+        $turmas  = $consultaConcluida ? $resp->json('data.turmas') : [];
         $listaValida = is_array($turmas) && array_is_list($turmas) && collect($turmas)->every(fn ($t) => is_array($t)
             && isset($t['id'],$t['nome'],$t['serie'],$t['turno'],$t['ano_letivo'],$t['ativo'])
             && is_int($t['id']) && $t['id'] > 0 && is_string($t['nome']) && is_string($t['serie']) && is_string($t['turno'])
@@ -25,15 +28,26 @@ class TurmaController extends Controller
             if (!isset($t['total_alunos']) || !is_int($t['total_alunos']) || $t['total_alunos'] < 0) $t['total_alunos'] = null;
             return $t;
         }, $turmas);
-        $contagensValidas = collect($turmas)->every(fn ($t) => is_array($t) && isset($t['total_alunos']) && is_int($t['total_alunos']) && $t['total_alunos'] >= 0);
-        $totalCadastros = $resp->successful() && $listaValida && $contagensValidas ? collect($turmas)->sum('total_alunos') : null;
-        $kpis    = $resp->successful() ? $resp->json('data.kpis')   : [];
+        $kpis    = $consultaConcluida ? $resp->json('data.kpis')   : [];
 
-        $escolas = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
+        $escolas = []; $escolasErro = false;
+        if (!\App\Support\Acesso::pessoal()) {
+            try {
+                $r = $this->api->get('/v1/escolas');
+                $listaEscolas = $r->json('data.escolas');
+                $escolasErro = $r->failed() || !is_array($listaEscolas) || !array_is_list($listaEscolas)
+                    || !collect($listaEscolas)->every(fn ($e) => is_array($e) && isset($e['id'],$e['nome']) && is_int($e['id']) && is_string($e['nome']));
+                if (!$escolasErro) $escolas = $listaEscolas;
+            } catch (ConnectionException) { $escolasErro = true; }
+        }
 
         return view('turmas.index', [
-            'erroLista' => !$resp->successful() || !$listaValida,
-            'totalCadastros' => $totalCadastros,
+            'erroLista' => !$consultaConcluida || !$listaValida,
+            'escolasErro' => $escolasErro,
+            'graficoTurnosErro' => !$consultaConcluida || !$listaValida,
+            'graficoTurnos' => $this->graficoTurnos($turmas),
+            // GET v1/turmas entrega a coleção completa no filtro; não recebe paginação Web.
+            'resumoCadastral' => \App\Support\ResumoCadastralTurmas::montar($turmas, $consultaConcluida && $listaValida, true),
             'haFiltros' => collect(['busca', 'escola_id', 'ano_letivo', 'ativo'])->contains(fn (string $campo) => $request->filled($campo)),
             'turmas'     => $turmas,
             'kpis'       => $kpis,
@@ -42,6 +56,13 @@ class TurmaController extends Controller
             'escola_id'  => $request->query('escola_id', ''),
             'ano_letivo' => $request->query('ano_letivo', ''),
         ]);
+    }
+
+    private function graficoTurnos(array $turmas): array
+    {
+        $rotulos=['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'];$totais=[];
+        foreach($turmas as $turma){$rotulo=$rotulos[$turma['turno']]??$turma['turno'];$totais[$rotulo]=($totais[$rotulo]??0)+1;}
+        return ['categorias'=>array_keys($totais),'series'=>[['nome'=>'Turmas','valores'=>array_values($totais)]],'inteiros'=>true,'rotulos'=>true];
     }
 
     public function store(Request $request)

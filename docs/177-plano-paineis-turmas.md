@@ -1,10 +1,14 @@
 # Gabarito360 Plano dos painéis de turmas e da turma
 
+**Diretriz vigente, conciliada em 07/11/2026:** a correção posterior do responsável, preservada integralmente em [180](180-correcao-dashboards-diretriz.md), substitui as orientações anteriores conflitantes sobre lista principal em cards e modelos neutros. São dois dashboards distintos; a relação de turmas abre em **Tabela**, com **Cards** compactos como alternativa explícita. Modelos têm composição completa, **Em breve** e **Dados demonstrativos**, separados das fontes reais. A decisão humana mais recente retoma a personalização com **GridStack.js e salvamento**, somente no desktop/tablet grande; a decisão mais recente exige linhas completas, alturas iguais por linha e reorganização automática dos membros da mesma linha; o cancelamento intermediário fica como histórico. Abaixo do corte operacional de **1024×700 CSS**, usar composição fixa responsiva, sem controles e sem sobrescrever o layout desktop. A remoção de Saiba mais cadastral e Ver os números permanece. O corte é uma aproximação por área disponível, não medição de polegadas físicas. As subdivisões P2.6–P2.13 abaixo desdobram essa correção sem renumerar P0–P8 ou criar módulos paralelos.
+
+Referência atual da execução: main `0e6e906` (PR210); release de homologação conhecida `b005425`. Isso comprova apenas o primeiro incremento anterior. As novas composições, demonstrações e integração GridStack estão em implementação/revisão e **não foram declaradas publicadas ou aprovadas visualmente**. O acompanhamento atualizado está no [179](179-execucao-paineis-turmas.md).
+
 Este plano organiza a evolução das páginas **Turmas** e **Visão geral da turma** do Gabarito360, com gráficos e cards como apresentação principal para professores e gestão. A secretaria mantém uma experiência administrativa, com cards de resumo e listas operacionais.
 
 A primeira entrega deve apresentar a composição prevista para cada perfil, incluindo **cards de modelo com selo Em breve** para recursos ainda indisponíveis. Cada componente terá conclusão visual e conclusão funcional registradas separadamente. Os módulos futuros alimentarão os mesmos componentes, preservando sua posição e identidade.
 
-**Referência da reconciliação:** main c16ceca5342b2313141d690a862ef488400b02bf, consultada em 07/11/2026. A inspeção abrange documentação e código dessa versão; a situação de publicação e conferência autenticada deve ser registrada por ambiente. O documento176 possui um retrato anterior, por isso seus estados devem ser confrontados com entregas posteriores.
+**Referência inicial da reconciliação, preservada como histórico:** main c16ceca5342b2313141d690a862ef488400b02bf, consultada em 07/11/2026. A inspeção inicial abrange documentação e código dessa versão; a situação de publicação e conferência autenticada deve ser registrada por ambiente. O documento176 possui um retrato anterior, por isso seus estados devem ser confrontados com entregas posteriores.
 
 **Leitura dos identificadores:** P0 a P8 identificam as fases deste plano; P2.1 é uma subfase e P2.1.1 é uma tarefa. C1, TU1, PF1 e demais identificadores existentes conservam o significado de seus documentos originais. Esta numeração não substitui a dos planos anteriores.
 
@@ -14,7 +18,7 @@ A primeira entrega deve apresentar a composição prevista para cada perfil, inc
 
 ## Composição visual
 
-Priorizar cards de indicadores, barras, distribuições, pequenos gráficos comparativos, mapas de calor, linhas do tempo e cards de ações. Tabelas ficam disponíveis para detalhamento, acessibilidade, exportação e operações administrativas.
+Priorizar cards de indicadores, barras, distribuições, pequenos gráficos comparativos, mapas de calor, linhas do tempo e cards de ações nas análises. A relação operacional das turmas tem tabela como padrão em todos os tamanhos de tela; Cards é alternativa explícita, sem mudar registros, permissões ou estado de ordenação/paginação. Tabelas também atendem detalhamento, acessibilidade, exportação e operações administrativas. A preferência por gráficos não transforma a relação de registros no próprio dashboard.
 
 Preservar os tokens, marca, componentes, temas e área útil do produto. Reaproveitar Apache ECharts, distribuído localmente com versão fixa, e o componente compartilhado `<x-grafico>`; qualquer adaptação do painel existente deve convergir para o mesmo padrão. A decisão anterior substituiu roscas de nota por número, barra e referência de meta. A preferência por gráficos não reabre essa decisão. [Plano de gráficos](https://github.com/lucasgenial/gabarito360/blob/c16ceca5342b2313141d690a862ef488400b02bf/docs/27-plano-graficos-echarts.md).
 
@@ -24,7 +28,7 @@ A secretaria continua com lista operacional em `x-tabela`, integrada à superfí
 
 | Estado | Comportamento esperado |
 |---|---|
-| Modelo com Em breve | Estrutura definitiva, descrição do benefício e ilustração neutra; sem valores, nomes ou eventos apresentados como reais. |
+| Modelo com Em breve | Composição completa com gráfico, agenda ou apresentação apropriada, valores e nomes explicitamente fictícios, identificados no próprio card como Dados demonstrativos; nunca apresentados como reais. |
 | Carregando | Busca real em andamento, limitada à região afetada; termina em resultado, vazio ou erro. |
 | Sem registros | Recurso funcional, mas nenhum registro atende ao recorte. |
 | Zero válido | Valor zero efetivamente calculado sobre uma base conhecida. |
@@ -33,7 +37,7 @@ A secretaria continua com lista operacional em `x-tabela`, integrada à superfí
 | Funcional | Dados reais, recorte correto, origem verificável e ações autorizadas. |
 | Sem permissão | O componente e seus dados não são enviados ao usuário; não mostrar um modelo pedagógico à secretaria. |
 
-Os cards de modelo devem parecer finalizados, com título, tamanho e posição definidos. Não usar skeleton animado permanente, pois isso comunica carregamento. Gráficos de modelo podem usar formas neutras sem escala ou valores, identificadas como ilustração do recurso. Exemplos numéricos, quando necessários apenas para revisão de design, ficam em ambiente de demonstração explicitamente identificado.
+Os cards de modelo devem parecer finalizados, com título, tamanho e posição definidos, e exibir a representação completa do recurso: gráfico com escala, valores e legenda coerentes; agenda com datas, horários e vínculos fictícios; progresso com numerador e denominador explícitos. Exibir Em breve e Dados demonstrativos no próprio componente. O aviso esclarece que os exemplos não representam os filtros aplicados. Não usar skeleton permanente, desfoque ilegível ou apenas ícone/frase. A diretriz inicial de exemplos neutros foi substituída pelo doc180; a autorização não permite misturar fontes reais e fictícias no mesmo gráfico, gravar exemplos operacionais ou exportá-los como relatório real.
 
 Uma ação em card de modelo pode explicar o que ficará disponível. Não simular cadastro, agendamento ou salvamento. O card de agenda mostrará, por exemplo: **Agenda da turma · Em breve · Aplicações, devolutivas e compromissos deste período aparecerão aqui.**
 
@@ -154,6 +158,14 @@ A orientação posterior do TU1-R3 substituiu o quarto gráfico por acompanhamen
 - **P1.4.6** Definir desde esta fase o registro histórico dos estudantes elegíveis por aplicação, com política de dispensa, transferência, ingresso tardio e reaplicação. Separar essa captura do cadastro de períodos letivos para evitar perda de informação nas aplicações futuras.
 - **P1.4.7** Distinguir presença confirmada, cartão recebido, cartão processado, resultado válido e ausência registrada; elegibilidade confiável, sozinha, não comprova participação.
 
+## Subfase P1 5 Infraestrutura genérica de preferências dos dashboards
+
+- **P1.5.1** Registrar painéis em catálogo autoritativo do servidor, com componentes, seções, limites, capacidades e padrão por perfil. A infraestrutura deve servir aos futuros dashboards sem duplicar serviço de preferências; registrar painel futuro não ativa sua funcionalidade nem sua fonte.
+- **P1.5.2** Derivar o escopo de usuário, vínculo ativo, espaço, perfil e identificador de painel; na visão individual incluir também a **turma autorizada**. Validar acesso ao recurso antes de consultar, salvar, restaurar ou reexecutar recibo. Uma preferência da Turma A não afeta a Turma B, nem outro usuário/contexto/perfil.
+- **P1.5.3** Precedência: mapa pessoal válido do escopo atual sobre o padrão vigente do perfil; sem mapa pessoal, usar padrão do perfil. Não confundir padrão visual com autorização, nem restaurar/salvar automaticamente por mudança de viewport. Revogação e catálogo atual continuam superiores ao conteúdo salvo.
+- **P1.5.4** Personalização permite somente reordenar e redimensionar os componentes previstos. Não há adicionar, excluir, ocultar ou duplicar widgets pelo usuário. Validar identidade e composição renderizada completa contra o catálogo atual, distinguindo evolução autorizada do catálogo de tentativa de remover componentes. Um mapa técnico salvo parcial/legado pode ser aceito por compatibilidade, mas IDs ausentes devem permanecer renderizados conforme padrão autorizado; omissão não exclui widget do catálogo ou da tela.
+- **P1.5.5** Evoluir API/BFF/recibos e chave/hash de escopo para turma individual e registro genérico de padrões; testar isolamento, padrão versus mapa pessoal, recurso não autorizado, catálogo/perfil atual, idempotência e mapa legado. Fonte nova requer revisão independente; não declarar publicação ou migration executada por existir código.
+
 **Entrega:** catálogo de componentes, contratos de filtros e matriz de conteúdo autorizado.
 
 **Critério de conclusão:** cada número e ação têm definição verificável; a composição pode ser implementada sem antecipar permissões ou fontes inexistentes.
@@ -174,7 +186,7 @@ A orientação posterior do TU1-R3 substituiu o quarto gráfico por acompanhamen
 ## Subfase P2 2 Página Turmas
 
 - **P2.2.1** Organizar cabeçalho/contexto, resumo em quatro a seis KPIs e busca de turmas.
-- **P2.2.2** Criar coleção de cards com identificação, brasão/imagem autorizada, série, turno, disciplinas pertinentes e acesso à turma.
+- **P2.2.2** Manter a relação de turmas em tabela por padrão e oferecer Cards compactos como alternativa, com identificação, brasão/imagem autorizada, série, turno, disciplinas pertinentes e acesso à turma. Esta redação substitui a preferência inicial por coleção de cards, preservando o mesmo identificador de tarefa.
 - **P2.2.3** Preparar área de comparação por barras e mapa de cobertura turma × disciplina.
 - **P2.2.4** Posicionar cards de prioridades, agenda, devolutivas e intervenções, usando Em breve onde faltar fonte.
 - **P2.2.5** Preservar busca, ordenação, paginação e ações existentes. Contagens devem representar o conjunto declarado, não uma página parcial apresentada como total.
@@ -191,7 +203,7 @@ A orientação posterior do TU1-R3 substituiu o quarto gráfico por acompanhamen
 
 ## Subfase P2 4 Composição por perfil
 
-- **P2.4.1 Professor autônomo:** em Turmas, resumo, cards das próprias turmas, pendências, comparação e agenda. Na turma, retrato, distribuição, grupos de acompanhamento, habilidades e agenda.
+- **P2.4.1 Professor autônomo:** em Turmas, resumo, relação das próprias turmas em tabela com Cards alternativos, pendências, comparação e agenda. Na turma, retrato, distribuição, grupos de acompanhamento, habilidades e agenda.
 - **P2.4.2 Professor escolar:** em Turmas, compromissos institucionais, suas turmas, resultados e agenda pertinente. Na turma, somente suas disciplinas, estudantes e encaminhamentos autorizados.
 - **P2.4.3 Coordenação:** em Turmas, cobertura, mapa turma × disciplina, prioridades e ciclo de avaliações. Na turma, panorama entre disciplinas, estudantes que precisam de acompanhamento, intervenções e conselho.
 - **P2.4.4 Equipe pedagógica:** em Turmas, demandas atribuídas, retornos e agenda. Na turma, histórico das ações, habilidades e reavaliações autorizadas.
@@ -209,6 +221,68 @@ A orientação posterior do TU1-R3 substituiu o quarto gráfico por acompanhamen
 **Entrega:** composições completas dos dois painéis, com modelos finais dos recursos futuros.
 
 **Critério de conclusão:** todos os componentes autorizados têm posição, estados e interações definidos; o usuário distingue imediatamente dados reais de recursos Em breve.
+
+## Subfase P2 6 Correção da composição dos dois dashboards
+
+- **P2.6.1** No dashboard de Turmas, separar resumo cadastral, análises agregadas, planejamento e relação operacional em tabela. Os gráficos ocupam área relevante; resumos e títulos isolados não concluem o dashboard.
+- **P2.6.2** No dashboard da Turma, preservar os seis KPIs, três análises, grupos nominais e operações TU1-R3 autorizados; integrar agenda e demais modelos nas seções pertinentes, sem trocar dados funcionais por demonstração.
+- **P2.6.3** Manter a composição administrativa sem análises, resultados, rankings ou modelos pedagógicos. Cada perfil respeita suas capacidades efetivas; nenhum cargo textual amplia permissão.
+- **P2.6.4** Ativar na visão agregada somente fontes cadastrais atuais sustentadas; comparar desempenho entre turmas com modelo demonstrativo até P3.3 ter base comparável e contrato validado. [necessario ver atender recurso] P3.3: média bruta legada não fornece esse indicador.
+- **P2.6.5** O bloco de resumo/KPIs dos dois dashboards (Turmas e Turma) é **fixo**, mantendo a composição padrão de cada perfil: sem mover, redimensionar ou alças de teclado/ponteiro. Fixo refere-se à composição, não a CSS sticky. Renderizar resumo pelo padrão autorizado do perfil, fora do catálogo editável de preferências. IDs de KPIs/resumo enviados como layout editável recebem422; `padrao.desktop` representa somente componentes editáveis fora desse bloco.
+
+## Subfase P2 7 Relação Tabela e Cards
+
+- **P2.7.1** Exibir Tabela efetivamente aberta ao entrar na tela; controle Tabela | Cards afeta apenas a relação de registros.
+- **P2.7.2** Usar a mesma coleção autorizada, preservando busca, filtros, ordenação, paginação, seleção e ações ao alternar, sem executar nova ordenação implícita.
+- **P2.7.3** Alternância local de apresentação Tabela/Cards; não confundir esse controle com o layout personalizado dos widgets. Celular não força Cards. Adaptar a tabela sem perder controles; ordenar, filtrar e paginar continuam sendo estados da coleção operacional.
+- **P2.7.4** Reutilizar x-tabela e a lógica operacional existente. O comportamento antigo de tabela em details recolhido com cards principais é histórico e será substituído.
+
+## Subfase P2 8 Demonstrações completas e isoladas
+
+- **P2.8.1** Alimentar os modelos com fábrica estática separada, IDs conhecidos e bases coerentes; desconhecidos não geram conteúdo. Não ler sessão, banco ou nomes selecionados pelos filtros para inventar resultados.
+- **P2.8.2** Renderizar comparação entre turmas, cobertura por disciplina, períodos, habilidades e reavaliação com gráficos; agenda com eventos fictícios e horários; devolutivas/metas com progresso; intervenções/conselho com responsáveis e prazos ilustrativos.
+- **P2.8.3** Manter Em breve e Dados demonstrativos visíveis, em todos os tamanhos de tela. Exemplos não representam o filtro global e não alimentam relatórios, notificações, indicadores reais ou operações dos módulos futuros.
+- **P2.8.4** Distinguir modelo de erro, null, zero, vazio e parcial. A fonte real, quando ativada, mantém o identificador de composição e a seção prevista; não há fallback automático para demonstração em caso de erro real.
+- **P2.8.5** Orientação posterior do responsável: utilizar **Calendar.js** nos três modelos de agenda (Agenda da turma, Próximos compromissos e Agenda administrativa), com adaptador demonstrativo, distribuição local/licença conferida e configuração somente leitura. Não simular cadastro ou salvamento. Este adaptador visual amplia C1/P5.1; não implementa o domínio de eventos C2/C3 nem notificações C4/N1–N3. [necessario ver atender recurso] conectar o calendário operacional aos mesmos widgets após esses contratos, mantendo a projeção administrativa sem pedagogia.
+
+## Subfase P2 9 Movimento manual e troca — RETOMADA com GridStack.js
+
+Histórico de 07/11/2026: a personalização foi cancelada e, em decisão posterior, retomada explicitamente com GridStack.js e salvamento. O cancelamento intermediário não define a entrega vigente.
+
+- **P2.9.1** Integrar GridStack.js distribuído localmente com adaptador de linhas. A decisão humana mais recente substitui a exigência anterior de vizinhos imóveis: agora o reflow/compactação dentro das regras de linha é expressamente solicitado. Prova de conceito deve demonstrar o algoritmo antes da integração final.
+- **P2.9.2** Oferecer organização somente quando a área disponível for pelo menos 1024×700 CSS. Essa aproximação operacional para desktop/tablet grande deve ser revista se o responsável ajustar o corte; não afirmar detectar polegadas físicas.
+- **P2.9.3** Cada linha horizontal deve preencher as 12 colunas, sem lacunas. Arrastar permite inserir em linha acima/abaixo ou criar nova linha após a última ocupada; linha vazia é destruída. Manter seções autorizadas e ausência de colisão, reequilibrando membros da linha de destino e origem. Testes antigos de terceiro imóvel/swap isolado não são gates desta versão.
+- **P2.9.4** Em telas menores, composição fixa fluida, sem controles de organização e sem gravação/restauração automática sobre o layout desktop. Novo widget autorizado não concede permissão por constar de preferência salva. Não usar modal para gerenciar posição/tamanho; oferecer alças e controles de teclado, Salvar visível e confirmação inline de restauração.
+
+## Subfase P2 10 Redimensionamento — RETOMADA em área grande
+
+- **P2.10.1** Resize somente na área grande definida em P2.9.2. Redimensionar empurra/reorganiza os membros da mesma linha e redistribui larguras para completar as 12 colunas sem gaps ou colisão. A altura da linha é a do maior widget e todos os seus membros recebem essa mesma altura. Respeitar mínimos legíveis/conteúdo e seção; verificar algoritmo com tamanhos mistos.
+- **P2.10.2** Gráficos ajustam-se integralmente à área útil sem rolagem horizontal/vertical, corte ou perda de legibilidade. GridStack não dispensa mínimo legível nem validação visual real.
+- **P2.10.3** Preservar alternativa de teclado nas alças, sem modal de gerenciamento; controles de arrasto/resize não interferem em gráficos ou navegação. Matrizes operacionais móveis podem ter a rolagem local necessária.
+- **P2.10.4** Manter removidos Ver os números/Consultar valores visuais e Saiba mais cadastral. Preservar valores alternativos acessíveis para leitores de tela; paginação explícita de gráfico não elimina dados.
+
+## Subfase P2 11 Preferências pessoais e restauração — RETOMADA
+
+- **P2.11.1** Retomar API/BFF/migration aditivos isolados já revisados; restauração de código não equivale à publicação ou migration executada. Revalidar todo delta atual contra f02c337/15a04de e o catálogo efetivo.
+- **P2.11.2** Identidade, vínculo, espaço, perfil e painel derivados no servidor; versão/idempotência e recibos preservados. IDs salvos não concedem acesso. Layout salvo inválido não pode ser parcialmente aplicado ou restaurado silenciosamente.
+- **P2.11.3** O cliente usa apenas o mapa desktop na área grande; adaptação a telas menores não salva nem sobrescreve esse mapa. Se o contrato preservar mapa mobile, não ativá-lo por consequência nem ampliá-lo sem revisão.
+- **P2.11.4** Restaurar exige intenção e alvo explícitos com confirmação inline, sem modal de gerenciamento. Conflito 409 não permite replay automático; resposta idempotente histórica exige consulta antes de nova edição. Migration continua não executada até o gate de publicação homologada.
+- **P2.11.5** Preservar no JSON o campo técnico opcional `altura_desejada`: inteiro, `minH <= altura_desejada <= h <= maxH`; `h` é a altura efetiva uniforme da linha, e a demanda individual evita perder a capacidade de reduzir o maior widget após recarregar. Ausência usa `h` como fallback no cliente sem inventar campo legado. Nenhuma coluna SQL extra; payload continua somente IDs/geometria técnica, nunca conteúdo/HTML. Telas menores não fazem GET/PUT de preferências.
+- **P2.11.6** Aplicar P1.5 à integração, excluindo o resumo fixo P2.6.5 do catálogo editável e dos padrões `desktop`: chave por usuário/vínculo/espaço/perfil/painel e turma quando individual; mapa pessoal válido sobre padrão do perfil. Reordenar/redimensionar somente: não oferecer excluir, adicionar ou duplicar widget. Registry e catálogo do servidor são autoritativos; alterações de escopo/recurso e recibos têm testes e revisão próprios.
+
+## Subfase P2 12 Revisão e acessibilidade da correção
+
+- **P2.12.1** Aplicar P2.5 e P8 à versão efetiva: revisar dois dashboards, desktop/celular, tema, foco, teclado, gráficos, estados e permissões.
+- **P2.12.2** Conferir que o resumo/KPIs dos dois dashboards não tem alças, ações de teclado/ponteiro ou endpoints capazes de mover/redimensionar seus IDs, que são rejeitados com422. Conferir GridStack/adaptador de linhas dos demais blocos na área grande: soma horizontal12 sem gaps, reflow de resize na mesma linha, altura de todos pelo maior widget, drag para linha anterior/posterior/nova após última, destruição de linha vazia, ausência de colisão, gerenciamento sem modal, teclado e persistência isolada. Abaixo do corte, composição fixa sem controles nem gravação sobre desktop. Conferir ausência de Saiba mais cadastral/Ver números, Tabela/Cards com a mesma coleção, gráficos sem rolagem, Calendar.js nos três modelos e alternativas acessíveis. Revalidar os estados de erro e a projeção administrativa.
+- **P2.12.3** Separar aprovação de dados, segurança, código e visual. Implementador não aprova o próprio delta; testes de motor não comprovam interação DOM ou qualidade visual.
+
+## Subfase P2 13 Integração e homologação da correção
+
+- **P2.13.1** Cumprir P8.4, CI e pareceres atuais; integrar a versão aprovada e publicar somente na homologação após verificar destino, backup e preservação de dados.
+- **P2.13.2** Conferir ambas as páginas, perfis representativos, gráficos demonstrativos, tabela padrão, alternância local e composição responsiva no ambiente publicado. Migration de preferências somente se integrar o candidato revisado e após gate explícito do operador; ainda não executada. Produção permanece excluída.
+- **P2.13.3** Registrar modelo visual concluído, integração pendente/concluída, revisão, publicação e conferência separadamente. Ausência de conferência autenticada permanece pendência explícita.
+
+Estas subdivisões são execução da correção do doc180 dentro de P2, com contratos P1 e gates P8; não recriam C/N/MT1 nem tornam seus módulos funcionais. P2.9/P2.10/P2.11 foram retomadas com GridStack após cancelamento intermediário, preservado como histórico. Integração conjunta, revisão e publicação continuam pendentes. Marcadores [necessario ver atender recurso] pertencem à documentação, nunca à interface.
 
 # Fase P3 Ativação dos dados já disponíveis
 
@@ -465,7 +539,7 @@ Esta fase acompanha P1–P7. Os critérios correspondentes são aplicados antes 
 | Componente | Apresentação principal | Página e público | Dependência para ativação |
 |---|---|---|---|
 | Resumo do contexto | Cards de KPI | Ambas, conforme papel | Cadastros e contratos atuais. |
-| Turmas | Cards pesquisáveis | Turmas, professores e gestão | Listagem, escopo, imagem e resumo autorizado. |
+| Turmas | Tabela pesquisável como padrão; Cards compactos alternativos | Turmas, conforme capacidades | Mesma listagem, escopo, imagem, ações e paginação/ordenação; alternância local sem preferências persistidas. |
 | Distribuição dos resultados | Barras por faixa | Turma, perfis pedagógicos | Resultados válidos; base explícita. |
 | Resultados por avaliação | Barras comparativas | Turma e agregados autorizados | TU1-R3 e cálculo por instrumento. |
 | Situações registradas | Barras por categoria | Turma | Critérios das avaliações. |
@@ -486,7 +560,7 @@ As representações de desempenho são descritivas até haver fundamento para co
 
 ## Marco M1 Composição visual
 
-P0, P1 e P2 entregam o catálogo e os dois painéis com os cards de modelo. Os modelos de agenda, habilidades e intervenções são entregas visuais concluídas; seus recursos permanecem pendentes.
+P0, P1 e P2 entregam o catálogo e os dois painéis com os cards de modelo. Ao cumprir revisão e aceite, os modelos de agenda, habilidades e intervenções serão classificados como entregas visuais concluídas; seus recursos permanecem pendentes. A definição deste marco não comprova sua conclusão atual nem a publicação da correção.
 
 ## Marco M2 Painéis com dados atuais
 
@@ -524,7 +598,7 @@ P8 é aplicado a cada entrega do fluxo. A conferência de um módulo pendente n�
 
 Para acompanhar a execução, cada componente deve conter: ID, página, perfis, referência do plano anterior, situação da implementação, entrega visual, dependência funcional, tratamento da lacuna, filtros, fonte, critérios de aceite, versão e ambiente de publicação.
 
-Exemplo: **Agenda da turma** — origem C1–C4; visual P2; integração P5; selo Em breve enquanto C2/C3 não atenderem aos critérios; secretaria recebe somente a variante administrativa; ativação funcional substitui o conteúdo neutro por eventos reais no mesmo componente.
+Exemplo: **Agenda da turma** — origem C1–C4; visual P2.8; integração P5; selos Em breve e Dados demonstrativos enquanto C2/C3 não atenderem aos critérios, com eventos fictícios preenchidos; secretaria recebe somente a variante administrativa. A ativação funcional substitui o exemplo por eventos reais no mesmo componente, mantendo ID, posição e dimensões pessoais; recorte vazio real vira vazio, nunca outra demonstração.
 
 Outro exemplo: **Participação na avaliação** — visual P2; fonte depende de P4.4/MT1 e do conjunto esperado da aplicação; o card atual de alunos com resultado permanece útil, com significado próprio. A ativação não converte retrospectivamente ausência de leitura em falta.
 

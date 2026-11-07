@@ -1,0 +1,13 @@
+import {build} from 'esbuild';
+import {fileURLToPath} from 'node:url';
+import {mkdirSync,copyFileSync,readFileSync,writeFileSync} from 'node:fs';
+const path=p=>fileURLToPath(new URL(p,import.meta.url));
+await build({entryPoints:[path('../../apps/web/resources/js/painel-agenda.js')],bundle:true,minify:true,format:'iife',platform:'browser',nodePaths:[path('./node_modules')],outfile:path('../../apps/web/public/js/painel-agenda.js'),legalComments:'eof'});
+const vendor=readFileSync(path('./node_modules/@calendarjs/ce/dist/style.css'),'utf8');
+if(/@import|url\(\s*["']?https?:/i.test(vendor))throw Error('CSS externo não é permitido no bundle local');
+writeFileSync(path('../../apps/web/public/css/painel-agenda.css'),(vendor+'\n'+readFileSync(path('../../apps/web/resources/css/painel-agenda.css'),'utf8')).replace(/\r\n/g,'\n'));
+const licenses=path('../../apps/web/public/js/libs/calendarjs/');mkdirSync(licenses,{recursive:true});
+copyFileSync(path('./LICENSE-calendarjs.md'),licenses+'LICENSE-calendarjs.md');
+copyFileSync(path('./node_modules/lemonadejs/LICENSE.md'),licenses+'LICENSE-lemonadejs.md');
+writeFileSync(licenses+'VERSOES.txt','@calendarjs/ce 1.1.0 — https://github.com/componade/calendarjs\nlemonadejs 5.3.6 — https://github.com/lemonadejs/lemonadejs\n');
+const bundle=path('../../apps/web/public/js/painel-agenda.js');writeFileSync(bundle,readFileSync(bundle,'utf8').replace(/[ \t]+$/gm,''));

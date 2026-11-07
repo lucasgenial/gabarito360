@@ -241,11 +241,17 @@ class TurmaOrganizacaoWebTest extends TestCase
 
     public function test_acoes_tem_cores_textos_modal_proprio_e_acompanhamento_sem_diretiva_exposta():void
     {
-        $this->preparar();$this->me['permissoes'][]='turma.desativar';$this->selecionarContextoFixture($this->me);
+        $this->preparar();$this->me['permissoes']=array_merge($this->me['permissoes'],['turma.desativar','aluno.ver','resultado.ver']);$this->selecionarContextoFixture($this->me);
         $this->consultarTela('/app/turmas/14')->assertOk()->assertSee('tu1r3-acao-editar')->assertSee('Editar turma')
             ->assertSee('data-arquivamento-modal',false)->assertSee('Arquivar turma')->assertSee('Alunos no recorte')
             ->assertSee('Ver todos (6)')->assertSee('Fictício &lt;1&gt;',false)->assertDontSee('@if(',false)
             ->assertDontSee('Acerto por questão')->assertDontSee('window.confirm',false);
+    }
+
+    public function test_acompanhamento_nominal_exige_as_duas_permissoes_mesmo_se_upstream_envia_nomes():void
+    {
+        $this->preparar();
+        $this->consultarTela('/app/turmas/14')->assertOk()->assertDontSee('Fictício &lt;1&gt;',false)->assertDontSee('data-widget-id="alunos-recorte"',false);
     }
 
     public function test_arquivamento_retorna_destino_explicito_sem_depender_de_referer_ou_url_anterior():void

@@ -1,0 +1,2 @@
+@calendarjs/ce 1.1.0 — https://github.com/componade/calendarjs
+lemonadejs 5.3.6 — https://github.com/lemonadejs/lemonadejs

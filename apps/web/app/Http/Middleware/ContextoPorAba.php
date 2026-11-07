@@ -61,7 +61,7 @@ class ContextoPorAba
         if (in_array($dados['perfil'], ['secretario_escolar', 'auxiliar_secretaria'], true)) {
             $permissao = match ($request->route()->getName()) {
                 'painel', 'perfil', 'perfil.update', 'perfil.senha', 'perfil.email', 'perfil.imagem', 'perfil.foto' => null,
-                'turmas.index', 'turmas.show', 'turmas.foto' => 'turma.ver',
+                'turmas.index', 'turmas.show', 'turmas.foto', 'paineis.preferencias.consultar', 'paineis.preferencias.salvar' => 'turma.ver',
                 'turmas.store', 'turmas.update', 'turmas.edit', 'turmas.imagem' => 'turma.gerir',
                 'turmas.toggle', 'turmas.arquivamento' => 'turma.desativar',
                 'alunos.index', 'alunos.show', 'alunos.foto' => 'aluno.ver',

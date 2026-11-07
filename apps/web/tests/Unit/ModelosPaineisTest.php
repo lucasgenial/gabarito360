@@ -22,14 +22,14 @@ class ModelosPaineisTest extends TestCase
         $this->assertSame([],ModelosPaineis::para('invalida','coordenador',$extras));
     }
 
-    public function test_catalogo_tem_contrato_sem_dados_simulados_ou_endpoint_inexistente(): void
+    public function test_metadados_separam_factory_demonstrativa_de_fontes_operacionais(): void
     {
         $m=ModelosPaineis::para('turma','coordenador',['turma.ver','relatorio.turma','turma.vincular_professor']);
         $this->assertNotEmpty($m);
         $this->assertCount(count($m),array_unique(array_column($m,'id')));
         foreach($m as $item) {
             foreach(['titulo','finalidade','permissao','pagina','posicao','tamanho','celular','fonte','dependencia','ativacao','filtros','visual','funcional'] as $campo) $this->assertArrayHasKey($campo,$item);
-            $this->assertSame('modelo',$item['estado']);
+            $this->assertSame('demonstrativo',$item['estado']);
             $this->assertSame('Em breve',$item['selo']);
             foreach(['url','endpoint','valor','eventos','alunos','percentual'] as $campo) $this->assertArrayNotHasKey($campo,$item);
         }

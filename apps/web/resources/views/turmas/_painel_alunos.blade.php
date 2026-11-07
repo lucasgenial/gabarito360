@@ -1,8 +1,9 @@
-@if(\App\Support\Acesso::pode('aluno.ver') && \App\Support\Acesso::pode('resultado.ver'))
+@if(!in_array(\App\Support\Acesso::perfil(),['aluno','aplicador'],true) && \App\Support\Acesso::pode('aluno.ver') && \App\Support\Acesso::pode('resultado.ver'))
 @php($analiseAlunos=$analise['alunos']??[])
 <x-painel-widget id="alunos-recorte" titulo="Alunos no recorte" :w="6" :h="12" secao="analises" :demo="false" class="painel-widget-alunos">
 <div class="tu1r3-alunos" data-painel-alunos>
-@if($analiseAlunos['disponivel']??false)
+@if($painelIndisponivel??false)<p class="painel-widget-indisponivel">Dados temporariamente indisponíveis. Atualize a página para tentar novamente.</p>
+@elseif($analiseAlunos['disponivel']??false)
 <div class="tu1r3-alunos-escolhas" role="group" aria-label="Acompanhamento dos alunos">@foreach(['atencao'=>'Atenção','dentro_criterio'=>'Dentro do critério','destaques'=>'Top 5'] as $chave=>$rotulo)<button type="button" class="btn btn-secondary" data-alunos-visao="{{ $chave }}" aria-pressed="{{ $loop->first?'true':'false' }}">{{ $rotulo }}@if($chave!=='destaques')<span class="badge">{{ $analiseAlunos[$chave]['total']??0 }}</span>@endif</button>@endforeach</div>
 @foreach(['atencao'=>['Indicação de acompanhamento','Ao menos um resultado com indicação de recuperação registrada.'],'dentro_criterio'=>['Dentro do critério','Todos os resultados deste aluno no recorte estão registrados como aprovados.'],'destaques'=>['Maiores acertos médios neste recorte','Médias com quantidades diferentes de resultados não são uma comparação de proficiência.']] as $chave=>[$titulo,$descricao])
 <section data-alunos-lista="{{ $chave }}" @unless($loop->first) hidden @endunless aria-label="{{ $titulo }}"><h3>{{ $titulo }}</h3><details class="dc1-ajuda"><summary>Saiba mais</summary><p>{{ $descricao }}</p></details>
