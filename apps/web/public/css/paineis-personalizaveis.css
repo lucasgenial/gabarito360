@@ -106,3 +106,7 @@
 .painel-widget-selos{display:flex;align-items:center;flex-wrap:wrap;gap:4px;flex:0 1 auto}
 .painel-widget-selos .badge{font-size:11px;line-height:1.3;padding:3px 6px;white-space:nowrap}
 .painel-aluno-base{display:block;margin-top:4px;font-size:.75rem;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}
+
+/* Paleta exclusiva dos painéis: comparação sem classificação pedagógica implícita. */
+.painel-widget,.painel-dados-reais{--painel-serie-1:#0f766e;--painel-serie-2:#6366f1;--painel-serie-3:#7c3aed;--painel-serie-4:#b45309;--painel-serie-5:#64748b}
+html[data-theme=dark] .painel-widget,html[data-theme=dark] .painel-dados-reais{--painel-serie-1:#2dd4bf;--painel-serie-2:#a5b4fc;--painel-serie-3:#c4b5fd;--painel-serie-4:#fbbf24;--painel-serie-5:#94a3b8}
