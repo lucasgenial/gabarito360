@@ -36,7 +36,7 @@ var imagem_turmaConfig = JSON.parse(document.getElementById('imagem-turma-config
   var mudou=ehFoto?!!f:(atual.tem_foto||String(atual.avatar_id||'')!==avatar());salvar.disabled=ocupado||!!editor?.busy||!mudou||!valido;
  }
  function preparar(){editor.reset();form.reset();cancelar.textContent='Cancelar';arquivo.value='';camera.value='';erro.hidden=true;sucesso.hidden=true;form.querySelector('[name="tipo"][value="'+(atual.tem_foto?'foto':'avatar')+'"]').checked=true;form.querySelectorAll('[name="avatar_id"]').forEach(function(i){i.checked=i.value===String(atual.avatar_id||'');});atualizar();}
- document.querySelectorAll('[data-abrir-imagem-turma]').forEach(function(b){b.addEventListener('click',function(){origem=b;preparar();modal.showModal();fechar.focus();});});
+ document.querySelectorAll('[data-abrir-imagem-turma]').forEach(function(b){b.addEventListener('click',function(){origem=b;document.querySelectorAll('[data-imagem-turma-confirmacao]').forEach(function(el){el.hidden=true;});preparar();modal.showModal();fechar.focus();});});
  function sair(){if(!ocupado)modal.close();}fechar.addEventListener('click',sair);cancelar.addEventListener('click',sair);modal.addEventListener('cancel',function(e){if(ocupado)e.preventDefault();});modal.addEventListener('close',function(){editor.reset();if(blob){URL.revokeObjectURL(blob);blob=null;}if(origem)origem.focus();});
  form.addEventListener('change',function(){cancelar.textContent='Cancelar';erro.hidden=true;sucesso.hidden=true;atualizar();});
  form.addEventListener('submit',async function(e){
@@ -44,7 +44,7 @@ var imagem_turmaConfig = JSON.parse(document.getElementById('imagem-turma-config
   var controle=new AbortController(),limite=setTimeout(function(){controle.abort();},20000);
   try{var r=await G360Requisicao(imagem_turmaConfig.acao,{method:'POST',body:dados,headers:{Accept:'application/json'},signal:controle.signal,credentials:'same-origin'});var j=await r.json();if(!r.ok){if(j.errors?.foto)throw new Error('Verifique o formato, tamanho e dimensões da foto.');throw new Error(j.message||'Não foi possível salvar a imagem.');}
    if(!j.data||!Object.hasOwn(j.data,'tem_foto'))throw new Error('Não foi possível confirmar a atualização. Atualize a página para conferir.');
-   atual=j.data;document.querySelectorAll('[data-imagem-turma]').forEach(function(el){if(String(el.dataset.imagemTurma)!==String(imagem_turmaConfig.turma))return;renderizar(el,atual,el.dataset.tamanho||'sm');});arquivo.value='';preparar();sucesso.textContent='Imagem da turma atualizada.';sucesso.hidden=false;cancelar.textContent='Fechar';
+   atual=j.data;document.querySelectorAll('[data-imagem-turma]').forEach(function(el){if(String(el.dataset.imagemTurma)!==String(imagem_turmaConfig.turma))return;renderizar(el,atual,el.dataset.tamanho||'sm');});document.querySelectorAll('[data-imagem-turma-confirmacao]').forEach(function(el){el.textContent='Imagem salva.';el.hidden=false;});arquivo.value='';preparar();sucesso.textContent='Imagem da turma atualizada.';sucesso.hidden=false;cancelar.textContent='Fechar';
   }catch(e){mostrarErro((e.name==='AbortError'||e instanceof TypeError||e instanceof SyntaxError)?'Não foi possível confirmar a atualização. Atualize a página para conferir.':e.message);erro.focus();}
   finally{clearTimeout(limite);ocupado=false;form.querySelectorAll('input,button').forEach(function(i){i.disabled=false;});fechar.disabled=false;cancelar.disabled=false;modal.removeAttribute('aria-busy');atualizar();}
  });
