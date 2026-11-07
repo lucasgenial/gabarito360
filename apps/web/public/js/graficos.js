@@ -3,7 +3,7 @@
   'use strict';
   if (window.G360Graficos) { window.G360Graficos.iniciar(); return; }
   var graficos = [], quadro = 0;
-  function token(nome) { return getComputedStyle(document.documentElement).getPropertyValue(nome).trim(); }
+  function token(nome, el) { return getComputedStyle(el || document.documentElement).getPropertyValue(nome).trim(); }
   function fonte() { return getComputedStyle(document.body).fontFamily; }
   function texto(d, v) {
     if (v === null || v === undefined || v === '-') return '—';
@@ -23,31 +23,33 @@
     return linhas.join('\n');
   }
   function opcoes(g) {
-    var d = g.dados, tinta = token('--fg-2') || token('--fg'), apagado = token('--muted'), linha = token('--border-soft');
-    var varias = d.series.length > 1, horizontal = !!d.horizontal || (g.el.clientWidth < 420 && d.categorias.length > 2);
+    var localToken = function(nome) { return token(nome, g.el); };
+    var d = g.dados, tinta = localToken('--fg-2') || localToken('--fg'), apagado = localToken('--muted'), linha = localToken('--border-soft');
+    var varias = d.series.length > 1, widget = g.el.closest('[data-widget-id]'), orientacao = widget && widget.dataset.orientacao;
+    var horizontal = orientacao === 'horizontal' || (orientacao !== 'vertical' && (!!d.horizontal || (g.el.clientWidth < 420 && d.categorias.length > 2)));
     var valor = { type: 'value', interval: d.formato === 'pct' && g.el.clientWidth < 420 ? 50 : undefined, max: d.maximo === undefined ? null : d.maximo, minInterval: d.inteiros ? 1 : 0,
       axisLabel: { color: apagado, fontSize: 11, formatter: d.formato === 'pct' ? '{value}%' : '{value}' }, splitLine: { lineStyle: { color: linha } } };
     var categorias = { type: 'category', data: d.categorias, inverse: horizontal,
-      axisTick: { show: false }, axisLine: { lineStyle: { color: token('--border') } },
-      axisLabel: { color: apagado, fontSize: 11, formatter: function(v,i){ return d.rotulos_curtos && d.rotulos_curtos[i] !== undefined ? d.rotulos_curtos[i] : v; }, width: horizontal ? (g.el.clientWidth < 420 ? 86 : 140) : undefined,
-        overflow: horizontal ? 'truncate' : undefined, interval: horizontal ? 0 : (d.intervalo === undefined ? 'auto' : d.intervalo), hideOverlap: !horizontal && d.intervalo !== 0 } };
+      axisTick: { show: false }, axisLine: { lineStyle: { color: localToken('--border') } },
+      axisLabel: { color: apagado, fontSize: 11, formatter: function(v,i){ return d.rotulos_curtos && d.rotulos_curtos[i] !== undefined ? d.rotulos_curtos[i] : v; }, width: horizontal ? (g.el.clientWidth < 420 ? 86 : 140) : Math.max(45,Math.floor((g.el.clientWidth-32)/Math.max(1,d.categorias.length))-12),
+        overflow: 'truncate', interval: horizontal ? 0 : (d.intervalo === undefined ? 'auto' : d.intervalo), hideOverlap: !horizontal && d.intervalo !== 0 } };
     return {
       animation: !window.matchMedia('(prefers-reduced-motion: reduce)').matches, animationDuration: 250,
-      color: [1, 2, 3, 4, 5].map(function (n) { return token('--serie-' + n); }),
+      color: [1, 2, 3, 4, 5].map(function (n) { return localToken('--painel-serie-' + n) || localToken('--serie-' + n); }),
       textStyle: { fontFamily: fonte(), color: tinta },
       aria: { enabled: true, decal: { show: varias }, label: { description: g.descricao + '. Os valores completos estão na alternativa textual acessível.' } },
       grid: { left: 4, right: horizontal ? 42 : 8, top: 16, bottom: varias ? 48 : 8, containLabel: true },
       legend: varias ? { bottom: 0, left: 0, type: 'plain', textStyle: { color: tinta }, itemWidth: 12, itemHeight: 12 } : { show: false },
       tooltip: { trigger: 'axis', renderMode: 'richText', confine: true, axisPointer: { type: 'shadow' },
-        backgroundColor: token('--surface'), borderColor: token('--border'), textStyle: { color: token('--fg'), fontFamily: fonte() },
+        backgroundColor: localToken('--surface'), borderColor: localToken('--border'), textStyle: { color: localToken('--fg'), fontFamily: fonte() },
         formatter: function (itens) { return dica(d, Array.isArray(itens) ? itens : [itens]); } },
       xAxis: horizontal ? valor : categorias, yAxis: horizontal ? categorias : valor,
       series: d.series.map(function (s) {
-        return { name: s.nome, type: 'bar', barMaxWidth: varias ? 22 : 36, barGap: '15%',
+        return { name: s.nome, type: 'bar', barMaxWidth: varias ? 22 : 36, barGap: '15%', labelLayout: { hideOverlap: true },
           itemStyle: { borderRadius: horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0] },
-          label: { show: !!d.rotulos, position: horizontal ? 'right' : 'top', color: tinta, fontSize: 11, fontWeight: 600,
+          label: { show: !!d.rotulos, position: horizontal ? 'right' : 'top', color: tinta, fontSize: 11, fontWeight: 600, padding: [0, 3], backgroundColor: 'transparent',
             formatter: function (p) { return texto(d, p.value); } },
-          data: s.valores.map(function (v, i) { var cor = s.cores && s.cores[i]; return cor ? { value: v, itemStyle: { color: token(cor) } } : v; }) };
+          data: s.valores.map(function (v, i) { var cor = s.cores && s.cores[i]; return cor ? { value: v, itemStyle: { color: localToken(cor) } } : v; }) };
       })
     };
   }
@@ -93,7 +95,8 @@
     if (mudancas.some(function (m) { return m.type === 'childList' && Array.from(m.addedNodes).some(function (n) { return n.nodeType === 1 && (n.matches('.grafico[data-grafico]') || n.querySelector('.grafico[data-grafico]')); }); })) iniciar();
     if (mudancas.some(function (m) { return m.type === 'attributes' && m.attributeName === 'hidden'; })) agendar(false);
   }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
-  document.addEventListener('g360:painel-redimensionado', function () { agendar(false); });
+  document.addEventListener('g360:painel-redimensionado', function () { agendar(true); });
+  document.addEventListener('g360:painel-orientacao', function () { agendar(true); });
   window.addEventListener('resize', function () { agendar(false); });
   window.addEventListener('beforeprint', function () { graficos.forEach(function (g) { if (g.instancia) g.instancia.setOption({ animation: false }); }); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();

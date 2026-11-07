@@ -50,12 +50,15 @@ if(!empty($painelAplicado['painel_fim']))$recortes[]='Até '.\Carbon\Carbon::par
 @if($painel || ($painelErro??false))@include('turmas._painel')@else
 <div class="kpi-grid"><div class="card kpi"><div class="kpi-label">Alunos ativos</div><div class="kpi-value">{{ $turma['total_alunos'] ?? 0 }}</div></div><div class="card kpi"><div class="kpi-label">Ano letivo</div><div class="kpi-value">{{ $turma['ano_letivo'] }}</div></div></div>
 @endif
-@if(\App\Support\Acesso::pode('correcao.acompanhar') || \App\Support\Acesso::pode('relatorio.turma'))
-<div class="card card-pad"><h2>Acompanhamento da turma</h2><div class="tu1-acoes">    @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}"><x-icone nome="grafico" /> Acompanhar correção</a>@endpode
+@php($modelosAcompanhamento = array_filter(\App\Support\ModelosPaineis::para('turma', \App\Support\Acesso::perfil()??'', \App\Support\Acesso::permissoes()), fn($m)=>in_array($m['grupo']??'planejamento',['planejamento','ensino','decisoes'],true)))
+@if($modelosAcompanhamento || \App\Support\Acesso::pode('correcao.acompanhar') || \App\Support\Acesso::pode('relatorio.turma'))
+<section class="card card-pad painel-acompanhamento" aria-labelledby="titulo-acompanhamento"><header class="painel-acompanhamento-cabecalho"><h2 id="titulo-acompanhamento">Acompanhamento da turma</h2><div class="tu1-acoes">    @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}"><x-icone nome="grafico" /> Acompanhar correção</a>@endpode
     @pode('relatorio.turma')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}"><x-icone nome="grafico" /> Relatório da turma</a>@endpode
-</div></div>
+</div></header>
+@include('turmas._modelos', ['paginaModelos'=>'turma','gruposExibidos'=>['planejamento','ensino','decisoes']])
+</section>
 @endif
-@include('turmas._modelos', ['paginaModelos'=>'turma'])
+@include('turmas._modelos', ['paginaModelos'=>'turma','gruposExibidos'=>['analises','administrativo']])
 </section>
 <section class="tu1-painel" id="alunos" data-turma-painel="alunos" aria-label="Alunos">@include('turmas._alunos')</section>
 @if($dc1Visivel??false)<section class="tu1-painel" id="disciplinas" data-turma-painel="disciplinas" aria-label="Disciplinas e professores">@include('disciplinas._turma')</section>@endif
