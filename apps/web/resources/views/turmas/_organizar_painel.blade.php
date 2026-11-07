@@ -10,6 +10,6 @@ if($paginaPainel==='turma')$alvosPainel['turmaId']=$turmaPainel??$turma['id'];
 @endphp
 <script type="application/json" id="painel-grade-config">{!! json_encode(['painel'=>$paginaPainel,'consultar'=>\App\Support\NavegacaoWeb::destino('paineis.preferencias.consultar',$alvosPainel),'salvar'=>\App\Support\NavegacaoWeb::destino('paineis.preferencias.salvar',$alvosPainel)],JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT) !!}</script>
 @once
-@push('styles')<link rel="stylesheet" href="{{ asset('css/painel-grade.css') }}?v={{ @filemtime(public_path('css/painel-grade.css')) }}">@endpush
+@push('styles')<link rel="stylesheet" href="{{ asset('css/paineis-personalizaveis.css') }}?v={{ @filemtime(public_path('css/paineis-personalizaveis.css')) }}"><link rel="stylesheet" href="{{ asset('css/painel-grade.css') }}?v={{ @filemtime(public_path('css/painel-grade.css')) }}">@endpush
 @push('scripts')<script src="{{ asset('js/painel-grade.js') }}?v={{ @filemtime(public_path('js/painel-grade.js')) }}" defer></script>@endpush
 @endonce
