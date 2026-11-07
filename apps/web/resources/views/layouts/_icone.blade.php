@@ -22,6 +22,7 @@
   @case('confirmar')<path d="m5 12 4 4L19 6"/>@break
   @case('salvar')<path d="M4 3h13l4 4v14H3V3zM7 3v6h9V3M7 21v-8h10v8"/>@break
   @case('transferir')<path d="M3 7h17l-4-4M21 17H4l4 4M20 7l-4 4M4 17l4-4"/>@break
+  @case('arrastar')<path d="M8 13V6a1.5 1.5 0 0 1 3 0v5M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10V6a1.5 1.5 0 0 1 3 0v6M17 10V9a1.5 1.5 0 0 1 3 0v6c0 4-2.4 7-6 7h-1c-2 0-3.3-.8-4.5-2.4l-4-5.4a1.5 1.5 0 0 1 2.3-1.9L8 15"/>@break
   @case('filtro')<path d="M3 4h18l-7 8v7l-4 2v-9z"/>@break
   @case('limpar')<path d="m4 16 9-12 8 6-9 12H8zM13 22h8M9 10l8 6"/>@break
   @case('ver')<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>@break
