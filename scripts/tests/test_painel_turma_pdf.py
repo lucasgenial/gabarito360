@@ -43,6 +43,19 @@ class PainelTurmaPdfTest(unittest.TestCase):
             self.assertIn('Nenhuma avaliação aplicada neste recorte.',text)
             self.assertNotIn('75,0%',text)
 
+    def test_sem_filtros_php_array_vazio_ou_objeto_nas_duas_orientacoes(self):
+        with tempfile.TemporaryDirectory()as temp:
+            for modo in ('retrato','paisagem'):
+                for filtros in ([],{}):
+                    with self.subTest(modo=modo,filtros=filtros):
+                        path=Path(temp)/(modo+str(type(filtros).__name__)+'.pdf')
+                        d=self.dados(path,modo,1);d['filtros']=filtros
+                        gerar(d);r=PdfReader(path)
+                        text=' '.join(p.extract_text()for p in r.pages)
+                        self.assertIn('Aplicação: Início do histórico a Hoje',text)
+                        self.assertIn('Avaliação 001',text)
+                        self.assertEqual(modo=='paisagem',float(r.pages[0].mediabox.width)>float(r.pages[0].mediabox.height))
+
     def test_situacoes_e_operacoes_usam_bases_diferentes_sem_inventar_participacao(self):
         with tempfile.TemporaryDirectory()as temp:
             path=Path(temp)/'situacoes.pdf';d=self.dados(path,'retrato',2)
