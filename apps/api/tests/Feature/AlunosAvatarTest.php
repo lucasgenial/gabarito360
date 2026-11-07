@@ -4,7 +4,6 @@ namespace Tests\Feature;
 use App\Models\Aluno;
 use App\Models\Usuario;
 use App\Support\Permissao;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -13,7 +12,7 @@ use Tests\TestCase;
 
 class AlunosAvatarTest extends TestCase
 {
-    use RefreshDatabase;
+    use \Tests\Support\BancoCurriculoDescartavel;
     private array $dados;
 
     protected function setUp(): void

@@ -5,14 +5,13 @@ namespace Tests\Feature;
 use App\Models\Usuario;
 use App\Support\Escopo;
 use App\Support\Permissao;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class EscopoEspacosTest extends TestCase
 {
-    use RefreshDatabase;
+    use \Tests\Support\BancoCurriculoDescartavel;
 
     private Usuario $admin;
     private array $es = [];

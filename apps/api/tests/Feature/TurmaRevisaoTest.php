@@ -2,7 +2,6 @@
 namespace Tests\Feature;
 
 use App\Models\Usuario;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\{DB,Process};
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
@@ -10,7 +9,7 @@ use Tests\TestCase;
 
 class TurmaRevisaoTest extends TestCase
 {
-    use RefreshDatabase,\Tests\Support\CenarioDisciplinas;
+    use \Tests\Support\BancoCurriculoDescartavel,\Tests\Support\CenarioDisciplinas;
 
     private function historico(): void
     {

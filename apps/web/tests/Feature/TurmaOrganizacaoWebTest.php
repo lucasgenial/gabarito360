@@ -31,7 +31,7 @@ class TurmaOrganizacaoWebTest extends TestCase
             $dados=match($p){
                 '/api/v1/auth/me'=>$this->me,
                 '/api/v1/auth/vinculos'=>[],
-                '/api/v1/turmas/14/painel'=>['kpis'=>['alunos'=>2,'avaliacoes'=>1,'resultados'=>1,'acerto_pct'=>80],'recorte'=>['disciplina'=>'Todas','professor'=>'Todos'],'opcoes'=>['disciplinas'=>[],'professores'=>[]],'avaliacoes'=>[]],
+                '/api/v1/turmas/14/painel'=>['kpis'=>['alunos'=>2,'avaliacoes'=>1,'resultados'=>1,'acerto_pct'=>80],'recorte'=>['disciplina'=>'Todas','professor'=>'Todos'],'opcoes'=>['disciplinas'=>[],'professores'=>[]],'avaliacoes'=>[],'analise'=>['alunos'=>['disponivel'=>true,'atencao'=>['total'=>6,'items'=>array_map(fn($i)=>['nome'=>'Fictício <'.$i.'>','resultados'=>1,'base_valida'=>1,'recuperacao'=>1,'media_pct'=>40],range(1,6))],'dentro_criterio'=>['total'=>0,'items'=>[]],'destaques'=>['total'=>0,'items'=>[],'empate_no_corte'=>false]]]],
                 '/api/v1/turmas'=>['turmas'=>[['id'=>14,'escola_id'=>5,'nome'=>'Turma A','serie'=>'3','ano_letivo'=>2026],['id'=>15,'escola_id'=>5,'nome'=>'Turma B','serie'=>'3','ano_letivo'=>2026]]],
                 '/api/v1/alunos/1'=>['id'=>1,'nome'=>'Aluno fictício','matricula'=>'F1','turma_id'=>14,'turma_nome'=>'Turma A','ativo'=>true,'turma'=>['id'=>14,'escola_id'=>5]],
                 '/api/v1/turmas/14','/api/v1/turmas/15'=>['id'=>(int)basename($p),'nome'=>str_ends_with($p,'14')?'Turma A':'Turma B','serie'=>'3ª série','turno'=>'tarde','escola_id'=>5,'ano_letivo'=>2026,'ativo'=>true,'media_turma'=>null,'total_alunos'=>0,'total_provas'=>0,'alunos'=>[],'provas'=>[]],
@@ -236,6 +236,15 @@ class TurmaOrganizacaoWebTest extends TestCase
         $this->me['perfil']='auxiliar_secretaria';$this->me['permissoes']=['turma.ver','aluno.ver'];$this->selecionarContextoFixture($this->me);
         $this->alterarRecurso('PUT','/app/turmas/14/arquivamento',$d)->assertForbidden();
         $this->alterarRecurso('PUT','/app/alunos/1/arquivamento',$d)->assertForbidden();
+    }
+
+    public function test_acoes_tem_cores_textos_modal_proprio_e_acompanhamento_sem_diretiva_exposta():void
+    {
+        $this->preparar();$this->me['permissoes'][]='turma.desativar';$this->selecionarContextoFixture($this->me);
+        $this->consultarTela('/app/turmas/14')->assertOk()->assertSee('tu1r3-acao-editar')->assertSee('Editar turma')
+            ->assertSee('data-arquivamento-modal',false)->assertSee('Arquivar turma')->assertSee('Alunos no recorte')
+            ->assertSee('Ver todos (6)')->assertSee('Fictício &lt;1&gt;',false)->assertDontSee('@if(',false)
+            ->assertDontSee('Acerto por questão')->assertDontSee('window.confirm',false);
     }
 
 }
