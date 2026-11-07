@@ -5,7 +5,6 @@ $k=$painel['kpis']; $analise=$painel['analise']??[]; $resumo=$analise['resumo']?
 $filtroValor=fn($nome)=>is_scalar(request($nome))?(string)request($nome):'';
 $painelAplicado=$painelAplicado??[]; $painelErros=$painelErros??[];
 $situacoes=$painel['situacoes_resultados']??[]; $acompanhamento=$painel['acompanhamento']??null;
-$questoes=$analise['questoes']??[];
 $numero=fn($v)=>$v===null?'—':number_format($v,1,',','').'%';
 $indicadores=[
  ['Avaliações aplicadas',$k['avaliacoes'],'prova','azul',($k['avaliacoes_sem_resultado']??0).' sem resultado concluído'],
@@ -32,17 +31,22 @@ $indicadores=[
 <div class="tu1-acoes"><button class="btn btn-secondary" type="button" data-painel-limpar><x-icone nome="limpar" /> Limpar</button><button class="btn btn-secondary" type="button" data-painel-cancelar><x-icone nome="fechar" /> Cancelar</button><button class="btn btn-primary" type="submit"><x-icone nome="confirmar" /> Aplicar filtros</button></div>
 </form></dialog>
 
-<div class="tu1-indicadores tu1r3-kpis">
+<x-painel-secao id="resumo" titulo="Indicadores da turma">
+@php($idsIndicadores=['kpi-avaliacoes','kpi-resultados','kpi-alunos-resultado','kpi-media','kpi-mediana','kpi-faixa'])
 @foreach($indicadores as [$rotulo,$valor,$icone,$tom,$ajuda])
-<div class="card kpi tu1-indicador tu1-tom-{{ $tom }}"><div class="tu1-kpi-topo"><span class="kpi-label">{{ $rotulo }}</span><x-icone :nome="$icone" /></div><div class="kpi-value">@if($rotulo==='Faixa observada'&&isset($resumo['min_pct']))<span class="tu1r3-nowrap">{{ $numero($resumo['min_pct']) }}</span> – <span class="tu1r3-nowrap">{{ $numero($resumo['max_pct']) }}</span>@else{{ $valor }}@endif</div><p class="field-help">{{ $ajuda }}</p></div>
+<x-painel-widget :id="$idsIndicadores[$loop->index]" :titulo="$rotulo" :w="3" :h="4" secao="resumo" :demo="false" class="painel-widget-kpi tu1-tom-{{ $tom }}">
+<div class="painel-kpi-valor"><strong>@if($rotulo==='Faixa observada'&&isset($resumo['min_pct']))<span class="tu1r3-nowrap">{{ $numero($resumo['min_pct']) }}</span> – <span class="tu1r3-nowrap">{{ $numero($resumo['max_pct']) }}</span>@else{{ $valor }}@endif</strong><span aria-hidden="true"><x-icone :nome="$icone" /></span></div>
+<p class="field-help">{{ $ajuda }}</p>
+</x-painel-widget>
 @endforeach
-</div>
-<div class="tu1r3-graficos" data-painel-graficos data-painel-dados="{{ json_encode(['analise'=>$analise,'situacoes'=>$situacoes],JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT|JSON_INVALID_UTF8_SUBSTITUTE) }}">
-<article class="card card-pad tu1r3-grafico-card"><h2>Distribuição dos acertos</h2><p class="field-help">Quantos resultados estão em cada faixa de acerto · base {{ $resumo['n']??0 }}.</p><div class="tu1r3-grafico" data-grafico="distribuicao" role="img" aria-label="Distribuição dos resultados por faixa de acerto"></div><details class="tu1r3-dados"><summary>Consultar valores</summary><ul>@foreach($analise['distribuicao_acertos']['faixas']??[] as $f)<li>{{ $f['label'] }}: <strong>{{ $f['total'] }}</strong></li>@endforeach</ul></details></article>
-<article class="card card-pad tu1r3-grafico-card"><h2>Resultados por avaliação</h2><p class="field-help">Média e mediana dos acertos · cada avaliação mantém sua base.</p><div class="tu1r3-grafico" data-grafico="avaliacoes" role="img" aria-label="Média e mediana por avaliação"></div><details class="tu1r3-dados"><summary>Consultar valores</summary><ul>@foreach($analise['por_avaliacao']??[] as $a)<li><strong>{{ $a['titulo'] }}</strong> · {{ $a['n'] }} resultados · média {{ $numero($a['media_pct']) }} · mediana {{ $numero($a['mediana_pct']) }}</li>@endforeach</ul></details></article>
-<article class="card card-pad tu1r3-grafico-card"><h2>Situações registradas</h2><p class="field-help">Critério de cada avaliação · {{ $situacoes['total']??0 }} resultados concluídos.</p><div class="tu1r3-grafico" data-grafico="situacoes" role="img" aria-label="Situações registradas nos resultados"></div><details class="tu1r3-dados"><summary>Consultar valores</summary><ul><li>Dentro do critério: {{ $situacoes['dentro_criterio']??0 }}</li><li>Indicação de recuperação: {{ $situacoes['indicacao_recuperacao']??0 }}</li><li>Outras situações: {{ $situacoes['outros']??0 }}</li></ul></details></article>
+</x-painel-secao>
+<div class="painel-dados-reais" data-painel-graficos data-painel-dados="{{ json_encode(['analise'=>$analise,'situacoes'=>$situacoes],JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT|JSON_INVALID_UTF8_SUBSTITUTE) }}">
+<x-painel-secao id="analises" titulo="Análises da turma">
+<x-painel-widget id="distribuicao-acertos" titulo="Distribuição dos acertos" :w="6" :h="9" secao="analises" :demo="false" class="painel-widget-grafico"><p class="field-help">Quantos resultados estão em cada faixa de acerto · base {{ $resumo['n']??0 }}.</p><div class="tu1r3-grafico" data-grafico="distribuicao" role="img" aria-label="Distribuição dos resultados por faixa de acerto"></div><details class="tu1r3-dados"><summary>Consultar valores</summary><ul>@foreach($analise['distribuicao_acertos']['faixas']??[] as $f)<li>{{ $f['label'] }}: <strong>{{ $f['total'] }}</strong></li>@endforeach</ul></details></x-painel-widget>
+<x-painel-widget id="resultados-avaliacao" titulo="Resultados por avaliação" :w="6" :h="9" secao="analises" :demo="false" class="painel-widget-grafico"><p class="field-help">Média e mediana dos acertos · cada avaliação mantém sua base.</p><div class="tu1r3-grafico" data-grafico="avaliacoes" role="img" aria-label="Média e mediana por avaliação"></div><details class="tu1r3-dados"><summary>Consultar valores</summary><ul>@foreach($analise['por_avaliacao']??[] as $a)<li><strong>{{ $a['titulo'] }}</strong> · {{ $a['n'] }} resultados · média {{ $numero($a['media_pct']) }} · mediana {{ $numero($a['mediana_pct']) }}</li>@endforeach</ul></details></x-painel-widget>
+<x-painel-widget id="situacoes-registradas" titulo="Situações registradas" :w="6" :h="9" secao="analises" :demo="false" class="painel-widget-grafico"><p class="field-help">Critério de cada avaliação · {{ $situacoes['total']??0 }} resultados concluídos.</p><div class="tu1r3-grafico" data-grafico="situacoes" role="img" aria-label="Situações registradas nos resultados"></div><details class="tu1r3-dados"><summary>Consultar valores</summary><ul><li>Dentro do critério: {{ $situacoes['dentro_criterio']??0 }}</li><li>Indicação de recuperação: {{ $situacoes['indicacao_recuperacao']??0 }}</li><li>Outras situações: {{ $situacoes['outros']??0 }}</li></ul></details></x-painel-widget>
 @include('turmas._painel_alunos')
-
+</x-painel-secao>
 </div>
 @if($acompanhamento)
 <div class="card card-pad tu1r3-leituras"><h2>Leituras dos cartões</h2><div class="tu1r3-pendencias">@foreach(['revisao'=>'Precisam de revisão','processamento'=>'Em processamento','falhas'=>'Falhas','nao_identificados'=>'Não identificados','aguardando_leitura'=>'Aguardando leitura'] as $campo=>$rotulo)<span><strong>{{ $acompanhamento[$campo]??0 }}</strong> {{ $rotulo }}</span>@endforeach</div></div>

@@ -1,6 +1,7 @@
+@if(\App\Support\Acesso::pode('aluno.ver') && \App\Support\Acesso::pode('resultado.ver'))
 @php($analiseAlunos=$analise['alunos']??[])
-<article class="card card-pad tu1r3-grafico-card tu1r3-alunos" data-painel-alunos>
-<h2>Alunos no recorte</h2>
+<x-painel-widget id="alunos-recorte" titulo="Alunos no recorte" :w="6" :h="12" secao="analises" :demo="false" class="painel-widget-alunos">
+<div class="tu1r3-alunos" data-painel-alunos>
 @if($analiseAlunos['disponivel']??false)
 <div class="tu1r3-alunos-escolhas" role="group" aria-label="Acompanhamento dos alunos">@foreach(['atencao'=>'Atenção','dentro_criterio'=>'Dentro do critério','destaques'=>'Top 5'] as $chave=>$rotulo)<button type="button" class="btn btn-secondary" data-alunos-visao="{{ $chave }}" aria-pressed="{{ $loop->first?'true':'false' }}">{{ $rotulo }}@if($chave!=='destaques')<span class="badge">{{ $analiseAlunos[$chave]['total']??0 }}</span>@endif</button>@endforeach</div>
 @foreach(['atencao'=>['Indicação de acompanhamento','Ao menos um resultado com indicação de recuperação registrada.'],'dentro_criterio'=>['Dentro do critério','Todos os resultados deste aluno no recorte estão registrados como aprovados.'],'destaques'=>['Maiores acertos médios neste recorte','Médias com quantidades diferentes de resultados não são uma comparação de proficiência.']] as $chave=>[$titulo,$descricao])
@@ -13,4 +14,6 @@
 @if($chave==='destaques'&&($analiseAlunos['destaques']['empate_no_corte']??false))<p class="field-help">Há outros alunos empatados nesta posição.</p>@endif
 </section>@endforeach
 @else<p class="tu1-vazio">O acompanhamento nominal não está disponível neste perfil.</p>@endif
-</article>
+</div>
+</x-painel-widget>
+@endif
