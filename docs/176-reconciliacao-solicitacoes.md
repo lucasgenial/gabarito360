@@ -54,3 +54,7 @@ Auditorias independentes versionadas: [UI/UX](evidencias/reconciliacao-ui-ux.md)
 5. Prosseguir com EI1 e demais dependências registradas no plano integrado115 e no quadro completo de pendências.
 
 O futuro editor de provas/enunciados e o GII não são implementação desta etapa. Enunciados e questões não serão misturados ao gabarito atual. Nenhum planejamento novo do GII foi iniciado.
+
+## Atualização posterior — painéis P0–P8 em07/11/2026
+
+IMG-E foi integrado/publicado no PR209; a tabela acima permanece como retrato do baseline anterior, não como ausência atual. [Plano177](177-plano-paineis-turmas.md), [protocolo178](178-protocolo-execucao-paineis.md) e [execução179](179-execucao-paineis-turmas.md) são a continuidade autorizada dos painéis. TU1-PDF corresponde a P8.1, IMG-L a P3.1.3 e UI1-R/AP1-L conservam os itens próprios. As pendências fora do painel permanecem registradas; não criar lista paralela para C/N/MT1. Os incrementos aprovados terão publicação somente na homologação, sem nova autorização interna.

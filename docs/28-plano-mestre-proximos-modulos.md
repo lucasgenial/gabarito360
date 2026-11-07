@@ -1042,3 +1042,7 @@ Arquivos disputados: `CatalogoPermissoes.php`, `Permissao.php`, `Escopo.php`, `a
 ## Replanejamento de03/11/2026 — orientação posterior do produto
 
 A solicitação posterior distinguiu duplicação pedagógica de prova, movimentação de matrícula e transferência institucional de dados. As regras incompatíveis deste documento (nome/posicionamento T5, capacidades de escola, restrições do CPF pessoal e identificação por espaço) devem ser revistas pelo [plano integrado115](115-replanejamento-provas-identidade-transferencias.md). O histórico deste documento descreve o que foi decidido/implementado antes; não é autorização para publicar a política antiga como se atendesse ao pedido novo. Plano115 é desenho para implementação, sem migration ou deploy nesta entrega. L4-D/E e o gate de publicação devem ser conciliados com as novas dependências.
+
+## Evolução dos painéis — 07/11/2026
+
+O plano [177](177-plano-paineis-turmas.md), protocolo [178](178-protocolo-execucao-paineis.md) e acompanhamento [179](179-execucao-paineis-turmas.md) ampliam TU1 e os pontos de consumo de C1–C4/N1–N3. Agenda e notificações permanecem nestes pacotes; seus cards de modelo não representam implementação funcional. P0–P8 do doc177 são identificadores locais dos painéis, distintos do portal acima. Atualizações posteriores de perfis/fotos/contratos prevalecem sobre os diagnósticos históricos. Produção continua condicionada à decisão expressa.

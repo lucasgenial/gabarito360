@@ -16,12 +16,24 @@ class TurmaController extends Controller
         $resp = $this->api->get('/v1/turmas', $request->only('busca', 'escola_id', 'ano_letivo', 'ativo'));
 
         $turmas  = $resp->successful() ? $resp->json('data.turmas') : [];
+        $listaValida = is_array($turmas) && array_is_list($turmas) && collect($turmas)->every(fn ($t) => is_array($t)
+            && isset($t['id'],$t['nome'],$t['serie'],$t['turno'],$t['ano_letivo'],$t['ativo'])
+            && is_int($t['id']) && $t['id'] > 0 && is_string($t['nome']) && is_string($t['serie']) && is_string($t['turno'])
+            && is_scalar($t['ano_letivo']) && (is_bool($t['ativo']) || in_array($t['ativo'],[0,1],true)));
+        $turmas = $listaValida ? $turmas : [];
+        $turmas = array_map(function ($t) {
+            if (!isset($t['total_alunos']) || !is_int($t['total_alunos']) || $t['total_alunos'] < 0) $t['total_alunos'] = null;
+            return $t;
+        }, $turmas);
+        $contagensValidas = collect($turmas)->every(fn ($t) => is_array($t) && isset($t['total_alunos']) && is_int($t['total_alunos']) && $t['total_alunos'] >= 0);
+        $totalCadastros = $resp->successful() && $listaValida && $contagensValidas ? collect($turmas)->sum('total_alunos') : null;
         $kpis    = $resp->successful() ? $resp->json('data.kpis')   : [];
 
         $escolas = \App\Support\Acesso::pessoal() ? [] : ($this->api->get('/v1/escolas')->json('data.escolas') ?? []);
 
         return view('turmas.index', [
-            'erroLista' => !$resp->successful(),
+            'erroLista' => !$resp->successful() || !$listaValida,
+            'totalCadastros' => $totalCadastros,
             'haFiltros' => collect(['busca', 'escola_id', 'ano_letivo', 'ativo'])->contains(fn (string $campo) => $request->filled($campo)),
             'turmas'     => $turmas,
             'kpis'       => $kpis,
