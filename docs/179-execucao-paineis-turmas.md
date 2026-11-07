@@ -56,3 +56,15 @@ Nenhum item anterior é apagado ou substituído nesta reconciliação. P0 é uma
 | P8 | PDF WIP preservado | Verificação transversal em curso | Conferência autenticada pendente | Validar cada incremento e publicar só homologação |
 
 Checkpoint: próximo trabalho elegível é concluir a projeção P1 com testes negativos e revisão independente, junto ao catálogo para P2. Não há nova publicação autorizada em produção. Os itens externos do quadro176 permanecem pendentes.
+
+## Primeiro incremento — PR210
+
+Implementado em branch isolado e submetido no PR210. Projeção API por conteúdo/ação (sem novas rotas, migrações ou fórmulas), catálogo inicial de modelos estáticos e coleção pedagógica com tabela alternativa. Secretaria/auxiliar conservam tabela e modelos administrativos; retirada de permissão não se transforma em zero ou lista vazia na apresentação. Contagens cadastrais usam a coleção filtrada completa; valores ausentes/inválidos não viram zero. A média bruta legada não alimenta os novos cards.
+
+Ordenação/paginação continuam no modo explicitamente chamado “Tabela com ordenação e paginação”. A coleção apresenta todos os registros do recorte e não herda a página/ordenação local da tabela. Esse comportamento é uma entrega inicial, não o fechamento de P2.2. Disciplinas, resumos agregados, prioridade por perfil, demais modelos e estados regionais continuam elegíveis para os incrementos seguintes.
+
+Validação local: Web completo **355 testes/12.900 asserções**; API novos7/83, regressões62/833, revisão independente com repetição7/83. Verificação de telas26scripts/0erros. Chrome local fictício: desktop,390 e320, tema escuro/claro, secretaria, alternância tabela/coleção,25registros e paginação/ordenação. Não se trata de login ou conferência autenticada do servidor.
+
+Pareceres em `docs/evidencias/paineis/`. A aprovação visual é restrita ao primeiro incremento; não declara P1/P2 completos. CI, merge, publicação e conferência do novo incremento ainda pendentes neste checkpoint. O TU1-PDF continua separado e não foi incluído nesta versão.
+
+Próximo trabalho elegível: satisfazer gates finais/publicar este incremento somente na homologação e prosseguir P1/P2 (catálogo completo, identidade/posição dos componentes, perfis/filtros e composições), mantendo P8 a cada entrega. P4/P5/P6 e motores P7 não estão funcionais por causa dos modelos.
