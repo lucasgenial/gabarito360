@@ -245,6 +245,8 @@ Route::prefix('v1')->group(function () {
 
         // Turmas
         Route::prefix('turmas')->group(function () {
+            Route::post('{id}/imagem', [\App\Http\Controllers\Api\ImagemTurmaController::class,'salvar'])->whereNumber('id')->middleware(['permissao:turma.gerir','throttle:imagem-perfil']);
+            Route::get('{id}/foto', [\App\Http\Controllers\Api\ImagemTurmaController::class,'mostrar'])->whereNumber('id')->middleware('permissao:turma.ver');
             Route::get('{id}/vinculo-docente/opcoes', [\App\Http\Controllers\Api\VinculoDocenteCompostoController::class,'opcoes'])->whereNumber('id')->middleware(['permissao:turma.ver','permissao:disciplina.gerir','permissao:turma.vincular_professor']);
             Route::post('{id}/vinculos-docentes', [\App\Http\Controllers\Api\VinculoDocenteCompostoController::class,'store'])->whereNumber('id')->middleware(['permissao:turma.ver','permissao:disciplina.gerir','permissao:turma.vincular_professor']);
             Route::get('/',            [TurmaController::class, 'index'])->middleware('permissao:turma.ver');

@@ -13,6 +13,7 @@
 @section('content')
 
 <x-pagina titulo="{{ $turma['nome'] }}">
+  <x-slot:imagem>@pode('turma.gerir')<button type="button" class="imagem-perfil-abrir" data-abrir-imagem-turma aria-label="Alterar imagem da turma"><x-avatar-turma :turma="$turma" tamanho="lg" /></button>@else<x-avatar-turma :turma="$turma" tamanho="lg" />@endpode</x-slot:imagem>
   <x-slot:sub>{{ $turma['serie'] }} ·
       {{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$turma['turno']] ?? $turma['turno'] }} ·
       <b>{{ $turma['total_alunos'] ?? 0 }}</b> aluno(s) · {{ $turma['ano_letivo'] }} · {{ $turma['ativo'] ? 'Em uso' : 'Arquivada' }}
@@ -56,4 +57,5 @@ if(!empty($painelAplicado['painel_fim']))$recortes[]='Até '.\Carbon\Carbon::par
 @if($dc1Visivel??false)<section class="tu1-painel" id="disciplinas" data-turma-painel="disciplinas" aria-label="Disciplinas e professores">@include('disciplinas._turma')</section>@endif
 <section class="tu1-painel" id="provas" data-turma-painel="provas" aria-label="Provas">@include('turmas._provas')</section>
 @unless(\App\Support\Acesso::pessoal())<section class="tu1-painel" id="acesso" data-turma-painel="acesso" aria-label="Acesso à turma">@include('turmas._acesso')</section>@endunless
+@pode('turma.gerir')@include('turmas._imagem')@endpode
 @endsection

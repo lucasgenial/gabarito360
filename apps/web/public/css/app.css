@@ -1548,3 +1548,10 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
   .contexto-aviso-acoes > .btn { width:100%; min-height:44px; }
   .vinculo-opcao .btn, .vinculo-card > form .btn, .troca-contexto-modal .btn { min-height:44px; }
 }
+
+/* Catálogos de identidade separados: alunos, educadores adultos e turmas. */
+.avatar-catalogo-educadores.avatar-aluno--imagem,.avatar-usuario .avatar-aluno--imagem,[data-imagem-propria] .avatar-aluno--imagem,#imagem-usuario-modal .avatar-aluno--imagem{background-image:url('../images/avatares/educadores-v1.png');background-size:600% 600%;background-position:var(--avatar-x) var(--avatar-y)}
+.avatar-catalogo-turmas.avatar-aluno--imagem{background-image:none;background-color:#e9eef4;position:relative}.avatar-turma-brasao{position:absolute;inset:10%;background-image:url('../images/avatares/brasoes-v1.png');background-size:600% 600%;background-position:var(--avatar-x) var(--avatar-y);image-rendering:pixelated;border-radius:4px}.g-pagina-identidade{display:flex;align-items:center;gap:16px}.g-pagina-identidade>div{min-width:0}.g-pagina-identidade .imagem-perfil-abrir{flex-shrink:0}.turma-identidade-lista{display:flex;align-items:center;gap:12px}
+@media(max-width:600px){.g-pagina-identidade{align-items:flex-start;gap:12px}}
+.g-pagina-identidade .imagem-perfil-abrir{margin:0;flex:0 0 auto}
+.g-pagina-identidade>[data-imagem-turma]{flex:0 0 auto}

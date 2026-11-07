@@ -259,6 +259,15 @@ document.querySelectorAll('[data-seletor-avatar]').forEach(function (seletor) {
     var id = Number(selecionado ? selecionado.value : 0);
     var imagem = Number.isInteger(id) && id >= 1 && id <= 36;
     preview.classList.toggle('avatar-aluno--imagem', imagem);
+    if (preview.classList.contains('avatar-catalogo-turmas')) {
+      var brasao = preview.querySelector('.avatar-turma-brasao');
+      if (imagem && !brasao) {
+        brasao = document.createElement('span');
+        brasao.className = 'avatar-turma-brasao';
+        preview.prepend(brasao);
+      }
+      if (!imagem && brasao) brasao.remove();
+    }
     preview.style.setProperty('--avatar-x', ((id - 1) % 6) * 20 + '%');
     preview.style.setProperty('--avatar-y', Math.floor((id - 1) / 6) * 20 + '%');
     var partes = (nome ? nome.value : '').trim().split(/\s+/u).filter(Boolean);
