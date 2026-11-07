@@ -51,4 +51,29 @@ class ContratoPreferenciasPainelTest extends TestCase
         $d=$this->resposta();$d['origem_disposicao']='origem-desconhecida';
         $this->assertFalse(ContratoPreferenciasPainel::valido($d));
     }
+    public function test_opcoes_visuais_preservam_false_sem_injetar_campos_no_legado():void
+    {
+        $d=$this->resposta();$d['catalogo'][0]['id']='distribuicao-acertos';$d['layouts']['desktop'][0]['id']='distribuicao-acertos';
+        $d['layouts']['desktop'][0]+=['fixo'=>false,'altura_livre'=>true,'orientacao'=>'horizontal'];
+        $d['padrao']=['desktop'=>$d['layouts']['desktop']];
+        $this->assertTrue(ContratoPreferenciasPainel::valido($d));$r=ContratoPreferenciasPainel::projetar($d);
+        $this->assertFalse($r['layouts']['desktop'][0]['fixo']);$this->assertTrue($r['layouts']['desktop'][0]['altura_livre']);
+        $this->assertSame('horizontal',$r['layouts']['desktop'][0]['orientacao']);$this->assertSame($r['layouts']['desktop'],$r['padrao']['desktop']);
+        $legacy=ContratoPreferenciasPainel::projetar($this->resposta());
+        foreach(['fixo','altura_livre','orientacao'] as $key)$this->assertArrayNotHasKey($key,$legacy['layouts']['desktop'][0]);
+    }
+
+    public function test_opcoes_visuais_malformadas_e_orientacao_fora_dos_cinco_ids_sao_recusadas():void
+    {
+        foreach(['fixo','altura_livre'] as $key)foreach([0,1,'false',null,[]] as $value){
+            $d=$this->resposta();$d['layouts']['desktop'][0][$key]=$value;$this->assertFalse(ContratoPreferenciasPainel::valido($d));
+        }
+        foreach([null,false,'diagonal',[]] as $value){
+            $d=$this->resposta();$d['catalogo'][0]['id']='habilidades';$d['layouts']['desktop'][0]['id']='habilidades';
+            $d['layouts']['desktop'][0]['orientacao']=$value;$this->assertFalse(ContratoPreferenciasPainel::valido($d));
+        }
+        $d=$this->resposta();$d['layouts']['desktop'][0]['orientacao']='vertical';$this->assertFalse(ContratoPreferenciasPainel::valido($d));
+        $d=$this->resposta();$d['padrao']=['desktop'=>$d['layouts']['desktop']];$d['padrao']['desktop'][0]['fixo']='false';$this->assertFalse(ContratoPreferenciasPainel::valido($d));
+    }
+
 }

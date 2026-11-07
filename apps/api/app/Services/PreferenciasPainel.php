@@ -55,8 +55,8 @@ final class PreferenciasPainel
                 $vistos = []; $caixas = [];
                 foreach ($widgets as $i=>$widget) {
                     $campo = 'layouts.'.$dispositivo.'.'.$i;
-                    if (!is_array($widget) || !in_array(count($widget), [6,7], true)
-                        || array_diff(array_keys($widget), ['id','section','x','y','w','h','altura_desejada'])) $this->falhar($campo);
+                    if (!is_array($widget) || (count($widget)<6 || count($widget)>10)
+                        || array_diff(array_keys($widget), ['id','section','x','y','w','h','altura_desejada','fixo','altura_livre','orientacao'])) $this->falhar($campo);
                     if (!is_string($widget['id'] ?? null) || !isset($porId[$widget['id']]) || isset($vistos[$widget['id']])) $this->falhar($campo.'.id');
                     $item = $porId[$widget['id']]; $limite = $item[$dispositivo];
                     if (($widget['section'] ?? null)!==$item['section']) $this->falhar($campo.'.section');
@@ -67,6 +67,10 @@ final class PreferenciasPainel
                     // Clientes anteriores continuam com seis campos, sem reescrita ou coerção.
                     if (array_key_exists('altura_desejada', $widget) && (!is_int($widget['altura_desejada'])
                         || $widget['altura_desejada']<$limite['minH'] || $widget['altura_desejada']>$widget['h'])) $this->falhar($campo.'.altura_desejada');
+                    // Opções visuais não ampliam limites, acesso ou capacidades.
+                    foreach (['fixo','altura_livre'] as $opcao) if (array_key_exists($opcao,$widget) && !is_bool($widget[$opcao])) $this->falhar($campo.'.'.$opcao);
+                    if (array_key_exists('orientacao',$widget) && (!in_array($widget['id'],['distribuicao-acertos','resultados-avaliacao','periodos-escolares','habilidades','reavaliacoes'],true)
+                        || !in_array($widget['orientacao'],['horizontal','vertical'],true))) $this->falhar($campo.'.orientacao');
                     foreach ($caixas as $outra) if ($outra['section']===$widget['section'] && $widget['x']<$outra['x']+$outra['w'] && $widget['x']+$widget['w']>$outra['x'] && $widget['y']<$outra['y']+$outra['h'] && $widget['y']+$widget['h']>$outra['y']) $this->falhar($campo, 'Os componentes não podem se sobrepor.');
                     $vistos[$widget['id']] = true; $caixas[] = $widget;
                 }

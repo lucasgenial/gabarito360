@@ -12,13 +12,34 @@
 .painel-secao-grade.grid-stack .painel-widget-grafico .painel-widget-corpo{overflow:hidden}
 .painel-secao-grade.grid-stack .painel-widget-grafico .grafico,.painel-secao-grade.grid-stack .painel-widget-grafico .tu1r3-grafico{height:auto!important;min-height:0;flex:1 1 0;overflow:hidden}
 .painel-secao-grade.grid-stack .painel-widget-grafico .field-help,.painel-secao-grade.grid-stack .painel-widget-grafico .painel-demo-descricao,.painel-secao-grade.grid-stack .painel-grafico-paginas{flex:0 0 auto}
-.painel-widget-mover{min-width:44px;min-height:44px;padding:8px;flex:0 0 auto;touch-action:none;cursor:grab}
+.painel-widget-controles{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;flex:0 0 auto;max-width:100%}
+.painel-widget-identificacao{min-width:0;flex:1 1 auto}
+.painel-widget{container-type:inline-size}
+.painel-widget-mover,.painel-widget-opcao,.painel-widget-orientacao{min-width:44px;min-height:44px;padding:8px;flex:0 0 auto;border:1px solid var(--border);border-radius:8px;background:var(--surface-2,var(--bg));color:var(--fg);box-shadow:0 1px 2px #0015340d}
+.painel-widget-controles .btn:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.painel-widget-opcao[aria-pressed=true]{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface));border-color:var(--accent)}
+.painel-widget-mover{touch-action:none;cursor:grab}
+.painel-widget-opcao svg{width:18px;height:18px}
+.painel-widget-orientacao{min-height:44px;padding:6px;font-size:.72rem;line-height:1.2;box-shadow:none}
+.painel-widget-orientacao span{display:flex;align-items:center;gap:4px}
+.painel-widget-orientacao svg{width:16px;height:16px}
+.painel-widget-controles .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.painel-widget-controles .btn:disabled{opacity:.5;cursor:not-allowed}
+.painel-acompanhamento{margin-block:24px;min-width:0}
+.painel-acompanhamento-cabecalho{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.painel-acompanhamento-cabecalho h2{margin:0;font-size:1.25rem}
+.painel-acompanhamento>.painel-secao:last-child{margin-bottom:0}
 .painel-widget-mover:active{cursor:grabbing}
 .painel-widget-mover:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .painel-secao-grade[data-editando=true] .painel-widget{outline:1px dashed var(--accent);outline-offset:-2px}
 .painel-secao-grade[data-editando=true]{background:linear-gradient(var(--surface-2),var(--surface-2));border-radius:var(--radius-md,12px)}
 .painel-secao-grade.grid-stack .grid-stack-placeholder>.placeholder-content{border:2px dashed var(--accent);border-radius:var(--radius-md,12px);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .painel-secao-grade.grid-stack[data-editando=false] .ui-resizable-handle{display:none!important}
-.painel-secao-grade.grid-stack .ui-resizable-se{width:44px;height:44px;right:8px;bottom:8px;touch-action:none}
+.painel-secao-grade.grid-stack .ui-resizable-se{width:44px;height:44px;right:4px;bottom:4px;touch-action:none;background-image:none!important;cursor:se-resize}
+.painel-secao-grade.grid-stack .ui-resizable-se::before{content:'';position:absolute;width:16px;height:16px;right:8px;bottom:8px;background:repeating-linear-gradient(135deg,transparent 0 3px,var(--muted) 3px 5px,transparent 5px 7px);clip-path:polygon(100% 0,100% 100%,0 100%)}
+.painel-secao-grade.grid-stack .grid-stack-item[gs-no-resize=true] .ui-resizable-handle{display:none!important}
+.painel-widget[data-fixo=true]{border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
+@container(max-width:420px){.painel-widget-cabecalho{flex-wrap:wrap}.painel-widget-identificacao{flex-basis:100%}.painel-widget-controles{justify-content:flex-start}}
+@media(max-width:600px){.painel-widget-cabecalho{flex-wrap:wrap}.painel-widget-orientacao{min-height:44px}.painel-acompanhamento{padding:16px}.painel-acompanhamento-cabecalho .tu1-acoes{width:100%}}
 @media(max-width:1023px),(max-height:699px){.painel-organizacao,.painel-widget-mover{display:none!important}}
 @media print{.painel-organizacao,.painel-widget-mover,.ui-resizable-handle{display:none!important}.painel-secao-grade.grid-stack{height:auto!important}.painel-secao-grade.grid-stack>.grid-stack-item{position:static!important;inset:auto!important;width:100%!important;height:auto!important;break-inside:avoid}.painel-secao-grade.grid-stack>.grid-stack-item>.painel-widget{position:static!important;inset:auto!important;overflow:visible;height:auto!important}.painel-secao-grade.grid-stack .painel-widget-grafico .grafico,.painel-secao-grade.grid-stack .painel-widget-grafico .tu1r3-grafico{height:300px!important;min-height:300px}}
