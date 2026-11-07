@@ -1,4 +1,5 @@
-@php($pedagogico=!\App\Support\Acesso::administrativo())
+@if(\App\Support\Acesso::pode('aluno.ver'))
+@php($pedagogico=!\App\Support\Acesso::administrativo() && \App\Support\Acesso::pode('relatorio.turma') && \App\Support\Acesso::pode('resultado.ver'))
 @php($gestorAluno=in_array(\App\Support\Acesso::perfil(),['coordenador','dir_escolar','vice_dir_escolar','secretario_escolar'],true))
 <div class="card">
 <div class="card-pad">
@@ -46,7 +47,7 @@
           </div></td>
           <td style="font-family:var(--font-mono);" data-rotulo="Matrícula"><div class="tabela-valor">{{ $a['matricula'] ?? '—' }}</div></td>
           @if($pedagogico)<td style="font-family:var(--font-mono);" data-rotulo="Média geral"><div class="tabela-valor">{{ ($a['media_geral'] ?? null) !== null ? number_format($a['media_geral'], 1, ',', '') : '—' }}</div></td>
-          <td style="font-family:var(--font-mono);" data-rotulo="Provas"><div class="tabela-valor">{{ $a['total_provas'] ?? 0 }}</div></td>@endif
+          <td style="font-family:var(--font-mono);" data-rotulo="Provas"><div class="tabela-valor">{{ $a['total_provas'] ?? 'Não informado' }}</div></td>@endif
           <td data-rotulo="Status"><div class="tabela-valor">
             @if($a['ativo'] ?? true)
               <span class="badge badge-success badge-dot">Em uso</span>
@@ -82,4 +83,6 @@
 @if($gestorAluno && \App\Support\Acesso::pode('aluno.gerir'))
 <dialog class="tu1-dialog" data-transferencia-modal aria-labelledby="transferencia-titulo"><div class="tu1-dialog-cabecalho"><h2 id="transferencia-titulo">Transferir aluno entre turmas</h2><button class="btn btn-ghost tu1-icone-acao" type="button" data-transferencia-fechar aria-label="Fechar transferência" title="Fechar transferência"><x-icone nome="fechar" /></button></div><div data-transferencia-corpo></div></dialog>
 @push('scripts')<script src="{{ asset('js/turma-transferencia.js') }}?v={{ filemtime(public_path('js/turma-transferencia.js')) }}" defer></script>@endpush
+@endif
+
 @endif

@@ -1,3 +1,4 @@
+@if(!\App\Support\Acesso::administrativo() && \App\Support\Acesso::pode('prova.ver'))
 <div class="card"><div class="card-pad">
 {{-- Seção: Provas da turma --}}
 <h2 class="section-title">
@@ -17,7 +18,7 @@
         <th scope="col">Prova</th>
         <th scope="col">Disciplina</th>
         <th scope="col">Aplicação</th>
-        <th scope="col">Média</th>
+        @pode('relatorio.turma')<th scope="col">Média</th>@endpode
         <th scope="col">Status</th>
         <th scope="col">Ações</th>
       </tr>
@@ -37,12 +38,12 @@
           <td class="tabela-principal" data-rotulo="Prova"><div class="tabela-valor"><strong>{{ $p['titulo'] }}</strong></div></td>
           <td data-rotulo="Disciplina"><div class="tabela-valor">{{ $p['disciplina'] }}</div></td>
           <td data-rotulo="Aplicação"><div class="tabela-valor">{{ $p['data_aplicacao'] ? \Carbon\Carbon::parse($p['data_aplicacao'])->format('d/m/Y') : '—' }}</div></td>
-          <td style="font-family:var(--font-mono);" data-rotulo="Média"><div class="tabela-valor">{{ $p['media'] !== null ? number_format($p['media'], 1, ',', '') : '—' }}</div></td>
+          @pode('relatorio.turma')<td style="font-family:var(--font-mono);" data-rotulo="Média"><div class="tabela-valor">{{ ($p['media']??null) !== null ? number_format($p['media'], 1, ',', '') : '—' }}</div></td>@endpode
           <td data-rotulo="Status"><div class="tabela-valor"><span class="badge {{ $sc['cls'] }}" style="{{ $sc['style'] ?? '' }}">{{ $sc['label'] }}</span></div></td>
           <td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
-            @if($p['status'] === 'em_correcao')
+            @if($p['status'] === 'em_correcao' && \App\Support\Acesso::pode('correcao.acompanhar'))
               <a href="{{ route('correcao.show', $p['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="grafico" /> Acompanhar</a>
-            @elseif($p['status'] === 'corrigida')
+            @elseif($p['status'] === 'corrigida' && \App\Support\Acesso::pode('relatorio.prova'))
               <a href="{{ route('relatorios.turmaProva', [$turma['id'], $p['id']]) }}" class="btn btn-sm btn-secondary"><x-icone nome="pdf" /> Relatório</a>
             @else
               <a href="{{ route('provas.show', $p['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver</a>
@@ -61,3 +62,5 @@
   @endif
 </div>
 
+
+@endif

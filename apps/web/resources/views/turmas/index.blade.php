@@ -14,7 +14,7 @@
   <x-slot:sub>@if($erroLista)Listagem temporariamente indisponível
   @else
   <b>{{ count($turmas) }}</b> turma(s) ·
-      <b>{{ $kpis['total_alunos'] ?? 0 }}</b> alunos no total
+      @if($totalCadastros!==null)<b>{{ $totalCadastros }}</b> cadastros ativos nas turmas deste recorte @else Contagem de cadastros indisponível @endif
   @endif
   </x-slot:sub>
     @pode('aluno.importar')<span class="field-help">Importação por planilha em breve.</span>@endpode
@@ -52,6 +52,7 @@
 @if($erroLista)
 <x-aviso tipo="erro">Não foi possível carregar os registros. Tente novamente usando os filtros acima.</x-aviso>
 @else
+  @if(!\App\Support\Acesso::administrativo())<details class="paineis-tabela-alternativa"><summary>Tabela com ordenação e paginação</summary>@endif
   <x-tabela :integrada="true" titulo="Turmas" :completa="true">
 <table class="table tabela-padrao" id="turmas-table">
     <caption class="sr-only">Turmas</caption>
@@ -62,7 +63,6 @@
         <th scope="col">Turno</th>
         @unless(\App\Support\Acesso::pessoal())<th scope="col">Escola</th>@endunless
         <th scope="col">Alunos</th>
-        @if(!\App\Support\Acesso::administrativo())<th scope="col">Desempenho médio</th>@endif
         <th scope="col">Ano letivo</th>
         <th scope="col">Status</th>
         <th scope="col">Ações</th>
@@ -73,7 +73,7 @@
         <tr data-nome="{{ strtolower($t['nome']) }}">
           <td data-valor-ordem="{{ $t['nome'] }}" data-rotulo="Turma" class="tabela-principal"><div class="tabela-valor">
             <div class="turma-name">
-              <div class="turma-av">{{ strtoupper(str_replace(['º ','ª '], '', $t['nome'])) }}</div>
+              <x-avatar-turma :turma="$t" tamanho="sm" />
               <strong>{{ $t['nome'] }}</strong>
             </div>
           </div></td>
@@ -84,21 +84,8 @@
             {{ $t['escola_nome'] ?? '—' }}
           </div></td>
           @endunless
-          <td style="font-family:var(--font-mono);" data-rotulo="Alunos"><div class="tabela-valor">{{ $t['total_alunos'] ?? 0 }}</div></td>
-          @if(!\App\Support\Acesso::administrativo())
-          <td data-rotulo="Desempenho médio"><div class="tabela-valor">
-            @if(($t['media_turma'] ?? null) !== null)
-              @php
-                $pct = min(100, max(0, ($t['media_turma'] / 10) * 100));
-                $cor = $t['media_turma'] >= 7 ? 'var(--success)' : ($t['media_turma'] >= 5 ? 'var(--warn)' : 'var(--danger)');
-              @endphp
-              <span class="mini-bar"><div style="width:{{ $pct }}%;background:{{ $cor }};"></div></span>
-              <span style="font-family:var(--font-mono);font-weight:600;">{{ number_format($t['media_turma'], 1, ',', '') }}</span>
-            @else
-              <span style="color:var(--muted);">—</span>
-            @endif
-          </div></td>
-          @endif
+          <td style="font-family:var(--font-mono);" data-rotulo="Alunos"><div class="tabela-valor">{{ $t['total_alunos'] ?? 'Não informado' }}</div></td>
+
           <td style="font-family:var(--font-mono);" data-rotulo="Ano letivo"><div class="tabela-valor">{{ $t['ano_letivo'] }}</div></td>
           <td data-rotulo="Status"><div class="tabela-valor">
             @if($t['ativo'])
@@ -113,7 +100,7 @@
         </tr>
       @empty
         <tr>
-          <td colspan="{{ (\App\Support\Acesso::pessoal() || \App\Support\Acesso::administrativo()) ? 8 : 9 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
+          <td colspan="{{ \App\Support\Acesso::pessoal() ? 7 : 8 }}" style="text-align:center;padding:48px 20px;color:var(--muted);">
             <div class="icone-grande"><x-icone nome="escola" /></div>
             <div style="font-size:15px;font-weight:600;color:var(--fg-2);margin-bottom:6px;">Nenhuma turma encontrada</div>
             <p>@if($haFiltros) Ajuste ou limpe os filtros para encontrar outros registros. @else Crie a primeira turma usando o botão "+ Nova turma". @endif</p>
@@ -123,8 +110,11 @@
     </tbody>
   </table>
 </x-tabela>
+  @if(!\App\Support\Acesso::administrativo())</details>@include('turmas._colecao')@endif
 @endif
 </section>
+
+@include('turmas._modelos', ['paginaModelos'=>'turmas'])
 
 {{-- Modal: criar turma --}}
 @pode('turma.gerir')
