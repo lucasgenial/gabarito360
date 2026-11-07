@@ -9,10 +9,10 @@ use Illuminate\Http\Request;
 class RevisaoAcesso
 {
     public const MENSAGEM = 'Seu acesso ativo mudou. Esta ação não foi executada.';
-    public const BINARIOS = ['perfil.foto', 'usuarios.foto', 'escolas.logo', 'redes.logo', 'alunos.foto',
+    public const BINARIOS = ['turmas.foto', 'perfil.foto', 'usuarios.foto', 'escolas.logo', 'redes.logo', 'alunos.foto',
         'correcao.tentativa.imagem', 'cartoes.imagem-segura', 'cartoes.imagem',
         'pedidos.exportacoes.arquivo', 'correcao.pdf', 'resultados.lote', 'resultados.pdf', 'turmas.painelPdf'];
-    public const DADOS = ['correcao.status', 'correcao.cartoes', 'correcao.alunos', 'correcao.envio',
+    public const DADOS = ['turmas.imagem', 'correcao.status', 'correcao.cartoes', 'correcao.alunos', 'correcao.envio',
         'cartoes.retirada', 'resultados.historico', 'escolas.censo.buscar', 'escolas.censo.pesquisar',
         'instituicoes.municipios', 'catalogo-pedidos.municipios', 'catalogo-atendimento.municipios', 'catalogo-gestao.municipios'];
 

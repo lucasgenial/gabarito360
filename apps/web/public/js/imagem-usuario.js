@@ -11,7 +11,7 @@ var imagem_usuarioConfig = JSON.parse(document.getElementById('imagem-usuario-co
  var atual=imagem_usuarioConfig.inicial,origem=null,ocupado=false,blob=null;
  var editor=new G360PreparoFoto({input:arquivo,camera:camera,root:document.getElementById('imagem-usuario-editor'),error:mostrarErro,change:atualizar,start:function(){cancelar.textContent='Cancelar';erro.hidden=true;sucesso.hidden=true;}});
  function renderizar(local,d,tamanho){
-  var span=document.createElement('span');span.className='avatar-aluno avatar-aluno--azul avatar-aluno--'+tamanho;span.setAttribute('aria-hidden','true');
+  var span=document.createElement('span');span.className='avatar-aluno avatar-catalogo-educadores avatar-aluno--azul avatar-aluno--'+tamanho;span.setAttribute('aria-hidden','true');
   if(d.tem_foto&&d.foto_url){var img=document.createElement('img');if(typeof d.foto_url==='string'&&d.foto_url.startsWith('blob:'))img.src=d.foto_url;else if(d.foto_url&&typeof d.foto_url==='object')img.dataset.imagemContextual=JSON.stringify(d.foto_url);else throw new Error('Imagem indisponível.');img.alt='';img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:inherit;';span.append(img);}
   else{var id=Number(d.avatar_id);if(id>=1&&id<=36){span.classList.add('avatar-aluno--imagem');span.style.setProperty('--avatar-x',((id-1)%6)*20+'%');span.style.setProperty('--avatar-y',Math.floor((id-1)/6)*20+'%');}var iniciais=document.createElement('span');iniciais.className='avatar-iniciais';iniciais.textContent=local.dataset.iniciais||document.querySelector('[data-imagem-propria]')?.dataset.iniciais||'?';span.append(iniciais);}
   local.replaceChildren(span);

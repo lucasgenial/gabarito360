@@ -1,0 +1,16 @@
+{
+  "generation_tool": "image_gen built-in",
+  "date": "2026-11-07",
+  "educadores": {
+    "file": "educadores-v1.png",
+    "count": 36,
+    "brief": "Original cohesive six by six atlas of adult educator portraits in pixel art, ages 25 to 65, varied skin tones, hairstyles, glasses, beards and professional clothing. No text.",
+    "sha256": "e6223e30a58f7472c8753a927ae2518164380dbfd8a2dab63ac89341d0e98209"
+  },
+  "turmas": {
+    "file": "brasoes-v1.png",
+    "count": 36,
+    "brief": "Original cohesive six by six atlas of medieval fantasy pixel art shields with distinct scholarly, animal and celestial emblems. No franchise insignia or text.",
+    "sha256": "754ac7651c861dc13938169c799b6e38cc3c1d9a2246d5a9a392f734fab10e97"
+  }
+}

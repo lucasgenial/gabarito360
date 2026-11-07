@@ -6,6 +6,7 @@
 @endsection
 @section('content')
 <x-pagina :titulo="$turma['nome']">
+  <x-slot:imagem>@pode('turma.gerir')<button type="button" class="imagem-perfil-abrir" data-abrir-imagem-turma aria-label="Alterar imagem da turma"><x-avatar-turma :turma="$turma" tamanho="lg" /></button>@else<x-avatar-turma :turma="$turma" tamanho="lg" />@endpode</x-slot:imagem>
   <x-slot:sub>{{ $turma['escola_nome'] }} · {{ $turma['ano_letivo'] }} · {{ $turma['total_alunos'] }} aluno(s) ativo(s)</x-slot:sub>
   @if(\App\Support\Acesso::pode('aluno.ver'))<a class="btn btn-secondary" href="{{ route('alunos.index', ['turma_id' => $turma['id']]) }}"><x-icone nome="aluno" /> Gerenciar alunos</a>@endif
 </x-pagina>
@@ -26,4 +27,5 @@
 <section id="alunos" data-turma-painel="alunos" class="tu1-painel" aria-label="Alunos">
 @include('turmas._alunos')
 </section>
+@pode('turma.gerir')@include('turmas._imagem')@endpode
 @endsection
