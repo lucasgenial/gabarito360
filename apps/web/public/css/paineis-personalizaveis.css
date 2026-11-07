@@ -11,6 +11,8 @@
 .painel-widget-corpo>.field-help,.painel-demo-descricao{margin:0;color:var(--muted);font-size:.875rem;line-height:1.5}
 .painel-widget-corpo [hidden],.painel-widget [hidden]{display:none!important}
 .painel-widget-corpo .tu1r3-grafico,.painel-widget-corpo>.grafico{flex:0 0 auto;height:clamp(260px,30vw,360px);width:100%;min-width:0;overflow:hidden}
+/* O SVG do ECharts ocupa a área medida do gráfico, inclusive em widgets altos. */
+.painel-widget :is(.grafico,.tu1r3-grafico) svg[viewBox]:not(.nav-icone){max-height:none;max-width:none}
 .painel-widget-corpo .grafico-dados,.painel-widget-corpo .tu1r3-dados{flex:0 0 auto;margin:0;padding-top:8px;border-top:1px solid var(--border-soft)}
 .painel-widget-corpo .grafico-dados summary,.painel-widget-corpo .tu1r3-dados summary{display:flex;align-items:center;min-height:44px;cursor:pointer}
 .painel-widget-corpo .tu1r3-dados ul{max-height:none}
