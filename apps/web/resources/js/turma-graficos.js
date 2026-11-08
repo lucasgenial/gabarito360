@@ -3,6 +3,8 @@ import {BarChart,PieChart} from 'echarts/charts';
 import {GridComponent,TooltipComponent,LegendComponent,AriaComponent,TitleComponent} from 'echarts/components';
 import {SVGRenderer} from 'echarts/renderers';
 import {LabelLayout} from 'echarts/features';
+import './painel-ajuda.js';
+import {baseResultados} from './painel-indicadores.js';
 use([BarChart,PieChart,GridComponent,TooltipComponent,LegendComponent,AriaComponent,TitleComponent,SVGRenderer,LabelLayout]);
 
 // Dados vêm do DTO autorizado do painel. Nenhuma consulta direta ou mudança de escopo no cliente.
@@ -34,7 +36,7 @@ if(raiz){
   const orientacao=elemento.closest('[data-widget-id]')?.dataset.orientacao;
   const horizontal=orientacao==='horizontal'||(orientacao!=='vertical'&&(tipo==='avaliacoes'||elemento.clientWidth<600));
   const comum={animation:!matchMedia('(prefers-reduced-motion: reduce)').matches,color:paleta,textStyle:{fontFamily:'Figtree, sans-serif',color:texto},aria:{enabled:true,label:{description:'Painel de indicadores da turma. Os valores completos e a base de cálculo estão na alternativa textual acessível de cada gráfico.'}},tooltip:{trigger:'axis',renderMode:'richText',confine:true},grid:{left:44,right:22,top:30,bottom:54,containLabel:true}};
-  if(tipo==='distribuicao'){comum.tooltip.formatter=itens=>{const i=itens[0];return i.axisValue+'\nResultados: '+i.value+'\nBase: '+(analise.distribuicao_acertos?.total??0)+' resultados';};}
+  if(tipo==='distribuicao'){comum.tooltip.formatter=itens=>{const i=itens[0];return i.axisValue+'\nResultados: '+i.value+'\n'+baseResultados(analise.distribuicao_acertos?.total,dados.situacoes?.total,analise.distribuicao_acertos?.percentuais_excluidos);};}
   const numerico={type:'value',min:0,max:100,interval:elemento.clientWidth<600?50:20,axisLabel:{formatter:'{value}%'},splitLine:{lineStyle:{color:borda}}};
   if(tipo==='distribuicao'){
    const faixas=analise.distribuicao_acertos?.faixas||[];
@@ -45,6 +47,7 @@ if(raiz){
   }
   if(tipo==='avaliacoes'){
    const itens=recortarAvaliacoes(elemento,horizontal);if(!(analise.por_avaliacao||[]).some(i=>i.n>0))return null;const primeiraOrdem=paginaAvaliacoes.inicio+1;
+   comum.tooltip.formatter=series=>{const i=Array.isArray(series)?series[0]:null,p=i?itens[i.dataIndex]:null;if(!p)return '';return p.titulo+'\nMédia: '+percentual(p.media_pct)+'\nMediana: '+percentual(p.mediana_pct)+'\n'+baseResultados(p.n,p.resultados_total,p.percentuais_excluidos)+'\nAvaliação completa no recorte desta turma.';};
    const categoria={type:'category',inverse:horizontal,data:itens.map(i=>i.titulo+' · n='+i.n),axisLabel:{width:horizontal?(elemento.clientWidth<600?80:130):Math.max(55,Math.floor((elemento.clientWidth-64)/Math.max(1,itens.length))-14),overflow:'truncate',interval:0,fontSize:11,formatter:(valor,index)=>(primeiraOrdem+index)+' · '+valor},axisTick:{show:false}};
    return {...comum,grid:{left:4,right:horizontal?48:14,top:25,bottom:54,containLabel:true},legend:{bottom:0,textStyle:{color:texto}},xAxis:horizontal?numerico:categoria,yAxis:horizontal?categoria:numerico,series:[{name:'Média',type:'bar',barMaxWidth:17,labelLayout:{hideOverlap:true},data:itens.map(i=>i.media_pct),itemStyle:{borderRadius:horizontal?[0,4,4,0]:[4,4,0,0]},label:{show:true,position:horizontal?'right':'top',padding:[0,3],formatter:p=>percentual(p.value),color:texto}},{name:'Mediana',type:'bar',barMaxWidth:17,labelLayout:{hideOverlap:true},data:itens.map(i=>i.mediana_pct),itemStyle:{borderRadius:horizontal?[0,4,4,0]:[4,4,0,0]},label:{show:true,position:horizontal?'right':'top',padding:[0,3],formatter:p=>percentual(p.value),color:texto}}]};
   }
@@ -57,7 +60,7 @@ if(raiz){
  function renderizar(elemento){
   if(!elemento.clientWidth)return;
   let g=graficos.get(elemento);const config=opcoes(elemento.dataset.grafico,elemento);
-  if(!config){if(g){g.dispose();graficos.delete(elemento);}vazio(elemento,elemento.dataset.grafico==='questoes'?'Sem análise de questões disponível neste recorte.':'Ainda não há resultados para este gráfico.');return;}
+  if(!config){if(g){g.dispose();graficos.delete(elemento);}vazio(elemento,elemento.dataset.grafico==='questoes'?'Sem análise de questões disponível neste recorte.':(['distribuicao','avaliacoes'].includes(elemento.dataset.grafico)&&dados.situacoes?.total>0?'Os resultados do recorte não têm percentual válido.':'Ainda não há resultados para este gráfico.'));return;}
   if(!g){elemento.textContent='';elemento.classList.remove('tu1r3-grafico-vazio');g=init(elemento,null,{renderer:'svg'});graficos.set(elemento,g);}
   const tipo=elemento.dataset.grafico;
   if(tipo==='distribuicao'||tipo==='avaliacoes'){

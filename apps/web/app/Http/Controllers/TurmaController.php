@@ -140,7 +140,7 @@ class TurmaController extends Controller
             catch(ConnectionException){$opcoesDocentesErro=true;}
         }
 
-        $painel=null; $painelErro=false; $painelErros=[]; $painelAplicado=[];
+        $painel=null; $painelErro=false; $painelErros=[]; $painelAplicado=[]; $painelConsultadoEm=null;
         if (\App\Support\Acesso::pode('relatorio.turma')) {
             $regras=$this->regrasFiltrosPainel();
             $v=\Illuminate\Support\Facades\Validator::make(request()->only(array_keys($regras)),$regras,$this->mensagensFiltrosPainel());
@@ -151,11 +151,11 @@ class TurmaController extends Controller
                 $painelAplicado=$anterior->fails()?[]:$anterior->validated();
             }else{$painelAplicado=$v->validated();}
             $recorte=$this->mapearFiltrosPainel($painelAplicado);
-            try { $r=$this->api->get("/v1/turmas/$id/painel",$recorte); $painelErro=$r->failed(); if(!$painelErro)$painel=$r->json('data'); }
+            try { $r=$this->api->get("/v1/turmas/$id/painel",$recorte); $painelErro=$r->failed(); if(!$painelErro){$painel=$r->json('data');$painelConsultadoEm=now('America/Sao_Paulo')->format('d/m/Y H:i:s P');} }
             catch(ConnectionException){$painelErro=true;}
         }
         return view('turmas.show', [
-            'painel'=>$painel,'painelErro'=>$painelErro,'painelErros'=>$painelErros,'painelAplicado'=>$painelAplicado,
+            'painel'=>$painel,'painelErro'=>$painelErro,'painelErros'=>$painelErros,'painelAplicado'=>$painelAplicado,'painelConsultadoEm'=>$painelConsultadoEm,
             'secaoInicial'=>$filtros['secao']??'visao-geral', 'opcoesDocentes'=>$opcoesDocentes,'opcoesDocentesErro'=>$opcoesDocentesErro,
             'acessoErro'=>$acessoErro,'escolasErro'=>$escolasErro,
             'turma'            => $resp->json('data'),

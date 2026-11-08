@@ -1,0 +1,19 @@
+.painel-titulo-ajuda {
+  appearance: none; border: 0; background: transparent; color: inherit;
+  font: inherit; text-align: start; padding: 0; min-height: 44px;
+  cursor: pointer; text-decoration: underline dotted; text-decoration-color: var(--border);
+  text-underline-offset: .25em;
+}
+.painel-titulo-ajuda:hover { text-decoration-color: var(--accent); }
+.painel-titulo-ajuda:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+.painel-ajuda {
+  position: fixed; inset: auto; left: 16px; top: 16px; margin: 0;
+  box-sizing: border-box; width: 320px; max-width: calc(100vw - 32px);
+  max-height: min(420px, calc(100dvh - 32px)); overflow: auto;
+  padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--surface); color: var(--fg); box-shadow: var(--shadow-sm);
+  font-family: inherit; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere;
+}
+.painel-ajuda p { margin: 0 0 10px; }
+.painel-ajuda p:last-child { margin-bottom: 0; }
+@media print { .painel-ajuda { display: none !important; } .painel-titulo-ajuda { text-decoration: none; } }
