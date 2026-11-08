@@ -79,9 +79,10 @@ export function prepareLayout(user,standard,limits){
   engine.batchUpdate(false,false);
   // Uma eventual âncora nova nasce na posição que a biblioteca lhe encontrou.
   const anchors=current.filter(n=>n.section===section&&n.fixo===true);
-  engine.compact('compact');out.push(...captureLayout(engine,before,limits,{anchors}));
+  out.push(...captureLayout(engine,before,limits,{anchors}));
  }
- return validateLayout(out,limits,{complete:true});
+ const valid=validateLayout(out,limits,{complete:true});
+ try{return fillLateral(valid,limits);}catch(error){if(error.feedback)return valid;throw error;}
 }
 
 /** Fallback legado sem padrao.desktop: o posicionamento inicial também é nativo. */
@@ -92,9 +93,10 @@ export function autoLayout(items,limits){
   const before=items.filter(n=>n.section===section),engine=nativeEngine([],limits,{compact:false});
   engine.batchUpdate();
   for(const n of before){validateLayout([n],limits);const opts=nodeOptions(n,limits.get(n.id));delete opts.x;delete opts.y;opts.autoPosition=true;engine.addNode(opts);}
-  engine.batchUpdate(false,false);engine.compact('compact');out.push(...captureLayout(engine,before,limits,{anchors:[]}));
+  engine.batchUpdate(false,false);out.push(...captureLayout(engine,before,limits,{anchors:[]}));
  }
- return validateLayout(out,limits,{complete:true});
+ const valid=validateLayout(out,limits,{complete:true});
+ try{return fillLateral(valid,limits);}catch(error){if(error.feedback)return valid;throw error;}
 }
 
 /** Teclado fornece coordenadas à API nativa, não troca membros de uma fila. */
@@ -106,4 +108,130 @@ export function keyboardChange(n,key,shift,c){
  }
  if(key==='ArrowLeft'||key==='ArrowRight')return {x:Math.max(0,Math.min(12-n.w,n.x+(key==='ArrowRight'?1:-1)))};
  return {y:Math.max(0,Math.min(200-n.h,n.y+(key==='ArrowDown'?1:-1)))};
+}
+
+export const lateralFeedback='Não há largura suficiente neste trecho. Solte acima ou abaixo.';
+function cannotFit(){const error=new Error(lateralFeedback);error.feedback=true;throw error;}
+export function bandsOf(items){
+ const bands=[];for(const n of [...items].sort((a,b)=>a.y-b.y||a.x-b.x)){
+  let band=bands.find(b=>b.y===n.y);if(!band)bands.push(band={y:n.y,items:[]});band.items.push(project(n));
+ }return bands;
+}
+
+/** Repartição inteira limitada, proporcional e estável na ordem indicada pelo gesto. */
+export function distributeWidths(items,capacity,limits,{activeId=null,preferredWidth=null,minWidths=new Map()}={}){
+ if(!Number.isInteger(capacity)||capacity<1||capacity>12||!items.length)cannotFit();
+ const min=n=>Math.max(limits.get(n.id).minW,minWidths.get(n.id)??0),max=n=>limits.get(n.id).maxW;
+ if(items.some(n=>min(n)>max(n))||items.reduce((s,n)=>s+min(n),0)>capacity)cannotFit();
+ const total=Math.min(capacity,items.reduce((s,n)=>s+max(n),0)),out=new Map(),active=items.find(n=>n.id===activeId);
+ let others=items,remaining=total;
+ if(active){others=items.filter(n=>n!==active);const lower=Math.max(min(active),total-others.reduce((s,n)=>s+max(n),0)),upper=Math.min(max(active),total-others.reduce((s,n)=>s+min(n),0));
+  const requested=preferredWidth??active.w;if(!Number.isInteger(requested))cannotFit();
+  const width=Math.max(lower,Math.min(upper,requested));out.set(active.id,width);remaining-=width;
+ }
+ let pending=[...others];
+ while(pending.length){const weight=pending.reduce((sum,n)=>sum+n.w,0),offers=pending.map((n,index)=>({n,index,exact:remaining*n.w/weight}));
+  const lower=offers.filter(o=>o.exact<min(o.n));
+  const bounded=lower.length?lower:offers.filter(o=>o.exact>max(o.n));
+  if(bounded.length){for(const o of bounded){const w=o.exact<min(o.n)?min(o.n):max(o.n);out.set(o.n.id,w);remaining-=w;}pending=pending.filter(n=>!out.has(n.id));continue;}
+  for(const o of offers){const w=Math.floor(o.exact);out.set(o.n.id,w);remaining-=w;}
+  offers.sort((a,b)=>(b.exact-Math.floor(b.exact))-(a.exact-Math.floor(a.exact))||a.index-b.index);
+  for(const o of offers)if(remaining){out.set(o.n.id,out.get(o.n.id)+1);remaining--;}
+  break;
+ }
+ return out;
+}
+
+export function minimumPixels(id){
+ if(['alunos-destaques','alunos-atencao','agenda-pedagogica','agenda-administrativa','proximos-compromissos','responsabilidade-docente-aplicacao'].includes(id))return 280;
+ if(['cadastros-turno','comparacao-turmas','cobertura-disciplinas','distribuicao-acertos','resultados-avaliacao','situacoes-registradas','periodos-escolares','habilidades','reavaliacoes'].includes(id))return 300;
+ return 240;
+}
+export function responsiveMinWidths(limits,gridWidth,gap=16){
+ if(!Number.isFinite(gridWidth)||gridWidth<=0||!Number.isFinite(gap)||gap<0)cannotFit();
+ return new Map([...limits].map(([id,c])=>[id,Math.max(c.minW,Math.ceil(12*(minimumPixels(id)+gap)/gridWidth))]));
+}
+
+function intervalsAt(engine,y){
+ const taken=Array(12).fill(false);for(const n of engine.nodes)if(n.y<=y&&n.y+n.h>y)for(let x=n.x;x<n.x+n.w;x++)taken[x]=true;
+ const result=[];for(let x=0;x<12;){if(taken[x]){x++;continue;}const start=x;while(x<12&&!taken[x])x++;result.push({x:start,w:x-start});}return result;
+}
+const distance=(center,slot)=>center<slot.x?slot.x-center:center>slot.x+slot.w?center-slot.x-slot.w:0;
+
+/** Faixas por topo, com h próprio; a engine nativa verifica e reserva as áreas reais. */
+function arrangeBands(bands,limits,{activeId=null,preferredWidth=null,minWidths=new Map(),affected=new Set()}={}){
+ const records=bands.flatMap(b=>b.items),ids=new Set();
+ for(const n of records){validateLayout([n],limits);if(ids.has(n.id))throw Error('Card repetido');ids.add(n.id);}
+ const pins=records.filter(n=>n.fixo===true);validateLayout(pins,limits);
+ const engine=nativeEngine(pins,limits,{compact:false});engine.mode='float';
+ let floor=0;
+ for(const band of bands){const moving=band.items.filter(n=>n.fixo!==true);if(!moving.length)continue;
+  const ownPins=band.items.filter(n=>n.fixo===true),anchorY=ownPins.length?ownPins[0].y:null;
+  if(ownPins.some(n=>n.y!==anchorY))cannotFit();
+  let accepted=null;
+  for(let y=anchorY??floor;y<200&&!accepted;y++){
+   if(anchorY!==null&&y!==anchorY)break;
+   const slots=intervalsAt(engine,y);if(!slots.length)continue;
+   const buckets=slots.map(slot=>({slot,items:[]}));
+   for(const n of moving){const center=n.x+n.w/2;const chosen=[...buckets].sort((a,b)=>distance(center,a.slot)-distance(center,b.slot)||a.slot.x-b.slot.x)[0];chosen.items.push(n);}
+   const proposal=[];let fits=true;
+   for(const {slot,items}of buckets){if(!items.length)continue;let widths;
+    // Não estreitar uma faixa alheia só para forçá-la num vão vertical anterior.
+    if(!items.some(n=>n.id===activeId)&&slot.w<Math.min(12,items.reduce((sum,n)=>sum+n.w,0))){fits=false;break;}
+    try{widths=distributeWidths(items,slot.w,limits,{activeId,preferredWidth,minWidths:items.some(n=>affected.has(n.id))?minWidths:new Map()});}catch{fits=false;break;}
+    let x=slot.x;for(const n of items){const candidate={...project(n),x,y,w:widths.get(n.id)};x+=candidate.w;
+     if(!engine.isAreaEmpty(candidate.x,candidate.y,candidate.w,candidate.h)||candidate.y+candidate.h>200){fits=false;break;}proposal.push(candidate);
+    }if(!fits)break;
+   }
+   if(fits&&proposal.length===moving.length)accepted=proposal;
+  }
+  if(!accepted)cannotFit();
+  for(const n of accepted)engine.addNode({...nodeOptions(n,limits.get(n.id)),locked:true,noMove:true,noResize:true});
+  floor=accepted[0].y+1;
+ }
+ const result=captureLayout(engine,records,limits,{anchors:pins});
+ const original=new Map(records.map(n=>[n.id,n]));
+ for(const n of result)if(n.id===activeId&&(n.w!==original.get(n.id).w||n.h!==original.get(n.id).h))n.altura_desejada=n.h;
+ return validateLayout(result,limits,{anchors:pins});
+}
+
+export function fillLateral(items,limits){
+ validateLayout(items,limits);const out=[];
+ for(const section of new Set(items.map(n=>n.section)))out.push(...arrangeBands(bandsOf(items.filter(n=>n.section===section)),limits));
+ return validateLayout(out,limits,{anchors:items.filter(n=>n.fixo===true)});
+}
+
+/** Intenção é capturada antes da colisão nativa: faixa de origem/índice ou topo/rodapé. */
+export function lateralAction(before,limits,id,action,{minWidths=new Map()}={}){
+ validateLayout(before,limits);const current=before.find(n=>n.id===id);if(!current||current.fixo===true)cannotFit();
+ const section=current.section,local=before.filter(n=>n.section===section),bands=bandsOf(local),source=bands.find(b=>b.items.some(n=>n.id===id));
+ const moving=project(current),affected=new Set(source.items.map(n=>n.id));
+ if(action.type==='resize'){
+  if(action.h!==undefined){if(!Number.isInteger(action.h))cannotFit();moving.h=Math.max(limits.get(id).minH,Math.min(limits.get(id).maxH,action.h));if(moving.h!==current.h)moving.altura_desejada=moving.h;}
+  source.items=source.items.map(n=>n.id===id?moving:n);
+ }else if(action.type==='move'){
+  const target=bands.find(b=>b.items.some(n=>n.id===action.targetId));if(!target||(action.targetId===id&&action.place==='lateral'))cannotFit();
+  source.items=source.items.filter(n=>n.id!==id);
+  if(action.place==='before-band'||action.place==='after-band')bands.splice(bands.indexOf(target)+(action.place==='after-band'?1:0),0,{y:target.y,items:[moving]});
+  else if(action.place==='lateral'){
+   const at=target.items.findIndex(n=>n.id===action.targetId),peer=target.items[at];if(peer.fixo===true)cannotFit();
+   moving.x=peer.x;moving.w=peer.w;target.items.splice(at+(action.after?1:0),0,moving);for(const n of target.items)affected.add(n.id);
+  }else cannotFit();
+ }else cannotFit();
+ // Antes de buscar outra altura, o conjunto lateral deve caber no trecho escolhido do snapshot.
+ const activeBand=bands.find(b=>b.items.some(n=>n.id===id));
+ if(action.type==='resize'||action.place==='lateral'){
+  const targetY=action.type==='resize'?current.y:local.find(n=>n.id===action.targetId).y;
+  const blockers=local.filter(n=>n.fixo===true||(!activeBand.items.some(m=>m.id===n.id)&&n.y<targetY));
+  const space=nativeEngine(blockers,limits,{compact:false});space.mode='float';
+  const slots=intervalsAt(space,targetY),center=action.type==='move'?(action.after?moving.x+moving.w-.01:moving.x+.01):current.x+current.w/2;
+  const slot=[...slots].sort((a,b)=>distance(center,a)-distance(center,b)||a.x-b.x)[0];if(!slot)cannotFit();
+  const group=activeBand.items.filter(n=>n.fixo!==true&&distance(n.x+n.w/2,slot)===0);
+  if(!group.some(n=>n.id===id))group.push(moving);
+  distributeWidths(group,slot.w,limits,{activeId:id,preferredWidth:action.w??current.w,minWidths});
+ }
+ const next=arrangeBands(bands.filter(b=>b.items.length),limits,{activeId:id,preferredWidth:action.w??current.w,minWidths,affected});
+ const result=[...before.filter(n=>n.section!==section),...next];
+ const active=result.find(n=>n.id===id);if(active.w!==current.w||active.h!==current.h)active.altura_desejada=active.h;
+ return validateLayout(result,limits,{anchors:before.filter(n=>n.fixo===true)});
 }
