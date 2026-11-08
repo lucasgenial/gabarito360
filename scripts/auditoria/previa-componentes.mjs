@@ -11,6 +11,7 @@ const rotas=new Map([
   ['/previas/tailwind/interface.js',['text/javascript','../../apps/web/public/previas/tailwind/interface.js']],
   ['/brand/gabarito360-icon.svg',['image/svg+xml','../../apps/web/public/brand/gabarito360-icon.svg']],
   ['/brand/gabarito360-icon-dark.svg',['image/svg+xml','../../apps/web/public/brand/gabarito360-icon-dark.svg']],
+  ['/images/avatares/educadores-v1.png',['image/png','../../apps/web/public/images/avatares/educadores-v1.png']],
   ['/favicon.ico',['image/x-icon','../../apps/web/public/favicon.ico']],
 ]);
 const servidor=createServer((req,res)=>{
@@ -53,6 +54,14 @@ try{
   await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).click();
   assert.equal(await pagina.locator('#dialogo-cancelar').evaluate(e=>e===document.activeElement),true);
   await pagina.keyboard.press('Escape');
+
+  const fundos=[];
+  for(const tipo of ['Informação','Sucesso','Atenção','Erro']){
+    await pagina.getByRole('button',{name:tipo,exact:true}).click();
+    fundos.push(await pagina.locator('.notificacao').evaluate(e=>getComputedStyle(e).backgroundColor));
+    assert.equal(await pagina.locator('.notificacao').getAttribute('role'),tipo==='Erro'?'alert':'status');
+  }
+  assert.equal(new Set(fundos).size,4);
   assert.equal(await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).evaluate(e=>e===document.activeElement),true);
   await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).click();
   await pagina.getByRole('button',{name:'Concluir demonstração',exact:true}).click();
@@ -79,13 +88,20 @@ try{
     await pagina.setViewportSize({width:largura,height:844});
     assert.equal(await altura(pagina.getByRole('button',{name:'pq',exact:true})),44);
     assert.equal(await pagina.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-    assert.equal(await pagina.locator('.contexto-cabecalho summary').count(),0);
+    assert.equal(await pagina.locator('#registros').getAttribute('data-modo'),'cards');
+    assert.equal(await pagina.getByRole('button',{name:'gd',exact:true}).evaluate(e=>Math.round(e.getBoundingClientRect().height)),48);
+    assert.equal(await pagina.getByRole('button',{name:'xg',exact:true}).evaluate(e=>Math.round(e.getBoundingClientRect().height)),56);
+    await pagina.getByRole('button',{name:'Meu espaço',exact:true}).click();
+    assert.equal(await pagina.locator('#contexto-espaco summary').count(),0);
     assert.equal(await pagina.locator('#nome-escola-exemplo').evaluate(e=>e.scrollWidth<=e.clientWidth),true);
-    assert.equal(await pagina.locator('header').evaluate(e=>getComputedStyle(e).position),'relative');
-    await pagina.getByRole('button',{name:'Abrir seções da referência',exact:true}).click();
+    assert.equal(await pagina.locator('#perfil-exemplo').evaluate(e=>e.scrollWidth<=e.clientWidth),true);
+    await pagina.locator('#dialogo-cancelar').click();
+    assert.equal(await pagina.locator('header').evaluate(e=>e.getBoundingClientRect().height<=90),true);
+    await pagina.getByRole('button',{name:'Abrir menu pelo avatar',exact:true}).click();
     assert.equal(await pagina.locator('main').evaluate(e=>e.inert),true);
     await pagina.keyboard.press('Escape');
     assert.equal(await pagina.locator('main').evaluate(e=>e.inert),false);
+    assert.equal(await pagina.getByRole('navigation',{name:'Seções da prévia no celular'}).isVisible(),true);
   }
   assert.deepEqual(erros,[]);
   assert.equal(requests.every(r=>r.metodo==='GET'&&new URL(r.url).origin===base),true);

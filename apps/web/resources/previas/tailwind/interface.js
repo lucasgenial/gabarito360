@@ -11,16 +11,28 @@
     const uso=document.createElementNS('http://www.w3.org/2000/svg','use');
     uso.setAttribute('href','#i-'+nome);svg.append(uso);return svg;
   }
-  function notificar(texto) {
+  const tiposNotificacao={informacao:{titulo:'Informação',icone:'info'},sucesso:{titulo:'Sucesso',icone:'confirmar'},atencao:{titulo:'Atenção',icone:'alerta'},erro:{titulo:'Erro',icone:'alerta'}};
+  function notificar(texto,tipo='informacao') {
+    if(!Object.hasOwn(tiposNotificacao,tipo))tipo='informacao';
+    const definicao=tiposNotificacao[tipo];
     const regiao=selecionar('#notificacoes');
-    const caixa=document.createElement('div');caixa.className='notificacao';
-    const mensagem=document.createElement('p');mensagem.className='tw:flex-1 tw:text-sm tw:leading-5';mensagem.textContent=texto;
+    const caixa=document.createElement('div');caixa.className='notificacao notificacao-'+tipo;caixa.setAttribute('role',tipo==='erro'?'alert':'status');caixa.setAttribute('aria-atomic','true');
+    const conteudo=document.createElement('div');conteudo.className='tw:flex-1 tw:text-sm tw:leading-5';
+    const titulo=document.createElement('p');titulo.className='tw:font-semibold';titulo.textContent=definicao.titulo;
+    const mensagem=document.createElement('p');mensagem.className='tw:mt-1';mensagem.textContent=texto;conteudo.append(titulo,mensagem);
     const fechar=document.createElement('button');fechar.type='button';fechar.className='botao botao-icone botao-discreto';fechar.setAttribute('aria-label','Fechar notificação');fechar.title='Fechar notificação';fechar.append(icone('fechar'));
     fechar.addEventListener('click',()=>{caixa.remove();});
-    caixa.append(icone('info'),mensagem,fechar);regiao.replaceChildren(caixa);
+    caixa.append(icone(definicao.icone),conteudo,fechar);regiao.replaceChildren(caixa);
     // Persistente até fechar: não desaparece durante leitura/foco, nem exige pausa.
   }
-  selecionarTodos('[data-toast]').forEach(botao=>botao.addEventListener('click',()=>notificar(botao.dataset.toast)));
+  selecionarTodos('[data-toast]').forEach(botao=>botao.addEventListener('click',()=>notificar(botao.dataset.toast,botao.dataset.toastTipo)));
+  const mostrarNotificacao=selecionar('#feedback [data-toast]');
+  const tipos=document.createElement('div');tipos.className='linha-acoes tw:mt-4';tipos.setAttribute('role','group');tipos.setAttribute('aria-label','Tipos de notificação');
+  mostrarNotificacao.replaceWith(tipos);mostrarNotificacao.textContent='Informação';mostrarNotificacao.dataset.toastTipo='informacao';tipos.append(mostrarNotificacao);
+  for(const [tipo,texto] of [['sucesso','Exemplo de operação concluída, sem gravação de dados.'],['atencao','Confira as informações antes de continuar.'],['erro','Não foi possível concluir o exemplo. Nenhum dado foi alterado.']]){
+    const botao=document.createElement('button');botao.type='button';botao.className='botao botao-secundario';botao.textContent=tiposNotificacao[tipo].titulo;
+    botao.addEventListener('click',()=>notificar(texto,tipo));tipos.append(botao);
+  }
 
   const tema=selecionar('#alternar-tema');
   tema.addEventListener('click',()=>{
@@ -28,17 +40,18 @@
     const nome='Mudar para tema '+(escuro?'claro':'escuro');tema.setAttribute('aria-label',nome);tema.title=nome;tema.replaceChildren(icone(escuro?'sol':'lua'));
   });
   const menu=selecionar('#menu-lateral'),abrirMenu=selecionar('#abrir-menu'),fundo=selecionar('#fundo-menu');
-  const fundoInerte=[selecionar('main'),selecionar('header'),selecionar('footer')];
+  const acionadoresMenu=selecionarTodos('[data-menu-abrir]');let ultimoMenu=abrirMenu;
+  const fundoInerte=[selecionar('main'),selecionar('header'),selecionar('footer'),selecionar('.navegacao-inferior'),selecionar('#notificacoes')].filter(Boolean);
   function fecharMenu(devolver=true) {
-    menu.dataset.aberto='false';fundo.hidden=true;abrirMenu.setAttribute('aria-expanded','false');
+    menu.dataset.aberto='false';fundo.hidden=true;acionadoresMenu.forEach(botao=>botao.setAttribute('aria-expanded','false'));
     fundoInerte.forEach(elemento=>{elemento.inert=false;});
-    if(devolver)abrirMenu.focus();
+    if(devolver)ultimoMenu.focus();
   }
-  abrirMenu.addEventListener('click',()=>{
-    menu.dataset.aberto='true';fundo.hidden=false;abrirMenu.setAttribute('aria-expanded','true');
+  acionadoresMenu.forEach(botao=>botao.addEventListener('click',()=>{
+    ultimoMenu=botao;menu.dataset.aberto='true';fundo.hidden=false;acionadoresMenu.forEach(acionador=>acionador.setAttribute('aria-expanded','true'));
     fundoInerte.forEach(elemento=>{elemento.inert=true;});
     menu.querySelector('[data-menu-fechar]').focus();
-  });
+  }));
   fundo.addEventListener('click',()=>fecharMenu());
   selecionar('[data-menu-fechar]').addEventListener('click',()=>fecharMenu());
   document.addEventListener('keydown',evento=>{
@@ -50,7 +63,7 @@
       else if(!evento.shiftKey&&document.activeElement===ultimo){evento.preventDefault();primeiro.focus();}
     }
   });
-  const links=selecionarTodos('.lista-menu a');
+  const links=selecionarTodos('.lista-menu a,a[data-secao]');
   function marcarSecao() {
     const atual=location.hash||'#composicao';
     links.forEach(link=>{if(link.hash===atual)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');});
@@ -86,8 +99,17 @@
   });
 
   const tabela=selecionar('#registros'),modos=selecionarTodos('button[data-modo]');
+  const controlesModos=modos[0].parentElement,modoMobile=matchMedia('(max-width:720px)');let apresentacaoPreferida='tabela';
+  const avisoModo=document.createElement('p');avisoModo.className='ajuda tw:px-4 tw:py-2';avisoModo.textContent='Apresentação em cards no celular';controlesModos.parentElement.after(avisoModo);
+  function atualizarModo(){
+    const modo=modoMobile.matches?'cards':apresentacaoPreferida;tabela.dataset.modo=modo;
+    if(modoMobile.matches&&controlesModos.contains(document.activeElement))selecionar('#buscar-aluno').focus({preventScroll:true});
+    controlesModos.hidden=modoMobile.matches;avisoModo.hidden=!modoMobile.matches;
+    modos.forEach(botao=>botao.setAttribute('aria-pressed',String(botao.dataset.modo===modo)));
+  }
+  modoMobile.addEventListener('change',atualizarModo);atualizarModo();
   modos.forEach(botao=>botao.addEventListener('click',()=>{
-    tabela.dataset.modo=botao.dataset.modo;modos.forEach(item=>item.setAttribute('aria-pressed',String(item===botao)));
+    apresentacaoPreferida=botao.dataset.modo;atualizarModo();
   }));
   const normalizar=texto=>texto.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLocaleLowerCase('pt-BR');
   selecionar('#buscar-aluno').addEventListener('input',evento=>{
@@ -103,7 +125,7 @@
   selecionar('#validar-campos').addEventListener('click',()=>{
     const nomeInvalido=marcarCampo(nome,'#nome-erro',nome.value.trim()===''||!nome.validity.valid);
     const anoInvalido=marcarCampo(ano,'#ano-erro',!Number.isInteger(ano.valueAsNumber)||!ano.validity.valid);
-    if(nomeInvalido||anoInvalido)(nomeInvalido?nome:ano).focus();else notificar('Campos válidos no exemplo. Nenhum dado foi enviado ou gravado.');
+    if(nomeInvalido||anoInvalido)(nomeInvalido?nome:ano).focus();else notificar('Campos válidos no exemplo. Nenhum dado foi enviado ou gravado.','sucesso');
   });
   selecionar('#limpar-campos').addEventListener('click',()=>{
     nome.value='';ano.value='2026';selecionar('#observacao').value='';
@@ -111,16 +133,23 @@
   });
 
   const dialogo=selecionar('#dialogo'),filtros=selecionar('#filtros-exemplo'),confirmar=selecionar('#dialogo-confirmar');
+  const contextoEspaco=document.createElement('dl');contextoEspaco.className='contexto-espaco';contextoEspaco.hidden=true;contextoEspaco.id='contexto-espaco';
+  for(const [rotulo,valor,id] of [['Minha escola','Colégio Estadual de Educação Básica Professora Maria das Dores de Almeida e Silva — Unidade Experimental de Ciências e Linguagens','nome-escola-exemplo'],['Meu perfil','Coordenação','perfil-exemplo']]){
+    const grupo=document.createElement('div'),titulo=document.createElement('dt'),dado=document.createElement('dd');titulo.textContent=rotulo;dado.textContent=valor;dado.id=id;grupo.append(titulo,dado);contextoEspaco.append(grupo);
+  }
+  filtros.before(contextoEspaco);
   let ultimoAcionador,modo;
   const textos={
     arquivar:['Arquivar turma — exemplo','O histórico seria preservado e a turma sairia da lista de turmas em uso. Aqui demonstramos somente a confirmação; nenhum registro será alterado.','Concluir demonstração'],
     filtro:['Filtrar indicadores — exemplo','Escolha um recorte para conferir a apresentação do filtro aplicado. Os números da prévia continuam fictícios.','Aplicar exemplo'],
-    revisao:['Como avaliar esta prévia','Navegue pelas seções, teste botões e estados, alterne tema e apresentação dos registros e abra Propriedades e regras. O padrão será aplicado ao sistema após sua aprovação.','Entendi']
+    revisao:['Como avaliar esta prévia','Navegue pelas seções, teste botões e estados, alterne tema e apresentação dos registros e abra Propriedades e regras. O padrão será aplicado ao sistema após sua aprovação.','Entendi'],
+    espaco:['Meu espaço','Escola e perfil deste exemplo. O nome completo permanece disponível, inclusive no celular.','Fechar']
   };
   selecionarTodos('[data-dialogo]').forEach(botao=>botao.addEventListener('click',()=>{
     ultimoAcionador=botao;modo=botao.dataset.dialogo;
     const [titulo,descricao,acao]=textos[modo];selecionar('#dialogo-titulo').textContent=titulo;selecionar('#dialogo-descricao').textContent=descricao;confirmar.textContent=acao;
     confirmar.classList.toggle('botao-perigo',modo==='arquivar');confirmar.classList.toggle('botao-principal',modo!=='arquivar');filtros.hidden=modo!=='filtro';
+    contextoEspaco.hidden=modo!=='espaco';confirmar.hidden=modo==='espaco';selecionar('#dialogo-cancelar').textContent=modo==='espaco'?'Fechar':'Cancelar';
     dialogo.showModal();selecionar('#dialogo-cancelar').focus();
   }));
   selecionarTodos('[data-dialogo-fechar]').forEach(botao=>botao.addEventListener('click',()=>dialogo.close()));
