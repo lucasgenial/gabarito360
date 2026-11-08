@@ -79,6 +79,9 @@ try{
     await pagina.setViewportSize({width:largura,height:844});
     assert.equal(await altura(pagina.getByRole('button',{name:'pq',exact:true})),44);
     assert.equal(await pagina.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    assert.equal(await pagina.locator('.contexto-cabecalho summary').count(),0);
+    assert.equal(await pagina.locator('#nome-escola-exemplo').evaluate(e=>e.scrollWidth<=e.clientWidth),true);
+    assert.equal(await pagina.locator('header').evaluate(e=>getComputedStyle(e).position),'relative');
     await pagina.getByRole('button',{name:'Abrir seções da referência',exact:true}).click();
     assert.equal(await pagina.locator('main').evaluate(e=>e.inert),true);
     await pagina.keyboard.press('Escape');

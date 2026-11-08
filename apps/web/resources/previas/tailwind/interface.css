@@ -92,6 +92,12 @@
   .popover-ajuda { @apply tw:m-auto tw:w-[min(28rem,calc(100vw-2rem))] tw:rounded-lg tw:border tw:border-linha tw:bg-superficie tw:p-4 tw:text-sm tw:leading-6 tw:text-texto tw:shadow-lg; }
   .popover-ajuda::backdrop { background:transparent; }
   .grade-exemplos { @apply tw:grid tw:min-w-0 tw:grid-cols-1 tw:gap-4 tw:lg:grid-cols-2; align-items:start; }
+  .cabecalho-referencia { @apply tw:relative tw:z-30 tw:grid tw:grid-cols-[minmax(0,1fr)_auto] tw:items-center tw:gap-3 tw:border-b tw:border-linha tw:bg-superficie tw:px-4 tw:py-2 tw:lg:sticky tw:lg:top-0 tw:lg:grid-cols-[auto_minmax(0,1fr)_auto] tw:lg:px-6; }
+  .contexto-cabecalho { @apply tw:order-3 tw:col-span-2 tw:min-w-0 tw:rounded-md tw:border tw:border-linha tw:bg-suave tw:px-3 tw:py-2 tw:lg:order-2 tw:lg:col-span-1; }
+  .contexto-cabecalho dl { @apply tw:mt-2 tw:grid tw:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] tw:gap-3 tw:text-xs tw:leading-4; }
+  .contexto-cabecalho dl > div { @apply tw:min-w-0; }
+  .contexto-cabecalho dt { @apply tw:text-discreto; }
+  .contexto-cabecalho dd { @apply tw:mt-1 tw:font-medium; overflow-wrap:anywhere; }
   .tabela-registros { @apply tw:w-full tw:border-collapse tw:text-left tw:text-sm tw:leading-5; }
   .tabela-registros th { @apply tw:border-b tw:border-linha tw:bg-suave tw:px-3 tw:py-2 tw:text-xs tw:font-medium tw:text-discreto; }
   .tabela-registros td { @apply tw:border-b tw:border-linha tw:px-3 tw:py-2 tw:align-middle; overflow-wrap:anywhere; }

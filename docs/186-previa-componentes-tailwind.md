@@ -8,6 +8,8 @@ URL prevista: /previas/tailwind/index.html na homologação, sob a proteção j�
 
 Pré-consulta independente UI/UX e ProductDesign aprovou uma página com seis seções e propriedades/regras acessíveis. O aceite visual técnico da prévia será registrado separadamente. **A aprovação humana do padrão permanece obrigatória antes de aplicar a identidade às telas reais.** O responsável aprovou o escopo para oApp e pediu a mesma estrutura de menu mobile/desktop: botão no topo abre o painel sobre o conteúdo,fechamento recolhe por completo e a área útil fica livre. As páginas estáticas atuais ficam fora desta entrega; a avaliação delas será posterior.
 
+Revisão posterior solicitada: “Meu espaço” fica noheader como selo informativo,com Minha escola/Meu perfil visíveis em duas colunas e semcontrole de expandir. Exemplo com nome fictício extenso; quebrar o nome completo,semreticências/overflow. No mobile o header acompanha a rolagem para não reservar permanentemente altura. O teste inicial390px confirmou largura240px para o nome,scrollWidth240,semoverflow horizontal; o contexto tem altura natural e a conferência320px continua no gate visual.
+
 | Referência | Demonstração |
 |---|---|
 | Composição | Menu navy,contexto/título/ações integrados,abas por teclado,KPIs fictícios e ajuda pelo título |
