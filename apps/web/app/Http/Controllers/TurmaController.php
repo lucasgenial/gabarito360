@@ -17,6 +17,7 @@ class TurmaController extends Controller
         try { $resp = $this->api->get('/v1/turmas', $request->only('busca', 'escola_id', 'ano_letivo', 'ativo')); }
         catch (ConnectionException) { /* Manter a casca e os estados indisponíveis, sem totais inventados. */ }
         $consultaConcluida = $resp?->successful() === true;
+        $dados = $consultaConcluida ? $resp->json('data') : [];
 
         $turmas  = $consultaConcluida ? $resp->json('data.turmas') : [];
         $listaValida = is_array($turmas) && array_is_list($turmas) && collect($turmas)->every(fn ($t) => is_array($t)
@@ -47,7 +48,9 @@ class TurmaController extends Controller
             'graficoTurnosErro' => !$consultaConcluida || !$listaValida,
             'graficoTurnos' => $this->graficoTurnos($turmas),
             // GET v1/turmas entrega a coleção completa no filtro; não recebe paginação Web.
-            'resumoCadastral' => \App\Support\ResumoCadastralTurmas::montar($turmas, $consultaConcluida && $listaValida, true),
+            'resumoCadastral' => \App\Support\ResumoCadastralTurmas::daApi($turmas, $consultaConcluida && $listaValida,
+                is_array($dados) ? ($dados['resumo_cadastral']??null) : null,
+                is_array($dados) && array_key_exists('resumo_cadastral', $dados)),
             'haFiltros' => collect(['busca', 'escola_id', 'ano_letivo', 'ativo'])->contains(fn (string $campo) => $request->filled($campo)),
             'turmas'     => $turmas,
             'kpis'       => $kpis,

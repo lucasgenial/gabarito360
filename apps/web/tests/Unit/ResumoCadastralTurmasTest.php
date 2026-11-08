@@ -95,6 +95,34 @@ class ResumoCadastralTurmasTest extends TestCase
         $this->assertSame(2, $resumo['turmas']);
     }
 
+    public function test_agregado_autorizado_preserva_contrato_legado_e_recusa_incoerencia_ou_pagina_parcial(): void
+    {
+        $turmas = [$this->turma(1,true,4),$this->turma(2,false,3)];
+        $agregado = ['versao'=>1,'base'=>'colecao_completa_no_recorte','colecao_completa'=>true,
+            'turmas'=>2,'em_uso'=>1,'arquivadas'=>1,'cadastros_ativos'=>7];
+        $esperado = ResumoCadastralTurmas::montar($turmas,true,true);
+        $this->assertSame($esperado,ResumoCadastralTurmas::daApi($turmas,true,null,false));
+        $this->assertSame($esperado,ResumoCadastralTurmas::daApi($turmas,true,$agregado,true));
+        foreach ([null,[], $agregado+['extra'=>'permitido']] as $valor) {
+            if (is_array($valor) && isset($valor['extra'])) {
+                $this->assertSame($esperado,ResumoCadastralTurmas::daApi($turmas,true,$valor,true));
+                continue;
+            }
+            $this->assertSemTotais(ResumoCadastralTurmas::daApi($turmas,true,$valor,true));
+        }
+        foreach (['versao'=>2,'base'=>'outra','colecao_completa'=>false,'turmas'=>3,
+            'em_uso'=>2,'arquivadas'=>0,'cadastros_ativos'=>999] as $campo=>$valor) {
+            $r=ResumoCadastralTurmas::daApi($turmas,true,array_replace($agregado,[$campo=>$valor]),true);
+            $this->assertSame('erro',$r['estado']);$this->assertSemTotais($r);
+        }
+        foreach ([true,'7',7.0,-1] as $valor) $this->assertSemTotais(ResumoCadastralTurmas::daApi(
+            $turmas,true,array_replace($agregado,['cadastros_ativos'=>$valor]),true));
+        // Um total individual ausente não invalida um agregado canônico completo e coerente.
+        $turmas[0]['total_alunos']=null;
+        $this->assertSame($esperado,ResumoCadastralTurmas::daApi($turmas,true,$agregado,true));
+        $this->assertSemTotais(ResumoCadastralTurmas::daApi($turmas,false,$agregado,true));
+    }
+
     private function assertSemTotais(array $resumo): void
     {
         foreach (['turmas','em_uso','arquivadas','cadastros_ativos'] as $chave) $this->assertNull($resumo[$chave]);

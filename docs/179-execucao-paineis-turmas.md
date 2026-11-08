@@ -195,3 +195,36 @@ Validação corrente do incremento: Web385 testes/14.628 asserções; Nodegrade2
 
 
 Ajustes derivados da revisão: LabelLayout do ECharts registrado explicitamente e rótulos sem sobreposição (valores completos preservados em tooltip/alternativa textual); override local retira o limite global de340px somente dosSVGs ECharts dos widgets, mantendo os gráficos proporcionais ao tamanho real do card. Alternância Tabela/Cards fora de Organizar agora usa o mesmo rascunho Salvar/Cancelar da orientação no desktop; mobile permanece local e não grava preferências. A matriz dos renderizadores36cenários passou; novo candidato exige reavaliação visual e CI próprios, sem reutilizar a aprovação incompleta do candidato anterior.
+
+
+## P2 encerrado e P3.1 — revisão vigente antes da próxima entrega
+
+O responsável aprovouPR214: commitda0e86b, merge4b80212, publicado somente em homologação. CI5checks e revisão independente concluídos, conferência Chrome2560/1440/390, backup validado e130tabelas/201arquivos preservados, semDDL. Os status pendentes dos candidatos anteriores são históricos; artefato operacional paineis-controles-entrega-final.json registra o fechamento.
+
+Próxima etapa canônica **P3.1 Cadastros e resumo**: corrigir a fonte do resumo, não implementar novamente dados reais já existentes. A API entregará campo aditivo resumo_cadastral com completude/base/versão e quatro contadores no MESMO alcance/filtros da lista. Total por turma e médias serão agrupados em consultas em lote, sem query por item. Os KPIs legados mantêm seu contrato/universo. O BFF valida o agregado e distingue ausência de versão antiga, formato inválido, vazio/zero e indisponibilidade. Cadastros de alunos ativos conta registros locais por aluno_id, não pessoas únicas entre instituições. Não deduplicar nomes/CPF nem criar vínculo global de pessoa nesta etapa.
+
+Turmas, alunos e imagens já têm fontes reais; disciplinas, indicações e atribuições já estão nas abas autorizadas. Conferir regressões/escopo em vez de recriar módulos ou chamar atribuição de professor único. Não introduzir dois KPIs adicionais sem contrato de fonte. Secretaria/auxiliar permanecem estritamente cadastrais. XLSX, participação, períodos, agenda, conselho e habilidades não se tornam operacionais por esta entrega.
+
+Novas decisões durante a execução, incorporadas à mesma entrega autorizada:
+
+- **GridStack nativo compacto** substitui adaptador de linhas. Cada widget tem w/h próprios; não igualar alturas, não completar12 colunas à força. Compactar espaços viáveis sem violar pins, limites/colisões ou seções. Lacunas impostas por retângulos fixos/dimensões são legítimas. Nada é salvo automaticamente.
+- Layout legado válido é projetado e compactado apenas para apresentação pelo engine nativo, mantendo dimensões/pins e metadados opcionais. Cancelar restaura o snapshot exibido inicialmente. O JSON armazenado permanece intacto até Salvar. Campo altura_livre legado continua aceito no transporte, mas sem efeito de igualdade e sem botão de opt-out: toda altura é independente.
+- **Resultados da turma** reúne Estudantes e Análises, com resumo fixo fora. IDs/seções e identidade dos widgets preservados. Hierarquia h2/h3/h4 acessível; marca técnica data-widget-titulo evita dependência de uma tag específica no engine.
+- Retirar Acompanhar correção do card Acompanhamento da turma. Relatório da turma e os modelos autorizados permanecem.
+- H/V somente ícone; todos os botões de widget têm face visual32px, alvo44px, sem reduzir desnecessariamente os ícones. Foco, aria-label/title e estados preservados.
+- Todos os gráficos de barras dos renderizadores compartilhados possuem títulos semânticos nos eixos horizontal e vertical, invertidos corretamente em H/V. Dados, séries, ferramentas de acessibilidade e paginação permanecem.
+
+| Etapa | Situação nesta revisão | Critério de fechamento |
+|---|---|---|
+| P2 visual/controles anteriores | Concluído e aprovado noPR214 | Evidências/recibo anteriores preservados |
+| P3.1 cadastro e resumo | Em implementação | Fonte canônica filtrada, SQL em lote, tipos/zeros/legado, imagens e gates |
+| Ajustes de UX e agrupamento | Em implementação após pré-consulta especializada | Resultados, ícones/buttons pequenos, eixos completos desktop/mobile |
+| GridStack nativo | Em implementação após revisão do planejamento | Encaixe nativo, pinimutável, tamanhosindependentes, Save/Cancel, legacy/mobile |
+| Validação/integração/publicação | Pendente | CI5checks+pareceres atuais+backup+homologação, sem produção |
+| P3.2 indicadores atuais | Próxima etapa canônica | Reconciliar sem reativar Leituras no painel contra decisão posterior |
+| P3.3 agregado de turmas | Pendente | Comparação por instrumento e fontes reais autorizadas |
+| P3.4 regiões e desempenho | Pendente | Isolamento de falhas e medidas de latência/consultas pertinentes |
+| P4–P7 | Pendentes segundo dependências originais | Esta entrega não ativa módulos demonstrativos ou planeja oGII |
+
+
+Implementação consolidada para o candidato: resumoAPI/BFF e regressões focais15/1087 (revisão independente) eWeb14/326; suíteWeb completa387/14714 passou antes de acrescentar a regressão estrutural adicional, focal7/95posterior tambémpassou. Grade nativa tem17testes reais; adaptador de linhas histórico tem29, semimport no runtime novo. UI/UX preparou8fontes e ensaiou144gráficos com nomes nosdois eixos e6combinações de botões/temas. Conferência independente atual emChrome emcurso: fonte não será integrada/publicada sem pareceres próprios e cinco checks verdes. Registro operacional de fechamento previsto em operacao-20261102/paineis-p31-entrega-final.json, criado somente depois do deploy/conferência; o estado pendente deste retrato do candidato não substitui o recibo final.
