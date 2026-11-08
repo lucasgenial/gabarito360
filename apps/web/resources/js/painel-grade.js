@@ -1,5 +1,22 @@
 import {GridStack} from 'gridstack';
 import {project,chartIds,validateLayout,nodeOptions,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,bandsOf,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback,gridCoordinateMetrics,previewCssBox,pointerResizeDelta,snapshotPreviewCss,restorePreviewCss} from './painel-geometria.js';
+
+/** Encerramento ordenado. O DD pode chamar stop sincronicamente em destroy(). */
+export class PanelGestureLifecycle{
+ stopping=false;
+ stop({active,wrappers,dd,invalidate,cancelPreview,restore,dispose}){
+  if(this.stopping)return false;
+  this.stopping=true;
+  try{
+   if(active)active.cancelled=true;
+   invalidate();cancelPreview();
+   // Não consultar engine.nodes: o ativo pode apontar para o placeholder nativo.
+   try{for(const wrapper of new Set(wrappers)){dd.resizable(wrapper,'destroy');dd.draggable(wrapper,'destroy');}}
+   finally{if(active)restore(active);}
+   dispose();return true;
+  }finally{this.stopping=false;}
+ }
+}
 // GridStack executa gestos; a transação lateral preserva a faixa e as alturas individuais.
 function iniciar(){
  const configEl=document.getElementById('painel-grade-config');if(!configEl)return;
@@ -11,9 +28,10 @@ function iniciar(){
  const status=toolbar.querySelector('[data-grade-status]'),actions=toolbar.querySelector('[data-grade-acoes]');
  const widgets=new Map([...document.querySelectorAll('[data-widget-id]')].filter(el=>el.dataset.section!=='resumo').map((el,index)=>[el.dataset.widgetId,{el,index,parent:el.parentElement}]));
  const sections=new Map([...document.querySelectorAll('[data-painel-secao]')].filter(el=>el.dataset.painelSecao!=='resumo').map(el=>[el.dataset.painelSecao,{el,grade:el.querySelector('.painel-secao-grade'),grid:null,style:null}]));
- let api=null,limits=new Map(),layout=[],saved=[],presentation='tabela',savedPresentation='tabela',editing=false,dirty=false,busy=false,invalid=false,uncertain=false,epoch=0,gesture=null,point={x:0,y:0},previewFrame=null;
+ let api=null,limits=new Map(),layout=[],saved=[],presentation='tabela',savedPresentation='tabela',editing=false,dirty=false,busy=false,invalid=false,uncertain=false,epoch=0,gesture=null,armedWrapper=null,point={x:0,y:0},previewFrame=null;
  const uuid=()=>{if(typeof crypto.randomUUID==='function')return crypto.randomUUID();const b=crypto.getRandomValues(new Uint8Array(16));b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;const h=[...b].map(n=>n.toString(16).padStart(2,'0')).join('');return [h.slice(0,8),h.slice(8,12),h.slice(12,16),h.slice(16,20),h.slice(20)].join('-');};
- const requests=new Set(),clone=value=>structuredClone(value),eligible=()=>media.matches&&!invalid&&configEl.isConnected;
+ const interactions=new PanelGestureLifecycle();
+ const requests=new Set(),clone=value=>structuredClone(value),eligible=()=>!interactions.stopping&&media.matches&&!invalid&&configEl.isConnected;
  const say=text=>status.textContent=text;
  function list(value){presentation=value;document.querySelectorAll('[data-painel-lista]').forEach(el=>el.dataset.apresentacao=value);document.querySelectorAll('[data-lista-modo]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.listaModo===value)));}
  function controls(){
@@ -59,10 +77,14 @@ function iniciar(){
   return prepareLayout(read(d.layouts.desktop),standard,limits);
  }
  function destroyGrids(){
-  if(gesture)restorePreview(gesture);
-  for(const s of sections.values())if(s.grid){s.grid.destroy(false);s.grid=null;for(const record of [...widgets.values()].sort((a,b)=>a.index-b.index))if(record.parent===s.grade){const wrapper=record.el.parentElement;if(wrapper?.classList.contains('grid-stack-item'))wrapper.replaceWith(record.el);record.el.classList.remove('grid-stack-item-content');s.grade.append(record.el);}
-   s.grade.classList.remove('grid-stack');s.grade.removeAttribute('data-editando');if(s.style===null)s.grade.removeAttribute('style');else s.grade.setAttribute('style',s.style);
-  }gesture=null;if(previewFrame!==null)cancelAnimationFrame(previewFrame);previewFrame=null;
+  if(interactions.stopping)return;
+  const wrappers=[];
+  for(const s of sections.values())if(s.grid)for(const record of widgets.values())if(record.parent===s.grade){const wrapper=record.el.parentElement;if(wrapper?.classList.contains('grid-stack-item'))wrappers.push(wrapper);}
+  interactions.stop({active:gesture,wrappers,dd:GridStack.getDD(),invalidate:()=>{++epoch;gesture=null;armedWrapper=null;},cancelPreview:()=>{if(previewFrame!==null)cancelAnimationFrame(previewFrame);previewFrame=null;},restore:restorePreview,dispose:()=>{
+   for(const s of sections.values())if(s.grid){s.grid.destroy(false);s.grid=null;for(const record of [...widgets.values()].sort((a,b)=>a.index-b.index))if(record.parent===s.grade){const wrapper=record.el.parentElement;if(wrapper?.classList.contains('grid-stack-item'))wrapper.replaceWith(record.el);record.el.classList.remove('grid-stack-item-content');s.grade.append(record.el);}
+    s.grade.classList.remove('grid-stack');s.grade.removeAttribute('data-editando');if(s.style===null)s.grade.removeAttribute('style');else s.grade.setAttribute('style',s.style);
+   }
+  }});
  }
  function render(){if(!eligible())return;
   for(const n of layout){const el=widgets.get(n.id)?.el;if(!el)continue;el.dataset.fixo=String(n.fixo===true);el.dataset.alturaLivre=String(n.altura_livre===true);if(n.orientacao)el.dataset.orientacao=n.orientacao;else delete el.dataset.orientacao;}
@@ -137,13 +159,13 @@ function iniciar(){
    if(active.feedback!=='valid'){say('Prévia ajustada. Solte para confirmar a disposição.');active.feedback='valid';}
   }catch{active.proposal=null;s.grade.dataset.previaValida='false';drawPreview(active,active.lastValid??active.before,false);if(active.feedback!=='invalid'){say(lateralFeedback);active.feedback='invalid';}}
  }
- function schedulePreview(){if(previewFrame!==null)return;previewFrame=requestAnimationFrame(()=>{previewFrame=null;previewGesture();});}
+ function schedulePreview(){if(interactions.stopping||!gesture||previewFrame!==null)return;previewFrame=requestAnimationFrame(()=>{previewFrame=null;previewGesture();});}
  function startGesture(s,section,event,el){
-  if(!editing||busy||uncertain||layout.find(n=>n.id===el.gridstackNode.id)?.fixo===true)return;
+  if(!eligible()||!s.grid||el.gridstackNode?.grid!==s.grid||!editing||busy||uncertain||layout.find(n=>n.id===el.gridstackNode.id)?.fixo===true)return;
   const before=clone(layout),rect=s.grade.getBoundingClientRect(),styles=new Map(),rectangles=new Map();
   const transform=GridStack.Utils.getValuesFromTransformedElement(s.grade),metrics=gridCoordinateMetrics({localWidth:s.grade.clientWidth,visualWidth:rect.width,cellHeight:s.grid.getCellHeight(true),inverseScaleY:transform.yScale});
   for(const n of bySection(before,section)){const wrap=widgets.get(n.id).el.parentElement,r=wrap.getBoundingClientRect();styles.set(n.id,snapshotPreviewCss(wrap.style));rectangles.set(n.id,{id:n.id,left:r.left+scrollX,top:r.top+scrollY,bottom:r.bottom+scrollY,width:r.width});}
-  gesture={section,id:el.gridstackNode.id,before,styles,epoch,resize:event.type==='resizestart',start:{x:point.x,y:point.y,pageY:point.y+scrollY},metrics,grade:{left:rect.left+scrollX,right:rect.right+scrollX,top:rect.top+scrollY,bottom:rect.bottom+scrollY},bands:bandsOf(bySection(before,section)).map(b=>{const items=b.items.map(n=>rectangles.get(n.id));return {items,top:Math.min(...items.map(r=>r.top)),bottom:Math.max(...items.map(r=>r.bottom))};})};
+  gesture={section,id:el.gridstackNode.id,wrapper:el,grid:s.grid,before,styles,epoch,resize:event.type==='resizestart',start:{x:point.x,y:point.y,pageY:point.y+scrollY},metrics,grade:{left:rect.left+scrollX,right:rect.right+scrollX,top:rect.top+scrollY,bottom:rect.bottom+scrollY},bands:bandsOf(bySection(before,section)).map(b=>{const items=b.items.map(n=>rectangles.get(n.id));return {items,top:Math.min(...items.map(r=>r.top)),bottom:Math.max(...items.map(r=>r.bottom))};})};
   if(!gesture.resize){gesture.ghost={el,value:el.style.getPropertyValue('opacity'),priority:el.style.getPropertyPriority('opacity')};el.style.setProperty('opacity','0.20');}
   // Vizinhos não são expulsos pela colisão intermediária: a prévia exibe o lote calculado.
   for(const node of s.grid.engine.nodes)if(node.id!==gesture.id)s.grid.update(node.el,{locked:true,noMove:true,noResize:true});
@@ -152,7 +174,8 @@ function iniciar(){
   schedulePreview();
  }
  function stopGesture(s,section,event,el){
-  const active=gesture;if(!active||active.section!==section)return;if(!active.cancelled)previewGesture();gesture=null;
+  if(interactions.stopping)return;
+  const active=gesture;if(!active||active.section!==section||active.wrapper!==el||active.grid!==s.grid)return;if(!active.cancelled)previewGesture();gesture=null;
   if(previewFrame!==null)cancelAnimationFrame(previewFrame);previewFrame=null;
   queueMicrotask(()=>{if(active.epoch!==epoch||!eligible()||!editing||busy||uncertain)return;
    restorePreview(active);
@@ -194,11 +217,17 @@ function iniciar(){
   if(gesture||invalid||(eligible()&&(busy||uncertain||!api)))return;list(b.dataset.listaModo);
   if(eligible()&&api){dirty=true;controls();say('Apresentação da lista alterada. Salve a disposição para manter.');}
  },{signal:life.signal}));
- document.addEventListener('pointerdown',e=>{point={x:e.clientX,y:e.clientY};},{signal:life.signal,capture:true});
+ document.addEventListener('pointerdown',e=>{point={x:e.clientX,y:e.clientY};
+  if(!eligible()||!editing||busy||uncertain)return;
+  const wrapper=e.target.closest?.('.grid-stack-item'),handle=e.target.closest?.('[data-widget-mover],.ui-resizable-handle');
+  if(wrapper&&handle&&[...widgets.values()].some(record=>record.el.parentElement===wrapper))armedWrapper=wrapper;
+ },{signal:life.signal,capture:true});
  document.addEventListener('pointermove',e=>{point={x:e.clientX,y:e.clientY};if(gesture)schedulePreview();},{signal:life.signal,capture:true});
- document.addEventListener('pointerup',e=>{point={x:e.clientX,y:e.clientY};},{signal:life.signal,capture:true});
- document.addEventListener('keydown',e=>{if(gesture&&e.key==='Escape')gesture.cancelled=true;},{signal:life.signal,capture:true});
- document.addEventListener('pointercancel',()=>{if(gesture)gesture.cancelled=true;},{signal:life.signal,capture:true});
+ document.addEventListener('pointerup',e=>{point={x:e.clientX,y:e.clientY};armedWrapper=null;},{signal:life.signal,capture:true});
+ function cancelGesture(){if((!gesture&&!armedWrapper)||interactions.stopping)return;const focus=document.activeElement;destroyGrids();render();if(eligible()&&focus?.isConnected)focus.focus?.({preventScroll:true});say('Movimento cancelado. A disposição anterior foi mantida.');}
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')cancelGesture();},{signal:life.signal,capture:true});
+ document.addEventListener('pointercancel',cancelGesture,{signal:life.signal,capture:true});
+ window.addEventListener('resize',cancelGesture,{signal:life.signal});
  function suspend(){++epoch;requests.forEach(c=>c.abort());requests.clear();busy=false;editing=false;dirty=false;api=null;destroyGrids();toolbar.hidden=true;controls();}
  media.addEventListener('change',()=>{suspend();if(eligible())load();},{signal:life.signal});
  document.addEventListener('g360:acesso-alterado',()=>{invalid=true;suspend();document.querySelectorAll('[data-lista-modo]').forEach(b=>b.disabled=true);},{signal:life.signal});
