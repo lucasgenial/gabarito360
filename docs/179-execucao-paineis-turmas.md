@@ -228,3 +228,30 @@ Novas decisões durante a execução, incorporadas à mesma entrega autorizada:
 
 
 Implementação consolidada para o candidato: resumoAPI/BFF e regressões focais15/1087 (revisão independente) eWeb14/326; suíteWeb completa387/14714 passou antes de acrescentar a regressão estrutural adicional, focal7/95posterior tambémpassou. Grade nativa tem17testes reais; adaptador de linhas histórico tem29, semimport no runtime novo. UI/UX preparou8fontes e ensaiou144gráficos com nomes nosdois eixos e6combinações de botões/temas. Conferência independente atual emChrome emcurso: fonte não será integrada/publicada sem pareceres próprios e cinco checks verdes. Registro operacional de fechamento previsto em operacao-20261102/paineis-p31-entrega-final.json, criado somente depois do deploy/conferência; o estado pendente deste retrato do candidato não substitui o recibo final.
+
+
+## Correção lateral posterior ao PR215 — planejamento revisto antes de implementar
+
+P3.1 foi concluído noPR215, merge1b6ad077, homologaçãof70c99f, cinco checks e130tabelas/201arquivos preservados. O responsável trouxe três screenshots e reabriu a interação de largura antes de iniciarP3.2. Não é defeito nas fontes cadastrais; a compactação nativa não implementa redistribuição horizontal dos vizinhos.
+
+Nova regra: cards lado a lado preenchem a largura disponível do container; aumentar/reduzir a largura de um redistribui a sobra entre os irmãos. Inserir um card existente entre/ao lado de outros encaixa o conjunto nessa mesma faixa, em vez de expulsar silenciosamente o terceiro. Esta decisão revoga larguras livres apenas nesse aspecto; não reintroduz altura uniforme ou obrigação de editar por linhas/modais. A composição continua em GridStack, com seções autorizadas e alturas individuais.
+
+Consulta prévia aUI/UX eProductDesign foi solicitada antes da implementação. Direção inicial: intenção lateral deriva do snapshot anterior ao gesto e da posição apontada, antes de a engine nativa empurrar vizinhos. Pins são obstáculos imutáveis; redistribuição somente no espaço livre. Respeitar mínimos/máximos; impossibilidade real mantém estado anterior com feedback, oferecendo posição acima/abaixo. O mínimo atual4 impede resize útil de3cards4+4+4; revisar comDesign eventual mínimo3 nos tipos compatíveis e piso de legibilidade por área útil. Não mudar catálogo antes desse parecer.
+
+| Trabalho interno autorizado | Estado inicial | Aceitação |
+|---|---|---|
+| Pré-consulta especializada | Em conclusão | Lateral/inserção, pins e minimos claramente definidos |
+| Distribuição horizontal elástica | A implementar | 2e3cards ocupam área; resize não expulsa irmão quando há largura legal |
+| Intenção de drag e teclado | A implementar | Inserção entre/ao lado; acima/abaixo explícito; snapshot antes da colisão |
+| Limites e alturas | A validar | Pins invioláveis, h independente, sem sobreposição/overflow |
+| API/BFF/legado | Preservar; catálogo somente se aprovado | Shape, CSRF, autorização, versão e recibos sem mudança |
+| Persistência e celular | A validar | Salvar/reload/Cancelar; mobile sem preferência desktop |
+| Revisão, CI, merge e homologação | Pendentes | Revisões no candidato, CI5, backup e conferência live; sem produção |
+| P3.2 | Aguarda este ajuste | Indicadores, recortes e bases reais |
+
+Aprovação e publicação doPR215 são históricas para esta nova fonte. Exige revisão independente própria do motor/UI e do pacote operacional. Nenhuma migration necessária; preservar dados/gabaritos, WIP PDF e produção. Próximo fechamento operacional previsto em operacao-20261102/paineis-lateral-entrega-final.json.
+
+
+Pré-consulta concluída: Design aprovou mínimo técnico3 nos editáveis, associado a piso cliente medido na largura CSS real da seção:240px para progresso/contagens/tarefas/registros,280px para nominais/timelines/responsabilidade docente e300px para gráficos. Piso é aplicado às novas operações, sem invalidar mapa legal salvo em viewport maior nem deslocar pins em carregamento. O gesto limita a largura ativa ao que resta após mínimos dos irmãos; impossibilidade real devolve feedback: “Os cards não cabem neste espaço. Solte acima ou abaixo.”
+
+Faixas de intenção derivam do topo y do snapshot, não de sobreposição transitiva de alturas. Cards altos atravessando a faixa inferior delimitam segmentos contíguos como obstáculos geométricos; não somar buracos separados, dividir/duplicar cards ou igualar alturas. A implementação usará distribuição horizontal sobre os gestos doGridStack, carregando o resultado final exato emfloat/batch; compactação global posterior que expulse pares ou desfaça o conjunto fica excluída. Isso substitui a política nativa compacta pura doPR215 somente na geometria solicitada.
