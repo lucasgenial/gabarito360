@@ -10,13 +10,13 @@ final class ContratoPreferenciasPainel
         $limites=['minW','maxW','minH','maxH','defaultW','defaultH'];
         $r=['versao'=>$d['versao'],'apresentacao'=>$d['apresentacao'],
             'layouts'=>array_combine(['desktop','mobile'],array_map(static fn($modo)=>array_map(
-                static fn($r)=>array_intersect_key($r,array_flip(['id','section','x','y','w','h','altura_desejada','fixo','altura_livre','orientacao'])),$d['layouts'][$modo]),['desktop','mobile'])),
+                static fn($r)=>array_intersect_key($r,array_flip(['id','section','x','y','w','h','altura_desejada','fixo','altura_livre','orientacao','ordem_card','ordem_secao'])),$d['layouts'][$modo]),['desktop','mobile'])),
             'catalogo'=>array_map(static fn($c)=>['id'=>$c['id'],'section'=>$c['section'],
                 'desktop'=>array_intersect_key($c['desktop'],array_flip($limites)),
                 'mobile'=>array_intersect_key($c['mobile'],array_flip($limites))],$d['catalogo']),
             'repetido'=>($d['repetido']??false)===true];
         if (array_key_exists('padrao',$d)) $r['padrao']=['desktop'=>array_map(
-            static fn($w)=>array_intersect_key($w,array_flip(['id','section','x','y','w','h','altura_desejada','fixo','altura_livre','orientacao'])),$d['padrao']['desktop'])];
+            static fn($w)=>array_intersect_key($w,array_flip(['id','section','x','y','w','h','altura_desejada','fixo','altura_livre','orientacao','ordem_card','ordem_secao'])),$d['padrao']['desktop'])];
         if (array_key_exists('origem_disposicao',$d)) $r['origem_disposicao']=$d['origem_disposicao'];
         return $r;
     }
@@ -55,10 +55,29 @@ final class ContratoPreferenciasPainel
                 foreach(['fixo','altura_livre'] as $opcao)if(array_key_exists($opcao,$r)&&!is_bool($r[$opcao]))return false;
                 if(array_key_exists('orientacao',$r)&&(!in_array($r['id'],['distribuicao-acertos','resultados-avaliacao','periodos-escolares','habilidades','reavaliacoes'],true)
                     ||!in_array($r['orientacao'],['horizontal','vertical'],true)))return false;
+                foreach(['ordem_card','ordem_secao'] as $opcao)if(array_key_exists($opcao,$r)&&(!is_int($r[$opcao])||$r[$opcao]<0||$r[$opcao]>63))return false;
                 foreach($anteriores as $a)if($a['section']===$r['section']&&$a['x']<$r['x']+$r['w']&&$r['x']<$a['x']+$a['w']&&$a['y']<$r['y']+$r['h']&&$r['y']<$a['y']+$a['h'])return false;
                 $vistos[$r['id']]=true;$anteriores[]=$r;
             }
+            if(!self::organizacaoValida($lista))return false;
         }
+        return true;
+    }
+
+    private static function organizacaoValida(array $widgets): bool
+    {
+        $grupos=['resultados'=>['estudantes','periodo-agenda','analises'],'acompanhamento'=>['planejamento','ensino','decisoes'],'administrativo'=>['administrativo']];
+        $porSecao=[];foreach($grupos as $card=>$secoes)foreach($secoes as $secao)$porSecao[$secao]=$card;
+        $cards=[];$secoes=[];
+        foreach($widgets as $w){
+            $campos=array_intersect(['ordem_card','ordem_secao'],array_keys($w));if(!$campos)continue;
+            if(count($campos)!==2 || !isset($porSecao[$w['section']]))return false;
+            $card=$porSecao[$w['section']];$secao=$w['section'];
+            if(isset($cards[$card])&&$cards[$card]!==$w['ordem_card'] || isset($secoes[$secao])&&$secoes[$secao]!==$w['ordem_secao'])return false;
+            $cards[$card]=$w['ordem_card'];$secoes[$secao]=$w['ordem_secao'];
+        }
+        if(count(array_unique($cards))!==count($cards))return false;
+        foreach($grupos as $lista){$ordens=array_intersect_key($secoes,array_flip($lista));if(count(array_unique($ordens))!==count($ordens))return false;}
         return true;
     }
 }

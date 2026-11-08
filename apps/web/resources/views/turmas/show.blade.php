@@ -52,7 +52,8 @@ if(!empty($painelAplicado['painel_fim']))$recortes[]='Até '.\Carbon\Carbon::par
 @endif
 @php($modelosAcompanhamento = array_filter(\App\Support\ModelosPaineis::para('turma', \App\Support\Acesso::perfil()??'', \App\Support\Acesso::permissoes()), fn($m)=>in_array($m['grupo']??'planejamento',['planejamento','ensino','decisoes'],true)))
 @if($modelosAcompanhamento || \App\Support\Acesso::pode('relatorio.turma'))
-<section class="card card-pad painel-acompanhamento" aria-labelledby="titulo-acompanhamento"><header class="painel-acompanhamento-cabecalho"><h2 id="titulo-acompanhamento">Acompanhamento da turma</h2><div class="tu1-acoes">
+<section class="card card-pad painel-acompanhamento" data-painel-card="acompanhamento" aria-labelledby="titulo-acompanhamento"><header class="painel-acompanhamento-cabecalho"><h2 id="titulo-acompanhamento">Acompanhamento da turma</h2><div class="tu1-acoes">
+    <x-painel-mover-grupo tipo="card" titulo="Acompanhamento da turma" />
     @pode('relatorio.turma')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}"><x-icone nome="grafico" /> Relatório da turma</a>@endpode
 </div></header>
 @include('turmas._modelos', ['paginaModelos'=>'turma','gruposExibidos'=>['planejamento','ensino','decisoes']])

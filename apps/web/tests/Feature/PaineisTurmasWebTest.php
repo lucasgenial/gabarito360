@@ -102,20 +102,25 @@ class PaineisTurmasWebTest extends TestCase
 
     public function test_resultados_agrupa_secoes_preserva_ids_e_controles_so_com_icones(): void
     {
-        $this->preparar('coordenador',permissoes:['turma.ver','aluno.ver','resultado.ver','relatorio.turma','correcao.acompanhar'],
+        config(['release.sha'=>str_repeat('a',40),'release.fase'=>'PREVIA-HIERARQUIA','versao.ambiente'=>'Homologação']);
+        $this->preparar('coordenador',permissoes:['turma.ver','aluno.ver','resultado.ver','relatorio.turma','correcao.acompanhar','turma.vincular_professor'],
             extra:['painel'=>['kpis'=>['avaliacoes'=>0,'resultados'=>0,'alunos_com_resultado'=>0]]]);
         $r=$this->consultarTela('/app/turmas/14')->assertOk()->assertSee('Resultados da turma')
             ->assertSee('Acompanhamento da turma')->assertDontSee('Acompanhar correção');
         $dom=new \DOMDocument();@$dom->loadHTML($r->getContent());$xp=new \DOMXPath($dom);
-        foreach(['estudantes','analises'] as $secao){
+        foreach(['estudantes','periodo-agenda','analises'] as $secao){
             $this->assertSame(1,$xp->query('//*[@aria-labelledby="titulo-resultados-turma"]//*[@data-painel-secao="'.$secao.'"]')->length);
-            $this->assertSame(1,$xp->query('//*[@data-painel-secao="'.$secao.'"]/h3')->length);
+            $this->assertSame(1,$xp->query('//*[@data-painel-secao="'.$secao.'"]/header/h3')->length);
         }
         $this->assertSame(1,$xp->query('//*[@data-widget-id="distribuicao-acertos"]//h4[@data-widget-titulo]')->length);
         $this->assertSame(0,$xp->query('//*[@aria-labelledby="titulo-resultados-turma"]//*[@data-painel-secao="resumo"]')->length);
         $this->assertSame(0,$xp->query('//button[@data-widget-altura-livre]')->length);
         $botoes=$xp->query('//button[@data-grafico-orientacao]');$this->assertSame(5,$botoes->length);
         foreach($botoes as $b){$this->assertSame('',trim($b->textContent));$this->assertNotSame('',$b->getAttribute('aria-label'));$this->assertNotSame('',$b->getAttribute('title'));}
+        if(getenv('G360_TW2_EXPORT')){
+            $dir=getenv('G360_TW2_EXPORT_DIR')?:sys_get_temp_dir().'/g360-tw2-render';if(!is_dir($dir))mkdir($dir,0700,true);
+            file_put_contents($dir.'/hierarquia.html',$r->getContent());
+        }
     }
 
 }

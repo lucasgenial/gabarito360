@@ -1,5 +1,6 @@
 import {GridStack} from 'gridstack';
 import {compactReadingLayout} from './painel-leitura.js';
+import {createPanelHierarchy,annotateOrder} from './painel-hierarquia.js';
 import {project,chartIds,validateLayout,nodeOptions,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,bandsOf,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback,gridCoordinateMetrics,previewCssBox,pointerResizeDelta,snapshotPreviewCss,restorePreviewCss} from './painel-geometria.js';
 
 /** Encerramento ordenado. O DD pode chamar stop sincronicamente em destroy(). */
@@ -35,6 +36,8 @@ function iniciar(){
  const interactions=new PanelGestureLifecycle();
  const requests=new Set(),clone=value=>structuredClone(value),eligible=()=>!interactions.stopping&&media.matches&&!invalid&&configEl.isConnected;
  const say=text=>status.textContent=text;
+ const hierarchy=createPanelHierarchy({signal:life.signal,canEdit:()=>eligible()&&editing&&!busy&&!uncertain&&!gesture,
+  onChange:order=>{layout=annotateOrder(layout,order);dirty=true;render();},say});
  function list(value){
   // A preferência salva continua sendo a apresentação desktop; mobile usa cards.
   presentation=value;const atual=mobile.matches?'cards':value;
@@ -43,6 +46,7 @@ function iniciar(){
  }
  mobile.addEventListener('change',()=>list(presentation),{signal:life.signal});
  function controls(){
+  hierarchy.controls();
   toolbar.hidden=!eligible()||(api&&limits.size===0&&!dirty);button('organizar').hidden=editing||(api&&limits.size===0);button('organizar').disabled=busy||!api||uncertain;
   actions.hidden=!(editing||dirty);actions.querySelectorAll('button').forEach(b=>b.disabled=busy||uncertain);
   button('consultar').hidden=!uncertain;button('consultar').disabled=busy;
@@ -95,7 +99,7 @@ function iniciar(){
    }
   }});
  }
- function render(){if(!eligible())return;
+ function render(){if(!eligible())return;hierarchy.render(layout);
   for(const n of layout){const el=widgets.get(n.id)?.el;if(!el)continue;el.dataset.fixo=String(n.fixo===true);el.dataset.alturaLivre=String(n.altura_livre===true);if(n.orientacao)el.dataset.orientacao=n.orientacao;else delete el.dataset.orientacao;}
   for(const [id,s]of sections){const items=bySection(layout,id);if(!items.length)continue;
    if(!s.grid){s.style=s.grade.getAttribute('style');s.grade.classList.add('grid-stack');
@@ -221,11 +225,11 @@ function iniciar(){
  }
  async function request(descriptor,body){const abort=new AbortController();requests.add(abort);const timer=setTimeout(()=>abort.abort(),25000);try{const response=await window.G360Requisicao(descriptor,{body:JSON.stringify(body||{}),credentials:'same-origin',headers:{Accept:'application/json'},signal:abort.signal});const d=await response.json();if(!response.ok){const error=new Error(response.status===409?'A organização ou o acesso mudou. Consulte o estado salvo antes de continuar.':'Não foi possível confirmar as preferências. Consulte o estado salvo antes de continuar.');error.status=response.status;throw error;}return d.data;}finally{clearTimeout(timer);requests.delete(abort);}}
  async function load(){if(!eligible())return;const current=++epoch;busy=true;uncertain=false;toolbar.hidden=false;say('Consultando sua disposição salva…');controls();try{const d=await request(config.consultar);if(current!==epoch||!eligible())return;const next=prepare(d);api=d;layout=next;saved=clone(next);savedPresentation=d.apresentacao;list(d.apresentacao);editing=false;dirty=false;render();say('Use Organizar painel para mover ou redimensionar os cards.');}catch(error){if(current!==epoch||!eligible())return;uncertain=true;say((error.status||error.feedback)?error.message:'As preferências estão indisponíveis. Consulte o estado salvo para tentar novamente.');}finally{if(current===epoch){busy=false;controls();}}}
- async function save(){if(!eligible()||!(editing||dirty)||busy||uncertain||!api||gesture)return;const current=epoch;busy=true;controls();say('Salvando disposição…');try{const d=await request(config.salvar,{versao:api.versao,chave:uuid(),acao:'salvar',apresentacao:presentation,layouts:{desktop:layout.map(project)}});if(current!==epoch||!eligible())return;const next=prepare(d);api=d;layout=next;saved=clone(next);savedPresentation=d.apresentacao;list(d.apresentacao);editing=false;dirty=false;render();say('Disposição salva.');}catch(error){if(current!==epoch||!eligible())return;uncertain=true;say((error.status||error.feedback)?error.message:'Não foi possível confirmar o salvamento. Consulte o estado salvo antes de continuar.');}finally{if(current===epoch){busy=false;controls();}}}
+ async function save(){if(!eligible()||!(editing||dirty)||busy||uncertain||!api||gesture||hierarchy.active())return;const current=epoch;busy=true;controls();say('Salvando disposição…');try{const d=await request(config.salvar,{versao:api.versao,chave:uuid(),acao:'salvar',apresentacao:presentation,layouts:{desktop:hierarchy.annotate(layout).map(project)}});if(current!==epoch||!eligible())return;const next=prepare(d);api=d;layout=next;saved=clone(next);savedPresentation=d.apresentacao;list(d.apresentacao);editing=false;dirty=false;render();say('Disposição salva.');}catch(error){if(current!==epoch||!eligible())return;uncertain=true;say((error.status||error.feedback)?error.message:'Não foi possível confirmar o salvamento. Consulte o estado salvo antes de continuar.');}finally{if(current===epoch){busy=false;controls();}}}
  button('organizar').addEventListener('click',()=>{if(!eligible()||!api||busy||uncertain)return;editing=true;render();say('Arraste pelo ícone ou use as setas. Shift e setas ajustam o tamanho. Salve ao terminar.');},{signal:life.signal});
  button('salvar').addEventListener('click',save,{signal:life.signal});button('consultar').addEventListener('click',load,{signal:life.signal});
- button('cancelar').addEventListener('click',()=>{if(busy)return;layout=clone(saved);list(savedPresentation);editing=false;dirty=false;render();say('Alterações descartadas.');button('organizar').focus();},{signal:life.signal});
- button('restaurar').addEventListener('click',()=>{if(!eligible()||!api||busy||uncertain)return;layout=prepare({...api,layouts:{...api.layouts,desktop:[]}});dirty=true;render();say('Padrão restaurado nesta tela. Salve para manter ou cancele para voltar.');},{signal:life.signal});
+ button('cancelar').addEventListener('click',()=>{if(busy)return;hierarchy.cancel();layout=clone(saved);list(savedPresentation);editing=false;dirty=false;render();say('Alterações descartadas.');button('organizar').focus();},{signal:life.signal});
+ button('restaurar').addEventListener('click',()=>{if(!eligible()||!api||busy||uncertain)return;hierarchy.cancel();layout=prepare({...api,layouts:{...api.layouts,desktop:[]}});dirty=true;render();say('Padrão restaurado nesta tela. Salve para manter ou cancele para voltar.');},{signal:life.signal});
  for(const [id,{el}]of widgets)el.querySelector('[data-widget-mover]')?.addEventListener('keydown',e=>keyMove(e,id),{signal:life.signal});
  for(const [id,{el}]of widgets)el.querySelector('[data-widget-fixar]')?.addEventListener('click',()=>{
   if(!eligible()||!editing||busy||uncertain)return;const current=layout.find(n=>n.id===id);if(!current)return;
@@ -242,6 +246,7 @@ function iniciar(){
   if(eligible()&&api){dirty=true;controls();say('Apresentação da lista alterada. Salve a disposição para manter.');}
  },{signal:life.signal}));
  document.addEventListener('pointerdown',e=>{point={x:e.clientX,y:e.clientY};
+  if(hierarchy.active()){e.preventDefault();e.stopPropagation();return;}
   if(!eligible()||!editing||busy||uncertain)return;
   const wrapper=e.target.closest?.('.grid-stack-item'),handle=e.target.closest?.('[data-widget-mover],.ui-resizable-handle');
   if(wrapper&&handle&&[...widgets.values()].some(record=>record.el.parentElement===wrapper))armedWrapper=wrapper;
@@ -254,7 +259,7 @@ function iniciar(){
  function scheduleReading(){if(readingFrame!==null||!eligible()||editing||!api)return;readingFrame=requestAnimationFrame(()=>{readingFrame=null;if(eligible()&&!editing&&api)render();});}
  window.addEventListener('resize',()=>{cancelGesture();scheduleReading();},{signal:life.signal});
  document.fonts?.ready.then(()=>{if(!life.signal.aborted)scheduleReading();});
- function suspend(){++epoch;requests.forEach(c=>c.abort());requests.clear();busy=false;editing=false;dirty=false;api=null;destroyGrids();toolbar.hidden=true;controls();}
+ function suspend(){++epoch;requests.forEach(c=>c.abort());requests.clear();busy=false;editing=false;dirty=false;api=null;hierarchy.cancel();destroyGrids();hierarchy.render([]);toolbar.hidden=true;controls();}
  media.addEventListener('change',()=>{suspend();if(eligible())load();},{signal:life.signal});
  document.addEventListener('g360:acesso-alterado',()=>{invalid=true;suspend();document.querySelectorAll('[data-lista-modo]').forEach(b=>b.disabled=true);},{signal:life.signal});
  window.G360PainelGradeDesmontar=()=>{life.abort();suspend();};

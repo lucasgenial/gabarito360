@@ -2,7 +2,7 @@
 namespace App\Services;
 
 use App\Models\Usuario;
-use App\Support\{CatalogoPaineis, CatalogoWidgetsPainel, ContextoVinculo, PadroesPainel, Permissao};
+use App\Support\{CatalogoPaineis, CatalogoWidgetsPainel, ContextoVinculo, OrganizacaoPainel, PadroesPainel, Permissao};
 use Illuminate\Support\Facades\{DB, Validator};
 use Illuminate\Validation\ValidationException;
 
@@ -30,7 +30,7 @@ final class PreferenciasPainel
         throw ValidationException::withMessages([$campo=>$mensagem]);
     }
 
-    public function validar(array $pedido, array $catalogo): array
+    public function validar(array $pedido, array $catalogo, string $painel=''): array
     {
         if (array_diff(array_keys($pedido), ['versao','chave','acao','apresentacao','layouts','alvos'])) $this->falhar('preferencias');
         Validator::make($pedido, ['versao'=>'required|integer|min:0|max:2147483646', 'chave'=>'required|uuid', 'acao'=>'required|in:salvar,restaurar'])->validate();
@@ -55,11 +55,13 @@ final class PreferenciasPainel
                 $vistos = []; $caixas = [];
                 foreach ($widgets as $i=>$widget) {
                     $campo = 'layouts.'.$dispositivo.'.'.$i;
-                    if (!is_array($widget) || (count($widget)<6 || count($widget)>10)
-                        || array_diff(array_keys($widget), ['id','section','x','y','w','h','altura_desejada','fixo','altura_livre','orientacao'])) $this->falhar($campo);
+                    if (!is_array($widget) || (count($widget)<6 || count($widget)>12)
+                        || array_diff(array_keys($widget), ['id','section','x','y','w','h','altura_desejada','fixo','altura_livre','orientacao','ordem_card','ordem_secao'])) $this->falhar($campo);
                     if (!is_string($widget['id'] ?? null) || !isset($porId[$widget['id']]) || isset($vistos[$widget['id']])) $this->falhar($campo.'.id');
                     $item = $porId[$widget['id']]; $limite = $item[$dispositivo];
-                    if (($widget['section'] ?? null)!==$item['section']) $this->falhar($campo.'.section');
+                    if (!is_string($widget['section']??null))$this->falhar($campo.'.section');
+                    $widget['section']=OrganizacaoPainel::secao($widget['id'],$widget['section'],$porId);
+                    if ($widget['section']!==$item['section']) $this->falhar($campo.'.section');
                     foreach (['x','y','w','h'] as $numero) if (!is_int($widget[$numero] ?? null)) $this->falhar($campo.'.'.$numero);
                     if ($widget['x']<0 || $widget['y']<0 || $widget['x']+$widget['w']>12 || $widget['y']+$widget['h']>200
                         || $widget['w']<$limite['minW'] || $widget['w']>$limite['maxW'] || $widget['h']<$limite['minH'] || $widget['h']>$limite['maxH']) $this->falhar($campo);
@@ -74,6 +76,7 @@ final class PreferenciasPainel
                     foreach ($caixas as $outra) if ($outra['section']===$widget['section'] && $widget['x']<$outra['x']+$outra['w'] && $widget['x']+$widget['w']>$outra['x'] && $widget['y']<$outra['y']+$outra['h'] && $widget['y']+$widget['h']>$outra['y']) $this->falhar($campo, 'Os componentes não podem se sobrepor.');
                     $vistos[$widget['id']] = true; $caixas[] = $widget;
                 }
+                if(!OrganizacaoPainel::valida(OrganizacaoPainel::projetar($widgets,$catalogo),$painel))$this->falhar('layouts.'.$dispositivo.'.organizacao');
                 $pedido['layouts'][$dispositivo] = $widgets;
             }
         }
@@ -90,7 +93,7 @@ final class PreferenciasPainel
     private function filtrar(array $resultado, array $catalogo, string $perfil, string $painel): array
     {
         $ids = array_fill_keys(array_column($catalogo, 'id'), true);
-        foreach (['desktop','mobile'] as $d) $resultado['layouts'][$d] = array_values(array_filter($resultado['layouts'][$d], fn ($w)=>isset($ids[$w['id']])));
+        foreach (['desktop','mobile'] as $d) $resultado['layouts'][$d] = OrganizacaoPainel::projetar(array_values(array_filter($resultado['layouts'][$d], fn ($w)=>isset($ids[$w['id']]))),$catalogo);
         return $resultado + ['catalogo'=>$catalogo, 'repetido'=>false,
             'padrao'=>['desktop'=>PadroesPainel::desktop($perfil,$painel,$catalogo)],
             'origem_disposicao'=>$resultado['layouts']['desktop'] ? 'usuario' : 'perfil'];
@@ -116,7 +119,7 @@ final class PreferenciasPainel
         $acao = function () use ($ator,$painel,$pedido,$turmaId) {
             $contexto = $this->contexto($ator,$painel,$turmaId,true);
             $catalogo = CatalogoWidgetsPainel::para($ator, $painel);
-            $pedido = $this->validar($pedido, $catalogo);
+            $pedido = $this->validar($pedido, $catalogo, $painel);
             $q = DB::table('preferencias_paineis')->where($contexto)->where('painel', $painel);
             $registro = (clone $q)->lockForUpdate()->first();
             if (!$registro) {
@@ -135,7 +138,16 @@ final class PreferenciasPainel
             $resultado = $this->estado($registro);
             if ($pedido['acao']==='salvar') {
                 if (isset($pedido['apresentacao'])) $resultado['apresentacao'] = $pedido['apresentacao'];
-                foreach ($pedido['layouts'] ?? [] as $d=>$widgets) $resultado['layouts'][$d] = $widgets;
+                foreach ($pedido['layouts'] ?? [] as $d=>$widgets) {
+                    $anteriores=array_column($resultado['layouts'][$d],null,'id');
+                    // Um cliente anterior que ajusta geometria não apaga a ordem dos grupos.
+                    foreach($widgets as &$w)if(!array_intersect(OrganizacaoPainel::CAMPOS,array_keys($w)))
+                        foreach(OrganizacaoPainel::CAMPOS as $k)if(array_key_exists($k,$anteriores[$w['id']]??[]))$w[$k]=$anteriores[$w['id']][$k];
+                    unset($w);
+                    $widgets=OrganizacaoPainel::projetar($widgets,$catalogo);
+                    if(!OrganizacaoPainel::valida($widgets,$painel))$this->falhar('layouts.'.$d.'.organizacao');
+                    $resultado['layouts'][$d] = $widgets;
+                }
             } else foreach ($pedido['alvos'] as $alvo) {
                 if ($alvo==='apresentacao') $resultado['apresentacao']='tabela';
                 else $resultado['layouts'][$alvo]=[];

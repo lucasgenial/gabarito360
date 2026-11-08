@@ -62,7 +62,7 @@ class EstruturaTailwindTest extends TestCase
             }
             if($arquivo==='editar')$this->assertSame(1,$xp->query('//form[@data-formulario-validado]//input[@name="_method" and @value="PUT"]')->length);
             if(getenv('G360_TW2_EXPORT')){
-                $dir=sys_get_temp_dir().'/g360-tw2-render';if(!is_dir($dir))mkdir($dir,0700,true);
+                $dir=(getenv('G360_TW2_EXPORT_DIR')?:sys_get_temp_dir().'/g360-tw2-render');if(!is_dir($dir))mkdir($dir,0700,true);
                 file_put_contents($dir.'/'.$arquivo.'.html',$r->getContent());
             }
         }
