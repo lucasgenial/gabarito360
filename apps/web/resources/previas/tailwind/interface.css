@@ -1,6 +1,8 @@
 @import "../../../../../scripts/tailwind/node_modules/tailwindcss/index.css" prefix(tw) source(none);
 @source "./index.html";
 @source "./interface.js";
+@import "./interface-desktop.css";
+@import "./interface-mobile.css";
 
 @theme inline {
   --color-marca: var(--cor-marca);
@@ -93,7 +95,15 @@
   .popover-ajuda { @apply tw:m-auto tw:w-[min(28rem,calc(100vw-2rem))] tw:rounded-lg tw:border tw:border-linha tw:bg-superficie tw:p-4 tw:text-sm tw:leading-6 tw:text-texto tw:shadow-lg; }
   .popover-ajuda::backdrop { background:transparent; }
   .grade-exemplos { @apply tw:grid tw:min-w-0 tw:grid-cols-1 tw:gap-4 tw:lg:grid-cols-2; align-items:start; }
-  .cabecalho-referencia { @apply tw:sticky tw:top-0 tw:z-30 tw:flex tw:min-h-14 tw:items-center tw:justify-between tw:gap-3 tw:border-b tw:border-linha tw:bg-superficie tw:px-4 tw:py-2 tw:lg:px-6; }
+  .cabecalho-referencia { @apply tw:sticky tw:top-0 tw:z-30 tw:flex tw:min-h-16 tw:items-center tw:justify-between tw:gap-3 tw:border-b tw:border-linha tw:bg-superficie tw:px-4 tw:py-2 tw:lg:px-6; }
+  .cabecalho-marca { @apply tw:flex tw:min-w-0 tw:items-center tw:gap-3; }
+  #marca-cabecalho { @apply tw:block tw:shrink-0; }
+  #marca-cabecalho img { width:176px;height:44px;object-fit:contain; }
+  .marca-tema-escuro { display:none; }
+  :root[data-tema=escuro] .marca-tema-claro { display:none; }
+  :root[data-tema=escuro] .marca-tema-escuro { display:block; }
+  .avatar-entidade { @apply tw:flex tw:shrink-0 tw:items-center tw:justify-center tw:rounded-lg tw:bg-marca-suave tw:font-semibold tw:text-marca; }
+  .rodape-referencia { @apply tw:mt-8 tw:border-t tw:border-linha tw:px-4 tw:py-4 tw:text-xs tw:text-discreto; }
   .menu-conta { @apply tw:fixed tw:inset-auto tw:right-4 tw:top-16 tw:m-0 tw:w-72 tw:max-w-[calc(100vw-2rem)] tw:rounded-lg tw:border tw:border-linha tw:bg-superficie tw:text-texto tw:shadow-lg; }
   .resumo-espaco { @apply tw:flex tw:min-h-11 tw:w-fit tw:cursor-pointer tw:items-center tw:gap-2 tw:text-sm tw:font-medium; list-style:none; }
   .resumo-espaco::-webkit-details-marker { display:none; }
@@ -121,7 +131,7 @@
   .notificacao-erro { @apply tw:border-perigo/40 tw:bg-perigo-fundo tw:text-perigo; }
   .notificacao .botao-discreto { color:inherit; }
   .avatar-pessoa { @apply tw:block tw:size-9 tw:rounded-full; background-image:url('/images/avatares/educadores-v1.png');background-size:600% 600%;background-position:0 0;image-rendering:pixelated; }
-  .navegacao-inferior { @apply tw:fixed tw:inset-x-0 tw:bottom-0 tw:z-30 tw:grid tw:grid-cols-5 tw:border-t tw:border-linha tw:bg-superficie tw:px-2 tw:pb-[env(safe-area-inset-bottom)] tw:lg:hidden; }
+  .navegacao-inferior { @apply tw:fixed tw:inset-x-0 tw:bottom-0 tw:z-30 tw:grid tw:grid-cols-5 tw:border-t tw:border-linha tw:bg-superficie tw:px-2 tw:pb-[env(safe-area-inset-bottom)]; }
   .navegacao-inferior :is(a,button) { @apply tw:flex tw:min-h-14 tw:items-center tw:justify-center tw:gap-1 tw:py-2 tw:text-xs tw:text-discreto; flex-direction:column; }
   .navegacao-inferior .icone { @apply tw:size-5; }
   .imagem-estado { @apply tw:flex tw:min-h-36 tw:flex-col tw:items-center tw:justify-center tw:gap-2 tw:rounded-md tw:bg-suave tw:p-3 tw:text-center tw:text-xs tw:text-discreto; }
@@ -129,15 +139,10 @@
   .skeleton { @apply tw:rounded tw:bg-linha/70; animation:respirar 1.6s ease-in-out infinite; }
 }
 @keyframes respirar { 0%,100%{opacity:.45}50%{opacity:1} }
-@media (pointer:coarse),(max-width:720px) {
+@media (pointer:coarse) {
   .botao:not(.botao-gd):not(.botao-xg),.botao-icone,.aba,.ajuda-titulo { @apply tw:min-h-11 tw:min-w-11; }
   .botao-icone { @apply tw:w-11; }
   .entrada { @apply tw:min-h-11; }
-}
-.menu-lateral { display:none; }
-.menu-lateral[data-aberto=true] { @apply tw:fixed tw:inset-y-0 tw:right-0 tw:left-auto tw:z-[120] tw:flex tw:w-64 tw:shadow-xl; }
-@media(min-width:1024px) {
-  .menu-lateral[data-aberto=true] { position:sticky;inset:auto;top:0;z-index:auto;box-shadow:none; }
 }
 @media(max-width:720px) {
   .tabela-registros,.tabela-registros tbody { @apply tw:block tw:w-full; }
@@ -161,3 +166,6 @@
 .tabela-registros[data-modo=cards] :is(.celula-nome,.celula-acoes)::before { content:none; }
 @media(prefers-reduced-motion:reduce) { :root {scroll-behavior:auto}.carregando,.skeleton{animation:none}.botao{transition:none} }
 @media print { .menu-lateral,header,footer,.botao,.propriedades,.notificacao,.no-print { display:none!important; } main{padding:0!important} .cartao{box-shadow:none} }
+
+.entrada[data-validacao=valido] { border-color:var(--cor-sucesso-texto); }
+.entrada[data-validacao=invalido] { border-color:var(--cor-perigo); }

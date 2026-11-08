@@ -12,6 +12,8 @@ const rotas=new Map([
   ['/brand/gabarito360-icon.svg',['image/svg+xml','../../apps/web/public/brand/gabarito360-icon.svg']],
   ['/brand/gabarito360-icon-dark.svg',['image/svg+xml','../../apps/web/public/brand/gabarito360-icon-dark.svg']],
   ['/images/avatares/educadores-v1.png',['image/png','../../apps/web/public/images/avatares/educadores-v1.png']],
+  ['/brand/gabarito360-email.png',['image/png','../../apps/web/public/brand/gabarito360-email.png']],
+  ['/brand/gabarito360-email-dark.png',['image/png','../../apps/web/public/brand/gabarito360-email-dark.png']],
   ['/favicon.ico',['image/x-icon','../../apps/web/public/favicon.ico']],
 ]);
 const servidor=createServer((req,res)=>{
@@ -30,15 +32,19 @@ try{
   pagina.on('request',r=>requests.push({url:r.url(),metodo:r.method()}));
   await pagina.goto(base+'/previas/tailwind/index.html');
   assert.equal(await pagina.locator('form').count(),0);
-  const larguraFechada=await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width);
-  await pagina.getByRole('button',{name:'Abrir menu principal',exact:true}).click();
-  assert.equal(await pagina.locator('main').evaluate(e=>e.inert),false);
-  assert.equal(await pagina.locator('#fundo-menu').isHidden(),true);
-  const geometria=await pagina.evaluate(()=>({menu:document.querySelector('#menu-lateral').getBoundingClientRect().right,conteudo:document.querySelector('main').getBoundingClientRect().left,largura:document.querySelector('main').getBoundingClientRect().width}));
-  assert.equal(Math.round(larguraFechada-geometria.largura),256);
-  assert.equal(geometria.menu<=geometria.conteudo,true);
+  assert.equal(await pagina.locator('#marca-cabecalho img:visible').count(),1);
+  assert.equal(await pagina.locator('#menu-lateral img').count(),0);
+  const larguraExpandida=await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width);
   await pagina.getByRole('button',{name:'Recolher menu principal',exact:true}).click();
-  assert.equal(await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width),larguraFechada);
+  assert.equal(await pagina.locator('main').evaluate(e=>e.inert),false);
+  assert.equal(await pagina.locator('#fundo-menu').count(),0);
+  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>e.clientWidth),80);
+  assert.equal(Math.round(await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width)-larguraExpandida),176);
+  await pagina.getByRole('button',{name:'Expandir menu principal',exact:true}).click();
+  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>e.clientWidth),256);
+  assert.equal(await pagina.locator('#meu-espaco').count(),1);
+  assert.equal(await pagina.locator('#espaco-lateral-experimento').isVisible(),true);
+  assert.equal(await pagina.locator('#avatar-turma-exemplo').evaluate(e=>e.clientWidth),64);
 
   assert.equal(await pagina.locator('link[rel=stylesheet]').count(),1);
   const altura=alvo=>alvo.evaluate(e=>Math.round(e.getBoundingClientRect().height));
@@ -78,7 +84,9 @@ try{
   await pagina.getByRole('button',{name:'Concluir demonstração',exact:true}).click();
   assert.equal(await pagina.locator('#registros tbody tr').count(),3);
 
+  assert.equal(await pagina.locator('#campos-turma-exemplo').getAttribute('data-motor-validacao'),'FormValidation');
   await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).click();
+  await pagina.locator('#nome-erro').waitFor({state:'visible'});
   assert.equal(await pagina.locator('#nome-turma').getAttribute('aria-invalid'),'true');
   assert.equal(await pagina.locator('#nome-turma').evaluate(e=>e===document.activeElement),true);
   await pagina.locator('#nome-turma').fill('Turma fictícia');await pagina.locator('#ano').fill('2026');
@@ -86,6 +94,7 @@ try{
   assert.equal(await pagina.locator('#nome-erro').isHidden(),true);
   await pagina.getByRole('button',{name:'Mudar para tema escuro',exact:true}).click();
   assert.equal(await pagina.locator('html').getAttribute('data-tema'),'escuro');
+  assert.equal(await pagina.locator('#marca-cabecalho img:visible').getAttribute('src'),'/brand/gabarito360-email-dark.png');
   await pagina.getByRole('button',{name:'Mudar para tema claro',exact:true}).click();
 
   await pagina.getByRole('tab',{name:'Alunos',exact:true}).focus();await pagina.keyboard.press('ArrowRight');
@@ -126,11 +135,24 @@ try{
     await pagina.getByRole('button',{name:'Sair',exact:true}).click();
     await pagina.locator('#composicao .propriedades summary').click();
     assert.equal(await pagina.locator('header').evaluate(e=>e.getBoundingClientRect().height<=90),true);
-    await pagina.getByRole('button',{name:'Abrir menu principal',exact:true}).click();
-    assert.equal(await pagina.locator('main').evaluate(e=>e.inert),true);
+    assert.equal(await pagina.locator('#menu-lateral').isHidden(),true);
+    assert.equal(await pagina.locator('#avatar-turma-exemplo').evaluate(e=>e.clientWidth),56);
+    assert.equal(await pagina.locator('#contexto-espaco').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),1);
+    assert.equal(await pagina.locator('#marca-cabecalho img:visible').evaluate(e=>e.clientWidth),160);
+    await pagina.getByRole('button',{name:'Abrir todas as seções',exact:true}).click();
+    assert.equal(await pagina.locator('#menu-mobile').evaluate(e=>e.open),true);
+    assert.equal(await pagina.locator('#menu-mobile').evaluate(e=>e.getBoundingClientRect().bottom<=innerHeight),true);
     await pagina.keyboard.press('Escape');
-    assert.equal(await pagina.locator('main').evaluate(e=>e.inert),false);
+    await pagina.locator('#menu-mobile').waitFor({state:'hidden'});
+    assert.equal(await pagina.locator('#abrir-menu-mobile').evaluate(e=>e===document.activeElement),true);
     assert.equal(await pagina.getByRole('navigation',{name:'Seções da prévia no celular'}).isVisible(),true);
+  }
+  for(const largura of [768,1024]){
+    await pagina.setViewportSize({width:largura,height:900});
+    assert.equal(await pagina.locator('#menu-lateral').isVisible(),true);
+    assert.equal(await pagina.getByRole('navigation',{name:'Seções da prévia no celular'}).isHidden(),true);
+    assert.equal(await pagina.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    assert.equal(await pagina.locator('#contexto-espaco').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),2);
   }
   assert.deepEqual(erros,[]);
   assert.equal(requests.every(r=>r.metodo==='GET'&&new URL(r.url).origin===base),true);

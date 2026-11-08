@@ -1,4 +1,5 @@
 'use strict';
+import {criarValidacaoTurma} from './validacao-formulario.js';
 
 // Prévia isolada: interações locais, sem transporte, autenticação ou persistência.
 (() => {
@@ -39,50 +40,29 @@
     const escuro=raiz.dataset.tema!=='escuro';raiz.dataset.tema=escuro?'escuro':'claro';
     const nome='Mudar para tema '+(escuro?'claro':'escuro');tema.setAttribute('aria-label',nome);tema.title=nome;tema.replaceChildren(icone(escuro?'sol':'lua'));
   });
-  const menu=selecionar('#menu-lateral'),abrirMenu=selecionar('#abrir-menu'),fundo=selecionar('#fundo-menu');
+  const estrutura=selecionar('.estrutura-referencia'),abrirMenu=selecionar('#abrir-menu');
   const conta=selecionar('#menu-conta'),avatar=selecionar('#abrir-conta');
   function fecharConta(){if(conta.matches(':popover-open'))conta.hidePopover();}
   selecionarTodos('[data-conta-feedback]').forEach(botao=>botao.addEventListener('click',()=>{fecharConta();avatar.focus();notificar(botao.dataset.contaFeedback);}));
   conta.addEventListener('keydown',evento=>{if(evento.key==='Escape'){evento.preventDefault();fecharConta();avatar.focus();}});
-  const acionadoresMenu=selecionarTodos('[data-menu-abrir]');let ultimoMenu=abrirMenu;
-  const menuDesktop=matchMedia('(min-width:1024px)');
-  const fundoInerte=[selecionar('main'),selecionar('header'),selecionar('footer'),selecionar('.navegacao-inferior'),selecionar('#notificacoes')].filter(Boolean);
-  function fecharMenu(devolver=true) {
-    menu.dataset.aberto='false';fundo.hidden=true;acionadoresMenu.forEach(botao=>botao.setAttribute('aria-expanded','false'));
-    abrirMenu.setAttribute('aria-label','Abrir menu principal');abrirMenu.title='Abrir menu principal';
-    fundoInerte.forEach(elemento=>{elemento.inert=false;});
-    if(devolver)ultimoMenu.focus();
+  const menuDesktop=matchMedia('(min-width:768px)'),telaAmpla=matchMedia('(min-width:1280px)');
+  function definirMenuDesktop(modo){
+    estrutura.dataset.menuDesktop=modo;const expandido=modo==='expandido';
+    abrirMenu.setAttribute('aria-expanded',String(expandido));
+    const rotulo=expandido?'Recolher menu principal':'Expandir menu principal';abrirMenu.setAttribute('aria-label',rotulo);abrirMenu.title=rotulo;
   }
-  acionadoresMenu.forEach(botao=>botao.addEventListener('click',()=>{
-    fecharConta();
-    if(menu.dataset.aberto==='true'){fecharMenu();return;}
-    ultimoMenu=botao;menu.dataset.aberto='true';fundo.hidden=menuDesktop.matches;acionadoresMenu.forEach(acionador=>acionador.setAttribute('aria-expanded','true'));
-    abrirMenu.setAttribute('aria-label','Recolher menu principal');abrirMenu.title='Recolher menu principal';
-    fundoInerte.forEach(elemento=>{elemento.inert=!menuDesktop.matches;});
-    if(!menuDesktop.matches)menu.querySelector('[data-menu-fechar]').focus();
-  }));
-  menuDesktop.addEventListener('change',()=>fecharMenu());
-  fundo.addEventListener('click',()=>fecharMenu());
-  selecionar('[data-menu-fechar]').addEventListener('click',()=>fecharMenu());
-  document.addEventListener('keydown',evento=>{
-    if(evento.key==='Escape'&&menu.dataset.aberto==='true')fecharMenu();
-    if(evento.key==='Tab'&&menu.dataset.aberto==='true'&&!menuDesktop.matches){
-      const alvos=[...menu.querySelectorAll('a,button')].filter(el=>el.getClientRects().length);
-      const primeiro=alvos[0],ultimo=alvos.at(-1);
-      if(evento.shiftKey&&document.activeElement===primeiro){evento.preventDefault();ultimo.focus();}
-      else if(!evento.shiftKey&&document.activeElement===ultimo){evento.preventDefault();primeiro.focus();}
-    }
-  });
-  const links=selecionarTodos('.lista-menu a,a[data-secao]');
-  function marcarSecao() {
-    const atual=location.hash||'#composicao';
-    links.forEach(link=>{if(link.hash===atual)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');});
-  }
-  links.forEach(link=>link.addEventListener('click',()=>{
-    if(menu.dataset.aberto==='true'&&!menuDesktop.matches){
-      fecharMenu(false);const titulo=document.querySelector(link.hash+' h2');
-      if(titulo){titulo.tabIndex=-1;requestAnimationFrame(()=>titulo.focus({preventScroll:true}));}
-    }
+  definirMenuDesktop(telaAmpla.matches?'expandido':'compacto');
+  abrirMenu.addEventListener('click',()=>{fecharConta();definirMenuDesktop(estrutura.dataset.menuDesktop==='expandido'?'compacto':'expandido');});
+  const menuMobile=selecionar('#menu-mobile'),abrirMenuMobile=selecionar('#abrir-menu-mobile');let devolverMenuMobile=true;
+  abrirMenuMobile.addEventListener('click',()=>{fecharConta();devolverMenuMobile=true;menuMobile.showModal();abrirMenuMobile.setAttribute('aria-expanded','true');menuMobile.querySelector('[data-menu-mobile-fechar]').focus();});
+  selecionar('[data-menu-mobile-fechar]').addEventListener('click',()=>menuMobile.close());
+  menuMobile.addEventListener('close',()=>{abrirMenuMobile.setAttribute('aria-expanded','false');if(devolverMenuMobile)(menuDesktop.matches?abrirMenu:abrirMenuMobile).focus();});
+  menuMobile.addEventListener('click',evento=>{if(evento.target!==menuMobile)return;const r=menuMobile.getBoundingClientRect();if(evento.clientX<r.left||evento.clientX>r.right||evento.clientY<r.top||evento.clientY>r.bottom)menuMobile.close();});
+  menuDesktop.addEventListener('change',()=>{if(menuMobile.open)menuMobile.close();definirMenuDesktop(telaAmpla.matches?'expandido':'compacto');});
+  const links=selecionarTodos('.lista-menu a,.lista-menu-mobile a,a[data-secao]');
+  function marcarSecao(){const atual=location.hash||'#composicao';links.forEach(link=>{if(link.hash===atual)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');});}
+  selecionarTodos('.lista-menu-mobile a').forEach(link=>link.addEventListener('click',()=>{
+    devolverMenuMobile=false;menuMobile.close();const titulo=document.querySelector(link.hash+' h2');if(titulo){titulo.tabIndex=-1;requestAnimationFrame(()=>titulo.focus({preventScroll:true}));}
   }));
   window.addEventListener('hashchange',marcarSecao);marcarSecao();
 
@@ -109,7 +89,7 @@
   });
 
   const tabela=selecionar('#registros'),modos=selecionarTodos('button[data-modo]');
-  const controlesModos=modos[0].parentElement,modoMobile=matchMedia('(max-width:720px)');let apresentacaoPreferida='tabela';
+  const controlesModos=modos[0].parentElement,modoMobile=matchMedia('(max-width:767px)');let apresentacaoPreferida='tabela';
   const avisoModo=document.createElement('p');avisoModo.className='ajuda tw:px-4 tw:py-2';avisoModo.textContent='Apresentação em cards no celular';controlesModos.parentElement.after(avisoModo);
   function atualizarModo(){
     const modo=modoMobile.matches?'cards':apresentacaoPreferida;tabela.dataset.modo=modo;
@@ -129,25 +109,20 @@
   });
 
   const nome=selecionar('#nome-turma'),ano=selecionar('#ano');
-  function marcarCampo(campo,erro,invalido) {
-    campo.setAttribute('aria-invalid',String(invalido));selecionar(erro).hidden=!invalido;return invalido;
-  }
-  selecionar('#validar-campos').addEventListener('click',()=>{
-    const nomeInvalido=marcarCampo(nome,'#nome-erro',nome.value.trim()===''||!nome.validity.valid);
-    const anoInvalido=marcarCampo(ano,'#ano-erro',!Number.isInteger(ano.valueAsNumber)||!ano.validity.valid);
-    if(nomeInvalido||anoInvalido)(nomeInvalido?nome:ano).focus();else notificar('Campos válidos no exemplo. Nenhum dado foi enviado ou gravado.','sucesso');
+  const validacao=criarValidacaoTurma(selecionar('#campos-turma-exemplo')),validar=selecionar('#validar-campos');
+  validar.addEventListener('click',async()=>{
+    if(validar.disabled)return;validar.disabled=true;validar.setAttribute('aria-busy','true');
+    try{if(await validacao.validarTudo())notificar('Campos válidos no exemplo. Nenhum dado foi enviado ou gravado.','sucesso');}
+    finally{validar.disabled=false;validar.removeAttribute('aria-busy');}
   });
-  selecionar('#limpar-campos').addEventListener('click',()=>{
-    nome.value='';ano.value='2026';selecionar('#observacao').value='';
-    marcarCampo(nome,'#nome-erro',false);marcarCampo(ano,'#ano-erro',false);nome.focus();
-  });
+  selecionar('#limpar-campos').addEventListener('click',()=>{nome.value='';ano.value='2026';selecionar('#observacao').value='';validacao.limparEstados();nome.focus();});
 
   const dialogo=selecionar('#dialogo'),filtros=selecionar('#filtros-exemplo'),confirmar=selecionar('#dialogo-confirmar');
   const trocarVinculo=selecionar('#trocar-vinculo'),quantidadeVinculos=selecionar('#quantidade-vinculos');
   const opcoesVinculo=document.createElement('div');opcoesVinculo.className='tw:mt-4 tw:grid tw:gap-3';opcoesVinculo.id='opcoes-vinculo';opcoesVinculo.hidden=true;
   for(const perfil of ['Coordenação','Professor']){
     const botao=document.createElement('button');botao.type='button';botao.className='botao botao-secundario botao-lg';botao.textContent=perfil+' — escola fictícia';
-    botao.addEventListener('click',()=>{selecionar('#perfil-exemplo').textContent=perfil;dialogo.close();notificar('Perfil fictício alterado na prévia. A sessão do aplicativo não foi modificada.');});opcoesVinculo.append(botao);
+    botao.addEventListener('click',()=>{selecionarTodos('[data-perfil-exemplo]').forEach(dado=>{dado.textContent=perfil;});dialogo.close();notificar('Perfil fictício alterado na prévia. A sessão do aplicativo não foi modificada.');});opcoesVinculo.append(botao);
   }
   filtros.before(opcoesVinculo);
   quantidadeVinculos.addEventListener('change',()=>{trocarVinculo.hidden=quantidadeVinculos.value==='1';});

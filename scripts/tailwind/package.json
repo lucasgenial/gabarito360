@@ -2,9 +2,17 @@
   "name": "g360-previa-componentes",
   "private": true,
   "type": "module",
-  "scripts": { "build": "node build.mjs" },
+  "scripts": {
+    "build": "node build.mjs"
+  },
   "devDependencies": {
+    "@form-validation/core": "2.4.0",
+    "@form-validation/validator-between": "2.4.0",
+    "@form-validation/validator-integer": "2.4.0",
+    "@form-validation/validator-not-empty": "2.4.0",
+    "@form-validation/validator-string-length": "2.4.0",
     "@tailwindcss/cli": "4.3.5",
+    "esbuild": "0.28.2",
     "tailwindcss": "4.3.5"
   }
 }
