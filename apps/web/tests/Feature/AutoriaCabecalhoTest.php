@@ -33,14 +33,19 @@ class AutoriaCabecalhoTest extends TestCase
         foreach (['escola','pessoal','interno'] as $tipo) {
             $r=$this->get('/teste-cabecalho?tipo='.$tipo)->assertOk()->assertSee($tipo==='interno'?'Trocar acesso':'Trocar vínculo')
                 ->assertSee('data-sem-contexto',false)->assertSee('aria-controls="user-menu"',false)
-                ->assertSee('aria-expanded="false"',false)->assertSee('id="user-menu" hidden',false)
-                ->assertDontSee('badge badge-info badge-dot',false)->assertSee('type="submit" class="logout"',false);
+                ->assertSee('aria-expanded="false"',false)->assertSee('class="conta-app" hidden',false)
+                ->assertDontSee('badge badge-info badge-dot',false)->assertSee('class="conta-app-sair"',false);
             $this->assertSame(1,substr_count($r->getContent(),'class="contexto-ativo"'));
             $r->assertSee('<details class="contexto-ativo">',false)->assertSee('Meu espaço')->assertSee('Meu perfil');
             $doc=new \DOMDocument(); @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$r->getContent());
             $resumo=(new \DOMXPath($doc))->query('//summary[@class="contexto-resumo"]')->item(0);
             $this->assertSame('Meu espaço',trim(preg_replace('/\s+/u',' ',$resumo->textContent)));
-            $r->assertDontSee('contexto-lateral',false)->assertSee('class="contexto-trocar"',false);
+            $r->assertSee('class="espaco-lateral-app"',false)->assertSee('id="contexto-trocar"',false);
+            $xp=new \DOMXPath($doc);
+            $this->assertSame(1,$xp->query('//header[contains(@class,"cabecalho-app")]//*[@id="user-menu-trigger"]')->length);
+            $this->assertSame(1,$xp->query('//*[@id="user-menu"]//form[@method="POST"]//input[@name="_token"]')->length);
+            $this->assertSame(0,$xp->query('//aside//summary')->length);
+            $this->assertSame(1,$xp->query('//a[contains(@class,"marca-estrutura")]')->length);
             if ($tipo==='interno') $r->assertSee('Equipe Gabarito360')->assertDontSee('Instituição fictícia com nome longo');
             if ($tipo==='pessoal') $r->assertSee('Tipo de espaço')->assertSee('Pessoal')->assertDontSee('Minha escola');
         }

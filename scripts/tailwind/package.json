@@ -13,6 +13,7 @@
     "@form-validation/validator-string-length": "2.4.0",
     "@tailwindcss/cli": "4.3.5",
     "esbuild": "0.28.2",
+    "postcss": "8.5.32",
     "tailwindcss": "4.3.5"
   }
 }
