@@ -9,7 +9,7 @@ const dependency=new URL('../paineis-grid/node_modules/',import.meta.url);
 const packageInfo=JSON.parse(await readFile(new URL('gridstack/package.json',dependency),'utf8'));
 assert.equal(packageInfo.version,'14.1.0');
 const compiled=await build({stdin:{contents:'export * from '+JSON.stringify(fileURLToPath(new URL('../../apps/web/resources/js/painel-geometria.js',import.meta.url)))+';export {GridStackEngine} from "gridstack/dist/gridstack-engine";',resolveDir:fileURLToPath(new URL('../paineis-grid/',import.meta.url))},bundle:true,write:false,format:'esm',platform:'node',nodePaths:[fileURLToPath(dependency)]});
-const {GridStackEngine,project,validateLayout,nativeEngine,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,distributeWidths,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback}=await import('data:text/javascript;base64,'+Buffer.from(compiled.outputFiles[0].contents).toString('base64'));
+const {GridStackEngine,project,validateLayout,nativeEngine,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,distributeWidths,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback,gridCoordinateMetrics,previewCssBox,pointerResizeDelta,snapshotPreviewCss,restorePreviewCss}=await import('data:text/javascript;base64,'+Buffer.from(compiled.outputFiles[0].contents).toString('base64'));
 const cap=(section='analises',extra={})=>({section,minW:2,maxW:12,minH:1,maxH:30,defaultW:6,defaultH:4,...extra});
 const caps=new Map(['a','b','c'].map(id=>[id,cap()]));
 const n=(id,x=0,y=0,w=6,h=4,extra={})=>({id,section:'analises',x,y,w,h,...extra});
@@ -172,4 +172,69 @@ test('lateral:duas faixas singleton respeitam limites e pins permanecem imóveis
  const moved=lateralAction(before,lateralCaps,'a',keyboardLateralAction(before,'a','ArrowDown'));
  assert.equal(moved.find(n=>n.id==='a').y,6);assert.equal(moved.find(n=>n.id==='b').y,0);assert.deepEqual(moved.find(n=>n.id==='c'),before[2]);
  const singleton=[n('a',0,0,12,9)];assert.equal(keyboardLateralAction(singleton,'a','ArrowDown'),null);
+});
+
+
+for(const zoom of [1,1.25,1.5])test(`zoom${zoom}: prévia local, ponteiro visual e6+3+3 conservam o mesmo destino`,()=>{
+ const localWidth=1800,visualWidth=localWidth*zoom,metrics=gridCoordinateMetrics({localWidth,visualWidth,cellHeight:48,inverseScaleY:1/zoom});
+ const limits=new Map(['a','b','c'].map(id=>[id,cap('analises',{minW:3,minH:8,maxH:20})]));
+ const input=[n('a',0,0,4,9),n('b',4,0,4,9),n('c',8,0,4,9)],start={x:650,y:400,pageY:600};
+ const delta=pointerResizeDelta(start,{x:start.x+2*150*zoom,y:start.y},metrics,200);
+ assert.deepEqual(delta,{dw:2,dh:0});
+ const result=lateralAction(input,limits,'a',{type:'resize',w:input[0].w+delta.dw});
+ assert.deepEqual(positions(result),[['a',0,0,6,9],['b',6,0,3,9],['c',9,0,3,9]]);
+ const boxes=result.map(item=>previewCssBox(item,metrics));
+ assert.deepEqual(boxes.map(b=>b.width),[900,450,450]);
+ assert.equal(boxes.reduce((sum,b)=>sum+b.width*zoom,0),visualWidth);
+ assert.ok(boxes.every(b=>(b.left+b.width)*zoom<=visualWidth));
+ assert.deepEqual(previewCssBox(result[0],metrics),boxes[0]); // O marcador usa a mesma conversão do ativo/vizinhos.
+ assert.deepEqual(input.map(item=>item.w),[4,4,4]);
+ const vertical=pointerResizeDelta(start,{x:start.x,y:start.y+2*48*zoom-30},metrics,230);
+ assert.deepEqual(vertical,{dw:0,dh:2});
+ const taller=lateralAction(input,limits,'a',{type:'resize',h:input[0].h+vertical.dh});
+ assert.deepEqual(taller.map(item=>item.h),[11,9,9]);
+ assert.equal(previewCssBox(taller[0],metrics).height*zoom,11*48*zoom);
+ assert.deepEqual(pointerResizeDelta(start,{x:start.x,y:start.y},metrics,250),{dw:0,dh:0});
+});
+
+test('escalaX1.25/escalaY1.5 e origem rolada não misturam eixos ou posições locais',()=>{
+ const metrics=gridCoordinateMetrics({localWidth:1800,visualWidth:2250,cellHeight:48,inverseScaleY:1/1.5});
+ const start={x:750,y:600,pageY:1000};
+ assert.deepEqual(pointerResizeDelta(start,{x:1125,y:724},metrics,420),{dw:2,dh:2});
+ assert.deepEqual(previewCssBox(n('a',4,7,3,11),metrics),{left:600,top:336,width:450,height:528});
+ assert.equal(metrics.cellHeightVisual,72);assert.equal(metrics.cellWidthVisual,187.5);
+});
+
+test('caso real1806CSS/2258visuais não multiplica zoom duas vezes nem ultrapassa a grade',()=>{
+ const metrics=gridCoordinateMetrics({localWidth:1806,visualWidth:2258,cellHeight:48,inverseScaleY:.8});
+ const nodes=[n('a',0,0,6,9),n('b',6,0,3,9),n('c',9,0,3,9)];
+ const visual=nodes.map(item=>{const box=previewCssBox(item,metrics);return {left:box.left*1.25,right:(box.left+box.width)*1.25,width:box.width*1.25};});
+ assert.deepEqual(visual.map(b=>b.width),[1128.75,564.375,564.375]);
+ assert.ok(visual.every(b=>b.left>=0&&b.right<=2258));assert.ok(2258-visual.at(-1).right<1);
+ assert.equal(pointerResizeDelta({x:0,y:0,pageY:0},{x:2258/6,y:120},metrics).dh,2);
+});
+
+test('medidas não positivas ou não finitas são recusadas sem assumir zoom1',()=>{
+ const base={localWidth:1800,visualWidth:2250,cellHeight:48,inverseScaleY:.8};
+ for(const key of Object.keys(base))for(const bad of [0,-1,NaN,Infinity,undefined])assert.throws(()=>gridCoordinateMetrics({...base,[key]:bad}),/Escala da grade inválida/);
+});
+
+
+test('cleanup restaura só a geometria própria sem reaplicar opacity0.8 nativa do resize',()=>{
+ // Interface CSSStyleDeclaration: modelo mínimo para observar propriedades tocadas,
+ // ausência e prioridade; o ensaio browser independente verifica o ciclo DD real.
+ const values=new Map([['opacity',['0.8','']],['position',['absolute','']],['left',['12px','important']],['width',['600px','']]]);
+ const style={getPropertyValue:key=>values.get(key)?.[0]??'',getPropertyPriority:key=>values.get(key)?.[1]??'',setProperty:(key,value,priority='')=>values.set(key,[value,priority]),removeProperty:key=>values.delete(key)};
+ const snapshot=snapshotPreviewCss(style);assert.deepEqual(snapshot.map(item=>item[0]),['left','top','width','height']);
+ style.setProperty('left','30px');style.setProperty('width','900px');style.setProperty('top','48px');style.setProperty('height','432px');
+ // DD finaliza antes do microtask da prévia; não ressuscitar seus estilos temporários.
+ style.removeProperty('opacity');style.setProperty('position','relative');style.setProperty('z-index','7');
+ restorePreviewCss(style,snapshot);
+ assert.equal(style.getPropertyValue('opacity'),'');assert.equal(style.getPropertyValue('position'),'relative');assert.equal(style.getPropertyValue('z-index'),'7');
+ assert.equal(style.getPropertyValue('left'),'12px');assert.equal(style.getPropertyPriority('left'),'important');assert.equal(style.getPropertyValue('width'),'600px');
+ assert.ok(!values.has('top'));assert.ok(!values.has('height'));
+ restorePreviewCss(style,snapshot);assert.equal(style.getPropertyValue('opacity'),'');
+ // Se o estilo atual tem opacidade própria, a limpeza geométrica também a conserva.
+ style.setProperty('opacity','.65','important');restorePreviewCss(style,snapshot);
+ assert.equal(style.getPropertyValue('opacity'),'.65');assert.equal(style.getPropertyPriority('opacity'),'important');
 });

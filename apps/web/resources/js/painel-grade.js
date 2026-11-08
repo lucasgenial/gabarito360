@@ -1,5 +1,5 @@
 import {GridStack} from 'gridstack';
-import {project,chartIds,validateLayout,nodeOptions,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,bandsOf,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback} from './painel-geometria.js';
+import {project,chartIds,validateLayout,nodeOptions,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,bandsOf,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback,gridCoordinateMetrics,previewCssBox,pointerResizeDelta,snapshotPreviewCss,restorePreviewCss} from './painel-geometria.js';
 // GridStack executa gestos; a transação lateral preserva a faixa e as alturas individuais.
 function iniciar(){
  const configEl=document.getElementById('painel-grade-config');if(!configEl)return;
@@ -91,22 +91,22 @@ function iniciar(){
  function restorePreview(active){
   if(active.ghost){const {el,value,priority}=active.ghost;if(value==='')el.style.removeProperty('opacity');else el.style.setProperty('opacity',value,priority);}
   // No drag o ativo é o helper fixed do DD; a biblioteca restaura suas próprias coordenadas.
-  for(const [id,style]of active.styles){if(id===active.id&&!active.resize)continue;const wrap=widgets.get(id)?.el.parentElement;if(!wrap?.classList.contains('grid-stack-item'))continue;if(style===null)wrap.removeAttribute('style');else wrap.setAttribute('style',style);}
+  for(const [id,style]of active.styles){if(id===active.id&&!active.resize)continue;const wrap=widgets.get(id)?.el.parentElement;if(!wrap?.classList.contains('grid-stack-item'))continue;restorePreviewCss(wrap.style,style);}
   if(active.placeholder){const {el,style,attributes}=active.placeholder;if(style===null)el.removeAttribute('style');else el.setAttribute('style',style);for(const [name,value]of attributes){if(value===null)el.removeAttribute(name);else el.setAttribute(name,value);}}
   delete sections.get(active.section).grade.dataset.previaValida;
  }
  function drawPreview(active,proposal,valid=true){
-  const s=sections.get(active.section),cell=s.grade.getBoundingClientRect().width/12,height=s.grid.getCellHeight(true);
+  const s=sections.get(active.section),paint=(el,n)=>{for(const [key,value]of Object.entries(previewCssBox(n,active.metrics)))el.style[key]=value+'px';};
   for(const n of bySection(proposal,active.section)){const wrap=widgets.get(n.id).el.parentElement;
    // Ghost segue ponteiro/offset nativo. Só os vizinhos recebem coordenadas locais da grade.
    if(n.id===active.id&&!active.resize)continue;
-   wrap.style.left=n.x*cell+'px';wrap.style.top=n.y*height+'px';wrap.style.width=n.w*cell+'px';wrap.style.height=n.h*height+'px';
+   paint(wrap,n);
   }
   const placeholder=s.grade.querySelector(':scope > .grid-stack-placeholder'),target=proposal.find(n=>n.id===active.id);
   if(placeholder&&target){
    if(!active.placeholder)active.placeholder={el:placeholder,style:placeholder.getAttribute('style'),attributes:['gs-x','gs-y','gs-w','gs-h','aria-hidden','data-previa-valida'].map(name=>[name,placeholder.getAttribute(name)])};
    // Reutilizar o único placeholder nativo elimina o retângulo antigo na faixa de origem.
-   placeholder.style.left=target.x*cell+'px';placeholder.style.top=target.y*height+'px';placeholder.style.width=target.w*cell+'px';placeholder.style.height=target.h*height+'px';
+   paint(placeholder,target);
    for(const key of ['x','y','w','h']){placeholder.style.setProperty('--gs-'+key,String(target[key]));placeholder.setAttribute('gs-'+key,String(target[key]));}
    if(valid)placeholder.style.removeProperty('--accent');else placeholder.style.setProperty('--accent','var(--danger)');
    placeholder.setAttribute('aria-hidden','true');placeholder.dataset.previaValida=String(valid);
@@ -128,7 +128,7 @@ function iniciar(){
   const active=gesture;if(!active||active.epoch!==epoch||!eligible()||!editing||busy||uncertain)return;
   const s=sections.get(active.section),current=active.before.find(n=>n.id===active.id);
   try{let action;
-   if(active.resize){const dw=Math.round((point.x-active.start.x)/active.cellWidth),clientDy=point.y-active.start.y,dh=clientDy===0?0:Math.round((point.y+scrollY-active.start.pageY)/active.cellHeight);
+   if(active.resize){const {dw,dh}=pointerResizeDelta(active.start,point,active.metrics,scrollY);
     action={type:'resize'};if(dw)action.w=current.w+dw;if(dh)action.h=current.h+dh;
    }else action=dragIntent(active);
    const minimums=action.type==='resize'&&action.w===undefined?new Map():actionMinimums(s);
@@ -141,8 +141,9 @@ function iniciar(){
  function startGesture(s,section,event,el){
   if(!editing||busy||uncertain||layout.find(n=>n.id===el.gridstackNode.id)?.fixo===true)return;
   const before=clone(layout),rect=s.grade.getBoundingClientRect(),styles=new Map(),rectangles=new Map();
-  for(const n of bySection(before,section)){const wrap=widgets.get(n.id).el.parentElement,r=wrap.getBoundingClientRect();styles.set(n.id,wrap.getAttribute('style'));rectangles.set(n.id,{id:n.id,left:r.left+scrollX,top:r.top+scrollY,bottom:r.bottom+scrollY,width:r.width});}
-  gesture={section,id:el.gridstackNode.id,before,styles,epoch,resize:event.type==='resizestart',start:{x:point.x,y:point.y,pageY:point.y+scrollY},cellWidth:rect.width/12,cellHeight:s.grid.getCellHeight(true),grade:{left:rect.left+scrollX,right:rect.right+scrollX,top:rect.top+scrollY,bottom:rect.bottom+scrollY},bands:bandsOf(bySection(before,section)).map(b=>{const items=b.items.map(n=>rectangles.get(n.id));return {items,top:Math.min(...items.map(r=>r.top)),bottom:Math.max(...items.map(r=>r.bottom))};})};
+  const transform=GridStack.Utils.getValuesFromTransformedElement(s.grade),metrics=gridCoordinateMetrics({localWidth:s.grade.clientWidth,visualWidth:rect.width,cellHeight:s.grid.getCellHeight(true),inverseScaleY:transform.yScale});
+  for(const n of bySection(before,section)){const wrap=widgets.get(n.id).el.parentElement,r=wrap.getBoundingClientRect();styles.set(n.id,snapshotPreviewCss(wrap.style));rectangles.set(n.id,{id:n.id,left:r.left+scrollX,top:r.top+scrollY,bottom:r.bottom+scrollY,width:r.width});}
+  gesture={section,id:el.gridstackNode.id,before,styles,epoch,resize:event.type==='resizestart',start:{x:point.x,y:point.y,pageY:point.y+scrollY},metrics,grade:{left:rect.left+scrollX,right:rect.right+scrollX,top:rect.top+scrollY,bottom:rect.bottom+scrollY},bands:bandsOf(bySection(before,section)).map(b=>{const items=b.items.map(n=>rectangles.get(n.id));return {items,top:Math.min(...items.map(r=>r.top)),bottom:Math.max(...items.map(r=>r.bottom))};})};
   if(!gesture.resize){gesture.ghost={el,value:el.style.getPropertyValue('opacity'),priority:el.style.getPropertyPriority('opacity')};el.style.setProperty('opacity','0.20');}
   // Vizinhos não são expulsos pela colisão intermediária: a prévia exibe o lote calculado.
   for(const node of s.grid.engine.nodes)if(node.id!==gesture.id)s.grid.update(node.el,{locked:true,noMove:true,noResize:true});
