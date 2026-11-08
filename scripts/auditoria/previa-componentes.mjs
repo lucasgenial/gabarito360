@@ -14,6 +14,8 @@ const rotas=new Map([
   ['/images/avatares/educadores-v1.png',['image/png','../../apps/web/public/images/avatares/educadores-v1.png']],
   ['/brand/gabarito360-email.png',['image/png','../../apps/web/public/brand/gabarito360-email.png']],
   ['/brand/gabarito360-email-dark.png',['image/png','../../apps/web/public/brand/gabarito360-email-dark.png']],
+  ['/fonts/brand/Figtree-ExtraBold.woff2',['font/woff2','../../apps/web/public/fonts/brand/Figtree-ExtraBold.woff2']],
+  ['/fonts/brand/AlbertSans-ExtraBold.woff2',['font/woff2','../../apps/web/public/fonts/brand/AlbertSans-ExtraBold.woff2']],
   ['/favicon.ico',['image/x-icon','../../apps/web/public/favicon.ico']],
 ]);
 const servidor=createServer((req,res)=>{
@@ -32,7 +34,10 @@ try{
   pagina.on('request',r=>requests.push({url:r.url(),metodo:r.method()}));
   await pagina.goto(base+'/previas/tailwind/index.html');
   assert.equal(await pagina.locator('form').count(),0);
-  assert.equal(await pagina.locator('#marca-cabecalho img:visible').count(),1);
+  assert.equal(await pagina.locator('#marca-cabecalho .marca-simbolo svg:visible').count(),1);
+  await pagina.evaluate(()=>document.fonts.ready);
+  assert.equal(await pagina.locator('.marca-nome').evaluate(e=>getComputedStyle(e).fontSize),'18px');
+  assert.equal(await pagina.locator('.marca-simbolo').evaluate(e=>e.getBoundingClientRect().width),32);
   assert.equal(await pagina.locator('#menu-lateral img').count(),0);
   const larguraExpandida=await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width);
   await pagina.getByRole('button',{name:'Recolher menu principal',exact:true}).click();
@@ -125,7 +130,8 @@ try{
   await pagina.getByRole('button',{name:'Mudar para tema escuro',exact:true}).click();
   assert.equal(await pagina.locator('html').getAttribute('data-tema'),'escuro');
   assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(0, 21, 52)');
-  assert.equal(await pagina.locator('#marca-cabecalho img:visible').getAttribute('src'),'/brand/gabarito360-email-dark.png');
+  assert.equal(await pagina.locator('#marca-cabecalho').evaluate(e=>getComputedStyle(e).color),'rgb(255, 255, 255)');
+  assert.equal(await pagina.locator('#marca-cabecalho .g360-simbolo-circulo').evaluate(e=>getComputedStyle(e).fill),'rgb(255, 255, 255)');
   await pagina.getByRole('button',{name:'Mudar para tema claro',exact:true}).click();
 
   await pagina.getByRole('tab',{name:'Alunos',exact:true}).focus();await pagina.keyboard.press('ArrowRight');
@@ -170,7 +176,7 @@ try{
     assert.equal(await pagina.locator('#menu-lateral').isHidden(),true);
     assert.equal(await pagina.locator('#avatar-turma-exemplo').evaluate(e=>e.clientWidth),56);
     assert.equal(await pagina.locator('#contexto-espaco').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),1);
-    assert.equal(await pagina.locator('#marca-cabecalho img:visible').evaluate(e=>e.clientWidth),160);
+    assert.equal(await pagina.locator('#marca-cabecalho .marca-simbolo').evaluate(e=>e.clientWidth),32);
     await pagina.getByRole('button',{name:'Abrir todas as seções',exact:true}).click();
     assert.equal(await pagina.locator('#menu-mobile').evaluate(e=>e.open),true);
     assert.equal(await pagina.locator('#menu-mobile').evaluate(e=>e.getBoundingClientRect().bottom<=innerHeight),true);
@@ -188,6 +194,27 @@ try{
     assert.equal(await pagina.locator('#contexto-espaco').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),2);
     await pagina.locator('#meu-espaco summary').click();
   }
+  for(const largura of [320,348,375,393,440]){
+    await pagina.setViewportSize({width:largura,height:956});
+    const grupo=pagina.locator('#acoes-turma-exemplo');
+    const pos=await grupo.locator('button').evaluateAll(bs=>bs.map(b=>({top:b.getBoundingClientRect().top,left:b.getBoundingClientRect().left,right:b.getBoundingClientRect().right,height:b.getBoundingClientRect().height})));
+    assert.equal(new Set(pos.map(p=>p.top)).size,1,'Grupo em uma linha: '+largura);
+    assert.equal(pos.every(p=>p.height>=44&&p.left>=0&&p.right<=largura),true);
+    assert.equal(await grupo.locator('[data-acao-compactavel] .rotulo-acao').isVisible(),largura>=375);
+    assert.equal(await grupo.locator('.contexto-acao').first().isVisible(),largura>=440);
+    assert.equal(await grupo.getByRole('button',{name:'Arquivar turma',exact:true}).locator('.rotulo-acao').isVisible(),true);
+    assert.equal(await pagina.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    await grupo.getByRole('button',{name:'Arquivar turma',exact:true}).click();
+    await pagina.locator('#dialogo').waitFor({state:'visible'});
+    await pagina.keyboard.press('Escape');
+    assert.equal(await grupo.getByRole('button',{name:'Arquivar turma',exact:true}).evaluate(e=>e===document.activeElement),true);
+  }
+  await pagina.setViewportSize({width:1440,height:1000});
+  await pagina.locator('#acoes-turma-exemplo [data-acao-compactavel]').focus();
+  await pagina.locator('#legenda-acao:popover-open').waitFor({state:'visible'});
+  assert.equal(await pagina.locator('#legenda-acao').textContent(),'Editar turma 3º A');
+  await pagina.keyboard.press('Escape');
+  assert.equal(await pagina.locator('#legenda-acao').evaluate(e=>e.matches(':popover-open')),false);
   assert.deepEqual(erros,[]);
   assert.equal(requests.every(r=>r.metodo==='GET'&&new URL(r.url).origin===base),true);
   assert.equal(requests.some(r=>/\/api\/|\/app\//.test(new URL(r.url).pathname)),false);

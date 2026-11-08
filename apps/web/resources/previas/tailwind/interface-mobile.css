@@ -4,7 +4,6 @@
   .area-referencia { display:contents; }
   #abrir-menu,.menu-lateral { display:none; }
   .cabecalho-referencia { min-height:64px;padding:8px 16px;gap:8px; }
-  #marca-cabecalho img { width:160px;height:40px; }
   .contexto-espaco { grid-template-columns:minmax(0,1fr);gap:16px; }
   .contexto-espaco dd { overflow-wrap:break-word; }
   .avatar-entidade { width:56px;height:56px;font-size:22px; }

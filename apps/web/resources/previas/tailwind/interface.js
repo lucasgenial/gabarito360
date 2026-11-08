@@ -1,8 +1,10 @@
 'use strict';
 import {criarValidacaoTurma} from './validacao-formulario.js';
+import {iniciarLegendasAcoes} from './legendas-acoes.js';
 
 // Prévia isolada: interações locais, sem transporte, autenticação ou persistência.
 (() => {
+  iniciarLegendasAcoes();
   const selecionar = valor => document.querySelector(valor);
   const selecionarTodos = valor => [...document.querySelectorAll(valor)];
   const raiz = document.documentElement;
@@ -139,6 +141,13 @@ import {criarValidacaoTurma} from './validacao-formulario.js';
     const [titulo,descricao,acao]=textos[modo];selecionar('#dialogo-titulo').textContent=titulo;selecionar('#dialogo-descricao').textContent=descricao;confirmar.textContent=acao;
     confirmar.classList.toggle('botao-perigo',modo==='arquivar');confirmar.classList.toggle('botao-principal',modo!=='arquivar');filtros.hidden=modo!=='filtro';
     opcoesVinculo.hidden=modo!=='vinculos';confirmar.hidden=modo==='vinculos';selecionar('#dialogo-cancelar').textContent=modo==='vinculos'?'Fechar':'Cancelar';
+    if(modo==='arquivar'){
+      const registro=botao.closest('tr[data-nome]')?.querySelector('.celula-nome strong')?.textContent;
+      selecionar('#dialogo-titulo').textContent=registro?'Arquivar cadastro — exemplo':'Arquivar turma 3º A — exemplo';
+      selecionar('#dialogo-descricao').textContent=registro
+        ? registro+': o cadastro sairia da lista de registros em uso, com o histórico preservado. Esta é apenas uma demonstração; nenhum registro será alterado.'
+        : 'A turma 3º A sairia da lista de turmas em uso, com o histórico preservado. Esta é apenas uma demonstração; nenhum registro será alterado.';
+    }
     dialogo.showModal();selecionar('#dialogo-cancelar').focus();
   }));
   selecionarTodos('[data-dialogo-fechar]').forEach(botao=>botao.addEventListener('click',()=>dialogo.close()));
