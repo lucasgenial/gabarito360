@@ -30,6 +30,16 @@ try{
   pagina.on('request',r=>requests.push({url:r.url(),metodo:r.method()}));
   await pagina.goto(base+'/previas/tailwind/index.html');
   assert.equal(await pagina.locator('form').count(),0);
+  const larguraFechada=await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width);
+  await pagina.getByRole('button',{name:'Abrir menu principal',exact:true}).click();
+  assert.equal(await pagina.locator('main').evaluate(e=>e.inert),false);
+  assert.equal(await pagina.locator('#fundo-menu').isHidden(),true);
+  const geometria=await pagina.evaluate(()=>({menu:document.querySelector('#menu-lateral').getBoundingClientRect().right,conteudo:document.querySelector('main').getBoundingClientRect().left,largura:document.querySelector('main').getBoundingClientRect().width}));
+  assert.equal(Math.round(larguraFechada-geometria.largura),256);
+  assert.equal(geometria.menu<=geometria.conteudo,true);
+  await pagina.getByRole('button',{name:'Recolher menu principal',exact:true}).click();
+  assert.equal(await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width),larguraFechada);
+
   assert.equal(await pagina.locator('link[rel=stylesheet]').count(),1);
   const altura=alvo=>alvo.evaluate(e=>Math.round(e.getBoundingClientRect().height));
   for(const [nome,minimo] of [['pq',32],['md',40],['gd',48],['xg',56]]){
