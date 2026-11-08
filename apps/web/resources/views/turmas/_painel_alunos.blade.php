@@ -6,9 +6,9 @@ $widgetsAlunos=[
  'atencao'=>['id'=>'alunos-atencao','titulo'=>'Alunos que precisam de atenção','descricao'=>'Alunos com ao menos um resultado com indicação de recuperação registrada no recorte.'],
 ];
 @endphp
-<x-painel-secao id="estudantes" titulo="Estudantes">
+<x-painel-secao id="estudantes" titulo="Estudantes" :nivel="3">
 @foreach($widgetsAlunos as $chave=>$widgetAluno)
-<x-painel-widget :id="$widgetAluno['id']" :titulo="$widgetAluno['titulo']" :w="6" :h="12" secao="estudantes" :demo="false" class="painel-widget-alunos">
+<x-painel-widget :id="$widgetAluno['id']" :nivel="4" :titulo="$widgetAluno['titulo']" :w="6" :h="12" secao="estudantes" :demo="false" class="painel-widget-alunos">
 <div class="tu1r3-alunos" data-painel-alunos="{{ $chave }}" aria-describedby="descricao-{{ $widgetAluno['id'] }}">
 <span class="painel-valores-acessiveis" id="descricao-{{ $widgetAluno['id'] }}">{{ $widgetAluno['descricao'] }}</span>
 @if($painelIndisponivel??false)<p class="painel-widget-indisponivel">Dados temporariamente indisponíveis. Atualize a página para tentar novamente.</p>
