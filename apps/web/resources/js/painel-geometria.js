@@ -118,6 +118,22 @@ export function bandsOf(items){
  }return bands;
 }
 
+/** Faixa singleton cruza a vizinha; separar um membro de faixa múltipla cria outra faixa. */
+export function keyboardLateralAction(items,id,key){
+ const current=items.find(n=>n.id===id);if(!current||current.fixo===true)return null;
+ const bands=bandsOf(items.filter(n=>n.section===current.section)),at=bands.findIndex(b=>b.items.some(n=>n.id===id)),band=bands[at],index=band.items.findIndex(n=>n.id===id);
+ if(key==='ArrowUp'||key==='ArrowDown'){
+  const direction=key==='ArrowUp'?-1:1,place=direction<0?'before-band':'after-band';
+  if(band.items.length>1)return {type:'move',targetId:id,place};
+  const adjacent=bands[at+direction];if(!adjacent)return null;
+  return {type:'move',targetId:adjacent.items[direction<0?0:adjacent.items.length-1].id,place};
+ }
+ if(key!=='ArrowLeft'&&key!=='ArrowRight')return null;
+ const direction=key==='ArrowLeft'?-1:1;let peer=band.items[index+direction],after=direction>0;
+ if(!peer){const adjacent=bands[at+direction]?.items;if(!adjacent)return null;peer=direction<0?adjacent[adjacent.length-1]:adjacent[0];after=direction<0;}
+ return {type:'move',targetId:peer.id,place:'lateral',after};
+}
+
 /** Repartição inteira limitada, proporcional e estável na ordem indicada pelo gesto. */
 export function distributeWidths(items,capacity,limits,{activeId=null,preferredWidth=null,minWidths=new Map()}={}){
  if(!Number.isInteger(capacity)||capacity<1||capacity>12||!items.length)cannotFit();
@@ -177,7 +193,7 @@ function arrangeBands(bands,limits,{activeId=null,preferredWidth=null,minWidths=
    const proposal=[];let fits=true;
    for(const {slot,items}of buckets){if(!items.length)continue;let widths;
     // Não estreitar uma faixa alheia só para forçá-la num vão vertical anterior.
-    if(!items.some(n=>n.id===activeId)&&slot.w<Math.min(12,items.reduce((sum,n)=>sum+n.w,0))){fits=false;break;}
+    if((band.preserveWidth||!items.some(n=>n.id===activeId))&&slot.w<Math.min(12,items.reduce((sum,n)=>sum+n.w,0))){fits=false;break;}
     try{widths=distributeWidths(items,slot.w,limits,{activeId,preferredWidth,minWidths:items.some(n=>affected.has(n.id))?minWidths:new Map()});}catch{fits=false;break;}
     let x=slot.x;for(const n of items){const candidate={...project(n),x,y,w:widths.get(n.id)};x+=candidate.w;
      if(!engine.isAreaEmpty(candidate.x,candidate.y,candidate.w,candidate.h)||candidate.y+candidate.h>200){fits=false;break;}proposal.push(candidate);
@@ -212,7 +228,7 @@ export function lateralAction(before,limits,id,action,{minWidths=new Map()}={}){
  }else if(action.type==='move'){
   const target=bands.find(b=>b.items.some(n=>n.id===action.targetId));if(!target||(action.targetId===id&&action.place==='lateral'))cannotFit();
   source.items=source.items.filter(n=>n.id!==id);
-  if(action.place==='before-band'||action.place==='after-band')bands.splice(bands.indexOf(target)+(action.place==='after-band'?1:0),0,{y:target.y,items:[moving]});
+  if(action.place==='before-band'||action.place==='after-band')bands.splice(bands.indexOf(target)+(action.place==='after-band'?1:0),0,{y:target.y,items:[moving],preserveWidth:true});
   else if(action.place==='lateral'){
    const at=target.items.findIndex(n=>n.id===action.targetId),peer=target.items[at];if(peer.fixo===true)cannotFit();
    moving.x=peer.x;moving.w=peer.w;target.items.splice(at+(action.after?1:0),0,moving);for(const n of target.items)affected.add(n.id);

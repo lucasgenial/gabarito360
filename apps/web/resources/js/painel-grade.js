@@ -1,5 +1,5 @@
 import {GridStack} from 'gridstack';
-import {project,chartIds,validateLayout,nodeOptions,captureLayout,prepareLayout,autoLayout,keyboardChange,bandsOf,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback} from './painel-geometria.js';
+import {project,chartIds,validateLayout,nodeOptions,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,bandsOf,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback} from './painel-geometria.js';
 // GridStack executa gestos; a transação lateral preserva a faixa e as alturas individuais.
 function iniciar(){
  const configEl=document.getElementById('painel-grade-config');if(!configEl)return;
@@ -59,6 +59,7 @@ function iniciar(){
   return prepareLayout(read(d.layouts.desktop),standard,limits);
  }
  function destroyGrids(){
+  if(gesture)restorePreview(gesture);
   for(const s of sections.values())if(s.grid){s.grid.destroy(false);s.grid=null;for(const record of [...widgets.values()].sort((a,b)=>a.index-b.index))if(record.parent===s.grade){const wrapper=record.el.parentElement;if(wrapper?.classList.contains('grid-stack-item'))wrapper.replaceWith(record.el);record.el.classList.remove('grid-stack-item-content');s.grade.append(record.el);}
    s.grade.classList.remove('grid-stack');s.grade.removeAttribute('data-editando');if(s.style===null)s.grade.removeAttribute('style');else s.grade.setAttribute('style',s.style);
   }gesture=null;if(previewFrame!==null)cancelAnimationFrame(previewFrame);previewFrame=null;
@@ -88,13 +89,27 @@ function iniciar(){
   return responsiveMinWidths(limits,s.grade.getBoundingClientRect().width,gap);
  }
  function restorePreview(active){
-  for(const [id,style]of active.styles){const wrap=widgets.get(id)?.el.parentElement;if(!wrap?.classList.contains('grid-stack-item'))continue;if(style===null)wrap.removeAttribute('style');else wrap.setAttribute('style',style);}
+  if(active.ghost){const {el,value,priority}=active.ghost;if(value==='')el.style.removeProperty('opacity');else el.style.setProperty('opacity',value,priority);}
+  // No drag o ativo é o helper fixed do DD; a biblioteca restaura suas próprias coordenadas.
+  for(const [id,style]of active.styles){if(id===active.id&&!active.resize)continue;const wrap=widgets.get(id)?.el.parentElement;if(!wrap?.classList.contains('grid-stack-item'))continue;if(style===null)wrap.removeAttribute('style');else wrap.setAttribute('style',style);}
+  if(active.placeholder){const {el,style,attributes}=active.placeholder;if(style===null)el.removeAttribute('style');else el.setAttribute('style',style);for(const [name,value]of attributes){if(value===null)el.removeAttribute(name);else el.setAttribute(name,value);}}
   delete sections.get(active.section).grade.dataset.previaValida;
  }
- function drawPreview(active,proposal){
+ function drawPreview(active,proposal,valid=true){
   const s=sections.get(active.section),cell=s.grade.getBoundingClientRect().width/12,height=s.grid.getCellHeight(true);
   for(const n of bySection(proposal,active.section)){const wrap=widgets.get(n.id).el.parentElement;
+   // Ghost segue ponteiro/offset nativo. Só os vizinhos recebem coordenadas locais da grade.
+   if(n.id===active.id&&!active.resize)continue;
    wrap.style.left=n.x*cell+'px';wrap.style.top=n.y*height+'px';wrap.style.width=n.w*cell+'px';wrap.style.height=n.h*height+'px';
+  }
+  const placeholder=s.grade.querySelector(':scope > .grid-stack-placeholder'),target=proposal.find(n=>n.id===active.id);
+  if(placeholder&&target){
+   if(!active.placeholder)active.placeholder={el:placeholder,style:placeholder.getAttribute('style'),attributes:['gs-x','gs-y','gs-w','gs-h','aria-hidden','data-previa-valida'].map(name=>[name,placeholder.getAttribute(name)])};
+   // Reutilizar o único placeholder nativo elimina o retângulo antigo na faixa de origem.
+   placeholder.style.left=target.x*cell+'px';placeholder.style.top=target.y*height+'px';placeholder.style.width=target.w*cell+'px';placeholder.style.height=target.h*height+'px';
+   for(const key of ['x','y','w','h']){placeholder.style.setProperty('--gs-'+key,String(target[key]));placeholder.setAttribute('gs-'+key,String(target[key]));}
+   if(valid)placeholder.style.removeProperty('--accent');else placeholder.style.setProperty('--accent','var(--danger)');
+   placeholder.setAttribute('aria-hidden','true');placeholder.dataset.previaValida=String(valid);
   }
  }
  function dragIntent(active){
@@ -118,9 +133,9 @@ function iniciar(){
    }else action=dragIntent(active);
    const minimums=action.type==='resize'&&action.w===undefined?new Map():actionMinimums(s);
    const proposal=lateralAction(active.before,limits,active.id,action,{minWidths:minimums});
-   active.proposal=proposal;s.grade.dataset.previaValida='true';drawPreview(active,proposal);
+   active.proposal=proposal;active.lastValid=proposal;s.grade.dataset.previaValida='true';drawPreview(active,proposal);
    if(active.feedback!=='valid'){say('Prévia ajustada. Solte para confirmar a disposição.');active.feedback='valid';}
-  }catch{active.proposal=null;s.grade.dataset.previaValida='false';drawPreview(active,active.before);if(active.feedback!=='invalid'){say(lateralFeedback);active.feedback='invalid';}}
+  }catch{active.proposal=null;s.grade.dataset.previaValida='false';drawPreview(active,active.lastValid??active.before,false);if(active.feedback!=='invalid'){say(lateralFeedback);active.feedback='invalid';}}
  }
  function schedulePreview(){if(previewFrame!==null)return;previewFrame=requestAnimationFrame(()=>{previewFrame=null;previewGesture();});}
  function startGesture(s,section,event,el){
@@ -128,6 +143,7 @@ function iniciar(){
   const before=clone(layout),rect=s.grade.getBoundingClientRect(),styles=new Map(),rectangles=new Map();
   for(const n of bySection(before,section)){const wrap=widgets.get(n.id).el.parentElement,r=wrap.getBoundingClientRect();styles.set(n.id,wrap.getAttribute('style'));rectangles.set(n.id,{id:n.id,left:r.left+scrollX,top:r.top+scrollY,bottom:r.bottom+scrollY,width:r.width});}
   gesture={section,id:el.gridstackNode.id,before,styles,epoch,resize:event.type==='resizestart',start:{x:point.x,y:point.y,pageY:point.y+scrollY},cellWidth:rect.width/12,cellHeight:s.grid.getCellHeight(true),grade:{left:rect.left+scrollX,right:rect.right+scrollX,top:rect.top+scrollY,bottom:rect.bottom+scrollY},bands:bandsOf(bySection(before,section)).map(b=>{const items=b.items.map(n=>rectangles.get(n.id));return {items,top:Math.min(...items.map(r=>r.top)),bottom:Math.max(...items.map(r=>r.bottom))};})};
+  if(!gesture.resize){gesture.ghost={el,value:el.style.getPropertyValue('opacity'),priority:el.style.getPropertyPriority('opacity')};el.style.setProperty('opacity','0.20');}
   // Vizinhos não são expulsos pela colisão intermediária: a prévia exibe o lote calculado.
   for(const node of s.grid.engine.nodes)if(node.id!==gesture.id)s.grid.update(node.el,{locked:true,noMove:true,noResize:true});
   actions.querySelectorAll('button').forEach(b=>b.disabled=true);
@@ -135,10 +151,11 @@ function iniciar(){
   schedulePreview();
  }
  function stopGesture(s,section,event,el){
-  const active=gesture;if(!active||active.section!==section)return;previewGesture();gesture=null;
+  const active=gesture;if(!active||active.section!==section)return;if(!active.cancelled)previewGesture();gesture=null;
   if(previewFrame!==null)cancelAnimationFrame(previewFrame);previewFrame=null;
   queueMicrotask(()=>{if(active.epoch!==epoch||!eligible()||!editing||busy||uncertain)return;
    restorePreview(active);
+   if(active.cancelled){render();say('Movimento cancelado. A disposição anterior foi mantida.');return;}
    try{if(!active.proposal)throw Error(lateralFeedback);acceptSection(section,bySection(active.proposal,section));say('Disposição ajustada. As alturas individuais foram mantidas. Salve para manter.');}
    catch{render();say(lateralFeedback);}
   });
@@ -146,12 +163,11 @@ function iniciar(){
  function keyMove(e,id){if(!editing||busy||uncertain||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const item=layout.find(n=>n.id===id);if(!item)return;
   if(item.fixo===true||gesture)return;const s=sections.get(item.section);let action;
   if(e.shiftKey){const patch=keyboardChange(item,e.key,true,bounds(item));action={type:'resize',...patch};}
-  else if(e.key==='ArrowUp'||e.key==='ArrowDown')action={type:'move',targetId:id,place:e.key==='ArrowUp'?'before-band':'after-band'};
-  else{const bands=bandsOf(bySection(layout,item.section)),source=bands.findIndex(b=>b.items.some(n=>n.id===id)),items=bands[source].items,index=items.findIndex(n=>n.id===id),direction=e.key==='ArrowLeft'?-1:1;
-   let peer=items[index+direction],after=direction>0;if(!peer){const adjacent=bands[source+direction]?.items;if(!adjacent)return;peer=direction<0?adjacent[adjacent.length-1]:adjacent[0];after=direction<0;}
-   action={type:'move',targetId:peer.id,place:'lateral',after};
-  }
+  else action=keyboardLateralAction(layout,id,e.key);
+  if(!action){say('O card já está no limite deste ajuste.');return;}
   try{const minimums=action.type==='resize'&&action.w===undefined?new Map():actionMinimums(s),next=lateralAction(layout,limits,id,action,{minWidths:minimums});
+   const previous=bySection(layout,item.section),adjusted=bySection(next,item.section);
+   if(adjusted.every(n=>{const original=previous.find(p=>p.id===n.id);return ['x','y','w','h'].every(k=>n[k]===original[k]);})){say('O card já está no limite deste ajuste.');return;}
    acceptSection(item.section,bySection(next,item.section));widgets.get(id).el.querySelector('[data-widget-mover]').focus({preventScroll:true});say('Disposição ajustada pelo teclado. Salve para manter.');
   }catch{render();say(lateralFeedback);}
  }
@@ -180,6 +196,8 @@ function iniciar(){
  document.addEventListener('pointerdown',e=>{point={x:e.clientX,y:e.clientY};},{signal:life.signal,capture:true});
  document.addEventListener('pointermove',e=>{point={x:e.clientX,y:e.clientY};if(gesture)schedulePreview();},{signal:life.signal,capture:true});
  document.addEventListener('pointerup',e=>{point={x:e.clientX,y:e.clientY};},{signal:life.signal,capture:true});
+ document.addEventListener('keydown',e=>{if(gesture&&e.key==='Escape')gesture.cancelled=true;},{signal:life.signal,capture:true});
+ document.addEventListener('pointercancel',()=>{if(gesture)gesture.cancelled=true;},{signal:life.signal,capture:true});
  function suspend(){++epoch;requests.forEach(c=>c.abort());requests.clear();busy=false;editing=false;dirty=false;api=null;destroyGrids();toolbar.hidden=true;controls();}
  media.addEventListener('change',()=>{suspend();if(eligible())load();},{signal:life.signal});
  document.addEventListener('g360:acesso-alterado',()=>{invalid=true;suspend();document.querySelectorAll('[data-lista-modo]').forEach(b=>b.disabled=true);},{signal:life.signal});
