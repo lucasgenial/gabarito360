@@ -72,6 +72,7 @@ try{
   await pagina.getByRole('button',{name:'Trocar vínculo',exact:true}).click();
   assert.equal(await pagina.locator('#troca-contexto-modal').evaluate(e=>e.open),true);
   await pagina.keyboard.press('Escape');
+  await pagina.waitForFunction(()=>!document.getElementById('troca-contexto-modal').open && document.activeElement?.id==='user-menu-trigger');
   assert.equal(await pagina.locator('#user-menu-trigger').evaluate(e=>e===document.activeElement),true);
   assert.equal(await pagina.locator('#user-menu').isHidden(),true);
   await pagina.getByRole('button',{name:'Cards',exact:true}).click();
@@ -96,6 +97,7 @@ try{
         await pagina.getByRole('button',{name:'Mais',exact:true}).click();
         assert.equal(await pagina.locator('#nav-folha').evaluate(e=>e.open),true);
         await pagina.keyboard.press('Escape');
+        await pagina.waitForFunction(()=>!document.getElementById('nav-folha').open && document.querySelector('.nav-inferior-mais')===document.activeElement);
         assert.equal(await pagina.locator('.nav-inferior-mais').evaluate(e=>e===document.activeElement),true);
         if(arquivo==='turmas')assert.equal(await pagina.locator('[data-painel-lista]').getAttribute('data-apresentacao'),'cards');
       }

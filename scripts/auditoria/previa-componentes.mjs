@@ -210,6 +210,10 @@ try{
     assert.equal(await grupo.getByRole('button',{name:'Arquivar turma',exact:true}).evaluate(e=>e===document.activeElement),true);
   }
   await pagina.setViewportSize({width:1440,height:1000});
+  // Estabilizar resize e rolagem antes de testar a legenda por foco.
+  // Esses eventos fecham legendas já abertas; não fazem parte da interação testada.
+  await pagina.locator('#acoes-turma-exemplo [data-acao-compactavel]').scrollIntoViewIfNeeded();
+  await pagina.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   await pagina.locator('#acoes-turma-exemplo [data-acao-compactavel]').focus();
   await pagina.locator('#legenda-acao:popover-open').waitFor({state:'visible'});
   assert.equal(await pagina.locator('#legenda-acao').textContent(),'Editar turma 3º A');
