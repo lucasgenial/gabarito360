@@ -47,7 +47,7 @@ Essa direção é base de implementação, não uma especificação imutável so
 
 | Etapa | Entrega e aceite | Situação |
 |---|---|---|
-| TW1 — inventário e fundação | Mapa de telas/perfis/estados; paleta/escala; componentes e pipelineTailwind real, dependências travadas e build reproduzível. Identificar fronteiras/reset/classes dinâmicas e CSS a retirar | Em planejamento; inventário inicial e direção realizados |
+| TW1 — inventário e fundação | Prévia de componentes, pipeline e revisão do conjunto | Concluída; aprovação humana da rodada4 |
 | TW2 — estrutura e composição completa | Shell autenticado: navegação,topo,títulos,breadcrumbs,tipografia e área útil; tela representativa com tabela/cards/formulário/modal para validar o conjunto desktop/mobile | Pendente |
 | TW3 — ações,tabelas e cards | Todas as famílias inventariadas e seus renderersJS; controlesSMALL e linhas naturais; paginação/ordenação/seleção/permissões preservadas; retirar CSS concorrente das famílias convertidas | Pendente |
 | TW4 — formulários e diálogos | Campos,validação,confirmações,feedback e fluxos completos; sem confirmação nativa do navegador; preservar CSRF,intenção,versão e tratamento de falha | Pendente |
@@ -76,3 +76,13 @@ As subdivisões técnicas serão executadas autonomamente. Não apresentar como 
 - https://tailwindcss.com/docs/preflight
 - https://tailwindcss.com/docs/detecting-classes-in-source-files
 - https://tailwindcss.com/docs/hover-focus-and-other-states
+
+## TW2 — planejamento revisado após aprovação humana da rodada4
+
+O responsável aprovou o conjunto da prévia e autorizou aplicar o padrão nas telas reais e publicar SOMENTE na homologação. PR222 integrado, baseafc8900. TW1/aceite da prévia concluídos. TW2 substitui a estrutura autenticada inteira: header único, lateral256/80 em fluxo desktop/tablet>=768, menu branco/darknavy, avatar como acionador da conta com nome/e-mail/perfil/troca condicional/saídaPOST, folha inferior móvel, MeuEspaço fixo na lateral expandida e recolhível/fullwidth no conteúdo, títulos/breadcrumbs/tipografia/rodapé/área útil.
+
+Fronteira técnica: nova folhaTailwind compilada semPreflight geral; estilos da estrutura removidos de uma saída operacional derivada do legado, mantendo app.css original para público/auth/print externos. Nenhum novo reset incide nos gráficos, tabelas, formulários ou PDFs ainda não migrados. Escalazoomautomática do legado deixa de reger a nova casca. Reutilizar marcaSVG/fonteslocais e ícones oficiais. Preservar IDs/hooks, menus de permissões, CSRF/revisão/seleção de vínculo/sessão/rotas/API. Não importar o WIPc0216e5 integralmente.
+
+Percurso representativo: Painel e Turmas(lista/cards/detalhe/editar/modal) para conferir composição e ações existentes dentro da nova casca. A migração integral dos componentes internos permanece emTW3(ações/tabelas/cards),TW4(campos/validação/modais) eTW5(painéis/mídia); não declarar essas famílias concluídas por receberem o novo shell. Shell compartilhado será conferido também com perfis escolares/pessoal/interno em testes, e visual real na homologação.
+
+Entrega: testes locais funcionais e de permissão/contexto, buildreproduzível/CI5checks, revisão independente de fonte+UI atual antes integração, backup integral dos dados atuais congelados/arquivos e rollback de código, pacote com allowlist exataWeb/API0 e guardas homologação. Nenhuma migration/DDL necessária ou produção autorizada. Deploy apenas ao fecharTW2, após testes e revisões. Validação Chrome autenticada após publicação e tabela atualizada ao final.

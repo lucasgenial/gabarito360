@@ -23,6 +23,7 @@ function iniciar(){
  const configEl=document.getElementById('painel-grade-config');if(!configEl)return;
  window.G360PainelGradeDesmontar?.();
  let config;try{config=JSON.parse(configEl.textContent)}catch{return}
+ const mobile=matchMedia('(max-width:767px)');
  const life=new AbortController(),media=matchMedia('(min-width:1024px) and (min-height:700px)');
  const toolbar=document.querySelector('[data-painel-organizacao]');if(!toolbar)return;
  const button=name=>toolbar.querySelector('[data-grade-'+name+']');
@@ -34,7 +35,13 @@ function iniciar(){
  const interactions=new PanelGestureLifecycle();
  const requests=new Set(),clone=value=>structuredClone(value),eligible=()=>!interactions.stopping&&media.matches&&!invalid&&configEl.isConnected;
  const say=text=>status.textContent=text;
- function list(value){presentation=value;document.querySelectorAll('[data-painel-lista]').forEach(el=>el.dataset.apresentacao=value);document.querySelectorAll('[data-lista-modo]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.listaModo===value)));}
+ function list(value){
+  // A preferência salva continua sendo a apresentação desktop; mobile usa cards.
+  presentation=value;const atual=mobile.matches?'cards':value;
+  document.querySelectorAll('[data-painel-lista]').forEach(el=>el.dataset.apresentacao=atual);
+  document.querySelectorAll('[data-lista-modo]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.listaModo===atual));const grupo=b.closest('[role=group]');if(grupo)grupo.hidden=mobile.matches;});
+ }
+ mobile.addEventListener('change',()=>list(presentation),{signal:life.signal});
  function controls(){
   toolbar.hidden=!eligible()||(api&&limits.size===0&&!dirty);button('organizar').hidden=editing||(api&&limits.size===0);button('organizar').disabled=busy||!api||uncertain;
   actions.hidden=!(editing||dirty);actions.querySelectorAll('button').forEach(b=>b.disabled=busy||uncertain);
@@ -251,6 +258,6 @@ function iniciar(){
  media.addEventListener('change',()=>{suspend();if(eligible())load();},{signal:life.signal});
  document.addEventListener('g360:acesso-alterado',()=>{invalid=true;suspend();document.querySelectorAll('[data-lista-modo]').forEach(b=>b.disabled=true);},{signal:life.signal});
  window.G360PainelGradeDesmontar=()=>{life.abort();suspend();};
- controls();if(eligible())load();
+ list(presentation);controls();if(eligible())load();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();

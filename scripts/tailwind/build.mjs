@@ -25,3 +25,5 @@ writeFileSync(destino+'interface.js',js);
 writeFileSync(destino+'index.html',normalizar(readFileSync(origem+'index.html','utf8'))
   .replaceAll('__CSS_VERSION__',hash(css)).replaceAll('__JS_VERSION__',hash(js)));
 console.log('Prévia isolada gerada com versões de conteúdo.');
+
+await import('./build-estrutura.mjs');

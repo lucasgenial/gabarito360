@@ -24,7 +24,7 @@
     <button class="btn btn-secondary tu1-icone-acao tu1r3-acao tu1r3-acao-pdf" type="button" data-documento-abrir="pdf" aria-label="Gerar PDF do painel da turma" title="Gerar PDF do painel da turma"><x-icone nome="pdf" /></button>
     @endif
     @pode('turma.gerir')
-    <a class="btn btn-secondary tu1r3-acao tu1r3-acao-editar" aria-label="Editar turma" title="Editar turma" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /> Editar turma</a>
+    <a class="btn btn-secondary tu1r3-acao tu1r3-acao-editar" aria-label="Editar turma" title="Editar turma" href="{{ route('turmas.edit',$turma['id']) }}"><x-icone nome="editar" /><span class="acao-turma-editar">Editar<span class="acao-turma-contexto"> turma</span></span></a>
     @endpode
     @pode('turma.desativar')<x-arquivamento tipo="turmas" :registro="$turma" />
     @endpode

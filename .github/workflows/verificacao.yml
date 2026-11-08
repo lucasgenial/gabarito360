@@ -79,7 +79,7 @@ jobs:
           node-version: 22
       - run: python3 scripts/verificar_telas.py
       - run: npm ci --prefix scripts/tailwind --ignore-scripts --no-audit --no-fund
-      - run: node scripts/tailwind/build.mjs && git diff --exit-code -- apps/web/public/previas/tailwind
+      - run: node scripts/tailwind/build.mjs && git diff --exit-code -- apps/web/public/previas/tailwind apps/web/public/css/estrutura-app.css apps/web/public/css/app-conteudo-legado.css
       - run: npm ci --prefix scripts/paineis-grid --ignore-scripts --no-audit --no-fund
       - run: node scripts/paineis-grid/build.mjs && git diff --exit-code -- apps/web/public/js/painel-grade.js apps/web/public/css/painel-grade.css apps/web/public/js/libs/gridstack
       - run: npm ci --prefix scripts/calendario --ignore-scripts --no-audit --no-fund
@@ -153,6 +153,13 @@ jobs:
       - run: composer install --no-interaction --no-progress
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
+      - name: Renderizar percurso TW2 e conferir estrutura no navegador
+        if: matrix.app == 'web'
+        run: |
+          G360_TW2_EXPORT=1 php artisan test --filter=EstruturaTailwindTest
+          cd ../..
+          npm install --prefix scripts/auditoria --ignore-scripts --no-package-lock --no-audit --no-fund
+          CHROME_PATH=/usr/bin/google-chrome node scripts/auditoria/estrutura-app.mjs
       - name: Conferir exclusão real entre processos da sessão web
         if: matrix.app == 'web'
         working-directory: ${{ github.workspace }}

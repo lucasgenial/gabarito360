@@ -57,6 +57,7 @@
     <caption class="sr-only">Turmas</caption>
     <thead>
       <tr>
+        <th scope="col" class="tw2-coluna-acoes">Ações</th>
         <th scope="col" data-ordenar="texto">Turma</th>
         <th scope="col">Série</th>
         <th scope="col">Turno</th>
@@ -64,12 +65,14 @@
         <th scope="col">Alunos</th>
         <th scope="col">Ano letivo</th>
         <th scope="col">Status</th>
-        <th scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
       @forelse($turmas as $t)
         <tr data-nome="{{ strtolower($t['nome']) }}">
+          <td data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
+            <a href="{{ route('turmas.show', $t['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver turma</a>
+          </div></td>
           <td data-valor-ordem="{{ $t['nome'] }}" data-rotulo="Turma" class="tabela-principal"><div class="tabela-valor">
             <div class="turma-name">
               <x-avatar-turma :turma="$t" tamanho="sm" />
@@ -79,7 +82,7 @@
           <td data-rotulo="Série"><div class="tabela-valor"><span class="badge badge-info">{{ $t['serie'] }}</span></div></td>
           <td data-rotulo="Turno"><div class="tabela-valor">{{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$t['turno']] ?? $t['turno'] }}</div></td>
           @unless(\App\Support\Acesso::pessoal())
-          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $t['escola_nome'] ?? '' }}" data-rotulo="Escola"><div class="tabela-valor">
+          <td title="{{ $t['escola_nome'] ?? '' }}" data-rotulo="Escola"><div class="tabela-valor">
             {{ $t['escola_nome'] ?? '—' }}
           </div></td>
           @endunless
@@ -93,9 +96,7 @@
               <span class="badge badge-danger badge-dot">Arquivada</span>
             @endif
           </div></td>
-          <td style="text-align:right;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
-            <a href="{{ route('turmas.show', $t['id']) }}" class="btn btn-sm btn-secondary">Ver turma</a>
-          </div></td>
+
         </tr>
       @empty
         <tr>
