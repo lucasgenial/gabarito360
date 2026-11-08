@@ -105,6 +105,7 @@ try{
     await pagina.locator('#meu-espaco summary').click();
     assert.equal(await pagina.locator('#meu-espaco').getAttribute('open'),'');
     assert.equal(await pagina.locator('#nome-escola-exemplo').evaluate(e=>e.scrollWidth<=e.clientWidth),true);
+    assert.equal(await pagina.locator('#nome-escola-exemplo').evaluate(e=>e.clientWidth>=100),true);
     assert.equal(await pagina.locator('#perfil-exemplo').evaluate(e=>e.scrollWidth<=e.clientWidth),true);
     await pagina.locator('#meu-espaco summary').click();
     assert.equal(await pagina.getByRole('button',{name:'Meu espaço',exact:true}).count(),0);
