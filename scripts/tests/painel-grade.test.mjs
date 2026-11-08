@@ -238,3 +238,50 @@ test('cleanup restaura só a geometria própria sem reaplicar opacity0.8 nativa 
  style.setProperty('opacity','.65','important');restorePreviewCss(style,snapshot);
  assert.equal(style.getPropertyValue('opacity'),'.65');assert.equal(style.getPropertyPriority('opacity'),'important');
 });
+
+
+// Executa a classe de lifecycle do runtime real, isolando apenas o boot DOM.
+// Não substitui os ensaios independentes do DD real no navegador.
+const runtimeSource=await readFile(new URL('../../apps/web/resources/js/painel-grade.js',import.meta.url),'utf8');
+const bootAt=runtimeSource.indexOf('function iniciar(){');assert.ok(bootAt>0);
+const lifecycleSource=runtimeSource.slice(0,bootAt).replace(/^import[^\n]*\n/gm,'');
+const {PanelGestureLifecycle}=await import('data:text/javascript;base64,'+Buffer.from(lifecycleSource).toString('base64'));
+
+for(const reason of ['viewport','contexto','pointercancel','Escape','desmontagem'])test(`lifecycle ${reason}: invalida antes de stop síncrono e remove DD antes do DOM`,()=>{
+ const lifecycle=new PanelGestureLifecycle(),active={epoch:4},real={id:'real',parentElement:{}},placeholder={id:'placeholder'};
+ let epoch=4,gesture=active,raf=12,commits=0,disposed=0;const order=[];
+ const late=()=>{if(active.epoch===epoch&&gesture===active&&!lifecycle.stopping)commits++;};
+ const options={active,wrappers:[real,real],invalidate:()=>{order.push('invalidate');epoch++;gesture=null;},cancelPreview:()=>{order.push('cancelRAF');raf=null;},restore:value=>{assert.equal(value,active);order.push('restoreOwn');},dispose:()=>{order.push('destroyGrid');real.parentElement=null;disposed++;},dd:{
+  resizable:(el,cmd)=>{assert.equal(el,real);assert.notEqual(el,placeholder);assert.equal(cmd,'destroy');assert.ok(el.parentElement);assert.equal(active.cancelled,true);assert.equal(gesture,null);assert.equal(raf,null);order.push('destroyResize');late();assert.equal(lifecycle.stop(options),false);},
+  draggable:(el,cmd)=>{assert.equal(el,real);assert.equal(cmd,'destroy');assert.ok(el.parentElement);order.push('destroyDrag');late();}
+ }};
+ assert.equal(lifecycle.stop(options),true);late();
+ assert.deepEqual(order,['invalidate','cancelRAF','destroyResize','destroyDrag','restoreOwn','destroyGrid']);
+ assert.equal(commits,0);assert.equal(disposed,1);assert.equal(lifecycle.stopping,false);
+});
+
+test('lifecycle encerra gesto armado e wrapper desconectado sem depender de node.el ou isConnected',()=>{
+ const lifecycle=new PanelGestureLifecycle(),wrapper={isConnected:false,parentElement:{isConnected:false}},calls=[];
+ const dd={resizable:(el,cmd)=>{assert.equal(el,wrapper);assert.equal(cmd,'destroy');calls.push('resize');},draggable:(el,cmd)=>{assert.equal(el,wrapper);assert.equal(cmd,'destroy');calls.push('drag');}};
+ const options={active:null,wrappers:[wrapper],dd,invalidate:()=>calls.push('invalidate'),cancelPreview:()=>calls.push('cancelRAF'),restore:()=>assert.fail('não existe prévia iniciada'),dispose:()=>calls.push('dispose')};
+ lifecycle.stop(options);assert.deepEqual(calls,['invalidate','cancelRAF','resize','drag','dispose']);
+ // Desmontagem já concluída é repetível, não cria listeners nem chama DD de novo.
+ calls.length=0;lifecycle.stop({...options,wrappers:[]});assert.deepEqual(calls,['invalidate','cancelRAF','dispose']);
+});
+
+test('lifecycle falha fechado antes de remover DOM e restaura apenas a prévia própria',()=>{
+ const lifecycle=new PanelGestureLifecycle(),active={},wrapper={parentElement:{}},calls=[];
+ const options={active,wrappers:[wrapper],invalidate:()=>calls.push('invalidate'),cancelPreview:()=>calls.push('cancelRAF'),dd:{resizable:()=>{calls.push('ddError');throw Error('cleanup interrompido');},draggable:()=>assert.fail('não avançar após erro')},restore:()=>calls.push('restoreOwn'),dispose:()=>assert.fail('DOM deve permanecer para diagnóstico')};
+ assert.throws(()=>lifecycle.stop(options),/cleanup interrompido/);assert.equal(active.cancelled,true);assert.ok(wrapper.parentElement);assert.equal(lifecycle.stopping,false);
+ assert.deepEqual(calls,['invalidate','cancelRAF','ddError','restoreOwn']);
+});
+
+test('lifecycle de uma instância não bloqueia retomada nem executa callbacks do gesto anterior',()=>{
+ const lifecycle=new PanelGestureLifecycle();let epoch=1,gesture={epoch:1},commits=0,cleanup=0;
+ const old=gesture,late=()=>{if(old.epoch===epoch&&gesture===old&&!lifecycle.stopping)commits++;};
+ lifecycle.stop({active:old,wrappers:[{}],invalidate:()=>{epoch++;gesture=null;},cancelPreview:()=>{},dd:{resizable:late,draggable:late},restore:()=>{},dispose:()=>cleanup++});
+ gesture={epoch,wrapper:{}};late();assert.equal(commits,0);assert.equal(cleanup,1);assert.equal(lifecycle.stopping,false);
+ // Uma interação nova pode terminar normalmente: a barreira antiga não fica ligada.
+ if(gesture.epoch===epoch&&!lifecycle.stopping)commits++;
+ assert.equal(commits,1);assert.equal(old.cancelled,true);
+});

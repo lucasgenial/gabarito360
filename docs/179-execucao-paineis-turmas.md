@@ -267,3 +267,11 @@ PR216 integrado no mergec089e2e, homologação93260b2, cinco checks aprovados e1
 Pré-consultaUI/UX aprovou correção exclusivamente técnica de coordenadas, semalterarzoomdo usuário ou estética: CSSlocal paraestilos/placeholder; ponteiro/hit-test/deltas nas medidasvisuais, normalizandoescala umaúnicavez. Conferir zoom100/125/150, rolagem, largura/altura, pins, cancelar, salvar/reload e previewigualdrop. Revisorindependente fará nova conferência exata; nenhum padrão novo de tela ou migration.
 
 Durante a execução o responsável priorizou diagnóstico/correção da demoraMariaDB. Investigar separadamente a suíteintegridadeGitHub29m44 e o banco dahomologação, medindo antesdealterarconfiguração. Essa investigação possui worktree próprio, sem misturar suas fontes ao patch de UI. Ambos preservamprodução/dados e precisam de validação específica. P3.2 permanece próximo pacote após os ajustes.
+
+## Cancelamento de gesto antes da desmontagem — revisão técnica posterior
+
+Após publicar o candidato combinado4ff6931, a conferência autenticada confirmou prévia/drop em zoom125% e Cancelar sem drift. A interrupção de um gesto por mudança de viewport revelou listeners DD órfãos: durante a interação o node.el nativo pode apontar para o placeholder, enquanto o wrapper real perde o parent após a desmontagem. Isso não altera a aprovação do fluxo normal, mas reabre o aceite de lifecycle.
+
+Pré-consulta independente aprovada: capturar wrappers reais, invalidar epoch/gesto/RAF e bloquear reentrância antes de encerrar DD pela API pública, mantendo engine e DOM até a limpeza nativa síncrona. Só depois restaurar estilos próprios e destruir/desembrulhar a grade. Sem vendor, monkeypatch, API, DDL, cache ou alteração de produção. Escape/pointercancel e interrupção de viewport/contexto cancelam sem Salvar.
+
+Implementação e testes de ordem, callbacks tardios, repetição e retomada serão seguidos de ensaio independente no navegador, incluindo gesto armado, drag/resize, viewport elegível/inelegível e zoom100/125/150. CI, merge e eventual publicação corretiva exclusiva em homologação continuam pendentes até os respectivos gates. P3.2 permanece aguardando o fechamento desta correção interna.
