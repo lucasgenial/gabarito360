@@ -88,11 +88,13 @@ try{
   await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).click();
   await pagina.locator('#nome-erro').waitFor({state:'visible'});
   assert.equal(await pagina.locator('#nome-turma').getAttribute('aria-invalid'),'true');
-  await pagina.waitForFunction(()=>document.activeElement?.id==='nome-turma'&&document.querySelector('#nome-turma').getBoundingClientRect().top>=64);
+  await pagina.locator('#nome-turma:focus').waitFor({state:'visible'});
+  assert.equal(await pagina.locator('#nome-turma').evaluate(e=>e.getBoundingClientRect().top>=64),true);
   assert.equal(await pagina.locator('#nome-turma').evaluate(e=>e===document.activeElement),true);
   await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).focus();
   await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).press('Enter');
-  await pagina.waitForFunction(()=>document.activeElement?.id==='nome-turma'&&document.querySelector('#nome-turma').getBoundingClientRect().top>=64);
+  await pagina.locator('#nome-turma:focus').waitFor({state:'visible'});
+  assert.equal(await pagina.locator('#nome-turma').evaluate(e=>e.getBoundingClientRect().top>=64),true);
   assert.equal(await pagina.locator('#nome-turma').evaluate(e=>e.getBoundingClientRect().bottom<innerHeight),true);
   await pagina.locator('#nome-turma').fill('Turma fictícia');await pagina.locator('#ano').fill('2026');
   await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).click();
