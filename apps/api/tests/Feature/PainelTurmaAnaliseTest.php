@@ -38,12 +38,18 @@ class PainelTurmaAnaliseTest extends TestCase
             ->assertJsonPath('data.analise.distribuicao_acertos.total',4)->assertJsonPath('data.analise.distribuicao_acertos.percentuais_excluidos',1)
             ->assertJsonPath('data.analise.distribuicao_acertos.faixas.0.total',1)->assertJsonPath('data.analise.distribuicao_acertos.faixas.2.total',1)
             ->assertJsonPath('data.analise.distribuicao_acertos.faixas.8.total',1)->assertJsonPath('data.analise.distribuicao_acertos.faixas.9.total',1)
+            ->assertJsonPath('data.analise.por_avaliacao.0.resultados_total',5)->assertJsonPath('data.analise.por_avaliacao.0.percentuais_excluidos',1)
+            ->assertJsonPath('data.analise.por_avaliacao.0.abrangencia','avaliacao_completa')
             ->assertJsonPath('data.analise.por_avaliacao.1.n',0)->assertJsonPath('data.analise.por_avaliacao.1.mediana_pct',null)
+            ->assertJsonPath('data.analise.por_avaliacao.1.resultados_total',0)->assertJsonPath('data.analise.por_avaliacao.1.percentuais_excluidos',0)
+            ->assertJsonPath('data.analise.por_avaliacao.1.abrangencia','avaliacao_completa')
             ->assertJsonPath('data.analise.questoes.avaliacao_id',3)->assertJsonCount(0,'data.analise.questoes.items');
         $this->getJson('/api/v1/turmas/1/painel?analise_prova_id=2')->assertUnprocessable();
         $this->getJson('/api/v1/turmas/1/painel?analise_prova_id=0')->assertUnprocessable();
-        $this->getJson('/api/v1/turmas/1/painel?disciplina_id=10')->assertOk()->assertJsonPath('data.analise.resumo.n',4);
-        $this->getJson('/api/v1/turmas/1/painel?disciplina_id=11')->assertOk()->assertJsonPath('data.analise.resumo.n',4);
+        foreach([10,11]as$disciplina)$this->getJson('/api/v1/turmas/1/painel?disciplina_id='.$disciplina)->assertOk()
+            ->assertJsonPath('data.analise.resumo.n',4)->assertJsonCount(1,'data.analise.por_avaliacao')
+            ->assertJsonPath('data.analise.por_avaliacao.0.resultados_total',5)->assertJsonPath('data.analise.por_avaliacao.0.percentuais_excluidos',1)
+            ->assertJsonPath('data.analise.por_avaliacao.0.abrangencia','avaliacao_completa');
     }
 
     public function test_mediana_impar_amostra_unica_e_vazia_nao_inventam_percentual():void

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 /** Agregados e acompanhamento nominal no mesmo recorte autorizado, com permissões próprias para nomes/resultados. */
 final class AnalisePainelTurma
 {
-    public function montar(Usuario $u,ConsultasPedagogicas $consulta,Builder $notas,Collection $provas,int $total,?int $selecao):array
+    public function montar(Usuario $u,ConsultasPedagogicas $consulta,Builder $notas,Collection $provas,int $total,?int $selecao,Collection $resultadosAgrupados):array
     {
         abort_if($selecao && !$provas->contains('id',$selecao),422,'Avaliação fora do recorte autorizado.');
         $valores=(clone $notas)->whereRaw('notas.total_questoes > 0 AND notas.acertos >= 0 AND notas.acertos <= notas.total_questoes')
@@ -25,7 +25,12 @@ final class AnalisePainelTurma
         for($i=0;$i<10;$i++)$expressoes[]='SUM(CASE WHEN x >= '.($i*10).' AND x '.($i===9?'<=':'<').' '.(($i+1)*10).' THEN 1 ELSE 0 END) as f'.$i;
         $hist=$base()->selectRaw(implode(', ',$expressoes))->first();$faixas=[];
         for($i=0;$i<10;$i++)$faixas[]=['de'=>$i*10,'ate'=>($i+1)*10,'label'=>($i*10).'–'.($i===9?'100%':'<'.(($i+1)*10).'%'),'total'=>(int)($hist->{'f'.$i}??0)];
-        $porAvaliacao=$provas->map(fn($p)=>['avaliacao_id'=>(int)$p->id,'titulo'=>$p->titulo]+$this->resumo($grupos->get($p->id),$medianas->get($p->id)?->mediana))->values()->all();
+        $porAvaliacao=$provas->map(function($p)use($grupos,$medianas,$resultadosAgrupados){
+            // Mesma agregação já calculada para os KPIs: não consulta nem soma disciplinas por instrumento.
+            $contagem=$resultadosAgrupados->get($p->id);$registrados=(int)($contagem?->corrigidos??0);
+            return ['avaliacao_id'=>(int)$p->id,'titulo'=>$p->titulo]+$this->resumo($grupos->get($p->id),$medianas->get($p->id)?->mediana)
+                +['resultados_total'=>$registrados,'percentuais_excluidos'=>$registrados-(int)($contagem?->validos??0),'abrangencia'=>'avaliacao_completa'];
+        })->values()->all();
         return ['resumo'=>$this->resumo($global,$mediana),
             'distribuicao_acertos'=>['faixas'=>$faixas,'total'=>(int)$global->n,'percentuais_excluidos'=>$total-(int)$global->n],
             'alunos'=>$this->alunos($u,$notas),'por_avaliacao'=>$porAvaliacao,'questoes'=>$this->questoes($u,$consulta,$notas,$provas,$selecao)];
