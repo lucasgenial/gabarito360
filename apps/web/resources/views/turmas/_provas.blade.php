@@ -20,7 +20,7 @@
         <th scope="col">Aplicação</th>
         @pode('relatorio.turma')<th scope="col">Média</th>@endpode
         <th scope="col">Status</th>
-        <th scope="col">Ações</th>
+        <th class="tabela-coluna-acoes" scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>

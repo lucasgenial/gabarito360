@@ -55,8 +55,8 @@ try{
   await pagina.locator('#meu-espaco summary').click();
   assert.equal(await pagina.locator('#contexto-espaco').evaluate(e=>Math.abs(e.getBoundingClientRect().width-e.closest('.faixa-espaco').getBoundingClientRect().width)<1),true);
   await pagina.locator('#meu-espaco summary').click();
-  assert.equal(await pagina.locator('#registros thead th').first().textContent(),'Ações');
-  assert.equal(await pagina.locator('#registros tbody tr').first().locator('td').first().getAttribute('class'),'celula-acoes');
+  assert.equal(await pagina.locator('#registros thead th').last().textContent(),'Ações');
+  assert.equal(await pagina.locator('#registros tbody tr').first().locator('td').last().getAttribute('class'),'celula-acoes');
   assert.equal(await pagina.locator('#registros .celula-acoes button[aria-label]').count(),6);
   assert.equal(await pagina.locator('#avatar-turma-exemplo').evaluate(e=>e.clientWidth),64);
 

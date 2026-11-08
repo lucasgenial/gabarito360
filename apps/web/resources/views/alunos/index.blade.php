@@ -55,7 +55,7 @@
         <th scope="col">Turma</th>
         <th scope="col">Série</th>
         <th scope="col">Status</th>
-        <th scope="col">Ações</th>
+        <th class="tabela-coluna-acoes" scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -77,7 +77,7 @@
               <span class="badge badge-danger badge-dot">Cadastro arquivado</span>
             @endif
           </div></td>
-          <td style="text-align:right;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
+          <td style="" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
             <a href="{{ route('alunos.show', $a['id']) }}" class="btn btn-sm btn-secondary">Ver</a>
           </div></td>
         </tr>

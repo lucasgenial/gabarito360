@@ -13,7 +13,7 @@
 </form>
 <section class="card card-pad" style="margin-top:20px;overflow-x:auto;">
   <x-tabela :integrada="true" titulo="Turmas disponíveis" modo="lista"><table class="tabela-padrao table"><caption>{{ $dados['turmas']['total'] }} turma(s) neste espaço</caption>
-    <thead><tr><th scope="col">Turma</th><th scope="col">Série</th><th scope="col">Ano</th><th scope="col">Consultar</th></tr></thead>
+    <thead><tr><th scope="col">Turma</th><th scope="col">Série</th><th scope="col">Ano</th><th class="tabela-coluna-acoes" scope="col">Consultar</th></tr></thead>
     <tbody>@forelse($dados['turmas']['data'] as $t)<tr><td class="tabela-principal" data-rotulo="Turma"><div class="tabela-valor">{{ $t['nome'] }}</div></td><td data-rotulo="Série"><div class="tabela-valor">{{ $t['serie'] }}</div></td><td data-rotulo="Ano"><div class="tabela-valor">{{ $t['ano_letivo'] }}</div></td>
       <td class="tabela-acoes" data-rotulo="Consultar"><div class="tabela-valor"><a href="{{ route('copias.cadastros',$f+['turma_id'=>$t['id'],'page'=>$dados['turmas']['current_page']]) }}" aria-label="Abrir turma {{ $t['nome'] }}">Abrir turma</a></div></td></tr>
     @empty<tr><td colspan="4">Nenhuma turma disponível.</td></tr>@endforelse</tbody>

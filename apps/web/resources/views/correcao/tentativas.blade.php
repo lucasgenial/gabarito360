@@ -9,7 +9,7 @@
   <details><summary>Saiba mais sobre este histórico</summary><p>Cada nova foto identificada tem um registro de leitura próprio, referente à mesma aplicação da prova; não representa uma reaplicação. Repetições técnicas do mesmo envio não contam como outra foto. O histórico começa com os registros preservados a partir desta funcionalidade; registros apagados antes dela não podem ser reconstruídas.</p></details>
   @if(!$dados['tentativas'])<p class="page-sub">Nenhuma leitura arquivada neste filtro. As correções existentes continuam disponíveis em Acompanhar correção.</p>@endif
   <x-tabela class="tentativa-lista" titulo="Leituras do cartão-resposta">
-    <table class="tabela-padrao"><thead><tr><th scope="col">Nome e dados</th><th scope="col">Ações</th></tr></thead><tbody>
+    <table class="tabela-padrao"><thead><tr><th scope="col">Nome e dados</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead><tbody>
       @foreach($dados['tentativas'] as $t)
       <tr><td class="tabela-principal" data-rotulo="Nome e dados"><strong>{{ $t['aluno_nome'] }}</strong><div>Leitura {{ $t['numero'] }} · {{ ['vigente'=>'Vigente','aguardando_confirmacao'=>'Aguardando confirmação','substituida'=>'Anterior','excluida'=>'Retirada','recusada'=>'Foto recusada','descartada'=>'Descartada'][$t['estado']] ?? 'Registro preservado' }}</div><div class="exam-meta">{{ $t['autor_nome'] }} · {{ \Carbon\Carbon::parse($t['ocorrido_em'],'UTC')->timezone('America/Sao_Paulo')->format('d/m/Y H:i') }}</div></td>
         <td class="tabela-acoes" data-rotulo="Ações"><a class="btn btn-secondary" href="{{ route('correcao.tentativa',$t['id']) }}">Conferir leitura</a></td></tr>

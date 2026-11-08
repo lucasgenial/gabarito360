@@ -7,7 +7,7 @@
     <x-aviso tipo="erro">Não foi possível carregar o histórico. O resultado acima continua disponível. <button type="button" data-historico-recurso="{{ json_encode($urlHistorico(['tentativa'=>null])) }}">Tentar novamente</button></x-aviso>
   @else
     <x-tabela class="tentativa-lista" titulo="Histórico de leituras do cartão-resposta do aluno">
-      <table class="tabela-padrao"><thead><tr><th scope="col">Leitura e dados</th><th scope="col">Ações</th></tr></thead><tbody>
+      <table class="tabela-padrao"><thead><tr><th scope="col">Leitura e dados</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead><tbody>
         @forelse($historico['tentativas'] as $t)
           <tr><td class="tabela-principal" data-rotulo="Leitura e dados">
             <strong>Leitura {{ $t['numero'] }} · {{ ['vigente'=>'Vigente','aguardando_confirmacao'=>'Aguardando confirmação','substituida'=>'Anterior','excluida'=>'Retirada','recusada'=>'Foto recusada','descartada'=>'Descartada'][$t['estado']]??'Registro preservado' }}</strong>
