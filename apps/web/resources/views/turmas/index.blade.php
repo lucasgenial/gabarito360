@@ -17,7 +17,7 @@
 
 @if($haFiltros)
   <p class="tw2-filtros-aplicados">Dados filtrados:
-    @if($busca) nome: {{ $busca }}; @endif
+    @if($busca) Busca: {{ $busca }}; @endif
     @if($escola_id && !\App\Support\Acesso::pessoal()) escola: {{ collect($escolas)->firstWhere('id', $escola_id)['nome'] ?? 'selecionada' }}; @endif
     @if($ano_letivo) ano letivo: {{ $ano_letivo }}. @endif
   </p>
@@ -26,7 +26,7 @@
   <form method="GET" action="{{ route('turmas.index') }}">
     <div class="modal-head"><h2 id="filtros-turmas-titulo">Filtrar turmas</h2><button class="modal-close" type="button" data-turmas-filtros-fechar aria-label="Fechar filtros">&times;</button></div>
     <div class="modal-body">
-      <div class="field"><label for="filtros-turmas-busca">Nome da turma</label><input class="input" type="search" id="filtros-turmas-busca" name="busca" value="{{ $busca }}" placeholder="Buscar turma por nome…" /></div>
+      <div class="field"><label for="filtros-turmas-busca">Nome ou série</label><input class="input" type="search" id="filtros-turmas-busca" name="busca" value="{{ $busca }}" placeholder="Buscar turma por nome ou série…" /></div>
       @unless(\App\Support\Acesso::pessoal())
       <div class="field"><label for="filtros-turmas-escola">Escola</label><select class="select" id="filtros-turmas-escola" name="escola_id"><option value="">Todas as escolas</option>@foreach($escolas as $e)<option value="{{ $e['id'] }}" @selected($escola_id == $e['id'])>{{ $e['nome'] }}</option>@endforeach</select></div>
       @endunless
