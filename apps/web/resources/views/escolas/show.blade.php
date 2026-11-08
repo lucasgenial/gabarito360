@@ -387,7 +387,7 @@
           <th scope="col">Alunos</th>
           <th scope="col">Média</th>
           <th scope="col">Status</th>
-          <th scope="col">Ações</th>
+          <th class="tabela-coluna-acoes" scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -449,7 +449,7 @@
           <th scope="col">Média geral</th>
           <th scope="col">Provas</th>
           <th scope="col">Status</th>
-          <th scope="col">Ações</th>
+          <th class="tabela-coluna-acoes" scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>

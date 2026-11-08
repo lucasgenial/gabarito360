@@ -33,25 +33,26 @@
 .tabela-rodape { border-top:1px solid var(--border-soft); font-size:13px; color:var(--muted); }
 .tabela-rodape nav { display:flex; align-items:center; gap:12px; }
 .tabela-conjunto [hidden] { display:none !important; }
-.tabela-area { width:100%; overflow-x:auto; }
+.tabela-area { width:100%; overflow-x:auto; container:tabela / inline-size; }
 table.tabela-padrao { width:100%; border-collapse:collapse; color:var(--fg); font-size:14px; }
 .tabela-padrao th { padding:12px 16px; text-align:left; background:var(--surface-2); color:var(--fg-2); font-size:13px; font-weight:600; border-bottom:1px solid var(--border); }
 .tabela-padrao td { padding:16px; vertical-align:middle; border-bottom:1px solid var(--border-soft); }
 .tabela-padrao tbody tr:last-child td { border-bottom:0; }
 .tabela-padrao tbody tr:hover { background:var(--surface-2); }
-.tabela-padrao .tabela-acoes { white-space:normal !important; min-width:150px; }
+.tabela-padrao .tabela-coluna-acoes, .tabela-padrao td.tabela-acoes { width:1%; min-width:0; text-align:center; }
+.tabela-padrao td.tabela-acoes { white-space:normal !important; }
+.tabela-padrao td.tabela-acoes > .tabela-valor, .tabela-padrao .tabela-valor > div.tabela-acoes { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px; }
+.tabela-padrao td.tabela-acoes :is(a,button) { flex:none; max-width:none; white-space:nowrap; overflow:visible; text-overflow:clip; }
 .tabela-padrao .tabela-acoes .btn { min-height:44px; margin:3px; }
 .tabela-padrao .tabela-acoes form { display:inline-block; }
 .tabela-padrao .tabela-acoes a:not(.btn) { display:inline-flex; align-items:center; min-height:44px; padding:8px 12px; border:1px solid var(--accent); border-radius:var(--radius-md); }
 .tabela-valor { min-width:0; }
-.tabela-compacta { table-layout:fixed; }
-.tabela-compacta th:last-child, .tabela-compacta td.tabela-acoes { width:132px; min-width:0; }
+.tabela-compacta { table-layout:auto; }
 .tabela-compacta td { overflow-wrap:anywhere; }
 .tabela-compacta .tabela-acoes .btn { white-space:nowrap !important; padding:10px 8px; }
 @media screen and (max-width:720px) {
   [data-modo="compacta"] .tabela-area { overflow-x:auto; }
   .tabela-compacta th, .tabela-compacta td { padding:12px 10px; }
-  .tabela-compacta th:last-child, .tabela-compacta td.tabela-acoes { width:110px; }
   .tabela-compacta .tabela-acoes .btn { margin:0; padding:10px 8px; font-size:12px; }
 }
 .tabela-valor .mini-bar { flex-shrink:0; }
@@ -83,7 +84,22 @@ table.tabela-padrao { width:100%; border-collapse:collapse; color:var(--fg); fon
   .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td[colspan] .icone-grande { margin-left:auto; margin-right:auto; }
   .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-acoes { display:block !important; text-align:left !important; padding:12px 0 !important; }
   .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-acoes::before { display:block; margin-bottom:6px; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-acoes { order:99; margin-top:auto; }
+  .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) td.tabela-acoes > .tabela-valor, .tabela-padrao:not(.tabela-matriz):not(.tabela-compacta) .tabela-valor > div.tabela-acoes { justify-content:flex-start; }
 }
+@container tabela (min-width:64rem) {
+  .tabela-padrao td.tabela-acoes > .tabela-valor, .tabela-padrao .tabela-valor > div.tabela-acoes { flex-wrap:nowrap; width:max-content; }
+}
+/* Cards mantêm as ações no rodapé esquerdo, inclusive no modo escolhido no desktop. */
+[data-apresentacao=cards] .tabela-padrao td.tabela-acoes > .tabela-valor, [data-apresentacao=cards] .tabela-padrao .tabela-valor > div.tabela-acoes { width:100%; flex-wrap:wrap; justify-content:flex-start; }
+/* Cabeçalhos ordenáveis usam a própria tabela; o select também atende o modo cards. */
+.tabela-ordenar { display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:inherit;cursor:pointer; }
+.tabela-ordenar::after { content:'↕';font-size:14px;opacity:.65;flex:none; }
+th[aria-sort=ascending] .tabela-ordenar::after { content:'↑';opacity:1; }
+th[aria-sort=descending] .tabela-ordenar::after { content:'↓';opacity:1; }
+.tabela-ordenacao-status { padding:8px 16px;margin:0;font-size:12px;color:var(--muted); }
+@media(pointer:coarse),(max-width:767px) { .tabela-ordenar { min-height:44px; } }
+@media print { .tabela-ordenar::after,.tabela-ordenacao-status { display:none; }.tabela-ordenar { min-height:0; } }
 @media print {
   .tabela-conjunto .no-print { display:none !important; }
   .tabela-area { overflow:visible; }

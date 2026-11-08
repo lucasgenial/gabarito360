@@ -53,7 +53,7 @@
         <th scope="col">Turmas</th>
         <th scope="col">Alunos</th>
         <th scope="col">Cartões enviados</th>
-        <th scope="col">Enviar cartão</th>
+        <th class="tabela-coluna-acoes" scope="col">Enviar cartão</th>
       </tr>
     </thead>
     <tbody>

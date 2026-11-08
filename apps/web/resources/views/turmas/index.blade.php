@@ -54,7 +54,6 @@
     <caption class="sr-only">Turmas</caption>
     <thead>
       <tr>
-        <th scope="col" class="tw2-coluna-acoes">Ações</th>
         <th scope="col" data-ordenar="texto">Turma</th>
         <th scope="col">Série</th>
         <th scope="col">Turno</th>
@@ -62,14 +61,12 @@
         <th scope="col">Alunos</th>
         <th scope="col">Ano letivo</th>
         <th scope="col">Status</th>
+        <th scope="col" class="tabela-coluna-acoes">Ações</th>
       </tr>
     </thead>
     <tbody>
       @forelse($turmas as $t)
         <tr data-nome="{{ strtolower($t['nome']) }}">
-          <td data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
-            <a href="{{ route('turmas.show', $t['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver turma</a>
-          </div></td>
           <td data-valor-ordem="{{ $t['nome'] }}" data-rotulo="Turma" class="tabela-principal"><div class="tabela-valor">
             <div class="turma-name">
               <x-avatar-turma :turma="$t" tamanho="sm" />
@@ -92,6 +89,10 @@
             @else
               <span class="badge badge-danger badge-dot">Arquivada</span>
             @endif
+          </div></td>
+
+          <td data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
+            <a href="{{ route('turmas.show', $t['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver turma</a>
           </div></td>
 
         </tr>

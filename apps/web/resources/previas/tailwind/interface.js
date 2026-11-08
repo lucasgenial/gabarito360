@@ -91,10 +91,25 @@ import {iniciarLegendasAcoes} from './legendas-acoes.js';
   });
 
   const tabela=selecionar('#registros'),modos=selecionarTodos('button[data-modo]');
+  const registrosOriginais=[...tabela.tBodies[0].rows],compararRegistros=new Intl.Collator('pt-BR',{numeric:true,sensitivity:'base'});
+  [...tabela.tHead.rows[0].cells].forEach((th,coluna)=>{
+    if(th.classList.contains('coluna-acoes'))return;
+    const rotulo=th.textContent.trim(),botao=document.createElement('button');
+    botao.type='button';botao.className='tabela-ordenar';botao.textContent=rotulo;
+    botao.setAttribute('aria-label','Ordenar por '+rotulo+' em ordem crescente');th.replaceChildren(botao);
+    botao.addEventListener('click',()=>{
+      const desc=th.getAttribute('aria-sort')==='ascending';
+      [...tabela.tHead.rows[0].cells].forEach(h=>{h.removeAttribute('aria-sort');const b=h.querySelector('.tabela-ordenar');if(b)b.setAttribute('aria-label','Ordenar por '+b.textContent+' em ordem crescente');});
+      th.setAttribute('aria-sort',desc?'descending':'ascending');botao.setAttribute('aria-label','Ordenar por '+rotulo+' em ordem '+(desc?'crescente':'decrescente'));
+      const linhas=[...registrosOriginais].sort((a,b)=>compararRegistros.compare(a.cells[coluna].textContent.trim(),b.cells[coluna].textContent.trim())*(desc?-1:1)||registrosOriginais.indexOf(a)-registrosOriginais.indexOf(b));
+      linhas.forEach(linha=>tabela.tBodies[0].append(linha));
+    });
+  });
   const controlesModos=modos[0].parentElement,modoMobile=matchMedia('(max-width:767px)');let apresentacaoPreferida='tabela';
   const avisoModo=document.createElement('p');avisoModo.className='ajuda tw:px-4 tw:py-2';avisoModo.textContent='Apresentação em cards no celular';controlesModos.parentElement.after(avisoModo);
   function atualizarModo(){
     const modo=modoMobile.matches?'cards':apresentacaoPreferida;tabela.dataset.modo=modo;
+    tabela.querySelectorAll('.tabela-ordenar').forEach(botao=>botao.tabIndex=modo==='cards'?-1:0);
     if(modoMobile.matches&&controlesModos.contains(document.activeElement))selecionar('#buscar-aluno').focus({preventScroll:true});
     controlesModos.hidden=modoMobile.matches;avisoModo.hidden=!modoMobile.matches;
     modos.forEach(botao=>botao.setAttribute('aria-pressed',String(botao.dataset.modo===modo)));

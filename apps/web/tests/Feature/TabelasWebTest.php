@@ -57,6 +57,7 @@ class TabelasWebTest extends TestCase
         $xp=new \DOMXPath($doc);
         $this->assertSame(25,$xp->query('//table[contains(@class,"tabela-padrao")]/tbody/tr')->length);
         $this->assertSame(25,$xp->query('//td[@data-rotulo="Ações"]//a')->length);
+        $this->assertSame(25,$xp->query('//table/tbody/tr/td[last()][@data-rotulo="Ações"]')->length);
         $this->assertSame(0,$xp->query('//table/tbody/tr[@hidden]')->length);
         $this->assertSame(25,$xp->query('//td[@data-rotulo="Aluno" and contains(@class,"tabela-principal")]')->length);
         $alvos=0;foreach($xp->query('//a[@data-recurso]') as $link){$d=json_decode($link->getAttribute('data-recurso'),true);$a=\App\Support\NavegacaoWeb::obter($d['referencia']);if(($a['nome']??null)==='alunos.show'&&(int)($a['parametros']['id']??0)===25)$alvos++;}$this->assertSame(1,$alvos);
@@ -75,10 +76,15 @@ class TabelasWebTest extends TestCase
         $this->assertSame(3,$xp->query('//td[@data-rotulo="Ações"]//a[contains(@href,"/permissoes")]')->length);
         $forms=$xp->query('//td[@data-rotulo="Ações"]//form[@method="POST"]');
         $this->assertSame(4,$forms->length);
+        $this->assertSame(3,$xp->query('//table/tbody/tr/td[last()][@data-rotulo="Ações"]')->length);
         $this->assertSame(2,$xp->query('//td[@data-rotulo="Ações"]//form[contains(@action,"/encerrar-vinculo")]')->length);
         foreach ($forms as $form) {
             $this->assertSame(1,$xp->query('.//input[@name="_token"]',$form)->length);
             $this->assertNull(parse_url($form->getAttribute('action'),PHP_URL_QUERY));$d=json_decode($form->getAttribute('data-recurso'),true,512,JSON_THROW_ON_ERROR);$alvo=\App\Support\NavegacaoWeb::obter($d['referencia']);$this->assertContains((int)$alvo['consulta']['vinculo_id'],[10,11,12]);$this->assertGreaterThan(0,(int)$alvo['parametros']['id']);$this->assertSame(1,$xp->query('.//input[@name="_recurso"]',$form)->length);
+        }
+        if(getenv('G360_TW2_EXPORT')){
+            $dir=sys_get_temp_dir().'/g360-tw2-render';if(!is_dir($dir))mkdir($dir,0700,true);
+            file_put_contents($dir.'/membros.html',$html);
         }
     }
 

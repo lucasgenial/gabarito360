@@ -125,8 +125,13 @@
   .tabela-registros td { @apply tw:border-b tw:border-linha tw:px-3 tw:py-2 tw:align-middle; overflow-wrap:anywhere; }
   .tabela-registros tbody tr:last-child td { @apply tw:border-b-0; }
   .tabela-registros tbody tr:hover { @apply tw:bg-suave/60; }
+  .tabela-ordenar { @apply tw:inline-flex tw:min-h-8 tw:items-center tw:gap-1.5 tw:border-0 tw:bg-transparent tw:p-0 tw:text-inherit tw:cursor-pointer; font:inherit; }
+  .tabela-ordenar::after { content:'↕';opacity:.65; }
+  th[aria-sort=ascending] .tabela-ordenar::after { content:'↑';opacity:1; }
+  th[aria-sort=descending] .tabela-ordenar::after { content:'↓';opacity:1; }
   .tabela-registros .coluna-acoes,.tabela-registros .celula-acoes { width:1%; }
-  .tabela-registros .celula-acoes > div { @apply tw:flex tw:flex-wrap tw:items-center tw:justify-start tw:gap-2; width:max-content;max-width:clamp(10rem,24vw,20rem); }
+  .tabela-registros .coluna-acoes,.tabela-registros .celula-acoes { text-align:center; }
+  .tabela-registros .celula-acoes > div { @apply tw:flex tw:flex-wrap tw:items-center tw:justify-center tw:gap-2; }
   .dialogo { @apply tw:m-auto tw:w-[min(32rem,calc(100vw-2rem))] tw:max-h-[calc(100dvh-2rem)] tw:overflow-auto tw:rounded-xl tw:border tw:border-linha tw:bg-superficie tw:p-5 tw:text-texto tw:shadow-xl; }
   .dialogo::backdrop { background:#00153480; }
   .dialogo .botao:not(.botao-gd):not(.botao-xg) { @apply tw:min-h-11 tw:min-w-11; }
@@ -162,7 +167,7 @@
   .tabela-registros .celula-acoes { @apply tw:block; order:3;margin-top:auto;width:100%; }
   .tabela-registros .celula-nome { order:1; }
   .tabela-registros td[data-rotulo="Situação"] { order:2; }
-  .tabela-registros .celula-acoes > div { width:100%;max-width:none; }
+  .tabela-registros .celula-acoes > div { width:100%;max-width:none;justify-content:flex-start; }
   .tabela-registros .celula-acoes::before { content:none; }
 }
 .tabela-registros[data-modo=cards],.tabela-registros[data-modo=cards] tbody { @apply tw:block tw:w-full; }
@@ -176,7 +181,7 @@
 .tabela-registros[data-modo=cards] .celula-nome { order:1; }
 .tabela-registros[data-modo=cards] td[data-rotulo="Situação"] { order:2; }
 .tabela-registros[data-modo=cards] .celula-acoes { order:3;margin-top:auto;width:100%; }
-.tabela-registros[data-modo=cards] .celula-acoes > div { width:100%;max-width:none; }
+.tabela-registros[data-modo=cards] .celula-acoes > div { width:100%;max-width:none;justify-content:flex-start; }
 @media(prefers-reduced-motion:reduce) { :root {scroll-behavior:auto}.carregando,.skeleton{animation:none}.botao{transition:none} }
 @media print { .menu-lateral,header,footer,.botao,.propriedades,.notificacao,.no-print { display:none!important; } main{padding:0!important} .cartao{box-shadow:none} }
 

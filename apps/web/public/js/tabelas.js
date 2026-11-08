@@ -1,14 +1,15 @@
-/* TBL1: coleções integrais; seleção é opt-in e preserva os inputs de todas as páginas. */
+/* Tabelas: ordenação nos cabeçalhos e cards, preservando nós, seleção e formulários. */
 (function () {
   'use strict';
   var compararTexto = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
   function normalizar(texto) { return String(texto).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR'); }
   document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('[data-tabela][data-colecao-completa="true"]').forEach(function (grupo) {
-      var selecao = grupo.dataset.modo === 'selecao';
+    document.querySelectorAll('[data-tabela]').forEach(function (grupo) {
+      var completa = grupo.dataset.colecaoCompleta === 'true';
+      var selecao = completa && grupo.dataset.modo === 'selecao';
       var tabela = grupo.querySelector('table.tabela-padrao');
-      if (!tabela || tabela.tBodies.length !== 1 || tabela.querySelector('td[rowspan]') ||
-          (!selecao && tabela.querySelector('input[type="checkbox"], input[type="radio"]'))) return;
+      if (!tabela || !tabela.tHead || tabela.tHead.rows.length !== 1 || tabela.tBodies.length !== 1 || tabela.querySelector('[rowspan]') ||
+          Array.from(tabela.tHead.rows[0].cells).some(function (c) { return c.colSpan !== 1; })) return;
       var corpo = tabela.tBodies[0], registros = Array.from(corpo.rows);
       if (!registros.length || registros.some(function (r) { return Array.from(r.cells).some(function (c) { return c.colSpan !== 1; }); })) return;
       var ordem = grupo.querySelector('[data-tabela-ordem]'), tamanho = grupo.querySelector('[data-tabela-tamanho]');
@@ -19,16 +20,57 @@
       var termoAplicado = '', marcadasNoFiltro = null;
       var indicesOriginais = new Map(registros.map(function (r, i) { return [r, i]; }));
       function marcada(r) { return !!r.querySelector('input[type="checkbox"][name]:checked'); }
-      Array.from(tabela.tHead.rows[0].cells).forEach(function (th, i) {
-        if (th.dataset.ordenar !== 'texto') return;
+      var cabecalhos = Array.from(tabela.tHead.rows[0].cells), aviso = grupo.querySelector('[data-tabela-ordenacao-status]');
+      function textoCelula(c) {
+        if (c.dataset.valorOrdem !== undefined) return c.dataset.valorOrdem.trim();
+        var principal = c.querySelector('.turma-name strong,.student-name b,.exam-title,.member-name');
+        if (principal) return principal.textContent.trim();
+        var copia = c.cloneNode(true);
+        copia.querySelectorAll('.sr-only,[aria-hidden="true"],.av,img').forEach(function (e) { e.remove(); });
+        return copia.textContent.replace(/\s+/g, ' ').trim();
+      }
+      function numero(texto, canonico) {
+        if (canonico && /^-?\d+(?:\.\d+)?$/.test(texto)) return Number(texto);
+        if (!/^-?(?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d+)?\s*(?:%|º|ª)?$/.test(texto)) return null;
+        return Number(texto.replace(/[.%ºª\s]/g, '').replace(',', '.'));
+      }
+      function data(texto) {
+        var m = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?$/);
+        if (!m) return null;
+        var d = new Date(Date.UTC(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0)));
+        return d.getUTCFullYear()===+m[3] && d.getUTCMonth()===+m[2]-1 && d.getUTCDate()===+m[1] ? d.getTime() : null;
+      }
+      function vazio(v) { return !v || /^[—–-]$/.test(v); }
+      var valores = new Map(), tipos = new Map();
+      cabecalhos.forEach(function (th, i) {
+        var celulas = registros.map(function (r) { return r.cells[i]; });
+        // Controles de seleção e operações não são dados a ordenar.
+        if (!th.textContent.trim() || th.classList.contains('tabela-coluna-acoes') || th.dataset.ordenar === 'nao' ||
+            celulas.some(function (c) { return !c || c.classList.contains('tabela-acoes'); }) ||
+            th.querySelector('input,select,button,a') || celulas.every(function (c) { return c.querySelector('input[type="checkbox"],input[type="radio"]') && !c.textContent.trim(); })) return;
+        var rotulo = th.textContent.trim();
+        var itens = celulas.map(function (c) { var texto=textoCelula(c); return {texto:texto,numero:numero(texto,c.dataset.valorOrdem!==undefined),data:data(texto)}; });
+        var preenchidos = itens.filter(function (v) { return !vazio(v.texto); });
+        var tipo = th.dataset.ordenar==='texto' ? 'texto' : preenchidos.length && preenchidos.every(function (v) { return v.numero!==null; }) ? 'numero' : preenchidos.length && preenchidos.every(function (v) { return v.data!==null; }) ? 'data' : 'texto';
+        tipos.set(i,tipo);valores.set(i,new Map(registros.map(function (r,j) { return [r,itens[j]]; })));
         colunas.push(i);
-        ['asc', 'desc'].forEach(function (direcao) {
-          var opcao = document.createElement('option');
-          opcao.value = i + ':' + direcao;
-          opcao.textContent = th.textContent.trim() + (direcao === 'asc' ? ' (A–Z)' : ' (Z–A)');
-          ordem.appendChild(opcao);
+        var botao = document.createElement('button');botao.type='button';botao.className='tabela-ordenar';
+        botao.textContent=rotulo;botao.setAttribute('aria-label','Ordenar por '+rotulo+' em ordem crescente');
+        th.replaceChildren(botao);
+        botao.addEventListener('click',function () { ordem.value=i+':'+(th.getAttribute('aria-sort')==='ascending'?'desc':'asc');ordenar(); });
+        ['asc','desc'].forEach(function (direcao) {
+          var opcao=document.createElement('option');opcao.value=i+':'+direcao;
+          opcao.textContent=rotulo+(direcao==='asc'?' (crescente)':' (decrescente)');ordem.appendChild(opcao);
         });
       });
+      if (!colunas.length && !completa) return;
+      function sincronizarCabecalhos() {
+        var oculto=getComputedStyle(tabela.tHead).position==='absolute' && tabela.tHead.getBoundingClientRect().width<=1;
+        cabecalhos.forEach(function (th) { var b=th.querySelector('.tabela-ordenar');if(b)b.tabIndex=oculto?-1:0; });
+      }
+      new ResizeObserver(sincronizarCabecalhos).observe(tabela);
+      new MutationObserver(sincronizarCabecalhos).observe(grupo,{attributes:true,attributeFilter:['data-apresentacao']});
+      sincronizarCabecalhos();
       function atualizarRodape(inicio, limite) {
         var quantidade = filtrados.length, paginas = Math.max(1, Math.ceil(quantidade / limite));
         if (selecao) {
@@ -45,6 +87,7 @@
         filtrados = ordenados.filter(function (tr) {
           return (!termoAplicado || normalizar(tr.dataset.busca || '').includes(termoAplicado)) && (marcadasNoFiltro === null || marcadasNoFiltro.has(tr));
         });
+        if (!completa) return;
         var limite = tamanho.value === 'todos' ? Math.max(1, filtrados.length) : Number(tamanho.value);
         var paginas = Math.max(1, Math.ceil(filtrados.length / limite));
         pagina = Math.min(pagina, paginas);
@@ -56,19 +99,33 @@
         if (document.activeElement === proxima && proxima.disabled && !anterior.disabled) anterior.focus();
         else if (document.activeElement === anterior && anterior.disabled && !proxima.disabled) proxima.focus();
       }
-      ordem.addEventListener('change', function () {
-        var partes = ordem.value.split(':'), coluna = Number(partes[0]);
-        ordenados = registros.slice();
-        Array.from(tabela.tHead.rows[0].cells).forEach(function (th) { th.removeAttribute('aria-sort'); });
-        if (colunas.includes(coluna) && ['asc', 'desc'].includes(partes[1])) {
-          ordenados.sort(function (a, b) {
-            return compararTexto.compare(a.cells[coluna].dataset.valorOrdem ?? a.cells[coluna].textContent.trim(), b.cells[coluna].dataset.valorOrdem ?? b.cells[coluna].textContent.trim()) * (partes[1] === 'desc' ? -1 : 1) || indicesOriginais.get(a) - indicesOriginais.get(b);
+      function ordenar() {
+        var partes=ordem.value.split(':'),coluna=Number(partes[0]),direcao=partes[1],valido=colunas.includes(coluna)&&['asc','desc'].includes(direcao);
+        ordenados=registros.slice();
+        cabecalhos.forEach(function (th,i) {
+          th.removeAttribute('aria-sort');var b=th.querySelector('.tabela-ordenar');
+          if (b) b.setAttribute('aria-label','Ordenar por '+b.textContent+' em ordem '+(valido&&i===coluna&&direcao==='asc'?'decrescente':'crescente'));
+        });
+        if (valido) {
+          var tipo=tipos.get(coluna),cache=valores.get(coluna);
+          ordenados.sort(function (a,b) {
+            var va=cache.get(a),vb=cache.get(b),vazioA=vazio(va.texto),vazioB=vazio(vb.texto);
+            // Ausências ficam por último em ambas as direções, com empates estáveis.
+            if (vazioA!==vazioB) return vazioA?1:-1;
+            var delta=tipo==='texto'?compararTexto.compare(va.texto,vb.texto):va[tipo]-vb[tipo];
+            return delta*(direcao==='desc'?-1:1)||indicesOriginais.get(a)-indicesOriginais.get(b);
           });
-          tabela.tHead.rows[0].cells[coluna].setAttribute('aria-sort', partes[1] === 'asc' ? 'ascending' : 'descending');
+          cabecalhos[coluna].setAttribute('aria-sort',direcao==='asc'?'ascending':'descending');
         }
         ordenados.forEach(function (tr) { corpo.appendChild(tr); });
-        pagina = 1; desenhar();
-      });
+        if (aviso) {
+          aviso.hidden=!valido;
+          aviso.textContent=valido?(completa?'Registros carregados':'Ordenação dos registros desta página')+' · '+cabecalhos[coluna].textContent+' · '+(direcao==='asc'?'crescente':'decrescente')+'.':'';
+        }
+        pagina=1;desenhar();
+      }
+      ordem.addEventListener('change',ordenar);
+      if (completa) {
       tamanho.addEventListener('change', function () { pagina = 1; desenhar(); });
       anterior.addEventListener('click', function () { pagina--; desenhar(); });
       proxima.addEventListener('click', function () { pagina++; desenhar(); });
@@ -94,8 +151,9 @@
         var resumo = grupo.closest('fieldset')?.querySelector('[data-tabela-resumo-inicial]');
         if (resumo) resumo.hidden = true;
       }
-      grupo.querySelector('[data-tabela-controles]').hidden = false;
       grupo.querySelector('[data-tabela-rodape]').hidden = false;
+      }
+      grupo.querySelector('[data-tabela-controles]').hidden = false;
       desenhar();
     });
   });

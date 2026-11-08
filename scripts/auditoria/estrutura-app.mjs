@@ -15,7 +15,19 @@ try{
     const req=route.request(),url=new URL(req.url());
     assert.equal(url.origin,base,'Nenhuma chamada externa no ensaio');
     if(req.method()!=='GET'){transporte.push(url.pathname);return route.fulfill({status:503,json:{message:'Transporte não disponível no ensaio visual'}});}
-    const nome=url.pathname.match(/^\/(turmas|turma|editar)\.html$/)?.[1];
+    if(/^\/ordenacao-(completa|parcial)\.html$/.test(url.pathname)){
+      const completa=url.pathname.includes('completa');
+      const linhas=Array.from({length:25},(_,i)=>{
+        const notas=['10,0','2,7','2,7','—'],datas=['02/02/2026','31/01/2026','01/02/2026','—'];
+        return `<tr data-teste="${i+1}"><td data-rotulo="Nome">Pessoa ${i+1}</td><td data-rotulo="Nota">${notas[i%4]}</td><td data-rotulo="Data">${datas[i%4]}</td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><form method="POST"><input name="_token" value="csrf-ficticio" type="hidden"><input type="checkbox" name="selecionados[]" value="${i+1}" checked><button type="button">Conferir</button></form></div></td></tr>`;
+      }).join('');
+      const tabela=`<table class="table tabela-padrao" id="teste-ordenacao"><thead><tr><th>Nome</th><th>Nota</th><th>Data</th><th class="tabela-coluna-acoes">Ações</th></tr></thead><tbody>${linhas}</tbody></table>`;
+      const html=readFileSync(join(fixtures,'membros.html'),'utf8').replace(/<table\b[\s\S]*?<\/table>/,tabela)
+        .replaceAll('https://gabarito360.com.br',base).replaceAll('http://localhost',base)
+        .replace('data-colecao-completa="true"',`data-colecao-completa="${completa}"`);
+      return route.fulfill({contentType:'text/html',body:html});
+    }
+    const nome=url.pathname.match(/^\/(turmas|turma|editar|membros)\.html$/)?.[1];
     if(nome){
       const html=readFileSync(join(fixtures,nome+'.html'),'utf8')
         .replaceAll('https://gabarito360.com.br',base).replaceAll('http://localhost',base)
@@ -80,7 +92,7 @@ try{
   assert.equal(await pagina.locator('[data-painel-lista]').getAttribute('data-apresentacao'),'cards');
   assert.equal(await pagina.locator('.tabela-acoes').evaluate(e=>getComputedStyle(e).order),'99');
   await pagina.getByRole('button',{name:'Tabela',exact:true}).click();
-  assert.equal(await pagina.locator('#turmas-table th').first().textContent(),'Ações');
+  assert.equal(await pagina.locator('#turmas-table th').last().textContent(),'Ações');
   await pagina.getByRole('button',{name:'+ Nova turma',exact:true}).click();
   assert.equal(await pagina.locator('#modal-criar').getAttribute('aria-hidden'),'false');
   await pagina.keyboard.press('Escape');
@@ -111,6 +123,40 @@ try{
     await pagina.getByRole('button',{name:'Mudar para tema claro',exact:true}).click();
   }
   assert.deepEqual(erros,[]);
+  // Equipe exercita grupos reais com links, formulários POST e vários estados/permissões.
+  await pagina.goto(base+'/membros.html');
+  for(const largura of [1440,1024,768,390,320]){
+    await pagina.setViewportSize({width:largura,height:740});
+    assert.equal(await pagina.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Equipe sem overflow de página '+largura);
+    assert.equal((await pagina.locator('table thead th').last().textContent()).trim(),'Ações');
+    const linhas=await pagina.locator('table tbody tr').evaluateAll(itens=>itens.map(tr=>{
+      const td=tr.querySelector('td.tabela-acoes'),r=td.getBoundingClientRect(),outros=[...tr.children].filter(e=>e!==td).map(e=>e.getBoundingClientRect());
+      return {ultima:tr.lastElementChild===td,direita:outros.every(e=>e.right<=r.left+1),botoes:[...td.querySelectorAll('a,button')].map(b=>{const v=b.getBoundingClientRect();return {texto:b.textContent.trim(),integro:b.scrollWidth<=b.clientWidth+1,dentro:v.left>=r.left-1&&v.right<=r.right+1,altura:v.height};})};
+    }));
+    for(const l of linhas){assert.ok(l.ultima);if(largura>720)assert.ok(l.direita,'Ações à direita dos dados');for(const b of l.botoes){assert.ok(b.integro,b.texto+' íntegro '+largura);assert.ok(b.dentro,b.texto+' dentro da coluna '+largura);assert.ok(b.altura>=32);}}
+  }
+  for(const modo of ['completa','parcial']){
+    await pagina.setViewportSize({width:1440,height:740});await pagina.goto(base+'/ordenacao-'+modo+'.html');
+    assert.equal(await pagina.locator('#teste-ordenacao th .tabela-ordenar').count(),3);
+    assert.equal(await pagina.locator('#teste-ordenacao th:last-child button').count(),0);
+    const linhas=pagina.locator('#teste-ordenacao tbody tr');
+    await pagina.getByRole('button',{name:'Ordenar por Nota em ordem crescente',exact:true}).click();
+    assert.equal(await linhas.first().getAttribute('data-teste'),'2');assert.equal(await linhas.nth(1).getAttribute('data-teste'),'3','Empates estáveis');
+    assert.equal(await linhas.last().getAttribute('data-teste'),'24','Ausentes por último');
+    assert.equal(await pagina.locator('th[aria-sort=ascending]').textContent(),'Nota');
+    assert.equal(await linhas.evaluateAll(itens=>itens.filter(e=>!e.hidden&&e.getBoundingClientRect().height>0).length),modo==='completa'?20:25);
+    await pagina.getByRole('button',{name:'Ordenar por Nota em ordem decrescente',exact:true}).press('Space');
+    assert.equal(await linhas.first().getAttribute('data-teste'),'1','10 é maior que 2,7');
+    await pagina.getByRole('button',{name:'Ordenar por Data em ordem crescente',exact:true}).click();
+    assert.equal(await linhas.first().getAttribute('data-teste'),'2','31 de janeiro antes de 1 de fevereiro');
+    assert.equal(await pagina.locator('th[aria-sort]').count(),1);
+    assert.equal(await pagina.locator('#teste-ordenacao input[name="selecionados[]"]:checked').count(),25);
+    assert.equal(await pagina.locator('#teste-ordenacao input[name="_token"][value="csrf-ficticio"]').count(),25);
+    assert.equal(await pagina.locator('#teste-ordenacao button:not(.tabela-ordenar)').count(),25);
+    if(modo==='parcial')assert.match(await pagina.locator('[data-tabela-ordenacao-status]').textContent(),/^Ordenação dos registros desta página/);
+    await pagina.setViewportSize({width:390,height:740});await pagina.locator('[data-tabela-ordem]').selectOption('0:desc');
+    assert.equal(await linhas.first().getAttribute('data-teste'),'25','Cards seguem a mesma ordenação');
+  }
   assert.deepEqual(transporte,[]);
   console.log('TW2: views reais, reflow, conta/troca, Mais/foco, tabela/cards, modal, 6 larguras, temas e isolamento aprovados.');
 }finally{await browser.close();}

@@ -74,7 +74,7 @@
     <p class="page-sub no-print">O PDF em lote reúne os resultados disponíveis, com uma página por aluno e o mesmo modelo individual. Alunos ainda sem resultado não entram no arquivo.</p>
   </div>
   <x-tabela :interna="true" :integrada="true" titulo="Resultados dos alunos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Resultados dos alunos</caption>
-    <thead><tr><th scope="col">Aluno</th><th scope="col">Turma</th><th scope="col">Nota</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
+    <thead><tr><th scope="col">Aluno</th><th scope="col">Turma</th><th scope="col">Nota</th><th scope="col">Status</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead>
     <tbody>
       @forelse($alunos as $a)
         <tr>
@@ -91,7 +91,7 @@
               {{ $a['status_aprovacao'] === 'aprovado' ? 'Aprovado' : 'Recuperação' }}
             </span>
           </div></td>
-          <td style="text-align:right;" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
+          <td style="" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
             <a href="{{ route('resultados.show', [$a['aluno_id'], $prova['id']]) }}?from=prova" class="btn btn-result btn-sm" aria-label="Ver prova">Ver prova</a>
           </div></td>
         </tr>
