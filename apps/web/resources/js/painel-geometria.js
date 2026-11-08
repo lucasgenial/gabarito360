@@ -5,6 +5,32 @@ const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
 const geometry=['x','y','w','h'];
 const optional=['altura_desejada','fixo','altura_livre','orientacao'];
 
+/** CSS local desenha a grade; pixels visuais interpretam o ponteiro. O utilitário
+ * público do GridStack retorna a escala inversa, inclusive para ancestrais com zoom. */
+export function gridCoordinateMetrics({localWidth,visualWidth,cellHeight,inverseScaleY}){
+ if(![localWidth,visualWidth,cellHeight,inverseScaleY].every(v=>Number.isFinite(v)&&v>0))throw Error('Escala da grade inválida');
+ return {cellWidthLocal:localWidth/12,cellHeightLocal:cellHeight,cellWidthVisual:visualWidth/12,cellHeightVisual:cellHeight/inverseScaleY};
+}
+
+export function previewCssBox(n,metrics){
+ return {left:n.x*metrics.cellWidthLocal,top:n.y*metrics.cellHeightLocal,width:n.w*metrics.cellWidthLocal,height:n.h*metrics.cellHeightLocal};
+}
+
+// A prévia só possui estas quatro propriedades. Não restaurar opacity/position
+// capturadas depois de o DD iniciar, pois sua limpeza pertence à biblioteca.
+export function snapshotPreviewCss(style){
+ return ['left','top','width','height'].map(key=>[key,style.getPropertyValue(key),style.getPropertyPriority(key)]);
+}
+
+export function restorePreviewCss(style,snapshot){
+ for(const [key,value,priority]of snapshot){if(value==='')style.removeProperty(key);else style.setProperty(key,value,priority);}
+}
+
+export function pointerResizeDelta(start,point,metrics,scrollY=0){
+ const clientDy=point.y-start.y;
+ return {dw:Math.round((point.x-start.x)/metrics.cellWidthVisual),dh:clientDy===0?0:Math.round((point.y+scrollY-start.pageY)/metrics.cellHeightVisual)};
+}
+
 /** Somente o contrato de transporte, sem DOM, conteúdo ou estado interno do GridStack. */
 export function project(n){
  const result={id:n.id,section:n.section,x:n.x,y:n.y,w:n.w,h:n.h};

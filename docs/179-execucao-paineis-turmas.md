@@ -258,3 +258,12 @@ Faixas de intenção derivam do topo y do snapshot, não de sobreposição trans
 
 
 Candidato lateral em revisão independente noPR216: API27testes/625asserções passaram pelo autor e revisor; engine30testes e29históricos, verificador27scriptssemerror. Chrome do autor confirmou6+6→7+5mesmoy/h eCancelar. A revisão encontrou prévia conflitante com o helperfixednativo e movimento vertical de singleton semefeito; ambos foram corrigidos e aguardam reconferência: ghostnativo segue ponteiro/opacidadeefêmera0.20, único placeholder emcoordsreais, limpeza emstop/Escape/pointercancel/context/viewport; setas cruzam faixaadjacente semfalsosucesso. Aprovação de direção visual foi renovada antes da correção; não confundir com aceite final. Revisão/API/pacote, CI5checks, merge e publicação continuam gates separados. O recibo final e a tabela atualizada serão registrados somente após homologação/conferência.
+
+
+## Correção de escala da prévia — posterior à publicação PR216
+
+PR216 integrado no mergec089e2e, homologação93260b2, cinco checks aprovados e130tabelas/201arquivos preservados, semDDL. Na conferência autenticada após publicar, o autor encontrou bodyCSSzoom1.25do usuário: gradeBCR2258/clientWidth1806. Soltura6+3+3 correta, mas preview usava BCR visual como largura CSS local e ampliava novamente. O aceite anterior semessaescala não cobre este caso; ensaio foi cancelado semgravarpreferênciasreais.
+
+Pré-consultaUI/UX aprovou correção exclusivamente técnica de coordenadas, semalterarzoomdo usuário ou estética: CSSlocal paraestilos/placeholder; ponteiro/hit-test/deltas nas medidasvisuais, normalizandoescala umaúnicavez. Conferir zoom100/125/150, rolagem, largura/altura, pins, cancelar, salvar/reload e previewigualdrop. Revisorindependente fará nova conferência exata; nenhum padrão novo de tela ou migration.
+
+Durante a execução o responsável priorizou diagnóstico/correção da demoraMariaDB. Investigar separadamente a suíteintegridadeGitHub29m44 e o banco dahomologação, medindo antesdealterarconfiguração. Essa investigação possui worktree próprio, sem misturar suas fontes ao patch de UI. Ambos preservamprodução/dados e precisam de validação específica. P3.2 permanece próximo pacote após os ajustes.
