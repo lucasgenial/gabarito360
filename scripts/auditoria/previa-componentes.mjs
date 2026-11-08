@@ -55,6 +55,8 @@ try{
   assert.equal(await pagina.locator('#dialogo-cancelar').evaluate(e=>e===document.activeElement),true);
   await pagina.keyboard.press('Escape');
 
+  assert.equal(await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).evaluate(e=>e===document.activeElement),true);
+
   const fundos=[];
   for(const tipo of ['Informação','Sucesso','Atenção','Erro']){
     await pagina.getByRole('button',{name:tipo,exact:true}).click();
@@ -62,7 +64,6 @@ try{
     assert.equal(await pagina.locator('.notificacao').getAttribute('role'),tipo==='Erro'?'alert':'status');
   }
   assert.equal(new Set(fundos).size,4);
-  assert.equal(await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).evaluate(e=>e===document.activeElement),true);
   await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).click();
   await pagina.getByRole('button',{name:'Concluir demonstração',exact:true}).click();
   assert.equal(await pagina.locator('#registros tbody tr').count(),3);
