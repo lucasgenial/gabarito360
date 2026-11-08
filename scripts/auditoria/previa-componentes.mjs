@@ -152,7 +152,9 @@ try{
     assert.equal(await pagina.locator('#menu-lateral').isVisible(),true);
     assert.equal(await pagina.getByRole('navigation',{name:'Seções da prévia no celular'}).isHidden(),true);
     assert.equal(await pagina.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    await pagina.locator('#meu-espaco summary').click();
     assert.equal(await pagina.locator('#contexto-espaco').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),2);
+    await pagina.locator('#meu-espaco summary').click();
   }
   assert.deepEqual(erros,[]);
   assert.equal(requests.every(r=>r.metodo==='GET'&&new URL(r.url).origin===base),true);
