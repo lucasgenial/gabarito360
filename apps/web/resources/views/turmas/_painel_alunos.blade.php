@@ -8,7 +8,7 @@ $widgetsAlunos=[
 @endphp
 <x-painel-secao id="estudantes" titulo="Estudantes" :nivel="3">
 @foreach($widgetsAlunos as $chave=>$widgetAluno)
-<x-painel-widget :id="$widgetAluno['id']" :ajuda="$ajudasIndicadores[$widgetAluno['id']]??[]" :nivel="4" :titulo="$widgetAluno['titulo']" :w="6" :h="12" secao="estudantes" :demo="false" class="painel-widget-alunos">
+<x-painel-widget :id="$widgetAluno['id']" data-painel-vazio="{{ ($vaziosIndicadores[$widgetAluno['id']]??false)?'true':'false' }}" :ajuda="$ajudasIndicadores[$widgetAluno['id']]??[]" :nivel="4" :titulo="$widgetAluno['titulo']" :w="6" :h="12" secao="estudantes" :demo="false" class="painel-widget-alunos">
 <div class="tu1r3-alunos" data-painel-alunos="{{ $chave }}" aria-describedby="descricao-{{ $widgetAluno['id'] }}">
 <span class="painel-valores-acessiveis" id="descricao-{{ $widgetAluno['id'] }}">{{ $widgetAluno['descricao'] }}</span>
 @if($painelIndisponivel??false)<p class="painel-widget-indisponivel">Dados temporariamente indisponíveis. Atualize a página para tentar novamente.</p>

@@ -1,4 +1,5 @@
 import {GridStack} from 'gridstack';
+import {compactReadingLayout} from './painel-leitura.js';
 import {project,chartIds,validateLayout,nodeOptions,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,bandsOf,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback,gridCoordinateMetrics,previewCssBox,pointerResizeDelta,snapshotPreviewCss,restorePreviewCss} from './painel-geometria.js';
 
 /** Encerramento ordenado. O DD pode chamar stop sincronicamente em destroy(). */
@@ -28,7 +29,7 @@ function iniciar(){
  const status=toolbar.querySelector('[data-grade-status]'),actions=toolbar.querySelector('[data-grade-acoes]');
  const widgets=new Map([...document.querySelectorAll('[data-widget-id]')].filter(el=>el.dataset.section!=='resumo').map((el,index)=>[el.dataset.widgetId,{el,index,parent:el.parentElement}]));
  const sections=new Map([...document.querySelectorAll('[data-painel-secao]')].filter(el=>el.dataset.painelSecao!=='resumo').map(el=>[el.dataset.painelSecao,{el,grade:el.querySelector('.painel-secao-grade'),grid:null,style:null}]));
- let api=null,limits=new Map(),layout=[],saved=[],presentation='tabela',savedPresentation='tabela',editing=false,dirty=false,busy=false,invalid=false,uncertain=false,epoch=0,gesture=null,armedWrapper=null,point={x:0,y:0},previewFrame=null;
+ let api=null,limits=new Map(),layout=[],saved=[],presentation='tabela',savedPresentation='tabela',editing=false,dirty=false,busy=false,invalid=false,uncertain=false,epoch=0,gesture=null,armedWrapper=null,point={x:0,y:0},previewFrame=null,readingFrame=null;
  const uuid=()=>{if(typeof crypto.randomUUID==='function')return crypto.randomUUID();const b=crypto.getRandomValues(new Uint8Array(16));b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;const h=[...b].map(n=>n.toString(16).padStart(2,'0')).join('');return [h.slice(0,8),h.slice(8,12),h.slice(12,16),h.slice(16,20),h.slice(20)].join('-');};
  const interactions=new PanelGestureLifecycle();
  const requests=new Set(),clone=value=>structuredClone(value),eligible=()=>!interactions.stopping&&media.matches&&!invalid&&configEl.isConnected;
@@ -78,6 +79,7 @@ function iniciar(){
  }
  function destroyGrids(){
   if(interactions.stopping)return;
+  if(readingFrame!==null)cancelAnimationFrame(readingFrame);readingFrame=null;
   const wrappers=[];
   for(const s of sections.values())if(s.grid)for(const record of widgets.values())if(record.parent===s.grade){const wrapper=record.el.parentElement;if(wrapper?.classList.contains('grid-stack-item'))wrappers.push(wrapper);}
   interactions.stop({active:gesture,wrappers,dd:GridStack.getDD(),invalidate:()=>{++epoch;gesture=null;armedWrapper=null;},cancelPreview:()=>{if(previewFrame!==null)cancelAnimationFrame(previewFrame);previewFrame=null;},restore:restorePreview,dispose:()=>{
@@ -98,11 +100,26 @@ function iniciar(){
    }
    // Locked temporário + top impede o pack de load() de restaurar coordenadas antigas em float.
    // Não é o pin do usuário e nunca entra no DTO. Após aplicar o lote, controls() restaura os pins reais.
-   for(const node of s.grid.engine.nodes)s.grid.update(node.el,{locked:true,noMove:true,noResize:true});
-   s.grid.mode('top');s.grid.load(items.map(n=>({...nodeOptions(n,bounds(n)),locked:true,noMove:true,noResize:true})),false);s.grid.mode('float');
-   const displayed=captureLayout(s.grid.engine,items,limits);
-   if(displayed.some(n=>{const expected=items.find(item=>item.id===n.id);return ['x','y','w','h'].some(k=>expected[k]!==n[k]);}))throw Error('A disposição nativa não foi restaurada integralmente');
-   s.grid.updateOptions({minRow:Math.min(200,Math.max(...items.map(n=>n.y+n.h))+(editing?3:0))});
+   const apply=(records,caps)=>{
+    for(const node of s.grid.engine.nodes)s.grid.update(node.el,{locked:true,noMove:true,noResize:true});
+    s.grid.mode('top');s.grid.load(records.map(n=>({...nodeOptions(n,caps.get(n.id)),locked:true,noMove:true,noResize:true})),false);s.grid.mode('float');
+    const displayed=captureLayout(s.grid.engine,records,caps);
+    if(displayed.some(n=>{const expected=records.find(item=>item.id===n.id);return ['x','y','w','h'].some(k=>expected[k]!==n[k]);}))throw Error('A disposição nativa não foi restaurada integralmente');
+   };
+   apply(items,limits);
+   let shown=items;
+   if(!editing){
+    const heights=new Map();
+    for(const n of items){const el=widgets.get(n.id).el;if(el.dataset.painelVazio!=='true')continue;
+     // Estes filhos têm flex0/altura natural no estado vazio, mesmo no wrapper canônico.
+     const css=getComputedStyle(el),header=el.querySelector('.painel-widget-cabecalho'),body=el.querySelector('.painel-widget-corpo');
+     const size=header.offsetHeight+body.scrollHeight+['paddingTop','paddingBottom','borderTopWidth','borderBottomWidth','rowGap'].reduce((v,k)=>v+(parseFloat(css[k])||0),0)+16;
+     heights.set(n.id,Math.max(1,Math.ceil(size/s.grid.getCellHeight(true))));
+    }
+    shown=compactReadingLayout(items,heights);
+    if(shown.some((n,i)=>n.h!==items[i].h||n.y!==items[i].y))apply(shown,new Map([...limits].map(([key,c])=>[key,{...c,minH:1}])));
+   }
+   s.grid.updateOptions({minRow:Math.min(200,Math.max(...shown.map(n=>n.y+n.h))+(editing?3:0))});
   }controls();document.dispatchEvent(new CustomEvent('g360:painel-redimensionado'));
  }
  function actionMinimums(s){
@@ -227,7 +244,9 @@ function iniciar(){
  function cancelGesture(){if((!gesture&&!armedWrapper)||interactions.stopping)return;const focus=document.activeElement;destroyGrids();render();if(eligible()&&focus?.isConnected)focus.focus?.({preventScroll:true});say('Movimento cancelado. A disposição anterior foi mantida.');}
  document.addEventListener('keydown',e=>{if(e.key==='Escape')cancelGesture();},{signal:life.signal,capture:true});
  document.addEventListener('pointercancel',cancelGesture,{signal:life.signal,capture:true});
- window.addEventListener('resize',cancelGesture,{signal:life.signal});
+ function scheduleReading(){if(readingFrame!==null||!eligible()||editing||!api)return;readingFrame=requestAnimationFrame(()=>{readingFrame=null;if(eligible()&&!editing&&api)render();});}
+ window.addEventListener('resize',()=>{cancelGesture();scheduleReading();},{signal:life.signal});
+ document.fonts?.ready.then(()=>{if(!life.signal.aborted)scheduleReading();});
  function suspend(){++epoch;requests.forEach(c=>c.abort());requests.clear();busy=false;editing=false;dirty=false;api=null;destroyGrids();toolbar.hidden=true;controls();}
  media.addEventListener('change',()=>{suspend();if(eligible())load();},{signal:life.signal});
  document.addEventListener('g360:acesso-alterado',()=>{invalid=true;suspend();document.querySelectorAll('[data-lista-modo]').forEach(b=>b.disabled=true);},{signal:life.signal});
