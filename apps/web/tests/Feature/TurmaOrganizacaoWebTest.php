@@ -13,6 +13,7 @@ class TurmaOrganizacaoWebTest extends TestCase
     private array $me;
     private string $falha='';
     private ?array $respostaArquivamento=null;
+    private ?array $painelAlternativo=null;
 
     protected function preparar(string $perfil='coordenador'): void
     {
@@ -40,6 +41,7 @@ class TurmaOrganizacaoWebTest extends TestCase
                 '/api/v1/disciplinas'=>['disciplinas'=>[['id'=>31,'nome'=>'Matemática <teste>','ativo'=>true]],'gerir'=>true],
                 default=>['professores'=>[],'usuarios'=>[],'escolas'=>[]],
             };
+            if($p==='/api/v1/turmas/14/painel'&&$this->painelAlternativo!==null)$dados=$this->painelAlternativo;
             if($r->method()==='POST')$dados=['id'=>9];
             return Http::response(['data'=>$dados,'meta'=>['pagina'=>2,'paginas'=>3,'total'=>45]],$r->method()==='POST'?201:200);
         });
@@ -259,6 +261,29 @@ class TurmaOrganizacaoWebTest extends TestCase
         $dados=json_decode($grafico->getAttribute('data-painel-dados'),true,512,JSON_THROW_ON_ERROR);
         $this->assertArrayNotHasKey('alunos',$dados['analise']);
         $this->assertEqualsCanonicalizing(['distribuicao_acertos','por_avaliacao'],array_keys($dados['analise']));
+    }
+
+    public function test_bases_dos_indicadores_sao_acessiveis_e_nao_injetam_html_da_avaliacao():void
+    {
+        $this->preparar();
+        $this->painelAlternativo=['kpis'=>['alunos'=>2,'avaliacoes'=>1,'resultados'=>3,'alunos_com_resultado'=>2],
+            'recorte'=>['disciplina'=>'Todas','professor'=>'Todos'],'opcoes'=>['disciplinas'=>[],'professores'=>[]],
+            'avaliacoes'=>[],'situacoes_resultados'=>['total'=>3,'dentro_criterio'=>1,'indicacao_recuperacao'=>2,'outros'=>0],
+            'analise'=>['resumo'=>['n'=>2,'media_pct'=>60,'mediana_pct'=>60,'min_pct'=>40,'max_pct'=>80],
+                'distribuicao_acertos'=>['total'=>2,'percentuais_excluidos'=>1,'faixas'=>[]],
+                'por_avaliacao'=>[['titulo'=>'Prova <img src=x onerror=alert(1)>','n'=>2,'media_pct'=>60,'mediana_pct'=>60,'resultados_total'=>3,'percentuais_excluidos'=>1,'abrangencia'=>'avaliacao_completa']],
+                'alunos'=>['disponivel'=>false]]];
+        $r=$this->consultarTela('/app/turmas/14')->assertOk()->assertSee('Base: 2 de 3 resultados; 1 sem percentual válido.')
+            ->assertSee('Base: 3 resultados.')->assertSee('Consultado em')->assertSee('não a última alteração dos dados')
+            ->assertSee('Cadastros distintos de alunos')->assertDontSee('<img src=x onerror=alert(1)>',false)
+            ->assertDontSee('data-widget-id="leituras"',false)->assertDontSee('Pessoas distintas com resultado');
+        $dom=new \DOMDocument();@$dom->loadHTML($r->getContent());$x=new \DOMXPath($dom);
+        $this->assertSame(9,$x->query('//button[@data-painel-ajuda]')->length);
+        foreach($x->query('//button[@data-painel-ajuda]') as $b){
+            $target=$b->getAttribute('popovertarget');
+            $this->assertSame($target,$b->getAttribute('aria-controls'));
+            $this->assertSame(1,$x->query('//*[@id="'.$target.'" and @popover="auto"]')->length);
+        }
     }
 
     public function test_arquivamento_retorna_destino_explicito_sem_depender_de_referer_ou_url_anterior():void

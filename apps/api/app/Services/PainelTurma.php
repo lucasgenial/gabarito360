@@ -75,7 +75,7 @@ final class PainelTurma
                 'leituras_revisao'=>$acompanhamento['revisao']??null],
             'situacoes_resultados'=>$this->situacoes($total,(int)$agrupadas->sum('dentro_criterio'),(int)$agrupadas->sum('indicacao_recuperacao')),
             'acompanhamento'=>$acompanhamento,
-            'analise'=>(new AnalisePainelTurma)->montar($u,$consulta,$notas,$provas,$total,$filtros['analise_prova_id']??null),
+            'analise'=>(new AnalisePainelTurma)->montar($u,$consulta,$notas,$provas,$total,$filtros['analise_prova_id']??null,$agrupadas),
             'avaliacoes'=>$avaliacoes];
     }
 

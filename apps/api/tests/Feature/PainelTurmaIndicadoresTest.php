@@ -68,4 +68,55 @@ class PainelTurmaIndicadoresTest extends TestCase
         $this->getJson('/api/v1/turmas/1/painel')->assertOk()->assertJsonPath('data.kpis.resultados',1)->assertJsonPath('data.acompanhamento',null)->assertJsonPath('data.avaliacoes.0.pendencias_revisao',null);
         $this->getJson('/api/v1/turmas/2/painel')->assertNotFound();
     }
+
+    public function test_bases_por_avaliacao_distinguem_zero_valido_percentuais_invalidos_e_ausencia_de_resultados(): void
+    {
+        $this->prova();$this->prova(3);$this->prova(4);
+        $this->cartao(1,'lido',1);$this->nota(1,1,0,10);
+        $this->cartao(2,'lido',2);$this->nota(2,2,0,0);
+        $this->cartao(3,'lido',3);$this->nota(3,3,11,10);
+        $this->cartao(4,'ambiguo',4);$this->nota(4,4,10,10);
+        $this->cartao(5,'lido',5,3);$this->nota(5,5,0,0,'recuperacao',3);
+        $r=$this->getJson('/api/v1/turmas/1/painel')->assertOk();
+        $r->assertJsonPath('data.kpis.resultados',4)->assertJsonPath('data.kpis.resultados_com_percentual',1)
+            ->assertJsonPath('data.analise.resumo.n',1)->assertJsonPath('data.analise.resumo.media_pct',0)
+            ->assertJsonPath('data.analise.distribuicao_acertos.percentuais_excluidos',3)
+            ->assertJsonPath('data.analise.por_avaliacao.0.n',1)->assertJsonPath('data.analise.por_avaliacao.0.media_pct',0)
+            ->assertJsonPath('data.analise.por_avaliacao.0.resultados_total',3)->assertJsonPath('data.analise.por_avaliacao.0.percentuais_excluidos',2)
+            ->assertJsonPath('data.analise.por_avaliacao.1.n',0)->assertJsonPath('data.analise.por_avaliacao.1.media_pct',null)
+            ->assertJsonPath('data.analise.por_avaliacao.1.resultados_total',1)->assertJsonPath('data.analise.por_avaliacao.1.percentuais_excluidos',1)
+            ->assertJsonPath('data.analise.por_avaliacao.2.n',0)->assertJsonPath('data.analise.por_avaliacao.2.media_pct',null)
+            ->assertJsonPath('data.analise.por_avaliacao.2.resultados_total',0)->assertJsonPath('data.analise.por_avaliacao.2.percentuais_excluidos',0);
+        foreach($r->json('data.analise.por_avaliacao')as$a){
+            $this->assertIsInt($a['resultados_total']);$this->assertIsInt($a['percentuais_excluidos']);
+            $this->assertSame($a['resultados_total'],$a['n']+$a['percentuais_excluidos']);
+            $this->assertSame('avaliacao_completa',$a['abrangencia']);
+        }
+    }
+
+    public function test_dto_reconstruido_sem_gravacao_permanece_estavel_para_o_guard_do_pdf(): void
+    {
+        $this->prova();$this->cartao(1,'lido',1);$this->nota(1,1,8,10);
+        $u=\App\Models\Usuario::findOrFail(1)->noVinculo(1);
+        $hash=fn()=>hash('sha256',json_encode(app(\App\Services\PainelTurma::class)->montar($u,1,[]),JSON_THROW_ON_ERROR));
+        $antes=$hash();$this->travel(2)->seconds();
+        $this->assertSame($antes,$hash(),'Apenas passar o tempo não pode invalidar um PDF sem alterações na origem.');
+        DB::table('notas')->where('cartao_id',1)->update(['acertos'=>5,'nota_final'=>5]);
+        $this->assertNotSame($antes,$hash(),'Mudança real continua alterando o DTO usado pelo guard do PDF.');
+    }
+
+    public function test_ampliar_avaliacoes_nao_acrescenta_consultas_por_instrumento(): void
+    {
+        $this->prova();$this->prova(3);
+        $u=\App\Models\Usuario::findOrFail(1)->noVinculo(1);
+        $medir=function()use($u){
+            DB::enableQueryLog();DB::flushQueryLog();
+            try{$dto=app(\App\Services\PainelTurma::class)->montar($u,1,[]);return [count(DB::getQueryLog()),$dto];}
+            finally{DB::disableQueryLog();DB::flushQueryLog();}
+        };
+        [$antes]=$medir();foreach(range(4,9)as$id)$this->prova($id);
+        [$depois,$dto]=$medir();
+        $this->assertCount(8,$dto['analise']['por_avaliacao']);
+        $this->assertSame($antes,$depois,'Metadados por avaliação devem reutilizar a agregação em lote.');
+    }
 }
