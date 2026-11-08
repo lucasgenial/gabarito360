@@ -68,7 +68,7 @@
   @include('layouts._flash-fallback')
 </main>
   @if(config('release.sha'))
-  <footer class="rodape-app" aria-label="Versão do software">Versão de testes: {{ config('release.fase') }} · {{ substr(config('release.sha'),0,8) }}</footer>
+  <footer class="rodape-app" aria-label="Versão do software">{{ config('versao.numero') }}</footer>
   @endif
 
 </div>{{-- .corpo-app --}}

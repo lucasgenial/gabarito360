@@ -50,6 +50,7 @@ class EstruturaTailwindTest extends TestCase
             $this->assertSame(0,$xp->query('//aside//summary')->length);
             $this->assertSame(1,$xp->query('//dialog[@id="nav-folha"]')->length);
             $this->assertSame(1,$xp->query('//footer[contains(@class,"rodape-app")]')->length);
+            $this->assertSame(config('versao.numero'),trim($xp->query('//footer[contains(@class,"rodape-app")]')->item(0)->textContent));
             $this->assertSame(1,$xp->query('//*[@id="user-menu"]//form[@method="POST"]//input[@name="_token"]')->length);
             $this->assertSame(1,$xp->query('//*[@id="user-menu"]//*[@id="contexto-trocar"]')->length);
             if($arquivo==='turmas'){

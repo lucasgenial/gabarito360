@@ -39,6 +39,7 @@ try{
   await pagina.getByRole('button',{name:'Expandir menu principal',exact:true}).click();
   const conferirRodape=async()=>{
     assert.equal(await pagina.locator('.rodape-app').isVisible(),true);
+    assert.match((await pagina.locator('.rodape-app').textContent()).trim(),/^\d+\.\d+\.\d+$/,'Rodapé exibe somente a versão numérica');
     const medidas=await pagina.locator('.rodape-app').evaluate(e=>({x:e.getBoundingClientRect().left,y:e.getBoundingClientRect().top,largura:e.getBoundingClientRect().width,fim:e.getBoundingClientRect().bottom,viewport:innerWidth,altura:innerHeight,lateral:document.querySelector('.lateral-app').getBoundingClientRect().width,movel:innerWidth<768}));
     assert.equal(medidas.x,medidas.movel?0:medidas.lateral);
     assert.equal(Math.round(medidas.x+medidas.largura),medidas.viewport);
