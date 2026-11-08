@@ -82,9 +82,10 @@ class Escopo
     private static function consultarProvas(Usuario $u,bool $historico): Builder
     {
         RegimeVinculos::exigir($u);
+        $perfil = $u->perfil;
         $q = Espacos::filtrar(Prova::query(), $u, 'provas.espaco_id');
         // O consumidor de resultado individual será integrado antes de liberar provas ao aluno.
-        if (ContextoVinculo::presente($u) && $u->perfil === 'aluno') return $q->whereRaw('1 = 0');
+        if (ContextoVinculo::presente($u) && $perfil === 'aluno') return $q->whereRaw('1 = 0');
         Espacos::conferirEscola($q, 'provas');
 
         $escolas = self::escolaIds($u);
@@ -93,7 +94,7 @@ class Escopo
         }
 
         // Compartilhar turma não libera provas criadas por outro professor.
-        if ($u->perfil === 'professor') {
+        if ($perfil === 'professor') {
             $turmas = self::turmaIds($u);
             $q->where(function ($w) use ($u,$turmas,$historico) {
                 $w->where(function ($propria) use ($u) {
@@ -128,11 +129,11 @@ class Escopo
                     }
                 });
             });
-        } elseif ($u->perfil === 'professor_autonomo') {
+        } elseif ($perfil === 'professor_autonomo') {
             $q->where('provas.criado_por', $u->id);
         }
 
-        if ($u->perfil === 'aplicador') {
+        if ($perfil === 'aplicador') {
             $q->whereDate('provas.data_aplicacao', now()->toDateString())
               ->whereIn('provas.status', ['publicada', 'em_correcao', 'corrigida']);
         }

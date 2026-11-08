@@ -64,6 +64,17 @@ class SelecaoInternaTest extends TestCase
         }
         $this->chamar($a,'POST','auth/vinculos/selecionar',['vinculo_id'=>1])->assertForbidden();
         foreach (['turmas','alunos','provas','cartoes/1','dashboard/admin','relatorios/prova/1'] as $url) $this->chamar($a,'GET',$url)->assertForbidden();
+        $interno = Usuario::findOrFail(1)->noAcessoInterno(1, 1);
+        foreach ([true, false] as $ativo) {
+            config(['espacos.ativo' => $ativo]);
+            foreach ([fn () => \App\Support\ContextoVinculo::espacos($interno),
+                fn () => \App\Support\Espacos::ids($interno),
+                fn () => \App\Support\Espacos::filtrar(DB::table('provas'), $interno, 'espaco_id')] as $consulta) {
+                try { $consulta(); $this->fail('Acesso interno não recebe escopo pedagógico.'); }
+                catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) { $this->assertSame(403, $e->getStatusCode()); }
+            }
+        }
+        config(['espacos.ativo' => true]);
         $this->chamar($escolar,'GET','turmas')->assertOk();
         $this->assertSame('admin_rede',Usuario::find(1)->perfil);
     }

@@ -38,6 +38,10 @@ class Espacos
 
     public static function ids(Usuario $u): array
     {
+        // A validação contextual já verifica conta, vínculo, vigência, grupo e hierarquia.
+        // Preserva a vedação pedagógica aos acessos internos antes de escolher o ramo.
+        abort_if(ContextoInterno::presente($u), 403, 'Selecione um vínculo pedagógico válido.');
+        if (ContextoVinculo::presente($u)) return ContextoVinculo::espacos($u);
         RegimeVinculos::exigir($u);
         if ($pessoal = EspacoPessoal::doAtor($u)) return [$pessoal];
         return self::escolas()->whereIn('e.id', Escopo::escolaIds($u) ?? [])
@@ -62,8 +66,8 @@ class Espacos
 
     public static function filtrar($query, Usuario $u, string $coluna)
     {
-        RegimeVinculos::exigir($u);
         if (self::ativo()) $query->whereIn($coluna, self::ids($u));
+        else RegimeVinculos::exigir($u);
         return $query;
     }
 
