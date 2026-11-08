@@ -21,7 +21,8 @@ final class CatalogoWidgetsPainel
             $defaultH = $id === 'turma-cadastro' ? 5 : ($kpi ? 4 : ($agenda ? 14 : (($graficoReal || $graficoDemo) ? 9 : (in_array($id,['alunos-destaques','alunos-atencao'],true) ? 12 : 9))));
             $maxH = $id === 'turma-cadastro' ? 12 : ($kpi ? 8 : 20);
             $lista[] = ['id'=>$id, 'section'=>$section,
-                'desktop'=>['minW'=>$kpi ? 2 : 4, 'maxW'=>12, 'minH'=>$minH, 'maxH'=>$maxH, 'defaultW'=>$kpi ? 3 : 6, 'defaultH'=>$defaultH],
+                // O cliente aplica também um piso visual por tipo e largura útil da seção.
+                'desktop'=>['minW'=>$kpi ? 2 : 3, 'maxW'=>12, 'minH'=>$minH, 'maxH'=>$maxH, 'defaultW'=>$kpi ? 3 : 6, 'defaultH'=>$defaultH],
                 'mobile'=>['minW'=>12, 'maxW'=>12, 'minH'=>$minH, 'maxH'=>$maxH, 'defaultW'=>12, 'defaultH'=>$defaultH]];
         };
         if ($painel === 'turmas') {
