@@ -9,7 +9,7 @@ const dependency=new URL('../paineis-grid/node_modules/',import.meta.url);
 const packageInfo=JSON.parse(await readFile(new URL('gridstack/package.json',dependency),'utf8'));
 assert.equal(packageInfo.version,'14.1.0');
 const compiled=await build({stdin:{contents:'export * from '+JSON.stringify(fileURLToPath(new URL('../../apps/web/resources/js/painel-geometria.js',import.meta.url)))+';export {GridStackEngine} from "gridstack/dist/gridstack-engine";',resolveDir:fileURLToPath(new URL('../paineis-grid/',import.meta.url))},bundle:true,write:false,format:'esm',platform:'node',nodePaths:[fileURLToPath(dependency)]});
-const {GridStackEngine,project,validateLayout,nativeEngine,captureLayout,prepareLayout,autoLayout,keyboardChange,distributeWidths,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback}=await import('data:text/javascript;base64,'+Buffer.from(compiled.outputFiles[0].contents).toString('base64'));
+const {GridStackEngine,project,validateLayout,nativeEngine,captureLayout,prepareLayout,autoLayout,keyboardChange,keyboardLateralAction,distributeWidths,fillLateral,lateralAction,responsiveMinWidths,lateralFeedback}=await import('data:text/javascript;base64,'+Buffer.from(compiled.outputFiles[0].contents).toString('base64'));
 const cap=(section='analises',extra={})=>({section,minW:2,maxW:12,minH:1,maxH:30,defaultW:6,defaultH:4,...extra});
 const caps=new Map(['a','b','c'].map(id=>[id,cap()]));
 const n=(id,x=0,y=0,w=6,h=4,extra={})=>({id,section:'analises',x,y,w,h,...extra});
@@ -159,4 +159,17 @@ test('lateral:prepare não deixa compactação global separar uma faixa salva ao
  const input=[n('a',0,0,6,10),n('b',6,0,6,4),n('c',0,10,12,2),n('d',0,12,6,3),n('e',6,12,6,6)];
  const result=prepareLayout(input,input,limits);assert.deepEqual(positions(result),positions(input));
  assert.deepEqual(prepareLayout(result,input,limits),result);
+});
+test('lateral:ArrowDown de singleton ultrapassa faixa vizinha e ArrowUp retorna sem alterar alturas',()=>{
+ const before=[n('a',0,0,12,9),n('b',0,9,8,10),n('c',8,9,4,9)],action=keyboardLateralAction(before,'a','ArrowDown');
+ assert.deepEqual(action,{type:'move',targetId:'c',place:'after-band'});
+ const down=lateralAction(before,lateralCaps,'a',action);assert.deepEqual(positions(down),[['a',0,10,12,9],['b',0,0,8,10],['c',8,0,4,9]]);
+ const up=lateralAction(down,lateralCaps,'a',keyboardLateralAction(down,'a','ArrowUp'));assert.deepEqual(positions(up),positions(before));
+});
+test('lateral:duas faixas singleton respeitam limites e pins permanecem imóveis',()=>{
+ const before=[n('a',0,0,12,4),n('b',0,4,12,6),n('c',4,30,4,8,{fixo:true})];
+ assert.equal(keyboardLateralAction(before,'a','ArrowUp'),null);assert.equal(keyboardLateralAction(before,'c','ArrowDown'),null);
+ const moved=lateralAction(before,lateralCaps,'a',keyboardLateralAction(before,'a','ArrowDown'));
+ assert.equal(moved.find(n=>n.id==='a').y,6);assert.equal(moved.find(n=>n.id==='b').y,0);assert.deepEqual(moved.find(n=>n.id==='c'),before[2]);
+ const singleton=[n('a',0,0,12,9)];assert.equal(keyboardLateralAction(singleton,'a','ArrowDown'),null);
 });
