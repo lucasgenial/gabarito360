@@ -68,7 +68,7 @@
   @include('layouts._flash-fallback')
 </main>
   @if(config('release.sha'))
-  <footer class="rodape-app" aria-label="Versão do software">{{ config('versao.numero') }}</footer>
+  <footer class="rodape-app" aria-label="Versão do software">Gabarito360 - v{{ config('versao.numero') }} - {{ config('versao.ambiente') }}</footer>
   @endif
 
 </div>{{-- .corpo-app --}}
