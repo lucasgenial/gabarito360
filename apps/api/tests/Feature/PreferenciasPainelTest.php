@@ -40,6 +40,47 @@ class PreferenciasPainelTest extends TestCase
         $this->assertSame(['id','section','x','y','w','h'],array_keys(json_decode(DB::table('preferencias_paineis')->value('desktop'),true)[0]));
     }
 
+    public function test_catalogo_admite_redistribuicao_lateral_sem_relaxar_alturas_mobile_ou_resumo(): void
+    {
+        foreach (['turmas','turma'] as $painel) {
+            $headers=$painel==='turma'?['X-G360-Painel-Turma'=>'1']:[];
+            $catalogo=$this->getJson('/api/v1/paineis/preferencias/'.$painel,$headers)->assertOk()->json('data.catalogo');
+            $this->assertNotEmpty($catalogo);
+            foreach ($catalogo as $item) {
+                $this->assertNotSame('resumo',$item['section']);
+                $this->assertSame(3,$item['desktop']['minW']);
+                $this->assertSame(12,$item['desktop']['maxW']);
+                $this->assertSame(12,$item['mobile']['minW']);
+                $this->assertSame(12,$item['mobile']['maxW']);
+            }
+            $porId=array_column($catalogo,null,'id');
+            $grafico=$painel==='turmas'?'cadastros-turno':'distribuicao-acertos';
+            $this->assertSame(8,$porId[$grafico]['desktop']['minH']);
+            $this->assertSame(9,$porId[$grafico]['desktop']['defaultH']);
+        }
+        $this->assertDatabaseCount('preferencias_paineis',0);
+    }
+
+    public function test_tres_vizinhos_seis_tres_tres_preservam_alturas_opcoes_e_replay(): void
+    {
+        $headers=['X-G360-Painel-Turma'=>'1'];
+        $widgets=[
+            $this->widget('distribuicao-acertos',x:0,w:6,h:8)+['altura_desejada'=>8,'fixo'=>false,'orientacao'=>'vertical'],
+            $this->widget('resultados-avaliacao',x:6,w:3,h:12)+['altura_desejada'=>9,'fixo'=>true],
+            $this->widget('situacoes-registradas',x:9,w:3,h:10),
+        ];
+        $p=$this->pedido(extra:['layouts'=>['desktop'=>$widgets]]);
+        $this->putJson('/api/v1/paineis/preferencias/turma',$p,$headers)->assertOk()->assertJsonPath('data.layouts.desktop',$widgets);
+        $this->putJson('/api/v1/paineis/preferencias/turma',$p,$headers)->assertOk()->assertJsonPath('data.repetido',true);
+        $this->getJson('/api/v1/paineis/preferencias/turma',$headers)->assertOk()->assertJsonPath('data.layouts.desktop',$widgets);
+        foreach ([['w'=>2],['w'=>'3'],['h'=>7],['x'=>5]] as $patch) {
+            $invalid=$widgets;$invalid[1]=array_replace($invalid[1],$patch);
+            $this->putJson('/api/v1/paineis/preferencias/turma',$this->pedido(1,['layouts'=>['desktop'=>$invalid]]),$headers)->assertUnprocessable();
+        }
+        $this->getJson('/api/v1/paineis/preferencias/turma',$headers)->assertOk()->assertJsonPath('data.versao',1)->assertJsonPath('data.layouts.desktop',$widgets);
+        $this->assertDatabaseCount('preferencias_painel_eventos',1);
+    }
+
     public function test_mobile_desktop_e_restauracao_explicita_sao_independentes_e_idempotentes(): void
     {
         $this->putJson('/api/v1/paineis/preferencias/turmas',$this->pedido(extra:['apresentacao'=>'cards']))->assertOk();

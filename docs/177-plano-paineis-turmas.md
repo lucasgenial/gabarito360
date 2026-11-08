@@ -1,3 +1,5 @@
+> **Decisão mais recente — preenchimento lateral:** após homologação do PR215 (f70c99f), o responsável solicita redistribuição horizontal entre vizinhos: resize absorve/libera largura nos demais; inserir um card ao lado/entre outros redimensiona o conjunto para ocupar a largura disponível. Alturas permanecem independentes. Pins, mínimos/máximos, seções, KPIs fixos, Salvar/Cancelar e alternativa mobile continuam preservados. Esta decisão substitui somente a regra anterior de larguras independentes/sem expansão obrigatória. Plano e gates atuais ao fim do179.
+
 > **Diretriz vigente após aprovação doPR214:** P2 visual publicado na homologação (`da0e86b`), com aceite do responsável. Próxima etapa P3.1: resumo cadastral canônico no mesmo recorte, regressão de cadastros/imagens e preservação administrativa. Novas decisões revogam a organização por linhas: GridStack nativo compacto, w/h independentes, pins invioláveis, sem expansão obrigatória. Botões compactos; nomes nos dois eixos das barras; Resultados da turma agrupa Estudantes/Análises. Planejamento detalhado e estados atuais ao fim do179.
 
 # Gabarito360 Plano dos painéis de turmas e da turma
