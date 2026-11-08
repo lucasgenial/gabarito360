@@ -21,9 +21,9 @@ class Permissao
         if (ContextoInterno::presente($u)) return ContextoInterno::permissoes($u);
         // Gravar um perfil interno no campo legado não concede acesso comercial ou pedagógico.
         if (in_array($u->getRawOriginal('perfil'), ContextoInterno::PERFIS, true) && !ContextoVinculo::presente($u)) return [];
-        RegimeVinculos::exigir($u);
         // Contextos explícitos são revalidados; não reutilizam o cache global legado por pessoa.
         if (ContextoVinculo::presente($u)) return ContextoVinculo::permissoes($u);
+        RegimeVinculos::exigir($u);
         // Estes perfis exigem vínculo explícito, mesmo que recebam extras no cadastro legado.
         if (in_array($u->perfil, ['professor_autonomo', 'secretario_escolar', 'vice_dir_escolar', 'auxiliar_secretaria'], true)) return [];
         if (isset(self::$cache[$u->id])) {

@@ -167,6 +167,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
+          --tmpfs /var/lib/mysql:rw,size=1073741824
           --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval=10s --health-timeout=5s --health-retries=10
     defaults:
@@ -180,6 +181,11 @@ jobs:
       DB_PASSWORD: teste-local-ci
     steps:
       - uses: actions/checkout@v4
+      - name: Conferir armazenamento e commits do MariaDB descartável
+        run: python3 scripts/ci/verificar_mariadb_descartavel.py
+        working-directory: ${{ github.workspace }}
+        env:
+          MARIADB_CONTAINER_ID: ${{ job.services.mariadb.id }}
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
