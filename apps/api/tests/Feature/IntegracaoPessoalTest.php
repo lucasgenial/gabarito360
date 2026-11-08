@@ -51,6 +51,9 @@ class IntegracaoPessoalTest extends TestCase
     public function test_selecao_painel_minimo_isolamento_e_revogacao(): void
     {
         $t=$this->selecionar();
+        $ator = Usuario::findOrFail(1)->noVinculo(1);
+        $this->assertSame([1], \App\Support\ContextoVinculo::espacos($ator));
+        $this->assertSame([1], \App\Support\Espacos::ids($ator));
         $this->chamar($t,'GET','dashboard/professor')->assertOk()->assertJsonPath('data.kpis.minhas_provas',1)
             ->assertJsonPath('data.kpis.minhas_turmas',1)->assertJsonPath('data.professor.espaco_nome','Pessoal 1')
             ->assertJsonPath('data.professor.escola_nome',null)->assertJsonPath('data.provas.0.total_alunos',1)->assertJsonCount(1,'data.provas');
