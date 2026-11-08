@@ -39,3 +39,11 @@ Auditoria automatizada scripts/auditoria/previa-componentes.mjs usa a página re
 | TW5 — painéis,mídia e ferramentas | Pendente |
 | TW6 — autenticação,público e documentos | Pendente |
 | TW7 — validação transversal | Contínua por entrega; migração geral não concluída |
+
+## Correção da referência recuperada
+
+A decisão subsequente revoga o modelo de ícone/modal informacional. Recuperar a composição original de a23d364: Meu espaço é um details recolhido na faixa inicial do card, junto ao breadcrumb; ao abrir, mostra escola/perfil em duas colunas, sem executar troca. Preservar nome completo e piso96px do perfil. Header compacto mantém avatar→menu à mostra/recolhido, tema e o controle separado Trocar vínculo. Este só aparece com mais de um vínculo elegível. Na prévia, a propriedade de um/dois vínculos e o modal de seleção são fictícios e não modificam sessões reais. O usuário solicitou também dois vínculos reais do usuário coordenador@gabarito360.dev na mesma escola, Coordenador e Professor, exclusivamente na homologação, em operação separada e auditada, preservando senha e dados.
+
+O parecer4ed9de5 é histórico; as partes alteradas exigem nova revisão. Nenhum merge ou deploy desse modelo rejeitado foi realizado.
+
+Esclarecimento final do responsável: o AVATAR abre o menu DA CONTA, não a navegação principal. Mostrar nome completo e e-mail de acesso no topo da conta; ações Meu perfil, Trocar vínculo (somente mais de um elegível) e Sair. Não duplicar a troca de vínculo em outro ícone no header. A navegação principal possui botão próprio, pode ficar à mostra ou escondida, e também abre por Mais no celular. Meu espaço continua apenas informativo, recolhível no card. Na prévia, nome/e-mail e vínculos são fictícios; Perfil/Sair são feedback de demonstração, sem abrir cadastro ou encerrar sessão real.

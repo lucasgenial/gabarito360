@@ -40,6 +40,10 @@
     const nome='Mudar para tema '+(escuro?'claro':'escuro');tema.setAttribute('aria-label',nome);tema.title=nome;tema.replaceChildren(icone(escuro?'sol':'lua'));
   });
   const menu=selecionar('#menu-lateral'),abrirMenu=selecionar('#abrir-menu'),fundo=selecionar('#fundo-menu');
+  const conta=selecionar('#menu-conta'),avatar=selecionar('#abrir-conta');
+  function fecharConta(){if(conta.matches(':popover-open'))conta.hidePopover();}
+  selecionarTodos('[data-conta-feedback]').forEach(botao=>botao.addEventListener('click',()=>{fecharConta();avatar.focus();notificar(botao.dataset.contaFeedback);}));
+  conta.addEventListener('keydown',evento=>{if(evento.key==='Escape'){evento.preventDefault();fecharConta();avatar.focus();}});
   const acionadoresMenu=selecionarTodos('[data-menu-abrir]');let ultimoMenu=abrirMenu;
   const fundoInerte=[selecionar('main'),selecionar('header'),selecionar('footer'),selecionar('.navegacao-inferior'),selecionar('#notificacoes')].filter(Boolean);
   function fecharMenu(devolver=true) {
@@ -48,6 +52,7 @@
     if(devolver)ultimoMenu.focus();
   }
   acionadoresMenu.forEach(botao=>botao.addEventListener('click',()=>{
+    fecharConta();
     ultimoMenu=botao;menu.dataset.aberto='true';fundo.hidden=false;acionadoresMenu.forEach(acionador=>acionador.setAttribute('aria-expanded','true'));
     fundoInerte.forEach(elemento=>{elemento.inert=true;});
     menu.querySelector('[data-menu-fechar]').focus();
@@ -133,23 +138,27 @@
   });
 
   const dialogo=selecionar('#dialogo'),filtros=selecionar('#filtros-exemplo'),confirmar=selecionar('#dialogo-confirmar');
-  const contextoEspaco=document.createElement('dl');contextoEspaco.className='contexto-espaco';contextoEspaco.hidden=true;contextoEspaco.id='contexto-espaco';
-  for(const [rotulo,valor,id] of [['Minha escola','Colégio Estadual de Educação Básica Professora Maria das Dores de Almeida e Silva — Unidade Experimental de Ciências e Linguagens','nome-escola-exemplo'],['Meu perfil','Coordenação','perfil-exemplo']]){
-    const grupo=document.createElement('div'),titulo=document.createElement('dt'),dado=document.createElement('dd');titulo.textContent=rotulo;dado.textContent=valor;dado.id=id;grupo.append(titulo,dado);contextoEspaco.append(grupo);
+  const trocarVinculo=selecionar('#trocar-vinculo'),quantidadeVinculos=selecionar('#quantidade-vinculos');
+  const opcoesVinculo=document.createElement('div');opcoesVinculo.className='tw:mt-4 tw:grid tw:gap-3';opcoesVinculo.id='opcoes-vinculo';opcoesVinculo.hidden=true;
+  for(const perfil of ['Coordenação','Professor']){
+    const botao=document.createElement('button');botao.type='button';botao.className='botao botao-secundario botao-lg';botao.textContent=perfil+' — escola fictícia';
+    botao.addEventListener('click',()=>{selecionar('#perfil-exemplo').textContent=perfil;dialogo.close();notificar('Perfil fictício alterado na prévia. A sessão do aplicativo não foi modificada.');});opcoesVinculo.append(botao);
   }
-  filtros.before(contextoEspaco);
+  filtros.before(opcoesVinculo);
+  quantidadeVinculos.addEventListener('change',()=>{trocarVinculo.hidden=quantidadeVinculos.value==='1';});
+  trocarVinculo.hidden=quantidadeVinculos.value==='1';
   let ultimoAcionador,modo;
   const textos={
     arquivar:['Arquivar turma — exemplo','O histórico seria preservado e a turma sairia da lista de turmas em uso. Aqui demonstramos somente a confirmação; nenhum registro será alterado.','Concluir demonstração'],
     filtro:['Filtrar indicadores — exemplo','Escolha um recorte para conferir a apresentação do filtro aplicado. Os números da prévia continuam fictícios.','Aplicar exemplo'],
     revisao:['Como avaliar esta prévia','Navegue pelas seções, teste botões e estados, alterne tema e apresentação dos registros e abra Propriedades e regras. O padrão será aplicado ao sistema após sua aprovação.','Entendi'],
-    espaco:['Meu espaço','Escola e perfil deste exemplo. O nome completo permanece disponível, inclusive no celular.','Fechar']
+    vinculos:['Trocar vínculo — exemplo','Dois vínculos fictícios na mesma escola. A seleção altera apenas a apresentação desta prévia.','Fechar']
   };
   selecionarTodos('[data-dialogo]').forEach(botao=>botao.addEventListener('click',()=>{
-    ultimoAcionador=botao;modo=botao.dataset.dialogo;
+    ultimoAcionador=conta.contains(botao)?avatar:botao;modo=botao.dataset.dialogo;fecharConta();
     const [titulo,descricao,acao]=textos[modo];selecionar('#dialogo-titulo').textContent=titulo;selecionar('#dialogo-descricao').textContent=descricao;confirmar.textContent=acao;
     confirmar.classList.toggle('botao-perigo',modo==='arquivar');confirmar.classList.toggle('botao-principal',modo!=='arquivar');filtros.hidden=modo!=='filtro';
-    contextoEspaco.hidden=modo!=='espaco';confirmar.hidden=modo==='espaco';selecionar('#dialogo-cancelar').textContent=modo==='espaco'?'Fechar':'Cancelar';
+    opcoesVinculo.hidden=modo!=='vinculos';confirmar.hidden=modo==='vinculos';selecionar('#dialogo-cancelar').textContent=modo==='vinculos'?'Fechar':'Cancelar';
     dialogo.showModal();selecionar('#dialogo-cancelar').focus();
   }));
   selecionarTodos('[data-dialogo-fechar]').forEach(botao=>botao.addEventListener('click',()=>dialogo.close()));
