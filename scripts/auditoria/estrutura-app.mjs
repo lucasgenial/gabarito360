@@ -37,6 +37,17 @@ try{
   assert.equal(await pagina.locator('.lateral-app').evaluate(e=>e.getBoundingClientRect().width),80);
   assert.equal(await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width)-amplo,176);
   await pagina.getByRole('button',{name:'Expandir menu principal',exact:true}).click();
+  const conferirRodape=async()=>{
+    assert.equal(await pagina.locator('.rodape-app').isVisible(),true);
+    const medidas=await pagina.locator('.rodape-app').evaluate(e=>({x:e.getBoundingClientRect().left,y:e.getBoundingClientRect().top,largura:e.getBoundingClientRect().width,fim:e.getBoundingClientRect().bottom,viewport:innerWidth,altura:innerHeight,lateral:document.querySelector('.lateral-app').getBoundingClientRect().width,movel:innerWidth<768}));
+    assert.equal(medidas.x,medidas.movel?0:medidas.lateral);
+    assert.equal(Math.round(medidas.x+medidas.largura),medidas.viewport);
+    assert.ok(medidas.y>=0 && medidas.fim<=medidas.altura,'Rodapé dentro da área visível');
+  };
+  await conferirRodape();
+  await pagina.getByRole('button',{name:'Recolher menu principal',exact:true}).click();
+  await conferirRodape();
+  await pagina.getByRole('button',{name:'Expandir menu principal',exact:true}).click();
   await pagina.getByRole('button',{name:'Filtrar turmas',exact:true}).click();
   assert.equal(await pagina.locator('#filtros-turmas').evaluate(e=>e.open),true);
   const buscaInicial=await pagina.locator('#filtros-turmas-busca').inputValue();
@@ -78,6 +89,7 @@ try{
       await pagina.setViewportSize({width:largura,height:650});
       assert.equal(await pagina.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,arquivo+' '+largura+' sem overflow');
       assert.equal(await pagina.locator('.cabecalho-app').evaluate(e=>e.getBoundingClientRect().height),64);
+      await conferirRodape();
       if(largura<768){
         assert.equal(await pagina.locator('.lateral-app').isHidden(),true);
         assert.equal(await pagina.locator('.nav-mobile-app').isVisible(),true);
