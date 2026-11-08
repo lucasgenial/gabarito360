@@ -6,7 +6,12 @@
   .area-referencia { display:contents; }
   main#conteudo { grid-column:2;grid-row:2; }
   .rodape-referencia { grid-column:2;grid-row:3; }
-  .menu-lateral { display:flex;flex-direction:column;gap:16px;grid-column:1;grid-row:2/4;position:sticky;top:64px;height:calc(100dvh - 64px);padding:16px 12px;background:#001534;color:white;overflow-y:auto; }
+  .menu-lateral { display:flex;flex-direction:column;gap:16px;grid-column:1;grid-row:2/4;position:sticky;top:64px;height:calc(100dvh - 64px);padding:16px 12px;background:var(--cor-superficie);color:var(--cor-texto);border-right:1px solid var(--cor-linha);overflow-y:auto; }
+  :root[data-tema=escuro] .menu-lateral { background:#001534;color:#e7edf6; }
+  :root[data-tema=escuro] .menu-lateral .lista-menu a { color:#c4d0e2; }
+  :root[data-tema=escuro] .menu-lateral .lista-menu a:hover { background:#ffffff12;color:white; }
+  :root[data-tema=escuro] .menu-lateral .lista-menu a[aria-current] { background:#ffffff18;color:white; }
+  :root[data-tema=escuro] .espaco-lateral dt { color:#a2afc4; }
   .lista-menu { display:flex;flex-direction:column;gap:4px; }
   .lista-menu .icone { width:20px;height:20px; }
   .rotulo-menu-compacto { display:none; }
@@ -14,10 +19,10 @@
   .estrutura-referencia[data-menu-desktop=compacto] .rotulo-menu { display:none; }
   .estrutura-referencia[data-menu-desktop=compacto] .rotulo-menu-compacto { display:block; }
   .estrutura-referencia[data-menu-desktop=compacto] .espaco-lateral { display:none; }
-  .espaco-lateral { margin-top:auto;padding-top:12px;border-top:1px solid #ffffff30;font-size:12px;line-height:18px; }
-  .espaco-lateral .resumo-espaco { font-size:13px; }
+  .espaco-lateral { margin-top:auto;padding-top:12px;border-top:1px solid var(--cor-linha);font-size:12px;line-height:18px; }
+  .titulo-espaco-lateral { font-size:13px;font-weight:600; }
   .espaco-lateral dl { display:grid;gap:12px;padding-top:8px; }
-  .espaco-lateral dt { color:#ffffffa8; }
+  .espaco-lateral dt { color:var(--cor-discreto); }
   .espaco-lateral dd { margin-top:4px;overflow-wrap:anywhere; }
   .contexto-espaco { grid-template-columns:minmax(0,1fr) minmax(6rem,auto); }
   .avatar-entidade { width:64px;height:64px;font-size:24px; }

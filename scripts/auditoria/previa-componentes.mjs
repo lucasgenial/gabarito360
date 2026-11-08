@@ -38,12 +38,21 @@ try{
   await pagina.getByRole('button',{name:'Recolher menu principal',exact:true}).click();
   assert.equal(await pagina.locator('main').evaluate(e=>e.inert),false);
   assert.equal(await pagina.locator('#fundo-menu').count(),0);
-  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>e.clientWidth),80);
+  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>e.getBoundingClientRect().width),80);
   assert.equal(Math.round(await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width)-larguraExpandida),176);
   await pagina.getByRole('button',{name:'Expandir menu principal',exact:true}).click();
-  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>e.clientWidth),256);
+  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>e.getBoundingClientRect().width),256);
   assert.equal(await pagina.locator('#meu-espaco').count(),1);
   assert.equal(await pagina.locator('#espaco-lateral-experimento').isVisible(),true);
+  assert.equal(await pagina.locator('#espaco-lateral-experimento details,#espaco-lateral-experimento summary').count(),0);
+  assert.equal(await pagina.locator('#espaco-lateral-experimento dl').isVisible(),true);
+  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 255, 255)');
+  await pagina.locator('#meu-espaco summary').click();
+  assert.equal(await pagina.locator('#contexto-espaco').evaluate(e=>Math.abs(e.getBoundingClientRect().width-e.closest('.faixa-espaco').getBoundingClientRect().width)<1),true);
+  await pagina.locator('#meu-espaco summary').click();
+  assert.equal(await pagina.locator('#registros thead th').first().textContent(),'Ações');
+  assert.equal(await pagina.locator('#registros tbody tr').first().locator('td').first().getAttribute('class'),'celula-acoes');
+  assert.equal(await pagina.locator('#registros .celula-acoes button[aria-label]').count(),6);
   assert.equal(await pagina.locator('#avatar-turma-exemplo').evaluate(e=>e.clientWidth),64);
 
   assert.equal(await pagina.locator('link[rel=stylesheet]').count(),1);
@@ -59,6 +68,10 @@ try{
   await pagina.getByRole('button',{name:'Cards',exact:true}).click();
   assert.equal(await pagina.locator('#registros').getAttribute('data-modo'),'cards');
   assert.equal(await pagina.locator('#registros tbody tr').count(),3);
+  for(const linha of await pagina.locator('#registros[data-modo=cards] tbody tr').all()){
+    const pos=await linha.evaluate(e=>{const a=e.querySelector('.celula-acoes').getBoundingClientRect(),n=e.querySelector('.celula-nome').getBoundingClientRect(),s=e.querySelector('[data-rotulo="Situação"]').getBoundingClientRect(),r=e.getBoundingClientRect();return {footer:a.top>=s.bottom-1&&a.top>=n.bottom,left:Math.abs(a.left-n.left)<1,bottom:r.bottom-a.bottom<8};});
+    assert.deepEqual(pos,{footer:true,left:true,bottom:true});
+  }
   await pagina.getByRole('searchbox',{name:'Buscar aluno no exemplo'}).fill('Bianca');
   assert.equal(await pagina.locator('#registros tbody tr:visible').count(),1);
   await pagina.getByRole('button',{name:'Tabela',exact:true}).click();
@@ -111,6 +124,7 @@ try{
   await pagina.locator('#ano-erro').waitFor({state:'hidden'});
   await pagina.getByRole('button',{name:'Mudar para tema escuro',exact:true}).click();
   assert.equal(await pagina.locator('html').getAttribute('data-tema'),'escuro');
+  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(0, 21, 52)');
   assert.equal(await pagina.locator('#marca-cabecalho img:visible').getAttribute('src'),'/brand/gabarito360-email-dark.png');
   await pagina.getByRole('button',{name:'Mudar para tema claro',exact:true}).click();
 
@@ -130,6 +144,7 @@ try{
     assert.equal(await pagina.getByRole('button',{name:'xg',exact:true}).evaluate(e=>Math.round(e.getBoundingClientRect().height)),56);
     await pagina.locator('#meu-espaco summary').click();
     assert.equal(await pagina.locator('#meu-espaco').getAttribute('open'),'');
+    assert.equal(await pagina.locator('#contexto-espaco').evaluate(e=>Math.abs(e.getBoundingClientRect().width-e.closest('.faixa-espaco').getBoundingClientRect().width)<1),true);
     assert.equal(await pagina.locator('#nome-escola-exemplo').evaluate(e=>e.scrollWidth<=e.clientWidth),true);
     assert.equal(await pagina.locator('#nome-escola-exemplo').evaluate(e=>e.clientWidth>=100),true);
     assert.equal(await pagina.locator('#perfil-exemplo').evaluate(e=>e.scrollWidth<=e.clientWidth),true);
