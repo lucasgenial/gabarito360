@@ -13,6 +13,25 @@ final class IndicadoresTurma
         return "Base: {$n} de {$t} resultados; {$e} sem percentual válido.";
     }
 
+    /** Ausência confirmada; falta de campo, erro e permissão negada não equivalem a zero. */
+    public static function vazios(array $d, bool $indisponivel=false): array
+    {
+        $out=array_fill_keys(['distribuicao-acertos','resultados-avaliacao','situacoes-registradas','alunos-destaques','alunos-atencao'],false);
+        if($indisponivel)return $out;
+        $a=$d['analise']??[];$faixas=$a['distribuicao_acertos']['faixas']??null;
+        $out['distribuicao-acertos']=($a['distribuicao_acertos']['total']??null)===0 && is_array($faixas)
+            && count(array_filter($faixas,fn($f)=>!is_array($f)||($f['total']??null)!==0))===0;
+        $provas=$a['por_avaliacao']??null;
+        $out['resultados-avaliacao']=($a['resumo']['n']??null)===0 && is_array($provas)
+            && count(array_filter($provas,fn($p)=>!is_array($p)||($p['n']??null)!==0))===0;
+        $s=$d['situacoes_resultados']??[];
+        $out['situacoes-registradas']=count(array_filter(['total','dentro_criterio','indicacao_recuperacao','outros'],fn($k)=>($s[$k]??null)!==0))===0;
+        foreach(['destaques','atencao']as$key){$g=$a['alunos'][$key]??[];
+            $out['alunos-'.$key]=($a['alunos']['disponivel']??null)===true && ($g['total']??null)===0 && ($g['items']??null)===[];
+        }
+        return $out;
+    }
+
     public static function ajudas(array $d, ?string $consulta, bool $indisponivel=false): array
     {
         $ids=['kpi-avaliacoes','kpi-resultados','kpi-alunos-resultado','kpi-media','kpi-mediana','kpi-faixa','distribuicao-acertos','resultados-avaliacao','situacoes-registradas','alunos-destaques','alunos-atencao'];
