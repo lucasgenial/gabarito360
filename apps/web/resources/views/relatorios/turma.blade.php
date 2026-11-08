@@ -76,7 +76,7 @@
   <h3 style="font-size:17px;margin-bottom:6px;">Resumo por prova</h3>
   <div>
     <x-tabela :integrada="true" titulo="Resultados por prova" modo="lista"><table class="tabela-padrao tab "><caption class="sr-only">Resultados por prova</caption>
-      <thead><tr><th scope="col" class="esq">Prova</th><th scope="col">Corrigidos</th><th scope="col">Média</th><th scope="col">Aprovação</th><th scope="col">Maior</th><th scope="col">Menor</th><th scope="col" class="no-print"></th></tr></thead>
+      <thead><tr><th scope="col" class="esq">Prova</th><th scope="col">Corrigidos</th><th scope="col">Média</th><th scope="col">Aprovação</th><th scope="col">Maior</th><th scope="col">Menor</th><th scope="col" class="tabela-coluna-acoes no-print">Ações</th></tr></thead>
       <tbody>
         @foreach($provas as $p)
           <tr>

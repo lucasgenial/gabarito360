@@ -69,7 +69,7 @@
         <th scope="col" class="hide-sm">Aplicação</th>
         <th scope="col">Status</th>
         <th scope="col">Progresso</th>
-        <th scope="col">Ações</th>
+        <th class="tabela-coluna-acoes" scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -141,7 +141,7 @@
             @endif
           </div></td>
           {{-- A ação reutiliza o rascunho no mesmo espaço, sem sair para outra página. --}}
-          <td style="text-align:right;white-space:nowrap;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
+          <td style="white-space:nowrap;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
             @if($p['status'] === 'rascunho' && ($p['pode_editar'] ?? true) && \App\Support\Acesso::pode('prova.editar'))
               <form method="POST" action="{{ route('provas.publicar', $p['id']) }}" style="display:inline;">
                 @csrf <x-revisao-acesso />

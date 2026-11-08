@@ -49,7 +49,7 @@
           <th scope="col">Professor(a)</th>
           <th scope="col">E-mail</th>
           <th scope="col">Status</th>
-          <th scope="col">Ações</th>
+          <th class="tabela-coluna-acoes" scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -70,7 +70,7 @@
                 <span class="badge badge-danger badge-dot">Inativo</span>
               @endif
             </div></td>
-            <td style="text-align:right;" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
+            <td style="" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
               @pode('turma.vincular_professor')<form method="POST"
                     action="{{ route('turmas.professores.destroy', array_filter(['id' => $turma['id'], 'uid' => $p['id'], 'vinculo_id' => $p['vinculo_id'] ?? null])) }}"
                     data-turma-confirmar="Retirar o acesso de {{ $p['nome'] }} a esta turma? As atribuições e os dados históricos serão preservados.">

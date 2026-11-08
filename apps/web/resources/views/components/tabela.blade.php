@@ -12,19 +12,22 @@
   </div>
   <p class="tabela-selecao-aviso" data-tabela-selecao-alterada role="status" hidden>A seleção mudou. Use Filtrar para atualizar a lista de selecionadas.</p>
   @endif
+  @endif
   <div class="tabela-controles no-print" data-tabela-controles hidden>
+    @if($completa)
     <label>Registros por página
       <select class="select" data-tabela-tamanho aria-label="Registros por página: {{ $titulo }}">
         <option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="todos">Todos</option>
       </select>
     </label>
+    @endif
     <label>Ordenar
       <select class="select" data-tabela-ordem aria-label="Ordenação: {{ $titulo }}">
         <option value="original">Ordem original</option>
       </select>
     </label>
   </div>
-  @endif
+  <p class="tabela-ordenacao-status no-print" data-tabela-ordenacao-status role="status" aria-live="polite" hidden></p>
   @if($modo === 'matriz')<p class="tabela-dica no-print">Quadro comparativo: deslize para ver todas as colunas. No teclado, selecione o quadro e use as setas.</p>@endif
   <div class="tabela-area" @if($modo === 'matriz') tabindex="0" role="region" aria-label="{{ $titulo }}: quadro com rolagem horizontal" @endif>{{ $slot }}</div>
   @if($completa && $modo === 'selecao')<div class="tabela-selecao-vazia" data-tabela-selecao-vazia hidden><p>Nenhuma disciplina corresponde ao filtro. As seleções fora do filtro continuam preservadas.</p><button type="button" class="btn btn-secondary" data-tabela-limpar>Limpar filtros</button></div>@endif

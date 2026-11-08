@@ -45,7 +45,7 @@
       @php($linhas=collect($o['selecionadas'])->filter(fn($d)=>(bool)$d['elegivel']===$elegivel))
       @if($linhas->isNotEmpty() || $elegivel)
       <h3>{{ $elegivel?'Selecionadas para a prova':'Precisam de revisão' }}</h3>
-      <x-tabela :titulo="$elegivel?'Disciplinas selecionadas':'Disciplinas que precisam de revisão'" modo="compacta"><table class="tabela-padrao tabela-compacta"><caption class="sr-only">{{ $elegivel?'Disciplinas selecionadas':'Disciplinas que precisam de revisão' }}</caption><thead><tr><th scope="col">Nome/dados</th><th scope="col">Ações</th></tr></thead><tbody>
+      <x-tabela :titulo="$elegivel?'Disciplinas selecionadas':'Disciplinas que precisam de revisão'" modo="compacta"><table class="tabela-padrao tabela-compacta"><caption class="sr-only">{{ $elegivel?'Disciplinas selecionadas':'Disciplinas que precisam de revisão' }}</caption><thead><tr><th scope="col">Nome/dados</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead><tbody>
         @forelse($linhas as $d)<tr><td><strong>{{ $d['nome'] }}</strong>@unless($elegivel)<span class="pc-secundario pc-revisar">{{ $d['motivo'] }}</span>@endunless<input type="hidden" name="disciplina_ids[]" value="{{ $d['id'] }}"></td><td class="tabela-acoes"><button type="submit" class="btn btn-ghost btn-sm" name="acao" value="remover:{{ $d['id'] }}" data-curriculo-intencao formnovalidate formaction="{{ $p?route('provas.curriculo.preparar',$p['id']):route('provas.preparar') }}">Remover<span class="sr-only"> {{ $d['nome'] }}</span></button></td></tr>@empty<tr><td colspan="2">Nenhuma disciplina adicionada. Selecione uma disciplina e use Adicionar à prova.</td></tr>@endforelse
       </tbody></table></x-tabela>
       @endif

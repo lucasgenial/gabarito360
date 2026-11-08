@@ -156,7 +156,7 @@ jobs:
       - name: Renderizar percurso TW2 e conferir estrutura no navegador
         if: matrix.app == 'web'
         run: |
-          G360_TW2_EXPORT=1 php artisan test --filter=EstruturaTailwindTest
+          G360_TW2_EXPORT=1 php artisan test --filter='EstruturaTailwindTest|TabelasWebTest'
           cd ../..
           npm install --prefix scripts/auditoria --ignore-scripts --no-package-lock --no-audit --no-fund
           CHROME_PATH=/usr/bin/google-chrome node scripts/auditoria/estrutura-app.mjs

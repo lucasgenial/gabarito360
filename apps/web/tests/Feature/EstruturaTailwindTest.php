@@ -54,6 +54,8 @@ class EstruturaTailwindTest extends TestCase
             $this->assertSame(1,$xp->query('//*[@id="user-menu"]//form[@method="POST"]//input[@name="_token"]')->length);
             $this->assertSame(1,$xp->query('//*[@id="user-menu"]//*[@id="contexto-trocar"]')->length);
             if($arquivo==='turmas'){
+                $this->assertSame('Ações',trim($xp->query('//*[@id="turmas-table"]/thead/tr/th[last()]')->item(0)->textContent));
+                $this->assertSame(1,$xp->query('//*[@id="turmas-table"]/tbody/tr/td[last()][@data-rotulo="Ações"]')->length);
                 $this->assertSame(1,$xp->query('//dialog[@id="filtros-turmas"]//form[@method="POST" and @data-navegacao-consulta]//input[@name="_token"]')->length);
                 $this->assertSame(3,$xp->query('//dialog[@id="filtros-turmas"]//*[@name="busca" or @name="escola_id" or @name="ano_letivo"]')->length);
                 $this->assertSame(0,$xp->query('//*[@name="busca" or @name="ano_letivo"][not(ancestor::dialog) and not(ancestor::*[@id="modal-criar"])]')->length);

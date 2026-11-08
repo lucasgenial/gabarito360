@@ -71,7 +71,7 @@
     <h3 style="font-size:17px;">Resultado detalhado por aluno</h3>
   </div>
   <x-tabela :interna="true" :integrada="true" titulo="Desempenho dos alunos" modo="lista"><table class="tabela-padrao table "><caption class="sr-only">Desempenho dos alunos</caption>
-    <thead><tr><th scope="col">Aluno</th><th scope="col">Nota</th><th scope="col">Desempenho</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
+    <thead><tr><th scope="col">Aluno</th><th scope="col">Nota</th><th scope="col">Desempenho</th><th scope="col">Status</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead>
     <tbody>
       @forelse($alunos as $a)
         @php
@@ -97,7 +97,7 @@
               {{ $a['status_aprovacao'] === 'aprovado' ? 'Aprovado' : 'Recuperação' }}
             </span>
           </div></td>
-          <td style="text-align:right;" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
+          <td style="" class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">
             <a href="{{ route('resultados.show', [$a['aluno_id'], $prova['id']]) }}?from=rel-turma&turma={{ $turma['id'] }}" class="btn btn-result btn-sm">Ver detalhes</a>
           </div></td>
         </tr>

@@ -8,7 +8,7 @@
 @unless($dc1Erro)@include('disciplinas._atribuir-turma')@endunless
 </div>
 @unless($dc1Erro)
-<x-tabela :interna="true" :integrada="true" titulo="Disciplinas desta turma"><table class="tabela-padrao"><caption class="sr-only">Disciplinas e professores da turma</caption><thead><tr><th scope="col">Disciplina</th><th scope="col">Professores</th><th scope="col">Situação</th><th scope="col">Ações</th></tr></thead><tbody>
+<x-tabela :interna="true" :integrada="true" titulo="Disciplinas desta turma"><table class="tabela-padrao"><caption class="sr-only">Disciplinas e professores da turma</caption><thead><tr><th scope="col">Disciplina</th><th scope="col">Professores</th><th scope="col">Situação</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead><tbody>
 @forelse($dc1Dados['componentes'] as $comp)
 @php($emCurso=collect($comp['atribuicoes'])->where('estado_periodo','Em curso'))
 @php($programadas=collect($comp['atribuicoes'])->where('estado_periodo','Programada'))

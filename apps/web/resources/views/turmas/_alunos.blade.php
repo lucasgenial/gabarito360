@@ -33,7 +33,7 @@
         @if($pedagogico)<th scope="col">Média geral</th>
         <th scope="col">Provas</th>@endif
         <th scope="col">Status</th>
-        <th scope="col">Ações</th>
+        <th class="tabela-coluna-acoes" scope="col">Ações</th>
       </tr>
     </thead>
     <tbody id="alunos-tbody">

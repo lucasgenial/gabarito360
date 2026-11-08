@@ -83,7 +83,7 @@
               <th scope="col">E-mail</th>
               <th scope="col">Desde</th>
               <th scope="col">Status</th>
-              <th scope="col">Ações</th>
+              <th class="tabela-coluna-acoes" scope="col">Ações</th>
             </tr>
           </thead>
           <tbody>
