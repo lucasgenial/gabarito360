@@ -1,3 +1,5 @@
+> **Decisão posterior vigente:** GridStack nativo compacto substitui a organização por linhas; dimensões independentes, pins protegidos, sem forçar largura/altura comum. Altura independente é o padrão e não precisa de toggle. API aceita flags legadas sem alteração de dados. Novos grupos Resultados da turma, botões pequenos e títulos dos dois eixos integram P3.1; ver179. O texto anterior é preservado como histórico nos pontos conflitantes.
+
 > **Atualização vigente após6444f2c:** linhas podem ter espaço livre. Novo incremento em andamento: botão de arraste com grip, resize proporcional, fixação de posição/tamanho, altura independente, orientação H/V em cinco gráficos e agrupamento pedagógico em Acompanhamento da turma. Seções técnicas e isolamento pessoal preservados, sem DDL. Ver execução179 e contrato de preferências; aprovação/publicação deste incremento ainda pendentes. As regras anteriores conflitantes de preenchimento obrigatório da linha são históricas.
 
 # Correção do planejamento e da implementação dos dashboards do Gabarito360

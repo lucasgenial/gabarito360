@@ -27,18 +27,29 @@
     var d = g.dados, tinta = localToken('--fg-2') || localToken('--fg'), apagado = localToken('--muted'), linha = localToken('--border-soft');
     var varias = d.series.length > 1, widget = g.el.closest('[data-widget-id]'), orientacao = widget && widget.dataset.orientacao;
     var horizontal = orientacao === 'horizontal' || (orientacao !== 'vertical' && (!!d.horizontal || (g.el.clientWidth < 420 && d.categorias.length > 2)));
+    var nomesPorWidget = {
+      'cadastros-turno':['Turno','Turmas'], 'comparacao-turmas':['Turma','Acertos (%)'],
+      'cobertura-disciplinas':['Disciplina','Aplicações (%)'], 'periodos-escolares':['Período escolar','Acertos (%)'],
+      'habilidades':['Habilidade','Acertos (%)'], 'reavaliacoes':['Grupo','Acertos (%)']
+    };
+    var nomes = nomesPorWidget[widget && widget.dataset.widgetId] || [d.eixo_categoria || 'Categoria',d.eixo_valor || (d.formato === 'pct' ? 'Percentual (%)' : d.formato === 'nota' ? 'Nota' : 'Quantidade')];
     var valor = { type: 'value', interval: d.formato === 'pct' && g.el.clientWidth < 420 ? 50 : undefined, max: d.maximo === undefined ? null : d.maximo, minInterval: d.inteiros ? 1 : 0,
       axisLabel: { color: apagado, fontSize: 11, formatter: d.formato === 'pct' ? '{value}%' : '{value}' }, splitLine: { lineStyle: { color: linha } } };
     var categorias = { type: 'category', data: d.categorias, inverse: horizontal,
       axisTick: { show: false }, axisLine: { lineStyle: { color: localToken('--border') } },
       axisLabel: { color: apagado, fontSize: 11, formatter: function(v,i){ return d.rotulos_curtos && d.rotulos_curtos[i] !== undefined ? d.rotulos_curtos[i] : v; }, width: horizontal ? (g.el.clientWidth < 420 ? 86 : 140) : Math.max(45,Math.floor((g.el.clientWidth-32)/Math.max(1,d.categorias.length))-12),
         overflow: 'truncate', interval: horizontal ? 0 : (d.intervalo === undefined ? 'auto' : d.intervalo), hideOverlap: !horizontal && d.intervalo !== 0 } };
+    valor.name = nomes[1]; valor.nameLocation = 'middle'; valor.nameGap = horizontal ? 28 : 38; valor.nameRotate = horizontal ? 0 : 90;
+    var medida = document.createElement('canvas').getContext('2d'); medida.font = '11px ' + fonte();
+    var larguraCategorias = Math.max.apply(null, d.categorias.map(function(v,i){return medida.measureText(String(d.rotulos_curtos && d.rotulos_curtos[i] !== undefined ? d.rotulos_curtos[i] : v)).width;}).concat([0]));
+    categorias.name = nomes[0]; categorias.nameLocation = 'middle'; categorias.nameGap = horizontal ? Math.min(g.el.clientWidth < 420 ? 86 : 140,larguraCategorias) + 20 : 32; categorias.nameRotate = horizontal ? 90 : 0;
+    [valor,categorias].forEach(function(e){ e.nameTextStyle = {color: tinta,fontSize:11,fontFamily:fonte()}; });
     return {
       animation: !window.matchMedia('(prefers-reduced-motion: reduce)').matches, animationDuration: 250,
       color: [1, 2, 3, 4, 5].map(function (n) { return localToken('--painel-serie-' + n) || localToken('--serie-' + n); }),
       textStyle: { fontFamily: fonte(), color: tinta },
       aria: { enabled: true, decal: { show: varias }, label: { description: g.descricao + '. Os valores completos estão na alternativa textual acessível.' } },
-      grid: { left: 4, right: horizontal ? 42 : 8, top: 16, bottom: varias ? 48 : 8, containLabel: true },
+      grid: { left: 40, right: horizontal ? 42 : 12, top: 24, bottom: varias ? 78 : 48, containLabel: true },
       legend: varias ? { bottom: 0, left: 0, type: 'plain', textStyle: { color: tinta }, itemWidth: 12, itemHeight: 12 } : { show: false },
       tooltip: { trigger: 'axis', renderMode: 'richText', confine: true, axisPointer: { type: 'shadow' },
         backgroundColor: localToken('--surface'), borderColor: localToken('--border'), textStyle: { color: localToken('--fg'), fontFamily: fonte() },

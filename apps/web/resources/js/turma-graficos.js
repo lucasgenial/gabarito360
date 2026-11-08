@@ -41,7 +41,7 @@ if(raiz){
    const itens=faixas.length===10?Array.from({length:5},(_,i)=>({label:i===4?'80–100%':(i*20)+'–<'+((i+1)*20)+'%',total:Number(faixas[i*2].total)+Number(faixas[i*2+1].total)})):faixas;
    if(!(analise.distribuicao_acertos?.total>0))return null;
    if(horizontal)return {...comum,grid:{left:4,right:32,top:20,bottom:34,containLabel:true},xAxis:{type:'value',minInterval:1,name:'Resultados',nameLocation:'middle',nameGap:26,splitLine:{lineStyle:{color:borda}}},yAxis:{type:'category',inverse:true,data:itens.map(i=>i.label),axisLabel:{fontSize:11},axisTick:{show:false}},series:[{name:'Resultados',type:'bar',data:itens.map(i=>i.total),barMaxWidth:26,itemStyle:{borderRadius:[0,4,4,0]},label:{show:true,position:'right',formatter:p=>p.value||'',color:texto}}]};
-   return {...comum,xAxis:{type:'category',data:itens.map(i=>i.label),axisLabel:{interval:0,rotate:0,fontSize:11},axisTick:{show:false}},yAxis:{type:'value',minInterval:1,name:'Resultados',splitLine:{lineStyle:{color:borda}}},series:[{name:'Resultados',type:'bar',data:itens.map(i=>i.total),barMaxWidth:36,itemStyle:{borderRadius:[5,5,0,0]},label:{show:true,position:'top',formatter:p=>p.value||'',color:texto}}]};
+   return {...comum,xAxis:{type:'category',data:itens.map(i=>i.label),axisLabel:{interval:0,rotate:elemento.clientWidth<400?35:0,fontSize:11},axisTick:{show:false}},yAxis:{type:'value',minInterval:1,name:'Resultados',splitLine:{lineStyle:{color:borda}}},series:[{name:'Resultados',type:'bar',data:itens.map(i=>i.total),barMaxWidth:36,itemStyle:{borderRadius:[5,5,0,0]},label:{show:true,position:'top',formatter:p=>p.value||'',color:texto}}]};
   }
   if(tipo==='avaliacoes'){
    const itens=recortarAvaliacoes(elemento,horizontal);if(!(analise.por_avaliacao||[]).some(i=>i.n>0))return null;const primeiraOrdem=paginaAvaliacoes.inicio+1;
@@ -59,6 +59,19 @@ if(raiz){
   let g=graficos.get(elemento);const config=opcoes(elemento.dataset.grafico,elemento);
   if(!config){if(g){g.dispose();graficos.delete(elemento);}vazio(elemento,elemento.dataset.grafico==='questoes'?'Sem análise de questões disponível neste recorte.':'Ainda não há resultados para este gráfico.');return;}
   if(!g){elemento.textContent='';elemento.classList.remove('tu1r3-grafico-vazio');g=init(elemento,null,{renderer:'svg'});graficos.set(elemento,g);}
+  const tipo=elemento.dataset.grafico;
+  if(tipo==='distribuicao'||tipo==='avaliacoes'){
+   const horizontal=config.xAxis.type==='value';
+   const categoria=tipo==='distribuicao'?'Faixa de acertos':'Avaliação';
+   const unidade=tipo==='distribuicao'?'Resultados':'Acertos (%)';
+   for(const [eixo,nome] of [['xAxis',horizontal?unidade:categoria],['yAxis',horizontal?categoria:unidade]]){
+    const vertical=eixo==='yAxis',categorico=config[eixo].type==='category';
+    let gap=38;
+    if(vertical&&categorico){const medida=document.createElement('canvas').getContext('2d');medida.font='11px Figtree, sans-serif';const a=config[eixo].axisLabel||{},larguras=config[eixo].data.map((v,i)=>medida.measureText(String(typeof a.formatter==='function'?a.formatter(v,i):v)).width);gap=Math.min(a.width||Infinity,Math.max(0,...larguras))+20;}
+    config[eixo]={...config[eixo],name:nome,nameLocation:'middle',nameRotate:vertical?90:0,nameGap:vertical?gap:(tipo==='distribuicao'&&!horizontal&&elemento.clientWidth<400?48:30),nameTextStyle:{color:cor('--muted'),fontSize:11}};
+   }
+   config.grid={...config.grid,left:40,right:horizontal?48:16,top:30,bottom:tipo==='avaliacoes'?82:(!horizontal&&elemento.clientWidth<400?76:52)};
+  }
   for(const eixo of ['xAxis','yAxis'])if(config[eixo]){
    const valores=Array.isArray(config[eixo])?config[eixo]:[config[eixo]];
    valores.forEach(a=>{a.axisLabel={...a.axisLabel,color:cor('--muted')};a.nameTextStyle={color:cor('--muted')};a.axisLine={lineStyle:{color:cor('--border')}};});
