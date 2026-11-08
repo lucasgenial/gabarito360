@@ -1,3 +1,5 @@
+> **Diretriz atual após aprovação doPR214:** a apresentação usa GridStack nativo em modo compacto, sem organização por linhas ou altura comum. w/h são individuais, pins invioláveis, sem esticar para preencher12. Save/Cancel, catálogo e escopos permanecem. altura_livre é aceito apenas por compatibilidade do transporte, sem botão/efeito; altura_desejada é preservado nos mapas legados e atualizado para h ao redimensionar o próprio widget. Trechos anteriores de linhas uniformes são históricos.
+
 # Preferências pessoais dos dashboards
 
 Contrato aditivo, sem alteração dos endpoints de turmas, resultados ou relatórios. Corresponde à persistência pessoal solicitada na correção dos painéis; não implementa agenda, indicadores novos nem exemplos operacionais. Base de implementação: main `0e6e906`.
@@ -91,3 +93,12 @@ Em Organizar painel, Fixar posição protege **x/y/w/h** contra movimentos, resi
 Orientação muda o gráfico imediatamente, sem ligar arraste/resize. No desktop elegível, Salvar disposição persiste orientação e geometria juntas; Cancelar devolve ambas ao estado salvo. No celular a alternância é apenas da exibição atual, sem GET/PUT de preferências e sem sobrescrever o desktop. Alterações de versão/acesso e falha de confirmação continuam bloqueadas até consulta explícita; não há reenvio automático.
 
 Acompanhamento da turma agrupa visualmente os modelos pedagógicos já autorizados de planejamento, ensino e decisões. IDs/seções, origem demonstrativa, permissões e mapas pessoais permanecem; não transforma modelos em módulos operacionais. Leituras dos cartões foi retirado apenas da composição individual, preservando correção/relatórios/dados. Paleta comparativa neutra não representa aprovação/reprovação; situações reais usam cores semânticas vinculadas ao critério registrado e preservam rótulos/alternativas acessíveis.
+
+
+## Substituição do adaptador de linhas pelo engine nativo
+
+A decisão posterior do responsável substitui normalizeRows: compactação e colisões são resolvidas pela biblioteca GridStack instalada, em12colunas/200linhas dentro da seção autorizada. Nem largura nem altura são distribuídas aos vizinhos. Altura do próprio widget independe das demais por padrão. Campos fixo, altura_livre, orientacao e altura_desejada mantêm tipos/semântica de transporte; não existe nova migration nem regravação retroativa.
+
+Mapa válido armazenado pode ser compactado no cliente para a nova apresentação, sem alterar suas dimensões/pins; IDs autorizados faltantes são completados com o padrão. Não há PUT automático. Salvar persiste a geometria final validada e Cancelar restaura o snapshot compacto que estava exibido antes da edição. Movimento/resize ilegais ou que desloquem pins são revertidos integralmente. IDs, limites, seções, colisões e completude são conferidos antes da escrita. O usuário não adiciona, exclui ou duplica widgets.
+
+Resumo continua fora do catálogo. Abaixo1024×700 não consultar nem gravar preferências; widgets retornam ao fluxo responsivo. Orientação H/V temporária no mobile não sobrescreve desktop. Títulos dos eixos e face32/alvo44 dos botões são apresentação, não novas opções de API.

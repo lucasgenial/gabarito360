@@ -49,7 +49,8 @@ class DadosPessoaisTest extends TestCase
         $this->putJson("/api/v1/alunos/$id",['turma_id'=>2])->assertNotFound();
         $this->postJson('/api/v1/alunos',['nome'=>'Fora','matricula'=>'P-2','turma_id'=>2])->assertNotFound();
         $this->putJson("/api/v1/alunos/$id",['nome'=>'Atualizado','espaco_id'=>2,'espaco_tipo'=>'escola'])->assertOk()->assertJsonPath('data.espaco_id',1);
-        $this->getJson('/api/v1/turmas')->assertOk()->assertJsonCount(1,'data.turmas');
+        $this->getJson('/api/v1/turmas')->assertOk()->assertJsonCount(1,'data.turmas')
+            ->assertJsonPath('data.resumo_cadastral.turmas',1)->assertJsonPath('data.resumo_cadastral.cadastros_ativos',1);
         $this->getJson('/api/v1/turmas/2')->assertNotFound();
         foreach (['escolas','usuarios','nucleos'] as $rota) $this->getJson('/api/v1/'.$rota)->assertForbidden();
     }

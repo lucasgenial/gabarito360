@@ -118,4 +118,95 @@ final class DashboardDesempenhoContratoTest extends TestCase
         $this->ator();DB::table('usuario_vinculos')->where('id',1)->update(['situacao'=>'suspenso']);
         $this->painel()->assertForbidden();
     }
+    public function test_resumo_cadastral_usa_mesmo_recorte_e_preserva_kpis_legados_e_medias(): void
+    {
+        $this->nota(2,10);$this->nota(3,0);
+        $this->aluno(4,2,true,6);
+        $r=$this->getJson('/api/v1/turmas?busca=A&ano_letivo=2026&ativo=1')->assertOk()
+            ->assertJsonCount(1,'data.turmas')->assertJsonPath('data.turmas.0.id',3)
+            ->assertJsonPath('data.resumo_cadastral',['versao'=>1,'base'=>'colecao_completa_no_recorte','colecao_completa'=>true,
+                'turmas'=>1,'em_uso'=>1,'arquivadas'=>0,'cadastros_ativos'=>1]);
+        $this->assertSame(['total_turmas'=>2,'total_ativas'=>2,'total_alunos'=>2],$r->json('data.kpis'));
+        $todos=$this->getJson('/api/v1/turmas')->assertOk()->assertJsonPath('data.resumo_cadastral.cadastros_ativos',2);
+        $z=collect($todos->json('data.turmas'))->firstWhere('id',1);
+        $this->assertEquals(5.0,$z['media_turma']);$this->assertSame(1,$z['total_alunos']);
+        DB::table('turmas')->where('id',3)->update(['ativo'=>false]);
+        $this->getJson('/api/v1/turmas?ativo=0')->assertOk()->assertJsonCount(1,'data.turmas')
+            ->assertJsonPath('data.resumo_cadastral.em_uso',0)->assertJsonPath('data.resumo_cadastral.arquivadas',1)
+            ->assertJsonPath('data.resumo_cadastral.cadastros_ativos',1);
+        foreach (['busca=nao-existe','escola_id=2','ano_letivo=2025'] as $filtro)
+            $this->getJson('/api/v1/turmas?'.$filtro)->assertOk()->assertJsonPath('data.resumo_cadastral',[
+                'versao'=>1,'base'=>'colecao_completa_no_recorte','colecao_completa'=>true,
+                'turmas'=>0,'em_uso'=>0,'arquivadas'=>0,'cadastros_ativos'=>0]);
+    }
+
+    public function test_resumo_conta_cadastros_sem_deduplicar_nomes_e_preserva_projecao_de_imagem(): void
+    {
+        $this->aluno(4);$this->aluno(5);
+        DB::table('alunos')->whereIn('id',[3,4,5])->update(['nome'=>'Mesmo nome fictício']);
+        DB::table('turmas')->where('id',1)->update(['avatar_id'=>3,'imagem_versao'=>7,'foto_path'=>'privado/turma-original.jpg']);
+        $r=$this->getJson('/api/v1/turmas')->assertOk()->assertJsonPath('data.resumo_cadastral.cadastros_ativos',4);
+        $turma=collect($r->json('data.turmas'))->firstWhere('id',1);
+        $this->assertSame(3,$turma['total_alunos']);$this->assertTrue($turma['tem_foto']);
+        $this->assertSame(3,$turma['avatar_id']);$this->assertSame(7,$turma['imagem_versao']);
+        $this->assertArrayNotHasKey('foto_path',$turma);$this->assertStringNotContainsString('privado/turma-original.jpg',$r->getContent());
+        $this->assertArrayNotHasKey('cpf',$r->json('data.resumo_cadastral'));
+    }
+
+    public function test_lista_e_resumo_nao_fazem_consulta_por_turma(): void
+    {
+        $medir=function(){
+            DB::enableQueryLog();DB::flushQueryLog();
+            try{$r=$this->getJson('/api/v1/turmas')->assertOk();return [count(DB::getQueryLog()),$r->json('data.resumo_cadastral')];}
+            finally{DB::disableQueryLog();DB::flushQueryLog();}
+        };
+        [$antes]=$medir();
+        foreach(range(10,25) as $id){
+            DB::table('turmas')->insert(['id'=>$id,'escola_id'=>1,'espaco_id'=>5,'nome'=>'Turma fictícia '.$id,'serie'=>'3','turno'=>'tarde','ano_letivo'=>2026]);
+            $this->aluno($id,$id);
+        }
+        [$depois,$resumo]=$medir();
+        $this->assertSame(18,$resumo['turmas']);$this->assertSame(18,$resumo['cadastros_ativos']);
+        $this->assertLessThanOrEqual($antes+2,$depois,'Lista+resumo não devem acrescentar consultas para cada turma.');
+    }
+
+    public function test_resumo_administrativo_nao_consulta_notas_e_revalidacao_permanece(): void
+    {
+        foreach(['secretario_escolar','auxiliar_secretaria'] as $perfil){
+            DB::table('usuarios')->where('id',1)->update(['perfil'=>$perfil]);
+            DB::table('usuario_vinculos')->where('id',1)->update(['perfil'=>$perfil]);
+            Permissao::limparCache();$this->ator();
+            DB::enableQueryLog();DB::flushQueryLog();
+            try{
+                $r=$this->getJson('/api/v1/turmas')->assertOk()->assertJsonPath('data.resumo_cadastral.cadastros_ativos',2);
+                foreach($r->json('data.turmas') as $t)$this->assertArrayNotHasKey('media_turma',$t);
+                foreach(DB::getQueryLog() as $query)$this->assertDoesNotMatchRegularExpression('/(?:from|join) ["`]?notas["`]?/i',$query['query']);
+            }finally{DB::disableQueryLog();DB::flushQueryLog();}
+        }
+        DB::table('usuario_vinculos')->where('id',1)->update(['situacao'=>'suspenso']);Permissao::limparCache();
+        $this->getJson('/api/v1/turmas')->assertForbidden();
+    }
+
+    public function test_resumo_professor_so_inclui_turmas_do_vinculo_atual(): void
+    {
+        DB::table('vinculo_turmas')->insert(['vinculo_id'=>2,'turma_id'=>1,'espaco_id'=>5]);
+        $this->ator(2);
+        $this->getJson('/api/v1/turmas')->assertOk()->assertJsonCount(1,'data.turmas')
+            ->assertJsonPath('data.turmas.0.id',1)->assertJsonPath('data.resumo_cadastral.turmas',1)
+            ->assertJsonPath('data.resumo_cadastral.cadastros_ativos',1);
+        $this->getJson('/api/v1/turmas?busca=A')->assertOk()->assertJsonPath('data.resumo_cadastral.turmas',0)
+            ->assertJsonPath('data.resumo_cadastral.cadastros_ativos',0);
+        DB::table('usuario_vinculos')->where('id',2)->update(['situacao'=>'suspenso']);
+        $this->getJson('/api/v1/turmas')->assertForbidden();
+    }
+
+    public function test_resumo_compatibilidade_sem_regime_de_espacos_preserva_escopo_legado(): void
+    {
+        config(['espacos.ativo'=>false,'vinculos.obrigatorio'=>false]);Permissao::limparCache();
+        DB::table('usuario_escopos')->insert(['usuario_id'=>1,'escopo_tipo'=>'escola','escopo_id'=>1]);
+        Sanctum::actingAs(Usuario::findOrFail(1));
+        $this->getJson('/api/v1/turmas')->assertOk()->assertJsonCount(2,'data.turmas')
+            ->assertJsonPath('data.resumo_cadastral.cadastros_ativos',2);
+    }
+
 }

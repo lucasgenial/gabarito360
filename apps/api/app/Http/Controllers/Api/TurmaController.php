@@ -44,19 +44,30 @@ class TurmaController extends Controller
         }
 
         $lista = $query->with('escola:id,nome,nucleo_id')->orderBy('nome')->get();
+        // A mesma seleção autorizada alimenta a lista e seu resumo. Nenhuma consulta por card/turma.
+        $recorte = (clone $query)->reorder()->select(Espacos::ativo()
+            ? ['turmas.id', 'turmas.espaco_id'] : ['turmas.id']);
+        $porTurma = $lista->isEmpty() ? collect() : $consulta->tabela('alunos')
+            ->joinSub($recorte, 'turmas_recorte', 'alunos.turma_id', '=', 'turmas_recorte.id')
+            ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('alunos.espaco_id', 'turmas_recorte.espaco_id'))
+            ->where('alunos.ativo', true)->groupBy('alunos.turma_id')
+            ->select('alunos.turma_id')->selectRaw('COUNT(DISTINCT alunos.id) as total')
+            ->get()->mapWithKeys(fn ($a) => [(int) $a->turma_id => (int) $a->total]);
+        $medias = !$conteudos['agregado'] || $lista->isEmpty() ? collect() : $consulta->tabela('notas')
+            ->joinSub($recorte, 'turmas_media', 'notas.turma_id', '=', 'turmas_media.id')
+            ->when(Espacos::ativo(), fn ($q) => $q->whereColumn('notas.espaco_id', 'turmas_media.espaco_id'))
+            ->groupBy('notas.turma_id')->select('notas.turma_id')->selectRaw('AVG(notas.nota_final) as media')
+            ->get()->keyBy('turma_id');
         $versoes = app(\App\Services\ArquivamentoCadastro::class)->versoes('turma',$lista->modelKeys());
-        $turmas = $lista->map(function (Turma $t) use ($consulta, $request, $versoes, $conteudos) {
+        $turmas = $lista->map(function (Turma $t) use ($porTurma, $medias, $versoes, $conteudos) {
                 $t->setAttribute('arquivamento',app(\App\Services\ArquivamentoCadastro::class)->estado($t,$versoes[$t->id]??0));
-                $totalAlunos = $consulta->tabela('alunos')
-                    ->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))
-                    ->where('ativo', true)
-                    ->count();
+                $totalAlunos = $porTurma->get($t->id, 0);
 
                 if (!$conteudos['agregado']) return array_merge($t->toArray(), [
                     'total_alunos' => $totalAlunos, 'escola_nome' => $t->escola?->nome,
                 ]);
 
-                $media = $consulta->tabela('notas')->where('turma_id', $t->id)->when(Espacos::ativo(), fn ($q) => $q->where('espaco_id', $t->espaco_id))->avg('nota_final');
+                $media = $medias->get($t->id)?->media;
 
                 return array_merge($t->toArray(), [
                     'total_alunos' => $totalAlunos,
@@ -78,7 +89,13 @@ class TurmaController extends Controller
                 ->count(),
         ];
 
-        return ApiResponse::success(['turmas' => $turmas, 'kpis' => $kpis]);
+        // Contamos cadastros locais, não pessoas únicas entre escolas ou participações em provas.
+        $emUso = $lista->where('ativo', true)->count();
+        $resumo = ['versao'=>1, 'base'=>'colecao_completa_no_recorte', 'colecao_completa'=>true,
+            'turmas'=>$lista->count(), 'em_uso'=>$emUso, 'arquivadas'=>$lista->count()-$emUso,
+            'cadastros_ativos'=>$porTurma->sum()];
+        // Os KPIs legados mantêm seu universo e contrato; o campo novo representa o filtro atual.
+        return ApiResponse::success(['turmas' => $turmas, 'kpis' => $kpis, 'resumo_cadastral'=>$resumo]);
     }
 
     public function store(Request $request): JsonResponse

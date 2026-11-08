@@ -51,8 +51,8 @@ if(!empty($painelAplicado['painel_fim']))$recortes[]='Até '.\Carbon\Carbon::par
 <div class="kpi-grid"><div class="card kpi"><div class="kpi-label">Alunos ativos</div><div class="kpi-value">{{ $turma['total_alunos'] ?? 0 }}</div></div><div class="card kpi"><div class="kpi-label">Ano letivo</div><div class="kpi-value">{{ $turma['ano_letivo'] }}</div></div></div>
 @endif
 @php($modelosAcompanhamento = array_filter(\App\Support\ModelosPaineis::para('turma', \App\Support\Acesso::perfil()??'', \App\Support\Acesso::permissoes()), fn($m)=>in_array($m['grupo']??'planejamento',['planejamento','ensino','decisoes'],true)))
-@if($modelosAcompanhamento || \App\Support\Acesso::pode('correcao.acompanhar') || \App\Support\Acesso::pode('relatorio.turma'))
-<section class="card card-pad painel-acompanhamento" aria-labelledby="titulo-acompanhamento"><header class="painel-acompanhamento-cabecalho"><h2 id="titulo-acompanhamento">Acompanhamento da turma</h2><div class="tu1-acoes">    @pode('correcao.acompanhar')<a class="btn btn-primary" href="{{ route('correcao.turma', $turma['id']) }}"><x-icone nome="grafico" /> Acompanhar correção</a>@endpode
+@if($modelosAcompanhamento || \App\Support\Acesso::pode('relatorio.turma'))
+<section class="card card-pad painel-acompanhamento" aria-labelledby="titulo-acompanhamento"><header class="painel-acompanhamento-cabecalho"><h2 id="titulo-acompanhamento">Acompanhamento da turma</h2><div class="tu1-acoes">
     @pode('relatorio.turma')<a class="btn btn-secondary" href="{{ route('relatorios.turma', $turma['id']) }}"><x-icone nome="grafico" /> Relatório da turma</a>@endpode
 </div></header>
 @include('turmas._modelos', ['paginaModelos'=>'turma','gruposExibidos'=>['planejamento','ensino','decisoes']])
