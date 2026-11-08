@@ -39,7 +39,7 @@
 .espaco-lateral-app dt { color:var(--muted); }
 .espaco-lateral-app dd { margin-top:4px;overflow-wrap:anywhere; }
 .menu-recolhido .espaco-lateral-app { display:none; }
-[data-theme=dark] .lateral-app { background:#001534;color:#e7edf6; }
+[data-theme=dark] .lateral-app { background:var(--surface);color:#e7edf6; }
 [data-theme=dark] .lateral-app-itens a { color:#c4d0e2; }
 [data-theme=dark] .lateral-app-itens a:hover,[data-theme=dark] .lateral-app-itens a.active { color:white;background:#ffffff18; }
 .corpo-app { grid-column:2;grid-row:2;display:flex;flex-direction:column;min-width:0; }
@@ -139,7 +139,9 @@
 @media(max-width:767px),(pointer:coarse) { .tw2-app:is(.tela-turmas,.tela-turma) .tabela-acoes .btn { min-height:44px; } }
 
 @media screen {
-.tw2-app:is(.tela-turmas,.tela-turma) form.tabela-filtros-principal>.select { width:auto;flex:1 1 180px;max-width:24rem; }
+.tw2-filtros-aplicados { margin-top:-12px;margin-bottom:20px;font-size:12px;line-height:18px;font-style:italic;color:var(--muted); }
+.tw2-app .tw2-filtros-dialog { width:min(520px,calc(100% - 32px));max-height:calc(100dvh - 32px);margin:auto;padding:0;overflow:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--fg); }
+.tw2-filtros-dialog::backdrop { background:#00153480; }
 .tw2-app:is(.tela-turmas,.tela-turma) .table .tw2-coluna-acoes { width:1%;white-space:nowrap; }
 .tw2-app:is(.tela-turmas,.tela-turma) [data-apresentacao=cards] .tabela-acoes { order:99;margin-top:auto; }
 }

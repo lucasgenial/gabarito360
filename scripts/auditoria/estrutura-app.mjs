@@ -37,6 +37,25 @@ try{
   assert.equal(await pagina.locator('.lateral-app').evaluate(e=>e.getBoundingClientRect().width),80);
   assert.equal(await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width)-amplo,176);
   await pagina.getByRole('button',{name:'Expandir menu principal',exact:true}).click();
+  await pagina.getByRole('button',{name:'Filtrar turmas',exact:true}).click();
+  assert.equal(await pagina.locator('#filtros-turmas').evaluate(e=>e.open),true);
+  const buscaInicial=await pagina.locator('#filtros-turmas-busca').inputValue();
+  await pagina.getByLabel('Nome da turma',{exact:true}).fill('Rascunho descartado');
+  await pagina.keyboard.press('Escape');
+  await pagina.waitForFunction(()=>!document.getElementById('filtros-turmas').open && document.querySelector('[data-turmas-filtros-abrir]')===document.activeElement).catch(async erro=>{
+    console.error(await pagina.evaluate(()=>({aberto:document.getElementById('filtros-turmas').open,foco:document.activeElement?.outerHTML.slice(0,500)})));
+    throw erro;
+  });
+  assert.equal(await pagina.locator('[data-turmas-filtros-abrir]').evaluate(e=>e===document.activeElement),true);
+  await pagina.getByRole('button',{name:'Filtrar turmas',exact:true}).click();
+  assert.equal(await pagina.locator('#filtros-turmas-busca').inputValue(),buscaInicial);
+  await pagina.getByLabel('Ano letivo',{exact:true}).fill('2025');
+  const transporteInicial=await pagina.locator('#filtros-turmas input[type=hidden]').evaluateAll(itens=>itens.map(e=>[e.name,e.value]));
+  await pagina.getByRole('button',{name:'Limpar campos',exact:true}).click();
+  assert.equal(await pagina.locator('#filtros-turmas-ano').inputValue(),'');
+  assert.deepEqual(await pagina.locator('#filtros-turmas input[type=hidden]').evaluateAll(itens=>itens.map(e=>[e.name,e.value])),transporteInicial);
+  await pagina.getByRole('button',{name:'Cancelar',exact:true}).click();
+  assert.equal(await pagina.locator('#filtros-turmas').evaluate(e=>e.open),false);
   await pagina.getByRole('button',{name:'Abrir opções da conta',exact:true}).click();
   assert.equal(await pagina.getByText('pessoa@example.test',{exact:true}).isVisible(),true);
   await pagina.getByRole('button',{name:'Trocar vínculo',exact:true}).click();
@@ -71,6 +90,8 @@ try{
     }
     await pagina.getByRole('button',{name:'Mudar para tema escuro',exact:true}).click();
     assert.equal(await pagina.locator('html').getAttribute('data-theme'),'dark');
+    assert.equal(await pagina.locator('.cabecalho-app').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(24, 34, 52)');
+    assert.equal(await pagina.locator('.lateral-app').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(24, 34, 52)');
     assert.equal(await pagina.locator('.marca-estrutura .g360-wordmark').evaluate(e=>getComputedStyle(e).color),'rgb(255, 255, 255)');
     await pagina.getByRole('button',{name:'Mudar para tema claro',exact:true}).click();
   }

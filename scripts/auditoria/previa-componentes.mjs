@@ -129,7 +129,7 @@ try{
   await pagina.locator('#ano-erro').waitFor({state:'hidden'});
   await pagina.getByRole('button',{name:'Mudar para tema escuro',exact:true}).click();
   assert.equal(await pagina.locator('html').getAttribute('data-tema'),'escuro');
-  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(0, 21, 52)');
+  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(24, 34, 52)');
   assert.equal(await pagina.locator('#marca-cabecalho').evaluate(e=>getComputedStyle(e).color),'rgb(255, 255, 255)');
   assert.equal(await pagina.locator('#marca-cabecalho .g360-simbolo-circulo').evaluate(e=>getComputedStyle(e).fill),'rgb(255, 255, 255)');
   await pagina.getByRole('button',{name:'Mudar para tema claro',exact:true}).click();

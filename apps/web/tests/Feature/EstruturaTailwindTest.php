@@ -49,6 +49,11 @@ class EstruturaTailwindTest extends TestCase
             $this->assertSame(1,$xp->query('//dialog[@id="nav-folha"]')->length);
             $this->assertSame(1,$xp->query('//*[@id="user-menu"]//form[@method="POST"]//input[@name="_token"]')->length);
             $this->assertSame(1,$xp->query('//*[@id="user-menu"]//*[@id="contexto-trocar"]')->length);
+            if($arquivo==='turmas'){
+                $this->assertSame(1,$xp->query('//dialog[@id="filtros-turmas"]//form[@method="POST" and @data-navegacao-consulta]//input[@name="_token"]')->length);
+                $this->assertSame(3,$xp->query('//dialog[@id="filtros-turmas"]//*[@name="busca" or @name="escola_id" or @name="ano_letivo"]')->length);
+                $this->assertSame(0,$xp->query('//*[@name="busca" or @name="ano_letivo"][not(ancestor::dialog) and not(ancestor::*[@id="modal-criar"])]')->length);
+            }
             if($arquivo==='editar')$this->assertSame(1,$xp->query('//form[@data-formulario-validado]//input[@name="_method" and @value="PUT"]')->length);
             if(getenv('G360_TW2_EXPORT')){
                 $dir=sys_get_temp_dir().'/g360-tw2-render';if(!is_dir($dir))mkdir($dir,0700,true);
