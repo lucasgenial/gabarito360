@@ -4,7 +4,7 @@
 <form method="POST" action="{{ route($tipo.'.arquivamento',$registro['id']) }}" data-arquivamento-titulo="{{ $rotulo }}" data-arquivamento-nome="{{ $registro['nome'] }}" data-arquivamento-verbo="{{ $arquivado?'Desarquivar':'Arquivar' }}" data-arquivamento-confirmar="{{ $rotulo }} {{ $registro['nome'] }}? {{ $arquivado?'O cadastro voltará a ficar disponível.':'O histórico será preservado e o cadastro sairá das listas de ativos.' }}">
 @csrf @method('PUT') <x-revisao-acesso />
 <input type="hidden" name="arquivado" value="{{ (int)!$arquivado }}"><input type="hidden" name="esperado_ativo" value="{{ (int)$registro['ativo'] }}"><input type="hidden" name="versao" value="{{ $registro['arquivamento']['versao']??0 }}"><input type="hidden" name="chave" value="{{ (string)\Illuminate\Support\Str::uuid() }}">
-<button type="submit" class="btn btn-secondary g360-arquivar-acao {{ $iconeSomente?'tu1-icone-acao':'btn-sm' }}" aria-label="{{ $rotulo }}" title="{{ $rotulo }}"><x-icone nome="arquivo" />@unless($iconeSomente) {{ $tipo==='turmas'?$rotulo:($arquivado?'Desarquivar':'Arquivar') }}@endunless</button>
+<button type="submit" class="btn btn-secondary g360-arquivar-acao {{ $iconeSomente?'tu1-icone-acao':'btn-sm' }}" aria-label="{{ $rotulo }}" title="{{ $rotulo }}"><x-icone nome="arquivo" />@unless($iconeSomente) <span>{{ $arquivado?'Desarquivar':'Arquivar' }}@if($tipo==='turmas')<span class="acao-turma-contexto"> turma</span>@endif</span>@endunless</button>
 </form>
 @once
 @push('styles')<link rel="stylesheet" href="{{ asset('css/arquivamento.css') }}?v={{ filemtime(public_path('css/arquivamento.css')) }}">@endpush

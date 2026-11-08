@@ -7,9 +7,7 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <script src="{{ asset('js/navegacao.js') }}?v={{ @filemtime(public_path('js/navegacao.js')) }}" defer></script>
 <title>@yield('title', 'Painel') — Gabarito360</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" />
+<link rel="stylesheet" href="{{ asset('css/app-conteudo-legado.css') }}?v={{ @filemtime(public_path('css/app-conteudo-legado.css')) }}" />
 @if(\App\Support\ContextoWeb::revisao())
 <meta name="g360-revisao" content="{{ \App\Support\ContextoWeb::revisao() }}">
 <script src="{{ asset('js/contexto-aba.js') }}?v={{ @filemtime(public_path('js/contexto-aba.js')) }}"></script>
@@ -19,90 +17,45 @@
 {{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
 <script src="{{ asset('js/layout-preferencias.js') }}?v={{ filemtime(public_path('js/layout-preferencias.js')) }}"></script>
 @include('layouts._marca-head')
+<link rel="stylesheet" href="{{ asset('css/estrutura-app.css') }}?v={{ filemtime(public_path('css/estrutura-app.css')) }}">
 </head>
-<body class="area-logada {{ config('release.sha') ? 'com-release' : '' }} @yield('tela')">
+<body class="area-logada tw2-app {{ config('release.sha') ? 'com-release' : '' }} @yield('tela')">
 
-<div class="app-casca">
 @php $vinculoAtual = \App\Support\ContextoWeb::atual(); @endphp
-
-{{-- Menu lateral (a partir de 1024 px), montado pelas permissões efetivas (App\Support\Acesso) --}}
-<aside class="app-lateral" aria-label="Menu principal">
-  <a class="brand" href="{{ route('painel') }}">
-    <x-marca size="sm" />
-  </a>
-  <nav class="lateral-menu">
-    @foreach(\App\Support\Acesso::menu() as $item)
-      <a href="{{ $item['url'] }}" title="{{ $item['curto'] }}" @class(['active' => $item['ativo']]) @if($item['ativo']) aria-current="page" @endif>
-        @include('layouts._icone', ['nome' => $item['icone']])<span class="lateral-rotulo">{{ $item['curto'] }}</span>
-      </a>
-    @endforeach
-  </nav>
-  <button type="button" class="lateral-recolher" id="menu-recolher" aria-label="Recolher ou expandir o menu" title="Recolher ou expandir o menu">
-    <svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-    <span class="lateral-rotulo">Recolher menu</span>
-  </button>
-</aside>
-
-<div class="app-corpo">
-{{-- Topo: logo só no celular/tablet (no computador ele fica no menu lateral) --}}
-<header class="app-header {{ \App\Support\ContextoWeb::id() ? 'com-vinculo' : '' }}">
-  <div class="container">
-    <a class="brand topo-marca" href="{{ route('painel') }}">
-      <x-marca size="sm" />
-    </a>
-
-    <div class="header-right">
-    @if($vinculoAtual && $opcoesTroca['disponivel'])
-      @php
-        $nomeContexto = \App\Support\Acesso::interno() ? 'Equipe Gabarito360' : $vinculoAtual['espaco']['nome'];
-        $trocaContexto = \App\Support\Acesso::interno() ? 'Trocar acesso' : 'Trocar vínculo';
-      @endphp
-      <button type="button" class="contexto-trocar" id="contexto-trocar" hidden aria-haspopup="dialog" aria-controls="troca-contexto-modal" data-alternativa="{{ route('vinculos.index',['trocar'=>1]) }}"
-         aria-label="{{ $nomeContexto }}. {{ \App\Support\Acesso::rotulo() }}. {{ $trocaContexto }}" title="{{ $trocaContexto }} — {{ $nomeContexto }}">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3"/></svg>
-      </button>
-      <noscript><a class="contexto-trocar" href="{{ route('vinculos.index',['trocar'=>1]) }}" data-sem-contexto aria-label="{{ $trocaContexto }}" title="{{ $trocaContexto }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h15l-3-3M20 17H5l3 3"/></svg></a></noscript>
-    @endif
-      @unless($vinculoAtual)
-      @hasSection('context-badge')
-        @yield('context-badge')
-      @else
-        <span class="badge badge-info badge-dot">{{ \App\Support\Acesso::rotulo() }}</span>
-      @endif
-      @endunless
-      <button class="theme-btn" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
-      <button type="button" class="avatar" data-abrir-imagem aria-label="Alterar foto ou avatar" title="Alterar foto ou avatar">
-        <x-avatar-usuario :nome="session('auth_nome','Usuário')" :avatar-id="session('auth_avatar_id')" :tem-foto="session('auth_tem_foto',false)" :versao="session('auth_imagem_versao',1)" :proprio="true" tamanho="sm" />
-      </button>
-      <div class="user-menu-container">
-        <button type="button" class="theme-btn" id="user-menu-trigger" aria-label="Abrir opções da conta" title="Opções da conta" aria-expanded="false" aria-controls="user-menu"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
-        <div class="user-menu" id="user-menu" hidden>
-          <div class="user-menu-header">
-            <div class="user-name">{{ session('auth_nome') }}</div>
-            <div class="user-role">{{ \App\Support\Acesso::rotulo() }} · {{ session('auth_email') }}</div>
-          </div>
-          <div class="user-menu-links">
-            <a href="{{ route('perfil') }}">Meu perfil</a>
-            @pode('rede.configurar')
-              <a href="{{ route('configuracoes.index') }}">Configurações</a>
-            @endpode
-            @if(session('auth_titular') && !\App\Support\Acesso::interno())
-              <a href="{{ route('assinatura.index') }}">Assinatura e cobrança</a>
-            @endif
-            <hr>
-            <form method="POST" action="{{ route('logout') }}">
-              @csrf <x-revisao-acesso />
-              <button type="submit" class="logout">Sair</button>
-            </form>
-          </div>
-        </div>
+<a class="estrutura-pular" href="#conteudo-principal">Pular para o conteúdo</a>
+<div class="estrutura-app">
+<header class="cabecalho-app">
+  <div class="cabecalho-app-marca">
+    <button type="button" id="menu-recolher" class="controle-estrutura menu-desktop-app" aria-controls="menu-lateral-app" aria-expanded="true" aria-label="Recolher menu principal" title="Recolher menu principal"><x-icone-estrutura nome="menu" /></button>
+    <a class="marca-estrutura" href="{{ route('painel') }}" aria-label="Gabarito360 — Painel"><x-marca size="sm" aria-hidden="true" /></a>
+  </div>
+  <div class="controles-cabecalho-app">
+    <button type="button" class="controle-estrutura" id="theme-toggle" aria-label="Alternar tema" title="Alternar tema"></button>
+    <div class="conta-container-app">
+      <button type="button" id="user-menu-trigger" class="controle-estrutura avatar-conta-app" aria-label="Abrir opções da conta" aria-expanded="false" aria-controls="user-menu" title="Opções da conta"><x-avatar-usuario :nome="session('auth_nome','Usuário')" :avatar-id="session('auth_avatar_id')" :tem-foto="session('auth_tem_foto',false)" :versao="session('auth_imagem_versao',1)" :proprio="true" tamanho="sm" /></button>
+      <div id="user-menu" class="conta-app" hidden>
+        <div class="conta-app-identidade"><strong>{{ session('auth_nome') }}</strong><span>{{ session('auth_email') }}</span><span>{{ \App\Support\Acesso::rotulo() }}</span></div>
+        <nav aria-label="Opções da conta">
+          <a href="{{ route('perfil') }}"><x-icone-estrutura nome="aluno" />Meu perfil</a>
+          @if($vinculoAtual && $opcoesTroca['disponivel'])
+          <button type="button" id="contexto-trocar" hidden aria-haspopup="dialog" aria-controls="troca-contexto-modal" data-alternativa="{{ route('vinculos.index',['trocar'=>1]) }}"><x-icone-estrutura nome="transferir" />{{ \App\Support\Acesso::interno()?'Trocar acesso':'Trocar vínculo' }}</button>
+          <noscript><a href="{{ route('vinculos.index',['trocar'=>1]) }}" data-sem-contexto>Trocar vínculo</a></noscript>
+          @endif
+          @pode('rede.configurar')<a href="{{ route('configuracoes.index') }}"><x-icone-estrutura nome="ajustes" />Configurações</a>@endpode
+          @if(session('auth_titular') && !\App\Support\Acesso::interno())<a href="{{ route('assinatura.index') }}">Assinatura e cobrança</a>@endif
+        </nav>
+        <form method="POST" action="{{ route('logout') }}">@csrf <x-revisao-acesso /><button type="submit" class="conta-app-sair"><x-icone-estrutura nome="sair" />Sair</button></form>
       </div>
     </div>
   </div>
 </header>
-
+<aside class="lateral-app" id="menu-lateral-app" aria-label="Menu principal">
+  <nav class="lateral-app-itens">@foreach(\App\Support\Acesso::menu() as $item)<a href="{{ $item['url'] }}" title="{{ $item['curto'] }}" aria-label="{{ $item['curto'] }}" @class(['active'=>$item['ativo']]) @if($item['ativo']) aria-current="page" @endif><x-icone-estrutura :nome="$item['icone']" /><span>{{ $item['curto'] }}</span></a>@endforeach</nav>
+  @if($vinculoAtual)<x-contexto-ativo :contexto="$vinculoAtual" :fixo="true" />@endif
+</aside>
+<div class="corpo-app">
 {{-- Conteúdo principal --}}
-<main class="container app-conteudo" id="conteudo-principal">
+<main class="conteudo-app" id="conteudo-principal">
   <div id="g360-notificacoes" class="no-print" aria-label="Notificações"></div>
   @if($vinculoAtual)
     <div class="contexto-conteudo"><x-contexto-ativo :contexto="$vinculoAtual" :erro-troca="$opcoesTroca['erro']" /></div>
@@ -115,43 +68,28 @@
   @include('layouts._flash-fallback')
 </main>
   @if(config('release.sha'))
-  <footer class="app-footer" aria-label="Versão do software">Versão de testes: {{ config('release.fase') }} · {{ substr(config('release.sha'),0,8) }}</footer>
+  <footer class="rodape-app" aria-label="Versão do software">{{ config('versao.numero') }}</footer>
   @endif
 
-</div>{{-- .app-corpo --}}
-</div>{{-- .app-casca --}}
+</div>{{-- .corpo-app --}}
+</div>{{-- .estrutura-app --}}
 
-{{-- Celular: barra inferior fixa com os 4 itens principais + "Mais" (docs/21 etapa 4) --}}
 @php $menuCel = \App\Support\Acesso::menuCelular(); @endphp
 @if(count($menuCel['barra']) > 1 || $menuCel['mais'])
-<nav class="nav-inferior" aria-label="Menu principal (celular)">
-  @foreach($menuCel['barra'] as $item)
-    <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']]) @if($item['ativo']) aria-current="page" @endif>
-      @include('layouts._icone', ['nome' => $item['icone']])<span>{{ $item['curto'] }}</span>
-    </a>
-  @endforeach
-  @if($menuCel['mais'])
-    <button type="button" class="nav-inferior-mais" aria-expanded="false" aria-controls="nav-folha">
-      @include('layouts._icone', ['nome' => 'mais'])<span>Mais</span>
-    </button>
-  @endif
+<nav class="nav-mobile-app" aria-label="Menu principal (celular)">
+  @foreach($menuCel['barra'] as $item)<a href="{{ $item['url'] }}" @class(['active'=>$item['ativo']]) @if($item['ativo']) aria-current="page" @endif><x-icone-estrutura :nome="$item['icone']" /><span>{{ $item['curto'] }}</span></a>@endforeach
+  @if($menuCel['mais'])<button type="button" class="nav-inferior-mais" aria-expanded="false" aria-controls="nav-folha" aria-haspopup="dialog"><x-icone-estrutura nome="mais" /><span>Mais</span></button>@endif
 </nav>
 @if($menuCel['mais'])
-<div class="nav-folha" id="nav-folha" hidden>
-  <div class="nav-folha-fundo" data-fechar></div>
-  <div class="nav-folha-painel" role="dialog" aria-label="Todas as opções">
-    <div class="nav-folha-cab"><b>Menu</b><button type="button" class="btn btn-ghost btn-sm" data-fechar>Fechar</button></div>
-    @foreach($menuCel['mais'] as $item)
-      <a href="{{ $item['url'] }}" @class(['active' => $item['ativo']])>@include('layouts._icone', ['nome' => $item['icone']]) {{ $item['curto'] }}</a>
-    @endforeach
-    <a href="{{ route('perfil') }}">@include('layouts._icone', ['nome' => 'aluno']) Meu perfil</a>
-  </div>
-</div>
+<dialog class="menu-mobile-app" id="nav-folha" aria-labelledby="menu-mobile-titulo">
+  <header><h2 id="menu-mobile-titulo">Menu</h2><button type="button" data-fechar>Fechar</button></header>
+  <nav aria-label="Todas as opções">
+    @foreach($menuCel['mais'] as $item)<a href="{{ $item['url'] }}" @class(['active'=>$item['ativo']]) @if($item['ativo']) aria-current="page" @endif><x-icone-estrutura :nome="$item['icone']" />{{ $item['curto'] }}</a>@endforeach
+    <a href="{{ route('perfil') }}"><x-icone-estrutura nome="aluno" />Meu perfil</a>
+  </nav>
+</dialog>
 @endif
-
 @endif
-
-
 <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
 <script src="{{ asset('js/carregamento.js') }}?v={{ @filemtime(public_path('js/carregamento.js')) }}"></script>
 <script src="{{ asset('js/entrada-vinculo.js') }}?v={{ filemtime(public_path('js/entrada-vinculo.js')) }}"></script>

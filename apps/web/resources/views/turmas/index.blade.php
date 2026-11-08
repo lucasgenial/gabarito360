@@ -11,33 +11,30 @@
 @section('content')
 
 <x-pagina titulo="Turmas">
-
+    <button class="btn btn-secondary" type="button" data-turmas-filtros-abrir aria-label="Filtrar turmas" title="Filtrar turmas"><x-icone nome="filtro" /></button>
     @pode('turma.gerir')<button class="btn btn-primary" data-turma-abrir="modal-criar">+ Nova turma</button>@endpode
 </x-pagina>
 
-{{-- Filtros --}}
-<form method="GET" class="filtros-cel tabela-filtros-principal" action="{{ route('turmas.index') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-  <div style="position:relative;flex:1;min-width:200px;">
-    <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.4;" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-    <input class="input" type="search" name="busca" aria-label="Buscar turma por nome" placeholder="Buscar turma por nome…"
-           value="{{ $busca }}" style="padding-left:36px;" />
-  </div>
-@unless(\App\Support\Acesso::pessoal())
-  <select class="select" name="escola_id" aria-label="Filtrar por escola" style="min-width:180px;">
-    <option value="">Todas as escolas</option>
-    @foreach($escolas as $e)
-      <option value="{{ $e['id'] }}" {{ $escola_id == $e['id'] ? 'selected' : '' }}>{{ $e['nome'] }}</option>
-    @endforeach
-  </select>
-@endunless
-  <input class="input" type="number" name="ano_letivo" aria-label="Filtrar por ano letivo" placeholder="Ano letivo"
-         value="{{ $ano_letivo }}" style="width:130px;" min="2020" max="2099" />
-  <button type="submit" class="btn btn-secondary">Filtrar</button>
-  <a href="#relacao-turmas" class="btn btn-ghost">Ir para turmas</a>
-  @if($haFiltros)
-    <a href="{{ route('turmas.index') }}" class="btn btn-ghost">Limpar</a>
-  @endif
-</form>
+@if($haFiltros)
+  <p class="tw2-filtros-aplicados">Dados filtrados:
+    @if($busca) nome: {{ $busca }}; @endif
+    @if($escola_id && !\App\Support\Acesso::pessoal()) escola: {{ collect($escolas)->firstWhere('id', $escola_id)['nome'] ?? 'selecionada' }}; @endif
+    @if($ano_letivo) ano letivo: {{ $ano_letivo }}. @endif
+  </p>
+@endif
+<dialog id="filtros-turmas" class="tw2-filtros-dialog" aria-labelledby="filtros-turmas-titulo">
+  <form method="GET" action="{{ route('turmas.index') }}">
+    <div class="modal-head"><h2 id="filtros-turmas-titulo">Filtrar turmas</h2><button class="modal-close" type="button" data-turmas-filtros-fechar aria-label="Fechar filtros">&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label for="filtros-turmas-busca">Nome da turma</label><input class="input" type="search" id="filtros-turmas-busca" name="busca" value="{{ $busca }}" placeholder="Buscar turma por nome…" /></div>
+      @unless(\App\Support\Acesso::pessoal())
+      <div class="field"><label for="filtros-turmas-escola">Escola</label><select class="select" id="filtros-turmas-escola" name="escola_id"><option value="">Todas as escolas</option>@foreach($escolas as $e)<option value="{{ $e['id'] }}" @selected($escola_id == $e['id'])>{{ $e['nome'] }}</option>@endforeach</select></div>
+      @endunless
+      <div class="field"><label for="filtros-turmas-ano">Ano letivo</label><input class="input" type="number" id="filtros-turmas-ano" name="ano_letivo" value="{{ $ano_letivo }}" min="2020" max="2099" /></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" type="button" data-turmas-filtros-limpar>Limpar campos</button><button class="btn btn-secondary" type="button" data-turmas-filtros-fechar>Cancelar</button><button class="btn btn-primary" type="submit">Aplicar filtros</button></div>
+  </form>
+</dialog>
 @include('turmas._organizar_painel',['paginaPainel'=>'turmas'])
 @include('turmas._resumo_cadastral')
 
@@ -57,6 +54,7 @@
     <caption class="sr-only">Turmas</caption>
     <thead>
       <tr>
+        <th scope="col" class="tw2-coluna-acoes">Ações</th>
         <th scope="col" data-ordenar="texto">Turma</th>
         <th scope="col">Série</th>
         <th scope="col">Turno</th>
@@ -64,12 +62,14 @@
         <th scope="col">Alunos</th>
         <th scope="col">Ano letivo</th>
         <th scope="col">Status</th>
-        <th scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
       @forelse($turmas as $t)
         <tr data-nome="{{ strtolower($t['nome']) }}">
+          <td data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
+            <a href="{{ route('turmas.show', $t['id']) }}" class="btn btn-sm btn-secondary"><x-icone nome="ver" /> Ver turma</a>
+          </div></td>
           <td data-valor-ordem="{{ $t['nome'] }}" data-rotulo="Turma" class="tabela-principal"><div class="tabela-valor">
             <div class="turma-name">
               <x-avatar-turma :turma="$t" tamanho="sm" />
@@ -79,7 +79,7 @@
           <td data-rotulo="Série"><div class="tabela-valor"><span class="badge badge-info">{{ $t['serie'] }}</span></div></td>
           <td data-rotulo="Turno"><div class="tabela-valor">{{ ['manha'=>'Manhã','tarde'=>'Tarde','noite'=>'Noite','integral'=>'Integral'][$t['turno']] ?? $t['turno'] }}</div></td>
           @unless(\App\Support\Acesso::pessoal())
-          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $t['escola_nome'] ?? '' }}" data-rotulo="Escola"><div class="tabela-valor">
+          <td title="{{ $t['escola_nome'] ?? '' }}" data-rotulo="Escola"><div class="tabela-valor">
             {{ $t['escola_nome'] ?? '—' }}
           </div></td>
           @endunless
@@ -93,9 +93,7 @@
               <span class="badge badge-danger badge-dot">Arquivada</span>
             @endif
           </div></td>
-          <td style="text-align:right;" data-rotulo="Ações" class="tabela-acoes"><div class="tabela-valor">
-            <a href="{{ route('turmas.show', $t['id']) }}" class="btn btn-sm btn-secondary">Ver turma</a>
-          </div></td>
+
         </tr>
       @empty
         <tr>
@@ -183,4 +181,5 @@
 
 @push('scripts')
 <script src="{{ asset('js/turmas.js') }}?v={{ filemtime(public_path('js/turmas.js')) }}" defer></script>
+<script src="{{ asset('js/turmas-filtros.js') }}?v={{ filemtime(public_path('js/turmas-filtros.js')) }}" defer></script>
 @endpush

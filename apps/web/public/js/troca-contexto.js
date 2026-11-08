@@ -4,10 +4,12 @@
   botao.hidden=false;
   botao.addEventListener('click',function () {
     if (typeof modal.showModal !== 'function') { window.location.href=botao.dataset.alternativa; return; }
+    const conta=document.getElementById('user-menu');
+    if(conta){conta.hidden=true;conta.classList.remove('active');document.getElementById('user-menu-trigger')?.setAttribute('aria-expanded','false');}
     modal.showModal();
   });
   document.getElementById('troca-contexto-fechar').addEventListener('click',function(){modal.close();});
-  modal.addEventListener('close',function(){botao.focus();});
+  modal.addEventListener('close',function(){(document.getElementById('user-menu-trigger')||botao).focus();});
   var ocupado=false, fechar=document.getElementById('troca-contexto-fechar'), erro=document.getElementById('troca-contexto-erro');
   modal.addEventListener('cancel',function(e){if(ocupado)e.preventDefault();});
   modal.querySelectorAll('form').forEach(function(form){form.addEventListener('submit',async function(e){

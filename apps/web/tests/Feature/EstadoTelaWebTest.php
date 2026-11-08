@@ -53,7 +53,7 @@ final class EstadoTelaWebTest extends TestCase
             'espaco'=>['id'=>13,'tipo'=>'escola','nome'=>'Escola fictícia']]);
         \Illuminate\Support\Facades\Http::preventStrayRequests();
         \Illuminate\Support\Facades\Http::fake();
-        $r=$this->get('/app/turmas')->assertOk()->assertSee('app-casca')->assertSee('navegacao-esqueleto')
+        $r=$this->get('/app/turmas')->assertOk()->assertSee('estrutura-app')->assertSee('navegacao-esqueleto')
             ->assertSee('Menu principal')->assertSee('Meu espaço')->assertSee('aria-busy="true"',false)
             ->assertSee('estado-tela.js')->assertDontSee('vinculo-card');
         \Illuminate\Support\Facades\Http::assertNothingSent();

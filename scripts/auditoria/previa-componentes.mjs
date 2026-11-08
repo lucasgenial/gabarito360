@@ -129,7 +129,7 @@ try{
   await pagina.locator('#ano-erro').waitFor({state:'hidden'});
   await pagina.getByRole('button',{name:'Mudar para tema escuro',exact:true}).click();
   assert.equal(await pagina.locator('html').getAttribute('data-tema'),'escuro');
-  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(0, 21, 52)');
+  assert.equal(await pagina.locator('#menu-lateral').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(24, 34, 52)');
   assert.equal(await pagina.locator('#marca-cabecalho').evaluate(e=>getComputedStyle(e).color),'rgb(255, 255, 255)');
   assert.equal(await pagina.locator('#marca-cabecalho .g360-simbolo-circulo').evaluate(e=>getComputedStyle(e).fill),'rgb(255, 255, 255)');
   await pagina.getByRole('button',{name:'Mudar para tema claro',exact:true}).click();
@@ -210,6 +210,10 @@ try{
     assert.equal(await grupo.getByRole('button',{name:'Arquivar turma',exact:true}).evaluate(e=>e===document.activeElement),true);
   }
   await pagina.setViewportSize({width:1440,height:1000});
+  // Estabilizar resize e rolagem antes de testar a legenda por foco.
+  // Esses eventos fecham legendas já abertas; não fazem parte da interação testada.
+  await pagina.locator('#acoes-turma-exemplo [data-acao-compactavel]').scrollIntoViewIfNeeded();
+  await pagina.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   await pagina.locator('#acoes-turma-exemplo [data-acao-compactavel]').focus();
   await pagina.locator('#legenda-acao:popover-open').waitFor({state:'visible'});
   assert.equal(await pagina.locator('#legenda-acao').textContent(),'Editar turma 3º A');
