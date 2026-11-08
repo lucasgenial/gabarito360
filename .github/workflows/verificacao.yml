@@ -183,6 +183,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Conferir armazenamento e commits do MariaDB descartável
         run: python3 scripts/ci/verificar_mariadb_descartavel.py
+        working-directory: ${{ github.workspace }}
         env:
           MARIADB_CONTAINER_ID: ${{ job.services.mariadb.id }}
       - uses: shivammathur/setup-php@v2
