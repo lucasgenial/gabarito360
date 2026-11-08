@@ -1,0 +1,93 @@
+import {chromium} from 'playwright-core';
+import {createServer} from 'node:http';
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
+
+const arquivo=valor=>fileURLToPath(new URL(valor,import.meta.url));
+const rotas=new Map([
+  ['/previas/tailwind/index.html',['text/html','../../apps/web/public/previas/tailwind/index.html']],
+  ['/previas/tailwind/interface.css',['text/css','../../apps/web/public/previas/tailwind/interface.css']],
+  ['/previas/tailwind/interface.js',['text/javascript','../../apps/web/public/previas/tailwind/interface.js']],
+  ['/brand/gabarito360-icon.svg',['image/svg+xml','../../apps/web/public/brand/gabarito360-icon.svg']],
+  ['/brand/gabarito360-icon-dark.svg',['image/svg+xml','../../apps/web/public/brand/gabarito360-icon-dark.svg']],
+  ['/favicon.ico',['image/x-icon','../../apps/web/public/favicon.ico']],
+]);
+const servidor=createServer((req,res)=>{
+  const rota=rotas.get(new URL(req.url,'http://localhost').pathname);
+  if(!rota){res.writeHead(404);res.end();return;}
+  res.setHeader('Content-Type',rota[0]);res.end(readFileSync(arquivo(rota[1])));
+});
+await new Promise(resolve=>servidor.listen(0,'127.0.0.1',resolve));
+const base='http://127.0.0.1:'+servidor.address().port;
+let navegador;
+try{
+  navegador=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true,args:['--no-sandbox']});
+  const contexto=await navegador.newContext({viewport:{width:1440,height:1000}});
+  const pagina=await contexto.newPage(),erros=[],requests=[];
+  pagina.on('pageerror',erro=>erros.push(erro.message));
+  pagina.on('request',r=>requests.push({url:r.url(),metodo:r.method()}));
+  await pagina.goto(base+'/previas/tailwind/index.html');
+  assert.equal(await pagina.locator('form').count(),0);
+  assert.equal(await pagina.locator('link[rel=stylesheet]').count(),1);
+  const altura=alvo=>alvo.evaluate(e=>Math.round(e.getBoundingClientRect().height));
+  for(const [nome,minimo] of [['pq',32],['md',40],['gd',48],['xg',56]]){
+    assert.equal(await altura(pagina.getByRole('button',{name:nome,exact:true})),minimo);
+  }
+  const largo=pagina.getByRole('button',{name:'pq + largura lg',exact:true});
+  assert.equal(await altura(largo),32);
+  assert.equal(await pagina.getByRole('button',{name:'Desabilitado',exact:true}).isDisabled(),true);
+  assert.equal(await pagina.getByRole('button',{name:'Carregando',exact:true}).isDisabled(),true);
+
+  await pagina.getByRole('button',{name:'Cards',exact:true}).click();
+  assert.equal(await pagina.locator('#registros').getAttribute('data-modo'),'cards');
+  assert.equal(await pagina.locator('#registros tbody tr').count(),3);
+  await pagina.getByRole('searchbox',{name:'Buscar aluno no exemplo'}).fill('Bianca');
+  assert.equal(await pagina.locator('#registros tbody tr:visible').count(),1);
+  await pagina.getByRole('button',{name:'Tabela',exact:true}).click();
+  assert.equal(await pagina.locator('#registros tbody tr:visible').count(),1);
+  await pagina.getByRole('searchbox',{name:'Buscar aluno no exemplo'}).fill('sem-correspondencia');
+  assert.equal(await pagina.locator('#busca-vazia').isVisible(),true);
+  await pagina.getByRole('searchbox',{name:'Buscar aluno no exemplo'}).fill('');
+
+  await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).click();
+  assert.equal(await pagina.locator('#dialogo-cancelar').evaluate(e=>e===document.activeElement),true);
+  await pagina.keyboard.press('Escape');
+  assert.equal(await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).evaluate(e=>e===document.activeElement),true);
+  await pagina.getByRole('button',{name:'Arquivar turma',exact:true}).click();
+  await pagina.getByRole('button',{name:'Concluir demonstração',exact:true}).click();
+  assert.equal(await pagina.locator('#registros tbody tr').count(),3);
+
+  await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).click();
+  assert.equal(await pagina.locator('#nome-turma').getAttribute('aria-invalid'),'true');
+  assert.equal(await pagina.locator('#nome-turma').evaluate(e=>e===document.activeElement),true);
+  await pagina.locator('#nome-turma').fill('Turma fictícia');await pagina.locator('#ano').fill('2026');
+  await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).click();
+  assert.equal(await pagina.locator('#nome-erro').isHidden(),true);
+  await pagina.getByRole('button',{name:'Mudar para tema escuro',exact:true}).click();
+  assert.equal(await pagina.locator('html').getAttribute('data-tema'),'escuro');
+  await pagina.getByRole('button',{name:'Mudar para tema claro',exact:true}).click();
+
+  await pagina.getByRole('tab',{name:'Alunos',exact:true}).focus();await pagina.keyboard.press('ArrowRight');
+  assert.equal(await pagina.getByRole('tab',{name:'Provas',exact:true}).getAttribute('aria-selected'),'true');
+  await pagina.getByRole('tab',{name:'Visão geral',exact:true}).click();
+  await pagina.locator('#composicao').getByRole('button',{name:'Acerto médio',exact:true}).click();
+  assert.equal(await pagina.locator('#ajuda-acerto').evaluate(e=>e.matches(':popover-open')),true);
+  await pagina.keyboard.press('Escape');
+
+  for(const largura of [390,320]){
+    await pagina.setViewportSize({width:largura,height:844});
+    assert.equal(await altura(pagina.getByRole('button',{name:'pq',exact:true})),44);
+    assert.equal(await pagina.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    await pagina.getByRole('button',{name:'Abrir seções da referência',exact:true}).click();
+    assert.equal(await pagina.locator('main').evaluate(e=>e.inert),true);
+    await pagina.keyboard.press('Escape');
+    assert.equal(await pagina.locator('main').evaluate(e=>e.inert),false);
+  }
+  assert.deepEqual(erros,[]);
+  assert.equal(requests.every(r=>r.metodo==='GET'&&new URL(r.url).origin===base),true);
+  assert.equal(requests.some(r=>/\/api\/|\/app\//.test(new URL(r.url).pathname)),false);
+  console.log('Prévia: escala, largura, estados, tabela/cards, busca, confirmação local, validação, tema, abas, ajuda e menu móvel aprovados; sem transporte de dados.');
+}finally{
+  await navegador?.close();await new Promise(resolve=>servidor.close(resolve));
+}
