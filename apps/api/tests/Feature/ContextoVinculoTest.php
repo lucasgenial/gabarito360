@@ -6,6 +6,7 @@ use App\Models\Usuario;
 use App\Support\ContextoCorrecao;
 use App\Support\ContextoVinculo;
 use App\Support\Escopo;
+use App\Support\Espacos;
 use App\Support\Instituicoes;
 use App\Support\Permissao;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -160,6 +161,10 @@ class ContextoVinculoTest extends TestCase
         DB::table($tabela)->where('id', $id)->update([$campo => $valor]);
         $this->recusa(fn () => Permissao::efetivas($u));
         $this->recusa(fn () => Escopo::escolaIds($u));
+        $this->recusa(fn () => ContextoVinculo::versaoAcesso($u));
+        $this->recusa(fn () => ContextoVinculo::espacos($u));
+        $this->recusa(fn () => Espacos::ids($u));
+        $this->recusa(fn () => Espacos::filtrar(DB::table('provas'), $u, 'espaco_id'));
     }
 
     public function test_vinculo_alheio_inexistente_e_vigencia_sao_recusados(): void
@@ -190,6 +195,66 @@ class ContextoVinculoTest extends TestCase
         $this->assertNotSame($antes, $depois);
         DB::table('vinculo_turmas')->where('vinculo_id', 2)->delete();
         $this->assertNotSame($depois, ContextoCorrecao::versaoAcesso($b));
+    }
+
+    public function test_assinatura_preserva_contrato_e_revalida_sem_consultas_duplicadas(): void
+    {
+        $u = Usuario::findOrFail(1)->noVinculo(2);
+        $v = ContextoVinculo::resolver($u);
+        // Contrato anterior, independente dos helpers privados usados pela assinatura.
+        $esperado = hash('sha256', json_encode([$u->id, $v->id, $v->espaco_id, $v->perfil,
+            $v->versao_autorizacao, $v->inicio_em, $v->fim_em, ContextoVinculo::escolas($u),
+            ContextoVinculo::referencias($u, 'turma'), ContextoVinculo::referencias($u, 'aluno'),
+            ContextoVinculo::permissoes($u)], JSON_THROW_ON_ERROR));
+
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+        try {
+            $this->assertSame($esperado, ContextoVinculo::versaoAcesso($u));
+            $validacoes = fn () => count(array_filter(DB::getQueryLog(), static fn ($q) =>
+                str_contains($q['query'], 'usuario_vinculos') && str_contains($q['query'], 'usuarios')));
+            $this->assertSame(1, $validacoes());
+            DB::flushQueryLog();
+            $this->assertNotEmpty(Permissao::efetivas($u));
+            $this->assertSame(1, $validacoes());
+        } finally {
+            DB::disableQueryLog();
+            DB::flushQueryLog();
+        }
+
+        // A mesma instância não conserva concessões entre chamadas.
+        DB::table('vinculo_permissoes')->insert(['vinculo_id' => 2, 'permissao' => 'prova.ver', 'efeito' => 'retirar']);
+        $this->assertFalse(Permissao::pode($u, 'prova.ver'));
+        $this->assertNotSame($esperado, ContextoVinculo::versaoAcesso($u));
+        DB::table('usuario_vinculos')->where('id', 2)->update(['situacao' => 'suspenso']);
+        $this->recusa(fn () => ContextoVinculo::versaoAcesso($u));
+        $this->recusa(fn () => ContextoVinculo::escolas($u));
+        $this->recusa(fn () => ContextoVinculo::referencias($u, 'turma'));
+        $this->recusa(fn () => ContextoVinculo::permissoes($u));
+    }
+
+    public function test_ids_de_espacos_preservam_alcance_sem_revalidacoes_em_cascata(): void
+    {
+        $this->vinculo(4, 1, 1, 'admin_rede');
+        $this->vinculo(5, 1, 3, 'dir_nucleo');
+        foreach ([1, 2, 4, 5] as $id) {
+            $u = Usuario::findOrFail(1)->noVinculo($id);
+            $esperado = Espacos::escolas()->whereIn('e.id', Escopo::escolaIds($u) ?? [])
+                ->pluck('ee.id')->map(fn ($id) => (int) $id)->all();
+            DB::enableQueryLog();
+            DB::flushQueryLog();
+            try {
+                $this->assertSame($esperado, Espacos::ids($u));
+                $this->assertSame(1, count(array_filter(DB::getQueryLog(), static fn ($q) =>
+                    str_contains($q['query'], 'usuario_vinculos') && str_contains($q['query'], 'usuarios'))));
+            } finally {
+                DB::disableQueryLog();
+                DB::flushQueryLog();
+            }
+        }
+        config(['espacos.ativo' => false]);
+        $this->recusa(fn () => Espacos::ids($u));
+        $this->recusa(fn () => Espacos::filtrar(DB::table('provas'), $u, 'espaco_id'));
     }
 
     public function test_fresh_preserva_vinculo_e_serializacao_de_fila_nao_o_descarta(): void

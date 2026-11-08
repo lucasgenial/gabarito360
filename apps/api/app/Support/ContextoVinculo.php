@@ -70,7 +70,11 @@ class ContextoVinculo
 
     public static function referencias(Usuario $u, string $tipo): array
     {
-        $v = self::resolver($u);
+        return self::referenciasDoVinculo(self::resolver($u), $tipo);
+    }
+
+    private static function referenciasDoVinculo(object $v, string $tipo): array
+    {
         if ($tipo === $v->espaco->tipo) return [(int) $v->espaco->{$tipo.'_id'}];
         if ($tipo === 'turma' && $v->perfil === 'professor') {
             return DB::table('vinculo_turmas as vt')->join('turmas as t', 't.id', '=', 'vt.turma_id')
@@ -90,7 +94,12 @@ class ContextoVinculo
 
     public static function escolas(Usuario $u): array
     {
-        $e = self::resolver($u)->espaco;
+        return self::escolasDoVinculo(self::resolver($u));
+    }
+
+    private static function escolasDoVinculo(object $v): array
+    {
+        $e = $v->espaco;
         if ($e->tipo === 'pessoal') return [];
         $q = Espacos::escolas();
         match ($e->tipo) {
@@ -101,9 +110,23 @@ class ContextoVinculo
         return $q->orderBy('e.id')->pluck('e.id')->map(fn ($id) => (int) $id)->all();
     }
 
+    /** IDs materializados para esta operação; cada chamada revalida o contexto inteiro. */
+    public static function espacos(Usuario $u): array
+    {
+        abort_if(ContextoInterno::presente($u), 403, 'Selecione um vínculo pedagógico válido.');
+        $v = self::resolver($u);
+        if ($v->espaco->tipo === 'pessoal') return [(int) $v->espaco_id];
+        return Espacos::escolas()->whereIn('e.id', self::escolasDoVinculo($v))
+            ->pluck('ee.id')->map(fn ($id) => (int) $id)->all();
+    }
+
     public static function permissoes(Usuario $u): array
     {
-        $v = self::resolver($u);
+        return self::permissoesDoVinculo(self::resolver($u));
+    }
+
+    private static function permissoesDoVinculo(object $v): array
+    {
         $padrao = DB::table('perfil_permissoes')->where('perfil', $v->perfil)->where('tipo', 'padrao')->pluck('permissao')->all();
         $ajustes = DB::table('vinculo_permissoes')->where('vinculo_id', $v->id)
             ->where(fn ($q) => $q->whereNull('valida_ate')->orWhere('valida_ate', '>=', now()->toDateString()))->get();
@@ -120,8 +143,9 @@ class ContextoVinculo
     public static function versaoAcesso(Usuario $u): string
     {
         $v = self::resolver($u);
+        // Reutiliza somente a validação desta chamada. Nunca guarda concessões no ator ou entre usos.
         return hash('sha256', json_encode([$u->id, $v->id, $v->espaco_id, $v->perfil,
-            $v->versao_autorizacao, $v->inicio_em, $v->fim_em, self::escolas($u),
-            self::referencias($u, 'turma'), self::referencias($u, 'aluno'), self::permissoes($u)], JSON_THROW_ON_ERROR));
+            $v->versao_autorizacao, $v->inicio_em, $v->fim_em, self::escolasDoVinculo($v),
+            self::referenciasDoVinculo($v, 'turma'), self::referenciasDoVinculo($v, 'aluno'), self::permissoesDoVinculo($v)], JSON_THROW_ON_ERROR));
     }
 }
