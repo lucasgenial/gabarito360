@@ -18,6 +18,8 @@ Regra solicitada pelo responsável em03/11/2026: toda alteração que afete inte
 
 ## Área útil e composição das telas
 
+Decisão de08/11/2026: orientações complementares de cards, gráficos e KPIs usam o próprio título como botão de ajuda contextual, seguindo o padrão aprovado noP3.2. Abrir por clique, toque, Enter ou Espaço; fechar com Escape/clique fora, sem roubar o foco. Manter indicação visual sutil, foco visível, texto escapado e alternativa acessível. Preferir esse padrão ao “Saiba mais” expansível nas adequações dessas orientações. Não transformar títulos de navegação ou accordions de conteúdo operacional em ajuda por inferência; esta decisão não autoriza migração indiscriminada de todos os collapses.
+
 Decisão explícita do responsável em03/11/2026: as telas da aplicação devem ocupar toda a área útil do viewport, em largura e altura, descontando menu, cabeçalho, rodapé e navegação móvel. Usar o layout compartilhado e superfícies de trabalho com largura100%; não introduzir max-width fixo em painéis, formulários principais ou listas que deixe uma faixa vazia na tela ampla. Margens responsivas e limites de leitura de parágrafos são permitidos; controles, diálogos e imagens mantêm limites próprios quando necessários. Grupos de trabalho seguem empilhados, com campos responsivos dentro deles. Validar desktop amplo, menu recolhido e celular sem overflow nem ações encobertas por rodapé. Toda mudança visual continua sujeita à aprovação independente acima.
 
 ## Tabelas, cards de registros e avisos

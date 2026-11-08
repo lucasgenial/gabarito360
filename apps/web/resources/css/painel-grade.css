@@ -57,3 +57,12 @@
 .painel-resultados .painel-secao>h3{margin:0 0 16px;font-size:1.125rem;line-height:1.4}
 .painel-widget-cabecalho h4{margin:0;font-size:1rem;line-height:1.4;overflow-wrap:anywhere}
 .painel-widget-identificacao h4{flex:1 1 auto}
+
+/* Ausência confirmada tem altura de mensagem, inclusive sem JS/grade no celular. */
+.painel-secao-grade>.painel-widget[data-painel-vazio=true]{align-self:start}
+.painel-widget[data-painel-vazio=true] .painel-widget-corpo,
+.painel-widget[data-painel-vazio=true] .tu1r3-alunos,
+.painel-widget[data-painel-vazio=true] .tu1r3-alunos-lista{flex:0 0 auto!important;height:auto;min-height:0;overflow:visible}
+.painel-widget[data-painel-vazio=true] .tu1r3-grafico{flex:0 0 auto!important;height:auto!important;min-height:0;padding:0;justify-content:flex-start;text-align:start}
+.painel-widget[data-painel-vazio=true] .tu1r3-alunos-lista{margin:0}
+.painel-widget[data-painel-vazio=true] .tu1r3-alunos-vazio{padding:0;border:0}
