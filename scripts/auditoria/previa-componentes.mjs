@@ -92,6 +92,16 @@ try{
   await pagina.locator('#nome-turma').fill('Turma fictícia');await pagina.locator('#ano').fill('2026');
   await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).click();
   assert.equal(await pagina.locator('#nome-erro').isHidden(),true);
+  assert.equal(await pagina.locator('#ano').getAttribute('required'),'');
+  for(const anoInvalido of ['1999','2026.5','']){
+    await pagina.locator('#ano').fill(anoInvalido);
+    await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).click();
+    await pagina.locator('#ano-erro').waitFor({state:'visible'});
+    assert.equal(await pagina.locator('#ano').getAttribute('aria-invalid'),'true');
+  }
+  await pagina.locator('#ano').fill('2026');
+  await pagina.getByRole('button',{name:'Validar exemplo',exact:true}).click();
+  await pagina.locator('#ano-erro').waitFor({state:'hidden'});
   await pagina.getByRole('button',{name:'Mudar para tema escuro',exact:true}).click();
   assert.equal(await pagina.locator('html').getAttribute('data-tema'),'escuro');
   assert.equal(await pagina.locator('#marca-cabecalho img:visible').getAttribute('src'),'/brand/gabarito360-email-dark.png');
