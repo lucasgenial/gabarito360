@@ -6,6 +6,29 @@ use PHPUnit\Framework\TestCase;
 
 final class IndicadoresTurmaTest extends TestCase
 {
+    public function test_vazios_exigem_confirmacao_sem_confundir_erro_omissao_ou_lista_parcial(): void
+    {
+        $d=['situacoes_resultados'=>['total'=>0,'dentro_criterio'=>0,'indicacao_recuperacao'=>0,'outros'=>0],'analise'=>[
+            'resumo'=>['n'=>0],'por_avaliacao'=>[],'distribuicao_acertos'=>['total'=>0,'faixas'=>[]],
+            'alunos'=>['disponivel'=>true,'destaques'=>['total'=>0,'items'=>[]],'atencao'=>['total'=>0,'items'=>[]]],
+        ]];
+        $this->assertSame([true],array_values(array_unique(IndicadoresTurma::vazios($d))));
+        $this->assertSame([false],array_values(array_unique(IndicadoresTurma::vazios($d,true))));
+        $this->assertSame([false],array_values(array_unique(IndicadoresTurma::vazios([]))));
+        $d['analise']['alunos']['atencao']['total']=1;
+        $this->assertFalse(IndicadoresTurma::vazios($d)['alunos-atencao']);
+        unset($d['analise']['alunos']['destaques']['total']);
+        $this->assertFalse(IndicadoresTurma::vazios($d)['alunos-destaques']);
+        $d['analise']['alunos']['disponivel']=false;
+        $this->assertFalse(IndicadoresTurma::vazios($d)['alunos-atencao']);
+        $d['analise']['distribuicao_acertos']['faixas']=[['total'=>1]];
+        $this->assertFalse(IndicadoresTurma::vazios($d)['distribuicao-acertos']);
+        $d['analise']['por_avaliacao']=[['n'=>1]];
+        $this->assertFalse(IndicadoresTurma::vazios($d)['resultados-avaliacao']);
+        unset($d['situacoes_resultados']['outros']);
+        $this->assertFalse(IndicadoresTurma::vazios($d)['situacoes-registradas']);
+    }
+
     public function test_base_zero_confirmada_nao_se_confunde_com_ausencia_ou_incoerencia(): void
     {
         $this->assertSame('Base: 0 de 0 resultados; 0 sem percentual válido.',IndicadoresTurma::base(0,0,0));
