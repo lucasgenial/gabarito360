@@ -31,7 +31,14 @@ export function criarValidacaoTurma(container) {
   return {
     async validarTudo(){
       const resultado=await motor.validate();
-      if(resultado!=='Valid')Object.values(campos).find(c=>c.elemento.getAttribute('aria-invalid')==='true')?.elemento.focus();
+      if(resultado!=='Valid'){
+        const primeiro=Object.values(campos).find(c=>c.elemento.getAttribute('aria-invalid')==='true')?.elemento;
+        if(primeiro)await new Promise(resolve=>requestAnimationFrame(()=>{
+          primeiro.focus({preventScroll:true});
+          primeiro.scrollIntoView({block:'center',behavior:'instant'});
+          resolve();
+        }));
+      }
       return resultado==='Valid';
     },
     limparEstados(){motor.resetForm(false);falhas.clear();Object.keys(campos).forEach(nome=>apresentar(nome,'pendente'));}
