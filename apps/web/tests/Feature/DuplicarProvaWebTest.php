@@ -24,7 +24,7 @@ class DuplicarProvaWebTest extends TestCase
     {
         $this->preparar();
         $r=$this->consultarTela('/app/provas')->assertOk()->assertSee('Criar cópia')->assertSee('não serão copiados')->assertSee('Matemática &lt;script&gt;',false)
-            ->assertSee('aria-label="Versão do software"',false)->assertSee('0.1.0')->assertDontSee('Versão de testes: INICIAL-V1-T5 · a90fbf51');
+            ->assertSee('aria-label="Versão do software"',false)->assertSee('Gabarito360 - v'.config('versao.numero').' - '.config('versao.ambiente'))->assertDontSee('Versão de testes: INICIAL-V1-T5 · a90fbf51');
         $this->assertStringContainsString('name="chave"',$r->getContent());
         $r->assertSee('aria-haspopup="dialog"',false)->assertSee('id="cp1-modal"',false)->assertSee('Nome da nova prova')->assertDontSee('Ver o que será copiado');
         if (getenv('G360_CP1_PREVIEW_DIR')) {

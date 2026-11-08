@@ -13,7 +13,7 @@ class EstruturaTailwindTest extends TestCase
     {
         config(['services.api.base_url'=>'http://api.test/api']);
         // A QA deve exibir o mesmo rodapé das releases, sem inventar uma publicação real.
-        config(['release.sha'=>str_repeat('a',40),'release.fase'=>'PREVIA-TW2']);
+        config(['release.sha'=>str_repeat('a',40),'release.fase'=>'PREVIA-TW2','versao.ambiente'=>'Homologação']);
         Http::swap(new \Illuminate\Http\Client\Factory);
         Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'ficticio','auth_vinculos'=>true,'auth_nome'=>'Pessoa fictícia','auth_email'=>'pessoa@example.test']);
@@ -50,7 +50,7 @@ class EstruturaTailwindTest extends TestCase
             $this->assertSame(0,$xp->query('//aside//summary')->length);
             $this->assertSame(1,$xp->query('//dialog[@id="nav-folha"]')->length);
             $this->assertSame(1,$xp->query('//footer[contains(@class,"rodape-app")]')->length);
-            $this->assertSame(config('versao.numero'),trim($xp->query('//footer[contains(@class,"rodape-app")]')->item(0)->textContent));
+            $this->assertSame('Gabarito360 - v'.config('versao.numero').' - Homologação',trim($xp->query('//footer[contains(@class,"rodape-app")]')->item(0)->textContent));
             $this->assertSame(1,$xp->query('//*[@id="user-menu"]//form[@method="POST"]//input[@name="_token"]')->length);
             $this->assertSame(1,$xp->query('//*[@id="user-menu"]//*[@id="contexto-trocar"]')->length);
             if($arquivo==='turmas'){

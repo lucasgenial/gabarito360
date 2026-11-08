@@ -39,7 +39,7 @@ try{
   await pagina.getByRole('button',{name:'Expandir menu principal',exact:true}).click();
   const conferirRodape=async()=>{
     assert.equal(await pagina.locator('.rodape-app').isVisible(),true);
-    assert.match((await pagina.locator('.rodape-app').textContent()).trim(),/^\d+\.\d+\.\d+$/,'Rodapé exibe somente a versão numérica');
+    assert.match((await pagina.locator('.rodape-app').textContent()).trim(),/^Gabarito360 - v\d+\.\d+\.\d+ - Homologação$/u,'Rodapé usa o formato definido pelo responsável');
     const medidas=await pagina.locator('.rodape-app').evaluate(e=>({x:e.getBoundingClientRect().left,y:e.getBoundingClientRect().top,largura:e.getBoundingClientRect().width,fim:e.getBoundingClientRect().bottom,viewport:innerWidth,altura:innerHeight,lateral:document.querySelector('.lateral-app').getBoundingClientRect().width,movel:innerWidth<768}));
     assert.equal(medidas.x,medidas.movel?0:medidas.lateral);
     assert.equal(Math.round(medidas.x+medidas.largura),medidas.viewport);
@@ -52,7 +52,7 @@ try{
   await pagina.getByRole('button',{name:'Filtrar turmas',exact:true}).click();
   assert.equal(await pagina.locator('#filtros-turmas').evaluate(e=>e.open),true);
   const buscaInicial=await pagina.locator('#filtros-turmas-busca').inputValue();
-  await pagina.getByLabel('Nome da turma',{exact:true}).fill('Rascunho descartado');
+  await pagina.getByLabel('Nome ou série',{exact:true}).fill('Rascunho descartado');
   await pagina.keyboard.press('Escape');
   await pagina.waitForFunction(()=>!document.getElementById('filtros-turmas').open && document.querySelector('[data-turmas-filtros-abrir]')===document.activeElement).catch(async erro=>{
     console.error(await pagina.evaluate(()=>({aberto:document.getElementById('filtros-turmas').open,foco:document.activeElement?.outerHTML.slice(0,500)})));
