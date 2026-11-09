@@ -101,4 +101,16 @@ Formalizar a assinatura mínima do módulo interno e dos agregadores para permit
 
 ## Fechamento e rastreabilidade
 
+### Revisão de compatibilidade após a primeira coleta nativa
+
+A comparação nativa da primeira candidata identificou perda de linhas no comparativo por escola do núcleo, apesar de os conjuntos autorizados e os bindings permanecerem iguais. A reprodução descartável em MariaDB 10.11.14 confirmou o problema com notas e alunos fictícios. Os controles de aliases, materialização e projeção separaram a interação de composição/otimização de uma mudança nas regras de acesso; isso não identifica, por si só, uma falha upstream específica do banco.
+
+Nos LEFT JOINs de registros autorizados, usar `ConsultasPedagogicas::paraJuncao` com PK obrigatória e somente as colunas consumidas. O DISTINCT preserva registros distintos pela PK e impede a mesclagem da subconsulta neste percurso. A autorização continua sendo SQL corrente; não guardar IDs, concessões ou conteúdo em cache. Não aplicar este adaptador indiscriminadamente a agregações já agrupadas, INNER JOINs ou consultas gerais. As oito composições existentes foram inventariadas em Dashboard, acompanhamento e relatórios. Novos consumidores precisam declarar projeção, cardinalidade, comportamento sem correspondência e custo do plano.
+
+Conservar também a condição do AVG anterior sobre o retorno bruto do driver: MariaDB pode retornar DECIMAL zero como string. Converter para float antes da condição alterava zero para null. A regressão cobre positivo, zero e ausência de notas, respeitando o contrato anterior de cada driver.
+
+Ordenações antigas sem desempate exigem oráculo específico, não normalização genérica: enumeração de respostas FULL apenas para os valores/linhas empatados demonstrados por SQL, preservando todos os demais campos, tipos e ordens. Há controles separados para última prova da direção, alunos com a mesma média e provas da turma com a mesma data. Qualquer alteração além desses empates, perda de linhas, mudança de tipos ou dados entre as janelas bloqueia o aceite.
+
+As correções passaram no foco SQLite/MariaDB (59 testes, 609 assertivas), incluindo a reprodução RED→GREEN do núcleo; a fixture final de isolamento passou em ambas as engines. O encerramento operacional continua condicionado ao CI, à revisão independente da candidata exata e à comparação nativa após a publicação de compatibilidade. Produção permanece fora do escopo.
+
 F2 só termina com todas as linhas de cobertura tratadas e verificadas, permissões/revogação atuais, contrato equivalente, crescimento controlado, comparação integrada por método, revisão de segurança/arquitetura e CI. O número de statements/latência final será resultado da medição, nunca promessa deste plano. Conservar evidências sanitizadas no diretório operacional, com SHA/release, método, cenário, população e limitações. Atualizar o status do plano integral e apresentar a tabela de etapas ao responsável.

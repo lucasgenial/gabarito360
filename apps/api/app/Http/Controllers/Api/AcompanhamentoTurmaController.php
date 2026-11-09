@@ -29,7 +29,7 @@ class AcompanhamentoTurmaController extends Controller
         }
 
         $turma = $consulta->tabela('turmas')
-            ->leftJoinSub($consulta->tabela('escolas'), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
+            ->leftJoinSub($consulta->paraJuncao('escolas', ['nome']), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
             ->where('turmas.id', $turmaId)
             ->first(['turmas.id', 'turmas.nome', 'turmas.serie', 'turmas.turno', 'turmas.ano_letivo', 'escolas.nome as escola_nome']);
         if (!$turma) {
@@ -53,7 +53,7 @@ class AcompanhamentoTurmaController extends Controller
 
         // Cartões dos alunos da turma nessas provas (mais recente por aluno/prova)
         $cartoes = $consulta->tabela('cartoes')
-            ->leftJoinSub($consulta->tabela('notas'), 'notas', 'notas.cartao_id', '=', 'cartoes.id')
+            ->leftJoinSub($consulta->paraJuncao('notas', ['cartao_id', 'nota_final', 'acertos', 'total_questoes']), 'notas', 'notas.cartao_id', '=', 'cartoes.id')
             ->whereIn('cartoes.prova_id', $provaIds)
             ->whereIn('cartoes.aluno_id', $alunoIds)
             ->orderBy('cartoes.id')
