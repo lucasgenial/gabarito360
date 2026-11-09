@@ -64,11 +64,12 @@
     }
     formularioConfirmado=form;submitter=botao;dialogo.querySelector('[data-confirmacao-texto]').textContent=form.dataset.turmaConfirmar;dialogo.showModal();dialogo.querySelector('button').focus();
   }
-  document.querySelectorAll('[data-turma-confirmar]').forEach(form => {
-    form.addEventListener('submit', e => {
-      if(aprovados.has(form)){aprovados.delete(form);return;}
-      e.preventDefault();if(form.reportValidity())confirmarFormulario(form,e.submitter);
-    });
+  // Delegado: as abas carregadas sob demanda (F4-B) trazem formulários depois desta inicialização.
+  document.addEventListener('submit', e => {
+    const form = e.target;
+    if(!(form instanceof HTMLFormElement) || !form.matches('[data-turma-confirmar]')) return;
+    if(aprovados.has(form)){aprovados.delete(form);return;}
+    e.preventDefault();if(form.reportValidity())confirmarFormulario(form,e.submitter);
   });
   const filtro = document.querySelector('[data-turma-filtrar-alunos]');
   filtro?.addEventListener('input', () => {
@@ -82,11 +83,11 @@
     const vazio = document.getElementById('no-results');
     if (vazio) vazio.style.display = visiveis === 0 && termo ? 'block' : 'none';
   });
-  const professor = document.getElementById('professor-selecionado');
-  const vinculo = document.getElementById('professor-vinculo');
-  if (professor && vinculo) {
-    const atualizar = () => { vinculo.value = professor.selectedOptions[0]?.dataset.vinculo || ''; };
-    professor.addEventListener('change', atualizar);
-    atualizar();
-  }
+  const atualizarVinculo = () => {
+    const professor = document.getElementById('professor-selecionado'), vinculo = document.getElementById('professor-vinculo');
+    if (professor && vinculo) vinculo.value = professor.selectedOptions[0]?.dataset.vinculo || '';
+  };
+  document.addEventListener('change', e => { if (e.target?.id === 'professor-selecionado') atualizarVinculo(); });
+  document.addEventListener('g360:turma-secao', atualizarVinculo);
+  atualizarVinculo();
 })();

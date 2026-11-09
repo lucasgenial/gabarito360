@@ -18,4 +18,4 @@
 <details class="dc1-ajuda"><summary>Saiba mais sobre os vínculos</summary><p>O vínculo começa hoje e respeita o prazo de acesso do professor. A confirmação reúne a disciplina, a indicação do professor e o acesso à turma em uma única operação. Disciplinas com professor atual ou programado não aparecem como disponíveis. O mesmo professor pode lecionar disciplinas diferentes. Consulte abaixo os períodos e o histórico.</p></details>
 </section>
 @endif
-@push('styles')<link rel="stylesheet" href="@ativo('css/formulario-escolar.css')">@endpush
+
