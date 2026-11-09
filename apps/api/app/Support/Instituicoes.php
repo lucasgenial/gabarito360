@@ -11,8 +11,8 @@ class Instituicoes
 {
     public static function referencias(Usuario $u, string $tipo): array
     {
-        RegimeVinculos::exigir($u);
         if (ContextoVinculo::presente($u)) return ContextoVinculo::referencias($u, $tipo);
+        RegimeVinculos::exigir($u);
         return DB::table('usuario_escopos')->where('usuario_id', $u->id)->where('escopo_tipo', $tipo)
             ->pluck('escopo_id')->map(fn ($id) => (int) $id)->all();
     }
@@ -34,6 +34,7 @@ class Instituicoes
 
     public static function redesIds(Usuario $u): ?array
     {
+        if (ContextoVinculo::presente($u)) return ConsultaVinculo::para($u)->redes()->pluck('redes.id')->map(fn ($id) => (int) $id)->all();
         RegimeVinculos::exigir($u);
         if (!Espacos::ativo() && $u->perfil === 'admin_rede') return null;
         if (!$u->ativo) return [];
@@ -55,6 +56,7 @@ class Instituicoes
     /** O aluno vê somente o cabeçalho da própria escola, sem ampliar Escopo::turmaIds. */
     public static function escolasLogoIds(Usuario $u): ?array
     {
+        if (ContextoVinculo::presente($u)) return ConsultaVinculo::para($u)->tabela('escolas')->pluck('escolas.id')->map(fn ($id) => (int) $id)->all();
         RegimeVinculos::exigir($u);
         if ($u->perfil !== 'aluno') return Escopo::escolaIds($u);
         if (!$u->ativo) return [];
@@ -66,6 +68,7 @@ class Instituicoes
 
     public static function nucleosIds(Usuario $u): ?array
     {
+        if (ContextoVinculo::presente($u)) return ConsultaVinculo::para($u)->nucleos()->pluck('nucleos.id')->map(fn ($id) => (int) $id)->all();
         RegimeVinculos::exigir($u);
         if (!Espacos::ativo() && in_array($u->perfil, ['admin_rede', 'secretario_educacao'], true)) return null;
         if (!$u->ativo) return [];
@@ -79,6 +82,7 @@ class Instituicoes
 
     public static function nucleos(Usuario $u)
     {
+        if (ContextoVinculo::presente($u)) return \App\Models\Nucleo::query()->whereIn('nucleos.id', ConsultaVinculo::para($u)->nucleos()->select('nucleos.id'));
         RegimeVinculos::exigir($u);
         $q = \App\Models\Nucleo::query();
         $ids = self::nucleosIds($u);

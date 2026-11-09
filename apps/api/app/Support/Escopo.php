@@ -18,8 +18,8 @@ class Escopo
     /** Escolas visíveis ao usuário. */
     public static function escolaIds(Usuario $u): ?array
     {
-        RegimeVinculos::exigir($u);
         if (ContextoVinculo::presente($u)) return ContextoVinculo::escolas($u);
+        RegimeVinculos::exigir($u);
         $ids = match ($u->perfil) {
             'admin_rede' => Espacos::ativo()
                 ? DB::table('escolas')->join('nucleos', 'nucleos.id', '=', 'escolas.nucleo_id')
@@ -46,6 +46,8 @@ class Escopo
     /** Turmas visíveis: professor só as vinculadas; demais, as turmas das suas escolas. */
     public static function turmaIds(Usuario $u): ?array
     {
+        if (ContextoVinculo::presente($u)) return ConsultaVinculo::para($u)->turmas()->orderBy('turmas.id')
+            ->pluck('turmas.id')->map(fn ($id) => (int) $id)->all();
         RegimeVinculos::exigir($u);
         if ($pessoal = EspacoPessoal::doAtor($u)) {
             return DB::table('turmas')->where('espaco_id', $pessoal)->where('espaco_tipo', 'pessoal')
@@ -81,6 +83,8 @@ class Escopo
 
     private static function consultarProvas(Usuario $u,bool $historico): Builder
     {
+        if (ContextoVinculo::presente($u)) return Prova::query()->whereIn('provas.id',
+            ConsultaVinculo::para($u)->provas($historico)->select('provas.id'));
         RegimeVinculos::exigir($u);
         $perfil = $u->perfil;
         $q = Espacos::filtrar(Prova::query(), $u, 'provas.espaco_id');
@@ -175,6 +179,8 @@ class Escopo
 
     public static function turmas(Usuario $u): Builder
     {
+        if (ContextoVinculo::presente($u)) return \App\Models\Turma::query()->whereIn('turmas.id',
+            ConsultaVinculo::para($u)->turmas()->select('turmas.id'));
         RegimeVinculos::exigir($u);
         $q = Espacos::filtrar(\App\Models\Turma::query(), $u, 'turmas.espaco_id');
         $ids = self::turmaIds($u);
@@ -183,6 +189,8 @@ class Escopo
 
     public static function alunos(Usuario $u): Builder
     {
+        if (ContextoVinculo::presente($u)) return \App\Models\Aluno::query()->whereIn('alunos.id',
+            ConsultaVinculo::para($u)->alunos()->select('alunos.id'));
         RegimeVinculos::exigir($u);
         $q = Espacos::filtrar(\App\Models\Aluno::query(), $u, 'alunos.espaco_id');
         if (Espacos::ativo()) {
