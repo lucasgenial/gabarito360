@@ -327,6 +327,19 @@
   }
 }
 /* GridStack é ativado somente em telas amplas; abaixo disso permanece a composição fluida. */
+.painel-secao-cabecalho,.painel-card-cabecalho{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.painel-secao-cabecalho>h2,.painel-secao-cabecalho>h3,.painel-card-cabecalho>h2{margin:0;min-width:0}
+.painel-secao-cabecalho{margin-bottom:16px}
+.painel-grupo-mover.btn{width:32px;height:32px;min-height:32px;padding:6px;flex:none;border:1px solid var(--border);border-radius:6px;background:var(--surface-2);color:var(--fg-2);cursor:grab;touch-action:none}
+.painel-grupo-mover.btn:active{cursor:grabbing}
+.painel-grupo-mover svg{display:block;width:16px;height:16px}
+.painel-grupo-mover[hidden]{display:none!important}
+.painel-grupo-mover:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.painel-grupo-arrastando{opacity:.65}
+[data-grupo-insercao=antes]{box-shadow:0 -3px 0 var(--accent)}
+[data-grupo-insercao=depois]{box-shadow:0 3px 0 var(--accent)}
+@media(pointer:coarse){.painel-grupo-mover.btn{width:44px;height:44px;min-height:44px;padding:12px}}
+@media(max-width:1023px),(max-height:699px),print{.painel-grupo-mover{display:none!important}}
 .painel-organizacao,.painel-organizacao-acoes{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-block:16px}
 .painel-organizacao [hidden],.painel-widget [hidden]{display:none!important}
 .painel-organizacao[hidden]{display:none!important}
@@ -377,12 +390,12 @@
 @media print{.painel-organizacao,.painel-widget-mover,.ui-resizable-handle{display:none!important}.painel-secao-grade.grid-stack{height:auto!important}.painel-secao-grade.grid-stack>.grid-stack-item{position:static!important;inset:auto!important;width:100%!important;height:auto!important;break-inside:avoid}.painel-secao-grade.grid-stack>.grid-stack-item>.painel-widget{position:static!important;inset:auto!important;overflow:visible;height:auto!important}.painel-secao-grade.grid-stack .painel-widget-grafico .grafico,.painel-secao-grade.grid-stack .painel-widget-grafico .tu1r3-grafico{height:300px!important;min-height:300px}}
 
 .painel-resultados{margin-block:24px;min-width:0}
-.painel-resultados>h2{margin:0 0 16px;font-size:1.25rem}
-.painel-resultados>.painel-secao,.painel-resultados>.painel-dados-reais>.painel-secao{margin:0}
-.painel-resultados>.painel-dados-reais{margin-top:24px}
+.painel-resultados>.painel-card-cabecalho{margin:0 0 16px}.painel-resultados>.painel-card-cabecalho>h2{font-size:1.25rem}
+.painel-resultados>:is(.painel-secao,.painel-dados-reais),.painel-resultados>.painel-dados-reais>.painel-secao{margin:0}
+.painel-resultados>:is(.painel-secao,.painel-dados-reais)~:is(.painel-secao,.painel-dados-reais){margin-top:24px}
 @media(max-width:600px){.painel-resultados{padding:16px}}
 
-.painel-resultados .painel-secao>h3{margin:0 0 16px;font-size:1.125rem;line-height:1.4}
+.painel-resultados .painel-secao-cabecalho>h3{font-size:1.125rem;line-height:1.4}
 .painel-widget-cabecalho h4{margin:0;font-size:1rem;line-height:1.4;overflow-wrap:anywhere}
 .painel-widget-identificacao h4{flex:1 1 auto}
 

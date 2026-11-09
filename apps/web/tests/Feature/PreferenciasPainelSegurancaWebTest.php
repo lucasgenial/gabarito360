@@ -9,6 +9,22 @@ use Tests\TestCase;
 /** Consumidor real BFF/UR4; não substitui a autorização ou os testes da API. */
 class PreferenciasPainelSegurancaWebTest extends TestCase
 {
+    public function test_resposta_de_organizacao_incompleta_ou_contraditoria_e_502_sem_put(): void
+    {
+        $d=$this->dto();$d['catalogo'][0]['id']='distribuicao-acertos';$d['catalogo'][0]['section']='analises';
+        $d['layouts']['desktop'][0]['id']='distribuicao-acertos';$d['layouts']['desktop'][0]['section']='analises';
+        $d['layouts']['desktop'][0]+=['ordem_card'=>1,'ordem_secao'=>0];
+        $this->preparar(data:$d);
+        $this->consultarJson('/app/paineis/preferencias/turma/14')->assertOk()->assertJsonPath('data.layouts.desktop.0.ordem_card',1);
+        $incompleta=$d;unset($incompleta['layouts']['desktop'][0]['ordem_secao']);
+        $divergente=$d;$divergente['catalogo'][]=array_replace($d['catalogo'][0],['id'=>'situacoes-registradas']);
+        $divergente['layouts']['desktop'][]=array_replace($d['layouts']['desktop'][0],['id'=>'situacoes-registradas','x'=>3,'ordem_card'=>0]);
+        foreach([$incompleta,$divergente] as $malformada){
+            $this->preparar(data:$malformada);
+            $this->consultarJson('/app/paineis/preferencias/turma/14')->assertStatus(502)->assertJsonMissingPath('data.layouts');
+            Http::assertNotSent(fn($r)=>$r->method()==='PUT');
+        }
+    }
     use ContextoSelecionado, NavegacaoHttp;
     private array $opcoesPrefs=[];
 

@@ -3,7 +3,7 @@ import {GridStackEngine} from 'gridstack/dist/gridstack-engine';
 export const chartIds=new Set(['distribuicao-acertos','resultados-avaliacao','periodos-escolares','habilidades','reavaliacoes']);
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
 const geometry=['x','y','w','h'];
-const optional=['altura_desejada','fixo','altura_livre','orientacao'];
+const optional=['altura_desejada','fixo','altura_livre','orientacao','ordem_card','ordem_secao'];
 
 /** CSS local desenha a grade; pixels visuais interpretam o ponteiro. O utilitário
  * público do GridStack retorna a escala inversa, inclusive para ancestrais com zoom. */
@@ -48,6 +48,7 @@ export function validateLayout(items,limits,{complete=false,anchors=[]}={}){
   if(n.x<0||n.y<0||n.x+n.w>12||n.y+n.h>200||n.w<c.minW||n.w>c.maxW||n.h<c.minH||n.h>c.maxH)throw Error('Card fora dos limites');
   if(own(n,'altura_desejada')&&(!Number.isInteger(n.altura_desejada)||n.altura_desejada<c.minH||n.altura_desejada>n.h))throw Error('Altura desejada inválida');
   for(const key of ['fixo','altura_livre'])if(own(n,key)&&typeof n[key]!=='boolean')throw Error('Opção inválida');
+  for(const key of ['ordem_card','ordem_secao'])if(own(n,key)&&(!Number.isInteger(n[key])||n[key]<0||n[key]>63))throw Error('Ordem de grupo inválida');
   if(own(n,'orientacao')&&(!chartIds.has(n.id)||!['horizontal','vertical'].includes(n.orientacao)))throw Error('Orientação inválida');
   for(const other of seen.values())if(other.section===n.section&&n.x<other.x+other.w&&n.x+n.w>other.x&&n.y<other.y+other.h&&n.y+n.h>other.y)throw Error('Os cards não podem se sobrepor');
   seen.set(n.id,n);

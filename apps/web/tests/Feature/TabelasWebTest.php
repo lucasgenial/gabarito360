@@ -83,7 +83,7 @@ class TabelasWebTest extends TestCase
             $this->assertNull(parse_url($form->getAttribute('action'),PHP_URL_QUERY));$d=json_decode($form->getAttribute('data-recurso'),true,512,JSON_THROW_ON_ERROR);$alvo=\App\Support\NavegacaoWeb::obter($d['referencia']);$this->assertContains((int)$alvo['consulta']['vinculo_id'],[10,11,12]);$this->assertGreaterThan(0,(int)$alvo['parametros']['id']);$this->assertSame(1,$xp->query('.//input[@name="_recurso"]',$form)->length);
         }
         if(getenv('G360_TW2_EXPORT')){
-            $dir=sys_get_temp_dir().'/g360-tw2-render';if(!is_dir($dir))mkdir($dir,0700,true);
+            $dir=(getenv('G360_TW2_EXPORT_DIR')?:sys_get_temp_dir().'/g360-tw2-render');if(!is_dir($dir))mkdir($dir,0700,true);
             file_put_contents($dir.'/membros.html',$html);
         }
     }

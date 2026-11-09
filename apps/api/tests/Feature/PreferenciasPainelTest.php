@@ -434,7 +434,7 @@ class PreferenciasPainelTest extends TestCase
         $this->getJson('/api/v1/paineis/preferencias/turma',$h)->assertOk()->assertJsonCount(0,'data.layouts.desktop')->assertDontSee('periodos-escolares');
         $this->assertSame($raw,DB::table('preferencias_paineis')->value('desktop'));
         DB::table('vinculo_permissoes')->where('vinculo_id',1)->where('permissao','relatorio.turma')->delete();
-        $this->getJson('/api/v1/paineis/preferencias/turma',$h)->assertOk()->assertJsonPath('data.layouts.desktop.0',$w);
+        $this->getJson('/api/v1/paineis/preferencias/turma',$h)->assertOk()->assertJsonPath('data.layouts.desktop.0',array_replace($w,['section'=>'periodo-agenda']));
     }
 
 }
