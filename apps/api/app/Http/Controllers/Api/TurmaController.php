@@ -95,7 +95,7 @@ class TurmaController extends Controller
             'turmas'=>$lista->count(), 'em_uso'=>$emUso, 'arquivadas'=>$lista->count()-$emUso,
             'cadastros_ativos'=>$porTurma->sum()];
         // Os KPIs legados mantêm seu universo e contrato; o campo novo representa o filtro atual.
-        return ApiResponse::success(['turmas' => $turmas, 'kpis' => $kpis, 'resumo_cadastral'=>$resumo]);
+        return app(\App\Services\BootstrapEditorPainel::class)->anexar(ApiResponse::success(['turmas' => $turmas, 'kpis' => $kpis, 'resumo_cadastral'=>$resumo]),$request,'turmas');
     }
 
     public function store(Request $request): JsonResponse
@@ -195,9 +195,9 @@ class TurmaController extends Controller
             return $dados;
         });
 
-        if ($conteudos['administrativo']) return ApiResponse::success(array_merge($turma->toArray(), [
+        if ($conteudos['administrativo']) return app(\App\Services\BootstrapEditorPainel::class)->anexar(ApiResponse::success(array_merge($turma->toArray(), [
             'escola_nome'=>$turma->escola?->nome,'total_alunos'=>$totalAlunos,'alunos'=>$alunos,
-        ]));
+        ])),$request,'turma',$id);
         $dados = array_merge($turma->toArray(), [
             'total_alunos'  => $totalAlunos,
             'escola_nome'   => $turma->escola?->nome,
@@ -206,7 +206,7 @@ class TurmaController extends Controller
         if ($conteudos['provas']) $dados['total_provas'] = $provas->count();
         $dados['alunos'] = $alunos;
         $dados['provas'] = $provas;
-        return ApiResponse::success($dados);
+        return app(\App\Services\BootstrapEditorPainel::class)->anexar(ApiResponse::success($dados),$request,'turma',$id);
     }
 
     /** Permissão de cadastro não concede agregados, resultados nominais ou provas. Sem cache entre requisições. */

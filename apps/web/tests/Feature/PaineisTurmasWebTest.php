@@ -21,13 +21,35 @@ class PaineisTurmasWebTest extends TestCase
         $this->selecionarContextoFixture($me);
         Http::fake(function($r)use($me,$total,$status,$extra){
             $path=parse_url($r->url(),PHP_URL_PATH);
+            $boot=$extra['editor_bootstrap']??null;$meta=$boot?['editor_painel'=>$boot['data'],'editor_etag'=>$boot['etag']]:[];
             if($path==='/api/v1/auth/me')return Http::response(['data'=>$me]);
             if($path==='/api/v1/turmas/14')return Http::response(['data'=>['id'=>14,'nome'=>'Turma fictícia','serie'=>'3ª série','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'total_alunos'=>3,
-                'alunos'=>[['id'=>8,'nome'=>'Nome nominal fictício','matricula'=>'FICTICIA','ativo'=>true]],'provas'=>[['id'=>22,'titulo'=>'Prova fictícia','disciplina'=>'Matemática','data_aplicacao'=>null,'status'=>'corrigida']]]]);
+                'alunos'=>[['id'=>8,'nome'=>'Nome nominal fictício','matricula'=>'FICTICIA','ativo'=>true]],'provas'=>[['id'=>22,'titulo'=>'Prova fictícia','disciplina'=>'Matemática','data_aplicacao'=>null,'status'=>'corrigida']]],'meta'=>$meta]);
             if($path==='/api/v1/turmas/14/painel')return Http::response(['data'=>$extra['painel']??[]]);
-            if($path==='/api/v1/turmas')return Http::response(['data'=>['turmas'=>[['id'=>14,'nome'=>'Turma <fictícia>','serie'=>'3ª série','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'total_alunos'=>$total,'avatar_id'=>1,'media_turma'=>987.6]],'kpis'=>['total_alunos'=>999]]+$extra],$status);
+            if($path==='/api/v1/turmas')return Http::response(['data'=>['turmas'=>[['id'=>14,'nome'=>'Turma <fictícia>','serie'=>'3ª série','turno'=>'tarde','ano_letivo'=>2026,'ativo'=>true,'total_alunos'=>$total,'avatar_id'=>1,'media_turma'=>987.6]],'kpis'=>['total_alunos'=>999]]+$extra,'meta'=>$meta],$status);
             return Http::response(['data'=>[]]);
         });
+    }
+
+    public function test_bootstrap_editor_no_ssr_preserva_catalogo_conteudo_e_nao_faz_consulta_adicional():void
+    {
+        config(['release.sha'=>str_repeat('a',40),'release.fase'=>'HOMOLOGACAO-EDITOR','versao.ambiente'=>'Homologação']);
+        foreach(['turmas','turma'] as $pagina){
+            $boot=json_decode(file_get_contents(__DIR__.'/../Fixtures/editor-'.$pagina.'.json'),true,512,JSON_THROW_ON_ERROR);
+            $painel=['kpis'=>['avaliacoes'=>0,'resultados'=>0,'alunos_com_resultado'=>0],'situacoes_resultados'=>['total'=>0,'dentro_criterio'=>0,'indicacao_recuperacao'=>0,'outros'=>0],
+                'analise'=>['resumo'=>['n'=>0],'por_avaliacao'=>[],'distribuicao_acertos'=>['total'=>0,'faixas'=>[],'percentuais_excluidos'=>0],
+                    'alunos'=>['disponivel'=>true,'destaques'=>['total'=>0,'items'=>[]],'atencao'=>['total'=>0,'items'=>[]]]]];
+            $this->preparar('coordenador',permissoes:['turma.ver','aluno.ver','resultado.ver','relatorio.turma','correcao.acompanhar','turma.vincular_professor'],extra:['editor_bootstrap'=>$boot,'painel'=>$painel]);
+            $r=$this->consultarTela($pagina==='turmas'?'/app/turmas':'/app/turmas/14')->assertOk()->assertSee('data-editor-painel',false)->assertSee('editor-paineis.js');
+            $dom=new \DOMDocument();@$dom->loadHTML($r->getContent());$xp=new \DOMXPath($dom);
+            $cfg=json_decode($xp->query('//*[@id="painel-editor-config"]')->item(0)->textContent,true,512,JSON_THROW_ON_ERROR);
+            $this->assertEquals($boot,$cfg['bootstrap']);
+            $ids=[];foreach($xp->query('//*[@data-widget-id and @data-section!="resumo"]') as $w)$ids[]=$w->getAttribute('data-widget-id');if($pagina==='turmas')$ids[]='turmas-lista';
+            $this->assertEqualsCanonicalizing(array_column($boot['data']['editor']['catalogo']['widgets'],'id'),$ids);
+            Http::assertNotSent(fn($r)=>str_contains($r->url(),'/paineis/preferencias/'));
+            Http::assertSent(fn($r)=>$r->hasHeader('X-G360-Painel-Editor','3')&&parse_url($r->url(),PHP_URL_PATH)===($pagina==='turmas'?'/api/v1/turmas':'/api/v1/turmas/14'));
+            if(($dir=getenv('G360_EDITOR_EXPORT_DIR'))||getenv('G360_TW2_EXPORT')){$dir=$dir?:getenv('G360_TW2_EXPORT_DIR')?:sys_get_temp_dir().'/g360-tw2-render';if(!is_dir($dir))mkdir($dir,0700,true);file_put_contents($dir.'/editor-'.$pagina.'.html',$r->getContent());}
+        }
     }
 
     public function test_colecao_preserva_alternativa_operacional_e_nao_publica_media_legada(): void

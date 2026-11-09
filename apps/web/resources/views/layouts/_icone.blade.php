@@ -17,6 +17,8 @@
   @case('compartilhar')<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 11l7.4-4M8.3 13l7.4 4"/>@break
   @case('editar')<path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z"/>@break
   @case('adicionar')<path d="M12 5v14M5 12h14"/>@break
+  @case('seta')<path d="M4 12h16m-6-6 6 6-6 6"/>@break
+  @case('atualizar')<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/>@break
   @case('voltar')<path d="m10 5-7 7 7 7M3 12h18"/>@break
   @case('fechar')<path d="m6 6 12 12M6 18 18 6"/>@break
   @case('confirmar')<path d="m5 12 4 4L19 6"/>@break

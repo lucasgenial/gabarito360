@@ -2,7 +2,7 @@
 namespace App\Services;
 
 use App\Models\Usuario;
-use App\Support\{CatalogoPaineis, CatalogoWidgetsPainel, ContextoVinculo, OrganizacaoPainel, PadroesPainel, Permissao};
+use App\Support\{CacheComposicaoPainel, CatalogoPaineis, CatalogoWidgetsPainel, ComposicaoPainel, ContextoVinculo, OrganizacaoPainel, PadroesPainel, Permissao};
 use Illuminate\Support\Facades\{DB, Validator};
 use Illuminate\Validation\ValidationException;
 
@@ -30,13 +30,15 @@ final class PreferenciasPainel
         throw ValidationException::withMessages([$campo=>$mensagem]);
     }
 
-    public function validar(array $pedido, array $catalogo, string $painel=''): array
+    public function validar(array $pedido, array $catalogo, string $painel='', bool $editor=false): array
     {
-        if (array_diff(array_keys($pedido), ['versao','chave','acao','apresentacao','layouts','alvos'])) $this->falhar('preferencias');
+        $campos=['versao','chave','acao','apresentacao','layouts','alvos'];if($editor)$campos=[...$campos,'composicao','catalogo_chave'];
+        if (array_diff(array_keys($pedido), $campos)) $this->falhar('preferencias');
         Validator::make($pedido, ['versao'=>'required|integer|min:0|max:2147483646', 'chave'=>'required|uuid', 'acao'=>'required|in:salvar,restaurar'])->validate();
         if (!is_int($pedido['versao'])) $this->falhar('versao');
         $pedido['chave'] = strtolower($pedido['chave']);
         if ($pedido['acao'] === 'restaurar') {
+            if(array_key_exists('composicao',$pedido)||array_key_exists('catalogo_chave',$pedido))$this->falhar('composicao');
             if (array_key_exists('layouts', $pedido) || array_key_exists('apresentacao', $pedido)) $this->falhar('alvos');
             $alvos = $pedido['alvos'] ?? null;
             if (!is_array($alvos) || !array_is_list($alvos) || !$alvos || count($alvos)>3 || count(array_unique($alvos, SORT_REGULAR))!==count($alvos)) $this->falhar('alvos');
@@ -45,7 +47,13 @@ final class PreferenciasPainel
             return $pedido;
         }
         if (array_key_exists('alvos', $pedido)) $this->falhar('alvos');
-        if (!array_key_exists('apresentacao', $pedido) && !array_key_exists('layouts', $pedido)) $this->falhar('preferencias');
+        if (!array_key_exists('apresentacao', $pedido) && !array_key_exists('layouts', $pedido) && !array_key_exists('composicao',$pedido)) $this->falhar('preferencias');
+        if(array_key_exists('composicao',$pedido)){
+            $defs=ComposicaoPainel::definicoes($painel,$catalogo);
+            abort_unless(is_string($pedido['catalogo_chave']??null)&&hash_equals(ComposicaoPainel::chave($defs),$pedido['catalogo_chave']),409,'O catálogo mudou. Consulte a disposição atual.');
+            $pedido['composicao']=ComposicaoPainel::validar($pedido['composicao'],$defs);
+            if(isset($pedido['layouts']))$this->falhar('layouts','Salve a composição separadamente da geometria legada.');
+        }elseif(array_key_exists('catalogo_chave',$pedido))$this->falhar('catalogo_chave');
         if (array_key_exists('apresentacao', $pedido) && !in_array($pedido['apresentacao'], ['tabela','cards'], true)) $this->falhar('apresentacao');
         if (array_key_exists('layouts', $pedido)) {
             if (!is_array($pedido['layouts']) || !$pedido['layouts'] || array_diff(array_keys($pedido['layouts']), ['desktop','mobile'])) $this->falhar('layouts');
@@ -87,24 +95,36 @@ final class PreferenciasPainel
     {
         $layouts = ['desktop'=>[], 'mobile'=>[]];
         if ($registro) foreach (array_keys($layouts) as $d) $layouts[$d] = json_decode($registro->$d, true, 64, JSON_THROW_ON_ERROR);
-        return ['versao'=>$registro ? (int)$registro->versao : 0, 'apresentacao'=>$registro?->apresentacao ?? 'tabela', 'layouts'=>$layouts];
+        return ['versao'=>$registro ? (int)$registro->versao : 0, 'apresentacao'=>$registro?->apresentacao ?? 'tabela', 'layouts'=>$layouts,
+            'composicao'=>isset($registro->composicao)?json_decode($registro->composicao,true,64,JSON_THROW_ON_ERROR):null];
     }
 
-    private function filtrar(array $resultado, array $catalogo, string $perfil, string $painel): array
+    private function filtrar(array $resultado, array $catalogo, string $perfil, string $painel, bool $editor=false, string $contextoHash=''): array
     {
+        $stored=$resultado['composicao']??null;unset($resultado['composicao']);
         $ids = array_fill_keys(array_column($catalogo, 'id'), true);
         foreach (['desktop','mobile'] as $d) $resultado['layouts'][$d] = OrganizacaoPainel::projetar(array_values(array_filter($resultado['layouts'][$d], fn ($w)=>isset($ids[$w['id']]))),$catalogo);
-        return $resultado + ['catalogo'=>$catalogo, 'repetido'=>false,
+        $publico=$resultado + ['catalogo'=>$catalogo, 'repetido'=>false,
             'padrao'=>['desktop'=>PadroesPainel::desktop($perfil,$painel,$catalogo)],
             'origem_disposicao'=>$resultado['layouts']['desktop'] ? 'usuario' : 'perfil'];
+        if($editor){
+            $defs=ComposicaoPainel::definicoes($painel,$catalogo);$basePerfil=$publico['padrao']['desktop'];$padrao=ComposicaoPainel::padrao($painel,$defs,$basePerfil);
+            $base=array_values(array_replace(array_column($basePerfil,null,'id'),array_column($resultado['layouts']['desktop'],null,'id')));
+            try{$composicao=CacheComposicaoPainel::projetar($stored,$painel,$defs,$base,$contextoHash,$resultado['versao']);$indisponivel=false;}
+            catch(ValidationException){$composicao=null;$indisponivel=true;}
+            $publico['editor']=['schema'=>3,'contexto'=>$contextoHash,'catalogo_chave'=>ComposicaoPainel::chave($defs),'catalogo'=>$defs,
+                'padrao'=>$padrao,'composicao'=>$composicao,'indisponivel'=>$indisponivel,
+                'origem'=>$stored!==null?'usuario':($resultado['layouts']['desktop']?'legado':'perfil')];
+        }
+        return $publico;
     }
 
-    public function mostrar(Usuario $ator, string $painel, ?int $turmaId=null): array
+    public function mostrar(Usuario $ator, string $painel, ?int $turmaId=null, bool $editor=false): array
     {
         $contexto = $this->contexto($ator,$painel,$turmaId);
         $registro = DB::table('preferencias_paineis')->where($contexto)->where('painel', $painel)->first();
         $this->contexto($ator,$painel,$turmaId);
-        return $this->filtrar($this->estado($registro), CatalogoWidgetsPainel::para($ator, $painel),$contexto['perfil'],$painel);
+        return $this->filtrar($this->estado($registro), CatalogoWidgetsPainel::para($ator, $painel),$contexto['perfil'],$painel,$editor,$contexto['contexto_hash']);
     }
 
     private function canonico(mixed $valor): mixed
@@ -114,12 +134,12 @@ final class PreferenciasPainel
         return array_map(fn ($v)=>$this->canonico($v), $valor);
     }
 
-    public function gravar(Usuario $ator, string $painel, array $pedido, ?int $turmaId=null): array
+    public function gravar(Usuario $ator, string $painel, array $pedido, ?int $turmaId=null, bool $editor=false): array
     {
-        $acao = function () use ($ator,$painel,$pedido,$turmaId) {
+        $acao = function () use ($ator,$painel,$pedido,$turmaId,$editor) {
             $contexto = $this->contexto($ator,$painel,$turmaId,true);
             $catalogo = CatalogoWidgetsPainel::para($ator, $painel);
-            $pedido = $this->validar($pedido, $catalogo, $painel);
+            $pedido = $this->validar($pedido, $catalogo, $painel,$editor);
             $q = DB::table('preferencias_paineis')->where($contexto)->where('painel', $painel);
             $registro = (clone $q)->lockForUpdate()->first();
             if (!$registro) {
@@ -130,7 +150,7 @@ final class PreferenciasPainel
             $anterior = DB::table('preferencias_painel_eventos')->where('preferencia_id', $registro->id)->where('chave', $pedido['chave'])->first();
             if ($anterior) {
                 abort_unless(hash_equals($anterior->pedido_hash, $hash), 409, 'Identificador já usado em outra configuração.');
-                return array_replace($this->filtrar(json_decode($anterior->resultado, true, 64, JSON_THROW_ON_ERROR), $catalogo,$contexto['perfil'],$painel), ['repetido'=>true]);
+                return array_replace($this->filtrar(json_decode($anterior->resultado, true, 64, JSON_THROW_ON_ERROR), $catalogo,$contexto['perfil'],$painel,$editor,$contexto['contexto_hash']), ['repetido'=>true]);
             }
             abort_unless((int)$registro->versao===$pedido['versao'], 409, 'A organização do painel mudou. Atualize antes de salvar.');
             // Omitir um dispositivo preserva até as caixas temporariamente não autorizadas
@@ -138,6 +158,7 @@ final class PreferenciasPainel
             $resultado = $this->estado($registro);
             if ($pedido['acao']==='salvar') {
                 if (isset($pedido['apresentacao'])) $resultado['apresentacao'] = $pedido['apresentacao'];
+                if(isset($pedido['composicao']))$resultado['composicao']=ComposicaoPainel::mesclar($pedido['composicao'],$resultado['composicao'],ComposicaoPainel::definicoes($painel,$catalogo),$painel);
                 foreach ($pedido['layouts'] ?? [] as $d=>$widgets) {
                     $anteriores=array_column($resultado['layouts'][$d],null,'id');
                     // Um cliente anterior que ajusta geometria não apaga a ordem dos grupos.
@@ -154,10 +175,13 @@ final class PreferenciasPainel
             }
             $resultado['versao']++;
             $this->contexto($ator,$painel,$turmaId);
-            DB::table('preferencias_paineis')->where('id', $registro->id)->update(['versao'=>$resultado['versao'], 'apresentacao'=>$resultado['apresentacao'], 'desktop'=>json_encode($resultado['layouts']['desktop'], JSON_THROW_ON_ERROR), 'mobile'=>json_encode($resultado['layouts']['mobile'], JSON_THROW_ON_ERROR), 'atualizado_em'=>now()->utc()]);
-            $auditado = array_intersect_key($resultado, array_flip(['versao','apresentacao','layouts']));
+            $alteracoes=['versao'=>$resultado['versao'], 'apresentacao'=>$resultado['apresentacao'], 'desktop'=>json_encode($resultado['layouts']['desktop'], JSON_THROW_ON_ERROR), 'mobile'=>json_encode($resultado['layouts']['mobile'], JSON_THROW_ON_ERROR), 'atualizado_em'=>now()->utc()];
+            // Escritas antigas não decodificam/regravam a coluna nova: preservar inclusive seus bytes.
+            if(isset($pedido['composicao']))$alteracoes['composicao']=json_encode($resultado['composicao'],JSON_THROW_ON_ERROR);
+            DB::table('preferencias_paineis')->where('id', $registro->id)->update($alteracoes);
+            $auditado = array_intersect_key($resultado, array_flip(['versao','apresentacao','layouts','composicao']));
             DB::table('preferencias_painel_eventos')->insert(['preferencia_id'=>$registro->id, 'chave'=>$pedido['chave'], 'pedido_hash'=>$hash, 'acao'=>$pedido['acao'], 'versao'=>$resultado['versao'], 'resultado'=>json_encode($auditado, JSON_THROW_ON_ERROR), 'ocorrido_em'=>now()->utc()]);
-            return $this->filtrar($resultado, $catalogo,$contexto['perfil'],$painel);
+            return $this->filtrar($resultado, $catalogo,$contexto['perfil'],$painel,$editor,$contexto['contexto_hash']);
         };
         $c = DB::connection();
         if (!in_array($c->getDriverName(), ['mysql','mariadb'], true)) return $c->transaction($acao, 3);

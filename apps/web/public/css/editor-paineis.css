@@ -1,0 +1,382 @@
+/**
+ * gridstack SASS styles 14.1.0
+ * Copyright (c) 2021-2025 Alain Dumesny - see GridStack root license
+ */
+.grid-stack {
+  position: relative;
+}
+
+.grid-stack-placeholder > .placeholder-content {
+  background-color: rgba(0, 0, 0, 0.1);
+  margin: 0;
+  position: absolute;
+  width: auto;
+  z-index: 0 !important;
+}
+
+.grid-stack > .grid-stack-item {
+  position: absolute;
+  padding: 0;
+  top: 0;
+  width: var(--gs-column-width);
+  height: var(--gs-cell-height);
+}
+.grid-stack > .grid-stack-item > .grid-stack-item-content {
+  margin: 0;
+  position: absolute;
+  width: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.grid-stack > .grid-stack-item.size-to-content:not(.size-to-content-max) > .grid-stack-item-content {
+  overflow-y: hidden;
+}
+
+.grid-stack:not(.grid-stack-rtl) > .grid-stack-item {
+  left: 0;
+}
+
+.grid-stack.grid-stack-rtl > .grid-stack-item {
+  right: 0;
+}
+
+.grid-stack > .grid-stack-item > .grid-stack-item-content,
+.grid-stack > .grid-stack-placeholder > .placeholder-content {
+  top: var(--gs-item-margin-top);
+  right: var(--gs-item-margin-right);
+  bottom: var(--gs-item-margin-bottom);
+  left: var(--gs-item-margin-left);
+}
+
+.grid-stack-item > .ui-resizable-handle {
+  position: absolute;
+  font-size: 0.1px;
+  display: block;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  user-select: none;
+  z-index: 100;
+}
+.grid-stack-item.ui-resizable-disabled > .ui-resizable-handle, .grid-stack-item.ui-resizable-autohide > .ui-resizable-handle {
+  display: none;
+}
+.grid-stack-item > .ui-resizable-ne,
+.grid-stack-item > .ui-resizable-nw,
+.grid-stack-item > .ui-resizable-se,
+.grid-stack-item > .ui-resizable-sw {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="%23666" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 20 20"><path d="m10 3 2 2H8l2-2v14l-2-2h4l-2 2"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 101;
+}
+.grid-stack-item > .ui-resizable-ne {
+  transform: rotate(45deg);
+}
+.grid-stack-item > .ui-resizable-sw {
+  transform: rotate(45deg);
+}
+.grid-stack-item > .ui-resizable-nw {
+  transform: rotate(-45deg);
+}
+.grid-stack-item > .ui-resizable-se {
+  transform: rotate(-45deg);
+}
+.grid-stack-item > .ui-resizable-nw {
+  cursor: nw-resize;
+  width: 20px;
+  height: 20px;
+  top: var(--gs-item-margin-top);
+  left: var(--gs-item-margin-left);
+}
+.grid-stack-item > .ui-resizable-n {
+  cursor: n-resize;
+  height: 10px;
+  top: var(--gs-item-margin-top);
+  left: 25px;
+  right: 25px;
+}
+.grid-stack-item > .ui-resizable-ne {
+  cursor: ne-resize;
+  width: 20px;
+  height: 20px;
+  top: var(--gs-item-margin-top);
+  right: var(--gs-item-margin-right);
+}
+.grid-stack-item > .ui-resizable-e {
+  cursor: e-resize;
+  width: 10px;
+  top: 15px;
+  bottom: 15px;
+  right: var(--gs-item-margin-right);
+}
+.grid-stack-item > .ui-resizable-se {
+  cursor: se-resize;
+  width: 20px;
+  height: 20px;
+  bottom: var(--gs-item-margin-bottom);
+  right: var(--gs-item-margin-right);
+}
+.grid-stack-item > .ui-resizable-s {
+  cursor: s-resize;
+  height: 10px;
+  left: 25px;
+  bottom: var(--gs-item-margin-bottom);
+  right: 25px;
+}
+.grid-stack-item > .ui-resizable-sw {
+  cursor: sw-resize;
+  width: 20px;
+  height: 20px;
+  bottom: var(--gs-item-margin-bottom);
+  left: var(--gs-item-margin-left);
+}
+.grid-stack-item > .ui-resizable-w {
+  cursor: w-resize;
+  width: 10px;
+  top: 15px;
+  bottom: 15px;
+  left: var(--gs-item-margin-left);
+}
+.grid-stack-item.ui-draggable-dragging > .ui-resizable-handle {
+  display: none !important;
+}
+.grid-stack-item.ui-draggable-dragging {
+  will-change: left, right, top;
+}
+.grid-stack-item.ui-resizable-resizing {
+  will-change: width, height;
+}
+.grid-stack-item.ui-draggable-armed {
+  cursor: move;
+  animation: gs-armed-wiggle 0.25s ease-in-out infinite;
+}
+.grid-stack-item > .ui-resizable-handle.ui-resizable-armed {
+  animation: gs-armed-pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes gs-armed-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-1.5deg);
+  }
+  75% {
+    transform: rotate(1.5deg);
+  }
+}
+@keyframes gs-armed-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+.ui-draggable-dragging,
+.ui-resizable-resizing {
+  z-index: 10000;
+}
+.ui-draggable-dragging > .grid-stack-item-content,
+.ui-resizable-resizing > .grid-stack-item-content {
+  box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.2);
+  opacity: 0.8;
+}
+
+.grid-stack-animate,
+.grid-stack-animate .grid-stack-item {
+  transition: left 0.3s, right 0.3s, top 0.3s, height 0.3s, width 0.3s;
+}
+
+.grid-stack-animate .grid-stack-item.ui-draggable-dragging,
+.grid-stack-animate .grid-stack-item.ui-resizable-resizing,
+.grid-stack-animate .grid-stack-item.grid-stack-placeholder {
+  transition: left 0s, right 0s, top 0s, height 0s, width 0s;
+}
+
+.grid-stack > .grid-stack-item[gs-y="0"] {
+  top: 0px;
+}
+
+.grid-stack:not(.grid-stack-rtl) > .grid-stack-item[gs-x="0"] {
+  left: 0%;
+}
+
+.grid-stack.grid-stack-rtl > .grid-stack-item[gs-x="0"] {
+  right: 0%;
+}
+
+.gs-print-show {
+  display: none;
+}
+
+@media print {
+  @page gs-landscape {
+    size: landscape;
+  }
+  @page gs-portrait {
+    size: portrait;
+  }
+  /* ========================================================================
+     PRINT LAYOUT
+     GridStack normally positions items with `position: absolute`, which browsers
+     can't paginate at all (it's removed from the flow). For print we switch to
+     block/float flow instead: items auto-size their height to content and flow
+     left to right, wrapping naturally across pages without being sliced in half.
+     Trade-off: this ignores the exact on-screen Y coordinate, so if one item in
+     a row is much taller than its siblings, shorter siblings in the next row
+     still can't start higher than that tall item's bottom (plain CSS has no
+     print-safe masonry packing) - hidden items don't cause this though, since
+     a display:none item simply takes no space and following items move up.
+     ======================================================================== */
+  .grid-stack {
+    display: block !important;
+    height: auto !important;
+    position: static !important;
+  }
+  .grid-stack > .grid-stack-item {
+    display: block !important;
+    float: left !important;
+    position: static !important;
+    height: auto !important; /* Let it grow with content */
+    left: auto !important;
+    top: auto !important;
+    /* Proportional width based on grid columns */
+    width: calc(100% * var(--gs-w) / var(--gs-columns, 12)) !important;
+    /* Prevent slicing items across pages */
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  .grid-stack > .grid-stack-item > .grid-stack-item-content {
+    position: relative !important; /* change from absolute to relative to dictate parent height */
+    height: auto !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    /* Convert absolute positioning offsets to margins to keep the gaps */
+    margin-top: var(--gs-item-margin-top) !important;
+    margin-right: var(--gs-item-margin-right) !important;
+    margin-bottom: var(--gs-item-margin-bottom) !important;
+    margin-left: var(--gs-item-margin-left) !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+  }
+  /* ========================================================================
+     PER-WIDGET PrintOptions
+     ======================================================================== */
+  .gs-print-hide {
+    display: none;
+  }
+  .gs-print-show {
+    display: block;
+  }
+  /* opt-in for any element (not just grid items) that must not have a page break land right after
+     it - ex: a section/table header that has to stay with the content that follows. Put this on a
+     plain block-level wrapper rather than directly on a `display:flex`/`grid` element: Chrome's print
+     engine ignores break-after/page-break-after set on flex/grid containers themselves. */
+  .gs-print-avoid-break-after {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+  /* needs to out-specificity the base item rule above (display: block !important)
+     so a hidden widget actually collapses instead of still reserving its slot */
+  .grid-stack > .grid-stack-item.gs-print-hide {
+    display: none !important;
+  }
+  /* pageBreak/orientation need the item to be a normal block box: Chrome's print
+     engine ignores forced page breaks on floated elements, so pull these out of
+     the float flow (their width is kept as-is - a plain block box already can't
+     have a later float rise up beside it, so nothing else tucks into the row). */
+  .grid-stack > .grid-stack-item[gs-page-break=true],
+  .grid-stack > .grid-stack-item[gs-print-orientation] {
+    float: none !important;
+    clear: both !important;
+  }
+  .grid-stack > .grid-stack-item[gs-page-break=true] {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+  .grid-stack > .grid-stack-item[gs-print-orientation=landscape] {
+    page: gs-landscape;
+    /* Force item to take proper landscape width, overriding portrait-page sizing.
+       vmax ensures we get the long edge of the paper regardless of default printer orientation */
+    min-width: calc(100vmax * var(--gs-w) / var(--gs-columns, 12)) !important;
+  }
+  .grid-stack > .grid-stack-item[gs-print-orientation=portrait] {
+    page: gs-portrait;
+    /* vmin ensures we get the short edge of the paper */
+    min-width: calc(100vmin * var(--gs-w) / var(--gs-columns, 12)) !important;
+  }
+  /* breakInside opts a widget (tall table/datagrid, or a section wrapping a nested sub-grid) out of
+     the base rule's break-inside: avoid, so it can fragment across pages instead of being pushed
+     whole to the next page whenever it doesn't fit in the space remaining on the current one - which
+     otherwise leaves the current page mostly blank. Pulled out of the float flow and widened to the
+     full print width, same reasoning as pageBreak/orientation above: Chrome can mis-paginate a
+     floated box that's allowed to break across pages, overlapping the next floated sibling. */
+  .grid-stack > .grid-stack-item[gs-break-inside=true] {
+    float: none !important;
+    clear: both !important;
+    width: 100% !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+  /* Hide interactive elements during print */
+  .grid-stack > .grid-stack-item > .ui-resizable-handle {
+    display: none !important;
+  }
+}
+/* Escopo completo do editor. Cores e controles vêm da estrutura Tailwind do App. */
+/* Antes da adoção dos nós, a leitura SSR já conserva os vazios compactos. */
+.tela-turma .painel-widget[data-painel-vazio=true] :is(.painel-widget-corpo,.tu1r3-alunos,.tu1r3-alunos-lista){flex:0 0 auto!important;height:auto;min-height:0;overflow:visible}
+.tela-turma .painel-widget[data-painel-vazio=true] .tu1r3-grafico{flex:0 0 auto!important;height:auto!important;min-height:0!important;padding:0;justify-content:flex-start;text-align:start}
+.editor-paineis{--line:var(--border);--brand:var(--accent);--soft:var(--surface-2);--brandsoft:var(--accent-soft);width:100%;min-width:0;margin-block:16px}
+.editor-paineis [hidden]{display:none!important}
+.editor-paineis-barra,.editor-paineis-acoes,.editor-paineis .barra-editor{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.editor-paineis-barra{margin-bottom:16px}.editor-paineis .barra-editor{justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px}
+.editor-paineis [role=tablist]{display:flex;flex-wrap:wrap;gap:4px}.editor-paineis [role=tab][aria-selected=true]{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 -2px var(--accent)}
+.editor-paineis .btn{font-size:12px;min-height:32px;padding:6px 10px;gap:6px}.editor-paineis .btn svg{width:16px;height:16px;flex:none}
+.editor-paineis .botao-icone{width:32px;min-width:32px;padding:0;display:inline-flex;justify-content:center;align-items:center}
+.editor-paineis .icone{width:16px;height:16px;display:inline-block}.editor-paineis .titulo-painel{font-size:20px;line-height:28px;font-weight:700}.editor-paineis .titulo-subsecao{font-size:18px;line-height:26px;font-weight:700}
+.editor-paineis .titulo-widget,.editor-paineis [data-widget-titulo]{font-size:16px;line-height:24px;font-weight:700;overflow-wrap:anywhere}
+.editor-paineis .quadro{display:flex;gap:16px;overflow-x:auto;align-items:stretch;padding:4px 2px 18px;min-height:300px;overscroll-behavior-x:contain}
+.editor-paineis .coluna{flex:1 0 300px;min-width:300px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);display:flex;flex-direction:column}
+.editor-paineis .coluna-topo{padding:12px;border-bottom:1px solid var(--border)}.editor-paineis .coluna-ordem{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted);margin-bottom:8px}
+.editor-paineis .coluna-titulo,.editor-paineis .item-topo{display:flex;gap:8px;align-items:flex-start}.editor-paineis .coluna-titulo>div,.editor-paineis .item-topo>div{flex:1;min-width:0}
+.editor-paineis .titulo-editavel{display:inline-flex;text-align:left;align-items:center;gap:8px;border:0;background:transparent;color:var(--fg);padding:2px 0;min-height:32px;overflow-wrap:anywhere;max-width:100%}
+.editor-paineis .titulo-editavel .icone{opacity:.55;width:14px;height:14px;flex:none}.editor-paineis .titulo-editavel:hover{color:var(--accent)}
+.editor-paineis .renomear{display:flex;flex-wrap:wrap;gap:4px;align-items:center;width:100%;font-size:14px;font-weight:400}
+.editor-paineis .renomear input{width:100%;min-width:0;min-height:36px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);padding:6px 8px;color:var(--fg);font:inherit}
+.editor-paineis .erro,.editor-paineis [data-editor-novo-erro]{width:100%;font-size:12px;color:var(--danger)}
+.editor-paineis .lista-widgets{padding:12px;min-height:130px;flex:1;display:flex;flex-direction:column;gap:10px}.editor-paineis .lista-widgets:empty:after{content:'Mova um widget para esta seção';font-size:12px;color:var(--muted);border:1px dashed var(--border);padding:24px 12px;border-radius:6px;text-align:center}
+.editor-paineis .item-widget{padding:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);box-shadow:0 1px 2px #00153409}.editor-paineis .item-widget.inativo{border-style:dashed}
+.editor-paineis .item-acoes{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.editor-paineis .ativacao{display:flex;align-items:center;gap:6px;font-size:12px;margin-right:auto}.editor-paineis .ativacao input{accent-color:var(--accent);width:16px;height:16px}
+.editor-paineis .transferencia{display:flex;align-items:center;gap:6px;margin-top:8px}.editor-paineis .transferencia label{font-size:11px;color:var(--muted)}.editor-paineis .transferencia select{max-width:100%;min-width:0;flex:1;border:1px solid var(--border);border-radius:4px;font-size:12px;padding:5px;background:var(--surface);color:var(--fg)}
+.editor-paineis .subsecao-quadro{padding:12px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;background:var(--surface-2);min-width:0}.editor-paineis .subsecao-quadro>.lista-widgets{padding:12px 0 0;min-height:100px}
+.editor-paineis .coluna-titulo .titulo-subsecao{font-size:20px;line-height:28px}.editor-paineis .item-no{min-width:0}
+.editor-paineis .mover-composicao,.editor-paineis [data-no-mover]{cursor:grab;touch-action:none}.editor-paineis .mover-composicao:active,.editor-paineis [data-no-mover]:active{cursor:grabbing}
+/* Sortable coloca o helper no body: a classe continua exclusiva deste editor. */
+.pe-arraste{font:14px Figtree,sans-serif;color:var(--fg);border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:12px}.pe-arraste button{color:inherit}.editor-paineis .sortable-ghost{opacity:.3;border:2px dashed var(--accent)}
+.editor-paineis .painel-visual{height:100%;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 1px 2px #00153418;min-width:0;overflow:hidden}
+.editor-paineis .secao-cabecalho{flex:none;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px;min-width:0;height:auto;min-height:0}
+.editor-paineis .secao-cabecalho>h2,.editor-paineis .secao-cabecalho>h3{min-width:0;overflow-wrap:anywhere;margin:0}.editor-paineis .secao-corpo{flex:1;min-height:0;min-width:0;padding:0 10px 12px}
+.editor-paineis .controles-no{display:flex;gap:4px;align-items:flex-start;flex:none}.editor-paineis .controles-no .btn{width:32px;padding-inline:0}
+.editor-paineis .grid-stack{min-width:0;min-height:0}.editor-paineis .grid-stack-item-content{overflow:hidden!important}.editor-paineis .grid-stack-item-content>.painel-widget{width:100%;height:100%;min-height:0;margin:0;display:flex;flex-direction:column}
+.editor-paineis .grid-stack-item-content>.painel-widget .painel-widget-corpo{flex:1;min-height:0;min-width:0}.editor-paineis .painel-widget-cabecalho{flex:none}.editor-paineis .painel-widget-controles{flex-wrap:nowrap}
+.editor-paineis .grid-stack-item-content>.painel-widget .painel-widget-corpo>:is(.grafico,.tu1r3-grafico){flex:1 1 0;height:auto;min-height:80px;width:100%;overflow:hidden}
+.editor-paineis .grid-stack-item-content>.painel-widget:not(.painel-widget-grafico) .painel-widget-corpo{overflow:auto}.editor-paineis .painel-widget-grafico .painel-widget-corpo{overflow:hidden}
+.editor-paineis #relacao-turmas{overflow:auto}.editor-paineis #relacao-turmas .painel-relacao-cabecalho{margin:0 0 12px}
+.editor-paineis .painel-widget[data-painel-vazio=true] :is(.painel-widget-corpo,.tu1r3-alunos,.tu1r3-alunos-lista){flex:0 0 auto!important;height:auto;min-height:0;overflow:visible}
+.editor-paineis .painel-widget[data-painel-vazio=true] .tu1r3-grafico{flex:0 0 auto!important;height:auto!important;min-height:0!important;padding:0;justify-content:flex-start;text-align:start}
+.editor-paineis .painel-widget[data-painel-vazio=true] .tu1r3-alunos-lista{margin:0}.editor-paineis .painel-widget[data-painel-vazio=true] .tu1r3-alunos-vazio{padding:0;border:0}
+.editor-paineis .grid-stack-placeholder>.placeholder-content{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px}
+.editor-paineis .grid-stack-item>.ui-resizable-se{width:22px;height:22px;right:8px;bottom:8px}
+.editor-paineis .grade-interna:empty:after{content:'Mova widgets para esta seção na aba Distribuição';position:absolute;inset:12px;display:grid;place-items:center;border:1px dashed var(--border);border-radius:6px;color:var(--muted);font-size:12px;text-align:center;padding:8px}
+.editor-paineis .barra-preview{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:12px;margin-bottom:16px;font-size:13px}
+.editor-paineis .edicao-suspensa{padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;margin-bottom:16px}.editor-paineis .vazio{padding:24px;text-align:center;color:var(--muted)}
+.editor-paineis [data-editor-status]{font-size:12px;color:var(--muted);margin-block:12px}.editor-paineis [data-editor-status]:empty{display:none}.editor-paineis [data-editor-status][data-tipo=erro]{color:var(--danger)}
+.editor-paineis .editor-dialog{margin:auto;width:min(480px,calc(100vw - 32px));max-height:calc(100dvh - 40px);padding:24px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--fg);overflow:auto}.editor-paineis .editor-dialog::backdrop{background:#00153466}.editor-paineis .editor-dialog h2{font-size:20px;font-weight:700;margin:0 0 16px}.editor-paineis .editor-dialog p{margin-bottom:16px}.editor-paineis .editor-dialog .editor-paineis-acoes{justify-content:flex-end;margin-top:16px}
+.editor-paineis .tw\:-rotate-90{transform:rotate(-90deg)}.editor-paineis .tw\:rotate-90{transform:rotate(90deg)}.editor-paineis .tw\:rotate-180{transform:rotate(180deg)}
+@media(max-width:767px){.editor-paineis{margin-block:12px}.editor-paineis .arvore-mobile{display:flex;flex-direction:column;gap:14px}.editor-paineis .mobile-no{min-width:0}.editor-paineis .mobile-no>.painel-visual{height:auto}.editor-paineis .secao-cabecalho{padding:14px}.editor-paineis .secao-corpo{padding:0 10px 12px}.editor-paineis .controles-no{display:none}.editor-paineis .painel-widget{margin:0!important;height:auto}.editor-paineis .mobile-no>.painel-widget .tu1r3-grafico,.editor-paineis .mobile-no>.painel-widget .grafico{height:240px;min-height:240px}.editor-paineis-barra:has([data-editor-consultar][hidden]){display:none}.editor-paineis .btn{min-height:44px;min-width:44px}}
+@media(prefers-reduced-motion:reduce){.editor-paineis *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

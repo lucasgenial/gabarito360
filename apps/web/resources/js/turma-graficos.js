@@ -10,10 +10,11 @@ use([BarChart,PieChart,GridComponent,TooltipComponent,LegendComponent,AriaCompon
 // Dados vêm do DTO autorizado do painel. Nenhuma consulta direta ou mudança de escopo no cliente.
 const raiz=document.querySelector('[data-painel-graficos]');
 if(raiz){
+ const area=raiz.closest('[data-turma-painel]')||raiz;
  let dados;try{dados=JSON.parse(raiz.dataset.painelDados);}catch{dados={};}
  const analise=dados.analise||{}, graficos=new Map();
  const paginaAvaliacoes={inicio:0,quantidade:6};
- const navAvaliacoes=raiz.querySelector('[data-avaliacoes-paginacao]');
+ const navAvaliacoes=area.querySelector('[data-avaliacoes-paginacao]');
  const percentual=v=>v==null?'Sem percentual':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
  const cor=nome=>getComputedStyle(raiz).getPropertyValue(nome).trim();
  const cores=()=>[1,2,3,4,5].map(n=>cor('--painel-serie-'+n)||cor('--serie-'+n));
@@ -81,7 +82,7 @@ if(raiz){
   }
   g.setOption(config,true);g.resize();
  }
- const elementos=[...raiz.querySelectorAll('[data-grafico]')];
+ const elementos=[...area.querySelectorAll('.tu1r3-grafico[data-grafico]')];
  if(navAvaliacoes){
   const mostrarPagina=delta=>{paginaAvaliacoes.inicio=Math.max(0,paginaAvaliacoes.inicio+delta*paginaAvaliacoes.quantidade);const el=elementos.find(e=>e.dataset.grafico==='avaliacoes');if(el)renderizar(el);};
   navAvaliacoes.querySelector('[data-avaliacoes-anterior]').addEventListener('click',e=>{mostrarPagina(-1);if(e.currentTarget.disabled)navAvaliacoes.querySelector('[data-avaliacoes-proxima]').focus();});

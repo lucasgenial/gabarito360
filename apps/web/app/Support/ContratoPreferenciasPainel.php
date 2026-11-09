@@ -18,12 +18,14 @@ final class ContratoPreferenciasPainel
         if (array_key_exists('padrao',$d)) $r['padrao']=['desktop'=>array_map(
             static fn($w)=>array_intersect_key($w,array_flip(['id','section','x','y','w','h','altura_desejada','fixo','altura_livre','orientacao','ordem_card','ordem_secao'])),$d['padrao']['desktop'])];
         if (array_key_exists('origem_disposicao',$d)) $r['origem_disposicao']=$d['origem_disposicao'];
+        if (array_key_exists('editor',$d)) $r['editor']=ContratoEditorPainel::projetar($d['editor']);
         return $r;
     }
-    public static function valido(mixed $d): bool
+    public static function valido(mixed $d, bool $exigirEditor=false): bool
     {
         if(!is_array($d)||!is_int($d['versao']??null)||$d['versao']<0||!in_array($d['apresentacao']??null,['tabela','cards'],true)
             ||!is_array($d['catalogo']??null)||!array_is_list($d['catalogo'])||count($d['catalogo'])>64||!is_array($d['layouts']??null))return false;
+        if($exigirEditor&&!array_key_exists('editor',$d)||array_key_exists('editor',$d)&&!ContratoEditorPainel::valido($d['editor']))return false;
         $catalogo=[];
         foreach($d['catalogo'] as $c){
             if(!is_array($c)||!is_string($c['id']??null)||!preg_match('/^[a-z][a-z0-9-]{0,79}$/D',$c['id'])||isset($catalogo[$c['id']])

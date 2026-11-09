@@ -14,7 +14,7 @@ class TurmaController extends Controller
     public function index(Request $request): View
     {
         $resp = null;
-        try { $resp = $this->api->get('/v1/turmas', $request->only('busca', 'escola_id', 'ano_letivo', 'ativo')); }
+        try { $resp = $this->api->semRedirecionamentos()->comEditorPainel()->get('/v1/turmas', $request->only('busca', 'escola_id', 'ano_letivo', 'ativo')); }
         catch (ConnectionException) { /* Manter a casca e os estados indisponíveis, sem totais inventados. */ }
         $consultaConcluida = $resp?->successful() === true;
         $dados = $consultaConcluida ? $resp->json('data') : [];
@@ -43,6 +43,7 @@ class TurmaController extends Controller
         }
 
         return view('turmas.index', [
+            'editorBootstrap'=>$this->editorBootstrap($resp),
             'erroLista' => !$consultaConcluida || !$listaValida,
             'escolasErro' => $escolasErro,
             'graficoTurnosErro' => !$consultaConcluida || !$listaValida,
@@ -59,6 +60,13 @@ class TurmaController extends Controller
             'escola_id'  => $request->query('escola_id', ''),
             'ano_letivo' => $request->query('ano_letivo', ''),
         ]);
+    }
+
+    private function editorBootstrap(?\Illuminate\Http\Client\Response $r):?array
+    {
+        if(!$r?->successful())return null;$d=$r->json('meta.editor_painel');$etag=$r->json('meta.editor_etag');
+        if(!\App\Support\ContratoPreferenciasPainel::valido($d,true)||!is_string($etag)||!preg_match('/^"g360-editor-[a-f0-9]{64}"$/D',$etag))return null;
+        return ['data'=>\App\Support\ContratoPreferenciasPainel::projetar($d),'etag'=>$etag];
     }
 
     private function graficoTurnos(array $turmas): array
@@ -93,7 +101,7 @@ class TurmaController extends Controller
     public function show(int $id): View|\Illuminate\Http\Response
     {
         try {
-            $resp = $this->api->get("/v1/turmas/{$id}");
+            $resp = $this->api->semRedirecionamentos()->comEditorPainel()->get("/v1/turmas/{$id}");
         } catch (ConnectionException) {
             return $this->indisponivel();
         }
@@ -104,7 +112,7 @@ class TurmaController extends Controller
             abort(404, 'Turma não encontrada.');
         }
 
-        if (\App\Support\Acesso::administrativo()) return view('turmas.administrativo', ['turma' => $resp->json('data')]);
+        if (\App\Support\Acesso::administrativo()) return view('turmas.administrativo', ['turma' => $resp->json('data'),'editorBootstrap'=>$this->editorBootstrap($resp)]);
 
         $filtros = request()->validate(['secao'=>'nullable|in:visao-geral,alunos,disciplinas,provas,acesso',
             'catalogo_busca'=>'nullable|string|max:100','catalogo_pagina'=>'nullable|integer|min:1|max:10000']);
@@ -155,6 +163,7 @@ class TurmaController extends Controller
             catch(ConnectionException){$painelErro=true;}
         }
         return view('turmas.show', [
+            'editorBootstrap'=>$this->editorBootstrap($resp),
             'painel'=>$painel,'painelErro'=>$painelErro,'painelErros'=>$painelErros,'painelAplicado'=>$painelAplicado,'painelConsultadoEm'=>$painelConsultadoEm,
             'secaoInicial'=>$filtros['secao']??'visao-geral', 'opcoesDocentes'=>$opcoesDocentes,'opcoesDocentesErro'=>$opcoesDocentesErro,
             'acessoErro'=>$acessoErro,'escolasErro'=>$escolasErro,

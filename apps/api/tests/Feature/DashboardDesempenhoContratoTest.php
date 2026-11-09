@@ -207,6 +207,8 @@ final class DashboardDesempenhoContratoTest extends TestCase
         Sanctum::actingAs(Usuario::findOrFail(1));
         $this->getJson('/api/v1/turmas')->assertOk()->assertJsonCount(2,'data.turmas')
             ->assertJsonPath('data.resumo_cadastral.cadastros_ativos',2);
+        $this->getJson('/api/v1/turmas',['X-G360-Painel-Editor'=>'3'])->assertOk()->assertJsonCount(2,'data.turmas')
+            ->assertJsonPath('data.resumo_cadastral.cadastros_ativos',2)->assertJsonMissingPath('meta.editor_painel');
     }
 
 }

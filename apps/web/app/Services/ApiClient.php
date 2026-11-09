@@ -13,6 +13,14 @@ class ApiClient
     private bool $usarIdentidade = false;
     private bool $seguirRedirecionamentos = true;
     private ?int $turmaPainel = null;
+    private bool $editorPainel = false;
+    private ?string $editorEtag = null;
+
+    public function comEditorPainel(?string $etag=null):self
+    {
+        if($etag!==null&&!preg_match('/^"g360-editor-[a-f0-9]{64}"$/D',$etag))throw new \InvalidArgumentException('Validador de editor inválido.');
+        $copia=clone $this;$copia->editorPainel=true;$copia->editorEtag=$etag;return $copia;
+    }
 
     /** Seletor do recurso autorizado na referência Web; a API sempre revalida o acesso. */
     public function noPainelDaTurma(?int $turma): self
@@ -55,6 +63,8 @@ class ApiClient
         }
 
         if ($this->turmaPainel !== null) $request = $request->withHeaders(['X-G360-Painel-Turma'=>(string)$this->turmaPainel]);
+        if ($this->editorPainel) $request=$request->withHeaders(['X-G360-Painel-Editor'=>'3']);
+        if ($this->editorEtag!==null) $request=$request->withHeaders(['If-None-Match'=>$this->editorEtag]);
 
         return $request;
     }
