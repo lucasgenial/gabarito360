@@ -3,6 +3,8 @@
   <button type="button" class="btn btn-secondary" data-editor-organizar disabled><x-icone nome="editar" /> Organizar painel</button>
   <button type="button" class="btn btn-secondary" data-editor-consultar hidden><x-icone nome="atualizar" /> Consultar estado salvo</button>
  </div>
+ <x-aviso tipo="info" data-editor-aviso hidden aria-live="polite" />
+ <p role="status" aria-live="polite" data-editor-status></p>
  <section data-editor-edicao hidden aria-label="Editar composição do painel">
   <div class="barra-editor">
    <div role="tablist" aria-label="Organização do painel">
@@ -23,7 +25,6 @@
  <p class="edicao-suspensa" data-editor-suspenso hidden>O rascunho foi preservado. Volte ao desktop para continuar a edição.</p>
  <div class="barra-preview" data-editor-preview hidden><span>Prévia das alterações ainda não salvas.</span><button type="button" class="btn btn-secondary" data-editor-voltar>Voltar à edição</button></div>
  <div data-editor-leitura></div>
- <p role="status" aria-live="polite" data-editor-status></p>
  <dialog class="editor-dialog" data-editor-confirmacao aria-labelledby="pe-confirmar-titulo">
   <h2 id="pe-confirmar-titulo"></h2><p data-editor-confirmar-texto></p>
   <div class="editor-paineis-acoes"><button type="button" class="btn btn-secondary" data-editor-nao>Cancelar</button><button type="button" class="btn btn-primary" data-editor-sim>Confirmar</button></div>
