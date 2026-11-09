@@ -39,3 +39,30 @@ As sprites foram geradas como imagens, não como pixel art em grade: têm entre 
 ## Validação e publicação
 
 Testes PHP do helper, testes JS existentes, CI completa e revisão independente de segurança/arquitetura. A configuração nginx fica versionada no repositório como referência e é aplicada só na VM 120, com backup do arquivo anterior e `nginx -t` antes do reload. Publicação somente na homologação, pelo roteiro de [127](127-h1-homologacao-isolada.md) e [129](129-h1-publicacao-ci1-e.md), com backup, comparação de dados e plano de retorno. Produção continua dependendo de decisão expressa do responsável.
+
+## Resultado na homologação
+
+Publicada em 09/11/2026 a release `9aee7fa21534aeab2a79fdaebd63e65bb61cdcff` (PR 233), fase `HOMOLOGACAO-PERF-F3`, sobre `a7e08f5`. O operador manteve a homologação em manutenção até conferir os dados. Confirmou 130 tabelas e 201 arquivos idênticos, sem migration e sem mudança de esquema, com backup SQL e de arquivos validado antes da troca. Reutilizou o `vendor` com locks idênticos e preservou a home independente, o isolamento FPM e o túnel.
+
+Depois da release, o site nginx da VM recebeu o `map` e o snippet de `infra/homologacao/nginx`, com backup do arquivo anterior e `nginx -t`. O hash do site passou de `f5096d6c…` para `aa1d9c0d…`, e os próximos operadores precisam usar o hash novo como referência. Na conferência por loopback:
+
+| Resposta | Cache-Control |
+|---|---|
+| CSS/JS com `?v=` de 16 hexadecimais | `private, max-age=31536000, immutable` |
+| Estáticos sem versão ou com versão inválida, inclusive sprites | `private, no-cache` (ETag; revalidação devolve 304 sem corpo) |
+| `/login`, manifesto, `/.env` (403), `/storage` (404) | `no-store` |
+| Asset sem Basic Auth | 401 |
+
+Uma URL com `v` forjado no formato válido também recebe cache imutável, mas só no cache privado de quem a pediu. Ela continua servindo o arquivo atual, sem expor conteúdo.
+
+Medição no Chrome autenticado do coordenador, nos mesmos três percursos da F1. A coluna "com cache" é a segunda navegação. A coluna "assets sem cache" baixa de novo todos os CSS, JS, imagens e fontes da tela com URL única, o equivalente ao cache desabilitado restrito a arquivos técnicos. Ela não inclui documento HTML nem chamadas BFF.
+
+| Percurso | F1: bytes transferidos, cache normal | F3: bytes transferidos, com cache | F3: assets sem cache |
+|---|---:|---:|---:|
+| Painel | 2.609.068 | 15.693 | 516.733 |
+| Lista de turmas | 5.270.691 | 53.324 | 1.244.323 |
+| Turma (pela lista) | 8.159.322 | 39.688 | 1.695.228 |
+
+Na turma, os quatro gráficos renderizam com um único runtime (`echarts-g360`, 205.826 B transferidos com compressão) e sem erros no console. Os avatares e brasões aparecem no tema claro e no escuro. Abrir `/app/turmas/detalhes` direto, sem vir da lista, mostra "Não foi possível abrir esta tela", comportamento da UR4 que já existia, porque a URL não carrega identificador.
+
+Limites: amostra única por percurso, um perfil (coordenador), desktop e rede real pela borda. Não foram medidos LCP/INP nem celular real. A conferência de 36–44 px dos brasões foi feita nas comparações estáticas da revisão de design. Os PNG v1 e o `echarts-6.1.0.common.min.js` continuam no diretório para a home exportada e a prévia local.
