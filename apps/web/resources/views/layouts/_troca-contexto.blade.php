@@ -23,4 +23,4 @@
     @endforeach
   </div>
 </dialog>
-<script src="{{ asset('js/troca-contexto.js') }}?v={{ filemtime(public_path('js/troca-contexto.js')) }}"></script>
+<script src="@ativo('js/troca-contexto.js')"></script>

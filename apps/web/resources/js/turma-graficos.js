@@ -1,11 +1,6 @@
-import {init,use} from 'echarts/core';
-import {BarChart,PieChart} from 'echarts/charts';
-import {GridComponent,TooltipComponent,LegendComponent,AriaComponent,TitleComponent} from 'echarts/components';
-import {SVGRenderer} from 'echarts/renderers';
-import {LabelLayout} from 'echarts/features';
+// ECharts vem do runtime único js/libs/echarts-g360.min.js (window.echarts), carregado antes deste arquivo.
 import './painel-ajuda.js';
 import {baseResultados} from './painel-indicadores.js';
-use([BarChart,PieChart,GridComponent,TooltipComponent,LegendComponent,AriaComponent,TitleComponent,SVGRenderer,LabelLayout]);
 
 // Dados vêm do DTO autorizado do painel. Nenhuma consulta direta ou mudança de escopo no cliente.
 const raiz=document.querySelector('[data-painel-graficos]');
@@ -62,7 +57,8 @@ if(raiz){
   if(!elemento.clientWidth)return;
   let g=graficos.get(elemento);const config=opcoes(elemento.dataset.grafico,elemento);
   if(!config){if(g){g.dispose();graficos.delete(elemento);}vazio(elemento,elemento.dataset.grafico==='questoes'?'Sem análise de questões disponível neste recorte.':(['distribuicao','avaliacoes'].includes(elemento.dataset.grafico)&&dados.situacoes?.total>0?'Os resultados do recorte não têm percentual válido.':'Ainda não há resultados para este gráfico.'));return;}
-  if(!g){elemento.textContent='';elemento.classList.remove('tu1r3-grafico-vazio');g=init(elemento,null,{renderer:'svg'});graficos.set(elemento,g);}
+  if(!g&&!window.echarts){vazio(elemento,'Gráfico indisponível. Os números continuam nos indicadores da turma.');return;}
+  if(!g){elemento.textContent='';elemento.classList.remove('tu1r3-grafico-vazio');g=window.echarts.init(elemento,null,{renderer:'svg'});graficos.set(elemento,g);}
   const tipo=elemento.dataset.grafico;
   if(tipo==='distribuicao'||tipo==='avaliacoes'){
    const horizontal=config.xAxis.type==='value';

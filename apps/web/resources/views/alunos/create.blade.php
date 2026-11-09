@@ -126,4 +126,4 @@
 <div style="height:48px;"></div>
 @endsection
 
-@push('scripts')<script src="{{ asset('js/aluno-cadastro.js') }}" defer></script>@endpush
+@push('scripts')<script src="@ativo('js/aluno-cadastro.js')" defer></script>@endpush

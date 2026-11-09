@@ -36,5 +36,5 @@
   @endif
   @if(session('auth_token'))<form method="POST" action="{{ route('logout') }}">@csrf <x-revisao-acesso /><button class="btn btn-ghost" type="submit">Sair desta conta</button></form>@endif
 </section></main>
-<script src="{{ asset('js/convite-vinculo.js') }}?v={{ @filemtime(public_path('js/convite-vinculo.js')) }}"></script>
+<script src="@ativo('js/convite-vinculo.js')"></script>
 @endsection

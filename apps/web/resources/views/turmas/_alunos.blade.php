@@ -82,7 +82,7 @@
 
 @if($gestorAluno && \App\Support\Acesso::pode('aluno.gerir'))
 <dialog class="tu1-dialog" data-transferencia-modal aria-labelledby="transferencia-titulo"><div class="tu1-dialog-cabecalho"><h2 id="transferencia-titulo">Transferir aluno entre turmas</h2><button class="btn btn-ghost tu1-icone-acao" type="button" data-transferencia-fechar aria-label="Fechar transferência" title="Fechar transferência"><x-icone nome="fechar" /></button></div><div data-transferencia-corpo></div></dialog>
-@push('scripts')<script src="{{ asset('js/turma-transferencia.js') }}?v={{ filemtime(public_path('js/turma-transferencia.js')) }}" defer></script>@endpush
+@push('scripts')<script src="@ativo('js/turma-transferencia.js')" defer></script>@endpush
 @endif
 
 @endif

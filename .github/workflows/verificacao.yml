@@ -87,7 +87,7 @@ jobs:
       - run: npm ci --prefix scripts/calendario --ignore-scripts --no-audit --no-fund
       - run: node scripts/calendario/build.mjs && git diff --exit-code -- apps/web/public/js/painel-agenda.js apps/web/public/css/painel-agenda.css apps/web/public/js/libs/calendarjs
       - run: npm ci --prefix scripts/graficos --ignore-scripts --no-audit --no-fund
-      - run: node scripts/graficos/build.mjs && git diff --exit-code -- apps/web/public/js/turma-graficos.js apps/web/public/js/libs/echarts
+      - run: node scripts/graficos/build.mjs && git diff --exit-code -- apps/web/public/js/turma-graficos.js apps/web/public/js/libs/echarts apps/web/public/js/libs/echarts-g360.min.js
       - run: npm ci --prefix scripts/notificacoes --ignore-scripts --no-audit --no-fund
       - run: node scripts/notificacoes/build.mjs && git diff --exit-code -- apps/web/public/js/notificacoes.js apps/web/public/js/libs/solid-js apps/web/public/js/libs/solid-toast
       - run: python3 -m pip install -r apps/api/omr/requirements.txt pypdf

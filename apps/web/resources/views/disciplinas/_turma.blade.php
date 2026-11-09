@@ -1,5 +1,5 @@
 @if($dc1Visivel ?? false)
-@push('styles')<link rel="stylesheet" href="{{ asset('css/disciplinas.css') }}?v={{ @filemtime(public_path('css/disciplinas.css')) }}">@endpush
+@push('styles')<link rel="stylesheet" href="@ativo('css/disciplinas.css')">@endpush
 <section class="dc1-stack" id="turma-disciplinas" aria-labelledby="turma-disciplinas-titulo">
 <div class="card"><div class="card-pad"><h2 id="turma-disciplinas-titulo">Disciplinas e professores</h2>
 @if($dc1Erro)<x-aviso tipo="erro">Não foi possível carregar a organização das disciplinas. Atualize a página antes de fazer alterações.</x-aviso>@else
@@ -20,4 +20,4 @@
 </div></section>
 @endif
 
-@push('scripts')<script src="{{ asset('js/turma-atribuicao.js') }}?v={{ filemtime(public_path('js/turma-atribuicao.js')) }}" defer></script>@endpush
+@push('scripts')<script src="@ativo('js/turma-atribuicao.js')" defer></script>@endpush

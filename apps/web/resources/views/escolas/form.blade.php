@@ -202,5 +202,5 @@
 @push('scripts')
 @php($g360Config = ['id'=>$e['id']??null,'buscar'=>\App\Support\NavegacaoWeb::destino('escolas.censo.buscar'),'pesquisar'=>\App\Support\NavegacaoWeb::destino('escolas.censo.pesquisar')])
 <script type="application/json" id="escola-formulario-config">@json($g360Config)</script>
-<script src="{{ asset('js/escola-formulario.js') }}?v={{ filemtime(public_path('js/escola-formulario.js')) }}"></script>
+<script src="@ativo('js/escola-formulario.js')"></script>
 @endpush

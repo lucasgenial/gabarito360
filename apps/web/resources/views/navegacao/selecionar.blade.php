@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow"><title>Selecione o registro — Gabarito360</title>
-<link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}">
-<link rel="stylesheet" href="{{ asset('css/marca.css') }}?v={{ filemtime(public_path('css/marca.css')) }}">
+<link rel="stylesheet" href="@ativo('css/app.css')">
+<link rel="stylesheet" href="@ativo('css/marca.css')">
 </head><body class="area-publica pagina-acesso"><main class="vinculo-pagina">
 <a class="brand" href="/app/painel"><x-marca /></a><section class="card vinculo-card">
 <h1>Selecione o registro para continuar</h1><p>Abra esta tela pela lista. A seleção anterior pode ter expirado ou pertencer a outro acesso.</p>

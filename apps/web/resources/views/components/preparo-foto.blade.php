@@ -1,10 +1,10 @@
 @props(['id'])
 @once
-<script src="{{ asset('js/libs/cropper-2.3.1.min.js') }}"></script>
-<script src="{{ asset('js/preparo-foto-geometria.js') }}?v={{ @filemtime(public_path('js/preparo-foto-geometria.js')) }}"></script>
-<script src="{{ asset('js/preparo-foto.js') }}?v={{ @filemtime(public_path('js/preparo-foto.js')) }}"></script>
+<script src="@ativo('js/libs/cropper-2.3.1.min.js')"></script>
+<script src="@ativo('js/preparo-foto-geometria.js')"></script>
+<script src="@ativo('js/preparo-foto.js')"></script>
 @endonce
-<div id="{{ $id }}-editor" class="foto-editor" data-codec-version="{{ @filemtime(public_path('js/preparo-foto-codecs.js')) }}" hidden>
+<div id="{{ $id }}-editor" class="foto-editor" data-codec-version="{{ \App\Support\Ativos::versao('js/preparo-foto-codecs.js') }}" hidden>
  <p data-foto-status role="status" aria-live="polite"></p>
  <button data-foto-abortar type="button" class="btn btn-secondary" hidden>Cancelar preparação</button>
  <div data-foto-ajustes hidden>

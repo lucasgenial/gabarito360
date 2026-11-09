@@ -7,9 +7,9 @@
 <title>{{ config('apresentacao.titulo') }}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}"/>
+<link rel="stylesheet" href="@ativo('css/app.css')"/>
 @include('layouts._marca-head')
-<link rel="stylesheet" href="{{ asset('css/apresentacao-publica.css') }}?v={{ filemtime(public_path('css/apresentacao-publica.css')) }}">
+<link rel="stylesheet" href="@ativo('css/apresentacao-publica.css')">
 </head>
 <body class="area-publica tela-inicio publico-apresentacao">
 
@@ -135,7 +135,7 @@
 </div></section>
 </main>
 <x-rodape-publico />
-<script src="{{ asset('js/apresentacao-publica.js') }}?v={{ filemtime(public_path('js/apresentacao-publica.js')) }}" defer></script>
+<script src="@ativo('js/apresentacao-publica.js')" defer></script>
 
 </body>
 </html>

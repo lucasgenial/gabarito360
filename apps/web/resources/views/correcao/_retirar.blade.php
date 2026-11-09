@@ -8,4 +8,4 @@
     <div class="retirar-acoes"><button type="button" class="btn btn-secondary" id="retirar-cancelar" autofocus>Cancelar</button><button type="submit" class="btn btn-danger">Retirar correção</button></div>
   </form>
 </dialog>
-@push('scripts')<script src="{{ asset('js/retirar-cartao.js') }}?v={{ filemtime(public_path('js/retirar-cartao.js')) }}"></script>@endpush
+@push('scripts')<script src="@ativo('js/retirar-cartao.js')"></script>@endpush

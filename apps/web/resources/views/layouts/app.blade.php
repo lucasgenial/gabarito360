@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="description" content="Gabarito360: correção de provas e relatórios educacionais.">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<script src="{{ asset('js/navegacao.js') }}?v={{ @filemtime(public_path('js/navegacao.js')) }}" defer></script>
+<script src="@ativo('js/navegacao.js')" defer></script>
 <title>@yield('title', 'Painel') — Gabarito360</title>
-<link rel="stylesheet" href="{{ asset('css/app-conteudo-legado.css') }}?v={{ @filemtime(public_path('css/app-conteudo-legado.css')) }}" />
+<link rel="stylesheet" href="@ativo('css/app-conteudo-legado.css')" />
 @if(\App\Support\ContextoWeb::revisao())
 <meta name="g360-revisao" content="{{ \App\Support\ContextoWeb::revisao() }}">
-<script src="{{ asset('js/contexto-aba.js') }}?v={{ @filemtime(public_path('js/contexto-aba.js')) }}"></script>
+<script src="@ativo('js/contexto-aba.js')"></script>
 @endif
-<link rel="stylesheet" href="{{ asset('css/tabelas.css') }}?v={{ @filemtime(public_path('css/tabelas.css')) }}" />
+<link rel="stylesheet" href="@ativo('css/tabelas.css')" />
 @stack('styles')
 {{-- Aplica o menu recolhido antes de desenhar a página (preferência do navegador) --}}
-<script src="{{ asset('js/layout-preferencias.js') }}?v={{ filemtime(public_path('js/layout-preferencias.js')) }}"></script>
+<script src="@ativo('js/layout-preferencias.js')"></script>
 @include('layouts._marca-head')
-<link rel="stylesheet" href="{{ asset('css/estrutura-app.css') }}?v={{ filemtime(public_path('css/estrutura-app.css')) }}">
+<link rel="stylesheet" href="@ativo('css/estrutura-app.css')">
 </head>
 <body class="area-logada tw2-app {{ config('release.sha') ? 'com-release' : '' }} @yield('tela')">
 
@@ -90,15 +90,15 @@
 </dialog>
 @endif
 @endif
-<script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
-<script src="{{ asset('js/carregamento.js') }}?v={{ @filemtime(public_path('js/carregamento.js')) }}"></script>
-<script src="{{ asset('js/entrada-vinculo.js') }}?v={{ filemtime(public_path('js/entrada-vinculo.js')) }}"></script>
+<script src="@ativo('js/app.js')"></script>
+<script src="@ativo('js/carregamento.js')"></script>
+<script src="@ativo('js/entrada-vinculo.js')"></script>
 @if($vinculoAtual && $opcoesTroca['disponivel']) @include('layouts._troca-contexto') @endif
 
-<script src="{{ asset('js/tabelas.js') }}?v={{ @filemtime(public_path('js/tabelas.js')) }}"></script>
+<script src="@ativo('js/tabelas.js')"></script>
 @stack('scripts')
 @include('layouts._imagem-usuario')
 @include('layouts._notificacoes')
-<script src="{{ asset('js/layout-interacoes.js') }}?v={{ filemtime(public_path('js/layout-interacoes.js')) }}"></script>
+<script src="@ativo('js/layout-interacoes.js')"></script>
 </body>
 </html>
