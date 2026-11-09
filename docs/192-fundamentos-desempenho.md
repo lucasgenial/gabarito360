@@ -29,14 +29,16 @@ Aplicar cada critério ao risco e à funcionalidade. Justificar o que não se ap
 
 ## Backlog após a baseline
 
+Atualização em09/11/2026: F0/F1 fechadas pela entrega documental e pelo diagnóstico da release2cb3305. O [plano integral](194-planejamento-desempenho-integral.md), o [ADR195](195-adr-fundamentos-desempenho.md) e o [diagnóstico F1](196-diagnostico-desempenho-f1.md) registram a situação atual. As medições anteriores permanecem históricas, com seus métodos/limites; não são substituídas retroativamente.
+
 | Grupo | Mudança proposta | Situação |
 |---|---|---|
-| PERF-01 | Baseline autenticada e decomposição por camada | Próxima após estabilizar o editor |
-| PERF-02/03 | Reduzir consultas repetidas de escopo e consultas em loops dos painéis | A priorizar por medição e prova de isolamento |
-| PERF-07/08 | Cache/compressão/versionamento dos assets e runtime de gráficos | Problema na origem observado; falta medir borda/navegador |
+| PERF-01 | Baseline autenticada e decomposição por camada | F1 concluída: oito perfis/12 casos HTTP/CLI separados e oito capturas Chrome; vitals/capacidade e limites permanecem explícitos |
+| PERF-02/03 | Reduzir consultas repetidas de escopo e consultas em loops dos painéis | Próxima etapa F2 completa: cadeia de autorização e painéis, com professor/gestão prioritários pelos resultados medidos |
+| PERF-07/08 | Cache/compressão/versionamento dos assets e runtime de gráficos | F3 planejada: origem/borda/browser medidos; assets no-store, sprites grandes e runtimes de gráficos duplicados; zstd já observado |
 | PERF-04/05/06/14 | Composição mínima, UR4 deduplicado, fotos e regiões progressivas | A medir por percurso |
 | PERF-09/10/12 | DTOs/paginação, planos/índices e documentos em fila quando necessário | Dependem de custo/volume demonstrados |
-| PERF-11 | Composição dos painéis com bootstrap, cache técnico versionado e estado em memória | Integrada à candidata do editor; validação da release ainda necessária |
+| PERF-11 | Composição dos painéis com bootstrap, cache técnico versionado e estado em memória | Editor publicado e validado em homologação; F1 confirma bootstrap sem consulta exclusiva adicional; demais otimizações seguem F3/F4 |
 | PERF-13/15 | Capacidade e operação/backup | Ajustar somente com evidência; manter durabilidade e segurança |
 
 ## Cache do editor nesta entrega
