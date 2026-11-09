@@ -34,9 +34,25 @@ final class NavegacaoWeb
         }
         $dados = ['nome'=>$nome,'metodo'=>$metodo,'parametros'=>$alvos,'consulta'=>$consulta];
         $json = json_encode($dados, JSON_THROW_ON_ERROR);
-        $ref = substr(hash_hmac('sha256', $json, self::escopo()), 0, 48);
-        Cache::put('ur4:'.self::escopo().':'.$ref, Crypt::encryptString($json), now()->addMinutes((int) config('session.lifetime', 120)));
+        $escopo = self::escopo();
+        $ref = substr(hash_hmac('sha256', $json, $escopo), 0, 48);
+        self::guardar($escopo, $ref, $json);
         return ['url'=>'/'.$meta['consulta'], 'pagina'=>'/'.$meta['pagina'], 'referencia'=>$ref, 'metodo'=>$metodo];
+    }
+
+    /**
+     * F4-C: a mesma referência (mesmo alvo, mesmo escopo) é gravada uma vez por requisição.
+     * A referência é determinística no escopo; repetir a gravação só renovaria o mesmo valor.
+     */
+    private static function guardar(string $escopo, string $ref, string $json): void
+    {
+        $request = request();
+        $emitidas = $request->attributes->get('ur4_emitidas', []);
+        if (isset($emitidas[$escopo.':'.$ref])) return;
+        if (!$request->attributes->has('ur4_expira')) $request->attributes->set('ur4_expira', now()->addMinutes((int) config('session.lifetime', 120)));
+        Cache::put('ur4:'.$escopo.':'.$ref, Crypt::encryptString($json), $request->attributes->get('ur4_expira'));
+        $emitidas[$escopo.':'.$ref] = true;
+        $request->attributes->set('ur4_emitidas', $emitidas);
     }
 
     public static function obter(mixed $ref, ?string $nome = null): ?array
@@ -54,6 +70,19 @@ final class NavegacaoWeb
     public static function deUrl(string $url, ?string $metodo = null, bool $todos = false): ?array
     {
         if ($url === '' || str_starts_with($url, '#')) return null;
+        // F4-C: a mesma URL aparece várias vezes por página (menus, linhas, ações); resolve uma vez por requisição e escopo.
+        $request = request();
+        $memo = $request->attributes->get('ur4_urls', []);
+        $chave = self::escopo()."\0".($metodo ?? '')."\0".($todos ? '1' : '0')."\0".$url;
+        if (array_key_exists($chave, $memo)) return $memo[$chave];
+        $destino = self::resolverUrl($url, $metodo, $todos);
+        $memo[$chave] = $destino;
+        $request->attributes->set('ur4_urls', $memo);
+        return $destino;
+    }
+
+    private static function resolverUrl(string $url, ?string $metodo, bool $todos): ?array
+    {
         $u = parse_url(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
         if (!$u || isset($u['user']) || isset($u['pass'])) return null;
         if (isset($u['host']) && strtolower($u['host']) !== strtolower(request()->getHost())) return null;
@@ -62,7 +91,12 @@ final class NavegacaoWeb
         parse_str($u['query'] ?? '', $query);
         $catalogo=self::catalogoDeUrls();
         if (isset($catalogo['fixos'][$path])) return null;
-        foreach ($catalogo['originais'] as $entrada) {
+        // F4-C: só as rotas do mesmo módulo (e as de módulo variável), na ordem original do catálogo.
+        $segmento=explode('/',$path,4)[2]??'';
+        $indices=array_merge($catalogo['segmentos'][$segmento]??[],$catalogo['curingas']);
+        if ($catalogo['curingas']) sort($indices);
+        foreach ($indices as $indice) {
+            $entrada=$catalogo['originais'][$indice];
             $meta=$entrada['meta'];
             if ($metodo && !in_array($metodo, $meta['metodos'], true)) continue;
             if (!preg_match($entrada['regex'], $path, $m)) continue;
@@ -80,14 +114,39 @@ final class NavegacaoWeb
     {
         $request=request();
         if ($request->attributes->has('ur4_catalogo_urls')) return $request->attributes->get('ur4_catalogo_urls');
-        $catalogo=['fixos'=>[],'originais'=>[]];
+        $catalogo=['fixos'=>[],'originais'=>[],'segmentos'=>[],'curingas'=>[]];
+        $rotas=[];$assinatura='';
         foreach (app('router')->getRoutes() as $rota) {
             if (!($meta=$rota->getAction('ur4')) || $rota->getAction('ur4_consulta')) continue;
+            $rotas[]=[$rota,$meta];
+            $assinatura.=$meta['nome']."\0".$meta['original']."\0".implode(',',$rota->methods())."\0".json_encode($rota->wheres)."\n";
+        }
+        // F4-C: compilar as expressões custa milissegundos por requisição. Elas dependem só das rotas da release e
+        // ficam no cache sob a assinatura das rotas, sem alvos, sessão ou autoridade. Como as referências, o valor é
+        // cifrado e autenticado pela APP_KEY: um cache adulterado ou ilegível é ignorado e o catálogo é recompilado.
+        $chave='ur4-catalogo:'.hash('xxh128',$assinatura);
+        $regexes=null;
+        $guardado=Cache::get($chave);
+        if (is_string($guardado)) {
+            try { $regexes=json_decode(Crypt::decryptString($guardado),true,4,JSON_THROW_ON_ERROR); }
+            catch (\Throwable) { $regexes=null; }
+        }
+        if (!is_array($regexes) || count($regexes)!==count($rotas) || !array_is_list($regexes)
+            || array_filter($regexes,fn($r)=>!is_string($r))) {
+            $regexes=[];
+            foreach ($rotas as [$rota,$meta]) {
+                $teste=new \Illuminate\Routing\Route($rota->methods(),$meta['original'],$rota->getAction());
+                $teste->setUri($meta['original'])->where($rota->wheres);
+                $regexes[]=$teste->toSymfonyRoute()->compile()->getRegex();
+            }
+            Cache::forever($chave,Crypt::encryptString(json_encode($regexes,JSON_THROW_ON_ERROR)));
+        }
+        foreach ($rotas as $i=>[$rota,$meta]) {
             if ($meta['consulta']!==$meta['original']) $catalogo['fixos']['/'.$meta['consulta']]=true;
             if ($meta['parametros']) $catalogo['fixos']['/'.$meta['pagina']]=true;
-            $teste=new \Illuminate\Routing\Route($rota->methods(),$meta['original'],$rota->getAction());
-            $teste->setUri($meta['original'])->where($rota->wheres);
-            $catalogo['originais'][]=['meta'=>$meta,'regex'=>$teste->toSymfonyRoute()->compile()->getRegex()];
+            $catalogo['originais'][]=['meta'=>$meta,'regex'=>(string)$regexes[$i]];
+            $segmento=explode('/',$meta['original'],3)[1]??'';
+            if (str_contains($segmento,'{')) $catalogo['curingas'][]=$i; else $catalogo['segmentos'][$segmento][]=$i;
         }
         $request->attributes->set('ur4_catalogo_urls',$catalogo);
         return $catalogo;
@@ -105,8 +164,9 @@ final class NavegacaoWeb
         if (!$dados) throw new \RuntimeException('Seleção de retorno indisponível.');
         $dados['entrada']=bin2hex(random_bytes(16));
         $json=json_encode($dados,JSON_THROW_ON_ERROR);
-        $ref=substr(hash_hmac('sha256',$json,self::escopo()),0,48);
-        Cache::put('ur4:'.self::escopo().':'.$ref,Crypt::encryptString($json),now()->addMinutes((int)config('session.lifetime',120)));
+        $escopo=self::escopo();
+        $ref=substr(hash_hmac('sha256',$json,$escopo),0,48);
+        self::guardar($escopo,$ref,$json);
         $destino['referencia']=$ref;
         return $destino;
     }

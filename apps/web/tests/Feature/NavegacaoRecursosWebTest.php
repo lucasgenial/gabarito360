@@ -58,6 +58,26 @@ class NavegacaoRecursosWebTest extends TestCase
             ['X-G360-Hidratar'=>'1']+$headers);
     }
 
+    public function test_referencias_repetidas_sao_gravadas_uma_vez_por_requisicao_e_escopo(): void
+    {
+        $gravadas=[];
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Cache\Events\KeyWritten::class,function($e)use(&$gravadas){if(str_starts_with($e->key,'ur4:'))$gravadas[]=$e->key;});
+        $a=NavegacaoWeb::destino('turmas.show',['id'=>14]);$b=NavegacaoWeb::destino('turmas.show',[14]);
+        $c=NavegacaoWeb::deUrl('/app/turmas/14','GET');$d=NavegacaoWeb::deUrl('/app/turmas/14','GET');
+        $outra=NavegacaoWeb::destino('turmas.show',['id'=>15]);
+        $this->assertSame($a,$b);$this->assertSame($c,$d);$this->assertSame($c,NavegacaoWeb::destino('turmas.show',['id'=>'14']));
+        $this->assertNotSame($a['referencia'],$outra['referencia']);
+        $this->assertCount(3,$gravadas,'mesmo alvo no mesmo escopo grava uma única vez');
+        $this->assertSame(14,(int)NavegacaoWeb::obter($a['referencia'])['parametros']['id']);
+        $this->assertNull(NavegacaoWeb::deUrl('/app/turmas/14','GET'.'X'));
+        // Outro vínculo muda o escopo: a referência anterior não é reaproveitada nem dispensa a gravação.
+        $this->selecionar('coordenador');
+        $e=NavegacaoWeb::destino('turmas.show',['id'=>14]);$f=NavegacaoWeb::deUrl('/app/turmas/14','GET');
+        $this->assertNotSame($a['referencia'],$e['referencia']);$this->assertSame($e,NavegacaoWeb::destino('turmas.show',[14]));$this->assertNotSame($c,$f);
+        $this->assertCount(5,$gravadas);
+        $this->assertNull(NavegacaoWeb::obter($a['referencia']),'referência do escopo anterior não resolve no novo');
+    }
+
     public function test_duas_turmas_tem_alvos_imoveis_sem_selecao_global(): void
     {
         $this->observar('turmas.show');
