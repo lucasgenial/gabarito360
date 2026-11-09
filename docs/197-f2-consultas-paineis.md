@@ -1,6 +1,6 @@
 # F2 — Consultas atuais, autorização e agregações dos painéis
 
-**Entrada revisada em 09/11/2026. Status: planejamento da etapa autorizada, implementação em andamento; nenhum resultado de otimização declarado.** Base de entrada: `origin/main` em `0faa2ec800f59b74c76b84a7e229cd206e575ad1`, branch `perf/f2-consultas-paineis`. Este documento detalha F2 de [194](194-planejamento-desempenho-integral.md), sob os fundamentos aceitos em [195](195-adr-fundamentos-desempenho.md). Evidências anteriores: [196](196-diagnostico-desempenho-f1.md) e insumos operacionais fora do Git.
+**Revisão de 09/11/2026. Status: F2 concluída, publicada e validada somente na homologação.** Base de entrada: `origin/main` em `0faa2ec800f59b74c76b84a7e229cd206e575ad1`, branch `perf/f2-consultas-paineis`. A implementação e a correção de compatibilidade foram integradas pelos PR230/231; runtime homologado `a7e08f5cb89f1a7753ef58cb2bb059ceb2bb9c60`. Este documento conserva o desenho de entrada e registra o fechamento de F2 de [194](194-planejamento-desempenho-integral.md), sob os fundamentos aceitos em [195](195-adr-fundamentos-desempenho.md). Evidências anteriores: [196](196-diagnostico-desempenho-f1.md) e insumos operacionais fora do Git.
 
 ## Resultado exigido e limites
 
@@ -111,6 +111,28 @@ Conservar também a condição do AVG anterior sobre o retorno bruto do driver: 
 
 Ordenações antigas sem desempate exigem oráculo específico, não normalização genérica: enumeração de respostas FULL apenas para os valores/linhas empatados demonstrados por SQL, preservando todos os demais campos, tipos e ordens. Há controles separados para última prova da direção, alunos com a mesma média e provas da turma com a mesma data. Qualquer alteração além desses empates, perda de linhas, mudança de tipos ou dados entre as janelas bloqueia o aceite.
 
-As correções passaram no foco SQLite/MariaDB (59 testes, 609 assertivas), incluindo a reprodução RED→GREEN do núcleo; a fixture final de isolamento passou em ambas as engines. O encerramento operacional continua condicionado ao CI, à revisão independente da candidata exata e à comparação nativa após a publicação de compatibilidade. Produção permanece fora do escopo.
+As correções passaram no foco SQLite/MariaDB (59 testes, 609 assertivas), incluindo a reprodução RED→GREEN do núcleo; a fixture final de isolamento passou em ambas as engines (sete testes, 57 assertivas). O CI do PR231 passou nos cinco jobs, incluindo 1.039 testes da API e 812 do filtro MariaDB, além dos cinco testes preliminares de progresso. O fechamento inclui `F2JuncoesTest` explicitamente no filtro MariaDB para não depender apenas da suíte completa SQLite e da execução MariaDB local. Produção permanece fora do escopo.
 
 F2 só termina com todas as linhas de cobertura tratadas e verificadas, permissões/revogação atuais, contrato equivalente, crescimento controlado, comparação integrada por método, revisão de segurança/arquitetura e CI. O número de statements/latência final será resultado da medição, nunca promessa deste plano. Conservar evidências sanitizadas no diretório operacional, com SHA/release, método, cenário, população e limitações. Atualizar o status do plano integral e apresentar a tabela de etapas ao responsável.
+
+### Resultado final medido na homologação
+
+A comparação final usou a versão anterior `2cb3305c1e01b3428f16000bb159409455ff0d7c` e a candidata exata `a7e08f5cb89f1a7753ef58cb2bb059ceb2bb9c60`, com os mesmos atores, alvos e conteúdo das 34 tabelas de negócio observadas. Os 12 casos de oito perfis passaram sem divergências, incluindo respostas completas, tipos e estados de acesso. As únicas variações admitidas são as três famílias de empates SQL preexistentes demonstradas acima, com enumeração limitada das respostas completas possíveis; nenhum campo foi removido ou normalizado para obter equivalência. O comparativo do núcleo exige igualdade completa.
+
+| Percurso | Consultas API kernel CLI antes → depois | Mediana API HTTP local antes → depois | Mediana hidratação Web HTTP local antes → depois |
+|---|---:|---:|---:|
+| Painel do professor | 2.500 → 32 | 2.034,738 → 229,372 ms | 2.142,771 → 329,800 ms |
+| Painel do coordenador | 1.445 → 38 | 1.179,308 → 186,676 ms | 1.302,515 → 305,827 ms |
+| Painel da direção escolar | 1.507 → 41 | 1.197,836 → 184,183 ms | 1.305,275 → 296,172 ms |
+| Painel da direção de núcleo | 880 → 32 | 678,397 → 168,485 ms | 776,441 → 250,103 ms |
+| Turma com editor, coordenador | 573 → 49 | 469,766 → 187,183 ms | 1.980,710 → 1.071,710 ms |
+| Correção/cartões, coordenador | 321 → 33 | 279,789 → 141,366 ms | 531,052 → 341,324 ms |
+| Relatório da prova, coordenador | 1.112 → 39 | 1.077,470 → 324,608 ms | 1.231,426 → 472,439 ms |
+
+As contagens vêm do profiling kernel CLI; as latências, de três requisições HTTP locais sequenciais por caso, usando FPM. Não somar/subtrair esses métodos nem apresentar as medianas como P95, SLA, tempo do navegador pela Internet ou capacidade concorrente. A quantidade de chamadas Web→API foi preservada (oito na turma com editor); deduplicação/composição permanece em F4. Os painéis internos conservaram três consultas, sem otimização atribuída a F2. O caso financeiro apresentou oscilação Web de 71,261 para 144,269 ms sem aumento das consultas/chamadas; a amostra curta não demonstra uma causa nem uma regressão sustentada.
+
+O adaptador de LEFT JOIN mantém custo que precisa continuar acompanhado: no microensaio causal de uma consulta, 9,757 → 10,984 ms, com planos maiores. Esse microensaio exclui a preparação do contexto e não substitui os ganhos do percurso completo. Crescimento em volume e capacidade seguem em F5/F6; não houve ajuste global do otimizador, isolamento, relógio, pool ou durabilidade para produzir os resultados.
+
+Backup completo validado antes da troca, comparação de banco/schema/ledger/arquivos durante a pausa e verificações pós-publicação passaram. Não houve migration nem alteração de dados escolares. Tokens e sessões temporários da coleta foram removidos, mantendo a auditoria normal. A proteção adicional, a página pública independente e os serviços foram preservados. A conferência autenticada no Chrome complementa a medição nativa; não houve mudança de interface nesta etapa.
+
+Os recibos, hashes, planos e coletas sanitizadas permanecem no diretório operacional, fora do Git. O complemento de documentação/CI não altera os bytes de `apps/api` ou `apps/web` da candidata publicada e dispensa nova publicação. F3 é a próxima etapa; produção não foi alterada.
