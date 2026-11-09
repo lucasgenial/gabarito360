@@ -1,6 +1,6 @@
 # F4 — carregamento e interação: planejamento de entrada
 
-**Data:** 09/11/2026. **Status:** F4-A em implementação; F4-B a F4-D planejadas. **Escopo:** somente homologação. Produção fora do escopo.
+**Data:** 09/11/2026. **Status:** F4-A publicada na homologação; F4-B em revisão; F4-C e F4-D planejadas. **Escopo:** somente homologação. Produção fora do escopo.
 
 ## Ponto de partida
 
@@ -26,3 +26,16 @@ Paralelizar as chamadas do BFF não entra nesta etapa. A API da homologação te
 ## Regras
 
 O comportamento de autorização não muda: a API revalida cada pedido, e nenhuma resposta passa a ser guardada em cache. Toda mudança de interface passa pela revisão independente de UI/UX antes do merge (AGENTS.md). Publicação somente na homologação, com o operador e as conferências de dados da F3.
+
+## F4-B — abas da turma sob demanda
+
+Na abertura pela visão geral, a turma deixa de pedir à API os professores com acesso, a lista de professores da escola, as disciplinas e as opções docentes. Isso tira até quatro chamadas sequenciais da primeira tela. As abas Acesso e Disciplinas mostram o carregador padrão (`G360Carga`) e buscam um fragmento HTML na primeira abertura, pela operação `turmas.secao`:
+
+- A URL do fragmento é emitida pelo SSR e convertida em referência UR4. O pedido leva CSRF e a revisão do contexto (`RevisaoAcesso::DADOS`).
+- O BFF revalida a turma na API antes de montar o fragmento. Responde `no-store` e recusa seção desconhecida (422), perfil administrativo, Acesso para perfil pessoal e Disciplinas fora do escopo DC1 (404).
+- Retornos de ações (`?secao=acesso|disciplinas`), rascunhos de atribuição (`retorno_componente`) e erros de validação continuam renderizados por inteiro no servidor, com foco e valores preservados.
+- Trocar de aba ou redimensionar a janela não repete a busca. Uma falha mostra "Não foi possível carregar este bloco" com o botão "Tentar novamente", sem apresentar lista vazia.
+- A confirmação de formulários (`data-turma-confirmar`), o texto da atribuição e o vínculo do professor selecionado passam a usar delegação no documento e funcionam também no conteúdo que chega depois. CSS e JS das abas saem dos parciais para a própria tela.
+- Sem JavaScript, a aba oferece o link que abre a mesma seção renderizada no servidor.
+
+A aba Alunos já vem nos dados da própria turma e continua no SSR. Testes: três cenários PHP, com adiamento, fragmento, negativas e falha, e três testes JS (`turma-abas-adiadas.test.mjs`).

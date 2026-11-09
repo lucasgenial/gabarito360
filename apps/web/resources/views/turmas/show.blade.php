@@ -62,8 +62,12 @@ if(!empty($painelAplicado['painel_fim']))$recortes[]='Até '.\Carbon\Carbon::par
 @include('turmas._modelos', ['paginaModelos'=>'turma','gruposExibidos'=>['analises','administrativo']])
 </section>
 <section class="tu1-painel" id="alunos" data-turma-painel="alunos" aria-label="Alunos">@include('turmas._alunos')</section>
-@if($dc1Visivel??false)<section class="tu1-painel" id="disciplinas" data-turma-painel="disciplinas" aria-label="Disciplinas e professores">@include('disciplinas._turma')</section>@endif
+@if($dc1Visivel??false)<section class="tu1-painel" id="disciplinas" data-turma-painel="disciplinas" aria-label="Disciplinas e professores">@if($disciplinasAdiadas??false)@include('turmas._secao_adiada',['secaoAdiada'=>'disciplinas','rotuloAdiado'=>'Carregando disciplinas e professores…'])@else @include('disciplinas._turma')@endif</section>@endif
 <section class="tu1-painel" id="provas" data-turma-painel="provas" aria-label="Provas">@include('turmas._provas')</section>
-@unless(\App\Support\Acesso::pessoal())<section class="tu1-painel" id="acesso" data-turma-painel="acesso" aria-label="Acesso à turma">@include('turmas._acesso')</section>@endunless
+@unless(\App\Support\Acesso::pessoal())<section class="tu1-painel" id="acesso" data-turma-painel="acesso" aria-label="Acesso à turma">@if($acessoAdiado??false)@include('turmas._secao_adiada',['secaoAdiada'=>'acesso','rotuloAdiado'=>'Carregando acesso à turma…'])@else @include('turmas._acesso')@endif</section>@endunless
 @pode('turma.gerir')@include('turmas._imagem')@endpode
 @endsection
+@if($dc1Visivel??false)
+@push('styles')<link rel="stylesheet" href="@ativo('css/disciplinas.css')"><link rel="stylesheet" href="@ativo('css/formulario-escolar.css')">@endpush
+@push('scripts')<script src="@ativo('js/turma-atribuicao.js')" defer></script>@endpush
+@endif

@@ -72,6 +72,49 @@ class TurmaOrganizacaoWebTest extends TestCase
         }
     }
 
+    public function test_visao_geral_adia_acesso_e_disciplinas_para_a_primeira_abertura(): void
+    {
+        $this->preparar();
+        $html=$this->consultarTela('/app/turmas/14')->assertOk()->assertSee('data-turma-secao-adiada',false)
+            ->assertSee('Carregando acesso à turma…')->assertSee('Carregando disciplinas e professores…')
+            ->assertDontSee('id="professor-selecionado"',false)->assertDontSee('Vincular disciplina e professor')
+            ->assertSee('turma-atribuicao.js',false)->assertSee('disciplinas.css',false)->getContent();
+        foreach(['/api/v1/turmas/14/professores','/api/v1/usuarios','/api/v1/turmas/14/disciplinas','/api/v1/turmas/14/vinculo-docente/opcoes'] as $p)
+            Http::assertNotSent(fn($r)=>parse_url($r->url(),PHP_URL_PATH)===$p);
+        $this->assertSame(1,substr_count($html,'turma-atribuicao.js'));
+        $this->assertStringNotContainsString('/turmas/14',preg_replace('~<noscript>.*?</noscript>~s','',$html));
+        \Illuminate\Testing\TestResponse::fromBaseResponse(response($html))->assertDestinoRecurso('turmas.secao',['id'=>14],['secao'=>'acesso']);
+        \Illuminate\Testing\TestResponse::fromBaseResponse(response($html))->assertDestinoRecurso('turmas.secao',['id'=>14],['secao'=>'disciplinas']);
+    }
+
+    public function test_secao_adiada_devolve_fragmento_sem_cache_com_formularios_ur4(): void
+    {
+        $this->preparar();
+        $r=$this->consultarJson('/app/turmas/14/secao?secao=disciplinas')->assertOk();
+        $this->assertStringContainsString('no-store',$r->headers->get('Cache-Control'));
+        $this->assertStringContainsString('Vincular disciplina e professor',$r->json('html'));
+        $this->assertStringContainsString('Matemática &lt;teste&gt;',$r->json('html'));
+        Http::assertSent(fn($q)=>parse_url($q->url(),PHP_URL_PATH)==='/api/v1/turmas/14/vinculo-docente/opcoes');
+        $this->assertNotEmpty($this->extrairFormularioRecurso('<html><body>'.$r->json('html').'</body></html>','turmas.atribuir',['id'=>14])['campos']['_recurso']);
+        $acesso=$this->consultarJson('/app/turmas/14/secao?secao=acesso')->assertOk()->json('html');
+        $this->assertStringContainsString('id="professores"',$acesso);$this->assertStringContainsString('Nenhum professor com acesso direto',$acesso);
+        Http::assertSent(fn($q)=>parse_url($q->url(),PHP_URL_PATH)==='/api/v1/turmas/14/professores');
+        $this->consultarJson('/app/turmas/14/secao?secao=provas')->assertStatus(422);
+        $this->falha='/api/v1/turmas/14/professores';
+        $this->assertStringContainsString('Não foi possível consultar os acessos',$this->consultarJson('/app/turmas/14/secao?secao=acesso')->assertOk()->json('html'));
+    }
+
+    public function test_secao_adiada_respeita_perfil_e_turma_negada(): void
+    {
+        $this->preparar('professor');
+        $this->consultarJson('/app/turmas/14/secao?secao=disciplinas')->assertOk();
+        Http::assertNotSent(fn($q)=>parse_url($q->url(),PHP_URL_PATH)==='/api/v1/turmas/14/vinculo-docente/opcoes');
+        config(['disciplinas.ativo'=>false]);
+        $this->consultarJson('/app/turmas/14/secao?secao=disciplinas')->assertNotFound();
+        $this->falha='/api/v1/turmas/14';
+        $this->consultarJson('/app/turmas/14/secao?secao=acesso')->assertStatus(503);
+    }
+
     public function test_falha_catalogo_ou_acesso_nao_parece_lista_vazia_nem_destroi_turma(): void
     {
         $this->preparar();$this->falha='/api/v1/turmas/14/vinculo-docente/opcoes';

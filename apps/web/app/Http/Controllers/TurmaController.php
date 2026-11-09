@@ -116,37 +116,20 @@ class TurmaController extends Controller
 
         $filtros = request()->validate(['secao'=>'nullable|in:visao-geral,alunos,disciplinas,provas,acesso',
             'catalogo_busca'=>'nullable|string|max:100','catalogo_pagina'=>'nullable|integer|min:1|max:10000']);
-        $escolas = []; $professores = []; $todosProfessores = []; $acessoErro = false; $escolasErro = false;
-        if (!\App\Support\Acesso::pessoal()) {
-            try {
-                $r = $this->api->get("/v1/turmas/{$id}/professores");
-                $acessoErro = $r->failed(); $professores = $r->successful() ? ($r->json('data.professores') ?? []) : [];
-                if (\App\Support\Acesso::pode('turma.vincular_professor')) {
-                    $r = $this->api->get('/v1/usuarios', ['perfil'=>'professor']);
-                    $acessoErro = $acessoErro || $r->failed(); $todosProfessores = $r->successful() ? ($r->json('data.usuarios') ?? []) : [];
-                }
-            } catch (ConnectionException) { $acessoErro = true; }
-        }
+        $secaoInicial = $filtros['secao'] ?? 'visao-geral';
+        // F4-B: abas fora da seção inicial buscam seus dados na primeira abertura. Retornos de ações,
+        // rascunhos e erros de validação continuam renderizados no servidor, com o estado preservado.
+        $imediata = fn (string $secao) => $secaoInicial === $secao || session()->has('errors') || request()->filled('retorno_componente');
+        $escolas = []; $escolasErro = false;
+        $acessoAdiado = !\App\Support\Acesso::pessoal() && !$imediata('acesso');
+        ['professores'=>$professores,'todosProfessores'=>$todosProfessores,'acessoErro'=>$acessoErro] = $acessoAdiado || \App\Support\Acesso::pessoal()
+            ? ['professores'=>[],'todosProfessores'=>[],'acessoErro'=>false] : $this->dadosAcesso($id);
 
-        $dc1Visivel = config('disciplinas.ativo') && session('auth_vinculos') && (\App\Support\ContextoWeb::atual()['espaco']['tipo'] ?? '') === 'escola'
-            && in_array(\App\Support\Acesso::perfil(), ['coordenador','dir_escolar','vice_dir_escolar','professor'], true) && \App\Support\Acesso::pode('turma.ver');
-        $dc1Dados = null; $dc1Erro = false; $dc1Retorno = [];
-        if ($dc1Visivel) {
-            try {
-                $dc1 = $this->api->get("/v1/turmas/{$id}/disciplinas"); $dc1Erro = $dc1->failed(); $dc1Dados = $dc1->json('data');
-                if ((int)request('retorno_turma') === $id && request()->filled('retorno_componente') && \App\Support\Acesso::pode('disciplina.gerir')) {
-                    $campos = request()->validate(['retorno_turma'=>'required|integer|min:1','retorno_componente'=>'required|integer|min:1',
-                        'rascunho_inicio'=>'nullable|date_format:Y-m-d','rascunho_fim'=>'nullable|date_format:Y-m-d','rascunho_papel'=>'nullable|in:titular,codocencia,substituicao','rascunho_vinculo'=>'nullable|integer|min:1','rascunho_chave'=>'nullable|uuid']);
-                    if ($this->api->get("/v1/turmas/{$id}/disciplinas/".$campos['retorno_componente'])->successful()) $dc1Retorno = array_filter($campos, fn($v)=>$v!==null);
-                }
-            } catch (\Illuminate\Http\Client\ConnectionException) { $dc1Erro = true; }
-        }
-
-        $opcoesDocentes=null; $opcoesDocentesErro=false;
-        if (!$dc1Erro && ($dc1Dados['atribuir']??false) && \App\Support\Acesso::perfil()==='coordenador' && \App\Support\Acesso::pode('disciplina.gerir')) {
-            try { $r=$this->api->get("/v1/turmas/$id/vinculo-docente/opcoes"); $opcoesDocentesErro=$r->failed(); if(!$opcoesDocentesErro)$opcoesDocentes=$r->json('data'); }
-            catch(ConnectionException){$opcoesDocentesErro=true;}
-        }
+        $dc1Visivel = $this->dc1Visivel();
+        $disciplinasAdiadas = $dc1Visivel && !$imediata('disciplinas');
+        $dc = $dc1Visivel && !$disciplinasAdiadas ? $this->dadosDisciplinas($id, true)
+            : ['dc1Dados'=>null,'dc1Erro'=>false,'dc1Retorno'=>[],'opcoesDocentes'=>null,'opcoesDocentesErro'=>false];
+        ['dc1Dados'=>$dc1Dados,'dc1Erro'=>$dc1Erro,'dc1Retorno'=>$dc1Retorno,'opcoesDocentes'=>$opcoesDocentes,'opcoesDocentesErro'=>$opcoesDocentesErro] = $dc;
 
         $painel=null; $painelErro=false; $painelErros=[]; $painelAplicado=[]; $painelConsultadoEm=null;
         if (\App\Support\Acesso::pode('relatorio.turma')) {
@@ -165,7 +148,8 @@ class TurmaController extends Controller
         return view('turmas.show', [
             'editorBootstrap'=>$this->editorBootstrap($resp),
             'painel'=>$painel,'painelErro'=>$painelErro,'painelErros'=>$painelErros,'painelAplicado'=>$painelAplicado,'painelConsultadoEm'=>$painelConsultadoEm,
-            'secaoInicial'=>$filtros['secao']??'visao-geral', 'opcoesDocentes'=>$opcoesDocentes,'opcoesDocentesErro'=>$opcoesDocentesErro,
+            'secaoInicial'=>$secaoInicial, 'opcoesDocentes'=>$opcoesDocentes,'opcoesDocentesErro'=>$opcoesDocentesErro,
+            'acessoAdiado'=>$acessoAdiado,'disciplinasAdiadas'=>$disciplinasAdiadas,
             'acessoErro'=>$acessoErro,'escolasErro'=>$escolasErro,
             'turma'            => $resp->json('data'),
             'escolas'          => $escolas,
@@ -173,6 +157,65 @@ class TurmaController extends Controller
             'todosProfessores' => $todosProfessores,
             'dc1Visivel' => $dc1Visivel, 'dc1Dados' => $dc1Dados, 'dc1Erro' => $dc1Erro, 'dc1Retorno' => $dc1Retorno,
         ]);
+    }
+
+    /** Fragmento de uma aba adiada (F4-B). A API revalida a turma e cada lista; nada é guardado em cache. */
+    public function secao(Request $request, int $id): \Illuminate\Http\JsonResponse
+    {
+        $secao = $request->validate(['secao' => 'required|in:acesso,disciplinas'])['secao'];
+        if (\App\Support\Acesso::administrativo()) abort(404);
+        if ($secao === 'acesso' && \App\Support\Acesso::pessoal()) abort(404);
+        if ($secao === 'disciplinas' && !$this->dc1Visivel()) abort(404);
+        try { $resp = $this->api->get("/v1/turmas/{$id}"); }
+        catch (ConnectionException) { abort(503, 'Turma temporariamente indisponível.'); }
+        if ($resp->serverError() || $resp->status() === 429) abort(503, 'Turma temporariamente indisponível.');
+        if ($resp->failed()) abort(404, 'Turma não encontrada.');
+        $turma = $resp->json('data');
+        $html = $secao === 'acesso'
+            ? view('turmas._acesso', ['turma'=>$turma] + $this->dadosAcesso($id))->render()
+            : view('disciplinas._turma', ['turma'=>$turma,'dc1Visivel'=>true] + $this->dadosDisciplinas($id, false))->render();
+        return response()->json(['html' => $html])->header('Cache-Control', 'private, no-store');
+    }
+
+    private function dc1Visivel(): bool
+    {
+        return config('disciplinas.ativo') && session('auth_vinculos') && (\App\Support\ContextoWeb::atual()['espaco']['tipo'] ?? '') === 'escola'
+            && in_array(\App\Support\Acesso::perfil(), ['coordenador','dir_escolar','vice_dir_escolar','professor'], true) && \App\Support\Acesso::pode('turma.ver');
+    }
+
+    /** @return array{professores: array, todosProfessores: array, acessoErro: bool} */
+    private function dadosAcesso(int $id): array
+    {
+        $professores = []; $todosProfessores = []; $acessoErro = false;
+        try {
+            $r = $this->api->get("/v1/turmas/{$id}/professores");
+            $acessoErro = $r->failed(); $professores = $r->successful() ? ($r->json('data.professores') ?? []) : [];
+            if (\App\Support\Acesso::pode('turma.vincular_professor')) {
+                $r = $this->api->get('/v1/usuarios', ['perfil'=>'professor']);
+                $acessoErro = $acessoErro || $r->failed(); $todosProfessores = $r->successful() ? ($r->json('data.usuarios') ?? []) : [];
+            }
+        } catch (ConnectionException) { $acessoErro = true; }
+        return compact('professores', 'todosProfessores', 'acessoErro');
+    }
+
+    /** Dados da aba Disciplinas; o rascunho de retorno só é lido na renderização completa da tela. */
+    private function dadosDisciplinas(int $id, bool $comRetorno): array
+    {
+        $dc1Dados = null; $dc1Erro = false; $dc1Retorno = [];
+        try {
+            $dc1 = $this->api->get("/v1/turmas/{$id}/disciplinas"); $dc1Erro = $dc1->failed(); $dc1Dados = $dc1->json('data');
+            if ($comRetorno && (int)request('retorno_turma') === $id && request()->filled('retorno_componente') && \App\Support\Acesso::pode('disciplina.gerir')) {
+                $campos = request()->validate(['retorno_turma'=>'required|integer|min:1','retorno_componente'=>'required|integer|min:1',
+                    'rascunho_inicio'=>'nullable|date_format:Y-m-d','rascunho_fim'=>'nullable|date_format:Y-m-d','rascunho_papel'=>'nullable|in:titular,codocencia,substituicao','rascunho_vinculo'=>'nullable|integer|min:1','rascunho_chave'=>'nullable|uuid']);
+                if ($this->api->get("/v1/turmas/{$id}/disciplinas/".$campos['retorno_componente'])->successful()) $dc1Retorno = array_filter($campos, fn($v)=>$v!==null);
+            }
+        } catch (ConnectionException) { $dc1Erro = true; }
+        $opcoesDocentes = null; $opcoesDocentesErro = false;
+        if (!$dc1Erro && ($dc1Dados['atribuir']??false) && \App\Support\Acesso::perfil()==='coordenador' && \App\Support\Acesso::pode('disciplina.gerir')) {
+            try { $r=$this->api->get("/v1/turmas/$id/vinculo-docente/opcoes"); $opcoesDocentesErro=$r->failed(); if(!$opcoesDocentesErro)$opcoesDocentes=$r->json('data'); }
+            catch(ConnectionException){$opcoesDocentesErro=true;}
+        }
+        return compact('dc1Dados', 'dc1Erro', 'dc1Retorno', 'opcoesDocentes', 'opcoesDocentesErro');
     }
 
     private function indisponivel(): \Illuminate\Http\Response
