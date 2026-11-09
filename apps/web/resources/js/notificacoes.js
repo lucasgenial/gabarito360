@@ -11,6 +11,7 @@ if(raiz){
   // Fluxo apenas dentro do host FIXO: alturas responsivas sem deslocar o App.
   const ativos=new Map();let seq=0;
   const dialogos=new WeakSet();
+  const dialogoAtivo=()=>document.activeElement?.closest?.('dialog[open]')||document.querySelector('dialog[open]');
   const titulos={sucesso:'Concluído',erro:'Não foi possível concluir',info:'Informação',carregando:'Em andamento'};
   function suspender(n,motivo,sim){
     if(ativos.get(n.id)!==n)return;
@@ -23,12 +24,12 @@ if(raiz){
     if(!dialogo||dialogos.has(dialogo))return;dialogos.add(dialogo);
     dialogo.addEventListener('close',()=>{
       for(const n of [...ativos.values()])if(n.dialogo===dialogo)fechar(n.id);
-      if(raiz.parentElement===dialogo){raiz.classList.remove('g360-toast-dialogo');document.body.append(raiz);}
+      if(raiz.parentElement===dialogo)hospedar(dialogoAtivo());
     });
   }
   function mostrar(tipo,mensagem,opcoes={}){
     if(!raiz.isConnected)return;
-    const dialogo=document.querySelector('dialog[open]');hospedar(dialogo);
+    const dialogo=dialogoAtivo();hospedar(dialogo);
     const id=opcoes.id||'g360-'+(++seq);const anterior=ativos.get(id);if(anterior){clearTimeout(anterior.timer);ativos.delete(id);}
     while(ativos.size>=3){const antigo=[...ativos.values()].find(n=>!n.elemento?.contains(document.activeElement));fechar(antigo.id);}
     const duracao=opcoes.duracao??(tipo==='sucesso'?5000:tipo==='info'?8000:Infinity);
