@@ -16,7 +16,7 @@ assert.throws(()=>orderFromLayout([{...annotated[0],ordem_card:'1'}],definitions
 assert.throws(()=>orderFromLayout([annotated[0],{...annotated[1],ordem_secao:2}],definitions));
 
 const initial=JSON.parse(readFileSync('apps/web/tests/Fixtures/editor-turma.json','utf8'));
-const base='http://hierarquia.test',publico=resolve('apps/web/public'),fixtures=process.env.HIERARQUIA_FIXTURES||join(tmpdir(),'g360-tw2-render');
+const base='https://hierarquia.test',publico=resolve('apps/web/public'),fixtures=process.env.HIERARQUIA_FIXTURES||join(tmpdir(),'g360-tw2-render');
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true});
 try{
  const context=await browser.newContext({viewport:{width:1440,height:1000}}),page=await context.newPage(),errors=[],writes=[];
@@ -51,13 +51,14 @@ try{
  const organize=()=>page.getByRole('button',{name:'Organizar painel',exact:true}).click();
  const save=()=>page.getByRole('button',{name:'Salvar disposição',exact:true}).click();
  const waitSaved=()=>page.getByText('Disposição salva.',{exact:true}).waitFor({state:'visible'});
- await page.goto(base+'/editor-turma.html');await organize();
+ await page.goto(base+'/editor-turma.html');assert.equal(await page.evaluate(()=>isSecureContext&&typeof crypto.randomUUID==='function'),true,'Ensaio reproduz o HTTPS da aplicação');await organize();
  assert.equal(writes.length,0,'SSR abre sem gravar');assert.equal(await page.getByRole('tab',{name:'Distribuição por seção',exact:true}).isVisible(),true);
  assert.equal(await page.locator('[data-painel-secao=resumo] [data-no-mover]').count(),0,'KPIs permanecem fora da composição');
  await page.locator('[data-destino="distribuicao-acertos"]').selectOption('');
  await page.locator('[data-quadro-ativo="devolutivas"]').uncheck();
  await page.locator('[data-quadro-titulo="distribuicao-acertos"]').click();await page.getByLabel('Novo título',{exact:true}).fill('Minha análise <teste>');await page.getByRole('button',{name:'Confirmar título',exact:true}).click();
  await page.getByRole('button',{name:'Novo painel',exact:true}).click();await page.getByLabel('Nome do painel',{exact:true}).fill('Painel vazio pessoal');await page.getByRole('button',{name:'Criar painel',exact:true}).click();
+ await page.getByRole('dialog',{name:'Novo painel',exact:true}).waitFor({state:'hidden'});
  await page.getByRole('tab',{name:'Ajustes finos',exact:true}).click();
  await page.locator('[data-no-mover="participacao"]').press('Shift+ArrowDown');assert.match(await page.locator('[data-editor-status]').textContent(),/ajustado/);
  await page.locator('[data-no-pin="distribuicao-acertos"]').click();assert.equal(await page.locator('[data-no-pin="distribuicao-acertos"]').getAttribute('aria-pressed'),'true');
