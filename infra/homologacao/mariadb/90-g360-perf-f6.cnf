@@ -1,0 +1,6 @@
+# PERF-F6 (docs/200): somente VM 120 (homologação). Produção fora do escopo.
+# Buffer pool de 128 MB (padrão) para 1 GB: o catálogo de instituições ocupa mais de 500 MB
+# e a busca nacional lia do disco a cada execução. A VM tem 3,8 GB e cerca de 2,7 GB disponíveis.
+# Não altera flush, durabilidade, binlog ou autenticação. Reversão: remover este arquivo e reiniciar o MariaDB.
+[mysqld]
+innodb_buffer_pool_size = 1G
