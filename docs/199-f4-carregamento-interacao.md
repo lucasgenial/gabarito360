@@ -1,6 +1,6 @@
 # F4 — carregamento e interação: planejamento de entrada
 
-**Data:** 09/11/2026. **Status:** F4-A e F4-B publicadas na homologação; F4-C e F4-D em revisão, para publicação conjunta. **Escopo:** somente homologação. Produção fora do escopo.
+**Data:** 09/11/2026. **Status:** concluída. F4-A, F4-B e F4-C/D publicadas somente na homologação. As subdivisões A e B foram publicadas separadamente, um desvio da regra de publicação por etapa do [194](194-planejamento-desempenho-integral.md); C e D saíram juntas, fechando a etapa. **Escopo:** somente homologação. Produção fora do escopo.
 
 ## Ponto de partida
 
@@ -85,3 +85,15 @@ Revisão independente da F4-C e da F4-D. A revisão apontou um bloqueio na F4-D:
 - Novos testes: equivalência do índice com a varredura linear em todas as rotas e métodos do catálogo, e replay recusado.
 
 Com o bloqueio corrigido, a avaliação da revisão passa a ser aprovada com ressalvas, já atendidas.
+
+## Publicação na homologação
+
+| Release | Fase | Base | Recibo |
+|---|---|---|---|
+| `43ab393` | HOMOLOGACAO-PERF-F4A | `9aee7fa` (F3) | 130 tabelas e 201 arquivos idênticos; sem migration; unidades restauradas |
+| `9e4a1be` | HOMOLOGACAO-PERF-F4B | `43ab393` | idem |
+| `ed7dd0c` | HOMOLOGACAO-PERF-F4CD | `9e4a1be` | idem |
+
+A primeira tentativa da F4-A parou na conferência do marcador anterior, antes de qualquer alteração. O gerador de operador trocava também a fase anterior pela nova. O gerador foi corrigido, o operador falho ficou arquivado fora do caminho e a segunda tentativa publicou normalmente.
+
+Verificação visual no Chrome pendente: a publicação encerrou a sessão da homologação, e a nova entrada depende do responsável. Produção não foi alterada.
