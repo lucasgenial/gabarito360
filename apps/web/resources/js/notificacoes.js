@@ -5,30 +5,42 @@ import toast,{Toaster} from 'solid-toast';
 // Ilha Solid pequena: Blade continua responsável pelas páginas e formulários.
 const raiz=document.getElementById('g360-notificacoes');
 if(raiz){
+  // Fora da grade de conteúdo: a pilha não ocupa espaço na página.
+  document.body.append(raiz);
   render(()=>createComponent(Toaster,{position:'top-right',gutter:12,containerClassName:'g360-toaster',containerStyle:{position:'relative',top:'0',right:'0',left:'0',bottom:'auto','z-index':10}}),raiz);
-  // CSS em fluxo mede a pilha e suas quebras de texto, inclusive após mudar a largura.
+  // Fluxo apenas dentro do host FIXO: alturas responsivas sem deslocar o App.
   const ativos=new Map();let seq=0;
+  const dialogos=new WeakSet();
+  const dialogoAtivo=()=>document.activeElement?.closest?.('dialog[open]')||document.querySelector('dialog[open]');
   const titulos={sucesso:'Concluído',erro:'Não foi possível concluir',info:'Informação',carregando:'Em andamento'};
   function suspender(n,motivo,sim){
     if(ativos.get(n.id)!==n)return;
     if(sim){if(!n.pausas.size&&n.inicio){n.restante-=Date.now()-n.inicio;n.inicio=0;}n.pausas.add(motivo);clearTimeout(n.timer);}
     else{n.pausas.delete(motivo);if(!n.pausas.size&&Number.isFinite(n.restante)){n.inicio=Date.now();clearTimeout(n.timer);n.timer=setTimeout(()=>fechar(n.id),Math.max(0,n.restante));}}
   }
-  function fechar(id){const n=ativos.get(id);if(!n)return;clearTimeout(n.timer);if(n.elemento?.contains(document.activeElement)&&n.origem?.isConnected)n.origem.focus({preventScroll:true});n.inline?.remove();toast.dismiss(id);ativos.delete(id);}
+  function fechar(id){const n=ativos.get(id);if(!n)return;clearTimeout(n.timer);if(n.elemento?.contains(document.activeElement)&&n.origem?.isConnected&&n.origem.getClientRects().length)n.origem.focus({preventScroll:true});toast.dismiss(id);ativos.delete(id);}
+  function hospedar(dialogo){
+    raiz.classList.toggle('g360-toast-dialogo',!!dialogo);(dialogo||document.body).append(raiz);
+    if(!dialogo||dialogos.has(dialogo))return;dialogos.add(dialogo);
+    dialogo.addEventListener('close',()=>{
+      for(const n of [...ativos.values()])if(n.dialogo===dialogo)fechar(n.id);
+      if(raiz.parentElement===dialogo)hospedar(dialogoAtivo());
+    });
+  }
   function mostrar(tipo,mensagem,opcoes={}){
-    const id=opcoes.id||'g360-'+(++seq);const anterior=ativos.get(id);if(anterior){clearTimeout(anterior.timer);anterior.inline?.remove();ativos.delete(id);}
+    if(!raiz.isConnected)return;
+    const dialogo=dialogoAtivo();hospedar(dialogo);
+    const id=opcoes.id||'g360-'+(++seq);const anterior=ativos.get(id);if(anterior){clearTimeout(anterior.timer);ativos.delete(id);}
     while(ativos.size>=3){const antigo=[...ativos.values()].find(n=>!n.elemento?.contains(document.activeElement));fechar(antigo.id);}
     const duracao=opcoes.duracao??(tipo==='sucesso'?5000:tipo==='info'?8000:Infinity);
-    const n={id,restante:duracao,pausas:new Set(),inicio:0,timer:null,origem:anterior?.origem||document.activeElement};ativos.set(id,n);
+    const n={id,restante:duracao,pausas:new Set(),inicio:0,timer:null,origem:opcoes.origem?.isConnected?opcoes.origem:anterior?.origem||document.activeElement,dialogo};ativos.set(id,n);
     const conteudo=document.createElement('div');conteudo.className='g360-toast-conteudo';conteudo.dataset.g360Toast=id;
     n.elemento=conteudo;
     const texto=document.createElement('div'),titulo=document.createElement('strong'),p=document.createElement('p');
     titulo.textContent=opcoes.titulo||titulos[tipo];p.textContent=String(mensagem);texto.append(titulo,p);
     const fecharBotao=document.createElement('button');fecharBotao.type='button';fecharBotao.className='g360-toast-fechar';fecharBotao.setAttribute('aria-label','Fechar notificação');fecharBotao.textContent='×';fecharBotao.onclick=()=>fechar(id);conteudo.append(texto,fecharBotao);
     conteudo.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();fechar(id);}});
-    const dialogo=document.querySelector('dialog[open]');
-    if(dialogo){conteudo.classList.add('g360-toast-inline');conteudo.setAttribute('role',tipo==='erro'?'alert':'status');dialogo.append(conteudo);n.inline=conteudo;}
-    else{
+    {
       const fn={sucesso:toast.success,erro:toast.error,carregando:toast.loading,info:toast}[tipo]||toast;
       fn(conteudo,{id,duration:Infinity,unmountDelay:0,className:'g360-toast g360-toast-'+tipo,
         ariaProps:{role:tipo==='erro'?'alert':'status','aria-live':tipo==='erro'?'assertive':'polite'},
