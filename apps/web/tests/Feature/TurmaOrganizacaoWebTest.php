@@ -15,14 +15,14 @@ class TurmaOrganizacaoWebTest extends TestCase
     private ?array $respostaArquivamento=null;
     private ?array $painelAlternativo=null;
 
-    protected function preparar(string $perfil='coordenador'): void
+    protected function preparar(string $perfil='coordenador', string $espaco='escola'): void
     {
         config(['services.api.base_url'=>'http://api.test/api','disciplinas.ativo'=>true]);
         Http::preventStrayRequests();
         $this->withSession(['auth_token'=>'identidade-ficticia','auth_vinculos'=>true]);
         $this->me=['token'=>'contexto-ficticio','tipo_contexto'=>'vinculo','vinculo_id'=>7,'perfil'=>$perfil,
             'permissoes'=>$perfil==='coordenador'?['turma.ver','turma.gerir','turma.vincular_professor','disciplina.gerir','aluno.gerir','relatorio.turma']:['turma.ver'],
-            'espaco'=>['id'=>5,'tipo'=>'escola','nome'=>'Escola fictícia']];
+            'espaco'=>['id'=>5,'tipo'=>$espaco,'nome'=>'Escola fictícia']];
         $this->selecionarContextoFixture($this->me);
         Http::fake(function($r){
             $p=parse_url($r->url(),PHP_URL_PATH);
@@ -70,6 +70,81 @@ class TurmaOrganizacaoWebTest extends TestCase
             $this->alterarRecurso('POST','/app/turmas/14/disciplinas',['disciplina_id'=>31])->assertForbidden();
             Http::assertNotSent(fn($r)=>$r->method()!=='GET');
         }
+    }
+
+    public function test_visao_geral_adia_acesso_e_disciplinas_para_a_primeira_abertura(): void
+    {
+        $this->preparar();
+        $html=$this->consultarTela('/app/turmas/14')->assertOk()->assertSee('data-turma-secao-adiada',false)
+            ->assertSee('Carregando acesso à turma…')->assertSee('Carregando disciplinas e professores…')
+            ->assertDontSee('id="professor-selecionado"',false)->assertDontSee('Vincular disciplina e professor')
+            ->assertSee('turma-atribuicao.js',false)->assertSee('disciplinas.css',false)->getContent();
+        foreach(['/api/v1/turmas/14/professores','/api/v1/usuarios','/api/v1/turmas/14/disciplinas','/api/v1/turmas/14/vinculo-docente/opcoes'] as $p)
+            Http::assertNotSent(fn($r)=>parse_url($r->url(),PHP_URL_PATH)===$p);
+        $this->assertSame(1,substr_count($html,'turma-atribuicao.js'));
+        $this->assertStringNotContainsString('/turmas/14',preg_replace('~<noscript>.*?</noscript>~s','',$html));
+        \Illuminate\Testing\TestResponse::fromBaseResponse(response($html))->assertDestinoRecurso('turmas.secao',['id'=>14],['secao'=>'acesso']);
+        \Illuminate\Testing\TestResponse::fromBaseResponse(response($html))->assertDestinoRecurso('turmas.secao',['id'=>14],['secao'=>'disciplinas']);
+    }
+
+    public function test_secao_adiada_devolve_fragmento_sem_cache_com_formularios_ur4(): void
+    {
+        $this->preparar();
+        $r=$this->consultarJson('/app/turmas/14/secao?secao=disciplinas')->assertOk();
+        $this->assertStringContainsString('no-store',$r->headers->get('Cache-Control'));
+        $this->assertStringContainsString('Vincular disciplina e professor',$r->json('html'));
+        $this->assertStringContainsString('Matemática &lt;teste&gt;',$r->json('html'));
+        Http::assertSent(fn($q)=>parse_url($q->url(),PHP_URL_PATH)==='/api/v1/turmas/14/vinculo-docente/opcoes');
+        $this->assertNotEmpty($this->extrairFormularioRecurso('<html><body>'.$r->json('html').'</body></html>','turmas.atribuir',['id'=>14])['campos']['_recurso']);
+        $acesso=$this->consultarJson('/app/turmas/14/secao?secao=acesso')->assertOk()->json('html');
+        $this->assertStringContainsString('id="professores"',$acesso);$this->assertStringContainsString('Nenhum professor com acesso direto',$acesso);
+        Http::assertSent(fn($q)=>parse_url($q->url(),PHP_URL_PATH)==='/api/v1/turmas/14/professores');
+        $this->consultarJson('/app/turmas/14/secao?secao=provas')->assertStatus(422);
+        $this->falha='/api/v1/turmas/14/professores';
+        $this->assertStringContainsString('Não foi possível consultar os acessos',$this->consultarJson('/app/turmas/14/secao?secao=acesso')->assertOk()->json('html'));
+    }
+
+    public function test_secao_adiada_respeita_perfil_e_turma_negada(): void
+    {
+        $this->preparar('professor');
+        $this->consultarJson('/app/turmas/14/secao?secao=disciplinas')->assertOk();
+        Http::assertNotSent(fn($q)=>parse_url($q->url(),PHP_URL_PATH)==='/api/v1/turmas/14/vinculo-docente/opcoes');
+        config(['disciplinas.ativo'=>false]);
+        $this->consultarJson('/app/turmas/14/secao?secao=disciplinas')->assertNotFound();
+        $this->falha='/api/v1/turmas/14';
+        $this->consultarJson('/app/turmas/14/secao?secao=acesso')->assertStatus(503);
+    }
+
+    public function test_secao_adiada_negada_para_perfil_pessoal_e_administrativo(): void
+    {
+        $this->preparar('professor_autonomo','pessoal');
+        $this->consultarJson('/app/turmas/14/secao?secao=acesso')->assertNotFound();
+        $this->consultarJson('/app/turmas/14/secao?secao=disciplinas')->assertNotFound();
+        $this->preparar('secretario_escolar');
+        $this->assertContains($this->consultarJson('/app/turmas/14/secao?secao=acesso')->status(),[403,404]);
+        Http::assertNotSent(fn($q)=>in_array(parse_url($q->url(),PHP_URL_PATH),['/api/v1/turmas/14/professores','/api/v1/turmas/14/disciplinas'],true));
+    }
+
+    public function test_secao_de_retorno_e_rascunho_continuam_no_servidor(): void
+    {
+        $this->preparar();
+        $this->consultarTela('/app/turmas/14?secao=acesso')->assertOk()->assertDontSee('Carregando acesso à turma…')
+            ->assertSee('id="professores"',false)->assertSee('Carregando disciplinas e professores…');
+        Http::assertSent(fn($q)=>parse_url($q->url(),PHP_URL_PATH)==='/api/v1/turmas/14/professores');
+        Http::assertNotSent(fn($q)=>parse_url($q->url(),PHP_URL_PATH)==='/api/v1/turmas/14/disciplinas');
+        $this->consultarTela('/app/turmas/14?retorno_turma=14&retorno_componente=8')->assertOk()
+            ->assertDontSee('data-turma-secao-adiada',false)->assertSee('Vincular disciplina e professor');
+    }
+
+    public function test_formulario_do_fragmento_volta_para_a_tela_mesmo_com_erro_de_validacao(): void
+    {
+        $this->preparar();
+        $fragmento=\App\Support\NavegacaoWeb::destino('turmas.secao',['id'=>14,'secao'=>'acesso']);
+        $this->alterarRecurso('POST','/app/turmas/14/professores',['usuario_id'=>2,'_retorno_tela'=>$fragmento['referencia']])
+            ->assertRetornoTela('/app/turmas/14?secao=acesso')->assertSessionHasErrors('vinculo_id');
+        $this->alterarRecurso('DELETE','/app/turmas/14/professores/2',['_retorno_tela'=>$fragmento['referencia']])
+            ->assertRetornoTela('/app/turmas/14?secao=acesso')->assertSessionHasErrors('vinculo_id');
+        Http::assertNotSent(fn($q)=>$q->method()!=='GET');
     }
 
     public function test_falha_catalogo_ou_acesso_nao_parece_lista_vazia_nem_destroi_turma(): void
