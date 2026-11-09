@@ -287,8 +287,7 @@ class DashboardController extends Controller
         $bimestres = [];
         for ($bim = 1; $bim <= 4; $bim++) {
             $media = $medias->{'periodo_'.$bim};
-            // AVG() do builder retornava número; DECIMAL do selectRaw pode vir como "0.000000".
-            $media = $media === null ? null : (float) $media;
+            // Preserva o valor bruto e a mesma condição do avg() anterior, inclusive DECIMAL zero.
             $bimestres[] = ['bimestre' => $bim, 'label' => "{$bim}º bim.", 'media' => $media ? round($media, 1) : null];
         }
         return $bimestres;
@@ -470,7 +469,6 @@ class DashboardController extends Controller
         $professores = $this->professoresTurmas($consulta, $turmaIds);
         $turmas = $turmas->map(function ($turma) use ($alunosPorTurma, $mediasPorTurma, $ultimasProvas, $professores) {
                 $mediaRaw = $mediasPorTurma->get($turma->id)?->media;
-                $mediaRaw = $mediaRaw === null ? null : (float) $mediaRaw;
                 $media = $mediaRaw ? round($mediaRaw, 1) : null;
 
                 $status = match (true) {
@@ -597,14 +595,14 @@ class DashboardController extends Controller
 
         // Comparativo de escolas
         $escolas = $consulta->tabela('escolas')
-            ->leftJoinSub($consulta->tabela('turmas'), 'turmas', function ($j) {
+            ->leftJoinSub($consulta->paraJuncao('turmas', ['escola_id', 'ativo']), 'turmas', function ($j) {
                 $j->on('turmas.escola_id', '=', 'escolas.id')->where('turmas.ativo', true);
             })
-            ->leftJoinSub($consulta->tabela('alunos'), 'alunos', function ($j) {
+            ->leftJoinSub($consulta->paraJuncao('alunos', ['turma_id', 'ativo']), 'alunos', function ($j) {
                 $j->on('alunos.turma_id', '=', 'turmas.id')->where('alunos.ativo', true);
             })
-            ->leftJoinSub($consulta->tabela('provas'), 'provas', 'provas.escola_id', '=', 'escolas.id')
-            ->leftJoinSub($consulta->tabela('notas'), 'notas', 'notas.prova_id', '=', 'provas.id')
+            ->leftJoinSub($consulta->paraJuncao('provas', ['escola_id']), 'provas', 'provas.escola_id', '=', 'escolas.id')
+            ->leftJoinSub($consulta->paraJuncao('notas', ['prova_id', 'nota_final']), 'notas', 'notas.prova_id', '=', 'provas.id')
             ->whereIn('escolas.id', $escolaIds)
             ->select(
                 'escolas.id',
