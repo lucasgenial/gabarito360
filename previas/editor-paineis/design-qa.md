@@ -1,26 +1,25 @@
-# Design QA — prévia local do editor de painéis
+# Design QA — editor de painéis, rodada2
 
 final result: **passed**
 
-Revisor: `/root/product_design_review`. Resultado restrito à apresentação da prévia local para avaliação humana. **Aprovação humana pendente. Nenhuma integração, publicação em homologação/produção ou alteração de preferências reais autorizada.**
+Revisor `/root/product_design_review`. **Aprovação humana pendente.** Resultado restrito à préviaLOCAL atual, semAPI, integração, mainmerge oudeployhomologação/produção autorizados.
 
-## Correspondência com o pedido
+## Direção vigente e comparação
 
-As referênciasTurmas/Turma identificam os blocos existentes a consolidar. A terceira referênciaKanban orienta interação e disposição de colunas, não fidelidadepixel ou importação de seus ativos. Na prévia, uma coluna representa um card-seção central: Turma possuiResultados/Acompanhamento; Turmas possuiTurmas/Análises/Acompanhamento pedagógico. A composição evita camadas extras e mantémKPIsfixos.
+A correção humana posterior revogouWYSIWYGnaabaDistribuição. O modelo atual é **Kanbanhierárquico**: três painéisroot porpadrão, Semseçãofixa e subseções embutidas comwidgets. Ajustesfinos usa grade mista raiz/subgrades, comwidgetsavulsos econtêineres disputando a mesma área. A referência67310b81 foi inspecionada junto àcaptura02 para hierarquia20/18/16bold; o Kanbananterior07 orienta continuidadedeinteração, nãofidelidadepixel.
 
-1. Entrar emOrganizar abreDistribuição: nomes, controles deativação, ordenação e transferência são locais ao widget/categoria. A indicaçãoBase→Topo torna explícita a interpretação literal aprovada para demonstração.
-2. Ajustesfinos usaGridStack intraseção; oscinco estudantes ficam visíveis semoverlap nas capturas atuais. Pin/grip/resize e controles debarra são distinguíveis.
-3. Verpainel mostra o rascunho; Salvarlocal eCancelar são explícitos. Mobile ofereceleitura, semeditor; viewport reduzida preserva rascunho na fonte.
-4. Contexto ativo deriva de mapaúnico, corrigindo a escolaerrada. Falhas derepack possuem recuperação porselect/teclado/toggle, corrigindo a exceção semfeedback. Bloqueio409 permanece atéreconsulta.
+## Verificação atual
 
-## Evidências atuais
+1. Capturas01/02 atuais mostram trêsroots,Semseção eAgendafilha comseusitens; títulos econtroles distintos, direçãobase→topo visível, Semseção não reordenável. Semoverlapmaterial.
+2. Captura03 mostraResultadosdaescola avulso fora docardcentral, comgradefine/pin/move/resize. Conteúdo egráfico íntegros. Scrollregionaldalista não foi confundido comscrollerdegráfico.
+3. Captura04 mostra leituramobilecomregistroseidentidade/rodapé/nav,semcontrolesdeediçãovisíveis no recorte. A ausência global deedição/nooverflow foi ensaiada pelo root, não provada apenas pelo print.
+4. Captura05 demonstra finoescurolegível. Capturas01/02 antigas antesdocorreto@source não foram usadas.
+5. Fonte revista:reorderdeirmãos6+6aplicaordempedida,semalterarXYinterno; focusNode restauraalvosconformeaba; normalizar veta ampliaçãodepainelfixado; headersauto medidosdebaixoparacima;limpezadoDDantesengines protege troca deviewport.
 
-Inspecionadas02-turma-desktop-leitura,03-turma-distribuicao,04-turma-ajustes-finos,05-mobile-leitura-final,06-desktop-distribuicao-escuro e07-turmas-distribuicao-final emOPS/editor-paineis-visual, comparadas às trêsreferências fornecidas. Nenhum P0/P1 remanescente identificado na fonte/visual examinados.01mobileanterior não é usada como evidência final.
+**23testesunitários executados por este revisor passaram**, incluindo ciclo/profundidade/subtree,catálogo,remoçãopromovendo filhos,migraçõeslocais1/2,pins,ordem6+6 eSaveconflito. AçõesChrome foram executadas e relatadas pelo root:dragDevolutivasparaAgendafilha,IDsúnicos,Cancelarrestauraárvore,novovazioocultoleitura,avulsoresize6→7,gestoativo390→1440/DDlimpo/draftpreservado,Save/reloadcontextoB e409reconsulta. Não opereiChrome nesta rodada.
 
-Os ensaiosChrome de arrasteSortablefallback, transferência, teclado, títulos, toggle, resize6→12/pin, Save/reloadlocal,409,reconsulta, secretariaB e320/390foram executados pelo root e relatados; **não foram executados por este revisor**. A revisão própria nesta rodada foi de fonte e imagens. A ausência global decontrolesmobile é sustentada por fonte e ensaioDOMroot, não apenas pelo recorte da captura05.
+## Resultado e fronteira
 
-## Rastreabilidade e limites
+Sem P0/P1remanescente identificado na fonte/capturas examinadas. **passed** significa qualidade suficiente para apresentar esta prévia ao responsável, não aprovação de propagação aoapp. Estado de fonteWIP: HEAD315ed0b é base, não commitdaUIcompleta. OPS/editor-paineis-rodada2-design-final.json registra snapshotSHA256LFdasfontes/outputs atuais (incluindograde-visual e quadro-secoes) e5SHA256PNG.
 
-A UI está em arquivos locais ainda semcommit; HEAD776ff6a é baseoperacional e não identifica osnovosarquivos. O parecerOPS/paineis-editor-design-final.json registra snapshotSHA256LF das fontes/outputs locais eSHA256PNG dascapturas. Alteração posterior exige revisão proporcional/rebind.
-
-Não há comprovação de integraçãoAPI ou persistênciaservidor; todas informações/preferências são fictícias e locais. Não é auditoriaWCAGintegral nem validação de indicadores novos, permissõesreais oudocumentos. Resultado **passed** significa qualidade suficiente desta prévia para o humano avaliar, não autorização para propagá-la ao produto.
+Preferências e dados sãofictícios locais; não hátesteautenticado/APIs/persistênciaservidor. Não é auditoriaWCAGintegral nemvalidação de métricasnovas/printPDF. Aprovações anteriores da primeira prévia/WYSIWYG não substituem esta revisão; nenhumdeploy oumainmerge autorizado.

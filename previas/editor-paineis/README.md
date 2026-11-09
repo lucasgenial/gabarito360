@@ -19,9 +19,10 @@ Abrir `http://localhost:9020/`. Servidor escuta somente127.0.0.1. `G360_PREVIA_P
 ## Conferir
 
 - Menu Turmas/Turma3ºA demonstra os dois painéis. Organizar painel aparece em desktop com ponteiro preciso, viewport mínimo1024×700. Mobile mostra a composição previamente salva ou o padrão do perfil, sem edição. Reduzir uma janela com rascunho não salva nem descarta esse rascunho.
-- Distribuição: arraste os cabeçalhos para ordenar cards-seção; arraste itens ou use o select para transferir widgets. Setas nos controles e teclado oferecem alternativas. Uma coluna corresponde a um card central. A direção literal solicitada é esquerda→direita = base→topo do painel; Ver painel exibe o resultado.
+- Distribuição preserva o quadro de colunas: cada coluna raiz corresponde a um painel, e as seções filhas são contêineres embutidos. Arraste itens ou use o select para escolher pai. Setas e teclado oferecem alternativas. Esquerda→direita = base→topo somente nas colunas; filhos têm ordem vertical natural.
 - Clique nos títulos para editar; confirmar/cancelar e restaurar título são explícitos. Mostrar no painel oculta/reativa sem remover o widget do catálogo.
-- Ajustes finos: GridStack12colunas somente dentro da seção, com pin e resize; usa os mesmos cálculos laterais do aplicativo. Setas movem e Shift+setas redimensionam. Não há transferência entre grades nessa aba.
+- Ajustes finos: GridStack12colunas na raiz e subgrades. Widgets avulsos e painéis compartilham a raiz; seções podem conter widgets e seções filhas. Setas movem e Shift+setas redimensionam; pin preserva posição/tamanho e pai. Não há transferência entre grades nessa aba.
+- Padrão com três painéis configurados por perfil. Novo painel e Criar nova seção no select usam o mesmo diálogo. Remover painel preserva os filhos no nível acima e só confirma a preferência ao Salvar. Painéis sem descendentes visíveis somem na leitura. Esta prévia permite até15painéis e dois níveis de seções, sem ciclos.
 - Ver painel confere o rascunho. Salvar disposição grava apenas neste navegador; Cancelar descarta alterações desde a entrada. Restaurar padrão carrega o padrão no rascunho e exige Salvar para mantê-lo.
 - Contexto permite conferir isolamento fictício por usuário/perfil/vínculo/painel/turma e simular falha/conflito. No conflito, preservar rascunho e carregar explicitamente a versão salva; nunca repetir gravação automaticamente.
 

@@ -1,6 +1,8 @@
 @import "../../scripts/tailwind/node_modules/tailwindcss/index.css" prefix(tw) source(none);
 @source "./index.html";
 @source "./interface.mjs";
+@source "./quadro-secoes.mjs";
+@source "./grade-visual.mjs";
 @font-face{font-family:G360Figtree;src:url('/fonts/brand/Figtree-ExtraBold.woff2');font-weight:800;font-display:swap}
 @font-face{font-family:G360Albert;src:url('/fonts/brand/AlbertSans-ExtraBold.woff2');font-weight:800;font-display:swap}
 :root{--bg:#f4f6fa;--surface:#fff;--soft:#eef2f8;--fg:#16233a;--muted:#56637a;--line:#c9d2df;--brand:#1d4f9e;--brandsoft:#dfe9f8;--success:#168821;--danger:#b72d20;color-scheme:light}
@@ -20,3 +22,42 @@ main{min-width:0;width:100%;padding:20px 32px 40px}.meu-espaco{margin-bottom:18p
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 .botao[aria-pressed=true]{background:var(--brandsoft);color:var(--brand);border-color:var(--brand)}
+
+/* Composição visual: raiz e seções são grades mistas com coordenadas locais. */
+.barra-editor [role=tab]{display:inline-flex;align-items:center;gap:8px}
+.titulo-painel{font-size:20px;line-height:28px;font-weight:700;letter-spacing:-.01em}
+.titulo-subsecao{font-size:18px;line-height:26px;font-weight:700}
+.widget .titulo-widget,.titulo-widget{font-size:16px;line-height:24px;font-weight:700}
+.titulo-editavel{font-size:inherit;line-height:inherit;font-weight:inherit;max-width:100%;min-width:0}
+.titulo-editavel .icone{width:14px;height:14px;flex:none}
+.composicao-visual,#grades,#painel{min-width:0;width:100%}
+.painel-visual{height:100%;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;background:var(--surface);box-shadow:0 1px 2px #00153418;min-width:0;overflow:hidden}
+.secao-cabecalho{height:96px;flex:none;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px;min-width:0}
+.secao-cabecalho>h2,.secao-cabecalho>h3{min-width:0;overflow-wrap:anywhere}
+.secao-corpo{flex:1;min-height:0;min-width:0;padding:0 10px 12px}
+.controles-no{display:flex;gap:4px;align-items:flex-start;flex:none}
+.controles-no .botao{width:32px;padding-inline:0}
+.opcoes-no,#ocultos-popover{margin:0;background:var(--surface);color:var(--fg);padding:16px;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 32px #00153425;width:320px;max-width:calc(100vw - 24px)}
+.opcoes-no label{font-size:12px;display:block;margin-bottom:6px;color:var(--muted)}
+.opcoes-no select{border:1px solid var(--line);padding:8px;background:var(--surface);width:100%;border-radius:6px;margin-bottom:12px;font-size:13px}
+.opcoes-no .botao{width:auto;padding-inline:12px}
+#ocultos-popover{inset:90px 20px auto auto}
+#ocultos-popover h2{font-size:16px;font-weight:700;margin-bottom:12px}
+.oculto-linha{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.grade-interna:empty:after{content:'Arraste widgets ou painéis para cá';position:absolute;inset:12px;display:grid;place-items:center;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:12px}
+.destino-ativo{outline:2px solid var(--brand);outline-offset:-2px;background:var(--brandsoft)}
+[data-no-mover]{cursor:grab;touch-action:none}[data-no-mover]:active{cursor:grabbing}
+.renomear{font-family:inherit;font-size:14px;font-weight:400;min-width:0}
+.renomear input{min-width:0;font-size:16px;line-height:24px}
+dialog input{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+#erro-novo-painel{color:var(--danger)}
+@media(max-width:767px){.arvore-mobile{display:flex;flex-direction:column;gap:14px}.mobile-no{min-width:0}.mobile-no>.painel-visual{height:auto}.secao-cabecalho{height:auto;min-height:64px;padding:14px}.secao-corpo{padding:0 10px 12px}.painel-visual .painel-visual .secao-cabecalho{padding:12px}.titulo-painel{font-size:20px}.controles-no{display:none}.opcoes-no{display:none!important}}
+
+/* A Distribuição preserva o quadro aprovado, agora com contêineres filhos. */
+.quadro .coluna-titulo .titulo-subsecao{font-size:20px;line-height:28px;font-weight:700}
+.quadro .item-topo .titulo-widget{font-size:16px;line-height:24px;font-weight:700}
+.quadro .subsecao-quadro{padding:12px;border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:6px;background:var(--soft);min-width:0}
+.subsecao-quadro>.lista-widgets{padding:12px 0 0;min-height:100px}
+.quadro .subsecao-quadro .titulo-subsecao{font-size:18px;line-height:26px;font-weight:700}
+.item-no{min-width:0}.mover-composicao{cursor:grab;touch-action:none}.mover-composicao:active{cursor:grabbing}
+.secao-cabecalho{height:auto;min-height:96px}

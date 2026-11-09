@@ -1,7 +1,6 @@
-import Sortable from 'sortablejs';
-import {GridStack} from 'gridstack';
-import {lateralAction,fillLateral} from '../../apps/web/resources/js/painel-geometria.js';
-import {catalogo,clone,padrao,validar,titulo,transferir,ativar,moverSecao,ler,salvar,scopeKey,perfis} from './modelo.mjs';
+import {montarGrade} from './grade-visual.mjs';
+import {montarQuadro} from './quadro-secoes.mjs';
+import {catalogo,clone,padrao,validar,titulo,transferir,ativar,ler,salvar,scopeKey,perfis,nodes,obter,filhos,profundidade,normalizar,adicionarPainel,removerPainel,caminho} from './modelo.mjs';
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -13,48 +12,42 @@ const names={ana:'Ana Oliveira',bruno:'Bruno Santos'};
 const escolas={'escola-a':{nome:'Escola Horizonte do Saber',completo:'Escola Horizonte do Saber — Unidade de Educação Básica e Formação Integral'},'escola-b':{nome:'Escola Caminhos do Futuro',completo:'Escola Caminhos do Futuro — Centro de Ensino e Formação Integral'}};
 function message(text,type='info'){ $('#mensagem').textContent=text;$('#mensagem').dataset.tipo=type; }
 function toast(text,type='sucesso'){const el=$('#toast');el.textContent=text;el.dataset.tipo=type;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,5500);message(text,type);}
-function focus(selector){requestAnimationFrame(()=>$(selector)?.focus({preventScroll:true}));}
+function focus(selector){requestAnimationFrame(()=>{const requested=$(selector),fallback=[requested,$('#tab-'+tab),$('#organizar')].find(el=>el&&!el.disabled&&el.getClientRects().length);fallback?.focus({preventScroll:true});});}
+function focusNode(id,part='title'){const attrs=tab==='distribuicao'?{title:'data-quadro-titulo',parent:'data-destino',move:'data-quadro-mover'}:{title:'data-no-mover',parent:'data-no-mover',move:'data-no-mover'};focus('['+attrs[part]+'="'+id+'"]');}
 function destroy(){sortables.forEach(s=>s.destroy());sortables=[];observers.forEach(o=>o.disconnect());observers=[];charts.forEach(c=>c.dispose());charts=[];grids.forEach(g=>g.destroy(false));grids=[];}
 function definitions(){return catalogo(context);}
 function changed(next){state=next;dirty=true;render();}
 function load(){editing=false;preview=false;dirty=false;uncertain=false;try{const read=ler(localStorage,context);state=read.state;revision=read.revision;origin=read.origin;}catch{state=padrao(context);revision=0;origin='perfil';message('Não foi possível ler a disposição local. O padrão do perfil foi aberto; confira antes de salvar.','erro');}entry=clone(state);render();}
 function confirmAction(title,text,run){const dialog=$('#dialogo-confirmar');$('#titulo-confirmar').textContent=title;$('#texto-confirmar').textContent=text;const yes=$('#confirmar-sim');const apply=()=>{dialog.close();run();};yes.addEventListener('click',apply,{once:true});dialog.addEventListener('close',()=>yes.removeEventListener('click',apply),{once:true});dialog.showModal();$('#confirmar-nao').focus();}
 function switchContext(next){const run=()=>{context=next;load();};if(editing&&dirty)confirmAction('Descartar o rascunho?','As alterações ainda não salvas deste painel serão descartadas.',run);else run();}
-function sectionLayout(section){return section.widgets.filter(id=>state.widgets[id].active).map(id=>{const w=state.widgets[id];return {id,section:section.id,x:w.x,y:w.y,w:w.w,h:w.h,fixo:w.fixo};});}
-function limits(section){return new Map(section.widgets.map(id=>{const d=definitions().widgets.find(w=>w.id===id);return [id,{section:section.id,minW:d.minW,maxW:12,minH:d.minH,maxH:30,defaultW:d.w,defaultH:d.h}];}));}
-function syncGeometry(nodes){for(const n of nodes){Object.assign(state.widgets[n.id],{x:n.x,y:n.y,w:n.w,h:n.h,fixo:n.fixo===true});}}
-function repack(next,sectionId){const s=next.sections.find(s=>s.id===sectionId),placed=s.widgets.filter(id=>next.widgets[id].active&&next.widgets[id].fixo).map(id=>next.widgets[id]);for(const id of s.widgets){const w=next.widgets[id];if(!w.active||w.fixo)continue;let found=false;for(let y=0;y<=200-w.h&&!found;y++)for(let x=0;x<=12-w.w&&!found;x++){if(placed.every(p=>x>=p.x+p.w||x+w.w<=p.x||y>=p.y+p.h||y+w.h<=p.y)){Object.assign(w,{x,y});placed.push(w);found=true;}}if(!found)throw Error('Não há espaço disponível nesta seção. Reduza os widgets em Ajustes finos.');}return next;}
-function moveWidget(id,sectionId,index){try{const source=state.sections.find(s=>s.widgets.includes(id)).id;let next=transferir(state,id,sectionId,index);if(source!==sectionId){next=repack(next,source);next=repack(next,sectionId);}validar(next,context);changed(next);focus('[data-item="'+id+'"] .mover-widget');toast('Widget movido. Salve a disposição para manter.');}catch(error){render();focus('[data-item="'+id+'"] .mover-widget');toast(error.message,'erro');}}
-
+function moveWidget(id,parent){try{changed(transferir(state,id,parent,context));focusNode(id,'parent');toast('Item movido. Salve a disposição para manter.');}catch(error){render();focusNode(id,'parent');toast(error.message,'erro');}}
+function toggleWidget(id,active){try{changed(ativar(state,id,active,context));if(active)focusNode(id);else focus('#widgets-ocultos');}catch(error){render();toast(error.message,'erro');}}
 function titleEditor(kind,id,parent){
- const current=kind==='secao'?state.sections.find(s=>s.id===id):state.widgets[id],max=kind==='secao'?60:80;
- const wrap=document.createElement('form');wrap.className='renomear';
- wrap.innerHTML='<input aria-label="Novo título '+(kind==='secao'?'da seção':'do widget')+'" maxlength="'+max+'" value="'+escape(current.title)+'"><span class="erro" id="erro-titulo-'+id+'" role="alert"></span>'+btn('Confirmar título','confirmar','data-confirmar-titulo')+btn('Cancelar edição do título','fechar','data-cancelar-titulo')+btn('Restaurar título padrão','atualizar','data-restaurar-titulo');
+ const current=obter(state,id),max=kind==='secao'?60:80,wrap=document.createElement('span');wrap.className='renomear';wrap.setAttribute('role','group');
+ wrap.innerHTML='<input aria-label="Novo título '+(kind==='secao'?'do painel':'do widget')+'" maxlength="'+max+'" value="'+escape(current.title)+'"><span class="erro" id="erro-titulo-'+id+'" role="alert"></span>'+btn('Confirmar título','confirmar','data-confirmar-titulo')+btn('Cancelar edição do título','fechar','data-cancelar-titulo')+btn('Restaurar título padrão','atualizar','data-restaurar-titulo');
  parent.replaceChildren(wrap);const input=wrap.querySelector('input');input.setAttribute('aria-describedby','erro-titulo-'+id);input.focus();input.select();
- const cancel=()=>{render();focus('[data-renomear-'+kind+'="'+id+'"]');};
- wrap.querySelector('[data-cancelar-titulo]').addEventListener('click',cancel);
- wrap.querySelector('[data-restaurar-titulo]').addEventListener('click',()=>{input.value=(kind==='secao'?definitions().sections:definitions().widgets).find(v=>v.id===id).title;input.focus();});
- const save=()=>{try{current.title=titulo(input.value,max);dirty=true;render();focus('[data-renomear-'+kind+'="'+id+'"]');}catch(e){wrap.querySelector('.erro').textContent=e.message;input.setAttribute('aria-invalid','true');input.focus();}};
- wrap.querySelector('[data-confirmar-titulo]').addEventListener('click',save);wrap.addEventListener('submit',e=>{e.preventDefault();save();});wrap.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();cancel();}});
+ const cancel=()=>{render();focusNode(id);};wrap.querySelector('[data-cancelar-titulo]').addEventListener('click',cancel);
+ wrap.querySelector('[data-restaurar-titulo]').addEventListener('click',()=>{input.value=kind==='secao'?current.originalTitle:definitions().widgets.find(v=>v.id===id).title;input.focus();});
+ const save=()=>{try{current.title=titulo(input.value,max);dirty=true;render();focusNode(id);}catch(e){wrap.querySelector('.erro').textContent=e.message;input.setAttribute('aria-invalid','true');input.focus();}};
+ wrap.querySelector('[data-confirmar-titulo]').addEventListener('click',save);wrap.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();cancel();}if(e.key==='Enter'){e.preventDefault();save();}});
 }
-function board(){
- const container=$('#quadro');container.innerHTML=state.sections.map((s,index)=>'<section class="coluna" data-secao="'+s.id+'" aria-label="'+escape(s.title)+'"><header class="coluna-topo"><div class="coluna-ordem"><span>'+(index===0?'Base do painel':index===state.sections.length-1?'Topo do painel':'Posição '+(index+1))+'</span><span>'+s.widgets.filter(id=>state.widgets[id].active).length+' ativos · '+s.widgets.filter(id=>!state.widgets[id].active).length+' ocultos</span></div><div class="coluna-titulo">'+btn('Mover seção '+s.title+'. Use as setas esquerda e direita.','arrastar','data-mover-secao="'+s.id+'"')+'<div><button type="button" class="titulo-editavel" data-renomear-secao="'+s.id+'">'+escape(s.title)+icon('editar')+'</button></div></div><div class="linha-acoes">'+btn('Mover seção para a esquerda','seta','data-coluna-esquerda="'+s.id+'" '+(index===0?'disabled':'')).replace('class="icone"','class="icone tw:rotate-180"')+btn('Mover seção para a direita','seta','data-coluna-direita="'+s.id+'" '+(index===state.sections.length-1?'disabled':''))+'</div></header><div class="lista-widgets" data-lista="'+s.id+'">'+s.widgets.map(id=>boardItem(id,s)).join('')+'</div></section>').join('');
- // Class is applied explicitly so controls keep their shared button styles.
- $$('[data-mover-secao]').forEach(el=>el.classList.add('mover-coluna'));
- $$('[data-mover-widget]').forEach(el=>el.classList.add('mover-widget'));
- $$('[data-renomear-secao]').forEach(b=>b.addEventListener('click',()=>titleEditor('secao',b.dataset.renomearSecao,b.parentElement)));
- $$('[data-renomear-widget]').forEach(b=>b.addEventListener('click',()=>titleEditor('widget',b.dataset.renomearWidget,b.parentElement)));
- for(const [selector,delta,key]of [['[data-coluna-esquerda]',-1,'colunaEsquerda'],['[data-coluna-direita]',1,'colunaDireita']])$$(selector).forEach(b=>b.addEventListener('click',()=>{const id=b.dataset[key];changed(moverSecao(state,id,delta));focus('[data-mover-secao="'+id+'"]');}));
- $$('[data-mover-secao]').forEach(b=>b.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const id=b.dataset.moverSecao;changed(moverSecao(state,id,e.key==='ArrowLeft'?-1:1));focus('[data-mover-secao="'+id+'"]');message('Seção reposicionada no rascunho.');}));
- $$('[data-toggle]').forEach(b=>b.addEventListener('change',()=>{const id=b.dataset.toggle;try{const next=ativar(state,id,b.checked);repack(next,next.sections.find(s=>s.widgets.includes(id)).id);validar(next,context);changed(next);}catch(error){render();toast(error.message,'erro');}focus('[data-toggle="'+id+'"]');}));
- $$('[data-transferir]').forEach(select=>select.addEventListener('change',()=>moveWidget(select.dataset.transferir,select.value)));
- $$('[data-subir],[data-descer]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.subir||b.dataset.descer,s=state.sections.find(s=>s.widgets.includes(id)),index=s.widgets.indexOf(id)+(b.dataset.subir?-1:1);moveWidget(id,s.id,index);}));
- $$('[data-mover-widget]').forEach(b=>b.addEventListener('keydown',e=>{if(!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const id=b.dataset.moverWidget,s=state.sections.find(s=>s.widgets.includes(id));moveWidget(id,s.id,s.widgets.indexOf(id)+(e.key==='ArrowUp'?-1:1));}));
- const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
- sortables.push(new Sortable(container,{forceFallback:true,fallbackOnBody:true,fallbackTolerance:5,draggable:'.coluna',handle:'.mover-coluna',animation:reduce?0:150,direction:'horizontal',ghostClass:'sortable-ghost',onStart:()=>dragBefore=clone(state),onEnd:()=>{if(!dragBefore)return;state.sections=[...container.querySelectorAll('.coluna')].map(el=>state.sections.find(s=>s.id===el.dataset.secao));dirty=true;dragBefore=null;render();message('Seções reorganizadas no rascunho.');}}));
- $$('[data-lista]').forEach(list=>sortables.push(new Sortable(list,{forceFallback:true,fallbackOnBody:true,fallbackTolerance:5,group:'widgets-autorizados',handle:'.mover-widget',draggable:'.item-widget',animation:reduce?0:150,emptyInsertThreshold:40,ghostClass:'sortable-ghost',onStart:()=>dragBefore=clone(state),onEnd:e=>{if(!dragBefore)return;try{const id=e.item.dataset.item,from=e.from.dataset.lista,to=e.to.dataset.lista;let next=transferir(state,id,to,e.newDraggableIndex);if(from!==to){next=repack(next,from);next=repack(next,to);}validar(next,context);changed(next);focus('[data-item="'+id+'"] .mover-widget');message('Widget movido para '+state.sections.find(s=>s.id===to).title+'.');}catch(error){state=dragBefore;render();toast(error.message,'erro');}finally{dragBefore=null;}}})));
+let creationWidget=null,creationDone=false;
+function createPanel(widgetId=null){
+ creationWidget=widgetId;creationDone=false;const form=$('#form-novo-painel');form.elements.titulo.value='';$('#erro-novo-painel').textContent='';
+ const options=state.sections.filter(n=>profundidade(state,n.id)===0);form.elements.pai.innerHTML='<option value="">Sem seção · área do painel</option>'+options.map(n=>'<option value="'+n.id+'">'+escape(caminho(state,n.id))+'</option>').join('');
+ const current=widgetId?obter(state,widgetId).parent:null;form.elements.pai.value=options.some(n=>n.id===current)?current:'';$('#dialogo-novo-painel').showModal();form.elements.titulo.focus();
 }
-function boardItem(id,section){const w=state.widgets[id],def=definitions().widgets.find(w=>w.id===id),index=section.widgets.indexOf(id);return '<article class="item-widget '+(!w.active?'inativo':'')+'" data-item="'+id+'"><div class="item-topo">'+btn('Mover widget '+w.title+'. Use as setas para cima e para baixo.','arrastar','data-mover-widget="'+id+'"')+'<div><button class="titulo-editavel" data-renomear-widget="'+id+'">'+escape(w.title)+icon('editar')+'</button><p class="item-tipo">'+escape(def.type==='lista'?'Lista de turmas':def.type==='agenda'?'Agenda':def.type.includes('destaques')||def.type==='atencao'?'Estudantes':'Indicador pedagógico')+'</p></div></div><div class="item-acoes"><label class="ativacao"><input type="checkbox" data-toggle="'+id+'" '+(w.active?'checked':'')+'>Mostrar no painel</label>'+btn('Subir '+w.title,'seta','data-subir="'+id+'" '+(index===0?'disabled':'')).replace('class="icone"','class="icone tw:-rotate-90"')+btn('Descer '+w.title,'seta','data-descer="'+id+'" '+(index===section.widgets.length-1?'disabled':'')).replace('class="icone"','class="icone tw:rotate-90"')+'</div><div class="transferencia"><label for="destino-'+id+'">Seção</label><select id="destino-'+id+'" data-transferir="'+id+'" aria-label="Mover '+escape(w.title)+' para seção">'+state.sections.map(s=>'<option value="'+s.id+'" '+(s.id===section.id?'selected':'')+'>'+escape(s.title)+'</option>').join('')+'</select></div></article>';}
+$('#form-novo-painel').addEventListener('submit',e=>{
+ e.preventDefault();const form=e.currentTarget;try{
+  const id='pessoal-'+crypto.randomUUID();let next=adicionarPainel(state,form.elements.titulo.value,id,form.elements.pai.value||null,context);if(creationWidget)next=transferir(next,creationWidget,id,context);
+  creationDone=true;$('#dialogo-novo-painel').close();tab='distribuicao';changed(next);focusNode(id);toast('Painel criado no rascunho. Painéis vazios ficam ocultos na visualização.');
+ }catch(error){$('#erro-novo-painel').textContent=error.message;form.elements.titulo.focus();}
+});
+$('#dialogo-novo-painel').addEventListener('close',()=>{if(creationDone)return;render();if(creationWidget)focusNode(creationWidget,'parent');else focus('#novo-painel');});
+$('#novo-painel').addEventListener('click',()=>createPanel());
+function removePanel(id){const n=obter(state,id);confirmAction('Remover '+n.title+'?','Os widgets e as subseções irão para o nível acima. Nenhum dado será excluído. A alteração só será mantida ao salvar.',()=>{try{changed(removerPainel(state,id,context));focus('#novo-painel');toast('Painel removido do rascunho; conteúdo preservado.');}catch(error){toast(error.message,'erro');}});}
+function hiddenWidgets(){const hidden=Object.values(state.widgets).filter(n=>!n.active);$('#widgets-ocultos').textContent='Widgets ocultos ('+hidden.length+')';$('#widgets-ocultos').disabled=hidden.length===0;$('#lista-ocultos').innerHTML=hidden.map(n=>'<div class="oculto-linha"><span>'+escape(n.title)+'</span>'+btn('Mostrar','ver','data-reativar="'+n.id+'"',true)+'</div>').join('');$$('[data-reativar]').forEach(b=>b.addEventListener('click',()=>toggleWidget(b.dataset.reativar,true)));}
+function board(){grids.push(montarQuadro({container:$('#quadro'),state,context,ui:{escape,icon,btn},callbacks:{change:changed,restore:(snapshot,text)=>{state=clone(snapshot);render();toast(text,'erro');},say:message,focus,rename:(id,parent)=>titleEditor(obter(state,id).kind==='section'?'secao':'widget',id,parent),create:createPanel,move:moveWidget,toggle:toggleWidget,remove:removePanel}}));}
 
 const chartTypes=new Set(['turnos','comparativo','cobertura','avaliacoes','periodos','distribuicao','habilidades','reavaliacoes']);
 function content(def){
@@ -66,35 +59,14 @@ function content(def){
  const p={participacao:[89,'32 de 36 participações','Confirmadas 32','Pendentes 4'],devolutivas:[75,'18 de 24 devolutivas','Concluídas 18','Pendentes 6'],metas:[60,'3 de 5 ações concluídas','Concluídas 3','Pendentes 2']}[def.type]||[0,'Sem registros','—','—'];
  return '<span class="numero-resumo">'+p[0]+'%</span><p>'+p[1]+'</p><div class="barra-percentual"><span style="width:'+p[0]+'%"></span></div><div class="resumo-itens"><span>'+p[2]+'</span><span>'+p[3]+'</span></div>';
 }
-function widgetMarkup(id,fine=false){const def=definitions().widgets.find(w=>w.id===id),w=state.widgets[id];return '<article class="widget" data-widget="'+id+'"><header><div><h3>'+escape(w.title)+'</h3><span class="selo">Dados demonstrativos</span></div><div class="widget-controles">'+(chartTypes.has(def.type)?btn('Alternar barras horizontais e verticais','barras-'+(w.orientacao==='vertical'?'horizontais':'verticais'),'data-orientacao="'+id+'"'):'')+(fine?btn((w.fixo?'Liberar':'Fixar')+' posição e tamanho de '+w.title,'fixar','data-pin="'+id+'" aria-pressed="'+w.fixo+'"')+btn('Mover '+w.title+'. Setas movem; Shift e setas redimensionam.','arrastar','data-mover-grade="'+id+'" '+(w.fixo?'disabled':'')):'')+'</div></header><div class="widget-conteudo">'+content(def)+'</div></article>';}
+function widgetMarkup(id,fine=false,custom={}){
+ const def=definitions().widgets.find(w=>w.id===id),w=state.widgets[id];
+ return '<article class="widget" data-widget="'+id+'"><header><div><h3 class="titulo-widget">'+(custom.title??escape(w.title))+'</h3><span class="selo">Dados demonstrativos</span></div><div class="widget-controles">'+(chartTypes.has(def.type)?btn('Alternar barras horizontais e verticais','barras-'+(w.orientacao==='vertical'?'horizontais':'verticais'),'data-orientacao="'+id+'"'):'')+(custom.controls||'')+'</div></header><div class="widget-conteudo">'+content(def)+'</div></article>';
+}
 function renderPanels(target,fine=false){
- target.innerHTML=state.sections.slice().reverse().filter(s=>s.widgets.some(id=>state.widgets[id].active)).map(s=>'<section class="card-secao" data-card-secao="'+s.id+'"><h2>'+escape(s.title)+'</h2><div class="'+(fine?'grid-stack':'grade-leitura')+'" data-grade="'+s.id+'">'+s.widgets.filter(id=>state.widgets[id].active).map(id=>{const w=state.widgets[id];return fine?'<div class="grid-stack-item" gs-id="'+id+'" gs-x="'+w.x+'" gs-y="'+w.y+'" gs-w="'+w.w+'" gs-h="'+w.h+'"><div class="grid-stack-item-content">'+widgetMarkup(id,true)+'</div></div>':'<div class="widget-espaco" style="grid-column:'+ (w.x+1)+' / span '+w.w+';grid-row:'+(w.y+1)+' / span '+w.h+'">'+widgetMarkup(id)+'</div>';}).join('')+'</div></section>').join('')||'<div class="card-secao vazio">Todos os widgets estão ocultos. Reative-os na aba Distribuição por seção.</div>';
- if(fine){
-  $$('[data-mover-grade]').forEach(b=>b.classList.add('mover-grade'));
-  for(const section of state.sections){const el=target.querySelector('[data-grade="'+section.id+'"]');if(!el)continue;const defs=limits(section),grid=GridStack.init({column:12,cellHeight:40,margin:6,float:false,acceptWidgets:false,handle:'.mover-grade',minRow:3,animate:false,alwaysShowResizeHandle:true,resizable:{handles:'se'},disableOneColumnMode:true},el);grids.push(grid);
-   for(const n of sectionLayout(section))grid.update(el.querySelector('[gs-id="'+n.id+'"]'),{minW:defs.get(n.id).minW,minH:defs.get(n.id).minH,maxW:12,maxH:30,locked:n.fixo,noMove:n.fixo,noResize:n.fixo});
-   let before;
-   grid.on('dragstart resizestart',()=>{before=sectionLayout(section);});
-   grid.on('dragstop resizestop',(event,item)=>{if(!before)return;try{
-    const id=item.gridstackNode.id,n=item.gridstackNode;let next;
-    if(event.type==='resizestop')next=lateralAction(before,defs,id,{type:'resize',w:n.w,h:n.h});
-    else{const from=before.find(v=>v.id===id),target=before.filter(v=>v.id!==id&&!v.fixo).sort((a,b)=>Math.abs(a.y-n.y)-Math.abs(b.y-n.y)||Math.abs(a.x-n.x)-Math.abs(b.x-n.x))[0];
-     next=target?lateralAction(before,defs,id,{type:'move',targetId:target.id,place:n.y>target.y+target.h/2?'after-band':n.y<target.y-1?'before-band':'lateral',after:n.x>target.x}):[{...from,x:0,y:0}];}
-    syncGeometry(fillLateral(next,defs));dirty=true;requestAnimationFrame(render);message('Ajuste aplicado ao rascunho.');
-   }catch(e){syncGeometry(before);requestAnimationFrame(render);toast('Ajuste indisponível: preserve espaço para os widgets fixados.','erro');}before=null;});
-  }
- }
+ const view=montarGrade({target,state,context,editing:fine,mobile:matchMedia('(max-width:767px)').matches,ui:{escape,icon,btn},widgetMarkup,callbacks:{definitions,change:changed,restore:(snapshot,text)=>{state=clone(snapshot);render();toast(text,'erro');},say:message,focus,path:id=>caminho(state,id),rename:(id,parent)=>titleEditor(obter(state,id).kind==='section'?'secao':'widget',id,parent),create:createPanel,move:moveWidget,toggle:toggleWidget,remove:removePanel,pin:id=>{const next=clone(state);obter(next,id).fixo=!obter(next,id).fixo;changed(next);focus('[data-no-pin="'+id+'"]');}}});grids.push(view);
  target.querySelectorAll('[data-orientacao]').forEach(b=>b.addEventListener('click',()=>{const w=state.widgets[b.dataset.orientacao];w.orientacao=w.orientacao==='vertical'?'horizontal':'vertical';if(editing)dirty=true;render();focus('[data-orientacao="'+b.dataset.orientacao+'"]');}));
- target.querySelectorAll('[data-pin]').forEach(b=>b.addEventListener('click',()=>{const w=state.widgets[b.dataset.pin];w.fixo=!w.fixo;dirty=true;render();focus('[data-pin="'+b.dataset.pin+'"]');}));
- target.querySelectorAll('[data-mover-grade]').forEach(b=>b.addEventListener('keydown',e=>{
-  if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const id=b.dataset.moverGrade,s=state.sections.find(s=>s.widgets.includes(id)),before=sectionLayout(s),n=before.find(n=>n.id===id),defs=limits(s);try{let next;
-   if(e.shiftKey)next=lateralAction(before,defs,id,{type:'resize',w:n.w+(e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0),h:n.h+(e.key==='ArrowDown'?1:e.key==='ArrowUp'?-1:0)});
-   else{const peers=before.filter(n=>n.id!==id&&!n.fixo).sort((a,b)=>a.y-b.y||a.x-b.x),target=peers.find(n=>e.key==='ArrowUp'?n.y<state.widgets[id].y:e.key==='ArrowDown'?n.y>=state.widgets[id].y:true);if(!target)return;next=lateralAction(before,defs,id,{type:'move',targetId:target.id,place:e.key==='ArrowUp'?'before-band':e.key==='ArrowDown'?'after-band':'lateral',after:e.key==='ArrowRight'});}
-   syncGeometry(next);dirty=true;render();focus('[data-mover-grade="'+id+'"]');message('Widget ajustado dentro da seção.');
-  }catch{toast('Não há espaço disponível para esse ajuste.','erro');}
- }));
- target.querySelectorAll('[data-abrir-turma]').forEach(b=>b.addEventListener('click',()=>switchContext({...context,painel:'turma'})));
- renderCharts(target);
+ target.querySelectorAll('[data-abrir-turma]').forEach(b=>b.addEventListener('click',()=>switchContext({...context,painel:'turma'})));renderCharts(target);
 }
 function renderCharts(target){
  const datasets={turnos:[['Manhã','Tarde','Integral'],[3,2,1],'Turmas'],comparativo:[['3º A','3º B','2º A'],[68,72,61],'Acerto (%)'],cobertura:[['Matemática','Português','Ciências'],[86,91,78],'Aplicações (%)'],avaliacoes:[['Avaliação 1','Avaliação 2','Avaliação 3'],[57,65,72],'Acerto (%)'],periodos:[['1º trimestre','2º trimestre','3º trimestre'],[62,69,76],'Acerto (%)'],distribuicao:[['0–39%','40–59%','60–79%','80–100%'],[4,6,12,6],'Alunos'],habilidades:[['Interpretar','Resolver','Argumentar'],[72,58,66],'Acerto (%)'],reavaliacoes:[['Aplicação','Reavaliação'],[46,68],'Acerto (%)']};
@@ -105,7 +77,7 @@ function renderCharts(target){
  });
 }
 function render(){
- destroy();const activeEdit=editing&&!preview&&media.matches;
+ destroy();document.querySelectorAll('[popover]:popover-open').forEach(el=>el.hidePopover());const activeEdit=editing&&!preview&&media.matches;
  const escola=escolas[context.vinculo];$$('[data-escola]').forEach(el=>el.textContent=el.dataset.escola==='completo'?escola.completo:escola.nome);
  $('#titulo-pagina').textContent=context.painel==='turmas'?'Turmas':'Turma 3º A';$('#subtitulo-pagina').textContent=context.painel==='turmas'?escola.nome:'Ensino médio · Manhã · 2026 · '+escola.nome;$('#breadcrumb').textContent='Início / Turmas'+(context.painel==='turma'?' / 3º A':'');
  $('#conta-menu strong').textContent=names[context.usuario];$('#conta-menu span').textContent=context.usuario+'@example.test';$$('[data-perfil]').forEach(el=>el.textContent=perfis[context.perfil]);$('#escopo').textContent=names[context.usuario]+' · '+perfis[context.perfil]+' · '+(context.vinculo==='escola-a'?'Escola Horizonte do Saber':'Escola Caminhos do Futuro')+' · Dados fictícios · '+(origin==='usuario'?'Disposição pessoal local':'Padrão do perfil');
@@ -115,7 +87,7 @@ function render(){
  $('#organizar').hidden=editing||!media.matches;$('#editor').hidden=!editing||preview;$('#barra-preview').hidden=!preview;$('#edicao-suspensa').hidden=!editing||media.matches;
  $('#aba-distribuicao').hidden=!activeEdit||tab!=='distribuicao';$('#aba-ajustes').hidden=!activeEdit||tab!=='ajustes';$('#quadro').replaceChildren();$('#grades').replaceChildren();$('#painel').replaceChildren();
  for(const t of ['distribuicao','ajustes']){$('#tab-'+t).setAttribute('aria-selected',String(tab===t));$('#tab-'+t).tabIndex=tab===t?0:-1;}
- $('#salvar').disabled=uncertain||!media.matches;$('#recarregar-salvo').hidden=!uncertain;
+ $('#novo-painel').hidden=tab!=='distribuicao';$('#widgets-ocultos').hidden=tab!=='distribuicao';hiddenWidgets();$('#salvar').disabled=uncertain||!media.matches;$('#recarregar-salvo').hidden=!uncertain;
  if(activeEdit){if(tab==='distribuicao')board();else renderPanels($('#grades'),true);}else if(editing&&!media.matches){const draft=state;state=clone(entry);renderPanels($('#painel'));state=draft;}else renderPanels($('#painel'));
 }
 $('#organizar').addEventListener('click',()=>{entry=clone(state);editing=true;preview=false;dirty=false;tab='distribuicao';render();focus('#tab-distribuicao');});

@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 const path=p=>fileURLToPath(new URL(p,import.meta.url));mkdirSync(path('dist'),{recursive:true});
 const symbols=readFileSync(path('../../apps/web/resources/previas/tailwind/index.html'),'utf8').match(/<defs>([\s\S]*?)<\/defs>/)[1];
 const existing=readFileSync(path('../../apps/web/resources/views/layouts/_icone.blade.php'),'utf8');
-const extra=['arrastar','fixar','barras-horizontais','barras-verticais'].map(name=>'<symbol id="i-'+name+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+existing.split("@case('"+name+"')")[1].split('@break')[0]+'</symbol>').join('');
+const extra=['arrastar','fixar','ajustes','barras-horizontais','barras-verticais'].map(name=>'<symbol id="i-'+name+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+existing.split("@case('"+name+"')")[1].split('@break')[0]+'</symbol>').join('');
 writeFileSync(path('dist/icones.svg'),'<svg xmlns="http://www.w3.org/2000/svg"><defs>'+symbols+extra+'</defs></svg>');
 copyFileSync(path('../../apps/web/resources/previas/tailwind/MATERIAL-SYMBOLS-LICENSE.txt'),path('dist/MATERIAL-SYMBOLS-LICENSE.txt'));
 const css=spawnSync(process.execPath,[path('../../scripts/tailwind/node_modules/@tailwindcss/cli/dist/index.mjs'),'-i',path('interface.css'),'-o',path('dist/interface.css'),'--minify'],{stdio:'inherit'});if(css.status!==0)process.exit(1);
