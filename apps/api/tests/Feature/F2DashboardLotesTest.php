@@ -163,7 +163,8 @@ final class F2DashboardLotesTest extends TestCase
         $this->assertSame('sem_dados', $vazia['status']);
         DB::table('notas')->where('prova_id', 1)->update(['nota_final' => 0]);
         $turma = collect($this->getJson('/api/v1/dashboard/dir-escolar')->assertOk()->json('data.turmas'))->firstWhere('id', 1);
-        $this->assertNull($turma['media']); // Mantém a convenção do contrato legado para média zero.
+        $decimal = in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
+        $this->assertSame($decimal ? 0 : null, $turma['media']); // Oráculo do controller anterior: DECIMAL zero era truthy.
     }
 
     public function test_uma_quatro_oito_turmas_nao_acrescentam_consultas_por_turma(): void
@@ -203,11 +204,74 @@ final class F2DashboardLotesTest extends TestCase
         $this->assertNull($notas['Artes']['ultima_data']);
         $this->assertSame($decimal ? '9.00' : 9, $notas['Artes']['ultima_nota']);
         $this->assertSame([
-            ['bimestre' => 1, 'label' => '1º bim.', 'media' => null],
+            ['bimestre' => 1, 'label' => '1º bim.', 'media' => $decimal ? 0 : null],
             ['bimestre' => 2, 'label' => '2º bim.', 'media' => 5],
             ['bimestre' => 3, 'label' => '3º bim.', 'media' => null],
             ['bimestre' => 4, 'label' => '4º bim.', 'media' => 7],
         ], $r->json('data.bimestres'));
+    }
+
+    public function test_nucleo_preserva_zero_decimal_nos_quatro_periodos_sem_confundir_ausencia(): void
+    {
+        $this->usuario(7, 'dir_nucleo');
+        DB::table('usuario_vinculos')->insert(['id' => 8, 'usuario_id' => 7, 'espaco_id' => 3, 'perfil' => 'dir_nucleo',
+            'situacao' => 'ativo', 'inicio_em' => now()->subDay(), 'versao_autorizacao' => 1]);
+        DB::table('notas')->where('prova_id', 1)->update(['nota_final' => 0, 'acertos' => 0]);
+        foreach ([10 => '2026-03-31', 11 => '2026-04-01', 12 => '2026-07-01'] as $id => $data) {
+            $this->prova($id, data: $data); $this->nota($id, 1, 0);
+        }
+        $this->ator(7, 8);
+        $decimal = in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
+        $zero = $decimal ? 0 : null;
+        $r = $this->getJson('/api/v1/dashboard/dir-nucleo')->assertOk();
+        $this->assertSame([$zero, $zero, $zero, $zero], array_column($r->json('data.bimestres'), 'media'));
+        DB::table('notas')->delete();
+        $r = $this->getJson('/api/v1/dashboard/dir-nucleo')->assertOk();
+        $this->assertSame([null, null, null, null], array_column($r->json('data.bimestres'), 'media'));
+    }
+
+    public function test_nucleo_comparativo_com_multiplas_turmas_preserva_contagens_media_zero_e_nulo(): void
+    {
+        $this->usuario(7, 'dir_nucleo');
+        DB::table('usuario_vinculos')->insert(['id' => 8, 'usuario_id' => 7, 'espaco_id' => 3, 'perfil' => 'dir_nucleo',
+            'situacao' => 'ativo', 'inicio_em' => now()->subDay(), 'versao_autorizacao' => 1]);
+        $this->turma(4);
+        $this->aluno(4, turma: 4); $this->aluno(5); $this->aluno(6, turma: 3, ativo: false);
+        foreach ([[10, 3, 3, 0], [11, 4, 4, 9], [12, 1, 5, 3]] as [$prova, $turma, $aluno, $nota]) {
+            $this->prova($prova, turma: $turma); $this->nota($prova, $aluno, $nota, turma: $turma);
+        }
+        DB::table('escolas')->insert(['id' => 3, 'nucleo_id' => 1, 'nome' => 'Escola sem resultados fictícia', 'inep' => '00000003', 'tipo_rede' => 'estadual']);
+        DB::table('espacos')->insert(['id' => 7, 'cliente_id' => 1, 'tipo' => 'escola', 'escola_id' => 3, 'nome' => 'Espaço fictício', 'situacao' => 'ativo']);
+        $this->turma(7, escola: 3, espaco: 7);
+        $this->ator(7, 8);
+        $maria = in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
+        $depth = $maria ? (int) DB::selectOne('SELECT @@SESSION.optimizer_search_depth as valor')->valor : null;
+        try {
+            // Mesmo otimizador limitado da homologação; só a sessão do banco descartável do teste.
+            if ($maria) DB::statement('SET SESSION optimizer_search_depth = 4');
+            $r = $this->getJson('/api/v1/dashboard/dir-nucleo')->assertOk()->assertJsonCount(2, 'data.escolas');
+            $escolas = collect($r->json('data.escolas'))->keyBy('id');
+            $this->assertSame(3, $escolas[1]['total_turmas']);
+            $this->assertSame(4, $escolas[1]['total_alunos']);
+            $this->assertSame($maria ? '4.5' : 4.5, $escolas[1]['media']);
+            $this->assertSame('abaixo_meta', $escolas[1]['status']);
+            $this->assertSame(1, $escolas[3]['total_turmas']);
+            $this->assertSame(0, $escolas[3]['total_alunos']);
+            $this->assertNull($escolas[3]['media']);
+            $this->assertSame('sem_dados', $escolas[3]['status']);
+            DB::table('notas')->update(['nota_final' => 0, 'acertos' => 0]);
+            $escolas = collect($this->getJson('/api/v1/dashboard/dir-nucleo')->assertOk()->json('data.escolas'))->keyBy('id');
+            $this->assertSame(4, $escolas[1]['total_alunos']);
+            $this->assertSame($maria ? '0.0' : 0, $escolas[1]['media']);
+            $this->assertSame('abaixo_meta', $escolas[1]['status']);
+            DB::table('notas')->delete();
+            $escolas = collect($this->getJson('/api/v1/dashboard/dir-nucleo')->assertOk()->json('data.escolas'))->keyBy('id');
+            $this->assertSame(4, $escolas[1]['total_alunos']);
+            $this->assertNull($escolas[1]['media']);
+            $this->assertSame('sem_dados', $escolas[1]['status']);
+        } finally {
+            if ($depth !== null) DB::statement('SET SESSION optimizer_search_depth = '.$depth);
+        }
     }
 
     public function test_numero_de_disciplinas_do_aluno_nao_cria_sql_por_disciplina(): void

@@ -10,6 +10,23 @@ class ConsultasPedagogicas
 {
     public function __construct(public readonly Usuario $ator,public readonly bool $historico=false) {}
 
+    /**
+     * Projeção autorizada para LEFT JOIN de registros, sem mesclar a subconsulta.
+     * A chave preserva a cardinalidade quando dois registros têm os mesmos valores.
+     */
+    public function paraJuncao(string $tabela, array $campos): \Illuminate\Database\Query\Builder
+    {
+        foreach ([$tabela, ...$campos] as $identificador) {
+            if (!is_string($identificador) || !preg_match('/\A[a-zA-Z_][a-zA-Z0-9_]*\z/D', $identificador)) {
+                throw new \InvalidArgumentException('Identificador de projeção inválido.');
+            }
+        }
+
+        $colunas = array_map(fn (string $campo) => $tabela.'.'.$campo, array_unique(['id', ...$campos]));
+
+        return $this->tabela($tabela)->select($colunas)->distinct();
+    }
+
     public function escolasIds(): ?array
     {
         if (ContextoVinculo::presente($this->ator)) return ConsultaVinculo::para($this->ator)->tabela('escolas')

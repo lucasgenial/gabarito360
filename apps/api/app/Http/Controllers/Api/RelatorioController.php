@@ -285,7 +285,7 @@ class RelatorioController extends Controller
             return null;
         }
 
-        return $consulta->tabela('turmas')->leftJoinSub($consulta->tabela('escolas'), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
+        return $consulta->tabela('turmas')->leftJoinSub($consulta->paraJuncao('escolas', ['nome']), 'escolas', 'escolas.id', '=', 'turmas.escola_id')
             ->where('turmas.id', $turmaId)
             ->first(['turmas.id', 'turmas.nome', 'turmas.serie', 'turmas.escola_id', 'escolas.nome as escola_nome']);
     }

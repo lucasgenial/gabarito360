@@ -69,7 +69,7 @@ class RelatorioConsolidadoController extends Controller
             return ApiResponse::notFound('Núcleo não encontrado.');
         }
 
-        $nucleo = $consulta->tabela('nucleos')->leftJoinSub($consulta->tabela('redes'), 'redes', 'redes.id', '=', 'nucleos.rede_id')
+        $nucleo = $consulta->tabela('nucleos')->leftJoinSub($consulta->paraJuncao('redes', ['nome']), 'redes', 'redes.id', '=', 'nucleos.rede_id')
             ->where('nucleos.id', $id)->first(['nucleos.id', 'nucleos.nome', 'redes.id as rede_id', 'redes.nome as rede']);
         if (!$nucleo) {
             return ApiResponse::notFound('Núcleo não encontrado.');
