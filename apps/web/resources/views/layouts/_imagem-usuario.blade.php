@@ -24,4 +24,4 @@
 </dialog>
 @php($g360Config = ['inicial'=>$imagemInicial,'acao'=>\App\Support\NavegacaoWeb::destino('perfil.imagem')])
 <script type="application/json" id="imagem-usuario-config">@json($g360Config)</script>
-<script src="{{ asset('js/imagem-usuario.js') }}?v={{ filemtime(public_path('js/imagem-usuario.js')) }}"></script>
+<script src="@ativo('js/imagem-usuario.js')"></script>

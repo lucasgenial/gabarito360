@@ -181,6 +181,6 @@
 
 
 @push('scripts')
-<script src="{{ asset('js/turmas.js') }}?v={{ filemtime(public_path('js/turmas.js')) }}" defer></script>
-<script src="{{ asset('js/turmas-filtros.js') }}?v={{ filemtime(public_path('js/turmas-filtros.js')) }}" defer></script>
+<script src="@ativo('js/turmas.js')" defer></script>
+<script src="@ativo('js/turmas-filtros.js')" defer></script>
 @endpush

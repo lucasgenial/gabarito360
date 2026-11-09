@@ -9,8 +9,8 @@
 @hasSection('robots')<meta name="robots" content="@yield('robots')">@endif
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}">
-<link rel="stylesheet" href="{{ asset('css/apresentacao-publica.css') }}?v={{ filemtime(public_path('css/apresentacao-publica.css')) }}">
+<link rel="stylesheet" href="@ativo('css/app.css')">
+<link rel="stylesheet" href="@ativo('css/apresentacao-publica.css')">
 @stack('styles')
 @include('layouts._marca-head')
 </head>
@@ -25,8 +25,8 @@
   @yield('content')
 </main>
 <x-rodape-publico />
-<script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
-<script src="{{ asset('js/apresentacao-publica.js') }}?v={{ filemtime(public_path('js/apresentacao-publica.js')) }}" defer></script>
+<script src="@ativo('js/app.js')"></script>
+<script src="@ativo('js/apresentacao-publica.js')" defer></script>
 @stack('scripts')
 </body>
 </html>

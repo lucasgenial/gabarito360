@@ -25,4 +25,4 @@
 </dialog>
 @php($g360Config = ['inicial'=>$imagemInicial,'rascunho'=>$rascunho,'acao'=>$rascunho?null:\App\Support\NavegacaoWeb::destino('alunos.imagem',[$aluno['id']])])
 <script type="application/json" id="imagem-aluno-config">@json($g360Config)</script>
-<script src="{{ asset('js/imagem-aluno.js') }}?v={{ filemtime(public_path('js/imagem-aluno.js')) }}"></script>
+<script src="@ativo('js/imagem-aluno.js')"></script>

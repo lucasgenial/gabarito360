@@ -1383,7 +1383,7 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 .avatar-aluno--neutro { background:var(--surface-2);color:var(--fg-2); }
 
 /* Galeria de personagens aprovada: catálogo fixo, sem upload. */
-.avatar-aluno--imagem { background-image:url('../images/avatares/estudantes-v1.png'); background-size:650% 650%; background-position:calc(0.76% + var(--avatar-x) * 0.9848) calc(0.76% + var(--avatar-y) * 0.9848); image-rendering:pixelated; overflow:hidden; }
+.avatar-aluno--imagem { background-image:url('../images/avatares/estudantes-v2.webp'); background-size:650% 650%; background-position:calc(0.76% + var(--avatar-x) * 0.9848) calc(0.76% + var(--avatar-y) * 0.9848); image-rendering:pixelated; overflow:hidden; }
 .avatar-aluno--imagem .avatar-iniciais { visibility:hidden; }
 .seletor-avatar { border:0; padding:0; margin:0 0 20px; min-width:0; }
 .seletor-avatar legend { font-weight:700; margin-bottom:12px; }
@@ -1554,8 +1554,8 @@ html[data-theme="dark"] .user-menu-links hr { border-top-color: var(--border); }
 }
 
 /* Catálogos de identidade separados: alunos, educadores adultos e turmas. */
-.avatar-catalogo-educadores.avatar-aluno--imagem,.avatar-usuario .avatar-aluno--imagem,[data-imagem-propria] .avatar-aluno--imagem,#imagem-usuario-modal .avatar-aluno--imagem{background-image:url('../images/avatares/educadores-v1.png');background-size:600% 600%;background-position:var(--avatar-x) var(--avatar-y)}
-.avatar-catalogo-turmas.avatar-aluno--imagem{background-image:none;background-color:#e9eef4;position:relative}.avatar-turma-brasao{position:absolute;inset:10%;background-image:url('../images/avatares/brasoes-v1.png');background-size:600% 600%;background-position:var(--avatar-x) var(--avatar-y);image-rendering:pixelated;border-radius:4px}.g-pagina-identidade{display:flex;align-items:center;gap:16px}.g-pagina-identidade>div{min-width:0}.g-pagina-identidade .imagem-perfil-abrir{flex-shrink:0}.turma-identidade-lista{display:flex;align-items:center;gap:12px}
+.avatar-catalogo-educadores.avatar-aluno--imagem,.avatar-usuario .avatar-aluno--imagem,[data-imagem-propria] .avatar-aluno--imagem,#imagem-usuario-modal .avatar-aluno--imagem{background-image:url('../images/avatares/educadores-v2.webp');background-size:600% 600%;background-position:var(--avatar-x) var(--avatar-y)}
+.avatar-catalogo-turmas.avatar-aluno--imagem{background-image:none;background-color:#e9eef4;position:relative}.avatar-turma-brasao{position:absolute;inset:10%;background-image:url('../images/avatares/brasoes-v2.webp');background-size:600% 600%;background-position:var(--avatar-x) var(--avatar-y);image-rendering:pixelated;border-radius:4px}.g-pagina-identidade{display:flex;align-items:center;gap:16px}.g-pagina-identidade>div{min-width:0}.g-pagina-identidade .imagem-perfil-abrir{flex-shrink:0}.turma-identidade-lista{display:flex;align-items:center;gap:12px}
 @media(max-width:600px){.g-pagina-identidade{align-items:flex-start;gap:12px}}
 .g-pagina-identidade .imagem-perfil-abrir{margin:0;flex:0 0 auto}
 .g-pagina-identidade>[data-imagem-turma]{flex:0 0 auto}

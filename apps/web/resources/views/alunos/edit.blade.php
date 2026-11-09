@@ -19,6 +19,6 @@
 </form>
 @endsection
 
-@push('scripts')<script src="{{ asset('js/formulario-erros.js') }}" defer></script>@endpush
+@push('scripts')<script src="@ativo('js/formulario-erros.js')" defer></script>@endpush
 
-@push('styles')<link rel="stylesheet" href="{{ asset('css/formulario-escolar.css') }}?v={{ filemtime(public_path('css/formulario-escolar.css')) }}">@endpush
+@push('styles')<link rel="stylesheet" href="@ativo('css/formulario-escolar.css')">@endpush

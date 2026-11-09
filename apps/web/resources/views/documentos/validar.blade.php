@@ -18,8 +18,8 @@
 </section>
 @endsection
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/validacao-documento.css') }}?v={{ @filemtime(public_path('css/validacao-documento.css')) }}">
+<link rel="stylesheet" href="@ativo('css/validacao-documento.css')">
 @endpush
 @push('scripts')
-<script src="{{ asset('js/validacao-documento.js') }}?v={{ @filemtime(public_path('js/validacao-documento.js')) }}" defer></script>
+<script src="@ativo('js/validacao-documento.js')" defer></script>
 @endpush

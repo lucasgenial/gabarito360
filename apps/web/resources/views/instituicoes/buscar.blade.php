@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('tela','tela-instituicoes-busca')
 @section('title','Buscar instituição')
-@push('styles')<link rel="stylesheet" href="{{ asset('css/instituicoes-busca.css') }}?v={{ @filemtime(public_path('css/instituicoes-busca.css')) }}">@endpush
+@push('styles')<link rel="stylesheet" href="@ativo('css/instituicoes-busca.css')">@endpush
 @section('breadcrumb')<a href="{{ route('instituicoes.index') }}">Minhas instituições</a><span class="sep">/</span><span>Buscar instituição</span>@endsection
 @section('content')
 <x-pagina titulo="Buscar instituição"><x-slot:sub>Encontre uma instituição para adicionar à sua lista pessoal.</x-slot:sub></x-pagina>
@@ -49,4 +49,4 @@
 </section>
 @elseif(!$errors->any())<section class="busca-inicio"><h2>Qual instituição você procura?</h2><p>Busque pelo nome ou escolha a localização para ver as instituições da região.</p></section>@endif
 @endsection
-@push('scripts')<script src="{{ asset('js/catalogo-instituicoes.js') }}?v={{ @filemtime(public_path('js/catalogo-instituicoes.js')) }}"></script>@endpush
+@push('scripts')<script src="@ativo('js/catalogo-instituicoes.js')"></script>@endpush

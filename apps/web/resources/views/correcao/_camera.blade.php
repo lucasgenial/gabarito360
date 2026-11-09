@@ -38,8 +38,8 @@
 </div>
 
 @push('scripts')
-<script src="{{ asset('js/cartoes-fila.js') }}?v={{ @filemtime(public_path('js/cartoes-fila.js')) }}"></script>
+<script src="@ativo('js/cartoes-fila.js')"></script>
 @php($g360Config = ['upload'=>\App\Support\NavegacaoWeb::destino('correcao.upload',[$prova['id']]),'envio'=>\App\Support\NavegacaoWeb::destino('correcao.envio',[$prova['id']]),'repetir'=>\App\Support\NavegacaoWeb::destino('correcao.envio.repetir',[$prova['id']]),'csrf'=>csrf_token(),'disciplina'=>$prova['disciplina']??'','alunos'=>collect($alunos)->map(fn($a)=>['id'=>$a['id'],'nome'=>$a['nome'],'turma'=>$a['turma_nome']??''])->values(),'chaveSessao'=>'g360:envios:'.hash('sha256',session()->getId()).':'.($prova['espaco_id']??'legado').':'.$prova['id'],'envioInicial'=>session('cartao_envio')])
 <script type="application/json" id="correcao-camera-config">@json($g360Config)</script>
-<script src="{{ asset('js/correcao-camera.js') }}?v={{ filemtime(public_path('js/correcao-camera.js')) }}"></script>
+<script src="@ativo('js/correcao-camera.js')"></script>
 @endpush

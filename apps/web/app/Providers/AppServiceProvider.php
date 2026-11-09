@@ -28,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
     {
         // @pode('cartao.enviar') ... @endpode — esconde ações que o perfil não tem (doc 03)
         Blade::if('pode', fn (string $acao) => Acesso::pode($acao));
+        // @ativo('js/arquivo.js') — URL versionada pelo conteúdo, para cache imutável (docs/198)
+        Blade::directive('ativo', fn (string $caminho) => "<?php echo e(\\App\\Support\\Ativos::url($caminho)); ?>");
         \Illuminate\Support\Facades\View::composer('layouts.app',function ($view) {
             $view->with('opcoesTroca',!empty($view->getData()['navegacaoEstrutura'])
                 ? ['opcoes'=>[],'disponivel'=>false,'erro'=>false]

@@ -22,5 +22,5 @@
 @push('scripts')
 @php($g360Config = ['tentativa'=>old('origem_id'),'titulo'=>old('titulo'),'chave'=>old('chave')])
 <script type="application/json" id="prova-copiar-config">@json($g360Config)</script>
-<script src="{{ asset('js/prova-copiar.js') }}?v={{ filemtime(public_path('js/prova-copiar.js')) }}"></script>
+<script src="@ativo('js/prova-copiar.js')"></script>
 @endpush

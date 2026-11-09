@@ -8,7 +8,7 @@ function g360_publicos_lista(): array
         'fonts/brand/Figtree-OFL.txt','fonts/brand/AlbertSans-OFL.txt',
         'brand/gabarito360-icon.svg','brand/gabarito360-icon-dark.svg',
         'brand/gabarito360-icon.png','brand/gabarito360-og.png',
-        'images/avatares/estudantes-v1.png',
+        'images/avatares/estudantes-v2.webp',
         'favicon.ico','favicon.svg','favicon-16x16.png','favicon-32x32.png',
         'favicon-48x48.png','favicon-96x96.png','apple-touch-icon.png',
         'android-chrome-192x192.png','android-chrome-512x512.png','icon-192.png','icon-512.png',

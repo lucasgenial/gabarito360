@@ -140,5 +140,5 @@
 @push('scripts')
 @php($g360Config = [])
 <script type="application/json" id="correcao-turma-config">@json($g360Config)</script>
-<script src="{{ asset('js/correcao-turma.js') }}?v={{ filemtime(public_path('js/correcao-turma.js')) }}"></script>
+<script src="@ativo('js/correcao-turma.js')"></script>
 @endpush

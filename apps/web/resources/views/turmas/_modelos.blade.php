@@ -75,11 +75,12 @@ $alturaDemo=$tipoDemo==='grafico'?9:($tipoDemo==='agenda'?14:($tipoDemo==='progr
 
 @if(collect($modelos)->contains(fn($m)=>in_array($m['id'],['agenda-pedagogica','proximos-compromissos','agenda-administrativa'],true)))
 @once
-@push('styles')<link rel="stylesheet" href="{{ asset('css/painel-agenda.css') }}?v={{ @filemtime(public_path('css/painel-agenda.css')) }}">@endpush
-@push('scripts')<script src="{{ asset('js/painel-agenda.js') }}?v={{ @filemtime(public_path('js/painel-agenda.js')) }}" defer></script>@endpush
+@push('styles')<link rel="stylesheet" href="@ativo('css/painel-agenda.css')">@endpush
+@push('scripts')<script src="@ativo('js/painel-agenda.js')" defer></script>@endpush
 @endonce
 @endif
 
 @once
-@push('scripts')<script src="{{ asset('js/libs/echarts-6.1.0.common.min.js') }}"></script><script src="{{ asset('js/graficos.js') }}?v={{ @filemtime(public_path('js/graficos.js')) }}" defer></script>@endpush
+@include('layouts._echarts')
+@push('scripts')<script src="@ativo('js/graficos.js')" defer></script>@endpush
 @endonce

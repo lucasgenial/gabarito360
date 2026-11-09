@@ -47,4 +47,4 @@
   </section>
 </main>
 @endsection
-@push('scripts')<script src="{{ asset('js/entrada-vinculo.js') }}?v={{ filemtime(public_path('js/entrada-vinculo.js')) }}"></script>@endpush
+@push('scripts')<script src="@ativo('js/entrada-vinculo.js')"></script>@endpush

@@ -34,8 +34,8 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/leitor-cartao.js') }}?v={{ filemtime(public_path('js/leitor-cartao.js')) }}"></script>
+<script src="@ativo('js/leitor-cartao.js')"></script>
 @php($g360Config = ['itens'=>$itens,'alternativas'=>$prova['num_alternativas']??5,'voltar'=>\App\Support\NavegacaoWeb::destino('correcao.show',[$prova['id']]),'csrf'=>csrf_token()])
 <script type="application/json" id="correcao-revisao-config">@json($g360Config)</script>
-<script src="{{ asset('js/correcao-revisao.js') }}?v={{ filemtime(public_path('js/correcao-revisao.js')) }}"></script>
+<script src="@ativo('js/correcao-revisao.js')"></script>
 @endpush

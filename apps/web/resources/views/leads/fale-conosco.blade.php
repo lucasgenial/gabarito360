@@ -83,7 +83,7 @@
 
 @if(config('services.turnstile.enabled') && config('services.turnstile.site_key'))
   @push('scripts')
-    <script src="{{ asset('js/turnstile.js') }}?v={{ @filemtime(public_path('js/turnstile.js')) }}"></script>
+    <script src="@ativo('js/turnstile.js')"></script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&amp;onload=g360Turnstile" async defer></script>
   @endpush
 @endif
