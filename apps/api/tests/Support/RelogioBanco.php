@@ -23,6 +23,8 @@ final class RelogioBanco
             $pdoAnterior = null;
             $instanteAnterior = null;
             $conexao->beforeExecuting(function ($sql, $bindings, Connection $c) use (&$pdoAnterior, &$instanteAnterior) {
+                // run() invoca os callbacks antes da reconexão automática; migrate:fresh pode desconectar o PDO.
+                $c->reconnectIfMissingConnection();
                 $pdo = $c->getPdo();
                 if ($c->getDriverName() === 'sqlite') {
                     if ($pdoAnterior !== $pdo) $pdo->sqliteCreateFunction('current_timestamp', fn () => now('UTC')->format('Y-m-d H:i:s'), 0);

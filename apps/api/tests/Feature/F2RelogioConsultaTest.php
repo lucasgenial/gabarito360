@@ -46,4 +46,21 @@ final class F2RelogioConsultaTest extends TestCase
         $this->assertSame([], $q->pluck('turmas.id')->all());
         $this->assertFalse($q->exists());
     }
+
+    public function test_harness_reconecta_conexao_desligada_antes_de_sincronizar_o_relogio(): void
+    {
+        config(['database.connections.f2_clock_reconnect' => config('database.connections.'.config('database.default'))]);
+        $c = DB::connection('f2_clock_reconnect');
+        $this->travelTo(now('UTC')->setDate(2026, 11, 4)->setTime(12, 0, 0));
+        $sql = $c->getDriverName() === 'sqlite' ? 'SELECT CURRENT_TIMESTAMP AS instante' : 'SELECT UTC_TIMESTAMP() AS instante';
+        try {
+            $this->assertSame('2026-11-04 12:00:00', $c->selectOne($sql)->instante);
+            $antigo = $c->getPdo();
+            $c->disconnect();
+            $this->assertNull($c->getRawPdo());
+            $this->travel(1)->seconds();
+            $this->assertSame('2026-11-04 12:00:01', $c->selectOne($sql)->instante);
+            $this->assertNotSame($antigo, $c->getPdo());
+        } finally { DB::purge('f2_clock_reconnect'); }
+    }
 }
