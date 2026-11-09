@@ -81,7 +81,7 @@
     quadro = requestAnimationFrame(function () {
       quadro = 0;
       graficos = graficos.filter(function (g) {
-        if (!g.el.isConnected) { if (g.instancia) g.instancia.dispose(); if (resize) resize.unobserve(g.el); return false; }
+        if (!g.el.isConnected) { if(g.el.closest('[data-editor-estacionado="true"]'))return true;if (g.instancia) g.instancia.dispose(); if (resize) resize.unobserve(g.el); return false; }
         desenhar(g, g.reconstruir); g.reconstruir = false; return true;
       });
     });
@@ -94,7 +94,8 @@
       var d;
       try { d = JSON.parse(el.getAttribute('data-grafico')); } catch (_) { return; }
       if (!d || !Array.isArray(d.categorias) || !Array.isArray(d.series) || !d.series.every(function (s) { return Array.isArray(s.valores); })) return;
-      var g = { el: el, dados: d, descricao: (el.getAttribute('aria-label') || 'Gráfico').replace(/[.\s]+$/g, ''), instancia: null, reconstruir: true }; graficos.push(g);
+      if(!el.dataset.graficoDescricaoBase)el.dataset.graficoDescricaoBase=(el.getAttribute('aria-label') || 'Gráfico').replace(/[.\s]+$/g, '');
+      var g = { el: el, dados: d, descricao: el.dataset.graficoDescricaoBase, instancia: null, reconstruir: true }; graficos.push(g);
       if (resize) resize.observe(el);
     });
     agendar(false);

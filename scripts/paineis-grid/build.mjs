@@ -4,3 +4,7 @@ await build({entryPoints:[path('../../apps/web/resources/js/painel-grade.js')],b
 writeFileSync(path('../../apps/web/public/css/painel-grade.css'),(readFileSync(path('./node_modules/gridstack/dist/gridstack.css'),'utf8')+'\n'+readFileSync(path('../../apps/web/resources/css/painel-grade.css'),'utf8')).replace(/\r\n/g,'\n'));
 const dest=path('../../apps/web/public/js/libs/gridstack/');mkdirSync(dest,{recursive:true});copyFileSync(path('./node_modules/gridstack/LICENSE'),dest+'LICENSE');
 const bundle=path('../../apps/web/public/js/painel-grade.js');writeFileSync(bundle,readFileSync(bundle,'utf8').replace(/[ \t]+$/gm,''));
+await build({entryPoints:[path('../../apps/web/resources/js/editor-paineis.js')],bundle:true,minify:true,format:'iife',platform:'browser',nodePaths:[path('./node_modules')],outfile:path('../../apps/web/public/js/editor-paineis.js'),legalComments:'eof'});
+writeFileSync(path('../../apps/web/public/css/editor-paineis.css'),(readFileSync(path('./node_modules/gridstack/dist/gridstack.css'),'utf8')+'\n'+readFileSync(path('../../apps/web/resources/css/editor-paineis.css'),'utf8')).replace(/\r\n/g,'\n'));
+const sortable=path('../../apps/web/public/js/libs/sortablejs/');mkdirSync(sortable,{recursive:true});copyFileSync(path('./node_modules/sortablejs/LICENSE'),sortable+'LICENSE');
+const editor=path('../../apps/web/public/js/editor-paineis.js');writeFileSync(editor,readFileSync(editor,'utf8').replace(/[ \t]+$/gm,''));

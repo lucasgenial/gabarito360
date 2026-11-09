@@ -50,8 +50,10 @@ try{
   assert.equal(await pagina.locator('main').evaluate(e=>e.getBoundingClientRect().width)-amplo,176);
   await pagina.getByRole('button',{name:'Expandir menu principal',exact:true}).click();
   const conferirRodape=async()=>{
-    assert.equal(await pagina.locator('.rodape-app').isVisible(),true);
+    const movel=await pagina.evaluate(()=>innerWidth<768);
+    assert.equal(await pagina.locator('.rodape-app').isVisible(),!movel);
     assert.match((await pagina.locator('.rodape-app').textContent()).trim(),/^Gabarito360 - v\d+\.\d+\.\d+ - Homologação$/u,'Rodapé usa o formato definido pelo responsável');
+    if(movel){const espaco=await pagina.locator('.conteudo-app').evaluate(e=>parseFloat(getComputedStyle(e).paddingBottom));assert.ok(espaco>=56&&espaco<136,'Reserva mobile conserva o menu e retira a faixa do rodapé');return;}
     const medidas=await pagina.locator('.rodape-app').evaluate(e=>({x:e.getBoundingClientRect().left,y:e.getBoundingClientRect().top,largura:e.getBoundingClientRect().width,fim:e.getBoundingClientRect().bottom,viewport:innerWidth,altura:innerHeight,lateral:document.querySelector('.lateral-app').getBoundingClientRect().width,movel:innerWidth<768}));
     assert.equal(medidas.x,medidas.movel?0:medidas.lateral);
     assert.equal(Math.round(medidas.x+medidas.largura),medidas.viewport);

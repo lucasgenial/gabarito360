@@ -1,1 +1,1 @@
-{"private":true,"type":"module","scripts":{"build":"node build.mjs"},"dependencies":{"gridstack":"14.1.0"},"devDependencies":{"esbuild":"0.28.2"}}
+{"private":true,"type":"module","scripts":{"build":"node build.mjs"},"dependencies":{"gridstack":"14.1.0","sortablejs":"1.15.7"},"devDependencies":{"esbuild":"0.28.2"}}

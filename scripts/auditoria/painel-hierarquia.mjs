@@ -15,8 +15,7 @@ assert.deepEqual(moveGroup(['a','b','c'],'a',2),['b','c','a']);assert.deepEqual(
 assert.throws(()=>orderFromLayout([{...annotated[0],ordem_card:'1'}],definitions));
 assert.throws(()=>orderFromLayout([annotated[0],{...annotated[1],ordem_secao:2}],definitions));
 
-const fixture=JSON.parse(readFileSync('apps/api/tests/Fixtures/organizacao-painel.json','utf8'));
-const initial={...fixture,versao:0,apresentacao:'tabela',layouts:{desktop:[],mobile:[]},repetido:false,origem_disposicao:'perfil'};
+const initial=JSON.parse(readFileSync('apps/web/tests/Fixtures/editor-turma.json','utf8'));
 const base='http://hierarquia.test',publico=resolve('apps/web/public'),fixtures=process.env.HIERARQUIA_FIXTURES||join(tmpdir(),'g360-tw2-render');
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true});
 try{
@@ -25,18 +24,22 @@ try{
  page.on('pageerror',e=>errors.push(e.message));
  await context.route('**/*',async route=>{
   const req=route.request(),url=new URL(req.url());assert.equal(url.origin,base,'Sem chamadas externas');
-  if(req.method()==='POST'&&url.pathname.startsWith('/app/paineis/preferencias/')){
-   assert.equal(url.search,'');const body=req.postDataJSON();
+  if(req.method()==='POST'&&url.pathname.startsWith('/app/')){
+   assert.equal(url.search,'');const body=req.postDataJSON();assert.equal(req.headers()['x-g360-painel-editor'],'3');
+   assert.ok(body._recurso&&body._token&&body._revisao,'UR4, CSRF e revisão no transporte');
    if(body.acao==='salvar'){
-    writes.push(body);if(conflict||body.versao!==saved.versao)return route.fulfill({status:409,json:{message:'A organização mudou.'}});
-    saved={...saved,versao:saved.versao+1,layouts:structuredClone(body.layouts),apresentacao:body.apresentacao,origem_disposicao:'usuario'};
-   }
-   return route.fulfill({json:{data:saved}});
+    writes.push(body);if(conflict||body.versao!==saved.data.versao)return route.fulfill({status:409,json:{message:'A organização mudou.'}});
+    assert.equal('context'in body.composicao,false);assert.equal(body.composicao.schema,3);
+    saved=structuredClone(saved);saved.data.versao++;saved.data.editor.composicao=structuredClone(body.composicao);saved.data.editor.origem='usuario';saved.data.apresentacao=body.apresentacao;
+    saved.etag='"g360-editor-'+String(saved.data.versao).padStart(64,'0')+'"';
+   }else if(req.headers()['if-none-match']===saved.etag)return route.fulfill({json:{nao_modificado:true,etag:saved.etag}});
+   return route.fulfill({json:saved});
   }
   assert.equal(req.method(),'GET','Nenhuma operação de negócio');
-  if(url.pathname==='/hierarquia.html'){
-   const html=readFileSync(join(fixtures,'hierarquia.html'),'utf8').replaceAll('https://gabarito360.com.br',base).replaceAll('http://localhost',base)
+  if(url.pathname==='/editor-turma.html'){
+   let html=readFileSync(join(fixtures,'editor-turma.html'),'utf8').replaceAll('https://gabarito360.com.br',base).replaceAll('http://localhost',base)
     .replaceAll('https:\\/\\/gabarito360.com.br',base).replaceAll('http:\\/\\/localhost',base);
+   html=html.replace(/(<script type="application\/json" id="painel-editor-config">)([\s\S]*?)(<\/script>)/,(_s,start,json,end)=>{const cfg=JSON.parse(json);cfg.bootstrap=saved;return start+JSON.stringify(cfg).replaceAll('<','\\u003c')+end;});
    return route.fulfill({contentType:'text/html',body:html});
   }
   const path=resolve(publico,'.'+url.pathname);
@@ -45,46 +48,30 @@ try{
   const type=path.endsWith('.css')?'text/css':path.endsWith('.js')?'application/javascript':path.endsWith('.svg')?'image/svg+xml':path.endsWith('.woff2')?'font/woff2':'image/png';
   return route.fulfill({contentType:type,body:readFileSync(path)});
  });
- const sections=()=>page.locator('[data-painel-card=resultados] [data-painel-secao]').evaluateAll(es=>es.map(e=>e.dataset.painelSecao));
- const cards=()=>page.locator('[data-painel-card]').evaluateAll(es=>es.map(e=>e.dataset.painelCard));
  const organize=()=>page.getByRole('button',{name:'Organizar painel',exact:true}).click();
  const save=()=>page.getByRole('button',{name:'Salvar disposição',exact:true}).click();
- const reset=()=>page.getByRole('button',{name:'Restaurar padrão',exact:true}).click();
  const waitSaved=()=>page.getByText('Disposição salva.',{exact:true}).waitFor({state:'visible'});
- await page.goto(base+'/hierarquia.html');await organize();
- assert.deepEqual(await sections(),definitions.resultados);assert.equal(await page.locator('[data-painel-secao=resumo] [data-painel-grupo-mover]').count(),0);
- assert.equal(await page.locator('[data-painel-grupo-mover]:visible').count(),8);
- await page.getByRole('button',{name:'Mover seção Estudantes. Arraste ou use as setas para cima e para baixo.',exact:true}).press('ArrowDown');
- assert.deepEqual(await sections(),['periodo-agenda','estudantes','analises']);
- await page.getByRole('button',{name:'Mover card Resultados da turma. Arraste ou use as setas para cima e para baixo.',exact:true}).press('ArrowDown');
- assert.deepEqual(await cards(),['acompanhamento','resultados']);
- await page.getByRole('button',{name:'Fixar posição e tamanho de Distribuição dos acertos',exact:true}).click();
+ await page.goto(base+'/editor-turma.html');await organize();
+ assert.equal(writes.length,0,'SSR abre sem gravar');assert.equal(await page.getByRole('tab',{name:'Distribuição por seção',exact:true}).isVisible(),true);
+ assert.equal(await page.locator('[data-painel-secao=resumo] [data-no-mover]').count(),0,'KPIs permanecem fora da composição');
+ await page.locator('[data-destino="distribuicao-acertos"]').selectOption('');
+ await page.locator('[data-quadro-ativo="devolutivas"]').uncheck();
+ await page.locator('[data-quadro-titulo="distribuicao-acertos"]').click();await page.getByLabel('Novo título',{exact:true}).fill('Minha análise <teste>');await page.getByRole('button',{name:'Confirmar título',exact:true}).click();
+ await page.getByRole('button',{name:'Novo painel',exact:true}).click();await page.getByLabel('Nome do painel',{exact:true}).fill('Painel vazio pessoal');await page.getByRole('button',{name:'Criar painel',exact:true}).click();
+ await page.getByRole('tab',{name:'Ajustes finos',exact:true}).click();
+ await page.locator('[data-no-mover="participacao"]').press('Shift+ArrowDown');assert.match(await page.locator('[data-editor-status]').textContent(),/ajustado/);
+ await page.locator('[data-no-pin="distribuicao-acertos"]').click();assert.equal(await page.locator('[data-no-pin="distribuicao-acertos"]').getAttribute('aria-pressed'),'true');
  await save();await waitSaved();assert.equal(writes.length,1);
- const node=saved.layouts.desktop.find(n=>n.id==='distribuicao-acertos');assert.equal(node.fixo,true);assert.equal(node.ordem_card,1);
- const payload=structuredClone(saved.layouts.desktop);
- await page.reload();await organize();assert.deepEqual(await cards(),['acompanhamento','resultados']);assert.deepEqual(await sections(),['periodo-agenda','estudantes','analises']);
- assert.equal(await page.locator('[data-painel-secao=analises]').evaluate(e=>e.parentElement.hasAttribute('data-painel-graficos')),true,'Contexto dos gráficos acompanha a seção inteira');
- await reset();assert.deepEqual(await sections(),definitions.resultados);await page.getByRole('button',{name:'Cancelar',exact:true}).first().click();
- assert.deepEqual(await sections(),['periodo-agenda','estudantes','analises']);assert.equal(writes.length,1,'Cancelar não grava');
- await organize();await reset();await save();await waitSaved();assert.equal(writes.length,2);
- assert.equal(saved.layouts.desktop.find(n=>n.id==='alunos-destaques').ordem_secao,0,'Restaurar envia ranks padrão explícitos');
- assert.equal(saved.layouts.desktop.find(n=>n.id==='metas').ordem_card,1);
- await page.reload();await organize();assert.deepEqual(await sections(),definitions.resultados);assert.deepEqual(await cards(),Object.keys(definitions));
- // Mesmo gesto de ponteiro serve para seção e card; o teclado atende qualquer distância da página.
- await page.setViewportSize({width:1440,height:2200});
- const handle=page.locator('[data-painel-secao=estudantes] [data-painel-grupo-mover]');await handle.scrollIntoViewIfNeeded();
- const start=await handle.boundingBox(),target=await page.locator('[data-painel-secao=periodo-agenda]').boundingBox();
- await page.mouse.move(start.x+start.width/2,start.y+start.height/2);await page.mouse.down();
- await page.mouse.move(start.x+start.width/2+12,start.y+start.height/2+12);
- await page.mouse.move(start.x+start.width/2,target.y+target.height-4,{steps:8});await page.mouse.up();
- assert.deepEqual(await sections(),['periodo-agenda','estudantes','analises'],'Ponteiro move título e widgets juntos');
- await page.getByRole('button',{name:'Cancelar',exact:true}).first().click();assert.deepEqual(await sections(),definitions.resultados);
- const beforeWrites=writes.length;await page.setViewportSize({width:390,height:844});
- assert.equal(await page.locator('[data-painel-grupo-mover]:visible').count(),0);assert.equal(await page.locator('[data-painel-organizacao]').isHidden(),true);
- await page.setViewportSize({width:1440,height:1000});await organize();assert.deepEqual(await sections(),definitions.resultados);assert.equal(writes.length,beforeWrites,'Breakpoint não grava preferências');
- conflict=true;await page.getByRole('button',{name:'Mover seção Estudantes. Arraste ou use as setas para cima e para baixo.',exact:true}).press('ArrowDown');await save();
- await page.getByRole('button',{name:'Consultar estado salvo',exact:true}).waitFor({state:'visible'});
- assert.equal(writes.length,beforeWrites+1,'409 não reexecuta o salvamento');assert.equal(await page.getByRole('button',{name:'Salvar disposição',exact:true}).isDisabled(),true);
- assert.deepEqual(errors,[]);assert.equal(payload.length,saved.layouts.desktop.length,'Sem excluir ou duplicar widgets');
- console.log('Painéis: grupos/cards, ponteiro/teclado, pins, persistência/reload, restaurar/cancelar, mobile e409 aprovados.');
+ assert.equal(saved.data.editor.composicao.widgets['distribuicao-acertos'].parent,null);assert.equal(saved.data.editor.composicao.widgets['distribuicao-acertos'].fixo,true);assert.equal(saved.data.editor.composicao.widgets.devolutivas.active,false);assert.equal(saved.data.editor.composicao.widgets.participacao.h,10);
+ assert.equal(await page.locator('[data-editor-leitura]').getByText('Painel vazio pessoal',{exact:true}).count(),0,'Contêiner vazio não ocupa leitura');
+ await page.reload();await organize();assert.equal(await page.getByRole('button',{name:'Painel vazio pessoal',exact:true}).count(),1,'Vazio persiste no editor');
+ await page.getByRole('button',{name:'Cancelar',exact:true}).click();assert.equal(writes.length,1);
+ await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('[data-editor-organizar]').isVisible(),false);assert.equal(await page.locator('[data-editor-leitura]>.arvore-mobile').count(),1);assert.equal(await page.locator('.rodape-app').isVisible(),false);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.equal(writes.length,1,'Mobile não grava');
+ await page.setViewportSize({width:1440,height:1000});await organize();await page.getByRole('tab',{name:'Ajustes finos',exact:true}).click();
+ await page.locator('[data-no-mover="participacao"]').press('Shift+ArrowDown');await page.setViewportSize({width:390,height:844});assert.equal(await page.locator('[data-editor-suspenso]').isVisible(),true);await page.setViewportSize({width:1440,height:1000});assert.equal(await page.locator('[gs-id="participacao"]').getAttribute('gs-h'),'11');
+ await page.getByRole('button',{name:'Cancelar',exact:true}).click();assert.equal(await page.locator('[gs-id="participacao"]').getAttribute('gs-h'),'10');
+ await organize();await page.getByRole('button',{name:'Restaurar padrão',exact:true}).click();assert.equal(await page.getByRole('dialog',{name:'Restaurar padrão do perfil?',exact:true}).isVisible(),true);await page.getByRole('button',{name:'Confirmar',exact:true}).click();conflict=true;await save();
+ await page.getByRole('button',{name:'Consultar estado salvo',exact:true}).waitFor({state:'visible'});assert.equal(writes.length,2,'409 não reexecuta PUT');assert.equal(await page.getByRole('button',{name:'Salvar disposição',exact:true}).isDisabled(),true);
+ assert.deepEqual(errors,[]);assert.equal(Object.keys(saved.data.editor.composicao.widgets).length,initial.data.editor.catalogo.widgets.length,'Sem excluir/duplicar widgets');
+ console.log('Editor real: hierarquia, avulso, título escapado, pin, teclado, visibilidade, SaveReload, padrão/Cancelar, viewport, mobile e409 aprovados.');
 }finally{await browser.close();}

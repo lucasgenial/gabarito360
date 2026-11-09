@@ -62,3 +62,5 @@ dialog input{width:100%;padding:8px;border:1px solid var(--line);border-radius:6
 .item-no{min-width:0}.mover-composicao{cursor:grab;touch-action:none}.mover-composicao:active{cursor:grabbing}
 .secao-cabecalho{height:auto;min-height:0}
 .grade-interna{min-height:0}
+
+@source "../../apps/web/resources/js/editor-paineis";

@@ -185,4 +185,37 @@ class PreferenciasPainelSegurancaWebTest extends TestCase
         $this->postJson($a['url'],['_recurso'=>$a['referencia'],'_revisao'=>ContextoWeb::revisao(),'_token'=>csrf_token(),'turmaId'=>15],
             ['X-G360-Hidratar'=>'1'])->assertStatus(422);
     }
+
+    public function test_ei1_304_exige_condicional_e_validador_iguais():void
+    {
+        $a='"g360-editor-'.str_repeat('a',64).'"';$b='"g360-editor-'.str_repeat('b',64).'"';
+        foreach([[null,$a,502],[$a,$b,502],[$a,$a,200]] as [$sent,$returned,$status]){
+            $this->withHeaders(['X-G360-Painel-Editor'=>'3','If-None-Match'=>$sent]);
+            $this->preparar(304,headers:['ETag'=>$returned]);
+            $r=$this->consultarJson('/app/paineis/preferencias/turmas')->assertStatus($status)->assertHeader('Cache-Control','no-store, private');
+            if($status===200)$r->assertJsonPath('nao_modificado',true)->assertJsonPath('etag',$a);
+            Http::assertNotSent(fn($r)=>$r->method()==='PUT');
+        }
+    }
+
+    public function test_ei1_editor_validado_get_put_e_whitelist():void
+    {
+        $d=json_decode(file_get_contents(__DIR__.'/../Fixtures/editor-painel.json'),true);
+        $a='"g360-editor-'.str_repeat('a',64).'"';
+        $this->withHeaders(['X-G360-Painel-Editor'=>'3']);$this->preparar(data:$d,headers:['ETag'=>$a]);
+        $this->consultarJson('/app/paineis/preferencias/turmas')->assertOk()->assertJsonPath('data.editor.schema',3)->assertJsonPath('etag',$a);
+        $body=['versao'=>0,'chave'=>'4ea91eba-b8cf-4bed-84a3-077c050ac18b','acao'=>'salvar','composicao'=>$d['editor']['composicao'],'catalogo_chave'=>$d['editor']['catalogo_chave']];
+        $this->alterarRecursoJson('PUT','/app/paineis/preferencias/turmas',$body+['usuario_id'=>999,'turma_id'=>888,'token'=>'FORJADO'])->assertOk()->assertJsonPath('etag',$a);
+        $expected=$body;ksort($expected);Http::assertSent(function($r)use($expected){$actual=$r->data();ksort($actual);return $r->method()==='PUT'&&$actual===$expected&&$r->hasHeader('X-G360-Painel-Editor','3');});
+    }
+
+    public function test_ei1_editor_malformado_e_502_sem_leak():void
+    {
+        $d=json_decode(file_get_contents(__DIR__.'/../Fixtures/editor-painel.json'),true);
+        $cases=[];$bad=$d;$bad['editor']['catalogo']['widgets'][0]['parent']=[];$cases[]=$bad;
+        $bad=$d;$bad['editor']['composicao']['sections'][0]['headerRows']=null;$cases[]=$bad;
+        $bad=$d;unset($bad['editor']);$cases[]=$bad;
+        foreach($cases as $bad){$bad['SEGREDO_EXTRA']='NAO_REPASSAR';$this->withHeaders(['X-G360-Painel-Editor'=>'3']);$this->preparar(data:$bad,headers:['ETag'=>'"g360-editor-'.str_repeat('a',64).'"']);$this->consultarJson('/app/paineis/preferencias/turmas')->assertStatus(502)->assertDontSee('NAO_REPASSAR');}
+    }
+
 }

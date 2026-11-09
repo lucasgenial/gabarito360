@@ -89,6 +89,7 @@
       const html=await r.text();
       if (!/<html[\s>]/i.test(html)) throw new Error('Resposta incompatível.');
       document.documentElement.classList.remove('entrada-vinculo');
+      window.G360EditorPainelDesmontar?.();
       document.open();document.write(html);document.close();
     } catch (_) { erro(shell.querySelector('[data-navegacao-status]'),'Não foi possível carregar as informações. Tente novamente.',true); }
     finally { clearTimeout(timer); }
