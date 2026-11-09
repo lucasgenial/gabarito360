@@ -116,7 +116,7 @@ class EditorPainelTest extends TestCase
         $this->getJson(self::URL,self::HEADERS+['If-None-Match'=>$etag])->assertStatus(304);
         $d=$r->json('data');$s=$d['editor']['composicao'];$s['sections'][0]['title']='Mudou';$this->putJson(self::URL,$this->pedido($d,$s),self::HEADERS)->assertOk();
         $this->getJson(self::URL,self::HEADERS+['If-None-Match'=>$etag])->assertOk()->assertJsonPath('data.versao',1);
-        DB::table('usuario_vinculos')->where('id',1)->update(['situacao'=>'revogado']);
+        DB::table('usuario_vinculos')->where('id',1)->update(['situacao'=>'encerrado']);
         $this->getJson(self::URL,self::HEADERS+['If-None-Match'=>$etag])->assertForbidden();
     }
 
