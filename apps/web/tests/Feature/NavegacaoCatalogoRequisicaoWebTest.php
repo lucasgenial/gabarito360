@@ -19,7 +19,7 @@ final class NavegacaoCatalogoRequisicaoWebTest extends TestCase
         $a=NavegacaoWeb::deUrl('/app/turmas/927463185?busca=consulta-privada-ficticia','GET',true);
         $this->assertNotNull($a);
         $cat=request()->attributes->get('ur4_catalogo_urls');
-        $this->assertSame(['fixos','originais'],array_keys($cat));
+        $this->assertSame(['fixos','originais','segmentos','curingas'],array_keys($cat));
         $this->assertNotEmpty($cat['originais']);
         foreach($cat['originais'] as $entrada){
             $this->assertSame(['meta','regex'],array_keys($entrada));$this->assertIsArray($entrada['meta']);
@@ -36,6 +36,61 @@ final class NavegacaoCatalogoRequisicaoWebTest extends TestCase
         $this->assertNotSame($a['referencia'],$b['referencia']);
         $this->assertSame('927463185',NavegacaoWeb::obter($a['referencia'])['parametros']['id']);
         $this->assertSame('927463186',NavegacaoWeb::obter($b['referencia'])['parametros']['id']);
+        Http::assertNothingSent();
+    }
+
+    public function test_catalogo_compilado_no_cache_e_cifrado_e_adulteracao_e_ignorada(): void
+    {
+        $this->withSession(['auth_token'=>'identidade-ficticia','auth_vinculos'=>true]);
+        ContextoWeb::ativar(['vinculo_id'=>7,'tipo_contexto'=>'vinculo','token'=>'ficticio','perfil'=>'professor',
+            'permissoes'=>[],'espaco'=>['id'=>13,'tipo'=>'escola']]);
+        Http::preventStrayRequests();
+        $gravados=[];
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Cache\Events\KeyWritten::class,function($e)use(&$gravados){if(str_starts_with($e->key,'ur4-catalogo:'))$gravados[$e->key]=$e->value;});
+        NavegacaoWeb::deUrl('/app/turmas/14','GET',true);
+        $this->assertCount(1,$gravados);
+        [$chave,$valor]=[array_key_first($gravados),reset($gravados)];
+        $this->assertIsString($valor);$this->assertStringNotContainsString('turmas',$valor,'o cache não guarda as expressões em claro');
+        // Um catálogo em claro que casaria qualquer caminho com a primeira operação não é aceito.
+        $total=count(request()->attributes->get('ur4_catalogo_urls')['originais']);
+        $tudo=array_fill(0,$total,'#^.*$#');
+        $replay=\Illuminate\Support\Facades\Crypt::encryptString(json_encode(['k'=>'ur4-catalogo:outra-assinatura','r'=>$tudo]));
+        foreach ([$tudo,'nao-cifrado',\Illuminate\Support\Facades\Crypt::encryptString(json_encode($tudo).'x'),$replay,
+            \Illuminate\Support\Facades\Crypt::encryptString(json_encode($tudo))] as $adulterado) {
+            \Illuminate\Support\Facades\Cache::forever($chave,$adulterado);
+            request()->attributes->remove('ur4_catalogo_urls');request()->attributes->remove('ur4_urls');
+            $d=NavegacaoWeb::deUrl('/app/turmas/15','GET',true);
+            $this->assertSame('turmas.show',NavegacaoWeb::obter($d['referencia'])['nome']);
+            $this->assertSame('15',NavegacaoWeb::obter($d['referencia'])['parametros']['id']);
+        }
+        Http::assertNothingSent();
+    }
+
+    public function test_indice_por_modulo_escolhe_a_mesma_operacao_que_a_varredura_linear(): void
+    {
+        $this->withSession(['auth_token'=>'identidade-ficticia','auth_vinculos'=>true]);
+        ContextoWeb::ativar(['vinculo_id'=>7,'tipo_contexto'=>'vinculo','token'=>'ficticio','perfil'=>'professor',
+            'permissoes'=>[],'espaco'=>['id'=>13,'tipo'=>'escola']]);
+        Http::preventStrayRequests();
+        NavegacaoWeb::deUrl('/app/turmas/14','GET',true);
+        $cat=request()->attributes->get('ur4_catalogo_urls');
+        $conferidas=0;
+        foreach ($cat['originais'] as $entrada) {
+            $caminho='/'.preg_replace('/\{[^}]+\}/','7',$entrada['meta']['original']);
+            if (isset($cat['fixos'][$caminho])) continue;
+            foreach ($entrada['meta']['metodos'] as $metodo) {
+                $linear=null;
+                foreach ($cat['originais'] as $outra) {
+                    if (!in_array($metodo,$outra['meta']['metodos'],true) || !preg_match($outra['regex'],$caminho)) continue;
+                    $linear=$outra['meta']['nome'];break;
+                }
+                request()->attributes->remove('ur4_urls');
+                $d=NavegacaoWeb::deUrl($caminho,$metodo,true);
+                $this->assertSame($linear,$d?NavegacaoWeb::obter($d['referencia'])['nome']:null,$metodo.' '.$caminho);
+                $conferidas++;
+            }
+        }
+        $this->assertGreaterThan(100,$conferidas);
         Http::assertNothingSent();
     }
 
