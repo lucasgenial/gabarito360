@@ -60,4 +60,5 @@ dialog input{width:100%;padding:8px;border:1px solid var(--line);border-radius:6
 .subsecao-quadro>.lista-widgets{padding:12px 0 0;min-height:100px}
 .quadro .subsecao-quadro .titulo-subsecao{font-size:18px;line-height:26px;font-weight:700}
 .item-no{min-width:0}.mover-composicao{cursor:grab;touch-action:none}.mover-composicao:active{cursor:grabbing}
-.secao-cabecalho{height:auto;min-height:96px}
+.secao-cabecalho{height:auto;min-height:0}
+.grade-interna{min-height:0}

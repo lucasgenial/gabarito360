@@ -1,5 +1,6 @@
 import {montarGrade} from './grade-visual.mjs';
 import {montarQuadro} from './quadro-secoes.mjs';
+import {manterContinuidade} from './continuidade-visual.mjs';
 import {catalogo,clone,padrao,validar,titulo,transferir,ativar,ler,salvar,scopeKey,perfis,nodes,obter,filhos,profundidade,normalizar,adicionarPainel,removerPainel,caminho} from './modelo.mjs';
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -16,7 +17,7 @@ function focus(selector){requestAnimationFrame(()=>{const requested=$(selector),
 function focusNode(id,part='title'){const attrs=tab==='distribuicao'?{title:'data-quadro-titulo',parent:'data-destino',move:'data-quadro-mover'}:{title:'data-no-mover',parent:'data-no-mover',move:'data-no-mover'};focus('['+attrs[part]+'="'+id+'"]');}
 function destroy(){sortables.forEach(s=>s.destroy());sortables=[];observers.forEach(o=>o.disconnect());observers=[];charts.forEach(c=>c.dispose());charts=[];grids.forEach(g=>g.destroy(false));grids=[];}
 function definitions(){return catalogo(context);}
-function changed(next){state=next;dirty=true;render();}
+function changed(next,view=null){state=next;dirty=true;render(view);}
 function load(){editing=false;preview=false;dirty=false;uncertain=false;try{const read=ler(localStorage,context);state=read.state;revision=read.revision;origin=read.origin;}catch{state=padrao(context);revision=0;origin='perfil';message('Não foi possível ler a disposição local. O padrão do perfil foi aberto; confira antes de salvar.','erro');}entry=clone(state);render();}
 function confirmAction(title,text,run){const dialog=$('#dialogo-confirmar');$('#titulo-confirmar').textContent=title;$('#texto-confirmar').textContent=text;const yes=$('#confirmar-sim');const apply=()=>{dialog.close();run();};yes.addEventListener('click',apply,{once:true});dialog.addEventListener('close',()=>yes.removeEventListener('click',apply),{once:true});dialog.showModal();$('#confirmar-nao').focus();}
 function switchContext(next){const run=()=>{context=next;load();};if(editing&&dirty)confirmAction('Descartar o rascunho?','As alterações ainda não salvas deste painel serão descartadas.',run);else run();}
@@ -47,7 +48,7 @@ $('#dialogo-novo-painel').addEventListener('close',()=>{if(creationDone)return;r
 $('#novo-painel').addEventListener('click',()=>createPanel());
 function removePanel(id){const n=obter(state,id);confirmAction('Remover '+n.title+'?','Os widgets e as subseções irão para o nível acima. Nenhum dado será excluído. A alteração só será mantida ao salvar.',()=>{try{changed(removerPainel(state,id,context));focus('#novo-painel');toast('Painel removido do rascunho; conteúdo preservado.');}catch(error){toast(error.message,'erro');}});}
 function hiddenWidgets(){const hidden=Object.values(state.widgets).filter(n=>!n.active);$('#widgets-ocultos').textContent='Widgets ocultos ('+hidden.length+')';$('#widgets-ocultos').disabled=hidden.length===0;$('#lista-ocultos').innerHTML=hidden.map(n=>'<div class="oculto-linha"><span>'+escape(n.title)+'</span>'+btn('Mostrar','ver','data-reativar="'+n.id+'"',true)+'</div>').join('');$$('[data-reativar]').forEach(b=>b.addEventListener('click',()=>toggleWidget(b.dataset.reativar,true)));}
-function board(){grids.push(montarQuadro({container:$('#quadro'),state,context,ui:{escape,icon,btn},callbacks:{change:changed,restore:(snapshot,text)=>{state=clone(snapshot);render();toast(text,'erro');},say:message,focus,rename:(id,parent)=>titleEditor(obter(state,id).kind==='section'?'secao':'widget',id,parent),create:createPanel,move:moveWidget,toggle:toggleWidget,remove:removePanel}}));}
+function board(){grids.push(montarQuadro({container:$('#quadro'),state,context,ui:{escape,icon,btn},callbacks:{change:changed,restore:(snapshot,text,view=null)=>{state=clone(snapshot);render(view);toast(text,'erro');},say:message,focus,rename:(id,parent)=>titleEditor(obter(state,id).kind==='section'?'secao':'widget',id,parent),create:createPanel,move:moveWidget,toggle:toggleWidget,remove:removePanel}}));}
 
 const chartTypes=new Set(['turnos','comparativo','cobertura','avaliacoes','periodos','distribuicao','habilidades','reavaliacoes']);
 function content(def){
@@ -64,7 +65,7 @@ function widgetMarkup(id,fine=false,custom={}){
  return '<article class="widget" data-widget="'+id+'"><header><div><h3 class="titulo-widget">'+(custom.title??escape(w.title))+'</h3><span class="selo">Dados demonstrativos</span></div><div class="widget-controles">'+(chartTypes.has(def.type)?btn('Alternar barras horizontais e verticais','barras-'+(w.orientacao==='vertical'?'horizontais':'verticais'),'data-orientacao="'+id+'"'):'')+(custom.controls||'')+'</div></header><div class="widget-conteudo">'+content(def)+'</div></article>';
 }
 function renderPanels(target,fine=false){
- const view=montarGrade({target,state,context,editing:fine,mobile:matchMedia('(max-width:767px)').matches,ui:{escape,icon,btn},widgetMarkup,callbacks:{definitions,change:changed,restore:(snapshot,text)=>{state=clone(snapshot);render();toast(text,'erro');},say:message,focus,path:id=>caminho(state,id),rename:(id,parent)=>titleEditor(obter(state,id).kind==='section'?'secao':'widget',id,parent),create:createPanel,move:moveWidget,toggle:toggleWidget,remove:removePanel,pin:id=>{const next=clone(state);obter(next,id).fixo=!obter(next,id).fixo;changed(next);focus('[data-no-pin="'+id+'"]');}}});grids.push(view);
+ const view=montarGrade({target,state,context,editing:fine,mobile:matchMedia('(max-width:767px)').matches,ui:{escape,icon,btn},widgetMarkup,callbacks:{definitions,change:changed,restore:(snapshot,text,view=null)=>{state=clone(snapshot);render(view);toast(text,'erro');},say:message,focus,path:id=>caminho(state,id),rename:(id,parent)=>titleEditor(obter(state,id).kind==='section'?'secao':'widget',id,parent),create:createPanel,move:moveWidget,toggle:toggleWidget,remove:removePanel,pin:id=>{const next=clone(state);obter(next,id).fixo=!obter(next,id).fixo;changed(next);focus('[data-no-pin="'+id+'"]');}}});grids.push(view);
  target.querySelectorAll('[data-orientacao]').forEach(b=>b.addEventListener('click',()=>{const w=state.widgets[b.dataset.orientacao];w.orientacao=w.orientacao==='vertical'?'horizontal':'vertical';if(editing)dirty=true;render();focus('[data-orientacao="'+b.dataset.orientacao+'"]');}));
  target.querySelectorAll('[data-abrir-turma]').forEach(b=>b.addEventListener('click',()=>switchContext({...context,painel:'turma'})));renderCharts(target);
 }
@@ -76,7 +77,8 @@ function renderCharts(target){
   chart.setOption({animation:!matchMedia('(prefers-reduced-motion:reduce)').matches,animationDuration:200,aria:{enabled:true},textStyle:{color:fg,fontFamily:'system-ui'},grid:{left:horizontal?105:52,right:horizontal?45:20,top:20,bottom:horizontal?42:55},tooltip:{trigger:'axis',confine:true},xAxis:horizontal?val:cat,yAxis:horizontal?cat:val,series:[{type:'bar',data:values.map((value,i)=>({value,itemStyle:{color:def.type==='distribuicao'?['#c75547','#d99a2c','#168a7d','#367cb4'][i]:def.type==='habilidades'&&value<60?'#d99a2c':'#147e79'}})),barMaxWidth:44,label:{show:true,position:horizontal?'right':'top',color:fg,fontSize:11,formatter:p=>p.value+(unit.includes('%')?'%':'')},itemStyle:{borderRadius:horizontal?[0,4,4,0]:[4,4,0,0]}}]});const ro=new ResizeObserver(()=>chart.resize());ro.observe(el);observers.push(ro);
  });
 }
-function render(){
+function render(view=null){return manterContinuidade(view,renderContent);}
+function renderContent(){
  destroy();document.querySelectorAll('[popover]:popover-open').forEach(el=>el.hidePopover());const activeEdit=editing&&!preview&&media.matches;
  const escola=escolas[context.vinculo];$$('[data-escola]').forEach(el=>el.textContent=el.dataset.escola==='completo'?escola.completo:escola.nome);
  $('#titulo-pagina').textContent=context.painel==='turmas'?'Turmas':'Turma 3º A';$('#subtitulo-pagina').textContent=context.painel==='turmas'?escola.nome:'Ensino médio · Manhã · 2026 · '+escola.nome;$('#breadcrumb').textContent='Início / Turmas'+(context.painel==='turma'?' / 3º A':'');

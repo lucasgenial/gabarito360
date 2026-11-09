@@ -57,3 +57,23 @@ A aba Distribuição CONTINUA com o quadro de colunas anterior, agora hierárqui
 | Validação humana | Prévia aberta no Chrome; nenhum merge em main/deploy de homologação/produção nesta entrega |
 
 Esquema local3 usa referências de pai e geometria por nó; leitura dos esquemas locais1/2 projeta a árvore sem regravar o registro até Salvar. Não é contrato da API real. Redimensionar pai não pode cortar filhos ou ampliar uma âncora fixada. Desmontagem encerra DD nos wrappers reais antes das engines; ensaio Chrome durante gesto com mudança390→1440 preservou rascunho e não produziu erro. Remoção via modal de três contêineres reduziu a um painel mantendo sete widgets, e Cancelar restaurou todo o rascunho.
+
+## Correção da sobra de altura — 09/11/2026
+
+Planejamento revisto a partir do GIF e da captura enviados pelo responsável: corrigir o comportamento de redimensionamento da prévia existente, preservando quadro de colunas, composição, preferências, pins e limites de legibilidade. Pré-consulta independente de UI/UX aprovou mínimos baseados no cabeçalho real e no limite inferior dos filhos, com continuidade de foco e rolagem. Sem redesign, integração ou publicação nesta rodada.
+
+A reprodução confirmou que os dois gráficos de sete linhas cabiam em dez linhas com o cabeçalho, mas o pai ficava preso em quinze. A medição anterior à largura nativa inflava o mínimo; o `minRow` preservava o espaço histórico; e o teclado reaplicava coordenadas antigas. Agora a inicialização usa mínimos estruturais, mede cabeçalhos depois do dimensionamento e propaga limites reais de baixo para cima. Mouse e teclado capturam a mesma geometria nativa. A remontagem preserva âncora, rolagem e o controle que perdeu o foco ao ser removido, sem capturar foco externo.
+
+| Verificação desta correção | Resultado |
+|---|---|
+| Mesmo arranjo: dois gráficos lado a lado | Painel reduzido a dez linhas; próxima redução bloqueada pelo conteúdo |
+| Mouse: ampliar e reduzir novamente | Altura mantida ao soltar; rolagem e posição do painel preservadas |
+| Escape durante redimensionamento | Geometria anterior, foco e rolagem restaurados |
+| Seção filha com dois widgets | Quinze para dez linhas; mínimo do painel externo recalculado |
+| Pin | Controle de mover desabilitado, resize oculto, geometria preservada |
+| Salvar e reabrir em contexto fictício separado | Alturas de dezoito e dezessete linhas preservadas; não força ajuste automático de toda preferência |
+| Celular 390×844 | Leitura da disposição salva, sem edição nem overflow horizontal |
+| Build e testes do modelo | Build isolado e 23 testes aprovados |
+| Revisão visual independente | Parecer específico desta correção registrado em design-qa.md |
+
+Capturas e relatórios desta rodada ficam em `operacao-20261102/editor-resize-visual` e `operacao-20261102/editor-resize-design-final.*`, fora do Git. Gestos e salvamento foram ensaiados no Chrome pelo implementador; o revisor independente confere fonte e evidências, sem alegação de auditoria WCAG integral. A aba original do usuário e seu rascunho foram preservados. A nova prévia corrigida fica em outra aba para avaliação; nenhuma preferência real, API ou ambiente servidor foi alterado.
