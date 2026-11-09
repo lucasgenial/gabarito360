@@ -4,7 +4,7 @@
 <a href="{{ route('correcao.show',$dados['prova']['id']) }}">Acompanhar correção</a><span class="sep">/</span><a href="{{ route('correcao.tentativas',$dados['prova']['id']) }}">Histórico de leituras do cartão-resposta</a><span class="sep">/</span><span>Leitura {{ $dados['numero'] }}</span>
 @endsection
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/leituras-resultados.css') }}?v={{ filemtime(public_path('css/leituras-resultados.css')) }}">
+<link rel="stylesheet" href="@ativo('css/leituras-resultados.css')">
 @endpush
 
 @section('content')

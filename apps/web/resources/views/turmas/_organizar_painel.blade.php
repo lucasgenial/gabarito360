@@ -46,6 +46,6 @@ if($paginaPainel==='turma')$alvosPainel['turmaId']=$turmaPainel??$turma['id'];
 @endphp
 <script type="application/json" id="painel-editor-config">{!! json_encode(['painel'=>$paginaPainel,'bootstrap'=>$editorBootstrap??null,'consultar'=>\App\Support\NavegacaoWeb::destino('paineis.preferencias.consultar',$alvosPainel),'salvar'=>\App\Support\NavegacaoWeb::destino('paineis.preferencias.salvar',$alvosPainel)],JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT) !!}</script>
 @once
-@push('styles')<link rel="stylesheet" href="{{ asset('css/paineis-personalizaveis.css') }}?v={{ @filemtime(public_path('css/paineis-personalizaveis.css')) }}"><link rel="stylesheet" href="{{ asset('css/editor-paineis.css') }}?v={{ @filemtime(public_path('css/editor-paineis.css')) }}">@endpush
-@push('scripts')<script src="{{ asset('js/painel-graficos-opcoes.js') }}?v={{ @filemtime(public_path('js/painel-graficos-opcoes.js')) }}" defer></script><script src="{{ asset('js/editor-paineis.js') }}?v={{ @filemtime(public_path('js/editor-paineis.js')) }}" defer></script>@endpush
+@push('styles')<link rel="stylesheet" href="@ativo('css/paineis-personalizaveis.css')"><link rel="stylesheet" href="@ativo('css/editor-paineis.css')">@endpush
+@push('scripts')<script src="@ativo('js/painel-graficos-opcoes.js')" defer></script><script src="@ativo('js/editor-paineis.js')" defer></script>@endpush
 @endonce

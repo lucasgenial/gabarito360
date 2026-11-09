@@ -25,5 +25,5 @@ $imagemInicial=['avatar_id'=>$turma['avatar_id']??null,'tem_foto'=>(bool)($turma
 @php($g360TurmaConfig=['inicial'=>$imagemInicial,'acao'=>\App\Support\NavegacaoWeb::destino('turmas.imagem',['id'=>$turma['id']]),'turma'=>$turma['id']])
 @push('scripts')
 <script type="application/json" id="imagem-turma-config">@json($g360TurmaConfig)</script>
-<script src="{{ asset('js/imagem-turma.js') }}?v={{ filemtime(public_path('js/imagem-turma.js')) }}" defer></script>
+<script src="@ativo('js/imagem-turma.js')" defer></script>
 @endpush

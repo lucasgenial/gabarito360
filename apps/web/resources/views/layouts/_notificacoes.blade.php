@@ -6,4 +6,4 @@
   }
 @endphp
 <script type="application/json" id="g360-notificacoes-iniciais">@json($notificacoes)</script>
-<script src="{{ asset('js/notificacoes.js') }}?v={{ @filemtime(public_path('js/notificacoes.js')) }}" defer></script>
+<script src="@ativo('js/notificacoes.js')" defer></script>

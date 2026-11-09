@@ -48,7 +48,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/leituras-resultados.css') }}?v={{ filemtime(public_path('css/leituras-resultados.css')) }}">
+<link rel="stylesheet" href="@ativo('css/leituras-resultados.css')">
 <style>@media print { @page { size: A4; margin: 12mm; } }</style>
 @endpush
 
@@ -130,5 +130,5 @@
 @push('scripts')
 @php($g360Config = ['pdf'=>\App\Support\NavegacaoWeb::destino('resultados.pdf',[$aluno['id'],$prova['id'],'modelo'=>'aluno']),'texto'=>$resumoTexto,'nomeArquivo'=>'resultado-'.\Illuminate\Support\Str::slug($aluno['nome'].' '.$prova['disciplina']).'.pdf'])
 <script type="application/json" id="resultado-compartilhar-config">@json($g360Config)</script>
-<script src="{{ asset('js/resultado-compartilhar.js') }}?v={{ filemtime(public_path('js/resultado-compartilhar.js')) }}"></script>
+<script src="@ativo('js/resultado-compartilhar.js')"></script>
 @endpush

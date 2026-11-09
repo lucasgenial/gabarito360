@@ -14,7 +14,7 @@
 @push('styles')
 <link rel="preload" href="{{ asset('brand/gabarito360-icon.svg') }}" as="image" type="image/svg+xml">
 <link rel="preload" href="{{ asset('brand/gabarito360-icon-dark.svg') }}" as="image" type="image/svg+xml">
-<link rel="stylesheet" href="{{ asset('css/leituras-resultados.css') }}?v={{ filemtime(public_path('css/leituras-resultados.css')) }}">
+<link rel="stylesheet" href="@ativo('css/leituras-resultados.css')">
 @endpush
 
 @section('content')
@@ -152,8 +152,8 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/cartoes-miniaturas.js') }}?v={{ filemtime(public_path('js/cartoes-miniaturas.js')) }}"></script>
+<script src="@ativo('js/cartoes-miniaturas.js')"></script>
 @php($g360Config = ['status'=>\App\Support\NavegacaoWeb::destino('correcao.status',[$prova['id']]),'cartoes'=>\App\Support\NavegacaoWeb::destino('correcao.cartoes',[$prova['id']]),'alunos'=>\App\Support\NavegacaoWeb::destino('correcao.alunos',[$prova['id']]),'provaId'=>$prova['id'],'podeExcluir'=>$podeMexer,'notaMax'=>$prova['nota_maxima']??10,'csrf'=>csrf_token()])
 <script type="application/json" id="correcao-acompanhamento-config">@json($g360Config)</script>
-<script src="{{ asset('js/correcao-acompanhamento.js') }}?v={{ filemtime(public_path('js/correcao-acompanhamento.js')) }}"></script>
+<script src="@ativo('js/correcao-acompanhamento.js')"></script>
 @endpush

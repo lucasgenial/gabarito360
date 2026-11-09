@@ -6,11 +6,11 @@
 @if(session('erro'))<x-aviso tipo="erro">{{ session('erro') }}</x-aviso>@endif
 @if($errors->any())<x-aviso tipo="erro"><ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></x-aviso>@endif
 @include('alunos._transferencia-form')
-@push('scripts')<script src="{{ asset('js/turma-transferencia.js') }}?v={{ filemtime(public_path('js/turma-transferencia.js')) }}" defer></script>@endpush
+@push('scripts')<script src="@ativo('js/turma-transferencia.js')" defer></script>@endpush
 @endsection
 
-@push('scripts')<script src="{{ asset('js/formulario-erros.js') }}" defer></script>@endpush
+@push('scripts')<script src="@ativo('js/formulario-erros.js')" defer></script>@endpush
 
-@push('styles')<link rel="stylesheet" href="{{ asset('css/formulario-escolar.css') }}?v={{ filemtime(public_path('css/formulario-escolar.css')) }}">@endpush
+@push('styles')<link rel="stylesheet" href="@ativo('css/formulario-escolar.css')">@endpush
 
-@push('styles')<link rel="stylesheet" href="{{ asset('css/turma-detalhe.css') }}">@endpush
+@push('styles')<link rel="stylesheet" href="@ativo('css/turma-detalhe.css')">@endpush

@@ -61,6 +61,7 @@ $vaziosIndicadores=\App\Support\IndicadoresTurma::vazios(is_array($painel)?$pain
 </section>
 @include('turmas._painel_documento')
 @endif
-@push('scripts')<script src="{{ asset('js/turma-painel.js') }}?v={{ filemtime(public_path('js/turma-painel.js')) }}" defer></script><script src="{{ asset('js/turma-graficos.js') }}?v={{ filemtime(public_path('js/turma-graficos.js')) }}" defer></script>@endpush
+@include('layouts._echarts')
+@push('scripts')<script src="@ativo('js/turma-painel.js')" defer></script><script src="@ativo('js/turma-graficos.js')" defer></script>@endpush
 
-@push('styles')<link rel="stylesheet" href="{{ asset('css/painel-indicadores.css') }}?v={{ filemtime(public_path('css/painel-indicadores.css')) }}">@endpush
+@push('styles')<link rel="stylesheet" href="@ativo('css/painel-indicadores.css')">@endpush

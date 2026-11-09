@@ -9,9 +9,9 @@
   <div id="doc-mobile" class="rev-documento-destino"></div>
 </dialog>
 @push('scripts')
-<script src="{{ asset('js/leitor-cartao.js') }}?v={{ filemtime(public_path('js/leitor-cartao.js')) }}"></script>
-<script src="{{ asset('js/painel-cartao.js') }}?v={{ filemtime(public_path('js/painel-cartao.js')) }}"></script>
+<script src="@ativo('js/leitor-cartao.js')"></script>
+<script src="@ativo('js/painel-cartao.js')"></script>
 @php($g360Config = ['documento'=>is_array($documentoUrl)?$documentoUrl:\App\Support\NavegacaoWeb::deUrl($documentoUrl),'opcoes'=>$documentoOpcoes??[]])
 <script type="application/json" id="cartao-documento-config">@json($g360Config)</script>
-<script src="{{ asset('js/cartao-documento.js') }}?v={{ filemtime(public_path('js/cartao-documento.js')) }}"></script>
+<script src="@ativo('js/cartao-documento.js')"></script>
 @endpush
