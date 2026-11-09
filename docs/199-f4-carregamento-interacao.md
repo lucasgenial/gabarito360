@@ -1,6 +1,6 @@
 # F4 — carregamento e interação: planejamento de entrada
 
-**Data:** 09/11/2026. **Status:** F4-A publicada na homologação; F4-B em revisão; F4-C e F4-D planejadas. **Escopo:** somente homologação. Produção fora do escopo.
+**Data:** 09/11/2026. **Status:** F4-A e F4-B publicadas na homologação; F4-C e F4-D em revisão, para publicação conjunta. **Escopo:** somente homologação. Produção fora do escopo.
 
 ## Ponto de partida
 
@@ -50,3 +50,28 @@ Revisão independente (UI/UX, acessibilidade e segurança): **aprovada com ressa
 - Testes adicionados para: negativas de perfil pessoal e administrativo, retorno e rascunho renderizados no servidor, retorno do fragmento com erro de validação e composição delegada da confirmação.
 
 Limite aceito: o rótulo "Carregando…" aparece junto com a região `role=status` e pode não ser lido por todos os leitores de tela. O erro é sempre anunciado.
+
+## F4-C — transformação UR4 mais barata
+
+A transformação de cada resposta (`RespostaNavegacao`) resolve as URLs da página para operações UR4 e grava uma referência cifrada por destino. Medição local da turma com 40 alunos e 15 provas (197 KB, 179 URLs, 145 referências):
+
+| Parte | Antes | Depois |
+|---|---|---|
+| Compilar o catálogo de rotas, por requisição | 6,8 ms | 1,6 ms |
+| Resolver uma URL distinta | 240 µs | 140 µs |
+| Transformação da turma, cache em arquivo (como na homologação) | ~107 ms | ~73 ms |
+| Transformação da turma, cache em memória | ~65 ms | ~43 ms |
+
+As medidas:
+
+- **Catálogo guardado.** As expressões compiladas das rotas ficam no cache sob uma assinatura das rotas da release. O valor é cifrado e autenticado pela `APP_KEY`, como as referências. Um valor adulterado, em claro ou ilegível é ignorado e recompilado (teste dedicado). O catálogo continua sem alvos, sessão ou autoridade.
+- **Índice por módulo.** A busca percorre só as rotas do mesmo primeiro segmento (`/app/<módulo>`), mantendo a ordem original do catálogo.
+- **Deduplicação.** URL e referência repetidas na mesma requisição e no mesmo escopo (sessão, identidade e revisão) são resolvidas e gravadas uma vez. A validade da referência é calculada uma vez por requisição.
+
+O HTML de saída da turma, normalizado nas referências, tokens e revisão (que variam por sessão), é idêntico byte a byte ao anterior.
+
+O custo restante é a gravação de uma referência por destino distinto: 145 escritas em arquivo na turma. Agrupar essas escritas, ou mudar o armazenamento das referências, altera o desenho da UR4 e a operação. Fica para a F6, com medição na homologação.
+
+## F4-D — ciclo de vida dos gráficos da turma
+
+`turma-graficos.js` passa a agrupar as renderizações num quadro de animação. Vários avisos do `ResizeObserver` viram um desenho por gráfico, e um tamanho inalterado não redesenha. O observador de tema só redesenha quando os tokens usados pelos gráficos mudam; abrir um modal, que altera classe ou estilo do documento, não redesenha mais. Na saída definitiva da página, o quadro pendente é cancelado e instâncias e observadores são descartados. Uma página guardada pelo navegador (bfcache) volta intacta, sem gráficos descartados. Testes: `turma-graficos-ciclo.test.mjs`, com 3 cenários que falham no código anterior. O `graficos.js` já agrupava por quadro e descartava gráficos desconectados, e não muda.

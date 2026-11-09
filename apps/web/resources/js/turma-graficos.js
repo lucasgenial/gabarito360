@@ -53,8 +53,12 @@ if(raiz){
   }
   return null;
  }
- function renderizar(elemento){
-  if(!elemento.clientWidth)return;
+ const medidas=new WeakMap();
+ function renderizar(elemento,forcar=true){
+  if(!elemento.isConnected||!elemento.clientWidth)return;
+  const medida=elemento.clientWidth+'x'+elemento.clientHeight;
+  if(!forcar&&medidas.get(elemento)===medida&&graficos.has(elemento))return;
+  medidas.set(elemento,medida);
   let g=graficos.get(elemento);const config=opcoes(elemento.dataset.grafico,elemento);
   if(!config){if(g){g.dispose();graficos.delete(elemento);}vazio(elemento,elemento.dataset.grafico==='questoes'?'Sem análise de questões disponível neste recorte.':(['distribuicao','avaliacoes'].includes(elemento.dataset.grafico)&&dados.situacoes?.total>0?'Os resultados do recorte não têm percentual válido.':'Ainda não há resultados para este gráfico.'));return;}
   if(!g&&!window.echarts){vazio(elemento,'Gráfico indisponível. Os números continuam nos indicadores da turma.');return;}
@@ -85,10 +89,22 @@ if(raiz){
   navAvaliacoes.querySelector('[data-avaliacoes-proxima]').addEventListener('click',e=>{mostrarPagina(1);if(e.currentTarget.disabled)navAvaliacoes.querySelector('[data-avaliacoes-anterior]').focus();});
  }
 
- document.addEventListener('g360:painel-orientacao',e=>{const el=elementos.find(v=>v.closest('[data-widget-id]')?.dataset.widgetId===e.detail?.id);if(el)renderizar(el);});
- document.addEventListener('g360:painel-redimensionado',()=>elementos.forEach(renderizar));
- const resize=new ResizeObserver(entradas=>entradas.forEach(e=>renderizar(e.target)));elementos.forEach(e=>resize.observe(e));
- const tema=new MutationObserver(()=>elementos.forEach(renderizar));tema.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','data-tema','class','style']});
+ // F4-D: um quadro de animação por rodada. Vários avisos de tamanho ou tema viram uma renderização por gráfico.
+ const pendentes=new Map();let quadro=0;
+ function agendar(lista,forcar){
+  lista.forEach(e=>pendentes.set(e,pendentes.get(e)||forcar));
+  if(quadro)return;
+  quadro=requestAnimationFrame(()=>{quadro=0;const lote=[...pendentes];pendentes.clear();lote.forEach(([e,f])=>renderizar(e,f));});
+ }
+ document.addEventListener('g360:painel-orientacao',e=>{const el=elementos.find(v=>v.closest('[data-widget-id]')?.dataset.widgetId===e.detail?.id);if(el)agendar([el],true);});
+ document.addEventListener('g360:painel-redimensionado',()=>agendar(elementos,true));
+ const resize=new ResizeObserver(entradas=>agendar(entradas.map(e=>e.target),false));elementos.forEach(e=>resize.observe(e));
+ // Classe e estilo do documento mudam também ao abrir modais; só uma troca real dos tokens usados redesenha.
+ const assinaturaTema=()=>['--fg','--muted','--border','--border-soft','--success','--warn'].map(cor).concat(cores()).join('|');
+ let temaAtual=assinaturaTema();
+ const tema=new MutationObserver(()=>{const novo=assinaturaTema();if(novo===temaAtual)return;temaAtual=novo;agendar(elementos,true);});
+ tema.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','data-tema','class','style']});
 
- window.addEventListener('pagehide',()=>{resize.disconnect();tema.disconnect();graficos.forEach(g=>g.dispose());});
+ // Saída definitiva descarta instâncias e observadores. Página guardada pelo navegador (bfcache) volta intacta.
+ window.addEventListener('pagehide',e=>{if(e.persisted)return;cancelAnimationFrame(quadro);quadro=0;pendentes.clear();resize.disconnect();tema.disconnect();graficos.forEach(g=>g.dispose());graficos.clear();});
 }
