@@ -11,6 +11,7 @@ class GestaoVinculos
 {
     public static function consulta(Usuario $ator, bool $vigentes = false)
     {
+        if (ContextoVinculo::presente($ator)) return ConsultaVinculo::para($ator)->gestao($vigentes);
         ContextoVinculo::resolver($ator);
         $escolas = Escopo::escolaIds($ator) ?? [];
         $nucleos = Instituicoes::nucleosIds($ator) ?? [];

@@ -12,6 +12,8 @@ class ConsultasPedagogicas
 
     public function escolasIds(): ?array
     {
+        if (ContextoVinculo::presente($this->ator)) return ConsultaVinculo::para($this->ator)->tabela('escolas')
+            ->orderBy('escolas.id')->pluck('escolas.id')->map(fn ($id) => (int) $id)->all();
         RegimeVinculos::exigir($this->ator);
         if ($this->ator->perfil === 'aluno') return Instituicoes::escolasLogoIds($this->ator);
         if ($this->ator->perfil === 'secretario_educacao' && Espacos::ativo()) {
@@ -25,6 +27,7 @@ class ConsultasPedagogicas
 
     public function tabela(string $tabela)
     {
+        if (ContextoVinculo::presente($this->ator)) return ConsultaVinculo::para($this->ator)->tabela($tabela, $this->historico);
         RegimeVinculos::exigir($this->ator);
         $q = DB::table($tabela);
         if (!Espacos::ativo()) return $q;
@@ -112,6 +115,11 @@ class ConsultasPedagogicas
 
     public function modelo(string $classe)
     {
+        if (ContextoVinculo::presente($this->ator)) {
+            $consulta = ConsultaVinculo::para($this->ator);
+            $modelo = new $classe();
+            return $modelo->newQuery()->whereIn($modelo->getTable().'.id', $consulta->tabela($modelo->getTable(), $this->historico)->select($modelo->getTable().'.id'));
+        }
         RegimeVinculos::exigir($this->ator);
         $modelo = new $classe();
         $q = $modelo->newQuery();
