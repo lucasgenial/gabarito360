@@ -1,10 +1,11 @@
 import {GridStack} from 'gridstack';
 import {clone,nodes,obter,filhos,normalizar,visivel,profundidade,MAX_ROWS} from './modelo.mjs';
 import {capturarContinuidade} from './continuidade-visual.mjs';
+import {conectarGestosGrade} from './gestos-grade.mjs';
 
 /** Uma grade por pai: raiz e contêineres usam exatamente o mesmo sistema. */
 export function montarGrade({target,state,context,editing,mobile,ui,callbacks,widgetMarkup}){
- const {escape,btn}=ui,grids=[],limits=new Map(),headers=new Map();let frame=null,before=null,gestureView=null,destroying=false;
+ const {escape,btn}=ui,grids=[],limits=new Map(),headers=new Map();let frame=null,before=null,gestureView=null,pointerView=null,gestures=null,destroying=false;
  const shouldShow=n=>editing?(n.kind==='section'||n.active):visivel(state,n.id);
  const controls=n=>editing?'<div class="controles-no">'+btn((n.fixo?'Liberar':'Fixar')+' posição e tamanho de '+n.title,'fixar','data-no-pin="'+n.id+'" aria-pressed="'+n.fixo+'"')+btn('Mover '+n.title+'. Setas movem; Shift e setas redimensionam nos ajustes finos.','arrastar','data-no-mover="'+n.id+'" '+(n.fixo?'disabled':''))+'</div>':'';
  function markup(n,isMobile=false){
@@ -19,6 +20,8 @@ export function montarGrade({target,state,context,editing,mobile,ui,callbacks,wi
  const visible=nodes(state).some(n=>n.kind==='widget'&&n.active);
  target.innerHTML=group(null,mobile)+(!visible&&!editing?'<div class="vazio">Todos os widgets estão ocultos. Reative-os na edição do painel pelo desktop.</div>':'');
  const wrappers=new Set(target.querySelectorAll('.grid-stack-item'));
+ const prepareGesture=e=>{const el=e.target.closest('.grid-stack-item:not(.grid-stack-placeholder)');pointerView=wrappers.has(el)&&e.target.closest('[data-no-mover],.ui-resizable-handle')?capturarContinuidade(target,el.getAttribute('gs-id')):null;};
+ if(editing)target.addEventListener('mousedown',prepareGesture,true);
  function minPixel(n){if(n.kind==='widget')return callbacks.definitions().widgets.find(w=>w.id===n.id)?.type==='lista'?420:280;const children=filhos(state,n.id).filter(shouldShow);return Math.max(320,...children.map(child=>minPixel(child)*12/child.w+32));}
  // O mínimo depende do conteúdo já posicionado, nunca da altura antiga do pai.
  function refreshBounds(){
@@ -42,13 +45,13 @@ export function montarGrade({target,state,context,editing,mobile,ui,callbacks,wi
   for(const n of nodes(next))if(n.parent!==obter(snapshot,n.id).parent)throw Error('Mude a seção somente na aba Distribuição.');
   return next;
  }
- function commit(){
-  frame=null;if(destroying||!before)return;const snapshot=before,view=capturarContinuidade(target,gestureView.id);before=null;
+ function commit(gesture){
+  frame=null;if(destroying||!before||!gestures.current(gesture))return;const snapshot=before,view=capturarContinuidade(target,gestureView.id);if(!view.focus&&[document.body,document.documentElement].includes(document.activeElement))view.focus=gestureView.focus;before=null;gestures.complete(gesture);
   try{refreshBounds();const next=capture(snapshot);for(const anchor of nodes(snapshot).filter(n=>n.fixo&&shouldShow(n))){const n=obter(next,anchor.id);if(['parent','x','y','w','h'].some(k=>n[k]!==anchor[k]))throw Error('Um item fixado não pode mudar de posição ou tamanho.');}
    callbacks.change(normalizar(next,context),view);callbacks.say('Composição atualizada no rascunho.');
   }catch(error){callbacks.restore(snapshot,error.message,gestureView);}
  }
- const schedule=()=>{if(!before||destroying)return;if(frame!==null)cancelAnimationFrame(frame);frame=requestAnimationFrame(commit);};
+ const schedule=gesture=>{if(!before||destroying)return;if(frame!==null)cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>commit(gesture));};
  if(!mobile){
   for(const el of target.querySelectorAll('[data-parent-grid]')){
    const parent=el.dataset.parentGrid||null,items=filhos(state,parent).filter(shouldShow),minRow=editing&&(parent===null||!items.length)?3:0;
@@ -56,24 +59,24 @@ export function montarGrade({target,state,context,editing,mobile,ui,callbacks,wi
    grids.push(grid);
    const width=el.clientWidth;
    for(const node of grid.engine.nodes){const original=obter(state,node.id),def=original.kind==='widget'?callbacks.definitions().widgets.find(w=>w.id===original.id):{minW:4},minW=Math.min(12,Math.max(def.minW,Math.ceil(minPixel(original)/(Math.max(1,width)/12))));const bound={minW,minH:original.kind==='widget'?def.minH:3};limits.set(original.id,bound);grid.update(node.el,{...bound,maxW:12,maxH:MAX_ROWS,locked:original.fixo,noMove:!editing||original.fixo,noResize:!editing||original.fixo});}
-   grid.on('dragstart resizestart',(_event,el)=>{if(destroying||!editing)return;if(el?.gridstackNode?.grid!==grid)return;before=capture(state);gestureView=capturarContinuidade(target,el.getAttribute('gs-id'));});
-   grid.on('dragstop resizestop dropped',schedule);
   }
   // Depois que as larguras nativas existem, medir os cabeçalhos e propagar
   // mínimos das subgrades de baixo para cima, sem cortar texto ou conteúdo.
   refreshBounds();
+  if(editing)gestures=conectarGestosGrade({root:grids[0],grids,wrappers,validNode:id=>{const n=obter(state,id);return n&&!n.fixo;},begin:gesture=>{before=capture(state);gestureView=pointerView?.id===gesture.id?pointerView:capturarContinuidade(target,gesture.id);pointerView=null;},finish:schedule});
  }
  target.querySelectorAll('[data-no-pin]').forEach(b=>b.addEventListener('click',()=>callbacks.pin(b.dataset.noPin)));
  target.querySelectorAll('[data-no-mover]').forEach(b=>b.addEventListener('keydown',e=>{
   if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();e.stopPropagation();
+  if(before)return;
   try{refreshBounds();const next=capture(state),n=obter(next,b.dataset.noMover),bound=limits.get(n.id);if(n.fixo)return;const horizontal=['ArrowLeft','ArrowRight'].includes(e.key),delta=['ArrowLeft','ArrowUp'].includes(e.key)?-1:1,key=e.shiftKey?(horizontal?'w':'h'):(horizontal?'x':'y');n[key]+=delta;
    if(n.w<bound.minW||n.h<bound.minH)throw Error('O conteúdo precisa desse espaço mínimo.');callbacks.change(normalizar(next,context),capturarContinuidade(target,n.id));callbacks.focus('[data-no-mover="'+n.id+'"]');callbacks.say('Item ajustado dentro da grade.');
   }catch(error){callbacks.say(error.message,'erro');}
  }));
- const escapeGesture=e=>{if(e.key==='Escape'&&before){e.preventDefault();const snapshot=before;before=null;if(frame!==null)cancelAnimationFrame(frame);callbacks.restore(snapshot,'Gesto cancelado.',gestureView);}};
+ const escapeGesture=e=>{if(e.key==='Escape'&&before){e.preventDefault();const snapshot=before;before=null;gestures?.cancel();if(frame!==null)cancelAnimationFrame(frame);callbacks.restore(snapshot,'Gesto cancelado.',gestureView);}};
  document.addEventListener('keydown',escapeGesture);
  return {destroy(){
-  if(destroying)return;destroying=true;before=null;document.removeEventListener('keydown',escapeGesture);if(frame!==null)cancelAnimationFrame(frame);
+  if(destroying)return;destroying=true;before=null;pointerView=null;gestures?.destroy();target.removeEventListener('mousedown',prepareGesture,true);document.removeEventListener('keydown',escapeGesture);if(frame!==null)cancelAnimationFrame(frame);
   // Encerrar DD nos wrappers reais ANTES de destruir as engines. Um helper
   // ativo pode estar no body, fora da grade e de engine.nodes.
   target.querySelectorAll('.grid-stack-item:not(.grid-stack-placeholder)').forEach(el=>wrappers.add(el));const dd=GridStack.getDD();

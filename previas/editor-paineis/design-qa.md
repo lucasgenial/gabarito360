@@ -1,5 +1,19 @@
 # Design QA — editor de painéis
 
+## Correção atual: resize de widgets internos — 09/11/2026
+
+final result: **passed**, parecer específico de `/root/product_design_review`. Sem bloqueios no escopo local; aprovação humana da prévia continua pendente.
+
+O resize de widgets filhos era rejeitado pelo listener da raiz, embora o GridStack14 encaminhe os eventos internos para ela. O novo binding reconhece raiz, filho e neto por item, grade proprietária, catálogo e wrapper conectado; valida o par drag/resize e o único fim do ticket. Eventos duplicados, cancelados e posteriores à desmontagem não geram commit. A correção anterior de altura e continuidade permanece compartilhada pelos três níveis.
+
+O revisor examinou fonte, testes e capturas atuais de `operacao-20261102/participacao-resize-visual`; executou os28 testes, incluindo cinco regressões do contrato de gestos. `operacao-20261102/participacao-resize-design-final.json` identifica os hashes das fontes/outputs e PNGs revisados. O commit base `f317744` contém somente o fix anterior; o snapshot identifica os bytes efetivamente aprovados nesta rodada.
+
+Ensaios Chrome pelo implementador: Participação7→11 pelo mouse com pai13→14 e continuidade scroll580/top609.125; Ver painel manteve o ajuste. Neto Devolutivas7→8 atualizou a seção10→11. Raiz14→15 e teclado15→14 funcionaram. Pai fixado vetou crescimento incompatível do neto e restaurou8/11/14; esse ensaio não comprovou especificamente o foco no grip. Escape manteve rascunho, scroll e grip; gesto ativo seguido de viewport390 não deixou placeholders, commits tardios ou controles de edição. Save/reload no contexto fictício separado manteve o resize por mouse7→8. Não se alegam gestos próprios do revisor nem auditoria WCAG integral.
+
+O endurecimento final que rejeita um tipo de stop incompatível recebeu revisão proporcional dos novos bytes, testes e novos gestos válidos de filho/neto com Ver painel. As capturas desktop01/03 foram renovadas; a captura mobile02 antecede somente esse guard de evento, que não muda desenho ou DOM móvel. Não extrapolar para repetição de todos os ensaios após esse guard.
+
+Nenhuma alteração de API, app operacional, banco ou publicação. Sem autorização de main merge ou deploy. O usuário continua avaliando a prévia local; os registros reais e seu rascunho original não foram sobrescritos.
+
 ## Correção atual: altura e continuidade — 09/11/2026
 
 final result: **passed**. Parecer específico de `/root/product_design_review`, sem bloqueios. Aprovação humana da prévia e integração continuam pendentes.

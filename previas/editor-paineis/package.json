@@ -2,7 +2,7 @@
   "name": "gabarito360-previa-editor-paineis",
   "private": true,
   "type": "module",
-  "scripts": {"build": "node build.mjs", "dev": "node servidor.mjs", "test": "node --test modelo.test.mjs"},
+  "scripts": {"build": "node build.mjs", "dev": "node servidor.mjs", "test": "node --test modelo.test.mjs gestos-grade.test.mjs"},
   "dependencies": {"gridstack": "14.1.0", "sortablejs": "1.15.7"},
   "devDependencies": {"esbuild": "0.28.2"}
 }

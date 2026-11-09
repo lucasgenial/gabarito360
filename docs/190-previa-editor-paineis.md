@@ -77,3 +77,27 @@ A reprodução confirmou que os dois gráficos de sete linhas cabiam em dez linh
 | Revisão visual independente | Parecer específico desta correção registrado em design-qa.md |
 
 Capturas e relatórios desta rodada ficam em `operacao-20261102/editor-resize-visual` e `operacao-20261102/editor-resize-design-final.*`, fora do Git. Gestos e salvamento foram ensaiados no Chrome pelo implementador; o revisor independente confere fonte e evidências, sem alegação de auditoria WCAG integral. A aba original do usuário e seu rascunho foram preservados. A nova prévia corrigida fica em outra aba para avaliação; nenhuma preferência real, API ou ambiente servidor foi alterado.
+
+## Correção dos gestos internos — 09/11/2026
+
+O responsável confirmou que a sobra anterior foi resolvida, mas enviou nova gravação do widget Participação nas aplicações. Planejamento revisto: corrigir a captura do resize interno sem alterar o desenho, a altura mínima anterior ou o quadro de distribuição. Pré-consulta UI/UX aprovou lifecycle único na raiz, com validação de proprietário e correspondência de início/fim; exigiu ensaio de raiz, filho e neto, cancelamento, pins e persistência.
+
+Reprodução anterior à correção: o mouse aumentava o widget de7 para11 linhas, mas o status do rascunho permanecia vazio e o pai ficava em13. Ver painel descartava o ajuste, voltava para7 e desmontava a tela sem a continuidade do gesto. O GridStack14 encaminha eventos de subgrades à raiz; o filtro anterior exigia que o item pertencesse à própria raiz e rejeitava seus filhos. A aparência mudava, mas o gesto não chegava ao rascunho.
+
+Agora `gestos-grade.mjs` conecta o ciclo uma vez na raiz e reconhece elementos reais/conectados das grades montadas. Valida catálogo, item, proprietário, pai DOM e o par drag/resize antes de concluir. Ticket e fase permitem um único commit; eventos duplicados, cancelados ou posteriores à desmontagem são ignorados. A captura da geometria nativa, limites de baixo para cima e continuidade existentes são compartilhados por todos os níveis. O teclado não disputa um gesto ativo. A captura anterior ao mousedown preserva o controle focado quando o handle o desfoca, sem roubar foco externo.
+
+| Verificação | Resultado |
+|---|---|
+| Widget interno pelo mouse | Participação7→11, pai13→14; status de rascunho atualizado; scroll580 e topo609.125 preservados |
+| Ver painel | Mantém altura11; ajuste não volta ao registro anterior |
+| Widget de seção filha | Devolutivas7→8, seção10→11; item, limites, pai e foco preservados |
+| Painel raiz | Mouse14→15 e teclado15→14 continuam funcionando |
+| Pai fixado | Crescimento incompatível do neto vetado, com rollback de8/11/14 e mensagem de erro |
+| Escape e viewport móvel durante gesto | Geometria anterior preservada; nenhum commit tardio, placeholder ou controle de edição no mobile |
+| Salvar/reabrir em contexto fictício separado | Resize por mouse7→8 persistiu após reload em Ana/Direção/escola-b |
+| Contrato de gestos | Cinco testes de regressão, incluindo todos os níveis, fim incompatível/duplicado, catálogo e desmontagem |
+| Build e conjunto de testes | Build isolado e28 testes aprovados; nenhum erro de console observado |
+
+O endurecimento final do tipo de evento foi conferido proporcionalmente com novos gestos válidos de filho/neto e Ver painel, além dos testes negativos. No ensaio focal final o registro de Bruno já havia sido alterado pelo próprio usuário: mouse11→15 e neto8→9 foram incorporados, e teclado reduziu para11/8, seção11 e pai14, mantendo os valores em Ver painel. Esse rascunho de conferência ficou numa nova aba e não sobrescreveu a disposição salva de Bruno.
+
+Fontes/outputs e imagens são identificados no parecer independente `operacao-20261102/participacao-resize-design-final.*`. Capturas em `operacao-20261102/participacao-resize-visual`. A revisão de foco no rollback por pin não comprovou especificamente o grip; não extrapolar esse caso para uma auditoria integral de acessibilidade. Esta rodada não muda API, aplicação operacional, banco, homologação ou produção, nem autoriza integração antes da aprovação humana da prévia.
