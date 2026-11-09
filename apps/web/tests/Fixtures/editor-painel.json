@@ -1,0 +1,271 @@
+{
+    "versao": 0,
+    "apresentacao": "tabela",
+    "layouts": {
+        "desktop": [],
+        "mobile": []
+    },
+    "catalogo": [],
+    "repetido": false,
+    "editor": {
+        "schema": 3,
+        "contexto": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "catalogo_chave": "688789baf91ce4734d6a608dfde8ff57d81d8dbf823294bafac1a5ebf2941ed4",
+        "catalogo": {
+            "sections": [
+                {
+                    "id": "cadastros",
+                    "title": "Turmas"
+                },
+                {
+                    "id": "analises",
+                    "title": "Análises entre turmas"
+                },
+                {
+                    "id": "acompanhamento",
+                    "title": "Acompanhamento pedagógico"
+                },
+                {
+                    "id": "grupo-planejamento",
+                    "title": "Planejamento"
+                },
+                {
+                    "id": "grupo-ensino",
+                    "title": "Ensino e acompanhamento"
+                },
+                {
+                    "id": "grupo-administrativo",
+                    "title": "Organização administrativa"
+                }
+            ],
+            "widgets": [
+                {
+                    "id": "turmas-lista",
+                    "title": "Turmas",
+                    "type": "lista",
+                    "parent": "cadastros",
+                    "w": 12,
+                    "h": 12,
+                    "minW": 6,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 40
+                },
+                {
+                    "id": "devolutivas",
+                    "title": "Devolutivas",
+                    "type": "devolutivas",
+                    "parent": "grupo-planejamento",
+                    "w": 6,
+                    "h": 9,
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20
+                },
+                {
+                    "id": "proximos-compromissos",
+                    "title": "Agenda de avaliações",
+                    "type": "proximos-compromissos",
+                    "parent": "grupo-planejamento",
+                    "w": 6,
+                    "h": 9,
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20
+                }
+            ]
+        },
+        "padrao": {
+            "schema": 3,
+            "sections": [
+                {
+                    "id": "cadastros",
+                    "title": "Turmas",
+                    "originalTitle": "Turmas",
+                    "kind": "section",
+                    "parent": null,
+                    "x": 0,
+                    "y": 0,
+                    "w": 12,
+                    "h": 15,
+                    "fixo": false
+                },
+                {
+                    "id": "analises",
+                    "title": "Análises entre turmas",
+                    "originalTitle": "Análises entre turmas",
+                    "kind": "section",
+                    "parent": null,
+                    "x": 0,
+                    "y": 15,
+                    "w": 12,
+                    "h": 6,
+                    "fixo": false
+                },
+                {
+                    "id": "acompanhamento",
+                    "title": "Acompanhamento pedagógico",
+                    "originalTitle": "Acompanhamento pedagógico",
+                    "kind": "section",
+                    "parent": null,
+                    "x": 0,
+                    "y": 21,
+                    "w": 12,
+                    "h": 15,
+                    "fixo": false
+                },
+                {
+                    "id": "grupo-planejamento",
+                    "title": "Planejamento",
+                    "originalTitle": "Planejamento",
+                    "kind": "section",
+                    "parent": "acompanhamento",
+                    "x": 0,
+                    "y": 0,
+                    "w": 12,
+                    "h": 12,
+                    "fixo": false
+                }
+            ],
+            "widgets": {
+                "turmas-lista": {
+                    "id": "turmas-lista",
+                    "kind": "widget",
+                    "title": "Turmas",
+                    "parent": "cadastros",
+                    "active": true,
+                    "fixo": false,
+                    "x": 0,
+                    "y": 0,
+                    "w": 12,
+                    "h": 12,
+                    "orientacao": "vertical"
+                },
+                "devolutivas": {
+                    "id": "devolutivas",
+                    "kind": "widget",
+                    "title": "Devolutivas",
+                    "parent": "grupo-planejamento",
+                    "active": true,
+                    "fixo": false,
+                    "x": 0,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "orientacao": "vertical"
+                },
+                "proximos-compromissos": {
+                    "id": "proximos-compromissos",
+                    "kind": "widget",
+                    "title": "Agenda de avaliações",
+                    "parent": "grupo-planejamento",
+                    "active": true,
+                    "fixo": false,
+                    "x": 6,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "orientacao": "vertical"
+                }
+            }
+        },
+        "composicao": {
+            "schema": 3,
+            "sections": [
+                {
+                    "id": "cadastros",
+                    "title": "Turmas",
+                    "originalTitle": "Turmas",
+                    "kind": "section",
+                    "parent": null,
+                    "x": 0,
+                    "y": 0,
+                    "w": 12,
+                    "h": 15,
+                    "fixo": false
+                },
+                {
+                    "id": "analises",
+                    "title": "Análises entre turmas",
+                    "originalTitle": "Análises entre turmas",
+                    "kind": "section",
+                    "parent": null,
+                    "x": 0,
+                    "y": 15,
+                    "w": 12,
+                    "h": 6,
+                    "fixo": false
+                },
+                {
+                    "id": "acompanhamento",
+                    "title": "Acompanhamento pedagógico",
+                    "originalTitle": "Acompanhamento pedagógico",
+                    "kind": "section",
+                    "parent": null,
+                    "x": 0,
+                    "y": 21,
+                    "w": 12,
+                    "h": 15,
+                    "fixo": false
+                },
+                {
+                    "id": "grupo-planejamento",
+                    "title": "Planejamento",
+                    "originalTitle": "Planejamento",
+                    "kind": "section",
+                    "parent": "acompanhamento",
+                    "x": 0,
+                    "y": 0,
+                    "w": 12,
+                    "h": 12,
+                    "fixo": false
+                }
+            ],
+            "widgets": {
+                "turmas-lista": {
+                    "id": "turmas-lista",
+                    "kind": "widget",
+                    "title": "Turmas",
+                    "parent": "cadastros",
+                    "active": true,
+                    "fixo": false,
+                    "x": 0,
+                    "y": 0,
+                    "w": 12,
+                    "h": 12,
+                    "orientacao": "vertical"
+                },
+                "devolutivas": {
+                    "id": "devolutivas",
+                    "kind": "widget",
+                    "title": "Devolutivas",
+                    "parent": "grupo-planejamento",
+                    "active": true,
+                    "fixo": false,
+                    "x": 0,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "orientacao": "vertical"
+                },
+                "proximos-compromissos": {
+                    "id": "proximos-compromissos",
+                    "kind": "widget",
+                    "title": "Agenda de avaliações",
+                    "parent": "grupo-planejamento",
+                    "active": true,
+                    "fixo": false,
+                    "x": 6,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "orientacao": "vertical"
+                }
+            }
+        },
+        "indisponivel": false,
+        "origem": "perfil"
+    }
+}

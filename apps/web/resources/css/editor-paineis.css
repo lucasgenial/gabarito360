@@ -1,0 +1,54 @@
+/* Escopo completo do editor. Cores e controles vêm da estrutura Tailwind do App. */
+/* Antes da adoção dos nós, a leitura SSR já conserva os vazios compactos. */
+.tela-turma .painel-widget[data-painel-vazio=true] :is(.painel-widget-corpo,.tu1r3-alunos,.tu1r3-alunos-lista){flex:0 0 auto!important;height:auto;min-height:0;overflow:visible}
+.tela-turma .painel-widget[data-painel-vazio=true] .tu1r3-grafico{flex:0 0 auto!important;height:auto!important;min-height:0!important;padding:0;justify-content:flex-start;text-align:start}
+.editor-paineis{--line:var(--border);--brand:var(--accent);--soft:var(--surface-2);--brandsoft:var(--accent-soft);width:100%;min-width:0;margin-block:16px}
+.editor-paineis [hidden]{display:none!important}
+.editor-paineis-barra,.editor-paineis-acoes,.editor-paineis .barra-editor{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.editor-paineis-barra{margin-bottom:16px}.editor-paineis .barra-editor{justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px}
+.editor-paineis [role=tablist]{display:flex;flex-wrap:wrap;gap:4px}.editor-paineis [role=tab][aria-selected=true]{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 -2px var(--accent)}
+.editor-paineis .btn{font-size:12px;min-height:32px;padding:6px 10px;gap:6px}.editor-paineis .btn svg{width:16px;height:16px;flex:none}
+.editor-paineis .botao-icone{width:32px;min-width:32px;padding:0;display:inline-flex;justify-content:center;align-items:center}
+.editor-paineis .icone{width:16px;height:16px;display:inline-block}.editor-paineis .titulo-painel{font-size:20px;line-height:28px;font-weight:700}.editor-paineis .titulo-subsecao{font-size:18px;line-height:26px;font-weight:700}
+.editor-paineis .titulo-widget,.editor-paineis [data-widget-titulo]{font-size:16px;line-height:24px;font-weight:700;overflow-wrap:anywhere}
+.editor-paineis .quadro{display:flex;gap:16px;overflow-x:auto;align-items:stretch;padding:4px 2px 18px;min-height:300px;overscroll-behavior-x:contain}
+.editor-paineis .coluna{flex:1 0 300px;min-width:300px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);display:flex;flex-direction:column}
+.editor-paineis .coluna-topo{padding:12px;border-bottom:1px solid var(--border)}.editor-paineis .coluna-ordem{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted);margin-bottom:8px}
+.editor-paineis .coluna-titulo,.editor-paineis .item-topo{display:flex;gap:8px;align-items:flex-start}.editor-paineis .coluna-titulo>div,.editor-paineis .item-topo>div{flex:1;min-width:0}
+.editor-paineis .titulo-editavel{display:inline-flex;text-align:left;align-items:center;gap:8px;border:0;background:transparent;color:var(--fg);padding:2px 0;min-height:32px;overflow-wrap:anywhere;max-width:100%}
+.editor-paineis .titulo-editavel .icone{opacity:.55;width:14px;height:14px;flex:none}.editor-paineis .titulo-editavel:hover{color:var(--accent)}
+.editor-paineis .renomear{display:flex;flex-wrap:wrap;gap:4px;align-items:center;width:100%;font-size:14px;font-weight:400}
+.editor-paineis .renomear input{width:100%;min-width:0;min-height:36px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);padding:6px 8px;color:var(--fg);font:inherit}
+.editor-paineis .erro,.editor-paineis [data-editor-novo-erro]{width:100%;font-size:12px;color:var(--danger)}
+.editor-paineis .lista-widgets{padding:12px;min-height:130px;flex:1;display:flex;flex-direction:column;gap:10px}.editor-paineis .lista-widgets:empty:after{content:'Mova um widget para esta seção';font-size:12px;color:var(--muted);border:1px dashed var(--border);padding:24px 12px;border-radius:6px;text-align:center}
+.editor-paineis .item-widget{padding:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface);box-shadow:0 1px 2px #00153409}.editor-paineis .item-widget.inativo{border-style:dashed}
+.editor-paineis .item-acoes{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.editor-paineis .ativacao{display:flex;align-items:center;gap:6px;font-size:12px;margin-right:auto}.editor-paineis .ativacao input{accent-color:var(--accent);width:16px;height:16px}
+.editor-paineis .transferencia{display:flex;align-items:center;gap:6px;margin-top:8px}.editor-paineis .transferencia label{font-size:11px;color:var(--muted)}.editor-paineis .transferencia select{max-width:100%;min-width:0;flex:1;border:1px solid var(--border);border-radius:4px;font-size:12px;padding:5px;background:var(--surface);color:var(--fg)}
+.editor-paineis .subsecao-quadro{padding:12px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;background:var(--surface-2);min-width:0}.editor-paineis .subsecao-quadro>.lista-widgets{padding:12px 0 0;min-height:100px}
+.editor-paineis .coluna-titulo .titulo-subsecao{font-size:20px;line-height:28px}.editor-paineis .item-no{min-width:0}
+.editor-paineis .mover-composicao,.editor-paineis [data-no-mover]{cursor:grab;touch-action:none}.editor-paineis .mover-composicao:active,.editor-paineis [data-no-mover]:active{cursor:grabbing}
+/* Sortable coloca o helper no body: a classe continua exclusiva deste editor. */
+.pe-arraste{font:14px Figtree,sans-serif;color:var(--fg);border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:12px}.pe-arraste button{color:inherit}.editor-paineis .sortable-ghost{opacity:.3;border:2px dashed var(--accent)}
+.editor-paineis .painel-visual{height:100%;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:0 1px 2px #00153418;min-width:0;overflow:hidden}
+.editor-paineis .secao-cabecalho{flex:none;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px;min-width:0;height:auto;min-height:0}
+.editor-paineis .secao-cabecalho>h2,.editor-paineis .secao-cabecalho>h3{min-width:0;overflow-wrap:anywhere;margin:0}.editor-paineis .secao-corpo{flex:1;min-height:0;min-width:0;padding:0 10px 12px}
+.editor-paineis .controles-no{display:flex;gap:4px;align-items:flex-start;flex:none}.editor-paineis .controles-no .btn{width:32px;padding-inline:0}
+.editor-paineis .grid-stack{min-width:0;min-height:0}.editor-paineis .grid-stack-item-content{overflow:hidden!important}.editor-paineis .grid-stack-item-content>.painel-widget{width:100%;height:100%;min-height:0;margin:0;display:flex;flex-direction:column}
+.editor-paineis .grid-stack-item-content>.painel-widget .painel-widget-corpo{flex:1;min-height:0;min-width:0}.editor-paineis .painel-widget-cabecalho{flex:none}.editor-paineis .painel-widget-controles{flex-wrap:nowrap}
+.editor-paineis .grid-stack-item-content>.painel-widget .painel-widget-corpo>:is(.grafico,.tu1r3-grafico){flex:1 1 0;height:auto;min-height:80px;width:100%;overflow:hidden}
+.editor-paineis .grid-stack-item-content>.painel-widget:not(.painel-widget-grafico) .painel-widget-corpo{overflow:auto}.editor-paineis .painel-widget-grafico .painel-widget-corpo{overflow:hidden}
+.editor-paineis #relacao-turmas{overflow:auto}.editor-paineis #relacao-turmas .painel-relacao-cabecalho{margin:0 0 12px}
+.editor-paineis .painel-widget[data-painel-vazio=true] :is(.painel-widget-corpo,.tu1r3-alunos,.tu1r3-alunos-lista){flex:0 0 auto!important;height:auto;min-height:0;overflow:visible}
+.editor-paineis .painel-widget[data-painel-vazio=true] .tu1r3-grafico{flex:0 0 auto!important;height:auto!important;min-height:0!important;padding:0;justify-content:flex-start;text-align:start}
+.editor-paineis .painel-widget[data-painel-vazio=true] .tu1r3-alunos-lista{margin:0}.editor-paineis .painel-widget[data-painel-vazio=true] .tu1r3-alunos-vazio{padding:0;border:0}
+.editor-paineis .grid-stack-placeholder>.placeholder-content{background:var(--accent-soft);border:1px dashed var(--accent);border-radius:6px}
+.editor-paineis .grid-stack-item>.ui-resizable-se{width:22px;height:22px;right:8px;bottom:8px}
+.editor-paineis .grade-interna:empty:after{content:'Mova widgets para esta seção na aba Distribuição';position:absolute;inset:12px;display:grid;place-items:center;border:1px dashed var(--border);border-radius:6px;color:var(--muted);font-size:12px;text-align:center;padding:8px}
+.editor-paineis .barra-preview{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:12px;margin-bottom:16px;font-size:13px}
+.editor-paineis .edicao-suspensa{padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;margin-bottom:16px}.editor-paineis .vazio{padding:24px;text-align:center;color:var(--muted)}
+.editor-paineis [data-editor-status]{font-size:12px;color:var(--muted);margin-block:12px}.editor-paineis [data-editor-status]:empty{display:none}.editor-paineis [data-editor-status][data-tipo=erro]{color:var(--danger)}
+.editor-paineis .editor-dialog{margin:auto;width:min(480px,calc(100vw - 32px));max-height:calc(100dvh - 40px);padding:24px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--fg);overflow:auto}.editor-paineis .editor-dialog::backdrop{background:#00153466}.editor-paineis .editor-dialog h2{font-size:20px;font-weight:700;margin:0 0 16px}.editor-paineis .editor-dialog p{margin-bottom:16px}.editor-paineis .editor-dialog .editor-paineis-acoes{justify-content:flex-end;margin-top:16px}
+.editor-paineis .tw\:-rotate-90{transform:rotate(-90deg)}.editor-paineis .tw\:rotate-90{transform:rotate(90deg)}.editor-paineis .tw\:rotate-180{transform:rotate(180deg)}
+@media(max-width:767px){.editor-paineis{margin-block:12px}.editor-paineis .arvore-mobile{display:flex;flex-direction:column;gap:14px}.editor-paineis .mobile-no{min-width:0}.editor-paineis .mobile-no>.painel-visual{height:auto}.editor-paineis .secao-cabecalho{padding:14px}.editor-paineis .secao-corpo{padding:0 10px 12px}.editor-paineis .controles-no{display:none}.editor-paineis .painel-widget{margin:0!important;height:auto}.editor-paineis .mobile-no>.painel-widget .tu1r3-grafico,.editor-paineis .mobile-no>.painel-widget .grafico{height:240px;min-height:240px}.editor-paineis-barra:has([data-editor-consultar][hidden]){display:none}.editor-paineis .btn{min-height:44px;min-width:44px}}
+@media(prefers-reduced-motion:reduce){.editor-paineis *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

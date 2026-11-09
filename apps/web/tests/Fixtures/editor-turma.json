@@ -1,0 +1,1279 @@
+{
+    "data": {
+        "versao": 0,
+        "apresentacao": "tabela",
+        "layouts": {
+            "desktop": [],
+            "mobile": []
+        },
+        "catalogo": [
+            {
+                "id": "alunos-destaques",
+                "section": "estudantes",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 10,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 12
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 10,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 12
+                }
+            },
+            {
+                "id": "alunos-atencao",
+                "section": "estudantes",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 10,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 12
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 10,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 12
+                }
+            },
+            {
+                "id": "distribuicao-acertos",
+                "section": "analises",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "resultados-avaliacao",
+                "section": "analises",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "situacoes-registradas",
+                "section": "analises",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "periodos-escolares",
+                "section": "periodo-agenda",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "agenda-pedagogica",
+                "section": "periodo-agenda",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 12,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 14
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 12,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 14
+                }
+            },
+            {
+                "id": "devolutivas",
+                "section": "planejamento",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "participacao",
+                "section": "planejamento",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "responsabilidade-docente-aplicacao",
+                "section": "planejamento",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "habilidades",
+                "section": "ensino",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "intervencoes",
+                "section": "ensino",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "reavaliacoes",
+                "section": "ensino",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 8,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "metas",
+                "section": "decisoes",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            },
+            {
+                "id": "conselho",
+                "section": "decisoes",
+                "desktop": {
+                    "minW": 3,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 6,
+                    "defaultH": 9
+                },
+                "mobile": {
+                    "minW": 12,
+                    "maxW": 12,
+                    "minH": 7,
+                    "maxH": 20,
+                    "defaultW": 12,
+                    "defaultH": 9
+                }
+            }
+        ],
+        "repetido": false,
+        "padrao": {
+            "desktop": [
+                {
+                    "id": "alunos-destaques",
+                    "section": "estudantes",
+                    "x": 0,
+                    "y": 0,
+                    "w": 6,
+                    "h": 12,
+                    "altura_desejada": 12
+                },
+                {
+                    "id": "alunos-atencao",
+                    "section": "estudantes",
+                    "x": 6,
+                    "y": 0,
+                    "w": 6,
+                    "h": 12,
+                    "altura_desejada": 12
+                },
+                {
+                    "id": "distribuicao-acertos",
+                    "section": "analises",
+                    "x": 0,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "resultados-avaliacao",
+                    "section": "analises",
+                    "x": 6,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "situacoes-registradas",
+                    "section": "analises",
+                    "x": 0,
+                    "y": 9,
+                    "w": 12,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "periodos-escolares",
+                    "section": "periodo-agenda",
+                    "x": 0,
+                    "y": 0,
+                    "w": 6,
+                    "h": 14,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "agenda-pedagogica",
+                    "section": "periodo-agenda",
+                    "x": 6,
+                    "y": 0,
+                    "w": 6,
+                    "h": 14,
+                    "altura_desejada": 14
+                },
+                {
+                    "id": "devolutivas",
+                    "section": "planejamento",
+                    "x": 0,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "participacao",
+                    "section": "planejamento",
+                    "x": 6,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "responsabilidade-docente-aplicacao",
+                    "section": "planejamento",
+                    "x": 0,
+                    "y": 9,
+                    "w": 12,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "habilidades",
+                    "section": "ensino",
+                    "x": 0,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "intervencoes",
+                    "section": "ensino",
+                    "x": 6,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "reavaliacoes",
+                    "section": "ensino",
+                    "x": 0,
+                    "y": 9,
+                    "w": 12,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "metas",
+                    "section": "decisoes",
+                    "x": 0,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "altura_desejada": 9
+                },
+                {
+                    "id": "conselho",
+                    "section": "decisoes",
+                    "x": 6,
+                    "y": 0,
+                    "w": 6,
+                    "h": 9,
+                    "altura_desejada": 9
+                }
+            ]
+        },
+        "origem_disposicao": "perfil",
+        "editor": {
+            "schema": 3,
+            "contexto": "a015175013bb27b2823bcdc605fdc6583702fa451caa379a0fb0a11301c3088b",
+            "catalogo_chave": "587f43dc2c4a3657f0510fcd11082d9acbbe7e7004964bb965c5b336e0e9ea0b",
+            "catalogo": {
+                "sections": [
+                    {
+                        "id": "resultados",
+                        "title": "Resultados da turma"
+                    },
+                    {
+                        "id": "acompanhamento",
+                        "title": "Acompanhamento da turma"
+                    },
+                    {
+                        "id": "planejamento",
+                        "title": "Planejamento da turma"
+                    },
+                    {
+                        "id": "estudantes",
+                        "title": "Estudantes"
+                    },
+                    {
+                        "id": "periodo-agenda",
+                        "title": "Per\u00edodo e agenda"
+                    },
+                    {
+                        "id": "analises",
+                        "title": "An\u00e1lises da turma"
+                    },
+                    {
+                        "id": "ensino",
+                        "title": "Ensino e acompanhamento"
+                    },
+                    {
+                        "id": "administrativo",
+                        "title": "Organiza\u00e7\u00e3o administrativa"
+                    },
+                    {
+                        "id": "grupo-planejamento",
+                        "title": "Planejamento"
+                    }
+                ],
+                "widgets": [
+                    {
+                        "id": "alunos-destaques",
+                        "title": "Destaques da turma",
+                        "type": "alunos-destaques",
+                        "parent": "estudantes",
+                        "w": 6,
+                        "h": 12,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 10,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "alunos-atencao",
+                        "title": "Alunos que precisam de aten\u00e7\u00e3o",
+                        "type": "alunos-atencao",
+                        "parent": "estudantes",
+                        "w": 6,
+                        "h": 12,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 10,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "distribuicao-acertos",
+                        "title": "Distribui\u00e7\u00e3o dos acertos",
+                        "type": "distribuicao-acertos",
+                        "parent": "analises",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 8,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "resultados-avaliacao",
+                        "title": "Resultados por avalia\u00e7\u00e3o",
+                        "type": "resultados-avaliacao",
+                        "parent": "analises",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 8,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "situacoes-registradas",
+                        "title": "Situa\u00e7\u00f5es registradas",
+                        "type": "situacoes-registradas",
+                        "parent": "analises",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 8,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "periodos-escolares",
+                        "title": "Resultados por per\u00edodo escolar",
+                        "type": "periodos-escolares",
+                        "parent": "periodo-agenda",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 8,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "agenda-pedagogica",
+                        "title": "Agenda da turma",
+                        "type": "agenda-pedagogica",
+                        "parent": "periodo-agenda",
+                        "w": 6,
+                        "h": 14,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 12,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "devolutivas",
+                        "title": "Devolutivas",
+                        "type": "devolutivas",
+                        "parent": "grupo-planejamento",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 7,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "participacao",
+                        "title": "Participa\u00e7\u00e3o nas aplica\u00e7\u00f5es",
+                        "type": "participacao",
+                        "parent": "grupo-planejamento",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 7,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "responsabilidade-docente-aplicacao",
+                        "title": "Responsabilidade docente na aplica\u00e7\u00e3o",
+                        "type": "responsabilidade-docente-aplicacao",
+                        "parent": "grupo-planejamento",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 7,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "habilidades",
+                        "title": "Habilidades em acompanhamento",
+                        "type": "habilidades",
+                        "parent": "ensino",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 8,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "intervencoes",
+                        "title": "A\u00e7\u00f5es de acompanhamento",
+                        "type": "intervencoes",
+                        "parent": "ensino",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 7,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "reavaliacoes",
+                        "title": "Resultados das reavalia\u00e7\u00f5es",
+                        "type": "reavaliacoes",
+                        "parent": "ensino",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 8,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "metas",
+                        "title": "Metas de acompanhamento",
+                        "type": "metas",
+                        "parent": "planejamento",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 7,
+                        "maxH": 20
+                    },
+                    {
+                        "id": "conselho",
+                        "title": "Encaminhamentos do conselho",
+                        "type": "conselho",
+                        "parent": "planejamento",
+                        "w": 6,
+                        "h": 9,
+                        "minW": 3,
+                        "maxW": 12,
+                        "minH": 7,
+                        "maxH": 20
+                    }
+                ]
+            },
+            "padrao": {
+                "schema": 3,
+                "sections": [
+                    {
+                        "id": "resultados",
+                        "title": "Resultados da turma",
+                        "originalTitle": "Resultados da turma",
+                        "kind": "section",
+                        "parent": null,
+                        "x": 0,
+                        "y": 0,
+                        "w": 12,
+                        "h": 56,
+                        "fixo": false
+                    },
+                    {
+                        "id": "acompanhamento",
+                        "title": "Acompanhamento da turma",
+                        "originalTitle": "Acompanhamento da turma",
+                        "kind": "section",
+                        "parent": null,
+                        "x": 0,
+                        "y": 56,
+                        "w": 12,
+                        "h": 45,
+                        "fixo": false
+                    },
+                    {
+                        "id": "planejamento",
+                        "title": "Planejamento da turma",
+                        "originalTitle": "Planejamento da turma",
+                        "kind": "section",
+                        "parent": null,
+                        "x": 0,
+                        "y": 101,
+                        "w": 12,
+                        "h": 12,
+                        "fixo": false
+                    },
+                    {
+                        "id": "estudantes",
+                        "title": "Estudantes",
+                        "originalTitle": "Estudantes",
+                        "kind": "section",
+                        "parent": "resultados",
+                        "x": 0,
+                        "y": 0,
+                        "w": 12,
+                        "h": 15,
+                        "fixo": false
+                    },
+                    {
+                        "id": "periodo-agenda",
+                        "title": "Per\u00edodo e agenda",
+                        "originalTitle": "Per\u00edodo e agenda",
+                        "kind": "section",
+                        "parent": "resultados",
+                        "x": 0,
+                        "y": 15,
+                        "w": 12,
+                        "h": 17,
+                        "fixo": false
+                    },
+                    {
+                        "id": "analises",
+                        "title": "An\u00e1lises da turma",
+                        "originalTitle": "An\u00e1lises da turma",
+                        "kind": "section",
+                        "parent": "resultados",
+                        "x": 0,
+                        "y": 32,
+                        "w": 12,
+                        "h": 21,
+                        "fixo": false
+                    },
+                    {
+                        "id": "ensino",
+                        "title": "Ensino e acompanhamento",
+                        "originalTitle": "Ensino e acompanhamento",
+                        "kind": "section",
+                        "parent": "acompanhamento",
+                        "x": 0,
+                        "y": 0,
+                        "w": 12,
+                        "h": 21,
+                        "fixo": false
+                    },
+                    {
+                        "id": "grupo-planejamento",
+                        "title": "Planejamento",
+                        "originalTitle": "Planejamento",
+                        "kind": "section",
+                        "parent": "acompanhamento",
+                        "x": 0,
+                        "y": 21,
+                        "w": 12,
+                        "h": 21,
+                        "fixo": false
+                    }
+                ],
+                "widgets": {
+                    "alunos-destaques": {
+                        "id": "alunos-destaques",
+                        "kind": "widget",
+                        "title": "Destaques da turma",
+                        "parent": "estudantes",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 12,
+                        "orientacao": "vertical"
+                    },
+                    "alunos-atencao": {
+                        "id": "alunos-atencao",
+                        "kind": "widget",
+                        "title": "Alunos que precisam de aten\u00e7\u00e3o",
+                        "parent": "estudantes",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 12,
+                        "orientacao": "vertical"
+                    },
+                    "distribuicao-acertos": {
+                        "id": "distribuicao-acertos",
+                        "kind": "widget",
+                        "title": "Distribui\u00e7\u00e3o dos acertos",
+                        "parent": "analises",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "resultados-avaliacao": {
+                        "id": "resultados-avaliacao",
+                        "kind": "widget",
+                        "title": "Resultados por avalia\u00e7\u00e3o",
+                        "parent": "analises",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "situacoes-registradas": {
+                        "id": "situacoes-registradas",
+                        "kind": "widget",
+                        "title": "Situa\u00e7\u00f5es registradas",
+                        "parent": "analises",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 9,
+                        "w": 12,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "periodos-escolares": {
+                        "id": "periodos-escolares",
+                        "kind": "widget",
+                        "title": "Resultados por per\u00edodo escolar",
+                        "parent": "periodo-agenda",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 14,
+                        "orientacao": "vertical"
+                    },
+                    "agenda-pedagogica": {
+                        "id": "agenda-pedagogica",
+                        "kind": "widget",
+                        "title": "Agenda da turma",
+                        "parent": "periodo-agenda",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 14,
+                        "orientacao": "vertical"
+                    },
+                    "devolutivas": {
+                        "id": "devolutivas",
+                        "kind": "widget",
+                        "title": "Devolutivas",
+                        "parent": "grupo-planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "participacao": {
+                        "id": "participacao",
+                        "kind": "widget",
+                        "title": "Participa\u00e7\u00e3o nas aplica\u00e7\u00f5es",
+                        "parent": "grupo-planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "responsabilidade-docente-aplicacao": {
+                        "id": "responsabilidade-docente-aplicacao",
+                        "kind": "widget",
+                        "title": "Responsabilidade docente na aplica\u00e7\u00e3o",
+                        "parent": "grupo-planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 9,
+                        "w": 12,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "habilidades": {
+                        "id": "habilidades",
+                        "kind": "widget",
+                        "title": "Habilidades em acompanhamento",
+                        "parent": "ensino",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "intervencoes": {
+                        "id": "intervencoes",
+                        "kind": "widget",
+                        "title": "A\u00e7\u00f5es de acompanhamento",
+                        "parent": "ensino",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "reavaliacoes": {
+                        "id": "reavaliacoes",
+                        "kind": "widget",
+                        "title": "Resultados das reavalia\u00e7\u00f5es",
+                        "parent": "ensino",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 9,
+                        "w": 12,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "metas": {
+                        "id": "metas",
+                        "kind": "widget",
+                        "title": "Metas de acompanhamento",
+                        "parent": "planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    },
+                    "conselho": {
+                        "id": "conselho",
+                        "kind": "widget",
+                        "title": "Encaminhamentos do conselho",
+                        "parent": "planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical"
+                    }
+                }
+            },
+            "composicao": {
+                "schema": 3,
+                "sections": [
+                    {
+                        "id": "resultados",
+                        "kind": "section",
+                        "parent": null,
+                        "x": 0,
+                        "y": 0,
+                        "w": 12,
+                        "h": 56,
+                        "fixo": false,
+                        "title": "Resultados da turma",
+                        "originalTitle": "Resultados da turma"
+                    },
+                    {
+                        "id": "acompanhamento",
+                        "kind": "section",
+                        "parent": null,
+                        "x": 0,
+                        "y": 56,
+                        "w": 12,
+                        "h": 45,
+                        "fixo": false,
+                        "title": "Acompanhamento da turma",
+                        "originalTitle": "Acompanhamento da turma"
+                    },
+                    {
+                        "id": "planejamento",
+                        "kind": "section",
+                        "parent": null,
+                        "x": 0,
+                        "y": 101,
+                        "w": 12,
+                        "h": 12,
+                        "fixo": false,
+                        "title": "Planejamento da turma",
+                        "originalTitle": "Planejamento da turma"
+                    },
+                    {
+                        "id": "estudantes",
+                        "kind": "section",
+                        "parent": "resultados",
+                        "x": 0,
+                        "y": 0,
+                        "w": 12,
+                        "h": 15,
+                        "fixo": false,
+                        "title": "Estudantes",
+                        "originalTitle": "Estudantes"
+                    },
+                    {
+                        "id": "periodo-agenda",
+                        "kind": "section",
+                        "parent": "resultados",
+                        "x": 0,
+                        "y": 15,
+                        "w": 12,
+                        "h": 17,
+                        "fixo": false,
+                        "title": "Per\u00edodo e agenda",
+                        "originalTitle": "Per\u00edodo e agenda"
+                    },
+                    {
+                        "id": "analises",
+                        "kind": "section",
+                        "parent": "resultados",
+                        "x": 0,
+                        "y": 32,
+                        "w": 12,
+                        "h": 21,
+                        "fixo": false,
+                        "title": "An\u00e1lises da turma",
+                        "originalTitle": "An\u00e1lises da turma"
+                    },
+                    {
+                        "id": "ensino",
+                        "kind": "section",
+                        "parent": "acompanhamento",
+                        "x": 0,
+                        "y": 0,
+                        "w": 12,
+                        "h": 21,
+                        "fixo": false,
+                        "title": "Ensino e acompanhamento",
+                        "originalTitle": "Ensino e acompanhamento"
+                    },
+                    {
+                        "id": "grupo-planejamento",
+                        "kind": "section",
+                        "parent": "acompanhamento",
+                        "x": 0,
+                        "y": 21,
+                        "w": 12,
+                        "h": 21,
+                        "fixo": false,
+                        "title": "Planejamento",
+                        "originalTitle": "Planejamento"
+                    }
+                ],
+                "widgets": {
+                    "alunos-destaques": {
+                        "id": "alunos-destaques",
+                        "kind": "widget",
+                        "parent": "estudantes",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 12,
+                        "orientacao": "vertical",
+                        "title": "Destaques da turma"
+                    },
+                    "alunos-atencao": {
+                        "id": "alunos-atencao",
+                        "kind": "widget",
+                        "parent": "estudantes",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 12,
+                        "orientacao": "vertical",
+                        "title": "Alunos que precisam de aten\u00e7\u00e3o"
+                    },
+                    "distribuicao-acertos": {
+                        "id": "distribuicao-acertos",
+                        "kind": "widget",
+                        "parent": "analises",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Distribui\u00e7\u00e3o dos acertos"
+                    },
+                    "resultados-avaliacao": {
+                        "id": "resultados-avaliacao",
+                        "kind": "widget",
+                        "parent": "analises",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Resultados por avalia\u00e7\u00e3o"
+                    },
+                    "situacoes-registradas": {
+                        "id": "situacoes-registradas",
+                        "kind": "widget",
+                        "parent": "analises",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 9,
+                        "w": 12,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Situa\u00e7\u00f5es registradas"
+                    },
+                    "periodos-escolares": {
+                        "id": "periodos-escolares",
+                        "kind": "widget",
+                        "parent": "periodo-agenda",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 14,
+                        "orientacao": "vertical",
+                        "title": "Resultados por per\u00edodo escolar"
+                    },
+                    "agenda-pedagogica": {
+                        "id": "agenda-pedagogica",
+                        "kind": "widget",
+                        "parent": "periodo-agenda",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 14,
+                        "orientacao": "vertical",
+                        "title": "Agenda da turma"
+                    },
+                    "devolutivas": {
+                        "id": "devolutivas",
+                        "kind": "widget",
+                        "parent": "grupo-planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Devolutivas"
+                    },
+                    "participacao": {
+                        "id": "participacao",
+                        "kind": "widget",
+                        "parent": "grupo-planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Participa\u00e7\u00e3o nas aplica\u00e7\u00f5es"
+                    },
+                    "responsabilidade-docente-aplicacao": {
+                        "id": "responsabilidade-docente-aplicacao",
+                        "kind": "widget",
+                        "parent": "grupo-planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 9,
+                        "w": 12,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Responsabilidade docente na aplica\u00e7\u00e3o"
+                    },
+                    "habilidades": {
+                        "id": "habilidades",
+                        "kind": "widget",
+                        "parent": "ensino",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Habilidades em acompanhamento"
+                    },
+                    "intervencoes": {
+                        "id": "intervencoes",
+                        "kind": "widget",
+                        "parent": "ensino",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "A\u00e7\u00f5es de acompanhamento"
+                    },
+                    "reavaliacoes": {
+                        "id": "reavaliacoes",
+                        "kind": "widget",
+                        "parent": "ensino",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 9,
+                        "w": 12,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Resultados das reavalia\u00e7\u00f5es"
+                    },
+                    "metas": {
+                        "id": "metas",
+                        "kind": "widget",
+                        "parent": "planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 0,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Metas de acompanhamento"
+                    },
+                    "conselho": {
+                        "id": "conselho",
+                        "kind": "widget",
+                        "parent": "planejamento",
+                        "active": true,
+                        "fixo": false,
+                        "x": 6,
+                        "y": 0,
+                        "w": 6,
+                        "h": 9,
+                        "orientacao": "vertical",
+                        "title": "Encaminhamentos do conselho"
+                    }
+                }
+            },
+            "indisponivel": false,
+            "origem": "perfil"
+        }
+    },
+    "etag": "\"g360-editor-4546d3d84a98430f9ed65d62e2de94ac11cbaa32481db3098820be928f386c41\""
+}
