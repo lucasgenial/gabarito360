@@ -245,7 +245,9 @@ class ContextoVinculoTest extends TestCase
             DB::flushQueryLog();
             try {
                 $this->assertSame($esperado, Espacos::ids($u));
-                $this->assertSame(1, count(array_filter(DB::getQueryLog(), static fn ($q) =>
+                // Uma validação explícita e uma leitura com autoridade corrente no próprio SQL.
+                $this->assertCount(2, DB::getQueryLog());
+                $this->assertSame(2, count(array_filter(DB::getQueryLog(), static fn ($q) =>
                     str_contains($q['query'], 'usuario_vinculos') && str_contains($q['query'], 'usuarios'))));
             } finally {
                 DB::disableQueryLog();

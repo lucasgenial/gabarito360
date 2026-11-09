@@ -17,16 +17,23 @@ class ContextoVinculo
     public static function resolver(Usuario $u): object
     {
         abort_unless(Espacos::ativo() && self::presente($u), 403, 'Vínculo indisponível.');
-        $v = DB::table('usuario_vinculos as v')->join('usuarios as u', 'u.id', '=', 'v.usuario_id')
-            ->where('v.id', $u->vinculoContextoId())->where('v.usuario_id', $u->id)->where('u.ativo', true)
-            ->where('v.situacao', 'ativo')->where('v.inicio_em', '<=', now())
-            ->where(fn ($q) => $q->whereNull('v.fim_em')->orWhere('v.fim_em', '>', now()))->select('v.*')->first();
+        // Uma statement atual, sem estado de autorização no ator ou entre chamadas.
+        $q = PredicadosVinculo::contexto($u, false)->select('cv.*')
+            ->selectSub(PredicadosVinculo::conflito()->limit(1), 'contexto_conflito');
+        $campos = ['id', 'cliente_id', 'tipo', 'nome', 'situacao', 'rede_id', 'nucleo_id', 'escola_id',
+            'usuario_proprietario_id', 'criado_por', 'created_at', 'updated_at'];
+        foreach ($campos as $campo) $q->addSelect('ce.'.$campo.' as contexto_espaco_'.$campo);
+        $v = $q->first();
         abort_unless($v, 403, 'Vínculo indisponível.');
-        $e = DB::table('espacos')->find($v->espaco_id);
-        abort_unless($e && PerfisEspaco::habilitado($v->perfil)
-            && PerfisEspaco::compativel($v->perfil, $e, (int) $u->id)
-            && self::espacoValido($e), 403, 'Vínculo indisponível.');
-        if ($e->tipo==='escola') GruposFuncionais::conferir((int)$u->id,(int)$v->espaco_id,$v->perfil,now(),$v->fim_em,(int)$v->id,403);
+        abort_if($v->contexto_conflito !== null, 403,
+            'Esta instituição já possui um vínculo de outro grupo funcional para esta pessoa. Encerre o vínculo anterior ou solicite ao suporte uma exceção vinculada a chamado.');
+        unset($v->contexto_conflito);
+        $e = new \stdClass();
+        foreach ($campos as $campo) {
+            $alias = 'contexto_espaco_'.$campo;
+            $e->$campo = $v->$alias;
+            unset($v->$alias);
+        }
         $v->espaco = $e;
         return $v;
     }
@@ -49,28 +56,13 @@ class ContextoVinculo
 
     private static function instituicaoValida(string $tipo, mixed $referencia, mixed $cliente, bool $coluna = false, int $nivel = 0): \Illuminate\Database\Query\Builder
     {
-        $tabela = match ($tipo) { 'rede' => 'redes', 'nucleo' => 'nucleos', 'escola' => 'escolas' };
-        $i = 'instituicao_valida_'.$nivel;
-        $q = DB::table($tabela.' as '.$i)->selectRaw('1');
-        if ($coluna) $q->whereColumn($i.'.id', $referencia);
-        else $q->where($i.'.id', $referencia);
-        if ($tipo === 'rede') return $q;
-
-        $tipoPai = $tipo === 'escola' ? 'nucleo' : 'rede';
-        $p = 'espaco_pai_valido_'.$nivel;
-        $pai = DB::table('espacos as '.$p)->selectRaw('1')
-            ->where($p.'.tipo', $tipoPai)->where($p.'.situacao', 'ativo')->where($p.'.cliente_id', $cliente)
-            ->whereColumn($p.'.'.$tipoPai.'_id', $i.'.'.$tipoPai.'_id');
-        foreach (['rede_id', 'nucleo_id', 'escola_id', 'usuario_proprietario_id'] as $campo) {
-            if ($campo === $tipoPai.'_id') $pai->whereNotNull($p.'.'.$campo);
-            else $pai->whereNull($p.'.'.$campo);
-        }
-        return $q->whereExists($pai->whereExists(self::instituicaoValida($tipoPai, $p.'.'.$tipoPai.'_id', $cliente, true, $nivel + 1)));
+        return PredicadosVinculo::instituicao($tipo, $referencia, $cliente, $coluna, $nivel);
     }
 
     public static function referencias(Usuario $u, string $tipo): array
     {
-        return self::referenciasDoVinculo(self::resolver($u), $tipo);
+        return ConsultaVinculo::para($u)->referencias($tipo)->orderBy(DB::raw('1'))->get()
+            ->map(fn ($linha) => (int) array_values((array) $linha)[0])->all();
     }
 
     private static function referenciasDoVinculo(object $v, string $tipo): array
@@ -94,7 +86,7 @@ class ContextoVinculo
 
     public static function escolas(Usuario $u): array
     {
-        return self::escolasDoVinculo(self::resolver($u));
+        return ConsultaVinculo::para($u)->escolas()->orderBy('e.id')->pluck('e.id')->map(fn ($id) => (int) $id)->all();
     }
 
     private static function escolasDoVinculo(object $v): array
@@ -114,10 +106,7 @@ class ContextoVinculo
     public static function espacos(Usuario $u): array
     {
         abort_if(ContextoInterno::presente($u), 403, 'Selecione um vínculo pedagógico válido.');
-        $v = self::resolver($u);
-        if ($v->espaco->tipo === 'pessoal') return [(int) $v->espaco_id];
-        return Espacos::escolas()->whereIn('e.id', self::escolasDoVinculo($v))
-            ->pluck('ee.id')->map(fn ($id) => (int) $id)->all();
+        return ConsultaVinculo::para($u)->espacos()->get()->map(fn ($linha) => (int) array_values((array) $linha)[0])->all();
     }
 
     public static function permissoes(Usuario $u): array

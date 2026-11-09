@@ -66,6 +66,7 @@ class Espacos
 
     public static function filtrar($query, Usuario $u, string $coluna)
     {
+        if (self::ativo() && ContextoVinculo::presente($u)) return ConsultaVinculo::para($u)->filtrar($query, $coluna);
         if (self::ativo()) $query->whereIn($coluna, self::ids($u));
         else RegimeVinculos::exigir($u);
         return $query;

@@ -9,6 +9,7 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->beforeApplicationDestroyed(\Tests\Support\RelogioBanco::instalar($this->app));
         // Regressões do regime legado. Suítes de espaços ativam explicitamente após este setup.
         config(['espacos.ativo' => false]);
         // Fixture compartilhada da suíte; isolamento real de credenciais é ensaiado no CI.
