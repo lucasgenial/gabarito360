@@ -53,13 +53,44 @@ final class NavegacaoCatalogoRequisicaoWebTest extends TestCase
         $this->assertIsString($valor);$this->assertStringNotContainsString('turmas',$valor,'o cache não guarda as expressões em claro');
         // Um catálogo em claro que casaria qualquer caminho com a primeira operação não é aceito.
         $total=count(request()->attributes->get('ur4_catalogo_urls')['originais']);
-        foreach ([array_fill(0,$total,'#^.*$#'),'nao-cifrado',\Illuminate\Support\Facades\Crypt::encryptString(json_encode(array_fill(0,$total,'#^.*$#')).'x')] as $adulterado) {
+        $tudo=array_fill(0,$total,'#^.*$#');
+        $replay=\Illuminate\Support\Facades\Crypt::encryptString(json_encode(['k'=>'ur4-catalogo:outra-assinatura','r'=>$tudo]));
+        foreach ([$tudo,'nao-cifrado',\Illuminate\Support\Facades\Crypt::encryptString(json_encode($tudo).'x'),$replay,
+            \Illuminate\Support\Facades\Crypt::encryptString(json_encode($tudo))] as $adulterado) {
             \Illuminate\Support\Facades\Cache::forever($chave,$adulterado);
             request()->attributes->remove('ur4_catalogo_urls');request()->attributes->remove('ur4_urls');
             $d=NavegacaoWeb::deUrl('/app/turmas/15','GET',true);
             $this->assertSame('turmas.show',NavegacaoWeb::obter($d['referencia'])['nome']);
             $this->assertSame('15',NavegacaoWeb::obter($d['referencia'])['parametros']['id']);
         }
+        Http::assertNothingSent();
+    }
+
+    public function test_indice_por_modulo_escolhe_a_mesma_operacao_que_a_varredura_linear(): void
+    {
+        $this->withSession(['auth_token'=>'identidade-ficticia','auth_vinculos'=>true]);
+        ContextoWeb::ativar(['vinculo_id'=>7,'tipo_contexto'=>'vinculo','token'=>'ficticio','perfil'=>'professor',
+            'permissoes'=>[],'espaco'=>['id'=>13,'tipo'=>'escola']]);
+        Http::preventStrayRequests();
+        NavegacaoWeb::deUrl('/app/turmas/14','GET',true);
+        $cat=request()->attributes->get('ur4_catalogo_urls');
+        $conferidas=0;
+        foreach ($cat['originais'] as $entrada) {
+            $caminho='/'.preg_replace('/\{[^}]+\}/','7',$entrada['meta']['original']);
+            if (isset($cat['fixos'][$caminho])) continue;
+            foreach ($entrada['meta']['metodos'] as $metodo) {
+                $linear=null;
+                foreach ($cat['originais'] as $outra) {
+                    if (!in_array($metodo,$outra['meta']['metodos'],true) || !preg_match($outra['regex'],$caminho)) continue;
+                    $linear=$outra['meta']['nome'];break;
+                }
+                request()->attributes->remove('ur4_urls');
+                $d=NavegacaoWeb::deUrl($caminho,$metodo,true);
+                $this->assertSame($linear,$d?NavegacaoWeb::obter($d['referencia'])['nome']:null,$metodo.' '.$caminho);
+                $conferidas++;
+            }
+        }
+        $this->assertGreaterThan(100,$conferidas);
         Http::assertNothingSent();
     }
 

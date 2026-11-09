@@ -124,11 +124,15 @@ final class NavegacaoWeb
         // F4-C: compilar as expressões custa milissegundos por requisição. Elas dependem só das rotas da release e
         // ficam no cache sob a assinatura das rotas, sem alvos, sessão ou autoridade. Como as referências, o valor é
         // cifrado e autenticado pela APP_KEY: um cache adulterado ou ilegível é ignorado e o catálogo é recompilado.
+        // A versão do roteador entra na assinatura: atualizar o vendor recompila mesmo sem mudar rotas.
+        $assinatura.=\Composer\InstalledVersions::getVersion('symfony/routing')."\0".app()->version();
         $chave='ur4-catalogo:'.hash('xxh128',$assinatura);
         $regexes=null;
         $guardado=Cache::get($chave);
         if (is_string($guardado)) {
-            try { $regexes=json_decode(Crypt::decryptString($guardado),true,4,JSON_THROW_ON_ERROR); }
+            // O valor cifrado leva a própria chave: um valor válido de outra assinatura (replay) é recusado.
+            try { $lido=json_decode(Crypt::decryptString($guardado),true,4,JSON_THROW_ON_ERROR);
+                $regexes=is_array($lido) && ($lido['k']??null)===$chave ? ($lido['r']??null) : null; }
             catch (\Throwable) { $regexes=null; }
         }
         if (!is_array($regexes) || count($regexes)!==count($rotas) || !array_is_list($regexes)
@@ -139,7 +143,7 @@ final class NavegacaoWeb
                 $teste->setUri($meta['original'])->where($rota->wheres);
                 $regexes[]=$teste->toSymfonyRoute()->compile()->getRegex();
             }
-            Cache::forever($chave,Crypt::encryptString(json_encode($regexes,JSON_THROW_ON_ERROR)));
+            Cache::put($chave,Crypt::encryptString(json_encode(['k'=>$chave,'r'=>$regexes],JSON_THROW_ON_ERROR)),now()->addDays(30));
         }
         foreach ($rotas as $i=>[$rota,$meta]) {
             if ($meta['consulta']!==$meta['original']) $catalogo['fixos']['/'.$meta['consulta']]=true;

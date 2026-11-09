@@ -75,3 +75,13 @@ O custo restante é a gravação de uma referência por destino distinto: 145 es
 ## F4-D — ciclo de vida dos gráficos da turma
 
 `turma-graficos.js` passa a agrupar as renderizações num quadro de animação. Vários avisos do `ResizeObserver` viram um desenho por gráfico, e um tamanho inalterado não redesenha. O observador de tema só redesenha quando os tokens usados pelos gráficos mudam; abrir um modal, que altera classe ou estilo do documento, não redesenha mais. Na saída definitiva da página, o quadro pendente é cancelado e instâncias e observadores são descartados. Uma página guardada pelo navegador (bfcache) volta intacta, sem gráficos descartados. Testes: `turma-graficos-ciclo.test.mjs`, com 3 cenários que falham no código anterior. O `graficos.js` já agrupava por quadro e descartava gráficos desconectados, e não muda.
+
+Revisão independente da F4-C e da F4-D. A revisão apontou um bloqueio na F4-D: um gráfico oculto, em outra aba ou recolhido, perdia o redesenho forçado de tema ou orientação e reaparecia com as cores anteriores. Corrigido, com teste. Ressalvas incorporadas:
+
+- O valor cifrado do catálogo leva a própria chave, e um valor válido de outra assinatura (replay) é recusado.
+- A assinatura inclui as versões do roteador e do framework.
+- O catálogo guardado expira em 30 dias, em vez de nunca.
+- Os tokens do tema ficam numa lista única.
+- Novos testes: equivalência do índice com a varredura linear em todas as rotas e métodos do catálogo, e replay recusado.
+
+Com o bloqueio corrigido, a avaliação da revisão passa a ser aprovada com ressalvas, já atendidas.

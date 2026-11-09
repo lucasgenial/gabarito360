@@ -80,3 +80,14 @@ test('bfcache preserva os gráficos; saída definitiva descarta e cancela o quad
   const antes = p.contagem.setOption; p.rodarQuadros();
   assert.equal(p.contagem.setOption, antes, 'nenhum callback tardio depois do descarte');
 });
+
+test('gráfico oculto durante a troca de tema é redesenhado ao reaparecer no mesmo tamanho', () => {
+  const p = montar();
+  p.ro(p.graficos.map(target => ({target}))); p.rodarQuadros();
+  const antes = p.contagem.setOption;
+  p.graficos[0].clientWidth = 0;
+  p.tokens['--fg'] = '#eee'; p.mo(); p.rodarQuadros();
+  assert.equal(p.contagem.setOption, antes + 1, 'só o visível redesenha agora');
+  p.graficos[0].clientWidth = 600; p.ro([{target: p.graficos[0]}]); p.rodarQuadros();
+  assert.equal(p.contagem.setOption, antes + 2, 'o oculto redesenha ao voltar, com o tema novo');
+});

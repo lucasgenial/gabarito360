@@ -53,9 +53,11 @@ if(raiz){
   }
   return null;
  }
+ const TOKENS_TEMA=['--fg','--muted','--border','--border-soft','--success','--warn'];
  const medidas=new WeakMap();
  function renderizar(elemento,forcar=true){
-  if(!elemento.isConnected||!elemento.clientWidth)return;
+  // Oculto (outra aba, recolhido): um redesenho forçado fica pendente para quando reaparecer.
+  if(!elemento.isConnected||!elemento.clientWidth){if(forcar)medidas.delete(elemento);return;}
   const medida=elemento.clientWidth+'x'+elemento.clientHeight;
   if(!forcar&&medidas.get(elemento)===medida&&graficos.has(elemento))return;
   medidas.set(elemento,medida);
@@ -100,7 +102,8 @@ if(raiz){
  document.addEventListener('g360:painel-redimensionado',()=>agendar(elementos,true));
  const resize=new ResizeObserver(entradas=>agendar(entradas.map(e=>e.target),false));elementos.forEach(e=>resize.observe(e));
  // Classe e estilo do documento mudam também ao abrir modais; só uma troca real dos tokens usados redesenha.
- const assinaturaTema=()=>['--fg','--muted','--border','--border-soft','--success','--warn'].map(cor).concat(cores()).join('|');
+ // Tokens lidos por opcoes()/renderizar(); um novo cor('--x') nos gráficos precisa entrar nesta lista.
+ const assinaturaTema=()=>TOKENS_TEMA.map(cor).concat(cores()).join('|');
  let temaAtual=assinaturaTema();
  const tema=new MutationObserver(()=>{const novo=assinaturaTema();if(novo===temaAtual)return;temaAtual=novo;agendar(elementos,true);});
  tema.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','data-tema','class','style']});
