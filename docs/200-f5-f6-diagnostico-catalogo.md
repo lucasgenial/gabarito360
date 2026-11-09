@@ -45,3 +45,28 @@ Cada busca nacional roda duas consultas (contagem e página) de cerca de 1,5 s. 
 | Busca nacional por palavras (FULLTEXT/n-gram) ou exigir UF/município para texto curto | F5 | Abaixo de 100 ms | **Muda o resultado da busca** (substring → palavras, ou novo filtro obrigatório). Decisão de produto do responsável; a regra da F5 proíbe alterar a busca silenciosamente |
 
 A F6 também precisa medir, com a F4 publicada, a memória privativa dos pools FPM (API: 2 processos; web: 3) e o OPcache. Ajustes de pool só fazem sentido depois do buffer pool, um experimento por vez, com reversão própria.
+
+## Experimento F6-1: buffer pool de 1 GB (aplicado em 09/11/2026)
+
+Autorizado pelo responsável. Nesta versão do MariaDB (10.11.14), `innodb_buffer_pool_size_max` fica fixo no tamanho do início do serviço. Por isso o ajuste a quente foi recusado, e a mudança exigiu reiniciar o MariaDB, também autorizado.
+
+O operador pausou o worker e o timer de cópias, instalou o drop-in versionado [`infra/homologacao/mariadb/90-g360-perf-f6.cnf`](../infra/homologacao/mariadb/90-g360-perf-f6.cnf), conferiu com `my_print_defaults` e reiniciou. Depois conferiu o tamanho, a durabilidade e as tabelas, e restaurou as unidades. Se algo falhasse, removeria o drop-in e reiniciaria de novo. Recibo em `/root/g360-homologa/infra/perf-f6-buffer-pool/recibo.json`, na VM.
+
+| Item | Antes | Depois |
+|---|---|---|
+| Buffer pool | 128 MB | 1.024 MB |
+| `innodb_flush_log_at_trx_commit` | 1 | 1 (inalterado) |
+| Tabelas do banco | 130 | 130 |
+| Reinício do MariaDB | — | 0,8 s |
+| Leituras do disco / requisições ao buffer pool | ~4,5% | ~0,04% |
+| Busca nacional "escola municipal" (23.300 resultados) | 3,49 s | 1,79 s |
+| Busca nacional de 4 letras | 3,25 s | 1,70 s |
+| Busca nacional sem resultado | 1,46 s | 0,80 s |
+| Busca com UF / só UF | 0,13 / 0,14 s | 0,13 / 0,14 s |
+| Memória disponível da VM | 2,69 GB | 2,79 GB logo após; o buffer pool ocupa até 1 GB à medida que enche |
+
+Aplicação conferida no Chrome depois do reinício, sem erros. Worker ativo e timer de cópias ativo; o timer de agenda continua inativo, como antes.
+
+Reversão: remover o drop-in e reiniciar o MariaDB.
+
+A busca nacional continua perto de 1,8 s, porque cada requisição faz duas consultas (contagem e página) que avaliam `LIKE '%termo%'` em todas as entradas. O próximo ganho sem mudar a semântica é a ordem de junção da F5, estimada em mais ~40%. Abaixo de 100 ms, só com a decisão de produto descrita acima. Observar a memória do MariaDB com o buffer pool cheio antes de qualquer ajuste de pools FPM.
