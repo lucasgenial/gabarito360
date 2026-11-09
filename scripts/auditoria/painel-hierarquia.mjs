@@ -62,7 +62,8 @@ try{
  await page.getByRole('tab',{name:'Ajustes finos',exact:true}).click();
  await page.locator('[data-no-mover="participacao"]').press('Shift+ArrowDown');assert.match(await page.locator('[data-editor-status]').textContent(),/ajustado/);
  await page.locator('[data-no-pin="distribuicao-acertos"]').click();assert.equal(await page.locator('[data-no-pin="distribuicao-acertos"]').getAttribute('aria-pressed'),'true');
- await save();await waitSaved();assert.equal(writes.length,1);
+ const antesSave=await page.locator('h1').boundingBox();await save();await waitSaved();assert.equal(writes.length,1);
+ assert.equal(await page.locator('[data-editor-status]').textContent(),'','Não duplica sucesso em parágrafo solto');assert.equal(await page.locator('#g360-notificacoes [data-g360-toast]').count(),1);assert.deepEqual(await page.locator('h1').boundingBox(),antesSave,'Toast não desloca o painel');
  assert.equal(saved.data.editor.composicao.widgets['distribuicao-acertos'].parent,null);assert.equal(saved.data.editor.composicao.widgets['distribuicao-acertos'].fixo,true);assert.equal(saved.data.editor.composicao.widgets.devolutivas.active,false);assert.equal(saved.data.editor.composicao.widgets.participacao.h,10);
  assert.equal(await page.locator('[data-editor-leitura]').getByText('Painel vazio pessoal',{exact:true}).count(),0,'Contêiner vazio não ocupa leitura');
  await page.reload();await organize();assert.equal(await page.getByRole('button',{name:'Painel vazio pessoal',exact:true}).count(),1,'Vazio persiste no editor');
@@ -73,6 +74,7 @@ try{
  await page.getByRole('button',{name:'Cancelar',exact:true}).click();assert.equal(await page.locator('[gs-id="participacao"]').getAttribute('gs-h'),'10');
  await organize();await page.getByRole('button',{name:'Restaurar padrão',exact:true}).click();assert.equal(await page.getByRole('dialog',{name:'Restaurar padrão do perfil?',exact:true}).isVisible(),true);await page.getByRole('button',{name:'Confirmar',exact:true}).click();conflict=true;await save();
  await page.getByRole('button',{name:'Consultar estado salvo',exact:true}).waitFor({state:'visible'});assert.equal(writes.length,2,'409 não reexecuta PUT');assert.equal(await page.getByRole('button',{name:'Salvar disposição',exact:true}).isDisabled(),true);
+ assert.equal(await page.locator('[data-editor-aviso]').isVisible(),true,'Conflito continua visível junto dos controles');assert.match(await page.locator('[data-editor-aviso]').innerText(),/rascunho/i);
  assert.deepEqual(errors,[]);assert.equal(Object.keys(saved.data.editor.composicao.widgets).length,initial.data.editor.catalogo.widgets.length,'Sem excluir/duplicar widgets');
  console.log('Editor real: hierarquia, avulso, título escapado, pin, teclado, visibilidade, SaveReload, padrão/Cancelar, viewport, mobile e409 aprovados.');
 }finally{await browser.close();}

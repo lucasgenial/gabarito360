@@ -23,6 +23,7 @@
 
 @php $vinculoAtual = \App\Support\ContextoWeb::atual(); @endphp
 <a class="estrutura-pular" href="#conteudo-principal">Pular para o conteúdo</a>
+<div id="g360-notificacoes" class="no-print" aria-label="Notificações"></div>
 <div class="estrutura-app">
 <header class="cabecalho-app">
   <div class="cabecalho-app-marca">
@@ -56,7 +57,6 @@
 <div class="corpo-app">
 {{-- Conteúdo principal --}}
 <main class="conteudo-app" id="conteudo-principal">
-  <div id="g360-notificacoes" class="no-print" aria-label="Notificações"></div>
   @if($vinculoAtual)
     <div class="contexto-conteudo"><x-contexto-ativo :contexto="$vinculoAtual" :erro-troca="$opcoesTroca['erro']" /></div>
   @endif

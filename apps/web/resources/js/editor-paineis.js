@@ -2,6 +2,7 @@ import {montarGrade} from './editor-paineis/grade-visual.mjs';
 import {montarQuadro} from './editor-paineis/quadro-secoes.mjs';
 import {registrarWidgets} from './editor-paineis/registro.mjs';
 import {projetarLeitura} from './editor-paineis/leitura.mjs';
+import {criarFeedback} from './editor-paineis/feedback.mjs';
 import {capturarContinuidade,manterContinuidade} from './editor-paineis/continuidade-visual.mjs';
 import {clone,validar,titulo,transferir,ativar,nodes,obter,profundidade,normalizar,adicionarPainel,removerPainel,caminho} from './editor-paineis/modelo.mjs';
 
@@ -20,7 +21,8 @@ function iniciar(){
  const registry=registrarWidgets(root,config.painel,icon),ui={escape,icon,btn},frozenControls=new Map(),emptyHeights=new Map();
  let context,state,entry,standard,revision,etag,catalogKey,presentation='tabela',savedPresentation='tabela',mounted=null,editing=false,preview=false,tab='distribuicao',busy=false,uncertain=false,invalid=false,epoch=0,dirty=false,lastCheck=0,checking=null,channel=null,pendingConfirm=null,creationWidget=null,creationDone=false;
  const eligible=()=>media.matches&&!invalid&&cfg.isConnected;
- const say=(text,type='info')=>{const s=$('[data-editor-status]');s.textContent=text;s.dataset.tipo=type;};
+ const feedback=criarFeedback({status:$('[data-editor-status]'),aviso:$('[data-editor-aviso]')});
+ const say=(text,type='info')=>feedback.dizer(text,type);
  const on=(el,event,fn)=>el?.addEventListener(event,fn,{signal:life.signal});
  const focus=selector=>requestAnimationFrame(()=>{if(invalid)return;const el=$(selector);if(el&&!el.disabled&&el.getClientRects().length)el.focus({preventScroll:true});});
  const descriptorHeaders={'Accept':'application/json','X-G360-Painel-Editor':'3'};
@@ -74,7 +76,7 @@ function iniciar(){
   if(!initial&&editing&&changedVersion){uncertain=true;say('Há uma nova disposição salva. Seu rascunho foi preservado. Consulte o estado salvo antes de continuar.','atencao');controls();return false;}
   if(!initial&&editing){etag=next.etag;lastCheck=Date.now();controls();return true;}
   const view=state?capturarContinuidade(root,null):null;
-  ({context,state,standard,revision,etag,catalogKey,presentation}=next);entry=clone(state);savedPresentation=presentation;dirty=false;uncertain=false;
+  ({context,state,standard,revision,etag,catalogKey,presentation}=next);entry=clone(state);savedPresentation=presentation;dirty=false;uncertain=false;feedback.limpar();
   const summary=registry.area.querySelector('[data-painel-secao="resumo"]');if(summary)summary.after(root);
   if(initial||changedVersion||changedRepresentation)render(view);else controls();lastCheck=Date.now();return true;
  }
@@ -105,7 +107,7 @@ function iniciar(){
   try{
    const body=await request(config.salvar,{body:{versao:revision,chave:crypto.randomUUID(),acao:'salvar',catalogo_chave:catalogKey,composicao:candidate,apresentacao:presentation}});
    // Only this acknowledged transaction exits editing; no automatic write retry.
-   prepare(body);editing=false;preview=false;if(!adopt(body,{initial:true}))return;say('Disposição salva.');
+   prepare(body);editing=false;preview=false;if(!adopt(body,{initial:true}))return;feedback.notificar('Disposição salva.','sucesso',{origem:button('organizar')});
    channel?.postMessage({tipo:'invalidar',contexto:context.scope,versao:revision});focus('[data-editor-organizar]');
   }catch(e){if(!invalid){uncertain=e.status!==422;say(e.message,'erro');}}
   finally{busy=false;controls();}
@@ -133,8 +135,8 @@ function iniciar(){
  on($('[data-editor-novo-dialog]'),'close',()=>{if(!creationDone){render();focus(creationWidget?'[data-destino="'+creationWidget+'"]':'[data-editor-novo]');}});
  on(button('novo'),'click',()=>createPanel());on(button('salvar'),'click',save);
  on(button('organizar'),'click',()=>{if(!eligible()||busy||uncertain||!state)return;entry=clone(state);savedPresentation=presentation;editing=true;preview=false;render();focus('#pe-tab-'+tab);});
- on(button('cancelar'),'click',()=>{state=clone(entry);presentation=savedPresentation;editing=false;preview=false;dirty=false;render();say(uncertain?'Rascunho descartado. Consulte o estado salvo para continuar.':'Alterações descartadas.');focus('[data-editor-organizar]');});
- on(button('restaurar'),'click',()=>confirmAction('Restaurar padrão do perfil?','A disposição padrão será aplicada ao rascunho. Salve para manter a mudança.',()=>{changed(clone(standard));say('Padrão aplicado ao rascunho.');}));
+ on(button('cancelar'),'click',()=>{state=clone(entry);presentation=savedPresentation;editing=false;preview=false;dirty=false;render();if(uncertain)say('Rascunho descartado. Consulte o estado salvo para continuar.','atencao');else feedback.notificar('Alterações descartadas.');focus('[data-editor-organizar]');});
+ on(button('restaurar'),'click',()=>confirmAction('Restaurar padrão do perfil?','A disposição padrão será aplicada ao rascunho. Salve para manter a mudança.',()=>{changed(clone(standard));feedback.notificar('Padrão aplicado ao rascunho.');}));
  on(button('consultar'),'click',()=>{const run=()=>revalidate({force:true,replace:true});if(editing&&dirty)confirmAction('Abrir a disposição salva?','O rascunho local será descartado. Nenhuma operação será reenviada.',run);else run();});
  on(button('ver'),'click',()=>{preview=true;render();focus('[data-editor-voltar]');});on(button('voltar'),'click',()=>{preview=false;render();focus('#pe-tab-'+tab);});
  for(const b of all('[data-editor-aba]')){on(b,'click',()=>{if(!busy&&!uncertain){tab=b.dataset.editorAba;render();focus('#pe-tab-'+tab);}});on(b,'keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();if(busy||uncertain)return;tab=e.key==='Home'?'distribuicao':e.key==='End'?'fino':tab==='fino'?'distribuicao':'fino';render();focus('#pe-tab-'+tab);}});}
