@@ -1,0 +1,443 @@
+{
+  "catalogo": [
+    {
+      "id": "alunos-destaques",
+      "section": "estudantes",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 10,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 12
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 10,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 12
+      }
+    },
+    {
+      "id": "alunos-atencao",
+      "section": "estudantes",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 10,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 12
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 10,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 12
+      }
+    },
+    {
+      "id": "distribuicao-acertos",
+      "section": "analises",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "resultados-avaliacao",
+      "section": "analises",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "situacoes-registradas",
+      "section": "analises",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "periodos-escolares",
+      "section": "periodo-agenda",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "agenda-pedagogica",
+      "section": "periodo-agenda",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 12,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 14
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 12,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 14
+      }
+    },
+    {
+      "id": "devolutivas",
+      "section": "planejamento",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "participacao",
+      "section": "planejamento",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "responsabilidade-docente-aplicacao",
+      "section": "planejamento",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "habilidades",
+      "section": "ensino",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "intervencoes",
+      "section": "ensino",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "reavaliacoes",
+      "section": "ensino",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 8,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "metas",
+      "section": "decisoes",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    },
+    {
+      "id": "conselho",
+      "section": "decisoes",
+      "desktop": {
+        "minW": 3,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 6,
+        "defaultH": 9
+      },
+      "mobile": {
+        "minW": 12,
+        "maxW": 12,
+        "minH": 7,
+        "maxH": 20,
+        "defaultW": 12,
+        "defaultH": 9
+      }
+    }
+  ],
+  "padrao": {
+    "desktop": [
+      {
+        "id": "alunos-destaques",
+        "section": "estudantes",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 12,
+        "altura_desejada": 12
+      },
+      {
+        "id": "alunos-atencao",
+        "section": "estudantes",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 12,
+        "altura_desejada": 12
+      },
+      {
+        "id": "distribuicao-acertos",
+        "section": "analises",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "resultados-avaliacao",
+        "section": "analises",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "situacoes-registradas",
+        "section": "analises",
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "periodos-escolares",
+        "section": "periodo-agenda",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 14,
+        "altura_desejada": 9
+      },
+      {
+        "id": "agenda-pedagogica",
+        "section": "periodo-agenda",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 14,
+        "altura_desejada": 14
+      },
+      {
+        "id": "devolutivas",
+        "section": "planejamento",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "participacao",
+        "section": "planejamento",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "responsabilidade-docente-aplicacao",
+        "section": "planejamento",
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "habilidades",
+        "section": "ensino",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "intervencoes",
+        "section": "ensino",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "reavaliacoes",
+        "section": "ensino",
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "metas",
+        "section": "decisoes",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 9,
+        "altura_desejada": 9
+      },
+      {
+        "id": "conselho",
+        "section": "decisoes",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 9,
+        "altura_desejada": 9
+      }
+    ]
+  }
+}

@@ -56,6 +56,7 @@ final class ModelosPaineis
     private static function grupo(string $id): string
     {
         return match($id) {
+            'periodos-escolares','agenda-pedagogica'=>'periodo-agenda',
             'comparacao-turmas','cobertura-disciplinas'=>'analises',
             'habilidades','intervencoes','reavaliacoes'=>'ensino',
             'metas','conselho'=>'decisoes',

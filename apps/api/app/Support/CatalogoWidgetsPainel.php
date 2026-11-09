@@ -42,7 +42,8 @@ final class CatalogoWidgetsPainel
                     foreach (['alunos-destaques','alunos-atencao'] as $id) $adicionar($id, 'estudantes');
                 }
                 foreach (['distribuicao-acertos','resultados-avaliacao','situacoes-registradas'] as $id) $adicionar($id, 'analises');
-                foreach (['periodos-escolares','agenda-pedagogica','devolutivas','participacao','responsabilidade-docente-aplicacao'] as $id) $adicionar($id, 'planejamento');
+                foreach (['periodos-escolares','agenda-pedagogica'] as $id) $adicionar($id, 'periodo-agenda');
+                foreach (['devolutivas','participacao','responsabilidade-docente-aplicacao'] as $id) $adicionar($id, 'planejamento');
                 foreach (['habilidades','intervencoes','reavaliacoes'] as $id) $adicionar($id, 'ensino');
                 $adicionar('metas', 'decisoes');
                 if (in_array('turma.vincular_professor', $permissoes, true)) $adicionar('conselho', 'decisoes');

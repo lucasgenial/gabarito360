@@ -1,12 +1,12 @@
 @php
 $modelos=\App\Support\ModelosPaineis::para($paginaModelos, \App\Support\Acesso::perfil()??'', \App\Support\Acesso::permissoes());
 $gruposModelos=collect($modelos)->groupBy(fn($m)=>($m['grupo']??'planejamento')==='admin'?'administrativo':($m['grupo']??'planejamento'));
-$titulosGrupos=['analises'=>'Análises entre turmas','planejamento'=>'Planejamento','ensino'=>'Ensino e acompanhamento','decisoes'=>'Síntese e decisões','administrativo'=>'Organização administrativa'];
+$titulosGrupos=['periodo-agenda'=>'Período e agenda','analises'=>'Análises entre turmas','planejamento'=>'Planejamento','ensino'=>'Ensino e acompanhamento','decisoes'=>'Síntese e decisões','administrativo'=>'Organização administrativa'];
 @endphp
 @foreach(array_intersect_key($titulosGrupos,array_flip($gruposExibidos??array_keys($titulosGrupos))) as $grupo=>$tituloGrupo)
 @php $itensGrupo=$gruposModelos->get($grupo,collect()); @endphp
 @if($itensGrupo->isNotEmpty() || ($grupo==='analises' && isset($graficoTurnos)))
-<x-painel-secao :id="$grupo" :titulo="$tituloGrupo">
+<x-painel-secao :id="$grupo" :titulo="$tituloGrupo" :nivel="$nivelGrupos??2">
 @if($grupo==='analises' && isset($graficoTurnos))
 <x-painel-widget id="cadastros-turno" titulo="Turmas por turno" :w="6" :h="9" secao="analises" :demo="false" class="painel-widget-grafico">
 <span class="painel-valores-acessiveis">Distribuição cadastral das turmas autorizadas no recorte. Não representa desempenho ou participação em avaliações.</span>
@@ -32,7 +32,7 @@ if(isset($d['base']['acertos'])){$graficoDemo['numeradores']=$d['base']['acertos
 elseif(isset($d['base']['com_evidencia'])){$graficoDemo['numeradores']=$d['base']['com_evidencia'];$graficoDemo['rotulo_numerador']='Com evidência';}
 $alturaDemo=$tipoDemo==='grafico'?9:($tipoDemo==='agenda'?14:($tipoDemo==='progresso'?10:11));
 @endphp
-<x-painel-widget :id="$modelo['id']" :titulo="$modelo['titulo']" :w="6" :h="$alturaDemo" :secao="$grupo" :demo="true" class="painel-widget-demonstracao {{ $tipoDemo==='grafico'?'painel-widget-grafico':'' }}">
+<x-painel-widget :nivel="($nivelGrupos??2)+1" :id="$modelo['id']" :titulo="$modelo['titulo']" :w="6" :h="$alturaDemo" :secao="$grupo" :demo="true" class="painel-widget-demonstracao {{ $tipoDemo==='grafico'?'painel-widget-grafico':'' }}">
 @if(!$d || !($d['demonstrativo']??false))
 <p class="field-help" role="status">Não foi possível apresentar este exemplo ilustrativo.</p>
 @else
