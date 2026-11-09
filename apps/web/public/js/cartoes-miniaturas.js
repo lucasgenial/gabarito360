@@ -1,15 +1,15 @@
 /* Somente miniaturas: uma fila limitada e estado por imagem, sem reenviar cartões.
    F4 (docs/199): a miniatura só entra na fila quando chega perto da área visível. */
 window.criarMiniaturasCartoes = function (root, abrir) {
-  const registros = new Map(), fila = [];
+  const registros = new Map(), porBotao = new WeakMap(), fila = [];
   let ativos = 0;
   // Sem IntersectionObserver, mantém o comportamento anterior: enfileira tudo.
   const visiveis = typeof IntersectionObserver === 'function' ? new IntersectionObserver(entradas => {
     entradas.forEach(e => {
       if (!e.isIntersecting) return;
       visiveis.unobserve(e.target);
-      const r = [...registros.values()].find(x => x.botao === e.target);
-      if (r && !r.naFila) { r.naFila = true; fila.push(r); }
+      const r = porBotao.get(e.target);
+      if (r && registros.get(r.chave) === r && !r.naFila) { r.naFila = true; fila.push(r); }
     });
     proxima();
   }, {rootMargin: '400px 0px'}) : null;
@@ -68,7 +68,7 @@ window.criarMiniaturasCartoes = function (root, abrir) {
       const anterior = registros.get(chave);
       if (anterior) { anterior.url = url; if (anterior.botao !== botao) botao.replaceWith(anterior.botao); return; }
       const r = {chave, url, botao, img: botao.querySelector('img[data-miniatura-imagem]')};
-      registros.set(chave, r); estado(r, 'carregando'); enfileirar(r);
+      registros.set(chave, r); porBotao.set(botao, r); estado(r, 'carregando'); enfileirar(r);
       botao.addEventListener('click', () => {
         if (botao.dataset.estado === 'erro' && !r.naFila) { estado(r, 'carregando'); r.naFila = true; fila.push(r); proxima(); }
         else if (botao.dataset.estado === 'pronta') abrir(Number(botao.dataset.miniaturaCartao));
