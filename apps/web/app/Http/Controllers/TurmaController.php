@@ -166,7 +166,7 @@ class TurmaController extends Controller
         if (\App\Support\Acesso::administrativo()) abort(404);
         if ($secao === 'acesso' && \App\Support\Acesso::pessoal()) abort(404);
         if ($secao === 'disciplinas' && !$this->dc1Visivel()) abort(404);
-        try { $resp = $this->api->get("/v1/turmas/{$id}"); }
+        try { $resp = $this->api->semRedirecionamentos()->get("/v1/turmas/{$id}"); }
         catch (ConnectionException) { abort(503, 'Turma temporariamente indisponível.'); }
         if ($resp->serverError() || $resp->status() === 429) abort(503, 'Turma temporariamente indisponível.');
         if ($resp->failed()) abort(404, 'Turma não encontrada.');
@@ -226,7 +226,8 @@ class TurmaController extends Controller
     public function vincularProfessor(Request $request, int $id)
     {
         $retorno = $this->retornoAcesso($request, $id);
-        if (session('auth_vinculos')) $request->validate(['vinculo_id' => 'required|integer|min:1']);
+        // O formulário pode vir do fragmento sob demanda (F4-B): o erro volta para a tela, não para o fragmento.
+        if (session('auth_vinculos')) $this->validarVinculo($request, $retorno);
         $resp = $this->api->post("/v1/turmas/{$id}/professores", $request->only('usuario_id', 'vinculo_id'));
 
         if ($resp->failed()) {
@@ -239,13 +240,19 @@ class TurmaController extends Controller
     public function desvincularProfessor(int $id, int $usuarioId)
     {
         $retorno = $this->retornoAcesso(request(), $id);
-        $resp = $this->api->delete("/v1/turmas/{$id}/professores/{$usuarioId}", session('auth_vinculos') ? request()->validate(['vinculo_id' => 'required|integer|min:1']) : []);
+        $resp = $this->api->delete("/v1/turmas/{$id}/professores/{$usuarioId}", session('auth_vinculos') ? $this->validarVinculo(request(), $retorno) : []);
 
         if ($resp->failed()) {
             return redirect()->route('turmas.show', $retorno)->with('erro', 'Não foi possível retirar o acesso à turma.');
         }
 
         return redirect()->route('turmas.show', $retorno)->with('sucesso', 'Acesso à turma retirado. O histórico foi preservado.');
+    }
+
+    private function validarVinculo(Request $request, array $retorno): array
+    {
+        try { return $request->validate(['vinculo_id' => 'required|integer|min:1']); }
+        catch (\Illuminate\Validation\ValidationException $e) { throw $e->redirectTo(route('turmas.show', $retorno)); }
     }
 
     private function retornoAcesso(Request $request, int $id): array

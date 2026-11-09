@@ -39,3 +39,14 @@ Na abertura pela visão geral, a turma deixa de pedir à API os professores com 
 - Sem JavaScript, a aba oferece o link que abre a mesma seção renderizada no servidor.
 
 A aba Alunos já vem nos dados da própria turma e continua no SSR. Testes: três cenários PHP, com adiamento, fragmento, negativas e falha, e três testes JS (`turma-abas-adiadas.test.mjs`).
+
+Revisão independente (UI/UX, acessibilidade e segurança): **aprovada com ressalvas**, sem bloqueios. Incorporado neste PR:
+
+- Erros de validação de `vinculo_id` ao conceder ou retirar acesso voltam para a tela da turma, na aba Acesso. Antes, um formulário vindo do fragmento voltaria para o endpoint JSON.
+- Um atributo de URL inválido cai no estado de erro do bloco, sem interromper as abas.
+- O carregador fica num card, como o conteúdo que o substitui.
+- Com o link legado `#professores`, a tela rola até o título depois da carga.
+- O fragmento pede a turma sem seguir redirecionamentos, como a tela.
+- Testes adicionados para: negativas de perfil pessoal e administrativo, retorno e rascunho renderizados no servidor, retorno do fragmento com erro de validação e composição delegada da confirmação.
+
+Limite aceito: o rótulo "Carregando…" aparece junto com a região `role=status` e pode não ser lido por todos os leitores de tela. O erro é sempre anunciado.

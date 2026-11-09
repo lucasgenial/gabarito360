@@ -17,11 +17,13 @@
     const root = painel?.querySelector('[data-turma-secao-adiada]');
     if (!root || iniciadas.has(root) || typeof window.G360Carga !== 'function') return;
     iniciadas.add(root);
-    const alvo = JSON.parse(root.dataset.turmaSecaoUrl);
-    window.G360Carga(root).executar(() => window.G360BuscarJSON(alvo), d => {
+    // Um atributo inválido cai no estado de erro do bloco, sem interromper as demais abas.
+    window.G360Carga(root).executar(() => window.G360BuscarJSON(JSON.parse(root.dataset.turmaSecaoUrl)), d => {
       if (typeof d?.html !== 'string') throw new Error('Seção indisponível');
       root.querySelector('[data-carga-conteudo]').innerHTML = d.html;
       document.dispatchEvent(new CustomEvent('g360:turma-secao', {detail: {secao: painel.dataset.turmaPainel}}));
+      // Link legado #professores: rola até o título quando ele chega com o fragmento.
+      if (location.hash === '#professores') requestAnimationFrame(() => document.getElementById('professores')?.scrollIntoView({block: 'start'}));
     });
   }
   function selecionar(chave, foco = false, registrar = true) {

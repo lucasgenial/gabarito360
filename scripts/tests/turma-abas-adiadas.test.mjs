@@ -102,3 +102,19 @@ test('resposta sem html é tratada como falha', async () => {
   assert.match(p.raizes.acesso.partes['[data-carga-feedback]'].textContent, /Não foi possível carregar/);
   assert.equal(p.eventos.length, 0);
 });
+
+test('atribuição delegada compõe o texto da confirmação sem acumular em envios repetidos', () => {
+  const js = readFileSync(new URL('../../apps/web/public/js/turma-atribuicao.js', import.meta.url), 'utf8');
+  const ouvintes = [];
+  class HTMLFormElement { matches(s) { return s === '[data-turma-atribuicao]'; } }
+  const form = Object.assign(new HTMLFormElement(), {
+    dataset: {turmaConfirmar: 'Confirma?'},
+    elements: {namedItem: n => ({selectedOptions: [{textContent: n === 'disciplina_id' ? 'Matemática' : 'Prof. Fictício'}]})},
+  });
+  const contexto = {HTMLFormElement, WeakMap, document: {addEventListener: (t, fn, captura) => ouvintes.push({t, fn, captura})}};
+  vm.runInNewContext(js, contexto);
+  assert.equal(ouvintes.length, 1); assert.equal(ouvintes[0].captura, true);
+  ouvintes[0].fn({target: form}); ouvintes[0].fn({target: form});
+  assert.equal(form.dataset.turmaConfirmar, 'Matemática — Prof. Fictício. Confirma?');
+  ouvintes[0].fn({target: {matches: () => false}});
+});
