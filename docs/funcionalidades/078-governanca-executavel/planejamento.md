@@ -2,7 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em execução
-**Conforme princípios:** versão 6
+**Conforme princípios:** versão 7
 **Posição no plano mestre:** Onda 0, ordem 0.0 (urgente, por decisão do responsável em 10/11/2026)
 **Natureza:** nova
 **Origem:** surgiu na reestruturação da documentação em 10/11/2026; decisão registrada no [ADR-0053](../../decisoes/0053-principios-executaveis-e-mutaveis.md)
@@ -73,7 +73,7 @@ O problema que esta funcionalidade resolve: princípios definidos no início do 
 | 3.4 | Versão dos princípios por funcionalidade: campo "Conforme princípios" no `planejamento.md` | Um PR que altera uma funcionalidade validada com princípios superados por ADR que a afeta reprova | Entregue | Campo `Conforme princípios` nos 78 planejamentos (versão 1; a FN-078 na versão atual). `VERSAO` guarda a versão em que cada ADR mudou (histórico real: ADR-0004 na 2, ADR-0053 na 3 e na 5, ADR-0048 na 4). `scripts/verificar_conformidade_fn.py`, regra `R-VERSAO-PRINCIPIOS-FN` ativa. 6 testes em `scripts/tests/test_conformidade_fn.py`. Todas as 13 regras do registro estão ativas |
 | 4.1 | Modelo de PR e modelos de issue (nova funcionalidade candidata, correção, decisão do responsável) | Um PR ou issue novo abre no formato certo | Entregue | Modelo de PR reescrito: FN e subfase, revalidação dos princípios, contrato, validação, publicação e conferência final (prints, segredos, autoria). Três formulários de issue (funcionalidade candidata, correção, decisão do responsável), com rótulos próprios; issue em branco desativada. `scripts/verificar_documentacao.py` verifica os modelos na CI. Tela "New issue" conferida no GitHub em 10/11/2026: os 3 formulários e o link do catálogo aparecem; a issue em branco fica só para mantenedores |
 | 4.2 | Varredura de segredos com bloqueio no envio e Dependabot | As duas opções estão ativas no repositório | Entregue | Varredura de segredos e bloqueio no envio já estavam ativos em 10/11/2026. Alertas do Dependabot ativados em 10/11/2026. A primeira varredura achou 41 alertas, todos no Pillow 12.3.0 de `scripts/branding/requirements.txt`; atualizado para 13.0.0, com as imagens geradas idênticas byte a byte e 52 verificações de `verificar_assets.py` aprovadas. Atualizações de segurança e de versão ativas (`.github/dependabot.yml`), por decisão do responsável: o robô abre o PR, e `scripts/adotar_pr_dependabot.py` refaz o commit em nome do responsável. A CI reprova autor robô; PR só de dependências fica fora de `R-FN-NO-PR` e `R-VERSAO-PRINCIPIOS-FN`. Roteiro em `docs/operacao/dependencias.md` |
-| 5.1 | Agente de impacto: `scripts/impacto_principio.py` e definição em `.claude/agents/` | Um ADR novo ou alterado gera a lista de funcionalidades afetadas, as subfases de adequação e o `AGENTS.md` regerado, sem ação humana | Pendente | |
+| 5.1 | Agente de impacto: `scripts/impacto_principio.py` e definição em `.claude/agents/` | Um ADR novo ou alterado gera a lista de funcionalidades afetadas, as subfases de adequação e o `AGENTS.md` regerado, sem ação humana | Entregue | `scripts/impacto_principio.py --aplicar` sobe a versão, gera o AGENTS.md e gera `docs/planejamento/04-adequacoes.md` (ADRs pendentes, caminhos no escopo e subfase de adequação por FN). `--adr ADR-NNNN` mostra o impacto de um ADR. Agente `.claude/agents/impacto-principios.md`. Regra `R-IMPACTO-GERADO` na CI. A subfase de adequação fica na lista gerada, e não em cada `planejamento.md`: um ADR para todas as FNs mudaria 78 arquivos. A regra `R-VERSAO-PRINCIPIOS-FN` obriga a adequação quando a FN é alterada |
 | 6.1 | Revisor de conformidade por IA na CI, para as regras de julgamento | Um PR recebe veredito automático; "reprovado" bloqueia o merge; custo por PR dentro do limite definido | Pendente | |
 | 7.1 | `CHANGELOG.md`, tags e releases por versão | Cada versão publicada tem entrada no changelog e release no GitHub | Pendente | |
 | 7.2 | Auditoria periódica: fluxo agendado que roda todas as verificações e compara a documentação com o código | Um relatório de divergências é gerado por semana | Pendente | |
@@ -127,3 +127,4 @@ Nenhum até agora.
 | 2026-11-10 | Subfase 4.1 entregue: modelos de PR e de issue | lucasgenial |
 | 2026-11-10 | Subfase 4.2: alertas do Dependabot ativados; atualizações automáticas aguardam decisão | lucasgenial |
 | 2026-11-10 | Subfase 4.2 entregue: Dependabot com PRs adotados em nome do responsável | lucasgenial |
+| 2026-11-10 | Subfase 5.1 entregue: agente de impacto e lista de adequações gerada | lucasgenial |

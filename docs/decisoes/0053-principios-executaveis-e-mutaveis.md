@@ -7,11 +7,11 @@ data: 2026-11-10
 afeta_funcionalidades: [todas]
 afeta_caminhos: ["docs/decisoes/**", "AGENTS.md", "scripts/**"]
 verificacao: teste
-regras: [R-PRINCIPIOS, R-AGENTS-GERADO, R-VERSAO-PRINCIPIOS-FN]
+regras: [R-PRINCIPIOS, R-AGENTS-GERADO, R-VERSAO-PRINCIPIOS-FN, R-IMPACTO-GERADO]
 agents_secao: Princípios executáveis
 agents_ordem: 10
 agents_resumo:
-  - "Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras."
+  - "Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras. Depois de criar ou mudar um ADR, rode `python scripts/impacto_principio.py --aplicar` (agente `impacto-principios`): ele sobe a versão, gera o AGENTS.md e lista as adequações em `docs/planejamento/04-adequacoes.md`."
   - "Todo princípio vigente tem verificação automática: um teste na CI ou a revisão do agente de conformidade. A verificação não depende de ação humana."
   - "Antes de alterar uma funcionalidade, revalide o planejamento dela contra os princípios vigentes e aplique as adequações pendentes. Depois, suba o campo `Conforme princípios` do `planejamento.md` para a versão atual. A CI reprova o PR que altera `apps/` sem essa revalidação."
   - "Violações antigas das regras de código ficam em `docs/decisoes/linha-de-base.json`. Uma violação nova reprova a CI. A linha de base só pode diminuir. Implementação: FN-078."
@@ -55,6 +55,7 @@ Decisão do responsável: "Será bom criar algo que impossibilite essa ação." 
 - Esta decisão complementa o [ADR-0048](0048-tronco-unico-de-planejamento.md). O tronco único organiza a fila; este ADR garante que a fila obedeça aos princípios vigentes.
 - A implementação é a [FN-078 Governança executável](../funcionalidades/078-governanca-executavel/planejamento.md).
 - Obrigatório: todo `planejamento.md` declara `Conforme princípios: versão N`. O arquivo `VERSAO` guarda a versão em que cada ADR mudou. Um PR que altera `apps/` e cita uma FN reprova quando um ADR aceito que afeta a FN mudou depois da versão N.
+- Obrigatório: a mudança de um ADR se propaga sem ação humana. O agente `impacto-principios` roda `scripts/impacto_principio.py --aplicar`, que sobe a versão, gera o AGENTS.md e gera `docs/planejamento/04-adequacoes.md` com a subfase de adequação de cada funcionalidade afetada. A CI reprova o PR quando esses arquivos não estão em dia (regra `R-IMPACTO-GERADO`).
 - Obrigatório: uma violação existente antes da regra entra na [linha de base](linha-de-base.json). A linha de base só pode diminuir. A correção entra como subfase de adequação da funcionalidade dona.
 
 ## Verificação

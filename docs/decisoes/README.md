@@ -27,7 +27,7 @@ As regras vigentes resumidas estão no [AGENTS.md](../../AGENTS.md), com links p
    - Com `teste`, cite pelo menos uma regra de [regras.yml](regras.yml). Uma regra nova entra no registro como `planejada` ou `ativa`.
    - Com `agents_secao`, `agents_ordem` e `agents_resumo`, a regra entra no AGENTS.md.
 6. Acrescente uma linha à tabela abaixo.
-7. Rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`. O primeiro sobe a [versão dos princípios](VERSAO). O segundo gera o AGENTS.md. Não edite o AGENTS.md à mão: a CI reprova a diferença.
+7. Rode `python scripts/impacto_principio.py --aplicar` (agente `impacto-principios`). O comando sobe a [versão dos princípios](VERSAO), gera o AGENTS.md e gera a [lista de adequações](../planejamento/04-adequacoes.md). Não edite esses arquivos à mão: a CI reprova a diferença.
 
 As regras de código usam a [linha de base](linha-de-base.json) das violações antigas. Uma violação nova reprova a CI. Ao corrigir uma violação antiga, rode `python scripts/verificar_regras_codigo.py --atualizar-linha-de-base`. A linha de base só pode diminuir.
 

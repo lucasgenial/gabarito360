@@ -72,8 +72,8 @@ Cada caso de uso é verificável. Os critérios de aceite viram testes da CI ou 
 4. O script de princípios sobe a versão em `docs/decisoes/VERSAO`.
 5. O agente de impacto lê o campo `afeta` do ADR.
 6. O agente de impacto lista as funcionalidades, os documentos e os trechos de código afetados.
-7. O agente de impacto acrescenta uma subfase "Adequação ao ADR-NNNN" em cada funcionalidade afetada.
-8. O agente de impacto registra as adequações no plano mestre, na trilha de qualidade.
+7. O agente de impacto gera a subfase "Revalidar contra ADR-NNNN" de cada funcionalidade afetada em `docs/planejamento/04-adequacoes.md`.
+8. O plano mestre aponta para essa lista na trilha de qualidade. A regra `R-VERSAO-PRINCIPIOS-FN` obriga a adequação quando a funcionalidade é alterada.
 9. O script regera o `AGENTS.md` e o `CLAUDE.md`.
 10. A CI confirma que tudo está consistente.
 

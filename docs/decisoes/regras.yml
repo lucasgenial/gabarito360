@@ -46,6 +46,13 @@
   comando: python3 scripts/gerar_agents.py --verificar
   descricao: AGENTS.md igual ao gerado a partir dos ADRs aceitos.
 
+- id: R-IMPACTO-GERADO
+  adr: ADR-0053
+  estado: ativa
+  gravidade: bloqueia
+  comando: python3 scripts/impacto_principio.py --verificar
+  descricao: Mudança de ADR propagada; AGENTS.md e docs/planejamento/04-adequacoes.md em dia.
+
 - id: R-JS-EXTERNO
   adr: ADR-0023
   estado: ativa
