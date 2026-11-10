@@ -1,7 +1,7 @@
 ﻿<#
   Copia os backups do Proxmox para D:\Backups-Proxmox, com checksum.
   Mantém as 8 datas mais recentes: uma data nova completa elimina a mais antiga.
-  Agendado no Windows; documentação em docs/operacao/backup.md.
+  Agendado no Windows; documentação em docs/operacao/backup-e-restauracao.md.
 #>
 param([string]$Filtro = '')
 

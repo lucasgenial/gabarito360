@@ -78,6 +78,9 @@ jobs:
         with:
           node-version: 22
       - run: python3 scripts/verificar_telas.py
+      - run: python3 scripts/verificar_imagens.py
+      - run: python3 scripts/verificar_funcionalidades.py
+      - run: python3 scripts/verificar_documentacao.py --estrito
       - run: npm ci --prefix scripts/tailwind --ignore-scripts --no-audit --no-fund
       - run: node scripts/tailwind/build.mjs && git diff --exit-code -- apps/web/public/previas/tailwind apps/web/public/css/estrutura-app.css apps/web/public/css/app-conteudo-legado.css
       - run: npm ci --prefix scripts/paineis-grid --ignore-scripts --no-audit --no-fund

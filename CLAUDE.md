@@ -1,158 +1,75 @@
 # CLAUDE.md — Gabarito360
 
-Este arquivo é a referência permanente para todas as execuções neste projeto.
-Leia-o integralmente antes de qualquer ação.
-
----
+Leia este arquivo e o [AGENTS.md](AGENTS.md) antes de qualquer ação. O AGENTS.md tem as regras vigentes de todas as ferramentas. Este arquivo complementa o AGENTS.md com o essencial para o Claude Code e não repete as regras dele.
 
 ## Idioma
 
-Todas as respostas e comunicações devem ser em **Português Brasileiro (Pt-BR)**.
+Responda e escreva em português do Brasil, no padrão ASD-STE100 moderado (AGENTS.md).
 
----
+## O que é o Gabarito360
 
-## O Que É Este Projeto
+O Gabarito360 é uma plataforma de gestão de avaliações educacionais para redes de ensino. Ele atende todo o ciclo: cadastro, provas e gabaritos, correção por leitura óptica (OMR), resultados e análise pedagógica.
 
-O Gabarito360 é uma plataforma completa de gestão de avaliações educacionais para redes públicas de ensino.
+Para entender o sistema, leia nesta ordem:
 
-**Não é** apenas um leitor de gabaritos.
+1. [Visão geral](docs/visao-geral/README.md): o produto em 15 minutos.
+2. [Arquitetura](docs/arquitetura/README.md): a referência técnica.
+3. [Catálogo de funcionalidades](docs/funcionalidades/README.md): o que existe e o estado de cada item.
+4. [Plano mestre](docs/planejamento/00-plano-mestre.md): o que é feito agora e em que ordem.
 
-Missão: atender todo o ciclo de avaliação — do cadastro de questões à análise pedagógica dos resultados.
+## Regra fundamental
 
----
+Nenhum código é criado sem documentação aprovada. Toda funcionalidade tem `planejamento.md` e `casos-de-uso.md` aprovados em `docs/funcionalidades/NNN-slug/` antes da execução.
 
-## Regra Fundamental
+## Fontes de verdade
 
-**Nenhum código deve ser criado sem documentação aprovada.**
+Em conflito, vale esta ordem:
 
-Toda funcionalidade deve ter origem rastreável em:
-1. Mockup HTML identificado no inventário
-2. Ou aprovação explícita posterior documentada
+1. Mockups HTML: `mockups/`
+2. Style system: `style-system/`
+3. Documentação: `docs/` (estrutura em [docs/README.md](docs/README.md))
+4. Código atual, para descrever o que existe hoje
 
----
+Um legado antigo, quando presente fora deste repositório, serve só para recuperar regras de negócio validadas. É proibido reutilizar a arquitetura, o banco ou o código dele.
 
-## Prioridade das Fontes de Verdade
+## Arquitetura em uma tabela
 
-```
-1. Mockups HTML          → mockups/
-2. Style System          → style-system/
-3. Documentação oficial  → docs/
-4. Regras do legado      → Gabarito360/ (somente regras de negócio)
-5. Código legado         → Gabarito360/ (consulta histórica apenas)
-```
+| Parte | Tecnologia | Pasta | Responsabilidade |
+|---|---|---|---|
+| API | Laravel 13, PHP 8.3, Sanctum | `apps/api` | Autenticação, regras de negócio, OMR, relatórios. Só JSON. |
+| Web | Laravel 13 (BFF) | `apps/web` | Interface e painéis. Consome a API por HTTP. |
+| Banco | MariaDB 10.11 | — | Único banco aprovado. A API é a dona do banco. |
 
-Em conflito: Mockup > Style System > Docs > Legado
+**A API nunca renderiza telas.** Os apps móveis estão adiados (FN-010). Detalhes em [docs/arquitetura/01-contexto-e-containers.md](docs/arquitetura/01-contexto-e-containers.md).
 
----
+Os perfis e as permissões estão em [docs/arquitetura/04-identidade-acesso-e-permissoes.md](docs/arquitetura/04-identidade-acesso-e-permissoes.md). O design system está em [docs/arquitetura/09-interface-e-design-system.md](docs/arquitetura/09-interface-e-design-system.md).
 
-## Arquitetura Oficial
-
-### Banco de Dados
-- **MariaDB** (único banco aprovado)
-
-### Aplicações
-
-| App       | Tecnologia    | Diretório    | Responsabilidade                          |
-|-----------|---------------|--------------|-------------------------------------------|
-| API       | Laravel       | apps/api     | Auth, regras de negócio, OMR, relatórios  |
-| WEB       | Laravel       | apps/web     | Interface administrativa, dashboards      |
-| Android   | React Native  | apps/android | App mobile consumindo API                 |
-| iOS       | React Native  | apps/ios     | App mobile consumindo API                 |
-
-**A API nunca renderiza telas. Apenas JSON.**
-
----
-
-## Perfis do Sistema
-
-| Perfil              | Escopo                          |
-|---------------------|---------------------------------|
-| Administrador Rede  | Visão total da rede             |
-| Diretor de Núcleo   | Visão das escolas do núcleo     |
-| Diretor Escolar     | Visão da escola                 |
-| Coordenador         | Gestão pedagógica da escola     |
-| Professor           | Turmas e provas próprias        |
-| Aluno               | Próprias notas e provas         |
-
----
-
-## Design System
-
-- **Identidade:** própria, direção "Atual refinada" (`docs/26-plano-identidade-visual.md`)
-- **Fonte principal:** Figtree
-- **Fonte de código:** Roboto Mono
-- **Cor accent:** `#1d4f9e`
-- **Cor de atenção:** `#0b7f75`
-- **Cor success:** `#168821`
-- **Arquivo tokens:** `apps/web/public/css/app.css`
-
----
-
-## Convenções de Implementação
-
-### O Que Nunca Fazer
-- Criar código sem documentação aprovada
-- Reutilizar arquitetura, banco, frontend ou backend do legado sem justificativa
-- Misturar responsabilidades entre API e WEB
-- Renderizar HTML na API
-- Criar funcionalidades fora dos mockups sem aprovação
-
-### O Que Sempre Fazer
-- Consultar `docs/01-inventario-dos-mockups.md` antes de implementar qualquer tela
-- Verificar `docs/03-perfis-e-permissoes.md` antes de criar endpoints
-- Seguir a identidade própria e os tokens de `apps/web/public/css/app.css` em todos os componentes visuais
-- Documentar decisões de arquitetura em `docs/12-arquitetura.md`
-
----
-
-## Convenção de Commits
+## Convenção de commits
 
 ```
 tipo(escopo): descrição curta em pt-BR
 
-Tipos: feat, fix, docs, refactor, test, chore
-Escopo: api, web, android, ios, docs, db, infra
+Tipos: feat, fix, docs, refactor, test, chore, perf
+Escopo: api, web, docs, db, infra
 
 Exemplos:
   feat(api): implementa endpoint de autenticação
-  feat(web): cria dashboard do coordenador
-  docs: atualiza inventário dos mockups
-  fix(api): corrige cálculo de média da turma
+  fix(web): corrige o filtro da lista de turmas
+  docs: atualiza o catálogo de funcionalidades
 ```
 
----
+Sem `Co-Authored-By` de IA e sem "Generated with ..." (AGENTS.md, seção Autoria).
 
-## Fluxo de Trabalho
+## Fluxo de trabalho
 
-1. **Ler** o MP (Micro-Passo) correspondente em `docs/14-plano-de-execucao.md`
-2. **Verificar** dependências do MP no `docs/13-roadmap.md`
-3. **Consultar** inventário de mockups para funcionalidades envolvidas
-4. **Implementar** seguindo a arquitetura oficial
-5. **Testar** contra os critérios de aceite do MP
-6. **Commitar** seguindo a convenção de commits
+1. Consulte o agente `gerente-projetos`. Localize a funcionalidade (FN-NNN), a fase e a subfase no plano mestre. Confirme que ela está na fila priorizada.
+2. Leia o `planejamento.md` e o `casos-de-uso.md` da funcionalidade. Sem os dois aprovados, escreva os documentos primeiro.
+3. Verifique as dependências da subfase. Um módulo transversal pendente bloqueia a subfase.
+4. Consulte os mockups e o style system para as telas envolvidas.
+5. Use os agentes do time ([02-agentes.md](docs/planejamento/02-agentes.md)), na classe de modelo indicada.
+6. Implemente seguindo a arquitetura.
+7. Teste contra os critérios de aceite da subfase e dos casos de uso.
+8. Faça o commit na convenção acima. Atualize a etapa no catálogo e no `planejamento.md`, com evidência.
+9. Publique somente na homologação.
 
----
-
-## Documentação de Referência Rápida
-
-| Documento                         | Quando Consultar                              |
-|-----------------------------------|-----------------------------------------------|
-| docs/01-inventario-dos-mockups.md | Antes de implementar qualquer tela            |
-| docs/03-perfis-e-permissoes.md    | Antes de criar endpoints ou telas             |
-| docs/06-regras-de-negocio.md      | Antes de implementar lógica de negócio        |
-| docs/09-modelo-de-dados.md        | Antes de criar migrations                     |
-| docs/10-rotas-api.md              | Para implementação da API                     |
-| docs/11-rotas-web.md              | Para implementação do WEB                     |
-| docs/13-roadmap.md                | Para entender sequência de implementação      |
-| docs/14-plano-de-execucao.md      | Para executar um MP específico                |
-
----
-
-## Uso do Legado
-
-O diretório `Gabarito360/` contém o legado e é permitido apenas para:
-- Recuperar regras de negócio validadas
-- Recuperar fluxos funcionais aprovados
-- Recuperar decisões históricas documentadas
-
-**Proibido reutilizar:** arquitetura, banco, modelos, rotas, código frontend, código backend.
+Os identificadores antigos (MP-xxx, T5, L4…) estão traduzidos para FN-NNN na coluna "Identificador antigo" do catálogo.

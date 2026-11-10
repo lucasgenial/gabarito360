@@ -1,6 +1,6 @@
 ## Problema e comportamento resultante
 
-<!-- Explique o caso concreto, o resultado e o escopo final. Consulte docs/195-adr-fundamentos-desempenho.md. Preencha proporcionalmente; justifique o que não se aplica. Não anexar dados escolares, credenciais, SQL/bindings ou HAR bruto. -->
+<!-- Explique o caso concreto, o resultado e o escopo final. Consulte docs/decisoes/0046-fundamentos-de-desempenho-adr-195.md e docs/arquitetura/12-desempenho.md. Preencha proporcionalmente; justifique o que não se aplica. Não anexar dados escolares, credenciais, SQL/bindings ou HAR bruto. -->
 
 ## Contrato, acesso e dados
 
