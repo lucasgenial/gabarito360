@@ -1,6 +1,7 @@
 # 003 — Publicação, deploy e homologação isolada — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** Onda 0 — se aprovada a decisão §4 item 2, promoção à produção em blocos, começando por UR1–UR4, PR #194 e hotfix de leituras 500; pendências residuais no §3
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 B5 e docs/37; procedimentos T2 (docs/49–54, ramo de T2 que virou padrão); publicação por fase (docs/99, docs/100); H1 homologação isolada (docs/125–130, ADR-H1 no docs/127)

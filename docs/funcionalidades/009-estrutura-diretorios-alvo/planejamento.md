@@ -1,6 +1,7 @@
 # 009 — Estrutura-alvo de diretórios — Planejamento
 
-**Estado no tronco:** Candidata
+**Implementação:** Candidata
+**Etapa:** Candidata
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade); aguardando priorização — não é executada
 **Natureza:** nova
 **Origem:** surgiu na entrega ST1 (estabilização das turmas), docs/168, em 11/2026

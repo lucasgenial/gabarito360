@@ -1,6 +1,7 @@
 # 033 — Núcleos, escolas, turmas e alunos — Planejamento
 
-**Estado no tronco:** Parcial
+**Implementação:** Parcial
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 3 (PROPOSTA, §5) — subfases A3 e A4; dependência declarada "—"
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-014..017, MP-035, MP-039; docs/28 A3, A4

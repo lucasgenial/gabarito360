@@ -1,6 +1,7 @@
 # 036 — Organização da turma (TU1) — Planejamento
 
-**Estado no tronco:** Em homologação
+**Implementação:** Em homologação
+**Etapa:** Em homologação
 **Prioridade no plano mestre:** sem onda própria; restante (conferência autenticada, aposentar chaves legadas) na fila de produção §7 ("Organização da turma e imagens", PR #203–#209) e na trilha de qualidade
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco — docs/175, docs/176, docs/tu1-revisao-fluxos.md, docs/tu1-r3-dashboard-analitico.md (fila declarada no docs/165: "TU1 antes de retomar EI1")

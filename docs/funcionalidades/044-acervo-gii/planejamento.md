@@ -1,6 +1,7 @@
 # 044 — Acervo inteligente (GII) — Planejamento
 
-**Estado no tronco:** Candidata
+**Implementação:** Candidata
+**Etapa:** Candidata
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5); aguarda priorização do responsável
 **Natureza:** nova
 **Origem:** pedido do responsável registrado em docs/164; citado como futuro em docs/144, 146, 176 e 177 (P7.1)

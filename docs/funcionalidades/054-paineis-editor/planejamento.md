@@ -1,6 +1,8 @@
 # 054 — Personalização e editor dos painéis — Planejamento
 
-**Estado no tronco:** Concluída (entregue e validada na homologação)
+**Implementação:** Concluída
+**Etapa:** Concluída
+**Observação de estado:** entregue e validada na homologação
 **Prioridade no plano mestre:** fora das ondas (funcionalidade concluída). Está na fila de produção (§7, bloco "Painéis e editor"), aguardando a decisão §4 item 2. O §5 é PROPOSTA.
 **Natureza:** existente documentada a partir do código
 **Origem:** ramo de P2.9–P2.11 dos painéis de turmas (docs/179, 180); evoluiu para editor hierárquico próprio (docs/188–193)

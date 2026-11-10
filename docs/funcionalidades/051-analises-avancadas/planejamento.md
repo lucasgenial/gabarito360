@@ -1,6 +1,7 @@
 # 051 — TCT/TRI, integridade e sínteses — Planejamento
 
-**Estado no tronco:** Candidata
+**Implementação:** Candidata
+**Etapa:** Candidata
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5). Não executar antes da priorização do responsável.
 **Natureza:** nova
 **Origem:** docs/164 (frentes "Em breve" da apresentação pública) e docs/177 (P7.2–P7.4 dos painéis)

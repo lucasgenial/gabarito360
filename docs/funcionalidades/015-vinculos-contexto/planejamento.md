@@ -1,6 +1,7 @@
 # 015 — Vínculos por pessoa e seleção de vínculo — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendências: aceite visual de V2; destino da conta de aluno sem vínculo (decisão, ligada à §4 item 10 e a FN-020); perfis não suportados (Secretário de Educação, via FN-014/FN-017).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 (V1, V2), docs/40 §5 e §9, docs/55–62, docs/100

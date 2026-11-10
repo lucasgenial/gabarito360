@@ -1,6 +1,7 @@
 # 010 — Aplicativos Android e iOS — Planejamento
 
-**Estado no tronco:** Adiada
+**Implementação:** Adiada
+**Etapa:** Adiada
 **Prioridade no plano mestre:** Futuro (sem prioridade); pendência do §3: confirmar a manutenção do adiamento
 **Natureza:** nova
 **Origem:** tronco original — docs/13 MP-023 (Android) e iOS; docs/02 fase 8 (mobile offline); parte não entregue de MP-001

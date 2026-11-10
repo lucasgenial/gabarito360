@@ -1,6 +1,7 @@
 # 018 — Segurança de URLs, sessão e dependências (UR1–UR4) — Planejamento
 
-**Estado no tronco:** Em homologação
+**Implementação:** Em homologação
+**Etapa:** Em homologação
 **Prioridade no plano mestre:** Onda 0, se aprovada a decisão §4 item 2: primeiro bloco da promoção à produção (UR1–UR4, PR #194 e hotfix de leituras 500). Fila de produção no §7.
 **Natureza:** existente documentada a partir do código
 **Origem:** docs/165–171; priorizada pelo responsável durante a conferência de uma turma na homologação

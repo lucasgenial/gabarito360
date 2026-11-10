@@ -1,6 +1,7 @@
 # 016 — Identidade pessoal (ID1) — Planejamento
 
-**Estado no tronco:** Parcial
+**Implementação:** Parcial
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 1, ordem 4 (fechamento + contrato de conciliação); os dois documentos desta pasta fazem parte da Onda 0. Proposta ainda não aprovada (§5).
 **Natureza:** existente documentada a partir do código (fundação) com parte nova (operação e conciliação)
 **Origem:** docs/115 §4, docs/138–140

@@ -1,6 +1,8 @@
 # 057 — Notificações (módulo transversal) — Planejamento
 
-**Estado no tronco:** Pendente · **MÓDULO TRANSVERSAL**
+**Implementação:** Pendente
+**Etapa:** Em planejamento
+**Observação de estado:** MÓDULO TRANSVERSAL
 **Prioridade no plano mestre:** Onda 1, ordem 2 (PROPOSTA do §5, ainda não aprovada): N1 → N2 → N3
 **Natureza:** nova
 **Origem:** tronco original — docs/28 N1–N4 (Fase 4); docs/177 P5.4 (avisos dos painéis). Equivalências: N1–N4 → FN-057; P5 dos painéis → FN-056 e FN-057 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))

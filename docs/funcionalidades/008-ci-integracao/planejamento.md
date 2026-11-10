@@ -1,6 +1,7 @@
 # 008 — Integração contínua (MariaDB) — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** sem posição na fila (concluída); pendência residual no §3: confirmar o artefato final do CI
 **Natureza:** existente documentada a partir do código
 **Origem:** surgiu na entrega dos painéis de turma (PR #216 levou 29m44 no job MariaDB) — docs/181

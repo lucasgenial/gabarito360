@@ -1,5 +1,20 @@
 # Orientações do projeto
 
+## Padrão de escrita dos documentos (ASD-STE100 moderado)
+
+Decisão do responsável (10/11/2026): todo documento novo ou revisado segue o padrão ASD-STE100 (Simplified Technical English) em nível moderado, cerca de 80% das regras, aplicado ao português.
+
+- Escreva uma ideia por frase.
+- Frase de procedimento: até 20 palavras. Frase descritiva: até 25 palavras.
+- Use voz ativa. Em procedimentos, use o verbo no imperativo ("Crie a pasta", "Atualize o catálogo").
+- Escreva uma instrução por frase. Use listas numeradas para passos e tabelas para comparações.
+- Use um termo para cada conceito e mantenha o mesmo termo no documento inteiro.
+- Defina siglas na primeira ocorrência. Evite pronomes vagos ("isso", "ele") quando o referente não está na mesma frase.
+- Coloque avisos antes da instrução a que se referem.
+- Parágrafos: até 6 frases.
+- Exceções (os 20% restantes): nomes de código, citações literais, termos de domínio sem equivalente simples e tabelas de referência.
+- Documentos históricos (`docs/NN-*.md`) não são reescritos só para seguir o padrão. O padrão vale quando um documento for criado ou revisado.
+
 ## Autoria de commits e PRs
 
 Decisão do responsável (10/11/2026): **nenhuma IA se identifica como autora ou coautora**. O único autor é o usuário `lucasgenial`.

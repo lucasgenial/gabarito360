@@ -1,6 +1,7 @@
 # 028 — Encerramento de cliente (T6) — Planejamento
 
-**Estado no tronco:** Pendente
+**Implementação:** Pendente
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 4 — Comercial, portal e encerramento (depende de FN-064 e FN-068)
 **Natureza:** nova
 **Origem:** tronco original — docs/28 Fase 3 (T6); docs/102; docs/115 §12 ("L4/T6 — reconciliação final")

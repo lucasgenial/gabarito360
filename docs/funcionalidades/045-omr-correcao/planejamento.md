@@ -1,6 +1,8 @@
 # 045 — Motor OMR e acompanhamento da correção — Planejamento
 
-**Estado no tronco:** Concluída (com ressalva: teste com cartão impresso real pendente)
+**Implementação:** Concluída
+**Etapa:** Concluída
+**Observação de estado:** com ressalva: teste com cartão impresso real pendente
 **Prioridade no plano mestre:** fora das ondas (funcionalidade concluída); a ressalva é pendência do §3 sem onda própria. O §5 é PROPOSTA, ainda não aprovada.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-021 e MP-033; docs/19 MP-038 (mesma entrega que MP-033); docs/08 e docs/18

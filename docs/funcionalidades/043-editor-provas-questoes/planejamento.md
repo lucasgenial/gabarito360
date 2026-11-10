@@ -1,6 +1,7 @@
 # 043 — Editor de provas e banco de questões — Planejamento
 
-**Estado no tronco:** Candidata
+**Implementação:** Candidata
+**Etapa:** Candidata
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5); aguarda priorização do responsável
 **Natureza:** nova
 **Origem:** tronco original — docs/02 e docs/12 (fases pós-MVP 2–5); docs/118; docs/164 (frente anunciada "Em breve" na home)

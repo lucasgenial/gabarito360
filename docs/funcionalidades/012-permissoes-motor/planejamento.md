@@ -1,6 +1,7 @@
 # 012 — Motor de permissões, equipe e menus — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendências residuais sem priorização: migração das 8 rotas `perfil:` e registro das decisões 1–6 do docs/21.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/03, docs/13 (MP-013, 018, 026, 030, 031, 036), docs/19, docs/21 (etapas 0–7), docs/22

@@ -1,6 +1,8 @@
 # 058 — Visitas pedagógicas — Planejamento
 
-**Estado no tronco:** Pendente — **aguarda FN-056**
+**Implementação:** Pendente
+**Etapa:** Em planejamento
+**Observação de estado:** aguarda FN-056
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA do §5), depende de FN-056
 **Natureza:** evolução de existente (tabela, model e leitura no dashboard do núcleo existem; gestão não existe)
 **Origem:** tronco original — docs/13 MP-032; docs/07 UC-009; docs/16 (pede mockup de gestão antes do MP). Equivalência: MP-032 → FN-058 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))

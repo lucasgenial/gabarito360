@@ -1,6 +1,8 @@
 # 022 — Espaço pessoal e professor autônomo (T3) — Planejamento
 
-**Estado no tronco:** Concluída (revisão pendente)
+**Implementação:** Concluída
+**Etapa:** Concluída
+**Observação de estado:** revisão pendente
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). A revisão formal de T3 é pré-requisito de FN-027 (Onda 3).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 3 (T3); docs/63–65

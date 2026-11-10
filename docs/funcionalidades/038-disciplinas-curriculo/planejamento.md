@@ -1,6 +1,7 @@
 # 038 — Disciplinas, áreas e currículo das provas (DC1) — Planejamento
 
-**Estado no tronco:** Em homologação
+**Implementação:** Em homologação
+**Etapa:** Em homologação
 **Prioridade no plano mestre:** sem onda própria; restante (validação do responsável, produção) na fila de produção §7 ("Disciplinas e currículo", PR #171, #186)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco — docs/115 §6, docs/139, docs/141–151, docs/156, docs/157

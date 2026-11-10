@@ -1,6 +1,7 @@
 # 006 — Painel técnico — Planejamento
 
-**Estado no tronco:** Pendente
+**Implementação:** Pendente
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 4 (junto com FN-005 e FN-004 AU2), dependente de AU1
 **Natureza:** nova
 **Origem:** tronco original — docs/28 (A2). Não confundir com T5-A2 (lotes de cópias, FN-024)

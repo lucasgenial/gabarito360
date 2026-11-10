@@ -1,6 +1,7 @@
 # 032 — Busca do catálogo por autocompletar — Planejamento
 
-**Estado no tronco:** Adiada
+**Implementação:** Adiada
+**Etapa:** Adiada
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5) — adiada até haver uso real
 **Natureza:** evolução de existente (FN-031)
 **Origem:** surgiu na entrega de desempenho F5 em 09/11/2026 — docs/200 (F5, PERF-09/10/12)

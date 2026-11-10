@@ -1,6 +1,8 @@
 # 030 — Autocadastro, planos e assinatura — Planejamento
 
-**Estado no tronco:** Substituída (parcial)
+**Implementação:** Substituída
+**Etapa:** Substituída
+**Observação de estado:** parcial
 **Prioridade no plano mestre:** sem posição nas ondas do §5; depende da decisão do §4 item 5. Preços e cobrança seguem para FN-068 (Onda 4).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-025..029; docs/06 RN-015/RN-016; docs/01 §30 (pivô SaaS de 18/06/2026)

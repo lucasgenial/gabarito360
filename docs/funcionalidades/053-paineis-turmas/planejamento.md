@@ -1,6 +1,7 @@
 # 053 — Painéis de turmas e da turma — Planejamento
 
-**Estado no tronco:** Parcial
+**Implementação:** Parcial
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 2 (P3.3, P1.4.6, P3.4), depois de FN-026 e FN-059. O que já foi entregue está na fila de produção (§7, bloco "Painéis e editor"). O §5 é PROPOSTA.
 **Natureza:** existente documentada a partir do código
 **Origem:** ramo de TU1/TU1-R3 (FN-036) e da reconciliação do docs/176; virou módulo próprio com numeração local P0–P8 (docs/177)

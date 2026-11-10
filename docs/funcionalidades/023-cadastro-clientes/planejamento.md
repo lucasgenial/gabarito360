@@ -1,6 +1,7 @@
 # 023 — Cadastro de clientes (T4) — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Contratos completos remetidos a FN-068 (Onda 4).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 3 (T4); docs/66, 71. Ao ser implementada revelou a dependência de A1 (FN-013), antecipado.

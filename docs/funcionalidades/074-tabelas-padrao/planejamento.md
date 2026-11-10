@@ -1,6 +1,7 @@
 # 074 — Padrão de tabelas e listas — Planejamento
 
-**Estado no tronco:** Em homologação
+**Implementação:** Em homologação
+**Etapa:** Em homologação
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5), aplicada dentro das entregas; sem posição própria na fila. Pendência na trilha: paginação opcional na API.
 **Natureza:** existente documentada a partir do código
 **Origem:** ramo do CI1-F ampliado pelo responsável para todas as tabelas ([docs/130](../../130-ci1-f-validacao-integrada.md), [docs/131](../../131-padronizacao-tabelas-ui-ux.md)); TBL2 surgiu na entrega DC1 ([docs/149](../../149-tbl2-tabelas-integradas.md))

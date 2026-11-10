@@ -1,6 +1,7 @@
 # 068 — Financeiro (contratos, faturas, pagamentos) — Planejamento
 
-**Estado no tronco:** Pendente
+**Implementação:** Pendente
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 4 (PROPOSTA do §5): 068 financeiro → 069 selo; depende de decisão comercial
 **Natureza:** nova, com legado de assinatura (MP-027) existente documentado a partir do código
 **Origem:** tronco original — docs/28 F1–F3 (Fase 5); docs/163 (regras financeiras de EI1); docs/176 (FIN). Equivalência: F1–F3 e FIN → FN-068 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))

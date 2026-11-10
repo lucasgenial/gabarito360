@@ -1,6 +1,7 @@
 # 071 — Marca oficial e cabeçalhos de documentos — Planejamento
 
-**Estado no tronco:** Em homologação
+**Implementação:** Em homologação
+**Etapa:** Em homologação
 **Prioridade no plano mestre:** sem onda própria; bloco "Marca e apresentação pública" da fila de produção (§7), aguardando a decisão §4 item 2. Pendência no §3: "Produção"
 **Natureza:** existente documentada a partir do código
 **Origem:** pedido de branding do responsável — docs/161 e docs/162, etapas H1-A a H1-E. Atenção: "H1" também nomeia a homologação isolada (docs/127–129, FN-003)

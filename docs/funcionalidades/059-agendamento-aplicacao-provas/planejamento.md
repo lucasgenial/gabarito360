@@ -1,6 +1,8 @@
 # 059 — Marcação e aplicação de provas — Planejamento
 
-**Estado no tronco:** Pendente — **aguarda FN-056 e FN-057**
+**Implementação:** Pendente
+**Etapa:** Em planejamento
+**Observação de estado:** aguarda FN-056 e FN-057
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA do §5), depende de 056 e 057
 **Natureza:** evolução de existente (a data de aplicação da prova e as consultas derivadas existem; o agendamento como evento, os avisos e o registro de aplicação não existem)
 **Origem:** tronco original — docs/28 C4 (Fase 7); docs/177 P1.4.6, P5.4 e P3.3.5. Equivalência: C4 → FN-059 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))

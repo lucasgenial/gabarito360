@@ -1,6 +1,7 @@
 # 019 — Meu perfil, configurações e imagem de perfil — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendências sem priorização: limpeza de imagens órfãs e confirmação das configurações para o Diretor Escolar (MP-040). IM1 está só na homologação (§7).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-024, docs/19 MP-040; IM1 surgiu como ramo do PF1-C e virou módulo próprio (docs/134–137)

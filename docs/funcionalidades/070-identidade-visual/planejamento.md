@@ -1,6 +1,7 @@
 # 070 — Identidade visual e gráficos — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** sem onda (entregue em produção); pendência no §3: "Registrar decisões 1–2 do docs/26"
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/26 (V1–V5), docs/27 (G1–G3, detalhamento de V5)

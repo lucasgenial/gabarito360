@@ -1,6 +1,7 @@
 # 076 — Carregamento, estados de erro e navegação — Planejamento
 
-**Estado no tronco:** Parcial
+**Implementação:** Parcial
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5): carregamento regional aplicado dentro das entregas, nas telas que cada entrega tocar
 **Natureza:** existente documentada a partir do código (evolução parcial)
 **Origem:** UI1 — interrupção pontual antes de TU1, pedida pelo responsável em 06/11/2026 ([docs/174](../../174-ui1-carregamento-e-estados-de-erro.md)); breadcrumb, toast e carregamento progressivo nasceram na OMR2-C2 ([docs/159](../../159-omr2-resultado-e-historico-integrado.md)); UI1-R registrado na reconciliação [docs/176](../../176-reconciliacao-solicitacoes.md)

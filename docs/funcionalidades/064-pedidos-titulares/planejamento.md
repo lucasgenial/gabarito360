@@ -1,6 +1,7 @@
 # 064 — Pedidos dos titulares (L4) — Planejamento
 
-**Estado no tronco:** Parcial
+**Implementação:** Parcial
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 3 (proposta): "064 pedidos-titulares (L4-D, L4-E) + pacote de retenção (062, 066, 004 expurgo)"
 **Natureza:** existente documentada a partir do código (L4-A a C5); L4-D e L4-E novas
 **Origem:** tronco original — docs/28 Fase 2, pacote L4, replanejado em L4-A..E no docs/102; requisitos RL3–RL6 do docs/33

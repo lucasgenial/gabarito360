@@ -1,6 +1,7 @@
 # 060 — E-mail transacional e Fale Conosco — Planejamento
 
-**Estado no tronco:** Parcial
+**Implementação:** Parcial
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA do §5): E4 fase 2 e testes reais de E5/E6, depois de FN-057
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 E1–E7 (Fase 1); [docs/operacao/email.md](../../operacao/email.md). Equivalência: E1–E7 → FN-060; E8 (páginas públicas) → FN-072 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))

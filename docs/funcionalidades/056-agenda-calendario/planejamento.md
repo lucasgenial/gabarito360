@@ -1,6 +1,8 @@
 # 056 — Agenda e calendário (módulo transversal) — Planejamento
 
-**Estado no tronco:** Pendente · **MÓDULO TRANSVERSAL**
+**Implementação:** Pendente
+**Etapa:** Em planejamento
+**Observação de estado:** MÓDULO TRANSVERSAL
 **Prioridade no plano mestre:** Onda 1, ordem 1 (PROPOSTA do §5, ainda não aprovada): C1 formal → C2 → C3
 **Natureza:** nova, com parte visual existente documentada a partir do código (widgets demonstrativos com CalendarJS)
 **Origem:** tronco original — docs/28 C1–C3 (Fase 7); ampliada pelos painéis de turma em docs/177 P5, docs/179, docs/180 e docs/189. Equivalências: C1–C3 e P5 dos painéis → FN-056; M3 "Tempo escolar e agenda" → FN-056 e FN-039 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))

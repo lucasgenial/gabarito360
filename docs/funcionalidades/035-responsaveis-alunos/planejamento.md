@@ -1,6 +1,7 @@
 # 035 — Dados dos responsáveis — Planejamento
 
-**Estado no tronco:** Pendente
+**Implementação:** Pendente
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 3 (PROPOSTA, §5) — depende de FN-016
 **Natureza:** nova (há apenas o campo de texto livre `alunos.nome_responsavel`)
 **Origem:** tronco original — docs/28 A6

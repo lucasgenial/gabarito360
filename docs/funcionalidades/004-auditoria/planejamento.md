@@ -1,6 +1,7 @@
 # 004 — Auditoria de requisições, expurgo e tela de consulta — Planejamento
 
-**Estado no tronco:** Parcial
+**Implementação:** Parcial
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** expurgo na Onda 3 (pacote de retenção com 062, 066 e 064, decisão §4 item 11); AU2 na Onda 4 (junto com 005 e 006, dependência de D9 e AU1)
 **Natureza:** existente documentada a partir do código (AU1) e evolução de existente (expurgo, AU2)
 **Origem:** tronco original — docs/28 (AU1, AU2), docs/32; AU1 antecipado como dependência de T5; execução em docs/72–76; operação em docs/operacao/auditoria.md

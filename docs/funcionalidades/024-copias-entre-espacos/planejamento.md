@@ -1,6 +1,8 @@
 # 024 — Cópias entre espaços (T5) — Planejamento
 
-**Estado no tronco:** Substituída (política); código ativo
+**Implementação:** Substituída
+**Etapa:** Substituída
+**Observação de estado:** política); código ativo
 **Prioridade no plano mestre:** Onda 0 — decisões do §4 itens 3 e 4. Não há execução nova prevista; a política nova é FN-025 (Onda 3).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 3 (T5); docs/77–99, 114; substituição pelo docs/115 §9

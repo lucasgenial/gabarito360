@@ -1,6 +1,7 @@
 # 052 — Painéis por perfil — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** fora das ondas (funcionalidade concluída). Pendências do §3: confirmar MP-040 e SEGES; variantes por perfil (P2.4, tratadas em FN-053). O §5 é PROPOSTA.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-006..011; docs/19 MP-040; docs/27 G3 (gráficos e barra de progresso)

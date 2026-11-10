@@ -1,6 +1,7 @@
 # 072 — Site público e apresentação — Planejamento
 
-**Estado no tronco:** Em homologação
+**Implementação:** Em homologação
+**Etapa:** Em homologação
 **Prioridade no plano mestre:** sem onda própria; bloco "Marca e apresentação pública" da fila de produção (§7), aguardando a decisão §4 item 2; abertura comercial ligada ao §4 item 14 (FN-068)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 E8; home estática (docs/101, 102); H1-P apresentação de pré-lançamento, etapas P1–P5 (docs/161, 162, 164)

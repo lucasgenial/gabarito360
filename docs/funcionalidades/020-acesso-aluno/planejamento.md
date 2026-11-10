@@ -1,6 +1,8 @@
 # 020 — Acesso próprio do aluno — Planejamento
 
-**Estado no tronco:** Pendente (Incerto no plano mestre)
+**Implementação:** Pendente
+**Etapa:** Em planejamento
+**Observação de estado:** Incerto no plano mestre
 **Prioridade no plano mestre:** Onda 4, a avaliar junto com FN-067; depende da decisão §4 item 10. Proposta ainda não aprovada (§5).
 **Natureza:** evolução de existente (há código parcial sem liberação)
 **Origem:** tronco original — docs/19 MP-041 e decisão 6.4; docs/03

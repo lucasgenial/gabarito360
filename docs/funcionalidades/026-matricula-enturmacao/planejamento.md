@@ -1,6 +1,7 @@
 # 026 — Matrícula e enturmação (MT1) — Planejamento
 
-**Estado no tronco:** Parcial
+**Implementação:** Parcial
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 1 — Módulos transversais e fundações de dados, ordem 5 (destrava P1.4.6, P4.4, TE1 e T6)
 **Natureza:** evolução de existente (parte existente documentada a partir do código)
 **Origem:** docs/115 §7 e §12 (MT1); docs/13 MP-035b (status de matrícula); docs/28 A5 (troca de turma com histórico)

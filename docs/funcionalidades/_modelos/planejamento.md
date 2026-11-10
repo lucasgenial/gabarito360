@@ -1,10 +1,13 @@
 # <NNN> — <Nome da funcionalidade> — Planejamento
 
-**Estado no tronco:** <Candidata | Priorizada | Em planejamento | Planejamento aprovado | Em execução | Em homologação | Concluída | Adiada | Substituída>
-**Prioridade no plano mestre:** <posição/onda>
+**Implementação:** <Concluída | Em homologação | Parcial | Pendente | Adiada | Substituída | Candidata> (igual ao catálogo)
+**Etapa:** <Candidata | Priorizada | Em planejamento | Planejamento aprovado | Em execução | Em homologação | Concluída | Adiada | Substituída> (igual ao catálogo)
+**Posição no plano mestre:** <onda e ordem, ou "fora das ondas">
 **Natureza:** <nova | existente documentada a partir do código | evolução de existente>
 **Origem:** <tronco original (docs/13 MP-xxx, docs/28 pacote) | surgiu na entrega <x> em <data>>
-**Atualizado em:** <AAAA-MM-DD>, por <agente/pessoa>
+**Atualizado em:** <AAAA-MM-DD>, por lucasgenial
+
+> Escreva este documento no padrão ASD-STE100 moderado (AGENTS.md): uma ideia por frase, voz ativa, frases curtas.
 
 ## 1. Objetivo
 O problema resolvido e para quem, em 2 ou 3 frases.

@@ -1,6 +1,7 @@
 # 025 — Transferências institucionais (TR1, TE1, UX1) — Planejamento
 
-**Estado no tronco:** Pendente
+**Implementação:** Pendente
+**Etapa:** Em planejamento
 **Prioridade no plano mestre:** Onda 3 — Ciclo de vida de dados pessoais e institucional (TR1 → TE1 → UX1)
 **Natureza:** nova (substitui a política de FN-024)
 **Origem:** docs/115 §7–§9 e §12 (replanejamento de 03/11/2026), docs/116, 117, 139

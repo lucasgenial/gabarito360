@@ -1,6 +1,7 @@
 # 073 — Layout responsivo — Planejamento
 
-**Estado no tronco:** Concluída
+**Implementação:** Concluída
+**Etapa:** Concluída
 **Prioridade no plano mestre:** sem posição na fila (concluída; fora das ondas do §5)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — auditoria de layout de 30/10/2026 ([docs/23](../../23-plano-layout-responsivo.md), etapas L0–L8)

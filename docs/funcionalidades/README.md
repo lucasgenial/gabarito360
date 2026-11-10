@@ -1,103 +1,163 @@
-# Funcionalidades do Gabarito360 — índice
+# Catálogo de funcionalidades do Gabarito360
 
-**Atualizado em:** 09/11/2026
-**Fonte de prioridade e de status:** [plano mestre](../planejamento/00-plano-mestre.md) (PROPOSTA, aguardando aprovação da priorização). Regras: [governança](../planejamento/01-governanca.md).
+**Atualizado em:** 10/11/2026
 
-Cada funcionalidade tem um identificador canônico **FN-NNN** e uma pasta `docs/funcionalidades/NNN-slug/` com dois documentos, escritos nos [modelos](_modelos/):
+## Para que serve este catálogo
 
-- `planejamento.md` — objetivo, escopo, dependências, fases e subfases com evidência, riscos.
-- `casos-de-uso.md` — atores, permissões, fluxos e critérios verificáveis.
+Este catálogo é a **lista oficial** das funcionalidades do Gabarito360. Cada funcionalidade aparece aqui uma única vez.
 
-As 77 pastas foram criadas em 10/11/2026 com os dois documentos, em estado de **rascunho para aprovação**. Nenhuma funcionalidade pode entrar em execução sem os dois documentos aprovados pelo responsável.
+Use este catálogo para:
 
-**Funcionalidades existentes** (Concluída, Em homologação, Parcial, Substituída) tiveram os documentos escritos **a partir do código e das evidências** (PRs, docs numerados), descrevendo o comportamento atual e marcando com ⚠ as diferenças em relação ao planejado. **Funcionalidades novas** (Pendente, Candidata, Adiada) terão os documentos escritos antes da execução, na ordem das ondas do plano mestre.
+- Encontrar uma funcionalidade e os seus documentos.
+- Saber o estado atual de cada funcionalidade.
+- Traduzir um identificador antigo (por exemplo, MP-032 ou T5) para o identificador atual (FN-NNN).
+- Registrar uma funcionalidade nova.
 
-O estado abaixo repete o do plano mestre; em divergência, vale o plano mestre. A equivalência com os identificadores antigos (MP-xxx, T5, P3.2, F4...) está no §1 do plano mestre.
+Este catálogo **não** define a ordem de execução. A ordem está no [plano mestre](../planejamento/00-plano-mestre.md), que é o orquestrador da execução. As regras estão na [governança](../planejamento/01-governanca.md).
 
-| FN | Slug | Nome | Domínio | Estado | Pasta prevista | planejamento.md | casos-de-uso.md |
-|---|---|---|---|---|---|---|---|
-| FN-001 | fundacao-monorepo | Fundação do monorepo, banco e bases API/WEB | Plataforma e operação | Concluída | [`001-fundacao-monorepo/`](001-fundacao-monorepo/) | [planejamento](001-fundacao-monorepo/planejamento.md) | [casos de uso](001-fundacao-monorepo/casos-de-uso.md) |
-| FN-002 | base-operacao | Base de operação (backup, Redis, filas, leitura pela fila) | Plataforma e operação | Concluída | [`002-base-operacao/`](002-base-operacao/) | [planejamento](002-base-operacao/planejamento.md) | [casos de uso](002-base-operacao/casos-de-uso.md) |
-| FN-003 | publicacao-e-homologacao | Publicação, deploy e homologação isolada | Plataforma e operação | Concluída | [`003-publicacao-e-homologacao/`](003-publicacao-e-homologacao/) | [planejamento](003-publicacao-e-homologacao/planejamento.md) | [casos de uso](003-publicacao-e-homologacao/casos-de-uso.md) |
-| FN-004 | auditoria | Auditoria de requisições, expurgo e tela de consulta | Plataforma e operação | Parcial | [`004-auditoria/`](004-auditoria/) | [planejamento](004-auditoria/planejamento.md) | [casos de uso](004-auditoria/casos-de-uso.md) |
-| FN-005 | suporte-ver-como | "Ver como" e atendimento auditado | Plataforma e operação | Pendente | [`005-suporte-ver-como/`](005-suporte-ver-como/) | [planejamento](005-suporte-ver-como/planejamento.md) | [casos de uso](005-suporte-ver-como/casos-de-uso.md) |
-| FN-006 | painel-tecnico | Painel técnico | Plataforma e operação | Pendente | [`006-painel-tecnico/`](006-painel-tecnico/) | [planejamento](006-painel-tecnico/planejamento.md) | [casos de uso](006-painel-tecnico/casos-de-uso.md) |
-| FN-007 | escala-infraestrutura | Limites, armazenamento externo, separação e observabilidade | Plataforma e operação | Pendente | [`007-escala-infraestrutura/`](007-escala-infraestrutura/) | [planejamento](007-escala-infraestrutura/planejamento.md) | [casos de uso](007-escala-infraestrutura/casos-de-uso.md) |
-| FN-008 | ci-integracao | Integração contínua (MariaDB) | Plataforma e operação | Concluída | [`008-ci-integracao/`](008-ci-integracao/) | [planejamento](008-ci-integracao/planejamento.md) | [casos de uso](008-ci-integracao/casos-de-uso.md) |
-| FN-009 | estrutura-diretorios-alvo | Estrutura-alvo de diretórios | Plataforma e operação | Candidata | [`009-estrutura-diretorios-alvo/`](009-estrutura-diretorios-alvo/) | [planejamento](009-estrutura-diretorios-alvo/planejamento.md) | [casos de uso](009-estrutura-diretorios-alvo/casos-de-uso.md) |
-| FN-010 | app-mobile | Aplicativos Android e iOS | Plataforma e operação | Adiada | [`010-app-mobile/`](010-app-mobile/) | [planejamento](010-app-mobile/planejamento.md) | [casos de uso](010-app-mobile/casos-de-uso.md) |
-| FN-011 | autenticacao-conta | Autenticação e conta | Identidade e acesso | Parcial | [`011-autenticacao-conta/`](011-autenticacao-conta/) | [planejamento](011-autenticacao-conta/planejamento.md) | [casos de uso](011-autenticacao-conta/casos-de-uso.md) |
-| FN-012 | permissoes-motor | Motor de permissões, equipe e menus | Identidade e acesso | Concluída | [`012-permissoes-motor/`](012-permissoes-motor/) | [planejamento](012-permissoes-motor/planejamento.md) | [casos de uso](012-permissoes-motor/casos-de-uso.md) |
-| FN-013 | acessos-internos | Acessos internos (Desenvolvedor, Suporte, Financeiro) | Identidade e acesso | Concluída | [`013-acessos-internos/`](013-acessos-internos/) | [planejamento](013-acessos-internos/planejamento.md) | [casos de uso](013-acessos-internos/casos-de-uso.md) |
-| FN-014 | perfis-institucionais | Perfis institucionais (secretário escolar, vice-diretor e outros) | Identidade e acesso | Concluída | [`014-perfis-institucionais/`](014-perfis-institucionais/) | [planejamento](014-perfis-institucionais/planejamento.md) | [casos de uso](014-perfis-institucionais/casos-de-uso.md) |
-| FN-015 | vinculos-contexto | Vínculos por pessoa e seleção de vínculo | Identidade e acesso | Concluída | [`015-vinculos-contexto/`](015-vinculos-contexto/) | [planejamento](015-vinculos-contexto/planejamento.md) | [casos de uso](015-vinculos-contexto/casos-de-uso.md) |
-| FN-016 | identidade-pessoal | Identidade pessoal (ID1) | Identidade e acesso | Parcial | [`016-identidade-pessoal/`](016-identidade-pessoal/) | [planejamento](016-identidade-pessoal/planejamento.md) | [casos de uso](016-identidade-pessoal/casos-de-uso.md) |
-| FN-017 | convites-cpf | Vínculos e convites CPF-primeiro (VI1) | Identidade e acesso | Pendente | [`017-convites-cpf/`](017-convites-cpf/) | [planejamento](017-convites-cpf/planejamento.md) | [casos de uso](017-convites-cpf/casos-de-uso.md) |
-| FN-018 | seguranca-urls-sessao | Segurança de URLs, sessão e dependências (UR1–UR4) | Identidade e acesso | Em homologação | [`018-seguranca-urls-sessao/`](018-seguranca-urls-sessao/) | [planejamento](018-seguranca-urls-sessao/planejamento.md) | [casos de uso](018-seguranca-urls-sessao/casos-de-uso.md) |
-| FN-019 | perfil-configuracoes | Meu perfil, configurações e imagem de perfil | Identidade e acesso | Concluída | [`019-perfil-configuracoes/`](019-perfil-configuracoes/) | [planejamento](019-perfil-configuracoes/planejamento.md) | [casos de uso](019-perfil-configuracoes/casos-de-uso.md) |
-| FN-020 | acesso-aluno | Acesso próprio do aluno | Identidade e acesso | Pendente | [`020-acesso-aluno/`](020-acesso-aluno/) | [planejamento](020-acesso-aluno/planejamento.md) | [casos de uso](020-acesso-aluno/casos-de-uso.md) |
-| FN-021 | clientes-espacos | Clientes e espaços (T1/T2) | Clientes, espaços e vínculos | Concluída | [`021-clientes-espacos/`](021-clientes-espacos/) | [planejamento](021-clientes-espacos/planejamento.md) | [casos de uso](021-clientes-espacos/casos-de-uso.md) |
-| FN-022 | espaco-pessoal | Espaço pessoal e professor autônomo (T3) | Clientes, espaços e vínculos | Concluída | [`022-espaco-pessoal/`](022-espaco-pessoal/) | [planejamento](022-espaco-pessoal/planejamento.md) | [casos de uso](022-espaco-pessoal/casos-de-uso.md) |
-| FN-023 | cadastro-clientes | Cadastro de clientes (T4) | Clientes, espaços e vínculos | Concluída | [`023-cadastro-clientes/`](023-cadastro-clientes/) | [planejamento](023-cadastro-clientes/planejamento.md) | [casos de uso](023-cadastro-clientes/casos-de-uso.md) |
-| FN-024 | copias-entre-espacos | Cópias entre espaços (T5) | Clientes, espaços e vínculos | Substituída | [`024-copias-entre-espacos/`](024-copias-entre-espacos/) | [planejamento](024-copias-entre-espacos/planejamento.md) | [casos de uso](024-copias-entre-espacos/casos-de-uso.md) |
-| FN-025 | transferencias-institucionais | Transferências institucionais (TR1, TE1, UX1) | Clientes, espaços e vínculos | Pendente | [`025-transferencias-institucionais/`](025-transferencias-institucionais/) | [planejamento](025-transferencias-institucionais/planejamento.md) | [casos de uso](025-transferencias-institucionais/casos-de-uso.md) |
-| FN-026 | matricula-enturmacao | Matrícula e enturmação (MT1) | Clientes, espaços e vínculos | Parcial | [`026-matricula-enturmacao/`](026-matricula-enturmacao/) | [planejamento](026-matricula-enturmacao/planejamento.md) | [casos de uso](026-matricula-enturmacao/casos-de-uso.md) |
-| FN-027 | professor-independente | Professor independente (PA1) | Clientes, espaços e vínculos | Parcial | [`027-professor-independente/`](027-professor-independente/) | [planejamento](027-professor-independente/planejamento.md) | [casos de uso](027-professor-independente/casos-de-uso.md) |
-| FN-028 | encerramento-cliente | Encerramento de cliente (T6) | Clientes, espaços e vínculos | Pendente | [`028-encerramento-cliente/`](028-encerramento-cliente/) | [planejamento](028-encerramento-cliente/planejamento.md) | [casos de uso](028-encerramento-cliente/casos-de-uso.md) |
-| FN-029 | escola-independente | Escola independente / autônoma (EI1) | Clientes, espaços e vínculos | Pendente | [`029-escola-independente/`](029-escola-independente/) | [planejamento](029-escola-independente/planejamento.md) | [casos de uso](029-escola-independente/casos-de-uso.md) |
-| FN-030 | saas-autocadastro-assinatura | Autocadastro, planos e assinatura | Clientes, espaços e vínculos | Substituída | [`030-saas-autocadastro-assinatura/`](030-saas-autocadastro-assinatura/) | [planejamento](030-saas-autocadastro-assinatura/planejamento.md) | [casos de uso](030-saas-autocadastro-assinatura/casos-de-uso.md) |
-| FN-031 | catalogo-instituicoes | Catálogo nacional de instituições (CI1) | Clientes, espaços e vínculos | Em homologação | [`031-catalogo-instituicoes/`](031-catalogo-instituicoes/) | [planejamento](031-catalogo-instituicoes/planejamento.md) | [casos de uso](031-catalogo-instituicoes/casos-de-uso.md) |
-| FN-032 | busca-catalogo-autocompletar | Busca do catálogo por autocompletar | Clientes, espaços e vínculos | Adiada | [`032-busca-catalogo-autocompletar/`](032-busca-catalogo-autocompletar/) | [planejamento](032-busca-catalogo-autocompletar/planejamento.md) | [casos de uso](032-busca-catalogo-autocompletar/casos-de-uso.md) |
-| FN-033 | estrutura-escolar | Núcleos, escolas, turmas e alunos | Cadastros escolares | Parcial | [`033-estrutura-escolar/`](033-estrutura-escolar/) | [planejamento](033-estrutura-escolar/planejamento.md) | [casos de uso](033-estrutura-escolar/casos-de-uso.md) |
-| FN-034 | importacao-exportacao-alunos | Importação e exportação de alunos | Cadastros escolares | Pendente | [`034-importacao-exportacao-alunos/`](034-importacao-exportacao-alunos/) | [planejamento](034-importacao-exportacao-alunos/planejamento.md) | [casos de uso](034-importacao-exportacao-alunos/casos-de-uso.md) |
-| FN-035 | responsaveis-alunos | Dados dos responsáveis | Cadastros escolares | Pendente | [`035-responsaveis-alunos/`](035-responsaveis-alunos/) | [planejamento](035-responsaveis-alunos/planejamento.md) | [casos de uso](035-responsaveis-alunos/casos-de-uso.md) |
-| FN-036 | organizacao-turma | Organização da turma (TU1) | Cadastros escolares | Em homologação | [`036-organizacao-turma/`](036-organizacao-turma/) | [planejamento](036-organizacao-turma/planejamento.md) | [casos de uso](036-organizacao-turma/casos-de-uso.md) |
-| FN-037 | imagens-turmas-educadores | Imagens de turmas e educadores | Cadastros escolares | Parcial | [`037-imagens-turmas-educadores/`](037-imagens-turmas-educadores/) | [planejamento](037-imagens-turmas-educadores/planejamento.md) | [casos de uso](037-imagens-turmas-educadores/casos-de-uso.md) |
-| FN-038 | disciplinas-curriculo | Disciplinas, áreas e currículo das provas (DC1) | Cadastros escolares | Em homologação | [`038-disciplinas-curriculo/`](038-disciplinas-curriculo/) | [planejamento](038-disciplinas-curriculo/planejamento.md) | [casos de uso](038-disciplinas-curriculo/casos-de-uso.md) |
-| FN-039 | periodos-letivos | Períodos letivos | Cadastros escolares | Candidata | [`039-periodos-letivos/`](039-periodos-letivos/) | [planejamento](039-periodos-letivos/planejamento.md) | [casos de uso](039-periodos-letivos/casos-de-uso.md) |
-| FN-040 | provas-gabaritos | Provas e gabaritos | Provas e gabaritos | Concluída | [`040-provas-gabaritos/`](040-provas-gabaritos/) | [planejamento](040-provas-gabaritos/planejamento.md) | [casos de uso](040-provas-gabaritos/casos-de-uso.md) |
-| FN-041 | autoria-provas | Autoria das provas e "Meu espaço" | Provas e gabaritos | Em homologação | [`041-autoria-provas/`](041-autoria-provas/) | [planejamento](041-autoria-provas/planejamento.md) | [casos de uso](041-autoria-provas/casos-de-uso.md) |
-| FN-042 | duplicacao-provas | Duplicação de provas (CP1, CP2) | Provas e gabaritos | Parcial | [`042-duplicacao-provas/`](042-duplicacao-provas/) | [planejamento](042-duplicacao-provas/planejamento.md) | [casos de uso](042-duplicacao-provas/casos-de-uso.md) |
-| FN-043 | editor-provas-questoes | Editor de provas e banco de questões | Provas e gabaritos | Candidata | [`043-editor-provas-questoes/`](043-editor-provas-questoes/) | [planejamento](043-editor-provas-questoes/planejamento.md) | [casos de uso](043-editor-provas-questoes/casos-de-uso.md) |
-| FN-044 | acervo-gii | Acervo inteligente (GII) | Provas e gabaritos | Candidata | [`044-acervo-gii/`](044-acervo-gii/) | [planejamento](044-acervo-gii/planejamento.md) | [casos de uso](044-acervo-gii/casos-de-uso.md) |
-| FN-045 | omr-correcao | Motor OMR e acompanhamento da correção | Correção e OMR | Concluída | [`045-omr-correcao/`](045-omr-correcao/) | [planejamento](045-omr-correcao/planejamento.md) | [casos de uso](045-omr-correcao/casos-de-uso.md) |
-| FN-046 | revisao-leituras | Fotos da correção e revisão de leituras | Correção e OMR | Parcial | [`046-revisao-leituras/`](046-revisao-leituras/) | [planejamento](046-revisao-leituras/planejamento.md) | [casos de uso](046-revisao-leituras/casos-de-uso.md) |
-| FN-047 | omr-qualidade-resultado | Qualidade, tentativas, resultado e documentos verificáveis (OMR1–3) | Correção e OMR | Em homologação | [`047-omr-qualidade-resultado/`](047-omr-qualidade-resultado/) | [planejamento](047-omr-qualidade-resultado/planejamento.md) | [casos de uso](047-omr-qualidade-resultado/casos-de-uso.md) |
-| FN-048 | omr-driver-externo | Driver OMR externo | Correção e OMR | Candidata | [`048-omr-driver-externo/`](048-omr-driver-externo/) | [planejamento](048-omr-driver-externo/planejamento.md) | [casos de uso](048-omr-driver-externo/casos-de-uso.md) |
-| FN-049 | relatorios-resultados | Resultados e relatórios consolidados | Resultados e relatórios | Concluída | [`049-relatorios-resultados/`](049-relatorios-resultados/) | [planejamento](049-relatorios-resultados/planejamento.md) | [casos de uso](049-relatorios-resultados/casos-de-uso.md) |
-| FN-050 | relatorio-turma-pdf | Relatório PDF da turma | Resultados e relatórios | Pendente | [`050-relatorio-turma-pdf/`](050-relatorio-turma-pdf/) | [planejamento](050-relatorio-turma-pdf/planejamento.md) | [casos de uso](050-relatorio-turma-pdf/casos-de-uso.md) |
-| FN-051 | analises-avancadas | TCT/TRI, integridade e sínteses | Resultados e relatórios | Candidata | [`051-analises-avancadas/`](051-analises-avancadas/) | [planejamento](051-analises-avancadas/planejamento.md) | [casos de uso](051-analises-avancadas/casos-de-uso.md) |
-| FN-052 | dashboards-perfil | Painéis por perfil | Painéis | Concluída | [`052-dashboards-perfil/`](052-dashboards-perfil/) | [planejamento](052-dashboards-perfil/planejamento.md) | [casos de uso](052-dashboards-perfil/casos-de-uso.md) |
-| FN-053 | paineis-turmas | Painéis de turmas e da turma | Painéis | Parcial | [`053-paineis-turmas/`](053-paineis-turmas/) | [planejamento](053-paineis-turmas/planejamento.md) | [casos de uso](053-paineis-turmas/casos-de-uso.md) |
-| FN-054 | paineis-editor | Personalização e editor dos painéis | Painéis | Concluída | [`054-paineis-editor/`](054-paineis-editor/) | [planejamento](054-paineis-editor/planejamento.md) | [casos de uso](054-paineis-editor/casos-de-uso.md) |
-| FN-055 | acompanhamento-pedagogico | Acompanhamento pedagógico | Painéis | Pendente | [`055-acompanhamento-pedagogico/`](055-acompanhamento-pedagogico/) | [planejamento](055-acompanhamento-pedagogico/planejamento.md) | [casos de uso](055-acompanhamento-pedagogico/casos-de-uso.md) |
-| FN-056 | agenda-calendario | Agenda e calendário (módulo transversal) | Agenda e notificações | Pendente | [`056-agenda-calendario/`](056-agenda-calendario/) | [planejamento](056-agenda-calendario/planejamento.md) | [casos de uso](056-agenda-calendario/casos-de-uso.md) |
-| FN-057 | notificacoes | Notificações (módulo transversal) | Agenda e notificações | Pendente | [`057-notificacoes/`](057-notificacoes/) | [planejamento](057-notificacoes/planejamento.md) | [casos de uso](057-notificacoes/casos-de-uso.md) |
-| FN-058 | visitas-pedagogicas | Visitas pedagógicas | Agenda e notificações | Pendente | [`058-visitas-pedagogicas/`](058-visitas-pedagogicas/) | [planejamento](058-visitas-pedagogicas/planejamento.md) | [casos de uso](058-visitas-pedagogicas/casos-de-uso.md) |
-| FN-059 | agendamento-aplicacao-provas | Marcação e aplicação de provas | Agenda e notificações | Pendente | [`059-agendamento-aplicacao-provas/`](059-agendamento-aplicacao-provas/) | [planejamento](059-agendamento-aplicacao-provas/planejamento.md) | [casos de uso](059-agendamento-aplicacao-provas/casos-de-uso.md) |
-| FN-060 | email-transacional | E-mail transacional e Fale Conosco | Comunicação e e-mail | Parcial | [`060-email-transacional/`](060-email-transacional/) | [planejamento](060-email-transacional/planejamento.md) | [casos de uso](060-email-transacional/casos-de-uso.md) |
-| FN-061 | lgpd-termos-privacidade | Termos, privacidade e aceite | LGPD e portal | Parcial | [`061-lgpd-termos-privacidade/`](061-lgpd-termos-privacidade/) | [planejamento](061-lgpd-termos-privacidade/planejamento.md) | [casos de uso](061-lgpd-termos-privacidade/casos-de-uso.md) |
-| FN-062 | lgpd-inventario-retencao | Inventário de dados e retenção | LGPD e portal | Parcial | [`062-lgpd-inventario-retencao/`](062-lgpd-inventario-retencao/) | [planejamento](062-lgpd-inventario-retencao/planejamento.md) | [casos de uso](062-lgpd-inventario-retencao/casos-de-uso.md) |
-| FN-063 | lgpd-protecao-dados | Proteção dos dados (cifragem) | LGPD e portal | Concluída | [`063-lgpd-protecao-dados/`](063-lgpd-protecao-dados/) | [planejamento](063-lgpd-protecao-dados/planejamento.md) | [casos de uso](063-lgpd-protecao-dados/casos-de-uso.md) |
-| FN-064 | pedidos-titulares | Pedidos dos titulares (L4) | LGPD e portal | Parcial | [`064-pedidos-titulares/`](064-pedidos-titulares/) | [planejamento](064-pedidos-titulares/planejamento.md) | [casos de uso](064-pedidos-titulares/casos-de-uso.md) |
-| FN-065 | plano-incidentes | Plano de incidentes | LGPD e portal | Pendente | [`065-plano-incidentes/`](065-plano-incidentes/) | [planejamento](065-plano-incidentes/planejamento.md) | [casos de uso](065-plano-incidentes/casos-de-uso.md) |
-| FN-066 | avatares-alunos | Avatar no lugar de foto de aluno | LGPD e portal | Parcial | [`066-avatares-alunos/`](066-avatares-alunos/) | [planejamento](066-avatares-alunos/planejamento.md) | [casos de uso](066-avatares-alunos/casos-de-uso.md) |
-| FN-067 | portal-responsaveis | Portal dos responsáveis | LGPD e portal | Pendente | [`067-portal-responsaveis/`](067-portal-responsaveis/) | [planejamento](067-portal-responsaveis/planejamento.md) | [casos de uso](067-portal-responsaveis/casos-de-uso.md) |
-| FN-068 | financeiro | Financeiro (contratos, faturas, pagamentos) | Financeiro | Pendente | [`068-financeiro/`](068-financeiro/) | [planejamento](068-financeiro/planejamento.md) | [casos de uso](068-financeiro/casos-de-uso.md) |
-| FN-069 | selo-documentos | Selo dos documentos | Financeiro | Pendente | [`069-selo-documentos/`](069-selo-documentos/) | [planejamento](069-selo-documentos/planejamento.md) | [casos de uso](069-selo-documentos/casos-de-uso.md) |
-| FN-070 | identidade-visual | Identidade visual e gráficos | Público e marca | Concluída | [`070-identidade-visual/`](070-identidade-visual/) | [planejamento](070-identidade-visual/planejamento.md) | [casos de uso](070-identidade-visual/casos-de-uso.md) |
-| FN-071 | marca-documentos | Marca oficial e cabeçalhos de documentos | Público e marca | Em homologação | [`071-marca-documentos/`](071-marca-documentos/) | [planejamento](071-marca-documentos/planejamento.md) | [casos de uso](071-marca-documentos/casos-de-uso.md) |
-| FN-072 | site-publico | Site público e apresentação | Público e marca | Em homologação | [`072-site-publico/`](072-site-publico/) | [planejamento](072-site-publico/planejamento.md) | [casos de uso](072-site-publico/casos-de-uso.md) |
-| FN-073 | layout-responsivo | Layout responsivo | Qualidade transversal | Concluída | [`073-layout-responsivo/`](073-layout-responsivo/) | [planejamento](073-layout-responsivo/planejamento.md) | [casos de uso](073-layout-responsivo/casos-de-uso.md) |
-| FN-074 | tabelas-padrao | Padrão de tabelas e listas | Qualidade transversal | Em homologação | [`074-tabelas-padrao/`](074-tabelas-padrao/) | [planejamento](074-tabelas-padrao/planejamento.md) | [casos de uso](074-tabelas-padrao/casos-de-uso.md) |
-| FN-075 | tailwind-ui | Migração para Tailwind e UX transversal | Qualidade transversal | Parcial | [`075-tailwind-ui/`](075-tailwind-ui/) | [planejamento](075-tailwind-ui/planejamento.md) | [casos de uso](075-tailwind-ui/casos-de-uso.md) |
-| FN-076 | carregamento-estados | Carregamento, estados de erro e navegação | Qualidade transversal | Parcial | [`076-carregamento-estados/`](076-carregamento-estados/) | [planejamento](076-carregamento-estados/planejamento.md) | [casos de uso](076-carregamento-estados/casos-de-uso.md) |
-| FN-077 | desempenho | Desempenho e carga | Qualidade transversal | Parcial | [`077-desempenho/`](077-desempenho/) | [planejamento](077-desempenho/planejamento.md) | [casos de uso](077-desempenho/casos-de-uso.md) |
+## Documentos de cada funcionalidade
 
-**Totais por estado:** Concluída 20 · Em homologação 9 · Parcial 18 · Pendente 20 · Adiada 2 · Substituída 2 · Candidata 6 · total 77.
+Cada funcionalidade tem uma pasta `docs/funcionalidades/NNN-slug/` com dois documentos:
 
-## Como incluir uma funcionalidade nova
+| Documento | Conteúdo |
+|---|---|
+| `planejamento.md` | Objetivo, escopo, dependências, fases, subfases com evidência e riscos |
+| `casos-de-uso.md` | Atores, permissões, fluxos e critérios de aceite verificáveis |
 
-1. Registrar no plano mestre como **Candidata**, com origem e data, usando o próximo número livre (FN-078 em diante).
-2. Acrescentar a linha neste índice.
-3. Aguardar a priorização do responsável antes de escrever os documentos ou executar.
+Os modelos dos dois documentos estão em [`_modelos/`](_modelos/).
+
+Uma funcionalidade só entra em execução depois que o responsável aprova os dois documentos.
+
+## Colunas da tabela
+
+| Coluna | Significado |
+|---|---|
+| FN | Identificador único e permanente. Um número nunca é reutilizado. |
+| Nome | Nome curto da funcionalidade. |
+| Identificador antigo (documento) | Códigos usados antes deste catálogo e o documento de origem. Use para ler documentos históricos. |
+| Domínio | Área do sistema. |
+| Implementação | Quanto da funcionalidade existe no código. |
+| Etapa | Onde a funcionalidade está no ciclo de trabalho. |
+| Documentos | Links para o planejamento e os casos de uso. |
+
+**Valores de Implementação:**
+
+| Valor | Significado |
+|---|---|
+| Concluída | Entregue e validada. |
+| Em homologação | Publicada só na homologação, sem validação final. |
+| Parcial | Uma parte existe no código. Outra parte está pendente. |
+| Pendente | Nada existe no código. |
+| Adiada | Retirada da fila por decisão do responsável. |
+| Substituída | Outra funcionalidade ocupa o lugar desta. |
+| Candidata | Ideia registrada, sem prioridade definida. |
+
+**Valores de Etapa:**
+
+| Valor | Significado |
+|---|---|
+| Candidata | Registrada no catálogo. Aguarda a priorização do responsável. |
+| Priorizada | Tem posição definida no plano mestre. |
+| Em planejamento | Os documentos estão em escrita ou aguardam aprovação. |
+| Planejamento aprovado | O responsável aprovou os documentos. A execução pode começar. |
+| Em execução | Uma subfase está em desenvolvimento. |
+| Em homologação | A entrega está publicada só na homologação. |
+| Concluída | A entrega está validada. A produção depende de decisão expressa. |
+| Adiada ou Substituída | Fora da fila. O motivo está no planejamento. |
+
+Em 10/11/2026, todos os documentos estão em rascunho e aguardam aprovação. Por isso, as funcionalidades com trabalho pendente estão na etapa "Em planejamento".
+
+## Como registrar uma funcionalidade nova
+
+Faça estes passos com o agente `gerente-projetos`:
+
+1. Verifique se a funcionalidade já existe neste catálogo. Se existe, use a funcionalidade existente.
+2. Use o próximo número livre de FN. A numeração continua a partir de FN-078.
+3. Adicione uma linha nesta tabela. Use Implementação "Candidata" e Etapa "Candidata".
+4. Crie a pasta `NNN-slug/` com os dois documentos, a partir dos modelos.
+5. No `planejamento.md`, registre a origem (por exemplo, "surgiu na entrega dos painéis").
+6. Peça a priorização ao responsável. O plano mestre recebe a funcionalidade só depois dessa decisão.
+
+**Atenção:** a CI verifica a consistência deste catálogo. Uma pasta sem linha na tabela, uma linha sem pasta ou uma etapa diferente do `planejamento.md` falha a verificação.
+
+## Funcionalidades
+
+| FN | Nome | Identificador antigo (documento) | Domínio | Implementação | Etapa | Documentos |
+|---|---|---|---|---|---|---|
+| FN-001 | Fundação do monorepo, banco e bases API/WEB | MP-001..005 (docs/13) | Plataforma e operação | Concluída | Concluída | [planejamento](001-fundacao-monorepo/planejamento.md) · [casos de uso](001-fundacao-monorepo/casos-de-uso.md) |
+| FN-002 | Base de operação (backup, Redis, filas, leitura pela fila) | B1–B4, B6 (docs/28) | Plataforma e operação | Concluída | Concluída | [planejamento](002-base-operacao/planejamento.md) · [casos de uso](002-base-operacao/casos-de-uso.md) |
+| FN-003 | Publicação, deploy e homologação isolada | B5 e extensões (`--manter-manutencao`, `--backup-final`, `umask`), procedimentos T2 (docs/49–54), publicação por fase (docs/99–100); H1 homologação isolada (docs/125–130, ADR-H1) | Plataforma e operação | Concluída | Concluída | [planejamento](003-publicacao-e-homologacao/planejamento.md) · [casos de uso](003-publicacao-e-homologacao/casos-de-uso.md) |
+| FN-004 | Auditoria de requisições, expurgo e tela de consulta | AU1, expurgo, AU2 | Plataforma e operação | Parcial | Em planejamento | [planejamento](004-auditoria/planejamento.md) · [casos de uso](004-auditoria/casos-de-uso.md) |
+| FN-005 | "Ver como" e atendimento auditado | AU3, S1 | Plataforma e operação | Pendente | Em planejamento | [planejamento](005-suporte-ver-como/planejamento.md) · [casos de uso](005-suporte-ver-como/casos-de-uso.md) |
+| FN-006 | Painel técnico | A2 painel técnico (docs/28) — não confundir com T5-A2 | Plataforma e operação | Pendente | Em planejamento | [planejamento](006-painel-tecnico/planejamento.md) · [casos de uso](006-painel-tecnico/casos-de-uso.md) |
+| FN-007 | Limites, armazenamento externo, separação e observabilidade | X3–X6; AP1-L; separação física da API | Plataforma e operação | Pendente | Em planejamento | [planejamento](007-escala-infraestrutura/planejamento.md) · [casos de uso](007-escala-infraestrutura/casos-de-uso.md) |
+| FN-008 | Integração contínua (MariaDB) | CI do MariaDB (docs/181) | Plataforma e operação | Concluída | Concluída | [planejamento](008-ci-integracao/planejamento.md) · [casos de uso](008-ci-integracao/casos-de-uso.md) |
+| FN-009 | Estrutura-alvo de diretórios | Estrutura-alvo de diretórios (docs/168) | Plataforma e operação | Candidata | Candidata | [planejamento](009-estrutura-diretorios-alvo/planejamento.md) · [casos de uso](009-estrutura-diretorios-alvo/casos-de-uso.md) |
+| FN-010 | Aplicativos Android e iOS | MP-023 (Android) e iOS | Plataforma e operação | Adiada | Adiada | [planejamento](010-app-mobile/planejamento.md) · [casos de uso](010-app-mobile/casos-de-uso.md) |
+| FN-011 | Autenticação e conta | MP-012; RF-001 | Identidade e acesso | Parcial | Em planejamento | [planejamento](011-autenticacao-conta/planejamento.md) · [casos de uso](011-autenticacao-conta/casos-de-uso.md) |
+| FN-012 | Motor de permissões, equipe e menus | MP-013, 018, 026, 030, 031, 036; etapas 0–7 do docs/21 | Identidade e acesso | Concluída | Concluída | [planejamento](012-permissoes-motor/planejamento.md) · [casos de uso](012-permissoes-motor/casos-de-uso.md) |
+| FN-013 | Acessos internos (Desenvolvedor, Suporte, Financeiro) | A1-A, A1-B1, A1-B2 | Identidade e acesso | Concluída | Concluída | [planejamento](013-acessos-internos/planejamento.md) · [casos de uso](013-acessos-internos/casos-de-uso.md) |
+| FN-014 | Perfis institucionais (secretário escolar, vice-diretor e outros) | A1-C (secretário escolar); PF1 | Identidade e acesso | Concluída | Concluída | [planejamento](014-perfis-institucionais/planejamento.md) · [casos de uso](014-perfis-institucionais/casos-de-uso.md) |
+| FN-015 | Vínculos por pessoa e seleção de vínculo | V1, V2 vínculos (docs/28, 55–62) | Identidade e acesso | Concluída | Concluída | [planejamento](015-vinculos-contexto/planejamento.md) · [casos de uso](015-vinculos-contexto/casos-de-uso.md) |
+| FN-016 | Identidade pessoal (ID1) | ID1 (inclui ID1-D1 provisórios) | Identidade e acesso | Parcial | Em planejamento | [planejamento](016-identidade-pessoal/planejamento.md) · [casos de uso](016-identidade-pessoal/casos-de-uso.md) |
+| FN-017 | Vínculos e convites CPF-primeiro (VI1) | VI1 | Identidade e acesso | Pendente | Em planejamento | [planejamento](017-convites-cpf/planejamento.md) · [casos de uso](017-convites-cpf/casos-de-uso.md) |
+| FN-018 | Segurança de URLs, sessão e dependências (UR1–UR4) | UR1–UR4, UR2, UR2-P | Identidade e acesso | Em homologação | Em homologação | [planejamento](018-seguranca-urls-sessao/planejamento.md) · [casos de uso](018-seguranca-urls-sessao/casos-de-uso.md) |
+| FN-019 | Meu perfil, configurações e imagem de perfil | MP-024; IM1 | Identidade e acesso | Concluída | Concluída | [planejamento](019-perfil-configuracoes/planejamento.md) · [casos de uso](019-perfil-configuracoes/casos-de-uso.md) |
+| FN-020 | Acesso próprio do aluno | MP-041; decisão 6.4 do docs/19 | Identidade e acesso | Pendente | Em planejamento | [planejamento](020-acesso-aluno/planejamento.md) · [casos de uso](020-acesso-aluno/casos-de-uso.md) |
+| FN-021 | Clientes e espaços (T1/T2) | T1, T2 | Clientes, espaços e vínculos | Concluída | Concluída | [planejamento](021-clientes-espacos/planejamento.md) · [casos de uso](021-clientes-espacos/casos-de-uso.md) |
+| FN-022 | Espaço pessoal e professor autônomo (T3) | T3 | Clientes, espaços e vínculos | Concluída | Concluída | [planejamento](022-espaco-pessoal/planejamento.md) · [casos de uso](022-espaco-pessoal/casos-de-uso.md) |
+| FN-023 | Cadastro de clientes (T4) | T4 | Clientes, espaços e vínculos | Concluída | Concluída | [planejamento](023-cadastro-clientes/planejamento.md) · [casos de uso](023-cadastro-clientes/casos-de-uso.md) |
+| FN-024 | Cópias entre espaços (T5) | T5 (A–E) e revisão UX (PR #149) | Clientes, espaços e vínculos | Substituída | Substituída | [planejamento](024-copias-entre-espacos/planejamento.md) · [casos de uso](024-copias-entre-espacos/casos-de-uso.md) |
+| FN-025 | Transferências institucionais (TR1, TE1, UX1) | TR1, TE1, UX1 | Clientes, espaços e vínculos | Pendente | Em planejamento | [planejamento](025-transferencias-institucionais/planejamento.md) · [casos de uso](025-transferencias-institucionais/casos-de-uso.md) |
+| FN-026 | Matrícula e enturmação (MT1) | MP-035b (status de matrícula); A5 (importar/exportar): troca de turma com histórico; MT1 | Clientes, espaços e vínculos | Parcial | Em planejamento | [planejamento](026-matricula-enturmacao/planejamento.md) · [casos de uso](026-matricula-enturmacao/casos-de-uso.md) |
+| FN-027 | Professor independente (PA1) | PA1 | Clientes, espaços e vínculos | Parcial | Em planejamento | [planejamento](027-professor-independente/planejamento.md) · [casos de uso](027-professor-independente/casos-de-uso.md) |
+| FN-028 | Encerramento de cliente (T6) | T6 (A–E) | Clientes, espaços e vínculos | Pendente | Em planejamento | [planejamento](028-encerramento-cliente/planejamento.md) · [casos de uso](028-encerramento-cliente/casos-de-uso.md) |
+| FN-029 | Escola independente / autônoma (EI1) | EI1 escolas independentes (docs/163) | Clientes, espaços e vínculos | Pendente | Em planejamento | [planejamento](029-escola-independente/planejamento.md) · [casos de uso](029-escola-independente/casos-de-uso.md) |
+| FN-030 | Autocadastro, planos e assinatura | MP-025, 027, 028, 029; landing (só a rota) | Clientes, espaços e vínculos | Substituída | Substituída | [planejamento](030-saas-autocadastro-assinatura/planejamento.md) · [casos de uso](030-saas-autocadastro-assinatura/casos-de-uso.md) |
+| FN-031 | Catálogo nacional de instituições (CI1) | CI1 | Clientes, espaços e vínculos | Em homologação | Em homologação | [planejamento](031-catalogo-instituicoes/planejamento.md) · [casos de uso](031-catalogo-instituicoes/casos-de-uso.md) |
+| FN-032 | Busca do catálogo por autocompletar | F5 busca nacional do catálogo | Clientes, espaços e vínculos | Adiada | Adiada | [planejamento](032-busca-catalogo-autocompletar/planejamento.md) · [casos de uso](032-busca-catalogo-autocompletar/casos-de-uso.md) |
+| FN-033 | Núcleos, escolas, turmas e alunos | MP-014..017, MP-035a (foto), MP-039; A3, A4 (docs/28) — não confundir com T5-A3 | Cadastros escolares | Parcial | Em planejamento | [planejamento](033-estrutura-escolar/planejamento.md) · [casos de uso](033-estrutura-escolar/casos-de-uso.md) |
+| FN-034 | Importação e exportação de alunos | MP-016 (importação por planilha); A5 (importar/exportar) | Cadastros escolares | Pendente | Em planejamento | [planejamento](034-importacao-exportacao-alunos/planejamento.md) · [casos de uso](034-importacao-exportacao-alunos/casos-de-uso.md) |
+| FN-035 | Dados dos responsáveis | A6 | Cadastros escolares | Pendente | Em planejamento | [planejamento](035-responsaveis-alunos/planejamento.md) · [casos de uso](035-responsaveis-alunos/casos-de-uso.md) |
+| FN-036 | Organização da turma (TU1) | R1–R6 e TU1-R3 (docs/tu1-*); TU1 (docs/175, tu1-revisao-fluxos, tu1-r3) | Cadastros escolares | Em homologação | Em homologação | [planejamento](036-organizacao-turma/planejamento.md) · [casos de uso](036-organizacao-turma/casos-de-uso.md) |
+| FN-037 | Imagens de turmas e educadores | TU-IMG, IMG-E/L/N/P | Cadastros escolares | Parcial | Em planejamento | [planejamento](037-imagens-turmas-educadores/planejamento.md) · [casos de uso](037-imagens-turmas-educadores/casos-de-uso.md) |
+| FN-038 | Disciplinas, áreas e currículo das provas (DC1) | DC1 | Cadastros escolares | Em homologação | Em homologação | [planejamento](038-disciplinas-curriculo/planejamento.md) · [casos de uso](038-disciplinas-curriculo/casos-de-uso.md) |
+| FN-039 | Períodos letivos | P4 painéis (períodos); "PL1"; M3 "Tempo escolar e agenda" (docs/177) | Cadastros escolares | Candidata | Candidata | [planejamento](039-periodos-letivos/planejamento.md) · [casos de uso](039-periodos-letivos/casos-de-uso.md) |
+| FN-040 | Provas e gabaritos | MP-019, 020, 037 | Provas e gabaritos | Concluída | Concluída | [planejamento](040-provas-gabaritos/planejamento.md) · [casos de uso](040-provas-gabaritos/casos-de-uso.md) |
+| FN-041 | Autoria das provas e "Meu espaço" | Autoria das provas e "Meu espaço" (docs/132) | Provas e gabaritos | Em homologação | Em homologação | [planejamento](041-autoria-provas/planejamento.md) · [casos de uso](041-autoria-provas/casos-de-uso.md) |
+| FN-042 | Duplicação de provas (CP1, CP2) | A7; CP1, CP2 | Provas e gabaritos | Parcial | Em planejamento | [planejamento](042-duplicacao-provas/planejamento.md) · [casos de uso](042-duplicacao-provas/casos-de-uso.md) |
+| FN-043 | Editor de provas e banco de questões | — | Provas e gabaritos | Candidata | Candidata | [planejamento](043-editor-provas-questoes/planejamento.md) · [casos de uso](043-editor-provas-questoes/casos-de-uso.md) |
+| FN-044 | Acervo inteligente (GII) | P7.1 painéis; GII | Provas e gabaritos | Candidata | Candidata | [planejamento](044-acervo-gii/planejamento.md) · [casos de uso](044-acervo-gii/casos-de-uso.md) |
+| FN-045 | Motor OMR e acompanhamento da correção | MP-021, MP-033 e MP-038 (mesma entrega) | Correção e OMR | Concluída | Concluída | [planejamento](045-omr-correcao/planejamento.md) · [casos de uso](045-omr-correcao/casos-de-uso.md) |
+| FN-046 | Fotos da correção e revisão de leituras | R1–R3 fotos leves e revisão (docs/25); ações 1–4 do docs/24; hotfixes docs/152–157 | Correção e OMR | Parcial | Em planejamento | [planejamento](046-revisao-leituras/planejamento.md) · [casos de uso](046-revisao-leituras/casos-de-uso.md) |
+| FN-047 | Qualidade, tentativas, resultado e documentos verificáveis (OMR1–3) | OMR1–OMR3 | Correção e OMR | Em homologação | Em homologação | [planejamento](047-omr-qualidade-resultado/planejamento.md) · [casos de uso](047-omr-qualidade-resultado/casos-de-uso.md) |
+| FN-048 | Driver OMR externo | Driver OMR externo (fase 6 pós-MVP) | Correção e OMR | Candidata | Candidata | [planejamento](048-omr-driver-externo/planejamento.md) · [casos de uso](048-omr-driver-externo/casos-de-uso.md) |
+| FN-049 | Resultados e relatórios consolidados | MP-022, MP-034; hotfix PDF em lote (docs/123) | Resultados e relatórios | Concluída | Concluída | [planejamento](049-relatorios-resultados/planejamento.md) · [casos de uso](049-relatorios-resultados/casos-de-uso.md) |
+| FN-050 | Relatório PDF da turma | P8.1 painéis; TU1-PDF | Resultados e relatórios | Pendente | Em planejamento | [planejamento](050-relatorio-turma-pdf/planejamento.md) · [casos de uso](050-relatorio-turma-pdf/casos-de-uso.md) |
+| FN-051 | TCT/TRI, integridade e sínteses | P7.2–P7.4 painéis (TCT/TRI, integridade, sínteses) | Resultados e relatórios | Candidata | Candidata | [planejamento](051-analises-avancadas/planejamento.md) · [casos de uso](051-analises-avancadas/casos-de-uso.md) |
+| FN-052 | Painéis por perfil | MP-006..011, MP-040 (docs/13, docs/19); SEGES | Painéis | Concluída | Concluída | [planejamento](052-dashboards-perfil/planejamento.md) · [casos de uso](052-dashboards-perfil/casos-de-uso.md) |
+| FN-053 | Painéis de turmas e da turma | P0–P3, P8.2–P8.4 painéis (docs/177) | Painéis | Parcial | Em planejamento | [planejamento](053-paineis-turmas/planejamento.md) · [casos de uso](053-paineis-turmas/casos-de-uso.md) |
+| FN-054 | Personalização e editor dos painéis | EI1–EI6 etapas do editor (docs/191); FT1–FT3 | Painéis | Concluída | Concluída | [planejamento](054-paineis-editor/planejamento.md) · [casos de uso](054-paineis-editor/casos-de-uso.md) |
+| FN-055 | Acompanhamento pedagógico | P6 painéis | Painéis | Pendente | Em planejamento | [planejamento](055-acompanhamento-pedagogico/planejamento.md) · [casos de uso](055-acompanhamento-pedagogico/casos-de-uso.md) |
+| FN-056 | Agenda e calendário (módulo transversal) | C1–C3 calendário (docs/28); P5 dos painéis; M3 "Tempo escolar e agenda" (docs/177) | Agenda e notificações | Pendente | Em planejamento | [planejamento](056-agenda-calendario/planejamento.md) · [casos de uso](056-agenda-calendario/casos-de-uso.md) |
+| FN-057 | Notificações (módulo transversal) | N1–N4; P5 painéis | Agenda e notificações | Pendente | Em planejamento | [planejamento](057-notificacoes/planejamento.md) · [casos de uso](057-notificacoes/casos-de-uso.md) |
+| FN-058 | Visitas pedagógicas | MP-032 | Agenda e notificações | Pendente | Em planejamento | [planejamento](058-visitas-pedagogicas/planejamento.md) · [casos de uso](058-visitas-pedagogicas/casos-de-uso.md) |
+| FN-059 | Marcação e aplicação de provas | C4 (provas no calendário e lembretes) | Agenda e notificações | Pendente | Em planejamento | [planejamento](059-agendamento-aplicacao-provas/planejamento.md) · [casos de uso](059-agendamento-aplicacao-provas/casos-de-uso.md) |
+| FN-060 | E-mail transacional e Fale Conosco | E1–E7 (docs/28) | Comunicação e e-mail | Parcial | Em planejamento | [planejamento](060-email-transacional/planejamento.md) · [casos de uso](060-email-transacional/casos-de-uso.md) |
+| FN-061 | Termos, privacidade e aceite | L1 LGPD (docs/28); RL1–RL19 (docs/33) | LGPD e portal | Parcial | Em planejamento | [planejamento](061-lgpd-termos-privacidade/planejamento.md) · [casos de uso](061-lgpd-termos-privacidade/casos-de-uso.md) |
+| FN-062 | Inventário de dados e retenção | L2 LGPD (docs/28); RL1–RL19 (docs/33) | LGPD e portal | Parcial | Em planejamento | [planejamento](062-lgpd-inventario-retencao/planejamento.md) · [casos de uso](062-lgpd-inventario-retencao/casos-de-uso.md) |
+| FN-063 | Proteção dos dados (cifragem) | L3 LGPD (docs/28); RL1–RL19 (docs/33) | LGPD e portal | Concluída | Concluída | [planejamento](063-lgpd-protecao-dados/planejamento.md) · [casos de uso](063-lgpd-protecao-dados/casos-de-uso.md) |
+| FN-064 | Pedidos dos titulares (L4) | L4 LGPD (docs/28); RL1–RL19 (docs/33) | LGPD e portal | Parcial | Em planejamento | [planejamento](064-pedidos-titulares/planejamento.md) · [casos de uso](064-pedidos-titulares/casos-de-uso.md) |
+| FN-065 | Plano de incidentes | L5 LGPD (docs/28); RL1–RL19 (docs/33) | LGPD e portal | Pendente | Em planejamento | [planejamento](065-plano-incidentes/planejamento.md) · [casos de uso](065-plano-incidentes/casos-de-uso.md) |
+| FN-066 | Avatar no lugar de foto de aluno | L6 LGPD (docs/28); RL1–RL19 (docs/33) | LGPD e portal | Parcial | Em planejamento | [planejamento](066-avatares-alunos/planejamento.md) · [casos de uso](066-avatares-alunos/casos-de-uso.md) |
+| FN-067 | Portal dos responsáveis | P1–P8 portal dos responsáveis (docs/28) | LGPD e portal | Pendente | Em planejamento | [planejamento](067-portal-responsaveis/planejamento.md) · [casos de uso](067-portal-responsaveis/casos-de-uso.md) |
+| FN-068 | Financeiro (contratos, faturas, pagamentos) | F1–F3 financeiro (docs/28); FIN | Financeiro | Pendente | Em planejamento | [planejamento](068-financeiro/planejamento.md) · [casos de uso](068-financeiro/casos-de-uso.md) |
+| FN-069 | Selo dos documentos | R1 selo dos documentos (docs/28) | Financeiro | Pendente | Em planejamento | [planejamento](069-selo-documentos/planejamento.md) · [casos de uso](069-selo-documentos/casos-de-uso.md) |
+| FN-070 | Identidade visual e gráficos | V1–V5 base visual (docs/26); G1–G3 gráficos (docs/27) | Público e marca | Concluída | Concluída | [planejamento](070-identidade-visual/planejamento.md) · [casos de uso](070-identidade-visual/casos-de-uso.md) |
+| FN-071 | Marca oficial e cabeçalhos de documentos | H1 identidade visual oficial (docs/161–162, A–E) | Público e marca | Em homologação | Em homologação | [planejamento](071-marca-documentos/planejamento.md) · [casos de uso](071-marca-documentos/casos-de-uso.md) |
+| FN-072 | Site público e apresentação | H1-P apresentação pública, etapas P1–P5 (docs/164); E8 (páginas públicas); home estática (docs/101–102) | Público e marca | Em homologação | Em homologação | [planejamento](072-site-publico/planejamento.md) · [casos de uso](072-site-publico/casos-de-uso.md) |
+| FN-073 | Layout responsivo | L0–L8 layout (docs/23) | Qualidade transversal | Concluída | Concluída | [planejamento](073-layout-responsivo/planejamento.md) · [casos de uso](073-layout-responsivo/casos-de-uso.md) |
+| FN-074 | Padrão de tabelas e listas | TBL1, TBL2 | Qualidade transversal | Em homologação | Em homologação | [planejamento](074-tabelas-padrao/planejamento.md) · [casos de uso](074-tabelas-padrao/casos-de-uso.md) |
+| FN-075 | Migração para Tailwind e UX transversal | TW1–TW7; UX-D, UX-T; ações SMALL (docs/184) | Qualidade transversal | Parcial | Em planejamento | [planejamento](075-tailwind-ui/planejamento.md) · [casos de uso](075-tailwind-ui/casos-de-uso.md) |
+| FN-076 | Carregamento, estados de erro e navegação | UI1, UI1-R; carregamento progressivo e breadcrumb (OMR2-C2) | Qualidade transversal | Parcial | Em planejamento | [planejamento](076-carregamento-estados/planejamento.md) · [casos de uso](076-carregamento-estados/casos-de-uso.md) |
+| FN-077 | Desempenho e carga | F0–F4, F6, PERF-01..15, FUND-01..10 desempenho (docs/192–200); X1, X2; ST1, AP1-A..E | Qualidade transversal | Parcial | Em planejamento | [planejamento](077-desempenho/planejamento.md) · [casos de uso](077-desempenho/casos-de-uso.md) |
