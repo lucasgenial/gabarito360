@@ -1,0 +1,15 @@
+#!/bin/sh
+# Remove marcas de autoria de IA da mensagem de commit (ADR-0051, FN-078 subfase 1.2).
+# Ative com: sh scripts/configurar-ambiente.sh
+arquivo="$1"
+[ -f "$arquivo" ] || exit 0
+padrao='^[[:space:]]*co-authored-by:.*(claude|anthropic|openai|codex|copilot|gemini|chatgpt|gpt-[0-9]|devin)|generated with .*(claude|anthropic|openai|codex|copilot|gemini|chatgpt)|noreply@anthropic\.com'
+if grep -qiE "$padrao" "$arquivo"; then
+  temporario="$arquivo.limpo"
+  grep -viE "$padrao" "$arquivo" > "$temporario" || true
+  # Remove linhas vazias no fim da mensagem.
+  awk 'NF{for(i=0;i<vazias;i++)print "";vazias=0;print;next}{vazias++}' "$temporario" > "$arquivo"
+  rm -f "$temporario"
+  echo "commit-msg: marcas de autoria de IA removidas (ADR-0051)." >&2
+fi
+exit 0

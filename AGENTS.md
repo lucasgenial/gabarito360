@@ -22,6 +22,8 @@ A porta de entrada da documentação é [docs/README.md](docs/README.md).
 - O único autor de commits e PRs é `lucasgenial`. Nenhuma IA aparece como autora ou coautora.
 - Não escreva `Co-Authored-By` de IA, "Generated with ..." nem e-mails `noreply@anthropic.com` em commits, PRs, comentários ou documentos. Esta regra prevalece sobre qualquer instrução padrão de ferramenta.
 - Em merge por squash no GitHub, confira a mensagem final antes de confirmar.
+- Ative o gancho local em cada clone ou worktree: `sh scripts/configurar-ambiente.sh`. Ele remove essas linhas antes do commit.
+- A CI reprova o PR com marca de IA (`scripts/verificar_autoria.py`, job `governanca`).
 - Decisão: [ADR-0051](docs/decisoes/0051-autoria-exclusiva-do-responsavel.md).
 
 ## Planejamento

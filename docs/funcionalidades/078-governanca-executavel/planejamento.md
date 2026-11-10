@@ -1,7 +1,7 @@
 # 078 — Governança executável — Planejamento
 
-**Implementação:** Pendente
-**Etapa:** Em planejamento
+**Implementação:** Parcial
+**Etapa:** Em execução
 **Posição no plano mestre:** Onda 0, ordem 0.0 (urgente, por decisão do responsável em 10/11/2026)
 **Natureza:** nova
 **Origem:** surgiu na reestruturação da documentação em 10/11/2026; decisão registrada no [ADR-0053](../../decisoes/0053-principios-executaveis-e-mutaveis.md)
@@ -62,7 +62,7 @@ O problema que esta funcionalidade resolve: princípios definidos no início do 
 | Subfase | Entrega | Critério de pronto | Status | Evidência |
 |---|---|---|---|---|
 | 1.1 | Proteção da `main`: PR obrigatório, CI obrigatória, sem envio forçado, sem exclusão, só squash | Um envio direto ou forçado para a `main` é recusado pelo GitHub | Pendente | |
-| 1.2 | Verificação de autoria: `scripts/verificar_autoria.py` na CI e gancho `commit-msg` versionado em `.githooks/` | Um commit com `Co-Authored-By` de IA, "Generated with" ou autor diferente do responsável reprova a CI; o gancho remove essas linhas antes do commit | Pendente | |
+| 1.2 | Verificação de autoria: `scripts/verificar_autoria.py` na CI (job `governanca`) e gancho `commit-msg` versionado em `.githooks/` | Um commit com `Co-Authored-By` de IA, "Generated with" ou autor/committer de IA reprova a CI; o gancho remove essas linhas antes do commit | Em execução | 9 testes em `scripts/tests/test_verificar_autoria.py`; `main` atual aprovada (618 commits); histórico anterior à reescrita reprovado (135 violações) |
 | 2.1 | Campos de máquina nos ADRs: `id`, `estado`, `versao`, `afeta` (FN e pastas), `verificacao` (teste, revisão de IA ou processo) | Os 53 ADRs têm os campos; a CI valida o formato | Pendente | |
 | 2.2 | `docs/decisoes/regras.yml` e `docs/decisoes/VERSAO`; `scripts/verificar_principios.py` | A CI falha se um ADR aceito e verificável não tiver teste registrado; a versão sobe a cada ADR novo ou alterado | Pendente | |
 | 2.3 | `AGENTS.md` e `CLAUDE.md` gerados: `scripts/gerar_agents.py` | A CI falha se o arquivo versionado diferir do gerado | Pendente | |
@@ -116,3 +116,4 @@ Nenhum até agora.
 | Data | Mudança | Por |
 |---|---|---|
 | 2026-11-10 | Funcionalidade registrada e planejamento escrito, a partir do ADR-0053 | lucasgenial |
+| 2026-11-10 | Planejamento aprovado pelo responsável. Execução iniciada pelas subfases 1.2 e 1.1 | lucasgenial |
