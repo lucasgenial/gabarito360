@@ -1,0 +1,57 @@
+name: Nova funcionalidade candidata
+description: Registre uma necessidade nova. Ela entra no catálogo como "Candidata" e o responsável decide a prioridade.
+title: "[Candidata] "
+labels: ["funcionalidade-candidata"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Uma funcionalidade nova entra no catálogo com a etapa "Candidata" ([governança](https://github.com/lucasgenial/gabarito360/blob/main/docs/planejamento/01-governanca.md)).
+        O gerente de projetos registra a linha no catálogo. O responsável decide a prioridade.
+        Não anexe prints da aplicação nem dados pessoais.
+  - type: textarea
+    id: necessidade
+    attributes:
+      label: Necessidade
+      description: Que problema a funcionalidade resolve? Para quem?
+    validations:
+      required: true
+  - type: textarea
+    id: resultado
+    attributes:
+      label: Resultado esperado
+      description: O que a pessoa consegue fazer quando a funcionalidade existir?
+    validations:
+      required: true
+  - type: dropdown
+    id: perfis
+    attributes:
+      label: Perfis afetados
+      multiple: true
+      options:
+        - Administrador da Rede
+        - Secretário de Educação
+        - Diretor de Núcleo
+        - Diretor Escolar e Vice-diretor
+        - Coordenador
+        - Secretário Escolar e Auxiliar de secretaria
+        - Professor
+        - Professor autônomo
+        - Aplicador
+        - Aluno
+        - Responsável pelo aluno
+        - Desenvolvedor, Suporte e Financeiro
+    validations:
+      required: true
+  - type: input
+    id: relacionadas
+    attributes:
+      label: Funcionalidades relacionadas
+      description: FNs do catálogo que esta funcionalidade usa ou altera (por exemplo, FN-012, FN-030).
+  - type: input
+    id: origem
+    attributes:
+      label: Origem
+      description: Onde a necessidade surgiu (entrega, conversa, decisão, uso real) e a data.
+    validations:
+      required: true

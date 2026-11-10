@@ -1,0 +1,45 @@
+name: Decisão do responsável
+description: Peça uma decisão que só o responsável pode tomar. A decisão aprovada vira ADR em docs/decisoes/.
+title: "[Decisão] "
+labels: ["decisao-do-responsavel"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Uma decisão aprovada vira um ADR em `docs/decisoes/`, no modelo `_modelo.md` ([como registrar](https://github.com/lucasgenial/gabarito360/blob/main/docs/decisoes/README.md)).
+        Cada opção precisa de um estudo curto: vantagens, custos e riscos.
+  - type: textarea
+    id: pergunta
+    attributes:
+      label: Pergunta
+      description: A decisão em uma frase.
+    validations:
+      required: true
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: Por que a decisão é necessária agora? O que fica bloqueado sem ela?
+    validations:
+      required: true
+  - type: textarea
+    id: opcoes
+    attributes:
+      label: Opções e estudo
+      description: Uma seção por opção, com vantagens, custos e riscos.
+    validations:
+      required: true
+  - type: textarea
+    id: recomendacao
+    attributes:
+      label: Recomendação
+      description: A opção recomendada e o motivo.
+    validations:
+      required: true
+  - type: input
+    id: afeta
+    attributes:
+      label: Funcionalidades e ADRs afetados
+      description: Por exemplo, FN-078; ADR-0053.
+    validations:
+      required: true

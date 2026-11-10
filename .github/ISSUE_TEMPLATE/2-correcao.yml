@@ -1,0 +1,56 @@
+name: Correção
+description: Relate um comportamento errado numa funcionalidade existente.
+title: "[Correção] "
+labels: ["correcao"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Não anexe prints ou screenshots da aplicação (ADR-0049). Descreva a tela em texto.
+        Não inclua senhas, tokens, dados de alunos, SQL literal nem HAR bruto.
+  - type: input
+    id: fn
+    attributes:
+      label: Funcionalidade
+      description: A FN do catálogo (por exemplo, FN-030). Se não souber, escreva "não sei".
+    validations:
+      required: true
+  - type: dropdown
+    id: ambiente
+    attributes:
+      label: Ambiente
+      options:
+        - Homologação
+        - Produção
+        - Desenvolvimento local
+    validations:
+      required: true
+  - type: input
+    id: versao
+    attributes:
+      label: Versão no rodapé
+      description: O texto do rodapé, por exemplo "Gabarito360 - v0.1.0 - Homologação".
+  - type: textarea
+    id: passos
+    attributes:
+      label: Passos para reproduzir
+      description: Uma ação por passo. Inclua o perfil e o vínculo ativo.
+      placeholder: |
+        1. Entre como Professor, vínculo Escola X.
+        2. Abra Provas.
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+  - type: textarea
+    id: obtido
+    attributes:
+      label: Resultado obtido
+      description: O que aconteceu. Copie a mensagem de erro em texto, sem dados pessoais.
+    validations:
+      required: true
