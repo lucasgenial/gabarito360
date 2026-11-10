@@ -1,3 +1,8 @@
+## Funcionalidade
+
+FN: FN-NNN
+<!-- Obrigatório quando o PR altera apps/. Cite a FN do catálogo (docs/funcionalidades/README.md) e atualize o planejamento.md dela com a evidência. A CI verifica (R-FN-NO-PR). -->
+
 ## Problema e comportamento resultante
 
 <!-- Explique o caso concreto, o resultado e o escopo final. Consulte docs/decisoes/0046-fundamentos-de-desempenho-adr-195.md e docs/arquitetura/12-desempenho.md. Preencha proporcionalmente; justifique o que não se aplica. Não anexar dados escolares, credenciais, SQL/bindings ou HAR bruto. -->

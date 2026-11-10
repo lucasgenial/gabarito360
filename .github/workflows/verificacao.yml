@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: python3 -m unittest scripts/tests/test_verificar_autoria.py scripts/tests/test_principios.py scripts/tests/test_regras_codigo.py
+      - run: python3 -m unittest scripts/tests/test_verificar_autoria.py scripts/tests/test_principios.py scripts/tests/test_regras_codigo.py scripts/tests/test_fn_no_pr.py
       - name: Executar as regras ativas dos princípios (docs/decisoes/regras.yml)
         env:
           EVENTO: ${{ github.event_name }}
@@ -85,6 +85,8 @@ jobs:
           HEAD_PR: ${{ github.event.pull_request.head.sha }}
           ANTES: ${{ github.event.before }}
           DEPOIS: ${{ github.sha }}
+          PR_TITULO: ${{ github.event.pull_request.title }}
+          PR_CORPO: ${{ github.event.pull_request.body }}
         run: |
           if [ "$EVENTO" = "pull_request" ]; then
             INTERVALO="$BASE_PR..$HEAD_PR"

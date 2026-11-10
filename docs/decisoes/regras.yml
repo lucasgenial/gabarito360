@@ -82,9 +82,10 @@
   descricao: Versão única em apps/web/config/versao.php e rodapé no formato aprovado.
 
 - id: R-FN-NO-PR
-  adr: ADR-0053
-  estado: planejada
+  adr: ADR-0048
+  estado: ativa
   gravidade: bloqueia
+  comando: python3 scripts/verificar_fn_no_pr.py {INTERVALO}
   descricao: PR que altera apps/ cita uma FN e atualiza o planejamento dela.
 
 - id: R-VERSAO-PRINCIPIOS-FN
