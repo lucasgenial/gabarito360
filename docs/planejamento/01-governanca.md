@@ -41,7 +41,7 @@ Quando um pedido novo aparece durante uma entrega, faça estes passos:
 
 1. Verifique se o pedido serve só para concluir a entrega atual.
 2. Se serve só para a entrega atual, registre o pedido como subfase no `planejamento.md` da funcionalidade.
-3. Se o pedido vai além da entrega atual, registre uma funcionalidade nova no catálogo. Use a etapa "Candidata" e registre a origem.
+3. Se o pedido vai além da entrega atual, registre uma funcionalidade nova no catálogo. Use a etapa "Candidata" e registre a origem. Um pedido externo entra pela issue "Nova funcionalidade candidata". Uma correção entra pela issue "Correção". Uma decisão do responsável entra pela issue "Decisão do responsável" (modelos em `.github/ISSUE_TEMPLATE/`).
 4. Não execute a funcionalidade candidata. Ela aguarda a priorização do responsável.
 5. Se a funcionalidade nova é um módulo transversal, liste as funcionalidades que dependem dela. Essas funcionalidades aguardam o módulo.
 6. Termine a entrega atual com o que pertence a ela. No lugar do recurso futuro, use estado vazio ou "Em breve", conforme a regra de design.

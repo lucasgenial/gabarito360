@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Catálogo de funcionalidades
+    url: https://github.com/lucasgenial/gabarito360/blob/main/docs/funcionalidades/README.md
+    about: Antes de abrir uma issue, procure a funcionalidade no catálogo.
