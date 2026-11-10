@@ -12,10 +12,10 @@ Decisão do responsável (09/11/2026): o planejamento tem um único tronco, o [p
 
 ## Prints e imagens da aplicação
 
-Decisão do responsável (09/11/2026): por padrão, **nenhum print ou captura de tela da aplicação é mantido** no repositório nem em qualquer outro serviço de imagens: PRs, issues, documentos, artifacts, Drive, Canva e similares.
+Decisão do responsável (09/11/2026): por padrão, **nenhum print da aplicação é mantido**. "Print" abrange screenshot e captura de tela de qualquer origem, inclusive os feitos por agentes e ferramentas de navegador (Chrome, browser pane, Computer Use, Playwright, CI). Nenhum print fica no repositório nem em qualquer outro serviço de imagens: PRs, issues, documentos, artifacts, Drive, Canva e similares.
 
 - Conferências visuais (Chrome, revisão de UI/UX, homologação) são registradas por texto: o que foi verificado, onde, em que tema e largura, e o resultado.
-- Capturas usadas durante a conferência ficam apenas em memória ou em arquivos temporários locais, e não são anexadas nem publicadas.
+- Screenshots usados durante a conferência servem só para olhar: não são salvos em disco, anexados nem publicados. Cópias locais deixadas automaticamente pelas ferramentas são apagadas ao fim da conferência.
 - Imagens versionadas só são aceitas como assets da aplicação (`apps/web/public/`, `apps/web/resources/images/`) ou como desenhos de design de referência (`mockups/`, `style-system/`).
 - A CI verifica isso com `scripts/verificar_imagens.py`.
 - Uma exceção exige autorização expressa do responsável para aquele caso.
