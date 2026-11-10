@@ -17,6 +17,7 @@ O planejamento tem três tipos de documento. Cada tipo tem um papel diferente.
 |---|---|---|---|
 | [`docs/funcionalidades/README.md`](../funcionalidades/README.md) | **Catálogo.** A lista oficial de funcionalidades: identificador, nome, identificador antigo, domínio, implementação e etapa. | Gerente de projetos | Ao criar uma funcionalidade e a cada mudança de etapa |
 | `docs/funcionalidades/NNN-slug/planejamento.md` e `casos-de-uso.md` | **Detalhe.** Objetivo, escopo, subfases, evidências, dependências e casos de uso de uma funcionalidade. | Agentes de planejamento e de execução | Antes e durante a execução |
+| [`docs/planejamento/04-adequacoes.md`](04-adequacoes.md) | **Adequações.** As funcionalidades afetadas por ADR novo ou alterado e a subfase de adequação de cada uma. Arquivo gerado. | Agente `impacto-principios` (script) | A cada mudança de ADR |
 | [`docs/planejamento/00-plano-mestre.md`](00-plano-mestre.md) | **Orquestrador.** A ordem de execução, os portões, as decisões pendentes, o saneamento e a fila de produção. | Gerente de projetos, com aprovação do responsável | Quando o responsável prioriza ou decide |
 
 Regras de consistência:

@@ -60,7 +60,7 @@ Uma subfase só termina quando passa por todos os portões aplicáveis.
 | Item | Situação em 10/11/2026 |
 |---|---|
 | Em execução | Nenhuma funcionalidade. A execução aguarda a aprovação deste plano. |
-| Próximo passo | Onda 0: FN-078 (governança executável), a partir da subfase 5.1 (subfases 1.1 a 4.2 entregues); depois, decisões do responsável (seção 5) e aprovação dos documentos da Onda 1. |
+| Próximo passo | Onda 0: FN-078 (governança executável), a partir da subfase 6.1 (subfases 1.1 a 5.1 entregues; 6.1 depende de decisão do responsável); depois, decisões do responsável (seção 5) e aprovação dos documentos da Onda 1. |
 | Última entrega | FN-077 Desempenho, etapas F0 a F4, publicadas na homologação em 09/11/2026. |
 
 ### 4.2 Onda 0 — Saneamento e decisões
@@ -128,6 +128,7 @@ Esta trilha não ocupa a fila. Cada entrega aplica a trilha às telas que muda.
 | FN-074 Tabelas | Cada tabela nova usa o componente padrão. |
 | FN-077 Desempenho | Medição com 1000 usuários antes de qualquer abertura comercial. F6 restante quando houver uso real. |
 | FN-007 Escala | X3 a X6 conforme a medição de FN-077. |
+| FN-078 Adequações | Antes de alterar o código de uma funcionalidade, faça a subfase de adequação dela, listada em [04-adequacoes.md](04-adequacoes.md). |
 
 ### 4.7 Fora das ondas
 
