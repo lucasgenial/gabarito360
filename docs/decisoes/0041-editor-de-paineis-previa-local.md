@@ -1,3 +1,14 @@
+---
+id: ADR-0041
+titulo: Editor de painéis apresentado primeiro como prévia local
+estado: Substituída
+substituida_por: [ADR-0043]
+data: 2026-11-09
+afeta_funcionalidades: []
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0041 — A composição do editor de painéis em duas abas é apresentada primeiro como prévia local, sem aplicação nem publicação
 
 **Atualizado em:** 10/11/2026, por lucasgenial

@@ -1,3 +1,18 @@
+---
+id: ADR-0044
+titulo: Rodapé de versão oculto no celular
+estado: Aceita
+substituida_por: []
+data: 2026-11-09
+afeta_funcionalidades: [FN-073, FN-075]
+afeta_caminhos: ["apps/web/resources/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 101
+agents_resumo:
+  - "O rodapé de versão fica oculto no celular."
+---
 # ADR-0044 — O rodapé de versão não aparece no celular (até 767 CSS px) e não reserva espaço
 
 **Atualizado em:** 10/11/2026, por lucasgenial

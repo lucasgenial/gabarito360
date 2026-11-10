@@ -1,3 +1,18 @@
+---
+id: ADR-0023
+titulo: JavaScript executável em arquivos externos
+estado: Aceita
+substituida_por: []
+data: 2026-11-06
+afeta_funcionalidades: [FN-018, FN-075, FN-076]
+afeta_caminhos: ["apps/web/resources/views/**", "apps/web/public/js/**"]
+verificacao: teste
+regras: [R-JS-EXTERNO]
+agents_secao: Interface
+agents_ordem: 60
+agents_resumo:
+  - "JavaScript executável fica em arquivos externos. Sem `<script>` inline nem `onclick`."
+---
 # ADR-0023 — O JavaScript executável fica em arquivos externos; as views não têm script inline nem eventos inline
 
 **Atualizado em:** 10/11/2026, por lucasgenial

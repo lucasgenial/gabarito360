@@ -1,3 +1,18 @@
+---
+id: ADR-0047
+titulo: Plano integral de desempenho F0 a F6, com regras de medição e cache
+estado: Aceita
+substituida_por: []
+data: 2026-11-09
+afeta_funcionalidades: [FN-007, FN-077]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Desempenho
+agents_ordem: 30
+agents_resumo:
+  - "Não exporte SQL literal, corpos de requisição, dados de aluno, cookies, tokens nem HAR bruto."
+---
 # ADR-0047 — O plano integral de desempenho executa as etapas completas F0 a F6, com regras de medição e de cache
 
 **Atualizado em:** 10/11/2026, por lucasgenial

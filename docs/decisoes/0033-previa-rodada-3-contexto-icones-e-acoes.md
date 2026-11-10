@@ -1,3 +1,14 @@
+---
+id: ADR-0033
+titulo: Rodada 3 da prévia: contexto em largura total, ícones locais e menu lateral
+estado: Substituída
+substituida_por: [ADR-0039, ADR-0036]
+data: 2026-11-08
+afeta_funcionalidades: []
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0033 — Rodada 3: contexto em largura total, Material Symbols locais e menu lateral claro e navy
 
 **Atualizado em:** 10/11/2026, por lucasgenial

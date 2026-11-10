@@ -1,3 +1,21 @@
+---
+id: ADR-0049
+titulo: Sem prints da aplicação em nenhum serviço
+estado: Aceita
+substituida_por: []
+data: 2026-11-09
+afeta_funcionalidades: [FN-008, FN-070, FN-075]
+afeta_caminhos: ["**"]
+verificacao: teste
+regras: [R-PRINTS]
+agents_secao: Prints
+agents_ordem: 10
+agents_resumo:
+  - "Nenhum print da aplicação fica no repositório ou em serviços de imagem (PRs, issues, documentos, artifacts, Drive, Canva e similares). 'Print' inclui screenshot de qualquer origem, inclusive de agentes e ferramentas de navegador."
+  - "Screenshots usados numa conferência servem só para olhar. Não salve, não anexe e não publique. Apague as cópias locais que as ferramentas deixarem."
+  - "Registre as conferências visuais por texto: o que, onde, tema, largura e resultado."
+  - "A CI verifica com `scripts/verificar_imagens.py`. Exceção só com autorização expressa do responsável."
+---
 # ADR-0049 — Nenhum print da aplicação é mantido, em nenhum serviço; as conferências visuais são registradas por texto
 
 **Atualizado em:** 10/11/2026, por lucasgenial

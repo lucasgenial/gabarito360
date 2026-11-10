@@ -1,3 +1,18 @@
+---
+id: ADR-0029
+titulo: Meu espaço como bloco recolhível dentro do card
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-041, FN-075]
+afeta_caminhos: ["apps/web/resources/views/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 90
+agents_resumo:
+  - "Meu espaço é um bloco recolhível dentro do card."
+---
 # ADR-0029 — O Meu espaço da primeira prévia volta como bloco recolhível dentro do card, com escola e perfil em duas colunas
 
 **Atualizado em:** 10/11/2026, por lucasgenial

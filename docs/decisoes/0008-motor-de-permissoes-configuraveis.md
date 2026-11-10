@@ -1,3 +1,14 @@
+---
+id: ADR-0008
+titulo: Motor de permissões configurável por perfil e escola
+estado: Aceita
+substituida_por: []
+data: 2026-06-18
+afeta_funcionalidades: [FN-012, FN-013, FN-014]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+---
 # ADR-0008 — As permissões são um motor configurável por perfil e escola, migrado endpoint a endpoint
 
 **Atualizado em:** 10/11/2026, por lucasgenial

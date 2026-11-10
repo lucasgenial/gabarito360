@@ -1,3 +1,14 @@
+---
+id: ADR-0010
+titulo: E-mail com Resend para envio e Cloudflare Email Routing para recebimento
+estado: Aceita
+substituida_por: []
+data: 2026-10-31
+afeta_funcionalidades: [FN-011, FN-060]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0010 — O e-mail usa Resend para envio e Cloudflare Email Routing para recebimento, com quatro endereços
 
 **Atualizado em:** 10/11/2026, por lucasgenial

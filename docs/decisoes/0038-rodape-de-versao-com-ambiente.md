@@ -1,3 +1,18 @@
+---
+id: ADR-0038
+titulo: Rodapé de versão com ambiente derivado de APP_ENV
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-003, FN-075]
+afeta_caminhos: ["apps/web/config/versao.php", "apps/web/resources/views/**"]
+verificacao: teste
+regras: [R-VERSAO-RODAPE]
+agents_secao: Interface
+agents_ordem: 100
+agents_resumo:
+  - "Rodapé: `Gabarito360 - v0.1.0 - Homologação`. Versão em `apps/web/config/versao.php`."
+---
 # ADR-0038 — O rodapé exibe literalmente "Gabarito360 - v0.1.0 - Homologação", com o ambiente derivado de APP_ENV
 
 **Atualizado em:** 10/11/2026, por lucasgenial

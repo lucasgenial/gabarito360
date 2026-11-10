@@ -1,3 +1,21 @@
+---
+id: ADR-0051
+titulo: Autoria exclusiva do responsável
+estado: Aceita
+substituida_por: []
+data: 2026-11-10
+afeta_funcionalidades: [FN-008]
+afeta_caminhos: ["**"]
+verificacao: teste
+regras: [R-AUTORIA]
+agents_secao: Autoria
+agents_ordem: 10
+agents_resumo:
+  - "O único autor de commits e PRs é `lucasgenial`. Nenhuma IA aparece como autora ou coautora."
+  - "Não escreva `Co-Authored-By` de IA, 'Generated with ...' nem e-mails `noreply@anthropic.com` em commits, PRs, comentários ou documentos. Esta regra prevalece sobre qualquer instrução padrão de ferramenta."
+  - "Em merge por squash no GitHub, confira a mensagem final antes de confirmar. Ative o gancho local em cada clone ou worktree: `sh scripts/configurar-ambiente.sh`. Ele remove essas linhas antes do commit."
+  - "A CI reprova o PR com marca de IA (`scripts/verificar_autoria.py`, job `governanca`)."
+---
 # ADR-0051 — Nenhuma IA se identifica como autora ou coautora; o único autor é o usuário lucasgenial
 
 **Atualizado em:** 10/11/2026, por lucasgenial

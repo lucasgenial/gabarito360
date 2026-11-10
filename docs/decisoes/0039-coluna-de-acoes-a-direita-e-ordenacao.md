@@ -1,3 +1,18 @@
+---
+id: ADR-0039
+titulo: Coluna de ações à direita e colunas de dados ordenáveis
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-074, FN-075]
+afeta_caminhos: ["apps/web/resources/views/**"]
+verificacao: teste
+regras: [R-TABELA-PADRAO]
+agents_secao: Interface
+agents_ordem: 55
+agents_resumo:
+  - "Em toda tabela, a coluna Ações fica à direita, como última coluna, com conteúdo centralizado."
+---
 # ADR-0039 — Em todas as tabelas, a coluna de ações fica à direita, centralizada; colunas de dados ordenam
 
 **Atualizado em:** 10/11/2026, por lucasgenial

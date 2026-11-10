@@ -1,3 +1,14 @@
+---
+id: ADR-0017
+titulo: Cópia pontual de dados de produção para a homologação
+estado: Aceita
+substituida_por: []
+data: 2026-11-03
+afeta_funcionalidades: [FN-003]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0017 — O responsável autorizou copiar os usuários e dados atuais de produção para a homologação, mantendo as senhas
 
 **Atualizado em:** 10/11/2026, por lucasgenial

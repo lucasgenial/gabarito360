@@ -1,3 +1,14 @@
+---
+id: ADR-0014
+titulo: Portal dos responsáveis sem CPF nem código por e-mail, com Cloudflare Turnstile
+estado: Aceita
+substituida_por: []
+data: 2026-10-31
+afeta_funcionalidades: [FN-035, FN-061, FN-067]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+---
 # ADR-0014 — O portal dos responsáveis não usa CPF nem código por e-mail na primeira versão e usa Cloudflare Turnstile
 
 **Atualizado em:** 10/11/2026, por lucasgenial

@@ -1,3 +1,19 @@
+---
+id: ADR-0020
+titulo: Revisão de UI/UX por especialista em toda mudança de interface
+estado: Aceita
+substituida_por: []
+data: 2026-11-03
+afeta_funcionalidades: [FN-070, FN-073, FN-074, FN-075, FN-076]
+afeta_caminhos: ["apps/web/**", "mockups/**", "style-system/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 10
+agents_resumo:
+  - "Toda mudança de interface exige consulta prévia e revisão final de um agente de UI/UX e Product Design."
+  - "O implementador não aprova a própria tela."
+---
 # ADR-0020 — Toda mudança de interface exige aprovação do usuário ou de agente de UI/UX e Product Design, e consulta prévia
 
 **Atualizado em:** 10/11/2026, por lucasgenial

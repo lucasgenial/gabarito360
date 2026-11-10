@@ -1,3 +1,18 @@
+---
+id: ADR-0052
+titulo: Medição de desempenho com 1.000 usuários simultâneos
+estado: Aceita
+substituida_por: []
+data: 2026-11-10
+afeta_funcionalidades: [FN-007, FN-077]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Desempenho
+agents_ordem: 10
+agents_resumo:
+  - "Toda medição de desempenho usa 1000 usuários simultâneos, sem simulação."
+---
 # ADR-0052 — Toda medição de desempenho usa 1.000 usuários simultâneos, sem simulação
 
 **Atualizado em:** 10/11/2026, por lucasgenial

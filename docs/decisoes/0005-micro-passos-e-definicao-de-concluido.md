@@ -1,3 +1,14 @@
+---
+id: ADR-0005
+titulo: Micro-passos (MP) com dependências e seis critérios de Concluído
+estado: Substituída
+substituida_por: [ADR-0048]
+data: 2026-06-16
+afeta_funcionalidades: []
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0005 — O trabalho avança em micro-passos (MP) com dependências e seis critérios de "Concluído"
 
 **Atualizado em:** 10/11/2026, por lucasgenial

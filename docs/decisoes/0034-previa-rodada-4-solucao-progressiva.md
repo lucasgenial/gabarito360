@@ -1,3 +1,18 @@
+---
+id: ADR-0034
+titulo: Botões e ações adaptados por largura disponível; logo oficial
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-071, FN-074, FN-075]
+afeta_caminhos: ["apps/web/resources/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 93
+agents_resumo:
+  - "Botões e ações se adaptam à largura disponível."
+---
 # ADR-0034 — Rodada 4 aprovada: botões e ações se adaptam por largura disponível; logo oficial da homologação
 
 **Atualizado em:** 10/11/2026, por lucasgenial

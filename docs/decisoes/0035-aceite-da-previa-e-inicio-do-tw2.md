@@ -1,3 +1,14 @@
+---
+id: ADR-0035
+titulo: Aceite da prévia e início do TW2 só na homologação
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-075]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0035 — A prévia (rodada 4) está aprovada; o TW2 na estrutura real está autorizado só na homologação
 
 **Atualizado em:** 10/11/2026, por lucasgenial

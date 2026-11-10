@@ -1,3 +1,18 @@
+---
+id: ADR-0022
+titulo: Tabelas com x-tabela no card principal; listas viram cards no celular
+estado: Aceita
+substituida_por: []
+data: 2026-11-04
+afeta_funcionalidades: [FN-074, FN-075]
+afeta_caminhos: ["apps/web/resources/views/**"]
+verificacao: teste
+regras: [R-TABELA-PADRAO]
+agents_secao: Interface
+agents_ordem: 50
+agents_resumo:
+  - "Tabelas usam `x-tabela`, dentro do card principal."
+---
 # ADR-0022 — Tabelas operacionais usam x-tabela dentro do card principal; listas viram cards no celular; avisos têm margem
 
 **Atualizado em:** 10/11/2026, por lucasgenial

@@ -1,3 +1,19 @@
+---
+id: ADR-0046
+titulo: Fundamentos de desempenho e aceitação das funcionalidades
+estado: Aceita
+substituida_por: []
+data: 2026-11-09
+afeta_funcionalidades: [FN-007, FN-053, FN-054, FN-077]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Desempenho
+agents_ordem: 20
+agents_resumo:
+  - "A API é dona do banco. O cache técnico não tem autoridade de acesso."
+  - "A carga é progressiva e as escritas têm integridade."
+---
 # ADR-0046 — Fundamentos de desempenho e aceitação das funcionalidades (ADR-195)
 
 **Atualizado em:** 10/11/2026, por lucasgenial

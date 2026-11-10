@@ -1,3 +1,18 @@
+---
+id: ADR-0025
+titulo: Confirmações em modal da aplicação; ações de turma com ícone e texto
+estado: Aceita
+substituida_por: []
+data: 2026-11-07
+afeta_funcionalidades: [FN-036, FN-075]
+afeta_caminhos: ["apps/web/resources/**", "apps/web/public/js/**"]
+verificacao: teste
+regras: [R-SEM-DIALOGO-NATIVO]
+agents_secao: Interface
+agents_ordem: 70
+agents_resumo:
+  - "Confirmações usam modal da aplicação, nunca `confirm`, `alert` ou `prompt`."
+---
 # ADR-0025 — Confirmações de negócio usam modal da aplicação; Editar e Arquivar turma têm ícone e texto
 
 **Atualizado em:** 10/11/2026, por lucasgenial

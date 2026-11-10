@@ -1,3 +1,21 @@
+---
+id: ADR-0016
+titulo: Homologação isolada em VM própria antes de toda entrega
+estado: Aceita
+substituida_por: []
+data: 2026-11-03
+afeta_funcionalidades: [FN-003]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+agents_secao: Publicação
+agents_ordem: 20
+agents_resumo:
+  - "Publique primeiro na homologação isolada."
+  - "Exija backup, migração ensaiada e comparação de dados e arquivos antes e depois de cada publicação."
+  - "Preserve gabaritos, questões, cartões, respostas, notas e imagens."
+  - "Siga os roteiros em `docs/operacao/`."
+---
 # ADR-0016 — Toda entrega vai primeiro a uma homologação isolada em VM própria; a promoção para produção é decisão do responsável
 
 **Atualizado em:** 10/11/2026, por lucasgenial

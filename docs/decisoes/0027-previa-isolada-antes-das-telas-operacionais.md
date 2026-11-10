@@ -1,3 +1,14 @@
+---
+id: ADR-0027
+titulo: Prévia isolada com aceite humano antes das telas operacionais
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-075]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0027 — Uma página de prévia com componentes, propriedades e regras exige aceite humano antes da nova identidade nas telas operacionais
 
 **Atualizado em:** 10/11/2026, por lucasgenial

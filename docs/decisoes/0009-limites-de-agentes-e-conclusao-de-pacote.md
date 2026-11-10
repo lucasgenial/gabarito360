@@ -1,3 +1,14 @@
+---
+id: ADR-0009
+titulo: Ações sensíveis exigem aprovação; pacote só termina com testes e quadro atualizado
+estado: Aceita
+substituida_por: []
+data: 2026-10-31
+afeta_funcionalidades: [FN-002, FN-003, FN-008]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0009 — Ações sensíveis exigem aprovação explícita; um pacote só termina com testes, verificações e quadro atualizado
 
 **Atualizado em:** 10/11/2026, por lucasgenial

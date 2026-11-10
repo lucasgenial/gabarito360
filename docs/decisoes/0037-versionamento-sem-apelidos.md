@@ -1,3 +1,14 @@
+---
+id: ADR-0037
+titulo: Versão com número sem apelidos
+estado: Substituída
+substituida_por: [ADR-0038]
+data: 2026-11-08
+afeta_funcionalidades: []
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0037 — A versão usa número sem apelidos, com fonte única em config/versao.php
 
 **Atualizado em:** 10/11/2026, por lucasgenial

@@ -1,3 +1,18 @@
+---
+id: ADR-0002
+titulo: Documentação antes do código; mockups e style system vencem; legado só dá regras
+estado: Aceita
+substituida_por: []
+data: 2026-06-16
+afeta_funcionalidades: [todas]
+afeta_caminhos: ["mockups/**", "style-system/**", "docs/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 20
+agents_resumo:
+  - "Fontes de verdade de interface: `mockups/` e `style-system/`. Referência técnica: `docs/arquitetura/09-interface-e-design-system.md`."
+---
 # ADR-0002 — Nenhum código nasce sem documentação aprovada; mockups e style system vencem a documentação; o legado só fornece regras
 
 **Atualizado em:** 10/11/2026, por lucasgenial
