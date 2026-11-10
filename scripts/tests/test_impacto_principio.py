@@ -69,7 +69,7 @@ class TestImpacto(unittest.TestCase):
         self.assertIn('Revalidar contra ADR-0002 e subir para a versão 2', texto)
         self.assertIn('[FN-002]', texto)
         self.assertNotIn('[FN-001]', texto)
-        self.assertIn('| 1 |', texto)  # 1 arquivo versionado em apps/web/**
+        self.assertIn('`apps/web/**`', texto)
         self.assertEqual(self.rodar('--verificar')[0], 0)
 
     def test_adr_para_todas_ignora_fn_substituida(self):

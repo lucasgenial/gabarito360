@@ -12,14 +12,16 @@ Como usar:
 3. Suba "Conforme princípios" para a versão 7. A regra `R-VERSAO-PRINCIPIOS-FN` reprova o PR de código sem esse passo.
 4. Rode `python scripts/impacto_principio.py --aplicar`. A funcionalidade sai desta lista.
 
+Para ver quantos arquivos cada ADR alcança hoje, rode `python scripts/impacto_principio.py --adr ADR-NNNN`.
+
 ## 1. ADRs com adequação pendente
 
-| ADR | Versão | Título | Verificação | Funcionalidades pendentes | Arquivos no escopo |
+| ADR | Versão | Título | Verificação | Funcionalidades pendentes | Caminhos no escopo |
 |---|---|---|---|---|---|
 | [ADR-0004](../decisoes/0004-convencao-de-commits-e-branches.md) | 2 | Commits em tipo(escopo) pt-BR, atômicos, em branches de feature | processo | 75 | repositório inteiro |
-| [ADR-0048](../decisoes/0048-tronco-unico-de-planejamento.md) | 6 | Tronco único de planejamento: plano mestre, governança e catálogo | teste (R-CATALOGO, R-FN-NO-PR) | 75 | 1389 |
+| [ADR-0048](../decisoes/0048-tronco-unico-de-planejamento.md) | 6 | Tronco único de planejamento: plano mestre, governança e catálogo | teste (R-CATALOGO, R-FN-NO-PR) | 75 | `docs/funcionalidades/**`, `docs/planejamento/**`, `apps/**` |
 | [ADR-0051](../decisoes/0051-autoria-exclusiva-do-responsavel.md) | 6 | Autoria exclusiva do responsável | teste (R-AUTORIA) | 1 | repositório inteiro |
-| [ADR-0053](../decisoes/0053-principios-executaveis-e-mutaveis.md) | 7 | Princípios executáveis, versionados e mutáveis | teste (R-PRINCIPIOS, R-AGENTS-GERADO, R-VERSAO-PRINCIPIOS-FN, R-IMPACTO-GERADO) | 75 | 190 |
+| [ADR-0053](../decisoes/0053-principios-executaveis-e-mutaveis.md) | 7 | Princípios executáveis, versionados e mutáveis | teste (R-PRINCIPIOS, R-AGENTS-GERADO, R-VERSAO-PRINCIPIOS-FN, R-IMPACTO-GERADO) | 75 | `docs/decisoes/**`, `AGENTS.md`, `scripts/**` |
 
 ## 2. Subfases de adequação por funcionalidade
 

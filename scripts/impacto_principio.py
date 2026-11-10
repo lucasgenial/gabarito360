@@ -104,7 +104,6 @@ def pendencias():
 def gerar_adequacoes():
     versao = P.ler_versao()[0]
     lista = pendencias()
-    versionados = arquivos_versionados()
     adrs_pendentes = {}
     for *_, adrs in lista:
         for a in adrs:
@@ -125,17 +124,19 @@ def gerar_adequacoes():
         f'3. Suba "Conforme princípios" para a versão {versao}. A regra `R-VERSAO-PRINCIPIOS-FN` reprova o PR de código sem esse passo.',
         '4. Rode `python scripts/impacto_principio.py --aplicar`. A funcionalidade sai desta lista.',
         '',
+        'Para ver quantos arquivos cada ADR alcança hoje, rode `python scripts/impacto_principio.py --adr ADR-NNNN`.',
+        '',
         '## 1. ADRs com adequação pendente',
         '',
     ]
     if not adrs_pendentes:
         linhas += ['Nenhuma adequação pendente.', '']
     else:
-        linhas += ['| ADR | Versão | Título | Verificação | Funcionalidades pendentes | Arquivos no escopo |', '|---|---|---|---|---|---|']
+        linhas += ['| ADR | Versão | Título | Verificação | Funcionalidades pendentes | Caminhos no escopo |', '|---|---|---|---|---|---|']
         for a in sorted(adrs_pendentes.values(), key=lambda x: (x['versao'], x['id'])):
             qtd = sum(1 for *_, adrs in lista if any(x['id'] == a['id'] for x in adrs))
-            arquivos = contar_arquivos(a['caminhos'], versionados)
-            escopo = 'repositório inteiro' if arquivos is None else str(arquivos)
+            caminhos = [c for c in a['caminhos'] if c != '**']
+            escopo = ', '.join(f'`{c}`' for c in caminhos) if caminhos else 'repositório inteiro'
             regras = f' ({", ".join(a["regras"])})' if a['regras'] else ''
             linhas.append(f'| [{a["id"]}](../decisoes/{a["arquivo"]}) | {a["versao"]} | {a["titulo"]} | '
                           f'{a["verificacao"]}{regras} | {qtd} | {escopo} |')
