@@ -1,7 +1,7 @@
 """Executa todas as regras ativas de docs/decisoes/regras.yml (FN-078, ADR-0053).
 
 A CI chama este script. Uma regra nova entra na CI quando passa a 'ativa' no registro,
-sem mudar o workflow. O marcador {INTERVALO} no comando recebe a variável de ambiente INTERVALO.
+sem mudar o workflow. O marcador {INTERVALO} recebe a variável de ambiente INTERVALO; {BASE} recebe o início do intervalo.
 """
 import os
 import shlex
@@ -17,7 +17,7 @@ falhas = []
 for regra in P.ler_regras():
     if regra.get('estado') != 'ativa':
         continue
-    comando = str(regra['comando']).replace('{INTERVALO}', intervalo)
+    comando = str(regra['comando']).replace('{INTERVALO}', intervalo).replace('{BASE}', intervalo.split('..')[0])
     print(f'\n== {regra["id"]} ({regra.get("adr")}): {comando}', flush=True)
     partes = shlex.split(comando)
     if partes and partes[0] in ('python', 'python3'):

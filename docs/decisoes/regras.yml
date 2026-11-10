@@ -1,6 +1,7 @@
 # Registro de regras verificáveis dos princípios (FN-078, ADR-0053).
 # Cada regra liga um ADR a um teste. A CI executa as regras "ativa" com scripts/executar_regras.py.
-# Uma regra "planejada" ainda não tem teste; ela vira "ativa" na subfase 3.1 da FN-078.
+# Uma regra "planejada" ainda não tem teste.
+# As regras de código usam a linha de base docs/decisoes/linha-de-base.json: violação nova reprova; a contagem só diminui.
 # Gravidade: "bloqueia" reprova o PR; "avisa" só mostra a falha.
 
 - id: R-PRINTS
@@ -47,32 +48,37 @@
 
 - id: R-JS-EXTERNO
   adr: ADR-0023
-  estado: planejada
+  estado: ativa
   gravidade: bloqueia
+  comando: python3 scripts/verificar_regras_codigo.py R-JS-EXTERNO --base {BASE}
   descricao: Sem script inline com código e sem atributos on* nas views.
 
 - id: R-SEM-DIALOGO-NATIVO
   adr: ADR-0025
-  estado: planejada
+  estado: ativa
   gravidade: bloqueia
+  comando: python3 scripts/verificar_regras_codigo.py R-SEM-DIALOGO-NATIVO --base {BASE}
   descricao: Sem confirm, alert ou prompt no JavaScript da aplicação.
 
 - id: R-API-SO-JSON
   adr: ADR-0001
-  estado: planejada
+  estado: ativa
   gravidade: bloqueia
+  comando: python3 scripts/verificar_regras_codigo.py R-API-SO-JSON --base {BASE}
   descricao: A API não renderiza views; responde só JSON.
 
 - id: R-TABELA-PADRAO
   adr: ADR-0022
-  estado: planejada
+  estado: ativa
   gravidade: bloqueia
+  comando: python3 scripts/verificar_regras_codigo.py R-TABELA-PADRAO --base {BASE}
   descricao: As tabelas das telas usam o componente x-tabela.
 
 - id: R-VERSAO-RODAPE
   adr: ADR-0038
-  estado: planejada
+  estado: ativa
   gravidade: bloqueia
+  comando: python3 scripts/verificar_regras_codigo.py R-VERSAO-RODAPE --base {BASE}
   descricao: Versão única em apps/web/config/versao.php e rodapé no formato aprovado.
 
 - id: R-FN-NO-PR
