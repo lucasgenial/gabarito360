@@ -1,5 +1,15 @@
 # Orientações do projeto
 
+## Planejamento centralizado (tronco único)
+
+Decisão do responsável (09/11/2026): o planejamento tem um único tronco, o [plano mestre](docs/planejamento/00-plano-mestre.md), regido por [docs/planejamento/01-governanca.md](docs/planejamento/01-governanca.md).
+
+- Antes de iniciar qualquer funcionalidade, e ao terminar cada subfase, consultar o agente `gerente-projetos` (`.claude/agents/gerente-projetos.md`).
+- Toda funcionalidade, nova ou existente, tem `docs/funcionalidades/<NNN-slug>/planejamento.md` e `casos-de-uso.md` aprovados antes da execução.
+- Um plano que nasce durante uma entrega serve só para concluí-la. Algo que vá além dela entra no plano mestre como candidata e aguarda a priorização do responsável.
+- Um módulo transversal (por exemplo, a agenda) bloqueia as funcionalidades que dependem dele. Não criar versões locais paralelas.
+- Os documentos numerados `docs/NN-*.md` são histórico e evidência e não definem prioridade.
+
 ## Prints e imagens da aplicação
 
 Decisão do responsável (09/11/2026): por padrão, **nenhum print ou captura de tela da aplicação é mantido** no repositório nem em qualquer outro serviço de imagens: PRs, issues, documentos, artifacts, Drive, Canva e similares.
