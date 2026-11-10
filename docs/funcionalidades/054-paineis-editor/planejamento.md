@@ -19,7 +19,7 @@ Permitir que cada pessoa organize os painéis de Turmas e da Turma — ordem, la
   - Componente de toast para toda a aplicação → FN-076.
 
 ## 3. Fontes de verdade
-- Documentos de origem: docs/179 (`docs/179-execucao-paineis-turmas.md`) (seções finais), docs/180 (`docs/180-correcao-dashboards-diretriz.md`), docs/188 (`docs/188-tw3-acoes-direita.md`) (última seção), docs/189 (`docs/189-paineis-secoes-cards.md`), docs/190 (`docs/190-previa-editor-paineis.md`), docs/191 (`docs/191-editor-paineis-integracao.md`), docs/193 (`docs/193-feedback-editor-toast.md`), [contratos/preferencias-paineis.md](../../contratos/preferencias-paineis.md).
+- Documentos de origem: docs/179 (`docs/179-execucao-paineis-turmas.md`) (seções finais), docs/180 (`docs/180-correcao-dashboards-diretriz.md`), docs/188 (`docs/188-tw3-acoes-direita.md`) (última seção), docs/189 (`docs/189-paineis-secoes-cards.md`), docs/190 (`docs/190-previa-editor-paineis.md`), docs/191 (`docs/191-editor-paineis-integracao.md`), docs/193 (`docs/193-feedback-editor-toast.md`), [contratos/preferencias-paineis.md](../../arquitetura/10-paineis-e-editor.md).
 - Não há mockup original; a prévia local do editor (docs/190) foi aprovada pelo responsável em 09/11/2026.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 - Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (`turma.ver`).

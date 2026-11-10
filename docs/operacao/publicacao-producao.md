@@ -213,7 +213,7 @@ Use `queue:retry all` só fora do corte de esquema e depois de revisar os jobs f
 
 ## Histórico de publicações em produção
 
-Estas entradas resumem registros de execução. As evidências sanitizadas em formato JSON estão em [evidencias](evidencias/).
+Estas entradas resumem registros de execução. As evidências sanitizadas em formato JSON estão em evidencias (`docs/operacao/evidencias/`, removido em 10/11/2026; disponível no histórico do Git).
 
 | Data | Versão (SHA curto) | Conteúdo | Resultado e observações |
 |---|---|---|---|

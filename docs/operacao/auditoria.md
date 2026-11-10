@@ -86,7 +86,7 @@ Execute antes de qualquer eliminação futura.
 
 - **Job de CI `auditoria-recuperacao`.** Cria MariaDB e Redis descartáveis. Prova os grants da credencial do job, a falha e a recuperação do banco dedicado, o payload cifrado, o snapshot do Redis com job pendente, a parada e o reinício e o replay idempotente. O script exige o banco `g360_auditoria_ci`, loopback e ambiente de teste. **Não o execute no servidor.**
 - **Script `scripts/auditoria/ensaio-restauracao.sh`.** Exclusivo do runner de CI, com banco fictício e Docker local. Faz dump de todos os bancos do serviço de teste (com grants), salva o Redis com pendência, para as origens e restaura em contêineres novos com volumes próprios. Confere manifesto antes do consumo, grants, tabela de controle fora da auditoria, migrations, arquivo mensal, job cifrado pendente e replay sem duplicação. A chave da aplicação fica no runner e não é impressa. Backups e chaves não são publicados como artefatos. O tempo medido não é RTO de produção.
-- **Ensaio de contêineres completos.** A recuperação em clones isolados, com chaves, arquivos, reinício e 1,8 milhão de eventos sintéticos, está registrada no histórico (evidência `au1-recuperacao-volume-2026-11-01.json`, em [evidencias](evidencias/)). Ela não restaura o contêiner Proxmox real, as unidades systemd nem os arquivos de usuários.
+- **Ensaio de contêineres completos.** A recuperação em clones isolados, com chaves, arquivos, reinício e 1,8 milhão de eventos sintéticos, está registrada no histórico (evidência `au1-recuperacao-volume-2026-11-01.json`, em evidencias (`docs/operacao/evidencias/`, removido em 10/11/2026; disponível no histórico do Git)). Ela não restaura o contêiner Proxmox real, as unidades systemd nem os arquivos de usuários.
 
 ## Referência de capacidade (ensaio de 01/11/2026)
 
@@ -151,7 +151,7 @@ O canal de escalonamento é o acompanhamento deste projeto com o responsável. N
 - [11-seguranca-e-privacidade.md](../arquitetura/11-seguranca-e-privacidade.md), seção "Auditoria geral (AU1)"
 - [backup-e-restauracao.md](backup-e-restauracao.md)
 - [FN-004](../funcionalidades/004-auditoria/planejamento.md)
-- Evidência sanitizada: [au1-recuperacao-volume-2026-11-01.json](evidencias/au1-recuperacao-volume-2026-11-01.json)
+- Evidência sanitizada: au1-recuperacao-volume-2026-11-01.json (`docs/operacao/evidencias/au1-recuperacao-volume-2026-11-01.json`, removido em 10/11/2026; disponível no histórico do Git)
 
 ## Divergências encontradas
 

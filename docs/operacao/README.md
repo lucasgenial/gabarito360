@@ -35,7 +35,7 @@ A topologia completa está em [13-infraestrutura-e-ambientes.md](../arquitetura/
 
 ## Evidências
 
-A pasta [evidencias](evidencias/) guarda resumos sanitizados em JSON de ensaios e publicações (contagens, estados e tempos). Ela não contém dados pessoais, chaves nem prints.
+A pasta evidencias (`docs/operacao/evidencias/`, removido em 10/11/2026; disponível no histórico do Git) guarda resumos sanitizados em JSON de ensaios e publicações (contagens, estados e tempos). Ela não contém dados pessoais, chaves nem prints.
 
 ## Outros documentos relacionados
 
