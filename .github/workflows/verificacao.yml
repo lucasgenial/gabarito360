@@ -38,7 +38,7 @@ jobs:
       REDIS_MAX_RETRIES: '0'
       QUEUE_CONNECTION: redis
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -74,7 +74,7 @@ jobs:
     # FN-078: princípios verificados automaticamente (ADR-0053).
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - run: python3 -m unittest scripts/tests/test_verificar_autoria.py scripts/tests/test_principios.py scripts/tests/test_regras_codigo.py scripts/tests/test_fn_no_pr.py scripts/tests/test_conformidade_fn.py scripts/tests/test_dependencias.py scripts/tests/test_impacto_principio.py
@@ -101,7 +101,7 @@ jobs:
   telas:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -172,7 +172,7 @@ jobs:
       run:
         working-directory: apps/${{ matrix.app }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -223,7 +223,7 @@ jobs:
       DB_USERNAME: root
       DB_PASSWORD: teste-local-ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Conferir armazenamento e commits do MariaDB descartável
         run: python3 scripts/ci/verificar_mariadb_descartavel.py
         working-directory: ${{ github.workspace }}
