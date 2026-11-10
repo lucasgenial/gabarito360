@@ -14,7 +14,7 @@ agents_resumo:
   - "Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras."
   - "Todo princípio vigente tem verificação automática: um teste na CI ou a revisão do agente de conformidade. A verificação não depende de ação humana."
   - "Antes de alterar uma funcionalidade, revalide o planejamento dela contra os princípios vigentes e aplique as adequações pendentes."
-  - "Implementação em andamento: FN-078 (`docs/funcionalidades/078-governanca-executavel/planejamento.md`)."
+  - "Violações antigas das regras de código ficam em `docs/decisoes/linha-de-base.json`. Uma violação nova reprova a CI. A linha de base só pode diminuir. Implementação: FN-078."
 ---
 # ADR-0053 — Os princípios do projeto são executáveis, versionados e podem mudar a qualquer momento
 
@@ -54,6 +54,7 @@ Decisão do responsável: "Será bom criar algo que impossibilite essa ação." 
 - Proibido: editar à mão as seções geradas do `AGENTS.md` e do `CLAUDE.md`.
 - Esta decisão complementa o [ADR-0048](0048-tronco-unico-de-planejamento.md). O tronco único organiza a fila; este ADR garante que a fila obedeça aos princípios vigentes.
 - A implementação é a [FN-078 Governança executável](../funcionalidades/078-governanca-executavel/planejamento.md).
+- Obrigatório: uma violação existente antes da regra entra na [linha de base](linha-de-base.json). A linha de base só pode diminuir. A correção entra como subfase de adequação da funcionalidade dona.
 
 ## Verificação
 

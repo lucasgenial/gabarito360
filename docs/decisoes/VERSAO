@@ -1,4 +1,4 @@
 # Versão dos princípios do projeto (ADR-0053). Não edite à mão.
 # Atualize com: python scripts/verificar_principios.py --atualizar
-versao: 2
-hash: debf733510cd59d3cb9515609f3bcbec3d3e455dfa7836a815b579ac0e668008
+versao: 3
+hash: 99da8fbc45dc9874080811d57ff8ad9bf8548ad0a151ee478eb0a3c84d8a283e

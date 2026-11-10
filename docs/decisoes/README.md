@@ -29,6 +29,8 @@ As regras vigentes resumidas estão no [AGENTS.md](../../AGENTS.md), com links p
 6. Acrescente uma linha à tabela abaixo.
 7. Rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`. O primeiro sobe a [versão dos princípios](VERSAO). O segundo gera o AGENTS.md. Não edite o AGENTS.md à mão: a CI reprova a diferença.
 
+As regras de código usam a [linha de base](linha-de-base.json) das violações antigas. Uma violação nova reprova a CI. Ao corrigir uma violação antiga, rode `python scripts/verificar_regras_codigo.py --atualizar-linha-de-base`. A linha de base só pode diminuir.
+
 ## Estados
 
 | Estado | Significado |

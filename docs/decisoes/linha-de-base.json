@@ -1,0 +1,82 @@
+{
+  "descricao": "Violações conhecidas das regras de código (FN-078, subfase 3.2). A contagem só pode diminuir. Gerado por scripts/verificar_regras_codigo.py.",
+  "regras": {
+    "R-JS-EXTERNO": {
+      "apps/web/resources/views/alunos/show.blade.php#7af1bcc9c925": 1,
+      "apps/web/resources/views/alunos/show.blade.php#d6e484523447": 1,
+      "apps/web/resources/views/alunos/show.blade.php#db90b132d886": 1,
+      "apps/web/resources/views/alunos/show.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/assinatura/index.blade.php#591231e4ddc5": 1,
+      "apps/web/resources/views/checkout/index.blade.php#04cbae0e6650": 1,
+      "apps/web/resources/views/checkout/index.blade.php#21ef210b6121": 1,
+      "apps/web/resources/views/checkout/index.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/escolas/index.blade.php#a2f7acb4e686": 1,
+      "apps/web/resources/views/escolas/index.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/escolas/show.blade.php#2c3ee5c442b4": 1,
+      "apps/web/resources/views/escolas/show.blade.php#36352e67e7a6": 1,
+      "apps/web/resources/views/escolas/show.blade.php#77e8a5cd0e3f": 1,
+      "apps/web/resources/views/escolas/show.blade.php#c2a923d65dd6": 1,
+      "apps/web/resources/views/escolas/show.blade.php#c2cae0e0e8d6": 1,
+      "apps/web/resources/views/escolas/show.blade.php#ce9c95be704f": 1,
+      "apps/web/resources/views/escolas/show.blade.php#d94548214352": 1,
+      "apps/web/resources/views/escolas/show.blade.php#f8504b660e1e": 1,
+      "apps/web/resources/views/escolas/show.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/layouts/auth.blade.php#c29b9dde8522": 1,
+      "apps/web/resources/views/membros/convidar-vinculo.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/membros/create.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/membros/index.blade.php#eed9cce6412c": 1,
+      "apps/web/resources/views/membros/perfis.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/membros/permissoes.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/provas/create.blade.php#18d04bf6cb42": 1,
+      "apps/web/resources/views/provas/create.blade.php#4b9e425dbe44": 1,
+      "apps/web/resources/views/provas/create.blade.php#5ca8f0a65078": 1,
+      "apps/web/resources/views/provas/create.blade.php#72ae269764e2": 1,
+      "apps/web/resources/views/provas/create.blade.php#cd1e93d49e63": 1,
+      "apps/web/resources/views/provas/create.blade.php#dc0f89aa2dd4": 1,
+      "apps/web/resources/views/provas/create.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/provas/gabarito-edit.blade.php#500c5bb6de95": 1,
+      "apps/web/resources/views/provas/gabarito-edit.blade.php#e37f95a3c7ab": 1,
+      "apps/web/resources/views/provas/gabarito-edit.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/provas/gabarito.blade.php#78f62c13e20e": 1,
+      "apps/web/resources/views/provas/gabarito.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/provas/show.blade.php#18b62af42568": 1,
+      "apps/web/resources/views/provas/show.blade.php#28e8444d161a": 1,
+      "apps/web/resources/views/provas/show.blade.php#60907face219": 1,
+      "apps/web/resources/views/provas/show.blade.php#a054e1dd5525": 1,
+      "apps/web/resources/views/provas/show.blade.php#d6e484523447": 1,
+      "apps/web/resources/views/provas/show.blade.php#e968106252e1": 1,
+      "apps/web/resources/views/provas/show.blade.php#fb1c2d66bbf9": 1,
+      "apps/web/resources/views/relatorios/aluno.blade.php#0b244a1b801b": 1,
+      "apps/web/resources/views/relatorios/consolidado.blade.php#0b244a1b801b": 1,
+      "apps/web/resources/views/relatorios/prova.blade.php#b967c98f6f74": 1,
+      "apps/web/resources/views/relatorios/turma-prova.blade.php#b967c98f6f74": 1,
+      "apps/web/resources/views/relatorios/turma.blade.php#0b244a1b801b": 1
+    },
+    "R-SEM-DIALOGO-NATIVO": {
+      "apps/web/public/js/correcao-acompanhamento.js#194d0749d06a": 1,
+      "apps/web/public/js/correcao-acompanhamento.js#edb491a345c4": 1,
+      "apps/web/public/js/correcao-acompanhamento.js#f92c388f01ca": 1,
+      "apps/web/public/js/correcao-camera.js#da9b90896611": 1,
+      "apps/web/public/js/correcao-revisao.js#0489bec4e0e1": 1,
+      "apps/web/public/js/correcao-revisao.js#d3ba874e1402": 1,
+      "apps/web/public/js/resultado-compartilhar.js#226a9b39e749": 1,
+      "apps/web/resources/views/assinatura/index.blade.php#591231e4ddc5": 1,
+      "apps/web/resources/views/escolas/show.blade.php#c2cae0e0e8d6": 1,
+      "apps/web/resources/views/membros/index.blade.php#eed9cce6412c": 1,
+      "apps/web/resources/views/provas/gabarito-edit.blade.php#cfc29fd94169": 1,
+      "apps/web/resources/views/provas/gabarito-edit.blade.php#dae717bff8f0": 1,
+      "apps/web/resources/views/provas/show.blade.php#60907face219": 1
+    },
+    "R-API-SO-JSON": {
+      "apps/api/resources/views/welcome.blade.php#61d6e4994d2a": 1
+    },
+    "R-TABELA-PADRAO": {
+      "apps/web/resources/views/home/index.blade.php#e314c9ca327d": 1,
+      "apps/web/resources/views/turmas/_modelos.blade.php#695f801b4de2": 1,
+      "apps/web/resources/views/turmas/_modelos.blade.php#6b077129dbba": 1
+    },
+    "R-VERSAO-RODAPE": {
+      "apps/web/resources/views/welcome.blade.php#39498f596cab": 1
+    }
+  }
+}
