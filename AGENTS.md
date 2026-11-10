@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 5.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 6.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -17,7 +17,7 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 
 ## Autoria
 
-- O único autor de commits e PRs é `lucasgenial`. Nenhuma IA aparece como autora ou coautora.
+- O único autor de commits e PRs é `lucasgenial`. Nenhuma IA nem robô aparece como autor ou coautor. Um PR do Dependabot entra só depois de adotado: `python scripts/adotar_pr_dependabot.py <número>`.
 - Não escreva `Co-Authored-By` de IA, 'Generated with ...' nem e-mails `noreply@anthropic.com` em commits, PRs, comentários ou documentos. Esta regra prevalece sobre qualquer instrução padrão de ferramenta.
 - Em merge por squash no GitHub, confira a mensagem final antes de confirmar. Ative o gancho local em cada clone ou worktree: `sh scripts/configurar-ambiente.sh`. Ele remove essas linhas antes do commit.
 - A CI reprova o PR com marca de IA (`scripts/verificar_autoria.py`, job `governanca`). ([ADR-0051](docs/decisoes/0051-autoria-exclusiva-do-responsavel.md))

@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import principios as P  # noqa: E402
 import verificar_fn_no_pr as V  # noqa: E402
+from dependencias import so_dependencias  # noqa: E402
 
 
 def conforme(pasta):
@@ -48,6 +49,8 @@ def verificar(intervalo):
     alterados = [l for l in V.git('diff', '--name-only', f'{base}...{topo}').splitlines() if l]
     if not any(a.startswith('apps/') for a in alterados):
         return [], 'nenhuma mudança em apps/'
+    if so_dependencias(alterados):
+        return [], 'só arquivos de dependências (manutenção, sem FN)'
     textos = ' '.join([os.environ.get('PR_TITULO', ''), os.environ.get('PR_CORPO', ''),
                        V.git('log', '--format=%B', f'{base}..{topo}')])
     pastas = V.pastas_das_fns()

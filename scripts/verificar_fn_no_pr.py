@@ -4,6 +4,7 @@ Uma mudança em apps/ precisa:
 1. citar pelo menos uma funcionalidade (FN-NNN) existente no catálogo, no título ou na
    descrição do PR (variáveis PR_TITULO e PR_CORPO) ou numa mensagem de commit do intervalo;
 2. alterar o planejamento.md de pelo menos uma das FNs citadas.
+Exceção: um PR que só altera arquivos de dependências (scripts/dependencias.py).
 
 Uso:
   python scripts/verificar_fn_no_pr.py <base>..<head>     # padrão: origin/main..HEAD
@@ -13,6 +14,9 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from dependencias import so_dependencias  # noqa: E402
 
 RAIZ = Path(os.environ.get('PRINCIPIOS_RAIZ') or Path(__file__).resolve().parents[1])
 CATALOGO = RAIZ / 'docs' / 'funcionalidades' / 'README.md'
@@ -44,6 +48,8 @@ def verificar(intervalo):
     codigo = [a for a in alterados if a.startswith('apps/')]
     if not codigo:
         return [], 'nenhuma mudança em apps/'
+    if so_dependencias(alterados):
+        return [], 'só arquivos de dependências (manutenção, sem FN)'
     textos = ' '.join([os.environ.get('PR_TITULO', ''), os.environ.get('PR_CORPO', ''),
                        git('log', '--format=%B', f'{base}..{topo}')])
     citadas = sorted(set(re.findall(r'\bFN-\d{3}\b', textos)))

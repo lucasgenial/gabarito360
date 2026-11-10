@@ -65,6 +65,20 @@ class TestFnNoPr(unittest.TestCase):
         self.assertEqual(codigo, 1)
         self.assertIn('002-provas/planejamento.md', saida)
 
+    def test_so_dependencias_dispensa_fn(self):
+        self.escrever('apps/web/composer.lock', '{"x": 2}\n')
+        self.escrever('apps/api/omr/requirements.txt', 'numpy>=2\n')
+        self.commit('chore(deps): atualiza pacotes')
+        codigo, saida = self.rodar()
+        self.assertEqual(codigo, 0, saida)
+        self.assertIn('dependências', saida)
+
+    def test_dependencias_com_codigo_exige_fn(self):
+        self.escrever('apps/web/composer.lock', '{"x": 3}\n')
+        self.escrever('apps/web/a.php', '<?php // novo\n')
+        self.commit('chore(deps): atualiza e muda código')
+        self.assertEqual(self.rodar()[0], 1)
+
     def test_fn_inexistente_reprova(self):
         self.escrever('apps/web/a.php', '<?php // novo\n')
         self.escrever('docs/funcionalidades/002-provas/planejamento.md', '# FN-002\nevidência\n')
