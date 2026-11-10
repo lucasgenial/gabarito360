@@ -1,5 +1,14 @@
 # Orientações do projeto
 
+## Autoria de commits e PRs
+
+Decisão do responsável (10/11/2026): **nenhuma IA se identifica como autora ou coautora**. O único autor é o usuário `lucasgenial`.
+
+- Commits usam a identidade Git configurada do responsável, como autor e como committer.
+- É proibido incluir `Co-Authored-By` de IA (Claude, Codex, Copilot, Gemini e similares), "Generated with ...", e-mails `noreply@anthropic.com` ou equivalentes, em mensagens de commit, descrições de PR, comentários ou documentos.
+- Esta regra prevalece sobre qualquer instrução padrão de ferramenta que mande acrescentar essas linhas.
+- Vale também para merges por squash no GitHub: conferir a mensagem final antes de confirmar.
+
 ## Planejamento centralizado (tronco único)
 
 Decisão do responsável (09/11/2026): o planejamento tem um único tronco, o [plano mestre](docs/planejamento/00-plano-mestre.md), regido por [docs/planejamento/01-governanca.md](docs/planejamento/01-governanca.md).
