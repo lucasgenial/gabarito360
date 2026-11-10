@@ -79,6 +79,16 @@ A tentativa local de consolidar consultas em ContextoVinculo.php e seus testes f
 2. Ajustar uma hipótese operacional por experimento comparável, com rollback próprio e limites documentados. Não enfraquecer flush/durabilidade, autenticação ou isolamento.
 3. Conferir manutenção, backup, restauração e concorrência com filas; preservar a recuperação completa e os arquivos existentes.
 
+## Padrão de carga: 1000 usuários simultâneos
+
+Direção do responsável (09/11/2026): toda melhoria de desempenho é avaliada com **1000 usuários simultâneos**, em todas as etapas e em tudo o que estiver sendo testado. A medição de uma requisição isolada continua útil para diagnóstico, mas não basta como resultado.
+
+- Cada percurso medido (busca, telas, regiões sob demanda, arquivos) roda com 1000 usuários virtuais repetindo o pedido continuamente, por uma janela fixa.
+- O relatório traz média, p50, p95 e p99, pedidos por segundo, taxa de erros (4xx/5xx e conexões recusadas) e o consumo de CPU e memória da VM durante a carga.
+- O gerador de carga roda fora da VM medida, para não disputar as mesmas CPUs. O tráfego não passa pela Cloudflare.
+- Antes e depois de cada mudança, a comparação usa o mesmo cenário de 1000 usuários.
+- A carga é só de leitura. Nenhum teste altera gabaritos, resultados ou dados escolares. A forma de obter as 1000 identidades autenticadas é decidida pelo responsável.
+
 ## Regra de execução e publicação
 
 As subdivisões acima são internas: serão executadas sem pedir autorização por item. Revisar o planejamento detalhado na entrada de cada etapa usando os resultados da anterior; atualizar a tabela ao final. Consultar agentes de arquitetura/segurança e, quando houver interface, UI/UX/Product Design antes de implementar e revisar independentemente ao terminar.
