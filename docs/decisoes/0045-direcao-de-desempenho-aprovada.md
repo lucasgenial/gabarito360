@@ -1,3 +1,14 @@
+---
+id: ADR-0045
+titulo: Direção de desempenho: editor primeiro, baseline autenticada, prioridade por evidência
+estado: Aceita
+substituida_por: []
+data: 2026-11-09
+afeta_funcionalidades: [FN-054, FN-077]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0045 — A direção de desempenho aprovada fecha o editor primeiro, mede a baseline autenticada e prioriza por evidência
 
 **Atualizado em:** 10/11/2026, por lucasgenial

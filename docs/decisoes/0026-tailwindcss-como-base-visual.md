@@ -1,3 +1,18 @@
+---
+id: ADR-0026
+titulo: TailwindCSS como base visual, com a paleta Gabarito360
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-070, FN-074, FN-075]
+afeta_caminhos: ["apps/web/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 30
+agents_resumo:
+  - "Use o TailwindCSS com a paleta Gabarito360 como base visual."
+---
 # ADR-0026 — O TailwindCSS é a base visual efetiva; a paleta Gabarito360 permanece e a estética anterior deixa de ser requisito
 
 **Atualizado em:** 10/11/2026, por lucasgenial

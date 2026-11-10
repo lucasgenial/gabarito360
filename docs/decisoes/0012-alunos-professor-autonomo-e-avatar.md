@@ -1,3 +1,14 @@
+---
+id: ADR-0012
+titulo: Coordenador muda aluno de turma; professor autônomo com cadastro mínimo; avatar do aluno
+estado: Aceita
+substituida_por: []
+data: 2026-10-31
+afeta_funcionalidades: [FN-026, FN-027, FN-033, FN-066]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+---
 # ADR-0012 — Coordenador muda aluno de turma; professor autônomo tem cadastro mínimo; o aluno é representado por avatar
 
 **Atualizado em:** 10/11/2026, por lucasgenial

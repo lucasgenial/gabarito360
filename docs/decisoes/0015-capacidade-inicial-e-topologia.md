@@ -1,3 +1,14 @@
+---
+id: ADR-0015
+titulo: Capacidade inicial e topologia com WEB e API em grupos de processos separados
+estado: Aceita
+substituida_por: []
+data: 2026-10-31
+afeta_funcionalidades: [FN-007, FN-056, FN-077]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0015 — Meta inicial de 100 instituições, 600 professores e 1.000 responsáveis; WEB e API no mesmo servidor com grupos de processos separados
 
 **Atualizado em:** 10/11/2026, por lucasgenial

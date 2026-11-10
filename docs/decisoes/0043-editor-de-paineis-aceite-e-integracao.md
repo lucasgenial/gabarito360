@@ -1,3 +1,18 @@
+---
+id: ADR-0043
+titulo: Editor de painéis aprovado; integração só na homologação
+estado: Aceita
+substituida_por: []
+data: 2026-11-09
+afeta_funcionalidades: [FN-053, FN-054]
+afeta_caminhos: ["apps/web/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 112
+agents_resumo:
+  - "O editor de painéis está aprovado. A integração fica só na homologação."
+---
 # ADR-0043 — O editor de painéis está aprovado e a integração real nos painéis Turmas e Turma está autorizada, só na homologação
 
 **Atualizado em:** 10/11/2026, por lucasgenial

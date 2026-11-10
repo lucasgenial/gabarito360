@@ -1,3 +1,18 @@
+---
+id: ADR-0040
+titulo: Painéis com seções e cards reordenáveis
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-053, FN-054]
+afeta_caminhos: ["apps/web/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 110
+agents_resumo:
+  - "Seções e cards centrais dos painéis são reordenáveis."
+---
 # ADR-0040 — Resultados por período e Agenda da turma entram em Resultados da turma; seções e cards centrais são reordenáveis
 
 **Atualizado em:** 10/11/2026, por lucasgenial

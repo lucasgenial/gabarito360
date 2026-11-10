@@ -1,3 +1,18 @@
+---
+id: ADR-0032
+titulo: Menu desktop expandido (256 px) e compacto (80 px); navegação inferior no celular
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-073, FN-075]
+afeta_caminhos: ["apps/web/resources/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 92
+agents_resumo:
+  - "O menu desktop alterna entre expandido (256 px) e compacto (80 px). Até 767 px, use navegação inferior."
+---
 # ADR-0032 — O menu desktop alterna entre expandido (256 px) e compacto (80 px); celulares até 767 px usam navegação inferior
 
 **Atualizado em:** 10/11/2026, por lucasgenial

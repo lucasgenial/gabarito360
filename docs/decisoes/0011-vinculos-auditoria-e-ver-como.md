@@ -1,3 +1,14 @@
+---
+id: ADR-0011
+titulo: Escolha de vínculo ao entrar, auditoria restrita e Suporte que vê como outro usuário
+estado: Aceita
+substituida_por: []
+data: 2026-10-31
+afeta_funcionalidades: [FN-004, FN-005, FN-013, FN-015]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+---
 # ADR-0011 — Uma pessoa escolhe o vínculo ao entrar; a auditoria é restrita; o Suporte vê o sistema como outro usuário
 
 **Atualizado em:** 10/11/2026, por lucasgenial

@@ -1,3 +1,18 @@
+---
+id: ADR-0019
+titulo: Publicação no fechamento validado de etapa de nível 1
+estado: Aceita
+substituida_por: []
+data: 2026-11-03
+afeta_funcionalidades: [FN-016, FN-017, FN-025, FN-026, FN-031, FN-042]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+agents_secao: Publicação
+agents_ordem: 40
+agents_resumo:
+  - "Publique no fechamento validado de etapa de nível 1. Subdivisões internas avançam sem pedir autorização."
+---
 # ADR-0019 — Publique no fechamento validado de etapa de nível 1; subdivisões internas avançam sem pedir autorização
 
 **Atualizado em:** 10/11/2026, por lucasgenial

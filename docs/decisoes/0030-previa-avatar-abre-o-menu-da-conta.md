@@ -1,3 +1,18 @@
+---
+id: ADR-0030
+titulo: Avatar abre o menu da conta
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-015, FN-019, FN-075]
+afeta_caminhos: ["apps/web/resources/views/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 91
+agents_resumo:
+  - "O avatar abre o menu da conta. Não duplique a troca de vínculo."
+---
 # ADR-0030 — O avatar abre o menu da conta, não a navegação principal; a troca de vínculo não se duplica
 
 **Atualizado em:** 10/11/2026, por lucasgenial

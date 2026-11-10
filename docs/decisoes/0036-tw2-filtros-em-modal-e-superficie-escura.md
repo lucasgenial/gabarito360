@@ -1,3 +1,18 @@
+---
+id: ADR-0036
+titulo: Filtros em modal e superfície escura da lateral e do cabeçalho
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-036, FN-075]
+afeta_caminhos: ["apps/web/resources/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 94
+agents_resumo:
+  - "Filtros ficam em modal. A lateral e o cabeçalho mantêm a superfície escura."
+---
 # ADR-0036 — No TW2, os filtros ficam em modal e a lateral e o cabeçalho escuros mantêm a superfície antiga
 
 **Atualizado em:** 10/11/2026, por lucasgenial

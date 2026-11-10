@@ -1,0 +1,88 @@
+# Registro de regras verificáveis dos princípios (FN-078, ADR-0053).
+# Cada regra liga um ADR a um teste. A CI executa as regras "ativa" com scripts/executar_regras.py.
+# Uma regra "planejada" ainda não tem teste; ela vira "ativa" na subfase 3.1 da FN-078.
+# Gravidade: "bloqueia" reprova o PR; "avisa" só mostra a falha.
+
+- id: R-PRINTS
+  adr: ADR-0049
+  estado: ativa
+  gravidade: bloqueia
+  comando: python3 scripts/verificar_imagens.py
+  descricao: Nenhuma imagem fora das pastas de assets e de design (sem prints da aplicação).
+
+- id: R-AUTORIA
+  adr: ADR-0051
+  estado: ativa
+  gravidade: bloqueia
+  comando: python3 scripts/verificar_autoria.py {INTERVALO}
+  descricao: Nenhum commit com autoria, committer ou coautoria de IA.
+
+- id: R-CATALOGO
+  adr: ADR-0048
+  estado: ativa
+  gravidade: bloqueia
+  comando: python3 scripts/verificar_funcionalidades.py
+  descricao: Catálogo de funcionalidades consistente com as pastas e os cabeçalhos dos planejamentos.
+
+- id: R-DOCUMENTACAO
+  adr: ADR-0055
+  estado: ativa
+  gravidade: bloqueia
+  comando: python3 scripts/verificar_documentacao.py --estrito
+  descricao: Links da documentação resolvidos e nenhum documento fora da estrutura.
+
+- id: R-PRINCIPIOS
+  adr: ADR-0053
+  estado: ativa
+  gravidade: bloqueia
+  comando: python3 scripts/verificar_principios.py
+  descricao: ADRs com campos válidos, regras registradas e versão dos princípios atualizada.
+
+- id: R-AGENTS-GERADO
+  adr: ADR-0053
+  estado: ativa
+  gravidade: bloqueia
+  comando: python3 scripts/gerar_agents.py --verificar
+  descricao: AGENTS.md igual ao gerado a partir dos ADRs aceitos.
+
+- id: R-JS-EXTERNO
+  adr: ADR-0023
+  estado: planejada
+  gravidade: bloqueia
+  descricao: Sem script inline com código e sem atributos on* nas views.
+
+- id: R-SEM-DIALOGO-NATIVO
+  adr: ADR-0025
+  estado: planejada
+  gravidade: bloqueia
+  descricao: Sem confirm, alert ou prompt no JavaScript da aplicação.
+
+- id: R-API-SO-JSON
+  adr: ADR-0001
+  estado: planejada
+  gravidade: bloqueia
+  descricao: A API não renderiza views; responde só JSON.
+
+- id: R-TABELA-PADRAO
+  adr: ADR-0022
+  estado: planejada
+  gravidade: bloqueia
+  descricao: As tabelas das telas usam o componente x-tabela.
+
+- id: R-VERSAO-RODAPE
+  adr: ADR-0038
+  estado: planejada
+  gravidade: bloqueia
+  descricao: Versão única em apps/web/config/versao.php e rodapé no formato aprovado.
+
+- id: R-FN-NO-PR
+  adr: ADR-0053
+  estado: planejada
+  gravidade: bloqueia
+  descricao: PR que altera apps/ cita uma FN e atualiza o planejamento dela.
+
+- id: R-VERSAO-PRINCIPIOS-FN
+  adr: ADR-0053
+  estado: planejada
+  gravidade: bloqueia
+  descricao: Funcionalidade alterada está validada na versão atual dos princípios.

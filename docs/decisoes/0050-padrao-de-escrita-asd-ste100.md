@@ -1,3 +1,20 @@
+---
+id: ADR-0050
+titulo: Padrão de escrita ASD-STE100 moderado
+estado: Aceita
+substituida_por: []
+data: 2026-11-10
+afeta_funcionalidades: [todas]
+afeta_caminhos: ["docs/**", "AGENTS.md"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Idioma e escrita
+agents_ordem: 10
+agents_resumo:
+  - "Responda e escreva em português do Brasil."
+  - "Todo documento novo ou revisado segue o padrão ASD-STE100 moderado (cerca de 80% das regras): uma ideia por frase; procedimento até 20 palavras e descrição até 25; voz ativa e imperativo nos passos; listas numeradas para passos e tabelas para comparações; um termo por conceito e siglas definidas na primeira vez; avisos antes da instrução."
+  - "Exceções: nomes de código, citações literais, termos de domínio e tabelas de referência."
+---
 # ADR-0050 — Todo documento novo ou revisado segue o padrão ASD-STE100 moderado, aplicado ao português
 
 **Atualizado em:** 10/11/2026, por lucasgenial

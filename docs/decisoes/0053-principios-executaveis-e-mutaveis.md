@@ -1,3 +1,21 @@
+---
+id: ADR-0053
+titulo: Princípios executáveis, versionados e mutáveis
+estado: Aceita
+substituida_por: []
+data: 2026-11-10
+afeta_funcionalidades: [todas]
+afeta_caminhos: ["docs/decisoes/**", "AGENTS.md", "scripts/**"]
+verificacao: teste
+regras: [R-PRINCIPIOS, R-AGENTS-GERADO, R-VERSAO-PRINCIPIOS-FN]
+agents_secao: Princípios executáveis
+agents_ordem: 10
+agents_resumo:
+  - "Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras."
+  - "Todo princípio vigente tem verificação automática: um teste na CI ou a revisão do agente de conformidade. A verificação não depende de ação humana."
+  - "Antes de alterar uma funcionalidade, revalide o planejamento dela contra os princípios vigentes e aplique as adequações pendentes."
+  - "Implementação em andamento: FN-078 (`docs/funcionalidades/078-governanca-executavel/planejamento.md`)."
+---
 # ADR-0053 — Os princípios do projeto são executáveis, versionados e podem mudar a qualquer momento
 
 **Atualizado em:** 10/11/2026, por lucasgenial

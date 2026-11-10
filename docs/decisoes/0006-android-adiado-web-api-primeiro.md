@@ -1,3 +1,14 @@
+---
+id: ADR-0006
+titulo: Android adiado; WEB e API primeiro
+estado: Aceita
+substituida_por: []
+data: 2026-06-18
+afeta_funcionalidades: [FN-010]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0006 — O aplicativo Android (MP-023) fica adiado; a equipe fecha antes as funcionalidades WEB e API
 
 **Atualizado em:** 10/11/2026, por lucasgenial

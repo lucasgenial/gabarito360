@@ -1,3 +1,14 @@
+---
+id: ADR-0031
+titulo: Menu principal em fluxo lateral no desktop
+estado: Substituída
+substituida_por: [ADR-0032]
+data: 2026-11-08
+afeta_funcionalidades: []
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0031 — O menu principal abre em fluxo lateral somente no desktop, sem sobreposição; o mobile mantém quatro atalhos e Mais
 
 **Atualizado em:** 10/11/2026, por lucasgenial

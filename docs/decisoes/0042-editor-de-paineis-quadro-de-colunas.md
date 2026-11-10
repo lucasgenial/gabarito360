@@ -1,3 +1,18 @@
+---
+id: ADR-0042
+titulo: Aba Distribuição do editor com quadro de colunas por seção
+estado: Aceita
+substituida_por: []
+data: 2026-11-09
+afeta_funcionalidades: [FN-054]
+afeta_caminhos: ["apps/web/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 111
+agents_resumo:
+  - "No editor de painéis, a aba Distribuição mantém o quadro de colunas por seção."
+---
 # ADR-0042 — A aba Distribuição mantém o quadro de colunas por seção; a grade visual pertence aos Ajustes finos
 
 **Atualizado em:** 10/11/2026, por lucasgenial

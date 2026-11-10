@@ -22,7 +22,12 @@ As regras vigentes resumidas estão no [AGENTS.md](../../AGENTS.md), com links p
 2. Preencha data, estado, origem e funcionalidades afetadas.
 3. Cite o texto literal do responsável entre aspas.
 4. Se a decisão substitui outra, edite o estado da antiga para "Substituída por ADR-NNNN" e cite a antiga em Consequências.
-5. Acrescente uma linha à tabela abaixo.
+5. Preencha o cabeçalho de campos no início do arquivo (veja `_modelo.md`):
+   - `verificacao`: `teste` (a CI verifica), `revisao-ia` (o agente de conformidade verifica) ou `processo` (rito de trabalho).
+   - Com `teste`, cite pelo menos uma regra de [regras.yml](regras.yml). Uma regra nova entra no registro como `planejada` ou `ativa`.
+   - Com `agents_secao`, `agents_ordem` e `agents_resumo`, a regra entra no AGENTS.md.
+6. Acrescente uma linha à tabela abaixo.
+7. Rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`. O primeiro sobe a [versão dos princípios](VERSAO). O segundo gera o AGENTS.md. Não edite o AGENTS.md à mão: a CI reprova a diferença.
 
 ## Estados
 
@@ -89,6 +94,8 @@ As regras vigentes resumidas estão no [AGENTS.md](../../AGENTS.md), com links p
 | [ADR-0051](0051-autoria-exclusiva-do-responsavel.md) | Nenhuma IA se identifica como autora ou coautora; o único autor é o usuário lucasgenial | 10/11/2026 | Aceita | [FN-008](../funcionalidades/008-ci-integracao/planejamento.md) |
 | [ADR-0052](0052-medicao-com-1000-usuarios-simultaneos.md) | Toda medição de desempenho usa 1.000 usuários simultâneos, sem simulação | 10/11/2026 | Aceita | [FN-007](../funcionalidades/007-escala-infraestrutura/planejamento.md), [FN-077](../funcionalidades/077-desempenho/planejamento.md) |
 | [ADR-0053](0053-principios-executaveis-e-mutaveis.md) | Os princípios são executáveis, versionados e podem mudar a qualquer momento; a verificação é automática | 10/11/2026 | Aceita | Todas; [FN-078](../funcionalidades/078-governanca-executavel/planejamento.md) |
+| [ADR-0054](0054-time-de-agentes-e-modelos-multifornecedor.md) | Time de agentes e modelos de IA de mais de um fornecedor | 10/11/2026 | Aceita | Todas |
+| [ADR-0055](0055-estrutura-da-documentacao-e-documento-dono.md) | Estrutura da documentação e documento dono de cada assunto | 10/11/2026 | Aceita | Todas |
 
 ## Origem dos identificadores antigos
 

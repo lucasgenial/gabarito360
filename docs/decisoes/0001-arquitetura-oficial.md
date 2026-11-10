@@ -1,3 +1,14 @@
+---
+id: ADR-0001
+titulo: Monorepo com API Laravel só JSON, WEB Laravel e MariaDB
+estado: Aceita
+substituida_por: []
+data: 2026-06-16
+afeta_funcionalidades: [FN-001]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: teste
+regras: [R-API-SO-JSON]
+---
 # ADR-0001 — O Gabarito360 usa monorepo com API Laravel (somente JSON), WEB Laravel e MariaDB
 
 **Atualizado em:** 10/11/2026, por lucasgenial

@@ -1,3 +1,14 @@
+---
+id: ADR-0007
+titulo: SaaS multi-tenant com autocadastro e assinatura
+estado: Aceita
+substituida_por: []
+data: 2026-06-18
+afeta_funcionalidades: [FN-021, FN-022, FN-030, FN-068]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+---
 # ADR-0007 — O produto vira SaaS multi-tenant com secretaria, modalidade individual e institucional, cadastro autônomo e assinatura
 
 **Atualizado em:** 10/11/2026, por lucasgenial

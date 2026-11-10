@@ -1,3 +1,18 @@
+---
+id: ADR-0028
+titulo: Ajuda contextual no título de cards, gráficos e KPIs
+estado: Aceita
+substituida_por: []
+data: 2026-11-08
+afeta_funcionalidades: [FN-052, FN-053, FN-075]
+afeta_caminhos: ["apps/web/resources/views/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Interface
+agents_ordem: 80
+agents_resumo:
+  - "Ajuda contextual de cards e KPIs usa o título como botão."
+---
 # ADR-0028 — Orientações complementares de cards, gráficos e KPIs usam o próprio título como botão de ajuda contextual
 
 **Atualizado em:** 10/11/2026, por lucasgenial

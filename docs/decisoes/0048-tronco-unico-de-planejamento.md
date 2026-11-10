@@ -1,3 +1,21 @@
+---
+id: ADR-0048
+titulo: Tronco único de planejamento: plano mestre, governança e catálogo
+estado: Aceita
+substituida_por: []
+data: 2026-11-09
+afeta_funcionalidades: [todas]
+afeta_caminhos: ["docs/funcionalidades/**", "docs/planejamento/**", "apps/**"]
+verificacao: teste
+regras: [R-CATALOGO, R-FN-NO-PR]
+agents_secao: Planejamento
+agents_ordem: 10
+agents_resumo:
+  - "O catálogo de funcionalidades e o plano mestre são o único tronco de planejamento. As regras estão em `docs/planejamento/01-governanca.md`. A CI verifica o catálogo com `scripts/verificar_funcionalidades.py`."
+  - "Consulte o agente `gerente-projetos` antes de iniciar uma funcionalidade e ao fim de cada subfase. Toda funcionalidade tem `planejamento.md` e `casos-de-uso.md` aprovados antes da execução."
+  - "Um plano que nasce numa entrega serve só a ela. O que vai além vira funcionalidade candidata no catálogo."
+  - "Um módulo transversal bloqueia quem depende dele. Não crie versão local paralela."
+---
 # ADR-0048 — O planejamento tem um único tronco: o plano mestre, regido pela governança, com catálogo de funcionalidades
 
 **Atualizado em:** 10/11/2026, por lucasgenial

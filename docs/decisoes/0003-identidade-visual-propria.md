@@ -1,3 +1,14 @@
+---
+id: ADR-0003
+titulo: Identidade visual própria, direção Atual refinada, com tokens em arquivo único
+estado: Substituída
+substituida_por: [ADR-0026]
+data: 2026-06-16
+afeta_funcionalidades: []
+afeta_caminhos: []
+verificacao: processo
+regras: []
+---
 # ADR-0003 — O produto segue identidade visual própria, direção "Atual refinada", com tokens em um arquivo único
 
 **Atualizado em:** 10/11/2026, por lucasgenial

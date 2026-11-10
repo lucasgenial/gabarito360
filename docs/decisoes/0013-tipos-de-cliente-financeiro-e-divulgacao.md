@@ -1,3 +1,14 @@
+---
+id: ADR-0013
+titulo: Tipos de cliente, perfil Financeiro e divulgação conforme o plano
+estado: Aceita
+substituida_por: []
+data: 2026-10-31
+afeta_funcionalidades: [FN-021, FN-023, FN-068, FN-069]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+---
 # ADR-0013 — Cliente pode ser professor, escola, núcleo, rede, secretaria ou governo; o Financeiro é um perfil; a divulgação depende do plano
 
 **Atualizado em:** 10/11/2026, por lucasgenial

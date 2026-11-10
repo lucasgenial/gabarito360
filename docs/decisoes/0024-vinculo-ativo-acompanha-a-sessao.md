@@ -1,3 +1,18 @@
+---
+id: ADR-0024
+titulo: Vínculo ativo acompanha a sessão autenticada
+estado: Aceita
+substituida_por: []
+data: 2026-11-06
+afeta_funcionalidades: [FN-011, FN-015, FN-018]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
+verificacao: revisao-ia
+regras: []
+agents_secao: Sessão e vínculo
+agents_ordem: 10
+agents_resumo:
+  - "O vínculo ativo acompanha a sessão. Uma sessão irrecuperável encerra toda a sessão Web."
+---
 # ADR-0024 — O vínculo ativo acompanha a sessão autenticada, sem expiração própria; sessão irrecuperável encerra tudo
 
 **Atualizado em:** 10/11/2026, por lucasgenial

@@ -1,3 +1,18 @@
+---
+id: ADR-0018
+titulo: Produção só por decisão expressa do responsável
+estado: Aceita
+substituida_por: []
+data: 2026-11-03
+afeta_funcionalidades: [FN-003, FN-018, FN-046, FN-064]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+agents_secao: Publicação
+agents_ordem: 30
+agents_resumo:
+  - "A produção só recebe uma entrega por decisão expressa do responsável."
+---
 # ADR-0018 — A publicação em produção depende de decisão explícita do responsável, mesmo após CI, revisão e homologação
 
 **Atualizado em:** 10/11/2026, por lucasgenial

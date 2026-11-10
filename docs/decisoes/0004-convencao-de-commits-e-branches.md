@@ -1,3 +1,19 @@
+---
+id: ADR-0004
+titulo: Commits em tipo(escopo) pt-BR, atômicos, em branches de feature
+estado: Aceita
+substituida_por: []
+data: 2026-06-16
+afeta_funcionalidades: [todas]
+afeta_caminhos: []
+verificacao: processo
+regras: []
+agents_secao: Publicação
+agents_ordem: 10
+agents_resumo:
+  - "A `main` é protegida: toda mudança entra por PR, com os 6 jobs da CI aprovados e merge por squash. Não há envio direto nem forçado, inclusive para o administrador."
+  - "Não inclua em commits arquivos de outras tarefas."
+---
 # ADR-0004 — Commits seguem tipo(escopo): descrição em pt-BR, são atômicos e nascem em branches de feature
 
 **Atualizado em:** 10/11/2026, por lucasgenial
@@ -29,6 +45,8 @@ Regras do docs/15:
 4. Faça um commit por funcionalidade atômica, não por arquivo.
 5. Nunca versione `.env`, credenciais, arquivos de senha nem binários grandes.
 6. Trabalhe em branches de feature, não direto na `main`.
+
+Atualização de 10/11/2026 (FN-078, subfase 1.1): a `main` é protegida no GitHub. Toda mudança entra por PR. O merge exige os 6 jobs da CI aprovados e usa squash. O envio direto e o envio forçado são bloqueados, também para o administrador.
 
 ## Consequências
 

@@ -1,3 +1,18 @@
+---
+id: ADR-NNNN
+titulo: <Título curto>
+estado: Aceita
+substituida_por: []
+data: AAAA-MM-DD
+afeta_funcionalidades: [FN-NNN]
+afeta_caminhos: ["apps/web/**"]
+verificacao: teste
+regras: [R-NOME-DA-REGRA]
+agents_secao: Interface
+agents_ordem: 50
+agents_resumo:
+  - "Frase curta, no imperativo, que entra no AGENTS.md."
+---
 # ADR-NNNN — <Título da decisão em uma frase>
 
 **Data:** <AAAA-MM-DD da decisão original>
