@@ -70,3 +70,28 @@ Aplicação conferida no Chrome depois do reinício, sem erros. Worker ativo e t
 Reversão: remover o drop-in e reiniciar o MariaDB.
 
 A busca nacional continua perto de 1,8 s, porque cada requisição faz duas consultas (contagem e página) que avaliam `LIKE '%termo%'` em todas as entradas. O próximo ganho sem mudar a semântica é a ordem de junção da F5, estimada em mais ~40%. Abaixo de 100 ms, só com a decisão de produto descrita acima. Observar a memória do MariaDB com o buffer pool cheio antes de qualquer ajuste de pools FPM.
+
+## Decisão do responsável (09/11/2026): busca do catálogo adiada
+
+A busca do catálogo é usada em seletores pontuais, não numa navegação contínua. A aplicação ainda não tem uso real. Por isso a busca nacional **não é tratada como gargalo agora** e a otimização fica adiada. O buffer pool de 1 GB (F6-1) continua aplicado na homologação.
+
+Pontos de uso mapeados no código, para quando o tema voltar:
+
+1. Professor autônomo se vinculando a uma escola ("Minhas instituições", `InstituicoesPessoaisController`): catálogo publicado, ~217 mil entradas.
+2. Instituição vinculando escolas: hoje o cadastro de escola usa o Censo (`escolas/censo/buscar|pesquisar`, tabela `censo_escolas`, 19.554 escolas), outra base. Avaliar se passa a usar o catálogo publicado.
+3. Pedido de inclusão no catálogo ("Minhas solicitações").
+4. Atendimento e gestão internos do catálogo.
+5. Seleção de UF e município (5.503 municípios) nesses fluxos.
+
+Desenho preferido, a validar com UI/UX e com o padrão de 1000 usuários simultâneos:
+
+- Um componente único de autocompletar acessível.
+- Busca por prefixo de palavra; o código INEP continua como busca exata.
+- Filtro estruturado (UF/município) antes do texto.
+- Só os 10 primeiros resultados, sem contagem exata.
+- No navegador: mínimo de 3 letras (2 com UF), espera curta para a pessoa terminar de digitar e descarte de respostas antigas.
+- Índice e facetas reconstruídos a cada edição publicada, com resultados em cache por edição (o catálogo é público).
+
+Para municípios, basta servir a lista por UF, que é pequena e quase fixa.
+
+As hipóteses de índice de trigramas foram exploradas num schema descartável (`g360_hipoteses`), separado dos dados da aplicação, sem medição de carga simulada.
