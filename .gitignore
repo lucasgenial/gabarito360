@@ -36,3 +36,7 @@ Thumbs.db
 apps/api/storage/app/cartoes/
 apps/api/storage/app/release.json
 apps/web/storage/app/release.json
+
+# Python compilado
+__pycache__/
+*.pyc
