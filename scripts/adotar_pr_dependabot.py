@@ -34,12 +34,16 @@ def rodar(*args, entrada=None):
 
 
 def titulo_em_portugues(titulo):
-    titulo = re.sub(r'^chore\(deps(-dev)?\):\s*', '', titulo)
-    m = re.match(r'[Bb]ump (.+) from (\S+) to (\S+)(?: in (\S+))?$', titulo)
+    titulo = re.sub(r'^chore\(deps(-dev)?\):\s*', '', titulo).strip()
+    grupo = ''
+    g = re.search(r' in the (\S+) group(?: across \d+ director(?:y|ies))?$', titulo)
+    if g:
+        grupo, titulo = f' (grupo {g.group(1)})', titulo[:g.start()]
+    m = re.match(r'(?:[Bb]ump|[Uu]pdate) (\S+?)(?: requirement)? from (\S+) to (\S+)(?: in (\S+))?$', titulo)
     if m:
         local = f' em {m.group(4)}' if m.group(4) else ''
-        return f'chore(deps): atualiza {m.group(1)} de {m.group(2)} para {m.group(3)}{local}'
-    m = re.match(r'[Bb]ump the (\S+) group(?: across \d+ directories)?(?: in (\S+))? with (\d+) updates?', titulo)
+        return f'chore(deps): atualiza {m.group(1)} de {m.group(2)} para {m.group(3)}{local}{grupo}'
+    m = re.match(r'[Bb]ump the (\S+) group(?: across \d+ director(?:y|ies))?(?: in (\S+))? with (\d+) updates?', titulo)
     if m:
         local = f' em {m.group(2)}' if m.group(2) else ''
         return f'chore(deps): atualiza o grupo {m.group(1)}{local} ({m.group(3)} pacote(s))'
