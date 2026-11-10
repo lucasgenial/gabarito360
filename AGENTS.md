@@ -49,6 +49,13 @@ A porta de entrada da documentação é [docs/README.md](docs/README.md).
 - Registre toda decisão nova do responsável em `docs/decisoes/`, no modelo `_modelo.md`. Se ela substitui outra, marque a antiga como "Substituída por ADR-NNNN".
 - A CI verifica os links com `scripts/verificar_documentacao.py`.
 
+## Princípios executáveis
+
+- Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras.
+- Todo princípio vigente tem verificação automática: um teste na CI ou a revisão do agente de conformidade. A verificação não depende de ação humana.
+- Antes de alterar uma funcionalidade, revalide o planejamento dela contra os princípios vigentes e aplique as adequações pendentes.
+- Implementação em andamento: [FN-078](docs/funcionalidades/078-governanca-executavel/planejamento.md). Decisão: [ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md).
+
 ## Publicação
 
 - Publique primeiro na homologação isolada. A produção só recebe uma entrega por decisão expressa do responsável.

@@ -88,6 +88,7 @@ As regras vigentes resumidas estão no [AGENTS.md](../../AGENTS.md), com links p
 | [ADR-0050](0050-padrao-de-escrita-asd-ste100.md) | Todo documento novo ou revisado segue o padrão ASD-STE100 moderado, aplicado ao português | 10/11/2026 | Aceita | — |
 | [ADR-0051](0051-autoria-exclusiva-do-responsavel.md) | Nenhuma IA se identifica como autora ou coautora; o único autor é o usuário lucasgenial | 10/11/2026 | Aceita | [FN-008](../funcionalidades/008-ci-integracao/planejamento.md) |
 | [ADR-0052](0052-medicao-com-1000-usuarios-simultaneos.md) | Toda medição de desempenho usa 1.000 usuários simultâneos, sem simulação | 10/11/2026 | Aceita | [FN-007](../funcionalidades/007-escala-infraestrutura/planejamento.md), [FN-077](../funcionalidades/077-desempenho/planejamento.md) |
+| [ADR-0053](0053-principios-executaveis-e-mutaveis.md) | Os princípios são executáveis, versionados e podem mudar a qualquer momento; a verificação é automática | 10/11/2026 | Aceita | Todas; [FN-078](../funcionalidades/078-governanca-executavel/planejamento.md) |
 
 ## Origem dos identificadores antigos
 
