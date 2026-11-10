@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 1, ordem 1 (PROPOSTA do §5, ainda não aprovada): C1 formal → C2 → C3
 **Natureza:** nova, com parte visual existente documentada a partir do código (widgets demonstrativos com CalendarJS)
 **Origem:** tronco original — docs/28 C1–C3 (Fase 7); ampliada pelos painéis de turma em docs/177 P5, docs/179, docs/180 e docs/189. Equivalências: C1–C3 e P5 dos painéis → FN-056; M3 "Tempo escolar e agenda" → FN-056 e FN-039 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar ao Gabarito360 **uma única agenda**: um modelo de eventos com escopo e permissões próprios, uma tela de calendário e cards de agenda reais nos painéis. Professores, coordenação, direção, equipe pedagógica, secretaria e núcleo consultam e registram compromissos (aplicações, devolutivas, reuniões, visitas, tarefas administrativas) sem que cada funcionalidade invente o seu próprio calendário.
@@ -101,4 +101,4 @@ Nenhum aberto. Subdivisões técnicas da C2/C3 entram aqui quando a execução c
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

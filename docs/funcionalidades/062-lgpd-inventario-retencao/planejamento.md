@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 3 (proposta), dentro do "pacote de retenção" junto com FN-064, FN-066 e o expurgo de FN-004
 **Natureza:** existente documentada a partir dos registros (inventário e RIPD); retenção aprovada ainda sem código
 **Origem:** tronco original — docs/28 Fase 2, pacote L2; requisitos RL2, RL6, RL12 e RL13 do docs/33
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Manter o registro das operações com dados pessoais (finalidade, base, local, prazo e terceiros), aplicar a política de retenção aprovada e dar transparência sobre suboperadores e transferência internacional. Serve ao responsável pela plataforma, às instituições controladoras e aos titulares.
@@ -61,4 +61,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

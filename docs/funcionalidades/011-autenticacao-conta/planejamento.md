@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição própria nas ondas do §5. As pendências seguem por outras frentes: testes reais de E6 em FN-060 (Onda 2), autocadastro na decisão §4 item 5 (FN-030).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-012, docs/04 RF-001, docs/28 E3/E6
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que qualquer pessoa com conta ativa entre no Gabarito360 com e-mail e senha, recupere a senha, troque a senha (inclusive a troca obrigatória definida pelo gestor) e troque o e-mail de acesso com confirmação. A conta é a identidade de autenticação. O que a pessoa pode fazer depois de entrar depende do vínculo escolhido (FN-015) e do motor de permissões (FN-012).
@@ -74,4 +74,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | documento criado a partir do inventário e do código | lucasgenial |

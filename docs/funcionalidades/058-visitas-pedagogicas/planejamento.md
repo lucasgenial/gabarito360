@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA do §5), depende de FN-056
 **Natureza:** evolução de existente (tabela, model e leitura no dashboard do núcleo existem; gestão não existe)
 **Origem:** tronco original — docs/13 MP-032; docs/07 UC-009; docs/16 (pede mockup de gestão antes do MP). Equivalência: MP-032 → FN-058 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que o Diretor de Núcleo agende, acompanhe e encerre visitas pedagógicas às escolas do núcleo, com tipo e urgência, para orientar o acompanhamento em campo. As visitas aparecem na agenda única (FN-056) e no dashboard do núcleo.
@@ -66,4 +66,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

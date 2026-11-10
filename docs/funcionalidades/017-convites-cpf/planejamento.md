@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 2 (depende de FN-016, FN-056 para o aceite agendado e FN-057). Proposta ainda não aprovada (§5).
 **Natureza:** nova
 **Origem:** docs/115 §5, docs/119, 125, 133, 139
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Fazer o cadastro de pessoas na instituição começar pelo CPF: se a pessoa já existe, o operador só propõe um novo vínculo, sem sobrescrever dados da conta; se não existe, libera o cadastro mínimo. O titular aceita ou recusa, inclusive com início futuro, sem ganhar acesso antes da data.
@@ -63,4 +63,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | documento criado a partir do inventário e do código | lucasgenial |

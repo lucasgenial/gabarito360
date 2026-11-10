@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 4 (proposta), item "061 termos e privacidade (L1)", dependente de D13 e D14
 **Natureza:** evolução de existente (prévias sem rota já no código; publicação, aceite e cookies novos)
 **Origem:** tronco original — docs/28 Fase 2, pacote L1; requisitos RL7, RL15 e RL16 do docs/33; prévias do docs/35; E8 passo 3 (termos e privacidade adiados para L1)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Publicar o aviso de privacidade e as condições de uso do Gabarito360, com canal do encarregado, registrar a versão aceita por cada usuário e tratar cookies conforme a regra de necessários por padrão. Atende usuários das instituições, visitantes do site público e, depois, o portal dos responsáveis (FN-067).
@@ -62,4 +62,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

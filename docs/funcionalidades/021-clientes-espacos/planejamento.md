@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendência remanescente (índices e particionamento) remetida a FN-077/X1.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 3 (T1, T2); docs/40–54
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Separar quem contrata (cliente), onde os dados vivem (espaço) e quem acessa (vínculo), para que redes, núcleos, escolas e espaços pessoais compartilhem o mesmo MariaDB com isolamento explícito por `espaco_id`. Atende todos os perfis de forma indireta: é a base de autorização por escopo das demais funcionalidades.
@@ -75,4 +75,4 @@ Sem tela própria. Efeito visível: listas, painéis e relatórios mostram apena
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

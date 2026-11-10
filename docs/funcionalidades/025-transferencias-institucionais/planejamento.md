@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 3 — Ciclo de vida de dados pessoais e institucional (TR1 → TE1 → UX1)
 **Natureza:** nova (substitui a política de FN-024)
 **Origem:** docs/115 §7–§9 e §12 (replanejamento de 03/11/2026), docs/116, 117, 139
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir a cessão e o recebimento controlados de dados e histórico de alunos entre escolas e espaços, com autoridade institucional explícita em cada lado, corte temporal, recibo e auditoria imutável. A origem preserva seus fatos; o destino recebe só o autorizado e produz fatos novos isolados.
@@ -86,4 +86,4 @@ Nenhum (não iniciada).
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

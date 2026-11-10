@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 1, ordem 4 (fechamento + contrato de conciliação); os dois documentos desta pasta fazem parte da Onda 0. Proposta ainda não aprovada (§5).
 **Natureza:** existente documentada a partir do código (fundação) com parte nova (operação e conciliação)
 **Origem:** docs/115 §4, docs/138–140
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Criar a identidade canônica de pessoa, acima das contas e dos cadastros locais: uma pessoa pode ter conta de acesso, ser aluna em uma escola e professora em outra, sem que o CPF vire chave, URL ou senha. A fundação serve aos convites a partir do CPF, às transferências, ao professor independente e aos pedidos de titulares.
@@ -72,4 +72,4 @@ ID1-D1 (referências provisórias) é subdivisão interna do ID1-D; o docs/140 p
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | documento criado a partir do inventário e do código | lucasgenial |

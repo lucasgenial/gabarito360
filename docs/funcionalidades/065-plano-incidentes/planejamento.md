@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** trilha paralela de baixo risco da Onda 1 (proposta), se o responsável aceitar: "FN-065 (plano de incidentes, só documento)"
 **Natureza:** nova (documento operacional, sem código de produto)
 **Origem:** tronco original — docs/28 Fase 2, pacote L5; requisito RL11 do docs/33
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Ter um procedimento de resposta a incidentes de segurança com dados pessoais: como detectar, registrar, conter, avaliar, comunicar à ANPD e aos titulares quando cabível, e aprender com o ocorrido. Atende o responsável pela plataforma e as instituições controladoras.
@@ -49,4 +49,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem onda própria; IMG-N e IMG-P listados como órfãos (§3); entregues na fila de produção §7 ("Organização da turma e imagens", PR #208, #209)
 **Natureza:** existente documentada a partir do código
 **Origem:** ramo do TU1-R3 (docs/tu-img-avatar-foto.md), registrado como funcionalidade; docs/176, docs/177 (P3.1.3)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar identidade visual às turmas (brasões ou foto) e aos educadores (avatares adultos ou foto), separada dos avatares de alunos, com edição só por quem gerencia o recurso e preservação da imagem anterior em caso de falha.
@@ -67,4 +67,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 1 — Módulos transversais e fundações de dados, ordem 5 (destrava P1.4.6, P4.4, TE1 e T6)
 **Natureza:** evolução de existente (parte existente documentada a partir do código)
 **Origem:** docs/115 §7 e §12 (MT1); docs/13 MP-035b (status de matrícula); docs/28 A5 (troca de turma com histórico)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Registrar a vida escolar do aluno no tempo: matrícula por pessoa, escola e período, e enturmações com início e fim. Mudar de turma não move notas antigas; relatórios, PDFs e OMR usam o contexto histórico da aplicação.
@@ -73,4 +73,4 @@ Nenhum ativo.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

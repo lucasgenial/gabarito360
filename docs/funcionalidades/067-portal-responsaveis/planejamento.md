@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 4 (proposta): "067 portal-responsaveis — depende de 035, 061, 062, 069, D10"
 **Natureza:** nova
 **Origem:** tronco original — docs/28 Fase 8, pacotes P1–P8; termo do docs/33 §4; RIPD preliminar do docs/38
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que o responsável pelo aluno consulte as notas das provas, sem conta de usuário, com matrícula e código de acesso, em um ambiente separado, mínimo e auditado. É o módulo de maior risco, por tratar dados de menores; disponível só para escolas e perfis superiores.
@@ -70,4 +70,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

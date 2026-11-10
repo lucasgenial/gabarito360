@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendências: backlog de perfis futuros (sem priorização); Secretário de Educação contextual depois de FN-017 (Onda 2); código de acesso do responsável com FN-067 (Onda 4).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/70 (A1-C), docs/132–135 (PF1), docs/139
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Representar as funções reais da escola além da matriz original de oito perfis: secretário escolar, vice-diretor e auxiliar de secretaria, cada um com política própria e sem herdar poderes de direção. Inclui a regra que impede a mesma pessoa de acumular funções administrativas e pedagógicas na mesma escola, salvo exceção autorizada pela equipe da plataforma.
@@ -73,4 +73,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | documento criado a partir do inventário e do código | lucasgenial |

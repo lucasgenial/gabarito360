@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem onda (entregue em produção); pendência no §3: "Registrar decisões 1–2 do docs/26"
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/26 (V1–V5), docs/27 (G1–G3, detalhamento de V5)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar ao Gabarito360 uma identidade própria (direção "Atual refinada": azul próprio, verde-água para atenção, fonte Figtree) e gráficos consistentes com ECharts, em claro e escuro e na impressão A4. Atende todos os usuários e visitantes.
@@ -54,4 +54,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

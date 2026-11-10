@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendências: aceite visual de V2; destino da conta de aluno sem vínculo (decisão, ligada à §4 item 10 e a FN-020); perfis não suportados (Secretário de Educação, via FN-014/FN-017).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 (V1, V2), docs/40 §5 e §9, docs/55–62, docs/100
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que a mesma conta tenha vários papéis em vários espaços (por exemplo, professora em uma escola e coordenadora em outra) e escolha, ao entrar, em qual vínculo vai trabalhar. Cada vínculo tem situação, vigência, alcance (turmas, alunos), permissões ajustadas e histórico. Convites ligam pessoas a espaços sem que o gestor veja ou defina senhas.
@@ -78,4 +78,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | documento criado a partir do inventário e do código | lucasgenial |

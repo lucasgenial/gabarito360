@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem onda própria. O hotfix de leituras 500 e a revisão (PR #182–#187) estão na fila de produção (§7) e entram na Onda 0 apenas se o responsável aprovar a decisão §4 item 2 (promoção em blocos). R3 (limiares) não tem onda. O §5 é PROPOSTA.
 **Natureza:** existente documentada a partir do código
 **Origem:** incidente de produção de 30/10/2026 (processos PHP esgotados) → docs/24 e docs/25; hotfixes e melhorias da revisão nos docs/152–157
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que o educador confira e corrija as leituras do OMR olhando a foto do cartão, sem sobrecarregar o servidor com imagens pesadas, e sem expor as fotos por URL pública.
@@ -65,4 +65,4 @@ Os hotfixes dos docs/152–157 foram ramos desta funcionalidade e terminaram com
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

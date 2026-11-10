@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Nenhuma pendência funcional; a recuperação do Desenvolvedor segue manual.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 (A1), docs/66–69, docs/100, docs/102
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar à equipe da plataforma (Desenvolvedor, Suporte e Financeiro) um contexto de trabalho separado dos vínculos escolares e do cliente pagador, com permissões próprias, vigência, suspensão e trilha de eventos, sem acesso a dados pedagógicos.
@@ -68,4 +68,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | documento criado a partir do inventário e do código | lucasgenial |

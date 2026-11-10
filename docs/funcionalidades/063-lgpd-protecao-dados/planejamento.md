@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem onda (entregue em produção); nenhuma pendência no §3
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 2, pacote L3; requisitos RL8 e RL9 do docs/33
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Reduzir o dano de um acesso indevido ao banco, à fila ou aos logs: CPF e contatos cifrados com busca por hash, e-mails cifrados na fila, logs sem conteúdo livre e respostas sem cache nem referrer. Atende titulares e instituições.
@@ -50,4 +50,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

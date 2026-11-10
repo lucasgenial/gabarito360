@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 3 (PROPOSTA, §5) — depende de FN-026 e de e-mail (FN-060)
 **Natureza:** evolução de existente (só há o comando de terminal `g360:importar-alunos`)
 **Origem:** tronco original — docs/13 MP-016 (importação por planilha), docs/28 A5, docs/70, docs/134
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que a secretaria e a coordenação carreguem e atualizem alunos em lote por planilha, com prévia e erros por linha, e exportem a lista de alunos do próprio escopo, sem depender de operação de terminal.
@@ -69,4 +69,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

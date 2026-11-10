@@ -852,6 +852,35 @@ FN-043 editor de provas e questões, FN-044 GII, FN-051 análises avançadas, FN
 
 ---
 
+### 6.1 Divergências encontradas ao documentar as funcionalidades (10/11/2026)
+
+Registradas na seção 8 de cada `planejamento.md`. Viram decisões ou subfases quando o responsável aprovar os documentos.
+
+| FN | Divergência |
+|---|---|
+| 011 | `POST /login` e `/api/v1/auth/login` sem limite de tentativas; "Manter conectado" sem efeito; senha mínima de 8 no código e de 6 no docs/04; sem integração gov.br |
+| 012 | `secretario_educacao` aceito no cadastro de membro, mas não selecionável como vínculo; restam 8 rotas `perfil:` em `dashboard/*` |
+| 019 | Sem configuração por escola para o Diretor Escolar; seções de integrações, calendário e notificações do mockup inexistentes |
+| 020 | Painel do aluno funciona, mas o cadastro de membro `aluno` não cria a referência em `vinculo_alunos` (só o comando de conciliação) |
+| 021–023 | Não há caminho na aplicação para criar espaço `pessoal` ou de `rede`; lacuna sem subfase |
+| 025 | Faltava FN-057 (notificações) nas dependências (TR1-D, UX1-D) |
+| 026 | Mudança de turma publicada como "Transferir aluno" (docs/115 reserva o termo); `PUT /alunos/{id}` com `turma_id` move sem motivo nem registro; espaço pessoal não grava `aluno_movimentacoes`; dependência de FN-039 não declarada |
+| 030 | Webhook do Mercado Pago, `/checkout/*`, "Minha assinatura" e `POST /assinaturas/cancelar` (sem permissão) seguem ativos |
+| 031 | Permissões do CI1-E em vigor não constam do docs/03 |
+| 033 | `nucleo.gerir` concedível ao Diretor de Núcleo, mas `NucleoController::store` aceita só `admin_rede`; ficha PDF do aluno inexistente |
+| 034 | Mockup prevê "Importar planilha"; só há importação por terminal |
+| 035 | Campo legado `alunos.nome_responsavel` em texto livre, sem cifragem |
+| 038 | Matriz do docs/139 (`disciplina.ver`, `lotacao.gerir`) não existe; só `disciplina.gerir`, atrás da flag `DISCIPLINAS_ATIVAS` |
+| 049 | `relatorio.rede` do Secretário de Educação devolve 404 (`RelatorioConsolidadoController::rede` aceita só `admin_rede`) |
+| 059 | "Provas do dia" usa data UTC; entre 21h e 24h de Brasília mostra o dia seguinte |
+| 060 | Prévia dos modelos de e-mail (E4 fase 1) ausente; limite por e-mail/IP (E3) só por rota; modelo `boas-vindas-cadastro` sem remetente |
+| 066 | Foto de aluno voltou a ser aceita (PF1-C/IM1, homologação), contrariando RL19 e o passo 6 do L6; autorização registrada no docs/135 |
+| 068 | Tabelas `planos`, `assinaturas`, `pagamentos` e rotas de assinatura ativas (ver 030) |
+| 072 | Link do YouTube já está no rodapé (homologação), embora conste pendente |
+| 075 | Restam 1 `confirm(` e 4 `alert(` nativos em `correcao-*.js` |
+
+---
+
 ## §7 Fila de produção (só na homologação, aguardando decisão)
 
 Produção (CT 111): release `a90fbf5` (02/11/2026) + hotfix `83dd5ae` (PDF em lote, PR #156). Tudo abaixo foi mesclado e está só na homologação (VM 120), salvo indicação.

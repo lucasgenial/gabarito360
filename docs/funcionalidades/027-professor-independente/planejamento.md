@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 3 — Ciclo de vida de dados pessoais e institucional (depende de FN-016 e da revisão formal de T3)
 **Natureza:** evolução de existente (FN-022)
 **Origem:** docs/115 §10 e §12 (PA1), docs/124 (CI1-D)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Evoluir o espaço pessoal do professor: organizar turmas e disciplinas pelas instituições em que ele declara atuar, permitir identificação opcional e protegida do aluno, integrar seus dados a uma escola por convite e conciliação, e preservar o que lhe cabe quando sai da escola.
@@ -73,4 +73,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

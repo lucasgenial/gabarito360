@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 0 — decisões do §4 itens 3 e 4. Não há execução nova prevista; a política nova é FN-025 (Onda 3).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 3 (T5); docs/77–99, 114; substituição pelo docs/115 §9
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 > Documento curto de funcionalidade substituída. Não decide o destino do código: as decisões estão no §4 do [plano mestre](../../planejamento/00-plano-mestre.md).
 
@@ -64,4 +64,4 @@ Nenhum ativo.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

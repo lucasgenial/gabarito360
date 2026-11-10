@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição na fila (concluída; fora das ondas do §5)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — auditoria de layout de 30/10/2026 ([docs/23](../../23-plano-layout-responsivo.md), etapas L0–L8)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar a todas as telas e perfis um padrão único de layout que funcione do celular (375 px) ao 4K (3840 px): sem rolagem lateral, sem menu quebrando, com componentes compartilhados e sem dados fixos ou falsos. A régua serviu também de referência visual para os apps móveis futuros.
@@ -77,4 +77,4 @@ Nenhum ramo aberto. A funcionalidade está concluída; evoluções visuais segue
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

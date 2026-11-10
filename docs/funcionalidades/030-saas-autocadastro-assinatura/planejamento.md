@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição nas ondas do §5; depende da decisão do §4 item 5. Preços e cobrança seguem para FN-068 (Onda 4).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-025..029; docs/06 RN-015/RN-016; docs/01 §30 (pivô SaaS de 18/06/2026)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 > Documento curto de funcionalidade substituída. Não decide o destino do código: a decisão é o §4 item 5 do [plano mestre](../../planejamento/00-plano-mestre.md).
 
@@ -66,4 +66,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

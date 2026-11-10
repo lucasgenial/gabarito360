@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição na fila (concluída); pendência residual no §3: confirmar o artefato final do CI
 **Natureza:** existente documentada a partir do código
 **Origem:** surgiu na entrega dos painéis de turma (PR #216 levou 29m44 no job MariaDB) — docs/181
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Garantir que todo PR e todo push na `main` passem por uma verificação automática única — telas, imagens, artefatos gerados, testes das duas aplicações, integridade em MariaDB real e ensaio de recuperação da auditoria — em tempo aceitável, para que o operador só publique SHAs conferidos.
@@ -66,4 +66,4 @@ Esta funcionalidade nasceu como ramo da correção da prévia dos painéis (PR #
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

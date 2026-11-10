@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 3 (PROPOSTA, §5) — depende de FN-016
 **Natureza:** nova (há apenas o campo de texto livre `alunos.nome_responsavel`)
 **Origem:** tronco original — docs/28 A6
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Registrar os responsáveis de cada aluno de forma estruturada, com contatos protegidos, para que a escola complete os dados pendentes e para que o portal dos responsáveis (FN-067) tenha a base de identificação de que precisa.
@@ -63,4 +63,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

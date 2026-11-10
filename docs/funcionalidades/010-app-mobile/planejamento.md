@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Futuro (sem prioridade); pendência do §3: confirmar a manutenção do adiamento
 **Natureza:** nova
 **Origem:** tronco original — docs/13 MP-023 (Android) e iOS; docs/02 fase 8 (mobile offline); parte não entregue de MP-001
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Oferecer aplicativos Android e iOS em React Native, consumindo a mesma API, para autenticar, ver o painel do perfil, capturar cartões pela câmera e ver resultados, com suporte offline em fase posterior. Está adiada porque a correção pela câmera foi entregue na WEB móvel.
@@ -68,4 +68,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

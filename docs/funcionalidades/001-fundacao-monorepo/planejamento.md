@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição na fila (concluída); nenhuma pendência no §3 (apps móveis → FN-010)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 (MP-001..005), docs/12, docs/14, docs/15
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar ao Gabarito360 a estrutura mínima sobre a qual todas as funcionalidades são construídas: monorepo com a API Laravel (dona do banco, só JSON) e a WEB Laravel (interface, consumidora da API), o esquema inicial do MariaDB com seeders de desenvolvimento e a base de autenticação, resposta padronizada e layout.
@@ -67,4 +67,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5). Não executar antes da priorização do responsável.
 **Natureza:** nova
 **Origem:** docs/164 (frentes "Em breve" da apresentação pública) e docs/177 (P7.2–P7.4 dos painéis)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Oferecer análises que vão além da nota e do percentual de acertos: medidas psicométricas (TCT/TRI), indícios de padrões anômalos de resposta e sínteses automáticas, sempre com limites de interpretação explícitos e revisão humana.
@@ -56,4 +56,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem onda própria; restante (conferência autenticada, aposentar chaves legadas) na fila de produção §7 ("Organização da turma e imagens", PR #203–#209) e na trilha de qualidade
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco — docs/175, docs/176, docs/tu1-revisao-fluxos.md, docs/tu1-r3-dashboard-analitico.md (fila declarada no docs/165: "TU1 antes de retomar EI1")
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Organizar o detalhe da turma em seções claras (Visão geral, Alunos, Disciplinas e professores, Provas, Acesso) e oferecer as operações da turma — vínculo docente composto, transferência de aluno entre turmas da mesma escola, arquivamento reversível e painel analítico com PDF — com autorização no servidor e histórico preservado.
@@ -74,4 +74,4 @@ Nenhum aberto. TU-IMG nasceu como ramo do TU1-R3 e foi registrado como FN-037.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

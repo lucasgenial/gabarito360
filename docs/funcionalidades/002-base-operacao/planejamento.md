@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição própria na fila; pendências residuais no §3 (validação de B6 com cartão real e retenção do recibo B6, esta dentro do pacote de retenção da Onda 3, decisão §4 item 11)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 fase 0 (B1–B4, B6); correções em docs/36; operação em docs/operacao/backup.md e docs/operacao/deploy-b6-2026-10-31.md
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar ao servidor de produção uma base operacional segura: backup copiado e restaurável, Redis para cache, sessão e fila, workers e agendador como serviços, e a leitura de cartões fora do processo HTTP, para que a correção não ocupe a API.
@@ -76,4 +76,4 @@ A tela de câmera e acompanhamento da correção pertence a FN-045/FN-046. Esta 
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA do §5): E4 fase 2 e testes reais de E5/E6, depois de FN-057
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 E1–E7 (Fase 1); [docs/operacao/email.md](../../operacao/email.md). Equivalência: E1–E7 → FN-060; E8 (páginas públicas) → FN-072 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Fazer o Gabarito360 enviar e receber e-mail com o próprio domínio, de forma confiável e auditável: recuperação de senha, convite de usuário e de vínculo, confirmação e troca de e-mail e o Fale Conosco. Atende todos os usuários e visitantes do site. As fases seguintes de modelos levam avisos do sistema (notificações, provas, correções, importação) ao e-mail.
@@ -80,4 +80,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

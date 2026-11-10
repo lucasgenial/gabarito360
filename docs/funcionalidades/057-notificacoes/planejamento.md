@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 1, ordem 2 (PROPOSTA do §5, ainda não aprovada): N1 → N2 → N3
 **Natureza:** nova
 **Origem:** tronco original — docs/28 N1–N4 (Fase 4); docs/177 P5.4 (avisos dos painéis). Equivalências: N1–N4 → FN-057; P5 dos painéis → FN-056 e FN-057 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Criar **um único motor de notificações** para avisar as pessoas certas, no escopo certo, sobre o que acontece no sistema (convites, duplicações de prova, aplicações agendadas, correções concluídas), com central no topo da aplicação, preferências por tipo e envio por e-mail. Evita que cada funcionalidade crie sua própria lista de avisos.
@@ -82,4 +82,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

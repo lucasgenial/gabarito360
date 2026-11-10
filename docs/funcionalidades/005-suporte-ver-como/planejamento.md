@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 4 (junto com FN-004 AU2 e FN-006), dependente de D9 e de AU1
 **Natureza:** nova
 **Origem:** tronco original — docs/28 (S1); AU3 citado como fase separada nos docs/67, 71, 72 e 77, sem documento próprio
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que o Suporte atenda um usuário vendo o sistema como ele vê (S1), com motivo, prazo curto, faixa visível e registro de usuário real e usuário visto, e definir o atendimento com acesso a dados pedagógicos de forma auditada (AU3), hoje negado a todo contexto interno.
@@ -66,4 +66,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 4 (junto com FN-005 e FN-004 AU2), dependente de AU1
 **Natureza:** nova
 **Origem:** tronco original — docs/28 (A2). Não confundir com T5-A2 (lotes de cópias, FN-024)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar ao Desenvolvedor uma tela com o estado técnico da plataforma — filas, trabalhos com falha, envio de e-mails, versão publicada e saúde dos serviços — sem acesso a dados pedagógicos, substituindo consultas manuais por linha de comando no servidor.
@@ -62,4 +62,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -126,7 +126,7 @@ Os fluxos de login do UC-001 e de equipe do UC-008 ([docs/07](../../07-casos-de-
 **Escopo:** a própria conta
 **Pré-condições:** senha atual conhecida
 **Pós-condições:** pedido de troca gravado (novo e-mail cifrado, token com hash, validade 24 h); e-mail `confirmar-email` ao novo endereço
-**Tela/rota:** web `POST /perfil/email`; API `POST /auth/.../email` (`AuthController::trocarEmail`)
+**Tela/rota:** web `POST /perfil/email`; API `POST /auth/email` (`AuthController::trocarEmail`)
 
 **Fluxo principal:**
 1. Usuário informa o novo e-mail e a senha atual.

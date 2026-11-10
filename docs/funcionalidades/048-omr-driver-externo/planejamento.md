@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5). Não executar antes da priorização do responsável.
 **Natureza:** nova
 **Origem:** tronco original — docs/08 ("Modo Externo (Futuro)" e "Escopo Futuro — OMR Externo") e docs/12 (DA-004; fase 6 pós-MVP)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir a correção de cartões-resposta produzidos por terceiros, com layout diferente do cartão nativo, sem alterar o restante do fluxo de correção.
@@ -49,4 +49,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 3 (proposta), dentro do "pacote de retenção" junto com FN-062, FN-064 e o expurgo de FN-004; pendência única no §3: "Autorização do passo 6"
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 2, pacote L6; requisito RL19 do docs/33 (decisão "sem foto de aluno")
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Cumprir a minimização de dados representando o aluno por avatar (iniciais ou uma de 36 figuras aprovadas) em vez de foto. Atende alunos, escolas e professores que cadastram ou visualizam alunos.
@@ -53,4 +53,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

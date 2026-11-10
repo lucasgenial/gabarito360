@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA do §5), depende de 056 e 057
 **Natureza:** evolução de existente (a data de aplicação da prova e as consultas derivadas existem; o agendamento como evento, os avisos e o registro de aplicação não existem)
 **Origem:** tronco original — docs/28 C4 (Fase 7); docs/177 P1.4.6, P5.4 e P3.3.5. Equivalência: C4 → FN-059 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Transformar a data de aplicação de cada prova em um compromisso real da agenda única, com avisos à coordenação, direção e núcleo e lembrete na véspera, e registrar a aplicação propriamente dita: quem era elegível, quem participou e o que aconteceu com cada estudante. Atende quem marca provas (professor, coordenação), quem aplica (aplicador) e quem acompanha (direção, núcleo, painéis).
@@ -75,4 +75,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

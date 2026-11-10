@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Contratos completos remetidos a FN-068 (Onda 4).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 3 (T4); docs/66, 71. Ao ser implementada revelou a dependência de A1 (FN-013), antecipado.
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar à equipe interna (Desenvolvedor, Suporte, Financeiro) um cadastro comercial dos clientes — quem contrata — com dados de contato protegidos, histórico de modalidade e consulta dos espaços de cada cliente, sem conceder acesso pedagógico.
@@ -67,4 +67,4 @@ Rotas web `/app/clientes`, `/app/clientes/novo`, `/app/clientes/{id}`; item de m
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

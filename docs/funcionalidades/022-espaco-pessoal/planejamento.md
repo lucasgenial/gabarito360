@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). A revisão formal de T3 é pré-requisito de FN-027 (Onda 3).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 3 (T3); docs/63–65
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que um professor use o Gabarito360 por conta própria, num espaço pessoal isolado, sem escola fictícia nem poderes institucionais. O perfil `professor_autonomo` existe somente no espaço pessoal do qual a conta é proprietária.
@@ -70,4 +70,4 @@ Seleção do vínculo pessoal em `/app/vinculos`; menu móvel prioriza Painel, C
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

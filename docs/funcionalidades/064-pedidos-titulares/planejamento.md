@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 3 (proposta): "064 pedidos-titulares (L4-D, L4-E) + pacote de retenção (062, 066, 004 expurgo)"
 **Natureza:** existente documentada a partir do código (L4-A a C5); L4-D e L4-E novas
 **Origem:** tronco original — docs/28 Fase 2, pacote L4, replanejado em L4-A..E no docs/102; requisitos RL3–RL6 do docs/33
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Atender pedidos de titulares (acesso, correção, anonimização, eliminação, informação) com protocolo, conferência de identidade e de autoridade, decisão registrada e, para pedidos de acesso, exportação controlada dos dados. Atende titulares, instituições controladoras e a equipe interna que opera o atendimento.
@@ -73,4 +73,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem onda própria; restante (validação do responsável, produção) na fila de produção §7 ("Disciplinas e currículo", PR #171, #186)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco — docs/115 §6, docs/139, docs/141–151, docs/156, docs/157
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Dar à escola um catálogo local de disciplinas e áreas do conhecimento, referenciado à BNCC, com componentes por turma e atribuições docentes com vigência, e ligar as provas a disciplinas reais (não a texto livre), de modo que a visibilidade do professor e os recortes dos painéis usem a organização curricular.
@@ -79,4 +79,4 @@ Encerrados: áreas N:N → vínculos temporais (pedidos durante a execução, en
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** aguardando priorização; a PROPOSTA de ondas (§5) a coloca na Onda 1, ordem 3 (P4.1–P4.3), e o §4 item 7 recomenda priorizá-la junto com FN-056
 **Natureza:** nova (só existe o widget demonstrativo dos painéis)
 **Origem:** surgiu como ramo da entrega dos painéis de turmas (docs/177 P4, docs/179, docs/180; identificador local "PL1")
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Modelar o calendário acadêmico (ano/ciclo, unidades, bimestres, trimestres, semestres, organização própria da EJA) por escola, turma ou espaço pessoal, para que avaliações, painéis e acompanhamento possam ser recortados por período pedagógico em vez de intervalo de datas.
@@ -64,4 +64,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

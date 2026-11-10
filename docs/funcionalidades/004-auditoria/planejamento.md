@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** expurgo na Onda 3 (pacote de retenção com 062, 066 e 064, decisão §4 item 11); AU2 na Onda 4 (junto com 005 e 006, dependência de D9 e AU1)
 **Natureza:** existente documentada a partir do código (AU1) e evolução de existente (expurgo, AU2)
 **Origem:** tronco original — docs/28 (AU1, AU2), docs/32; AU1 antecipado como dependência de T5; execução em docs/72–76; operação em docs/operacao/auditoria.md
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Registrar quem fez o quê, onde e quando em toda requisição à API, sem gravar dados pessoais ou credenciais, com retenção de 180 dias, arquivo mensal verificável e, nas próximas fases, expurgo dos eventos vencidos e uma tela de consulta e exportação restrita a Desenvolvedor e Suporte.
@@ -82,4 +82,4 @@ AU2 não tem mockup. Antes da execução: mockup ou aprovação explícita, tabe
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

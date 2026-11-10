@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade); aguardando priorização — não é executada
 **Natureza:** nova
 **Origem:** surgiu na entrega ST1 (estabilização das turmas), docs/168, em 11/2026
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Reorganizar o monorepo para a estrutura aceita pelo responsável — `apps/web/`, `apps/api/plataforma/` e diretórios próprios para motores futuros — de modo que novos motores (por exemplo GII e TRI) tenham lugar próprio sem misturar responsabilidades com a API da plataforma.
@@ -60,4 +60,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -10,7 +10,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 
 ## UC-062-01 — Manter o registro das operações com dados pessoais
 
-**Ator:** responsável pela plataforma, apoiado por agente de documentação
+**Ator:** responsável pela plataforma, apoiado por lucasgenial
 **Permissão:** não se aplica (documento versionado)
 **Escopo:** plataforma
 **Pré-condições:** nova operação, campo ou terceiro introduzido por uma funcionalidade.

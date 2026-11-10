@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5), aplicada dentro das entregas; sem posição própria na fila. Pendência na trilha: paginação opcional na API.
 **Natureza:** existente documentada a partir do código
 **Origem:** ramo do CI1-F ampliado pelo responsável para todas as tabelas ([docs/130](../../130-ci1-f-validacao-integrada.md), [docs/131](../../131-padronizacao-tabelas-ui-ux.md)); TBL2 surgiu na entrega DC1 ([docs/149](../../149-tbl2-tabelas-integradas.md))
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Padronizar todas as tabelas operacionais da área logada num componente único, que vira cards no celular sem perder dados, ações nem permissões, integrado à superfície do card principal. Atende todos os perfis que consultam listas, relatórios e matrizes.
@@ -76,4 +76,4 @@ Nenhum ramo aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

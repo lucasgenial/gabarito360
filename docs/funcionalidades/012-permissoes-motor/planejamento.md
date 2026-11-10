@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendências residuais sem priorização: migração das 8 rotas `perfil:` e registro das decisões 1–6 do docs/21.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/03, docs/13 (MP-013, 018, 026, 030, 031, 036), docs/19, docs/21 (etapas 0–7), docs/22
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Decidir, para cada pedido, o que a pessoa pode fazer: permissões padrão do perfil, mais extras concedidas, menos padrões retirados, sempre limitadas pelo escopo (rede, núcleo, escola, turma). Também cobre a gestão da equipe (quem cadastra quem) e os menus montados a partir das permissões.
@@ -72,4 +72,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | documento criado a partir do inventário e do código | lucasgenial |

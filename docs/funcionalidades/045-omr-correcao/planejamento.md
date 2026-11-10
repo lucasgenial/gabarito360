@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** fora das ondas (funcionalidade concluída); a ressalva é pendência do §3 sem onda própria. O §5 é PROPOSTA, ainda não aprovada.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-021 e MP-033; docs/19 MP-038 (mesma entrega que MP-033); docs/08 e docs/18
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Ler por visão computacional os cartões-resposta fotografados, calcular a nota e permitir que professores, coordenação e direção acompanhem a correção de cada prova e de cada turma até que todos os alunos esperados estejam corrigidos.
@@ -66,4 +66,4 @@ Nenhum aberto. Os ramos históricos (qualidade, tentativas, revisão) viraram FN
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

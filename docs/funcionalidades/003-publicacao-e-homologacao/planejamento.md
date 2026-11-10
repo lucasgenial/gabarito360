@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 0 — se aprovada a decisão §4 item 2, promoção à produção em blocos, começando por UR1–UR4, PR #194 e hotfix de leituras 500; pendências residuais no §3
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 B5 e docs/37; procedimentos T2 (docs/49–54, ramo de T2 que virou padrão); publicação por fase (docs/99, docs/100); H1 homologação isolada (docs/125–130, ADR-H1 no docs/127)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Publicar versões de forma repetível e segura: um roteiro único de deploy para a produção (CT 111), publicação por fase com backup final obrigatório, e uma homologação isolada (VM 120) onde toda entrega é conferida antes de qualquer decisão de produção.
@@ -78,4 +78,4 @@ Sem interface própria. A homologação exibe identificação de ambiente, fase 
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

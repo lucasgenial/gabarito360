@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** trilha contínua de qualidade (aplicada dentro das entregas, sem fila própria); medição com 1000 usuários antes de qualquer abertura comercial (FN-077)
 **Natureza:** evolução de existente (há partes isoladas no código: limites por rota, Turnstile no contato, grupos PHP separados, mutex local de sessão)
 **Origem:** tronco original — docs/28 fase 9 (X3–X6); AP1-L (docs/176); mutex de sessão do docs/167 (UR3); separação física da API (docs/172, 173)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Preparar a plataforma para crescer sem perder segurança nem disponibilidade: limites de requisição por rota e na borda, fotos fora do servidor, serviços separáveis e observabilidade com alertas, na ordem e na medida que a medição de carga (FN-077) indicar.
@@ -73,4 +73,4 @@ Nenhum.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

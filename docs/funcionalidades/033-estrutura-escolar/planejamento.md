@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 3 (PROPOSTA, §5) — subfases A3 e A4; dependência declarada "—"
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-014..017, MP-035, MP-039; docs/28 A3, A4
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Manter a estrutura cadastral da rede: núcleos territoriais, escolas (sede, anexo, unidade vinculada), turmas e alunos, cada um no escopo do perfil e do vínculo ativo. É a base de todas as demais funcionalidades pedagógicas (provas, correção, relatórios, painéis).
@@ -79,4 +79,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 4 — Comercial, portal e encerramento (EI1-E depende de FN-068)
 **Natureza:** nova
 **Origem:** surgiu na entrega H1 (identidade e cabeçalhos) em 05/11/2026 — docs/163, 176
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que uma escola contrate e use o sistema diretamente, com cliente, espaço e equipe próprios, sem exigir rede ou núcleo fictícios. A "escola autônoma" fica isolada da instância superior até que esta assuma formalmente a responsabilidade financeira.
@@ -72,4 +72,4 @@ Nenhum (não iniciada).
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

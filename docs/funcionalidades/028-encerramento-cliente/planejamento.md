@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** Onda 4 — Comercial, portal e encerramento (depende de FN-064 e FN-068)
 **Natureza:** nova
 **Origem:** tronco original — docs/28 Fase 3 (T6); docs/102; docs/115 §12 ("L4/T6 — reconciliação final")
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Encerrar o contrato de um cliente de forma controlada: prever o impacto, bloquear o acesso de modo reversível, entregar a exportação institucional, aplicar a retenção acordada e executar o encerramento sem afetar outros clientes nem a identidade global das pessoas.
@@ -68,4 +68,4 @@ Nenhum (não iniciada).
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

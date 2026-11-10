@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem onda (entregue em produção); pendência única: confirmar o stepper do MP-037 (§3)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-019, MP-020; docs/19 MP-037
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Permitir que professores e coordenação criem provas objetivas, preencham e publiquem o gabarito oficial e deixem a prova pronta para a geração de cartões e a correção OMR. É o núcleo do ciclo de avaliação.
@@ -53,14 +53,14 @@ Permitir que professores e coordenação criem provas objetivas, preencham e pub
 
 ## 7. Interface
 - Web: `provas.index`, `provas.create`, `provas.show`, `provas.update`, `provas.publicar`, `provas.destroy`; `provas.gabarito.show|edit|salvar|publicar`.
-- Stepper visual de três passos presente em `provas/create.blade.php`, `provas/gabarito-edit.blade.php` e `provas/show.blade.php`.
+- Stepper visual de três passos presente em `provas/create.blade.php` e `provas/gabarito-edit.blade.php`.
 - Estados e tabelas conforme FN-076 e FN-074.
 
 ## 8. Riscos e decisões pendentes do responsável
 | Item | Opções | Recomendação | Decisão |
 |---|---|---|---|
 | §4 item 1 — aprovação do plano mestre e da priorização | Aprovar / ajustar | Aprovar §1–§3 e Onda 0 | Pendente |
-| Stepper do MP-037 "Incerto" no plano mestre: o código mostra o stepper de três passos nas telas de criação, gabarito e detalhe | Confirmar na homologação / dar por confirmado | Conferência textual do fluxo e atualização do plano mestre | Pendente |
+| Stepper do MP-037 "Incerto" no plano mestre: o código mostra o stepper de três passos nas telas de criação e de edição do gabarito | Confirmar na homologação / dar por confirmado | Conferência textual do fluxo e atualização do plano mestre | Pendente |
 | Passo 3 "Cartão e turmas" não detalhado no mockup (docs/07 UC-003) | — | Comportamento do código vale até novo mockup | Registrado |
 
 ## 9. Ramos desta entrega
@@ -69,4 +69,4 @@ Nenhum aberto.
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

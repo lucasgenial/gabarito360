@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5): TW3 restante a TW6 aplicados dentro das entregas, nas telas que cada entrega tocar; janela própria para TW4–TW6 proposta só depois da Onda 2 (proposta, não aprovada)
 **Natureza:** existente documentada a partir do código (evolução parcial)
 **Origem:** pedido transversal durante P3.2 ("ações SMALL", [docs/184](../../184-acoes-small-tabelas.md)), substituído pela decisão do responsável de adotar Tailwind ([docs/185](../../185-migracao-tailwind.md)) em 08/11/2026; UX-D e UX-T recuperados na reconciliação [docs/176](../../176-reconciliacao-solicitacoes.md)
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Adotar o TailwindCSS como base visual de todas as telas, preservando a paleta do Gabarito360, as funções, os dados e os requisitos de uso, e eliminar o CSS espalhado por tela. Inclui padronizar ações, tabelas, formulários e diálogos (sem confirmações nativas do navegador) para todos os perfis.
@@ -85,4 +85,4 @@ Decisões do §4 que tocam esta funcionalidade: item 1 (aprovação da prioriza�
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |

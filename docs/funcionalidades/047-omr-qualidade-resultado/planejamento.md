@@ -4,7 +4,7 @@
 **Prioridade no plano mestre:** sem onda; está na fila de produção (§7, bloco "OMR1–3", PR #188–#190), aguardando validação e a decisão §4 item 2. O §5 é PROPOSTA.
 **Natureza:** existente documentada a partir do código
 **Origem:** OMR1 surgiu de urgência (foto incompleta aceita pelo detector); OMR2 e OMR3 foram ampliações pedidas pelo responsável — docs/158, 159, 160
-**Atualizado em:** 2026-11-09, por agente de documentação
+**Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
 Recusar fotos que não permitem leitura confiável, preservar cada tentativa de correção sem sobrescrever a vigente, apresentar o resultado do aluno com a folha digitalizada e o histórico, e emitir PDFs cuja autenticidade qualquer pessoa pode conferir.
@@ -72,4 +72,4 @@ OMR2-C2 (breadcrumb e Solid Toast) e o carregamento progressivo nasceram aqui e 
 ## 10. Histórico
 | Data | Mudança | Por |
 |---|---|---|
-| 2026-11-09 | Documento criado a partir do inventário e do código | agente de documentação |
+| 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |
