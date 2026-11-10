@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendências: backlog de perfis futuros (sem priorização); Secretário de Educação contextual depois de FN-017 (Onda 2); código de acesso do responsável com FN-067 (Onda 4).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/70 (A1-C), docs/132–135 (PF1), docs/139

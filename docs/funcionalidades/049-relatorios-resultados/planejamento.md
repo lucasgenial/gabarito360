@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** fora das ondas (funcionalidade concluída). A pendência "relatório por tema" depende de FN-043, que está em "Futuro" (§5, PROPOSTA).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-022 e MP-034; hotfix do PDF em lote (docs/123)

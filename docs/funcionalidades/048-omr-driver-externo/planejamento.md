@@ -2,6 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5). Não executar antes da priorização do responsável.
 **Natureza:** nova
 **Origem:** tronco original — docs/08 ("Modo Externo (Futuro)" e "Escopo Futuro — OMR Externo") e docs/12 (DA-004; fase 6 pós-MVP)

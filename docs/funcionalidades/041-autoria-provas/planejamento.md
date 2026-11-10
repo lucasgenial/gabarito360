@@ -2,6 +2,7 @@
 
 **Implementação:** Em homologação
 **Etapa:** Em homologação
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem onda própria; restante (validação, produção) na fila de produção §7 ("Autoria das provas", PR #162)
 **Natureza:** existente documentada a partir do código
 **Origem:** ramo da correção de autoria, registrado como funcionalidade — docs/132

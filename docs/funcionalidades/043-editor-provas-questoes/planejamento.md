@@ -2,6 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5); aguarda priorização do responsável
 **Natureza:** nova
 **Origem:** tronco original — docs/02 e docs/12 (fases pós-MVP 2–5); docs/118; docs/164 (frente anunciada "Em breve" na home)

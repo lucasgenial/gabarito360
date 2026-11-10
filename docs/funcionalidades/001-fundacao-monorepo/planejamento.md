@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem posição na fila (concluída); nenhuma pendência no §3 (apps móveis → FN-010)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 (MP-001..005), docs/12, docs/14, docs/15

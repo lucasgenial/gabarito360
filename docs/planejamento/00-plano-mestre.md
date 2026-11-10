@@ -60,7 +60,7 @@ Uma subfase só termina quando passa por todos os portões aplicáveis.
 | Item | Situação em 10/11/2026 |
 |---|---|
 | Em execução | Nenhuma funcionalidade. A execução aguarda a aprovação deste plano. |
-| Próximo passo | Onda 0: FN-078 (governança executável), a partir da subfase 3.4 (subfases 1.1 a 3.3 entregues); depois, decisões do responsável (seção 5) e aprovação dos documentos da Onda 1. |
+| Próximo passo | Onda 0: FN-078 (governança executável), a partir da subfase 4.1 (subfases 1.1 a 3.4 entregues); depois, decisões do responsável (seção 5) e aprovação dos documentos da Onda 1. |
 | Última entrega | FN-077 Desempenho, etapas F0 a F4, publicadas na homologação em 09/11/2026. |
 
 ### 4.2 Onda 0 — Saneamento e decisões

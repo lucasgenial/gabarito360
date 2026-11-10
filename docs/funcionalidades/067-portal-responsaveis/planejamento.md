@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 4 (proposta): "067 portal-responsaveis — depende de 035, 061, 062, 069, D10"
 **Natureza:** nova
 **Origem:** tronco original — docs/28 Fase 8, pacotes P1–P8; termo do docs/33 §4; RIPD preliminar do docs/38

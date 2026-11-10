@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Observação de estado:** entregue e validada na homologação
 **Prioridade no plano mestre:** fora das ondas (funcionalidade concluída). Está na fila de produção (§7, bloco "Painéis e editor"), aguardando a decisão §4 item 2. O §5 é PROPOSTA.
 **Natureza:** existente documentada a partir do código

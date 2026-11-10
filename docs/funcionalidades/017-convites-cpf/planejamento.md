@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 2 (depende de FN-016, FN-056 para o aceite agendado e FN-057). Proposta ainda não aprovada (§5).
 **Natureza:** nova
 **Origem:** docs/115 §5, docs/119, 125, 133, 139

@@ -99,25 +99,55 @@ def funcionalidades():
     return set(re.findall(r'^\| (FN-\d{3}) \|', CATALOGO.read_text(encoding='utf-8'), re.M)) if CATALOGO.exists() else set()
 
 
+def _texto_normalizado(p):
+    texto = p.read_text(encoding='utf-8').replace('\r\n', '\n')
+    return '\n'.join(l.rstrip() for l in texto.split('\n')).strip() + '\n'
+
+
 def impressao_digital():
     """Hash do conjunto de ADRs. Qualquer mudança num ADR muda o hash."""
     h = hashlib.sha256()
     for _, p, _, _ in adrs():
-        texto = p.read_text(encoding='utf-8').replace('\r\n', '\n')
-        texto = '\n'.join(l.rstrip() for l in texto.split('\n')).strip() + '\n'
-        h.update(p.name.encode('utf-8') + b'\0' + texto.encode('utf-8') + b'\0')
+        h.update(p.name.encode('utf-8') + b'\0' + _texto_normalizado(p).encode('utf-8') + b'\0')
     return h.hexdigest()
 
 
+def digitais_por_adr():
+    """ADR-NNNN -> hash curto do texto normalizado do ADR."""
+    return {i: hashlib.sha256(_texto_normalizado(p).encode('utf-8')).hexdigest()[:16] for i, p, _, _ in adrs()}
+
+
 def ler_versao():
+    """Devolve (versao, hash, {ADR-NNNN: (versao_em_que_o_adr_mudou, hash_do_adr)})."""
     if not VERSAO.exists():
-        return 0, ''
-    dados = dict(re.findall(r'^(\w+):\s*(\S+)', VERSAO.read_text(encoding='utf-8'), re.M))
-    return int(dados.get('versao', 0)), dados.get('hash', '')
+        return 0, '', {}
+    texto = VERSAO.read_text(encoding='utf-8')
+    dados = dict(re.findall(r'^(versao|hash):\s*(\S+)', texto, re.M))
+    por_adr = {a: (int(v), h) for a, v, h in re.findall(r'^adr:\s*(ADR-\d{4})\s+(\d+)\s+(\S+)', texto, re.M)}
+    return int(dados.get('versao', 0)), dados.get('hash', ''), por_adr
 
 
-def gravar_versao(versao, digital):
+def gravar_versao(versao, registro):
+    linhas = ''.join(f'adr: {a} {v} {h}\n' for a, (v, h) in sorted(registro.items()))
     VERSAO.write_text(
         '# Versão dos princípios do projeto (ADR-0053). Não edite à mão.\n'
         '# Atualize com: python scripts/verificar_principios.py --atualizar\n'
-        f'versao: {versao}\nhash: {digital}\n', encoding='utf-8', newline='\n')
+        '# Cada linha "adr" guarda a versão em que o ADR mudou pela última vez e o hash do texto dele.\n'
+        f'versao: {versao}\nhash: {impressao_digital()}\n{linhas}', encoding='utf-8', newline='\n')
+
+
+def atualizar_versao():
+    """Sobe a versão quando um ADR muda. O ADR novo ou alterado recebe a nova versão. Devolve (antes, depois)."""
+    versao, digital, por_adr = ler_versao()
+    atuais = digitais_por_adr()
+    if digital == impressao_digital() and {a: h for a, (_, h) in por_adr.items()} == atuais:
+        return versao, versao
+    nova = versao + 1
+    registro = {a: (por_adr[a][0] if a in por_adr and por_adr[a][1] == h else nova, h) for a, h in atuais.items()}
+    gravar_versao(nova, registro)
+    return versao, nova
+
+
+def versao_dos_adrs():
+    """ADR-NNNN -> versão dos princípios em que o ADR mudou pela última vez."""
+    return {a: v for a, (v, _) in ler_versao()[2].items()}

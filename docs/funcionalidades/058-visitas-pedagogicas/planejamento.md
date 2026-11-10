@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Observação de estado:** aguarda FN-056
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA do §5), depende de FN-056
 **Natureza:** evolução de existente (tabela, model e leitura no dashboard do núcleo existem; gestão não existe)

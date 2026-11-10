@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem onda (entregue em produção); nenhuma pendência no §3
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 2, pacote L3; requisitos RL8 e RL9 do docs/33

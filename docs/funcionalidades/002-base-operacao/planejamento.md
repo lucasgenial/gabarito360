@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Observação de estado:** com ressalva
 **Prioridade no plano mestre:** sem posição própria na fila; pendências residuais no §3 (validação de B6 com cartão real e retenção do recibo B6, esta dentro do pacote de retenção da Onda 3, decisão §4 item 11)
 **Natureza:** existente documentada a partir do código

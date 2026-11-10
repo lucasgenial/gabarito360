@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem onda (entregue em produção); pendência única: confirmar o stepper do MP-037 (§3)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-019, MP-020; docs/19 MP-037

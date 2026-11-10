@@ -86,9 +86,10 @@ def verificar():
             if not 1 <= len(resumo) <= 4:
                 erros.append(f'{nome}: agents_resumo deve ter de 1 a 4 itens')
 
-    versao, digital = P.ler_versao()
+    versao, digital, por_adr = P.ler_versao()
     atual = P.impressao_digital()
-    if digital != atual:
+    atuais = P.digitais_por_adr()
+    if digital != atual or {a: h for a, (_, h) in por_adr.items()} != atuais:
         erros.append(f'VERSAO desatualizada: os ADRs mudaram desde a versão {versao}. '
                      'Rode: python scripts/verificar_principios.py --atualizar')
     return erros, avisos, versao
@@ -96,13 +97,11 @@ def verificar():
 
 if __name__ == '__main__':
     if '--atualizar' in sys.argv:
-        versao, digital = P.ler_versao()
-        atual = P.impressao_digital()
-        if digital == atual:
-            print(f'Princípios sem mudança: versão {versao}.')
+        antes, depois = P.atualizar_versao()
+        if antes == depois:
+            print(f'Princípios sem mudança: versão {antes}.')
         else:
-            P.gravar_versao(versao + 1, atual)
-            print(f'Versão dos princípios atualizada: {versao} -> {versao + 1}.')
+            print(f'Versão dos princípios atualizada: {antes} -> {depois}.')
         sys.exit(0)
     erros, avisos, versao = verificar()
     for a in avisos:

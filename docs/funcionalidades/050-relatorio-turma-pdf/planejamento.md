@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 1, trilha paralela de baixo risco, **se o responsável aceitar** ("integrar WIP do PDF da turma, sem dependência pendente"). O §5 é PROPOSTA.
 **Natureza:** evolução de existente (o PDF do recorte da turma existe desde TU1 R4; falta a paridade com o painel)
 **Origem:** pendência do TU1 (docs/176, TU1-PDF), absorvida como P8.1 do plano dos painéis (docs/177)

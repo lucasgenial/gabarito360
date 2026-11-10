@@ -2,6 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5); aguarda priorização do responsável
 **Natureza:** nova
 **Origem:** pedido do responsável registrado em docs/164; citado como futuro em docs/144, 146, 176 e 177 (P7.1)

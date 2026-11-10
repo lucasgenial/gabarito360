@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Observação de estado:** revisão pendente
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). A revisão formal de T3 é pré-requisito de FN-027 (Onda 3).
 **Natureza:** existente documentada a partir do código

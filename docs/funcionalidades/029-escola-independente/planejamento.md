@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 4 — Comercial, portal e encerramento (EI1-E depende de FN-068)
 **Natureza:** nova
 **Origem:** surgiu na entrega H1 (identidade e cabeçalhos) em 05/11/2026 — docs/163, 176

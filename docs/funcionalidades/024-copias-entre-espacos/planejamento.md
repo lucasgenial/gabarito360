@@ -2,6 +2,7 @@
 
 **Implementação:** Substituída
 **Etapa:** Substituída
+**Conforme princípios:** versão 1
 **Observação de estado:** política); código ativo
 **Prioridade no plano mestre:** Onda 0 — decisões do §4 itens 3 e 4. Não há execução nova prevista; a política nova é FN-025 (Onda 3).
 **Natureza:** existente documentada a partir do código

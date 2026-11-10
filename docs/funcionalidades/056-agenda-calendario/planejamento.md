@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Observação de estado:** MÓDULO TRANSVERSAL
 **Prioridade no plano mestre:** Onda 1, ordem 1 (PROPOSTA do §5, ainda não aprovada): C1 formal → C2 → C3
 **Natureza:** nova, com parte visual existente documentada a partir do código (widgets demonstrativos com CalendarJS)

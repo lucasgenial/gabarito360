@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Observação de estado:** Incerto no plano mestre
 **Prioridade no plano mestre:** Onda 4, a avaliar junto com FN-067; depende da decisão §4 item 10. Proposta ainda não aprovada (§5).
 **Natureza:** evolução de existente (há código parcial sem liberação)

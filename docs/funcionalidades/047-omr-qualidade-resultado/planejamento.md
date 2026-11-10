@@ -2,6 +2,7 @@
 
 **Implementação:** Em homologação
 **Etapa:** Em homologação
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem onda; está na fila de produção (§7, bloco "OMR1–3", PR #188–#190), aguardando validação e a decisão §4 item 2. O §5 é PROPOSTA.
 **Natureza:** existente documentada a partir do código
 **Origem:** OMR1 surgiu de urgência (foto incompleta aceita pelo detector); OMR2 e OMR3 foram ampliações pedidas pelo responsável — docs/158, 159, 160

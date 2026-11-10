@@ -24,6 +24,7 @@ Regras de consistência:
 - Uma funcionalidade aparece uma única vez no catálogo.
 - O plano mestre não repete o catálogo. Ele cita cada funcionalidade pelo identificador FN-NNN.
 - A implementação e a etapa no cabeçalho do `planejamento.md` são iguais às do catálogo.
+- O cabeçalho declara `Conforme princípios: versão N`: a versão dos princípios contra a qual o planejamento foi revalidado. Antes de alterar o código da funcionalidade, revalide e suba N para a versão atual ([ADR-0053](../decisoes/0053-principios-executaveis-e-mutaveis.md)).
 - A CI verifica estas regras com `scripts/verificar_funcionalidades.py`.
 
 Os documentos numerados `docs/NN-*.md` são histórico e evidência. Eles não definem prioridade. Quando divergem do plano mestre, vale o plano mestre.
