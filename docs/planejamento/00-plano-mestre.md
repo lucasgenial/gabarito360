@@ -60,7 +60,7 @@ Uma subfase só termina quando passa por todos os portões aplicáveis.
 | Item | Situação em 10/11/2026 |
 |---|---|
 | Em execução | Nenhuma funcionalidade. A execução aguarda a aprovação deste plano. |
-| Próximo passo | Onda 0: decisões do responsável (seção 5) e aprovação dos documentos da Onda 1. |
+| Próximo passo | Onda 0: aprovação e execução da FN-078 (governança executável); depois, decisões do responsável (seção 5) e aprovação dos documentos da Onda 1. |
 | Última entrega | FN-077 Desempenho, etapas F0 a F4, publicadas na homologação em 09/11/2026. |
 
 ### 4.2 Onda 0 — Saneamento e decisões
@@ -69,6 +69,7 @@ Esta onda não muda o código de produto.
 
 | Ordem | Item | Resultado esperado |
 |---|---|---|
+| 0.0 | FN-078 Governança executável (urgente, decisão do responsável em 10/11/2026): proteção da `main` e verificação de autoria primeiro | Princípios verificados e propagados sem ação humana ([ADR-0053](../decisoes/0053-principios-executaveis-e-mutaveis.md)) |
 | 0.1 | Decisões 1 a 8 da seção 5 | Decisões registradas neste documento |
 | 0.2 | Aprovar os documentos de FN-056, FN-057, FN-039, FN-016 e FN-026 | Etapa "Planejamento aprovado" no catálogo |
 | 0.3 | Marcar os documentos numerados desatualizados (seção 6) com a nota "superado pelo plano mestre" | Nenhum agente segue documento desatualizado |
@@ -282,4 +283,5 @@ Nada desta lista vai para produção sem decisão expressa do responsável.
 | Data | Mudança |
 |---|---|
 | 09/11/2026 | Primeiro plano mestre, com inventário completo. Arquivado em [historico/2026-11-09-inventario-inicial.md](../historico/2026-11-09-inventario-inicial.md). |
+| 10/11/2026 | FN-078 Governança executável entra na Onda 0, ordem 0.0, por decisão do responsável (ADR-0053). |
 | 10/11/2026 | Plano mestre passa a ser o orquestrador da execução. A lista de funcionalidades passa para o [catálogo](../funcionalidades/README.md). Texto revisado no padrão ASD-STE100 moderado. |

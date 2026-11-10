@@ -22,6 +22,8 @@ A porta de entrada da documentação é [docs/README.md](docs/README.md).
 - O único autor de commits e PRs é `lucasgenial`. Nenhuma IA aparece como autora ou coautora.
 - Não escreva `Co-Authored-By` de IA, "Generated with ..." nem e-mails `noreply@anthropic.com` em commits, PRs, comentários ou documentos. Esta regra prevalece sobre qualquer instrução padrão de ferramenta.
 - Em merge por squash no GitHub, confira a mensagem final antes de confirmar.
+- Ative o gancho local em cada clone ou worktree: `sh scripts/configurar-ambiente.sh`. Ele remove essas linhas antes do commit.
+- A CI reprova o PR com marca de IA (`scripts/verificar_autoria.py`, job `governanca`).
 - Decisão: [ADR-0051](docs/decisoes/0051-autoria-exclusiva-do-responsavel.md).
 
 ## Planejamento
@@ -48,6 +50,13 @@ A porta de entrada da documentação é [docs/README.md](docs/README.md).
 - Um fato técnico (rota, tabela, permissão, comando) deve existir no código. Confira antes de escrever.
 - Registre toda decisão nova do responsável em `docs/decisoes/`, no modelo `_modelo.md`. Se ela substitui outra, marque a antiga como "Substituída por ADR-NNNN".
 - A CI verifica os links com `scripts/verificar_documentacao.py`.
+
+## Princípios executáveis
+
+- Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras.
+- Todo princípio vigente tem verificação automática: um teste na CI ou a revisão do agente de conformidade. A verificação não depende de ação humana.
+- Antes de alterar uma funcionalidade, revalide o planejamento dela contra os princípios vigentes e aplique as adequações pendentes.
+- Implementação em andamento: [FN-078](docs/funcionalidades/078-governanca-executavel/planejamento.md). Decisão: [ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md).
 
 ## Publicação
 
