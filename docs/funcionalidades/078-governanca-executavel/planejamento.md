@@ -61,8 +61,8 @@ O problema que esta funcionalidade resolve: princípios definidos no início do 
 
 | Subfase | Entrega | Critério de pronto | Status | Evidência |
 |---|---|---|---|---|
-| 1.1 | Proteção da `main`: PR obrigatório, CI obrigatória, sem envio forçado, sem exclusão, só squash | Um envio direto ou forçado para a `main` é recusado pelo GitHub | Pendente | |
-| 1.2 | Verificação de autoria: `scripts/verificar_autoria.py` na CI (job `governanca`) e gancho `commit-msg` versionado em `.githooks/` | Um commit com `Co-Authored-By` de IA, "Generated with" ou autor/committer de IA reprova a CI; o gancho remove essas linhas antes do commit | Em execução | 9 testes em `scripts/tests/test_verificar_autoria.py`; `main` atual aprovada (618 commits); histórico anterior à reescrita reprovado (135 violações) |
+| 1.1 | Proteção da `main`: PR obrigatório, CI obrigatória, sem envio forçado, sem exclusão, só squash | Um envio direto ou forçado para a `main` é recusado pelo GitHub | Entregue | 10/11/2026: proteção ativa com os 6 jobs obrigatórios (`governanca`, `telas`, `testes (api)`, `testes (web)`, `integridade-mariadb`, `auditoria-recuperacao`), PR obrigatório (0 aprovações), histórico linear, sem envio forçado, sem exclusão, regra também para o administrador. Repositório só com squash; mensagem do squash = título e descrição do PR; branch apagada após o merge. Teste: envio direto recusado com "GH006 Protected branch update failed" |
+| 1.2 | Verificação de autoria: `scripts/verificar_autoria.py` na CI (job `governanca`) e gancho `commit-msg` versionado em `.githooks/` | Um commit com `Co-Authored-By` de IA, "Generated with" ou autor/committer de IA reprova a CI; o gancho remove essas linhas antes do commit | Entregue | 9 testes em `scripts/tests/test_verificar_autoria.py`; `main` atual aprovada (618 commits); histórico anterior à reescrita reprovado (135 violações); PR #241 mesclado com o job `governanca` aprovado |
 | 2.1 | Campos de máquina nos ADRs: `id`, `estado`, `versao`, `afeta` (FN e pastas), `verificacao` (teste, revisão de IA ou processo) | Os 53 ADRs têm os campos; a CI valida o formato | Pendente | |
 | 2.2 | `docs/decisoes/regras.yml` e `docs/decisoes/VERSAO`; `scripts/verificar_principios.py` | A CI falha se um ADR aceito e verificável não tiver teste registrado; a versão sobe a cada ADR novo ou alterado | Pendente | |
 | 2.3 | `AGENTS.md` e `CLAUDE.md` gerados: `scripts/gerar_agents.py` | A CI falha se o arquivo versionado diferir do gerado | Pendente | |
@@ -71,7 +71,7 @@ O problema que esta funcionalidade resolve: princípios definidos no início do 
 | 3.3 | Vínculo código ↔ FN ↔ documentação: PR que altera `apps/` cita uma FN e atualiza o `planejamento.md` dela | Um PR com mudança em `apps/` sem FN ou sem atualização do planejamento reprova | Pendente | |
 | 3.4 | Versão dos princípios por funcionalidade: campo "Conforme princípios" no `planejamento.md` | Um PR que altera uma funcionalidade validada com princípios superados por ADR que a afeta reprova | Pendente | |
 | 4.1 | Modelo de PR e modelos de issue (nova funcionalidade candidata, correção, decisão do responsável) | Um PR ou issue novo abre no formato certo | Pendente | |
-| 4.2 | Varredura de segredos com bloqueio no envio e Dependabot | As duas opções estão ativas no repositório | Pendente | |
+| 4.2 | Varredura de segredos com bloqueio no envio e Dependabot | As duas opções estão ativas no repositório | Parcial | Varredura de segredos e bloqueio no envio já estavam ativos em 10/11/2026; Dependabot pendente |
 | 5.1 | Agente de impacto: `scripts/impacto_principio.py` e definição em `.claude/agents/` | Um ADR novo ou alterado gera a lista de funcionalidades afetadas, as subfases de adequação e o `AGENTS.md` regerado, sem ação humana | Pendente | |
 | 6.1 | Revisor de conformidade por IA na CI, para as regras de julgamento | Um PR recebe veredito automático; "reprovado" bloqueia o merge; custo por PR dentro do limite definido | Pendente | |
 | 7.1 | `CHANGELOG.md`, tags e releases por versão | Cada versão publicada tem entrada no changelog e release no GitHub | Pendente | |
@@ -100,7 +100,7 @@ Sem interface de usuário. As saídas são mensagens de CI, comentários de PR g
 | Fornecedor e chave do revisor de IA na CI | Anthropic (Claude), OpenAI (Codex) ou os dois | Começar com um fornecedor; usar o outro como revisor independente quando o risco for alto | Pendente |
 | Limite de custo do revisor de IA | Valor máximo por PR e por mês | Definir um teto mensal; a CI usa só os ADRs afetados para reduzir o custo | Pendente |
 | Violações antigas | Corrigir agora ou registrar na linha de base | Registrar na linha de base e corrigir como subfase de adequação, sem bloquear o trabalho em andamento | Pendente |
-| Regra de proteção da `main` para o próprio responsável | Aplicar a regra também ao administrador ou permitir exceção | Aplicar também ao administrador; exceção só por decisão registrada em ADR | Pendente |
+| Regra de proteção da `main` para o próprio responsável | Aplicar a regra também ao administrador ou permitir exceção | Aplicar também ao administrador; exceção só por decisão registrada em ADR | Aplicada também ao administrador (aprovação da FN-078 em 10/11/2026) |
 
 Riscos:
 
@@ -117,3 +117,4 @@ Nenhum até agora.
 |---|---|---|
 | 2026-11-10 | Funcionalidade registrada e planejamento escrito, a partir do ADR-0053 | lucasgenial |
 | 2026-11-10 | Planejamento aprovado pelo responsável. Execução iniciada pelas subfases 1.2 e 1.1 | lucasgenial |
+| 2026-11-10 | Subfases 1.1 e 1.2 entregues: `main` protegida e verificação de autoria ativa (#241) | lucasgenial |

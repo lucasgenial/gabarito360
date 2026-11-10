@@ -60,6 +60,7 @@ A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
 ## Publicação
 
+- A `main` é protegida: toda mudança entra por PR, com os 6 jobs da CI aprovados e merge por squash. Não há envio direto nem forçado, inclusive para o administrador.
 - Publique primeiro na homologação isolada. A produção só recebe uma entrega por decisão expressa do responsável.
 - Exija backup, migração ensaiada e comparação de dados e arquivos antes e depois de cada publicação.
 - Preserve gabaritos, questões, cartões, respostas, notas e imagens.
