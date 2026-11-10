@@ -19,10 +19,10 @@ Permitir que a secretaria e a coordenação carreguem e atualizem alunos em lote
   - Retenção dos arquivos CSV → FN-062 (§4 item 11).
 
 ## 3. Fontes de verdade
-- Mockup: `mockups/turmas.html` (botão "Importar planilha"; [docs/01](../../01-inventario-dos-mockups.md) §13).
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) A5; [docs/13](../../13-roadmap.md) MP-016; [docs/70](../../70-a1-c-secretario-escolar.md); [docs/134](../../134-pf1-b-matriz-perfis-prioritarios.md); docs/04 RF-003.3 (formato "a definir").
+- Mockup: `mockups/turmas.html` (botão "Importar planilha"; docs/01 (`docs/01-inventario-dos-mockups.md`) §13).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) A5; docs/13 (`docs/13-roadmap.md`) MP-016; docs/70 (`docs/70-a1-c-secretario-escolar.md`); docs/134 (`docs/134-pf1-b-matriz-perfis-prioritarios.md`); docs/04 RF-003.3 (formato "a definir").
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — `aluno.importar` (Administrador, Diretor Escolar, Coordenador padrão; Professor extra; Secretário Escolar padrão; Vice-diretor extra).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — `aluno.importar` (Administrador, Diretor Escolar, Coordenador padrão; Professor extra; Secretário Escolar padrão; Vice-diretor extra).
 - Plano mestre: [§2 FN-034](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

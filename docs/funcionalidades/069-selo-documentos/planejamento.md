@@ -19,10 +19,10 @@ Exibir, nas impressões e nos PDFs, a divulgação do Gabarito360 conforme a mod
   - Relatórios em si → [FN-049](../049-relatorios-resultados/planejamento.md) e [FN-050](../050-relatorio-turma-pdf/planejamento.md).
 
 ## 3. Fontes de verdade
-- Mockups: não há mockup do selo; os relatórios seguem `mockups/relatorio-prova.html`, `relatorio-turma-prova.html` e `resultado.html` ([docs/01](../../01-inventario-dos-mockups.md)). O desenho do bloco precisa de aprovação.
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) R1 e a decisão já definida ("Cliente presenteado exibe a divulgação do Gabarito360 em impressões e PDFs. Cliente pagante exibe apenas 'Feito no gabarito360.com.br'"); [docs/161](../../161-identidade-e-cabecalhos.md) (resolvedor de identidade e partial de impressão compartilhado).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-010 do [docs/07](../../07-casos-de-uso.md) (exportar PDF) é o fluxo em que o selo aparece.
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — o selo não cria permissão; vale para quem já pode imprimir ou exportar.
+- Mockups: não há mockup do selo; os relatórios seguem `mockups/relatorio-prova.html`, `relatorio-turma-prova.html` e `resultado.html` (docs/01 (`docs/01-inventario-dos-mockups.md`)). O desenho do bloco precisa de aprovação.
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) R1 e a decisão já definida ("Cliente presenteado exibe a divulgação do Gabarito360 em impressões e PDFs. Cliente pagante exibe apenas 'Feito no gabarito360.com.br'"); docs/161 (`docs/161-identidade-e-cabecalhos.md`) (resolvedor de identidade e partial de impressão compartilhado).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-010 do docs/07 (`docs/07-casos-de-uso.md`) (exportar PDF) é o fluxo em que o selo aparece.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — o selo não cria permissão; vale para quem já pode imprimir ou exportar.
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

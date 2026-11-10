@@ -19,10 +19,10 @@ Modelar o calendário acadêmico (ano/ciclo, unidades, bimestres, trimestres, se
   - Cards e recortes dos painéis → FN-053; acompanhamento pedagógico → FN-055.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/177](../../177-plano-paineis-turmas.md) fase P4 (P4.1.1–P4.4.5); docs/179, docs/180.
+- Documentos de origem: docs/177 (`docs/177-plano-paineis-turmas.md`) fase P4 (P4.1.1–P4.4.5); docs/179, docs/180.
 - Widget demonstrativo "Resultados por período escolar" (PR #211–#214, #226).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — chaves a definir (P4.2.1: quem configura, revisa, encerra e reabre).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — chaves a definir (P4.2.1: quem configura, revisa, encerra e reabre).
 - Plano mestre: [§2 FN-039](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

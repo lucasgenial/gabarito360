@@ -20,10 +20,10 @@ Permitir que o Diretor de Núcleo agende, acompanhe e encerre visitas pedagógic
   - Registro pedagógico da visita (relato, encaminhamentos) → não previsto nos documentos de origem; se pedido, entra como candidata.
 
 ## 3. Fontes de verdade
-- Mockup: `mockups/dashboard-diretor-nucleo.html` (lista "Próximas visitas": data, tipo, urgência Prioritária/Monitorar/Referência; ação rápida "Agendar Visita", rota a definir); inventário em [docs/01](../../01-inventario-dos-mockups.md). **Não há mockup da tela de gestão.**
-- Documentos de origem: [docs/13](../../13-roadmap.md) MP-032; [docs/07](../../07-casos-de-uso.md) UC-009; [docs/16](../../16-gap-analise.md).
+- Mockup: `mockups/dashboard-diretor-nucleo.html` (lista "Próximas visitas": data, tipo, urgência Prioritária/Monitorar/Referência; ação rápida "Agendar Visita", rota a definir); inventário em docs/01 (`docs/01-inventario-dos-mockups.md`). **Não há mockup da tela de gestão.**
+- Documentos de origem: docs/13 (`docs/13-roadmap.md`) MP-032; docs/07 (`docs/07-casos-de-uso.md`) UC-009; docs/16 (`docs/16-gap-analise.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (Diretor de Núcleo: escolas do seu núcleo). Não há chave `visita.*` no catálogo.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (Diretor de Núcleo: escolas do seu núcleo). Não há chave `visita.*` no catálogo.
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

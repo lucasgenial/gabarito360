@@ -1,10 +1,10 @@
 # 056 — Agenda e calendário (módulo transversal) — Casos de uso
 
 **Natureza:** nova, com parte visual existente documentada a partir do código
-**Perfis envolvidos:** professor, professor autônomo, coordenador, equipe pedagógica, diretor e vice-diretor escolar, secretaria/auxiliar (só público administrativo), diretor de núcleo, administrador da rede; responsável pelo produto (C1). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** professor, professor autônomo, coordenador, equipe pedagógica, diretor e vice-diretor escolar, secretaria/auxiliar (só público administrativo), diretor de núcleo, administrador da rede; responsável pelo produto (C1). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para o que já existe, descreve o comportamento **atual** e marca as diferenças com ⚠, apontando a subfase que as resolve. O UC-007 do [docs/07](../../07-casos-de-uso.md) (dashboard por perfil) é consumidor deste módulo e não é repetido aqui.
+Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para o que já existe, descreve o comportamento **atual** e marca as diferenças com ⚠, apontando a subfase que as resolve. O UC-007 do docs/07 (`docs/07-casos-de-uso.md`) (dashboard por perfil) é consumidor deste módulo e não é repetido aqui.
 
 ---
 

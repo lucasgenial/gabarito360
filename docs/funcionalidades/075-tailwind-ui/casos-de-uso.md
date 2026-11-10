@@ -1,7 +1,7 @@
 # 075 — Migração para Tailwind e UX transversal — Casos de uso
 
 **Natureza:** existente documentada a partir do código (parcial)
-**Perfis envolvidos:** todos os perfis autenticados; visitante em TW6 (ver [docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** todos os perfis autenticados; visitante em TW6 (ver docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
 Funcionalidade transversal de apresentação. Os fluxos de negócio pertencem às FNs donas de cada tela; aqui ficam as garantias de navegação e interação comuns.

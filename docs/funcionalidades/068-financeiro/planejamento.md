@@ -27,10 +27,10 @@ Dar à equipe do Gabarito360 (perfil Financeiro) o controle comercial de cada cl
 **Regra fixa do docs/28:** nunca guardar número de cartão ou CVV; só tokens do provedor.
 
 ## 3. Fontes de verdade
-- Mockups: não há mockup das telas do Financeiro; páginas de planos, checkout e "Minha assinatura" constam no [docs/01](../../01-inventario-dos-mockups.md) (seção SaaS) como novas, sem mockup.
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) Fase 5 e decisões já definidas (perfil Financeiro, presenteado/pagante); [docs/163](../../163-escolas-independentes.md) (regra comercial adicional); [docs/176](../../176-reconciliacao-solicitacoes.md) (FIN); [docs/164](../../164-apresentacao-publica-pre-lancamento.md); [docs/06](../../06-regras-de-negocio.md) RN-015.
+- Mockups: não há mockup das telas do Financeiro; páginas de planos, checkout e "Minha assinatura" constam no docs/01 (`docs/01-inventario-dos-mockups.md`) (seção SaaS) como novas, sem mockup.
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) Fase 5 e decisões já definidas (perfil Financeiro, presenteado/pagante); docs/163 (`docs/163-escolas-independentes.md`) (regra comercial adicional); docs/176 (`docs/176-reconciliacao-solicitacoes.md`) (FIN); docs/164 (`docs/164-apresentacao-publica-pre-lancamento.md`); docs/06 (`docs/06-regras-de-negocio.md`) RN-015.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md), extensão A1 (Financeiro: consultar e gerir clientes; dados pedagógicos negados).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`), extensão A1 (Financeiro: consultar e gerir clientes; dados pedagógicos negados).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

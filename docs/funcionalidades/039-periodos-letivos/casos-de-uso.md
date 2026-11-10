@@ -1,7 +1,7 @@
 # 039 — Períodos letivos — Casos de uso
 
 **Natureza:** nova (candidata; casos de uso propostos de alto nível)
-**Perfis envolvidos:** a definir em P4.2.1 (provavelmente Diretor Escolar, Coordenador, Secretário Escolar; Professor autônomo no espaço pessoal); consulta por quem vê painéis — ver [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** a definir em P4.2.1 (provavelmente Diretor Escolar, Coordenador, Secretário Escolar; Professor autônomo no espaço pessoal); consulta por quem vê painéis — ver docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto.

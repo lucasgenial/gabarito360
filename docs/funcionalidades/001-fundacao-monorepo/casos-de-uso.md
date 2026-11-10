@@ -1,12 +1,12 @@
 # 001 — Fundação do monorepo, banco e bases API/WEB — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** operador técnico (sem perfil na matriz do [docs/03](../../03-perfis-e-permissoes.md)); clientes da API (WEB e, no futuro, apps móveis)
+**Perfis envolvidos:** operador técnico (sem perfil na matriz do docs/03 (`docs/03-perfis-e-permissoes.md`)); clientes da API (WEB e, no futuro, apps móveis)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
 
-A autenticação do usuário (UC-001 do [docs/07](../../07-casos-de-uso.md)) é coberta por FN-011 e não é repetida aqui.
+A autenticação do usuário (UC-001 do docs/07 (`docs/07-casos-de-uso.md`)) é coberta por FN-011 e não é repetida aqui.
 
 ---
 

@@ -1,12 +1,12 @@
 # 012 — Motor de permissões, equipe e menus — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor (com extra `usuario.gerir`), Coordenador; todos os perfis como sujeitos da autorização ([docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor (com extra `usuario.gerir`), Coordenador; todos os perfis como sujeitos da autorização (docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
 
-Referência: UC-008 "Gerenciar Equipe da Escola" de [docs/07](../../07-casos-de-uso.md). Os casos abaixo detalham UC-008 conforme o código. Quando o gestor está em um vínculo selecionado (regime de vínculos obrigatório, em produção desde 02/11), a listagem, a ativação e as permissões são delegadas à gestão por vínculo (FN-015, UC-015-05 e UC-015-06).
+Referência: UC-008 "Gerenciar Equipe da Escola" de docs/07 (`docs/07-casos-de-uso.md`). Os casos abaixo detalham UC-008 conforme o código. Quando o gestor está em um vínculo selecionado (regime de vínculos obrigatório, em produção desde 02/11), a listagem, a ativação e as permissões são delegadas à gestão por vínculo (FN-015, UC-015-05 e UC-015-06).
 
 ---
 
@@ -30,7 +30,7 @@ Referência: UC-008 "Gerenciar Equipe da Escola" de [docs/07](../../07-casos-de-
 - 2c. `professor_autonomo`, `secretario_escolar`, `vice_dir_escolar`, `auxiliar_secretaria` sem vínculo: nenhuma permissão.
 - ⚠ 1a. Oito rotas `dashboard/*` ainda usam `perfil:` em vez de `permissao:` (subfase 2.3).
 
-**Regras de negócio:** permissão nunca amplia escopo ([docs/03 §5](../../03-perfis-e-permissoes.md)).
+**Regras de negócio:** permissão nunca amplia escopo (docs/03 §5 (`docs/03-perfis-e-permissoes.md`)).
 
 **Critérios de aceite:**
 - [ ] Extra vencida (`valida_ate` < hoje) não conta.

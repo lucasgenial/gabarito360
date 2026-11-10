@@ -18,10 +18,10 @@ Dar identidade visual às turmas (brasões ou foto) e aos educadores (avatares a
   - Logo de escola e de rede → FN-033.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [tu-img-avatar-foto](../../tu-img-avatar-foto.md), [tu1-r3-dashboard-analitico](../../tu1-r3-dashboard-analitico.md) (última seção), [docs/176](../../176-reconciliacao-solicitacoes.md), [docs/177](../../177-plano-paineis-turmas.md) P3.1.3.
+- Documentos de origem: tu-img-avatar-foto (`docs/tu-img-avatar-foto.md`), tu1-r3-dashboard-analitico (`docs/tu1-r3-dashboard-analitico.md`) (última seção), docs/176 (`docs/176-reconciliacao-solicitacoes.md`), docs/177 (`docs/177-plano-paineis-turmas.md`) P3.1.3.
 - Assets: `apps/web/public/images/avatares/` (educadores, brasões, estudantes); `docs/tu-img-assets.json`.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`).
 - Plano mestre: [§2 FN-037](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

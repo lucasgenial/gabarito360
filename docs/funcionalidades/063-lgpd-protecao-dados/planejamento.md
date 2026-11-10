@@ -15,7 +15,7 @@ Reduzir o dano de um acesso indevido ao banco, à fila ou aos logs: CPF e contat
 - **Não inclui:** nomes, matrículas, notas e datas de nascimento (sujeitos a escopo e minimização); contatos dos responsáveis (FN-035) e código do portal (FN-067), que devem usar proteção própria quando existirem; retenção e descarte de logs históricos (FN-062); fotos de alunos (FN-066).
 
 ## 3. Fontes de verdade
-[docs/28 L3](../../28-plano-mestre-proximos-modulos.md), [docs/33 §6](../../33-lgpd-privacidade-e-consentimento.md), [docs/operacao/protecao-dados.md](../../operacao/protecao-dados.md). Código: `apps/api/app/Casts/DadoProtegido.php`, `apps/api/app/Support/DadoProtegido.php` (hash por campo), `apps/api/app/Logging/` e `apps/web/app/Logging/` (`ProtegerDados`, `GerenciadorProtegido`), middlewares `ProtegerRespostas` e `RecusarCredenciaisNaUrl` na API e na web. Casos de uso: [casos-de-uso.md](casos-de-uso.md).
+docs/28 L3 (`docs/28-plano-mestre-proximos-modulos.md`), docs/33 §6 (`docs/33-lgpd-privacidade-e-consentimento.md`), [docs/operacao/protecao-dados.md](../../arquitetura/11-seguranca-e-privacidade.md). Código: `apps/api/app/Casts/DadoProtegido.php`, `apps/api/app/Support/DadoProtegido.php` (hash por campo), `apps/api/app/Logging/` e `apps/web/app/Logging/` (`ProtegerDados`, `GerenciadorProtegido`), middlewares `ProtegerRespostas` e `RecusarCredenciaisNaUrl` na API e na web. Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

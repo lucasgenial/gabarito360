@@ -4,7 +4,7 @@
 **Etapa:** Em homologação
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5), aplicada dentro das entregas; sem posição própria na fila. Pendência na trilha: paginação opcional na API.
 **Natureza:** existente documentada a partir do código
-**Origem:** ramo do CI1-F ampliado pelo responsável para todas as tabelas ([docs/130](../../130-ci1-f-validacao-integrada.md), [docs/131](../../131-padronizacao-tabelas-ui-ux.md)); TBL2 surgiu na entrega DC1 ([docs/149](../../149-tbl2-tabelas-integradas.md))
+**Origem:** ramo do CI1-F ampliado pelo responsável para todas as tabelas (docs/130 (`docs/130-ci1-f-validacao-integrada.md`), docs/131 (`docs/131-padronizacao-tabelas-ui-ux.md`)); TBL2 surgiu na entrega DC1 (docs/149 (`docs/149-tbl2-tabelas-integradas.md`))
 **Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
@@ -25,9 +25,9 @@ Padronizar todas as tabelas operacionais da área logada num componente único, 
   - busca nacional paginada do catálogo: [FN-032](../032-busca-catalogo-autocompletar/).
 
 ## 3. Fontes de verdade
-- Mockups com tabelas: `mockups/dashboard-*.html`, `escolas.html` e demais listados em [docs/01](../../01-inventario-dos-mockups.md).
-- Documentos de origem: [docs/130](../../130-ci1-f-validacao-integrada.md), [docs/131](../../131-padronizacao-tabelas-ui-ux.md), [docs/149](../../149-tbl2-tabelas-integradas.md); regra permanente em `AGENTS.md` ("Tabelas, cards de registros e avisos").
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md). Perfis: [docs/03](../../03-perfis-e-permissoes.md).
+- Mockups com tabelas: `mockups/dashboard-*.html`, `escolas.html` e demais listados em docs/01 (`docs/01-inventario-dos-mockups.md`).
+- Documentos de origem: docs/130 (`docs/130-ci1-f-validacao-integrada.md`), docs/131 (`docs/131-padronizacao-tabelas-ui-ux.md`), docs/149 (`docs/149-tbl2-tabelas-integradas.md`); regra permanente em `AGENTS.md` ("Tabelas, cards de registros e avisos").
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md). Perfis: docs/03 (`docs/03-perfis-e-permissoes.md`).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

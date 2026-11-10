@@ -1,7 +1,7 @@
 # 042 — Duplicação de provas (CP1, CP2) — Casos de uso
 
 **Natureza:** existente documentada a partir do código (CP1); proposta (CP2, A7)
-**Perfis envolvidos:** Professor, Professor autônomo (CP1); Coordenador e Professor destinatário (CP2) — ver [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** Professor, Professor autônomo (CP1); Coordenador e Professor destinatário (CP2) — ver docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.

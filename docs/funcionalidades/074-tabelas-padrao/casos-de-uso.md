@@ -1,10 +1,10 @@
 # 074 — Padrão de tabelas e listas — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis que consultam listas, relatórios e matrizes (ver [docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** todos os perfis que consultam listas, relatórios e matrizes (ver docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
-Funcionalidade transversal de apresentação. As permissões e o escopo de cada lista são os da tela dona; o componente não acrescenta nem remove dados. Fluxos de negócio relacionados: UC-004, UC-006 e UC-008 de [docs/07](../../07-casos-de-uso.md).
+Funcionalidade transversal de apresentação. As permissões e o escopo de cada lista são os da tela dona; o componente não acrescenta nem remove dados. Fluxos de negócio relacionados: UC-004, UC-006 e UC-008 de docs/07 (`docs/07-casos-de-uso.md`).
 
 ---
 

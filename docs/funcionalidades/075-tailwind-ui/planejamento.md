@@ -4,7 +4,7 @@
 **Etapa:** Em planejamento
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5): TW3 restante a TW6 aplicados dentro das entregas, nas telas que cada entrega tocar; janela própria para TW4–TW6 proposta só depois da Onda 2 (proposta, não aprovada)
 **Natureza:** existente documentada a partir do código (evolução parcial)
-**Origem:** pedido transversal durante P3.2 ("ações SMALL", [docs/184](../../184-acoes-small-tabelas.md)), substituído pela decisão do responsável de adotar Tailwind ([docs/185](../../185-migracao-tailwind.md)) em 08/11/2026; UX-D e UX-T recuperados na reconciliação [docs/176](../../176-reconciliacao-solicitacoes.md)
+**Origem:** pedido transversal durante P3.2 ("ações SMALL", docs/184 (`docs/184-acoes-small-tabelas.md`)), substituído pela decisão do responsável de adotar Tailwind (docs/185 (`docs/185-migracao-tailwind.md`)) em 08/11/2026; UX-D e UX-T recuperados na reconciliação docs/176 (`docs/176-reconciliacao-solicitacoes.md`)
 **Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
@@ -28,9 +28,9 @@ Adotar o TailwindCSS como base visual de todas as telas, preservando a paleta do
 
 ## 3. Fontes de verdade
 - Style system (`style-system/`) e tokens em `apps/web/public/css/app.css` (paleta preservada).
-- Documentos de origem: [docs/184](../../184-acoes-small-tabelas.md), [docs/185](../../185-migracao-tailwind.md), [docs/186](../../186-previa-componentes-tailwind.md), [docs/187](../../187-tw2-conferencia-homologacao.md), [docs/188](../../188-tw3-acoes-direita.md), [docs/176](../../176-reconciliacao-solicitacoes.md).
+- Documentos de origem: docs/184 (`docs/184-acoes-small-tabelas.md`), docs/185 (`docs/185-migracao-tailwind.md`), docs/186 (`docs/186-previa-componentes-tailwind.md`), docs/187 (`docs/187-tw2-conferencia-homologacao.md`), docs/188 (`docs/188-tw3-acoes-direita.md`), docs/176 (`docs/176-reconciliacao-solicitacoes.md`).
 - Regras permanentes em `AGENTS.md` (confirmação por modal da aplicação; Editar e Arquivar turma com ícone e texto).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md). Perfis: [docs/03](../../03-perfis-e-permissoes.md).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md). Perfis: docs/03 (`docs/03-perfis-e-permissoes.md`).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

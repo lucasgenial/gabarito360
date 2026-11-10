@@ -21,10 +21,10 @@ Fazer o Gabarito360 enviar e receber e-mail com o próprio domínio, de forma co
   - Pagamentos (`assinatura-pagamento`) → [FN-068](../068-financeiro/planejamento.md); resultado ao responsável (`portal-resultado`) → [FN-067](../067-portal-responsaveis/planejamento.md).
 
 ## 3. Fontes de verdade
-- Mockups: não há mockup de e-mail; formulário Fale Conosco segue a identidade atual (docs/28 E7; inventário [docs/01](../../01-inventario-dos-mockups.md), seção de páginas SaaS).
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) §2 (E-mail no ECOAR, DNS) e Fase 1; [docs/operacao/email.md](../../operacao/email.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001 do [docs/07](../../07-casos-de-uso.md) (autenticação) e UC-008 (gerir equipe) são relacionados.
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (`usuario.gerir` para convites).
+- Mockups: não há mockup de e-mail; formulário Fale Conosco segue a identidade atual (docs/28 E7; inventário docs/01 (`docs/01-inventario-dos-mockups.md`), seção de páginas SaaS).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) §2 (E-mail no ECOAR, DNS) e Fase 1; [docs/operacao/email.md](../../operacao/email.md).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001 do docs/07 (`docs/07-casos-de-uso.md`) (autenticação) e UC-008 (gerir equipe) são relacionados.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (`usuario.gerir` para convites).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

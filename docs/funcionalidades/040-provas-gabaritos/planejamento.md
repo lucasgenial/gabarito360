@@ -22,10 +22,10 @@ Permitir que professores e coordenação criem provas objetivas, preencham e pub
   - Marcação de data e aplicação na agenda → FN-059.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/provas.html`, `criar-prova.html`, `gabarito.html` ([docs/01](../../01-inventario-dos-mockups.md) §08–§10).
-- Documentos de origem: [docs/13](../../13-roadmap.md) MP-019, MP-020; [docs/19](../../19-plano-telas-por-perfil.md) MP-037; docs/04 RF-006; [docs/06](../../06-regras-de-negocio.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-003 de [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — `prova.ver`, `prova.criar`, `prova.editar`, `gabarito.ver`, `gabarito.editar`.
+- Mockups: `mockups/provas.html`, `criar-prova.html`, `gabarito.html` (docs/01 (`docs/01-inventario-dos-mockups.md`) §08–§10).
+- Documentos de origem: docs/13 (`docs/13-roadmap.md`) MP-019, MP-020; docs/19 (`docs/19-plano-telas-por-perfil.md`) MP-037; docs/04 RF-006; docs/06 (`docs/06-regras-de-negocio.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-003 de docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — `prova.ver`, `prova.criar`, `prova.editar`, `gabarito.ver`, `gabarito.editar`.
 - Plano mestre: [§2 FN-040](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

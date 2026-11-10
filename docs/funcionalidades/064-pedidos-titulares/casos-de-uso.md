@@ -1,7 +1,7 @@
 # 064 — Pedidos dos titulares (L4) — Casos de uso
 
 **Natureza:** existente documentada a partir do código (UC-064-01 a 08); propostos (UC-064-09 a 11)
-**Perfis envolvidos:** Desenvolvedor e Suporte (contexto interno); Administrador da Rede e professor autônomo (contexto de vínculo, só concessão de exportação). Financeiro, perfis escolares e identidades sem contexto não acessam. Ver [docs/03](../../03-perfis-e-permissoes.md), seções L4-B1, L4-B2 e concessão de exportação.
+**Perfis envolvidos:** Desenvolvedor e Suporte (contexto interno); Administrador da Rede e professor autônomo (contexto de vínculo, só concessão de exportação). Financeiro, perfis escolares e identidades sem contexto não acessam. Ver docs/03 (`docs/03-perfis-e-permissoes.md`), seções L4-B1, L4-B2 e concessão de exportação.
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
@@ -202,7 +202,7 @@ Regras comuns aos UC-064-01 a 06 (`App\Services\PedidosTitulares`):
 - 3b. Protocolo não elegível ou conferências pendentes: 409.
 - 3c. Suporte, Desenvolvedor, Financeiro ou Diretor Escolar: 403.
 
-**Regras de negócio:** docs/109; [docs/03](../../03-perfis-e-permissoes.md).
+**Regras de negócio:** docs/109; docs/03 (`docs/03-perfis-e-permissoes.md`).
 
 **Critérios de aceite:**
 - [x] Só admin_rede e professor_autonomo concedem.

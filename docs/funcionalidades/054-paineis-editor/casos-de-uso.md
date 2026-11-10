@@ -1,10 +1,10 @@
 # 054 — Personalização e editor dos painéis — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** qualquer perfil com `turma.ver` e vínculo selecionado. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** qualquer perfil com `turma.ver` e vínculo selecionado. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Descreve o comportamento **atual** (na homologação, validado). Não há caso de uso correspondente no [docs/07](../../07-casos-de-uso.md).
+Descreve o comportamento **atual** (na homologação, validado). Não há caso de uso correspondente no docs/07 (`docs/07-casos-de-uso.md`).
 
 ---
 

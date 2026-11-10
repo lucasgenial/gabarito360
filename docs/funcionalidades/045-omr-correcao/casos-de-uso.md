@@ -1,10 +1,10 @@
 # 045 — Motor OMR e acompanhamento da correção — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** Administrador da Rede, Diretor de Núcleo (só acompanha), Diretor Escolar, Vice-diretor (padrão de leitura e extras), Coordenador, Professor, Professor autônomo, Aplicador (só envia). Ver [docs/03](../../03-perfis-e-permissoes.md) §4.5.
+**Perfis envolvidos:** Administrador da Rede, Diretor de Núcleo (só acompanha), Diretor Escolar, Vice-diretor (padrão de leitura e extras), Coordenador, Professor, Professor autônomo, Aplicador (só envia). Ver docs/03 (`docs/03-perfis-e-permissoes.md`) §4.5.
 **Atualizado em:** 2026-11-09
 
-Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Descreve o comportamento **atual**; diferenças em relação ao planejado estão marcadas com ⚠. Base: UC-004 do [docs/07](../../07-casos-de-uso.md), que estes casos detalham sem repetir.
+Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Descreve o comportamento **atual**; diferenças em relação ao planejado estão marcadas com ⚠. Base: UC-004 do docs/07 (`docs/07-casos-de-uso.md`), que estes casos detalham sem repetir.
 
 ---
 

@@ -1,10 +1,10 @@
 # 032 — Busca do catálogo por autocompletar — Casos de uso
 
 **Natureza:** evolução de existente — casos de uso propostos, de alto nível (funcionalidade adiada)
-**Perfis envolvidos:** os mesmos dos pontos de uso: `professor_autonomo`, Suporte/Desenvolvedor, gestores com `catalogo.manter_escopo`, perfis com `escola.criar`. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** os mesmos dos pontos de uso: `professor_autonomo`, Suporte/Desenvolvedor, gestores com `catalogo.manter_escopo`, perfis com `escola.criar`. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Derivados do desenho preferido do [docs/200](../../200-f5-f6-diagnostico-catalogo.md). O comportamento atual da busca está em UC-031-01.
+Derivados do desenho preferido do docs/200 (`docs/200-f5-f6-diagnostico-catalogo.md`). O comportamento atual da busca está em UC-031-01.
 
 ---
 

@@ -1,7 +1,7 @@
 # 065 — Plano de incidentes — Casos de uso
 
 **Natureza:** nova (procedimento operacional)
-**Perfis envolvidos:** responsável pela plataforma; Desenvolvedor e Suporte (investigação pela auditoria); instituição controladora; encarregado. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** responsável pela plataforma; Desenvolvedor e Suporte (investigação pela auditoria); instituição controladora; encarregado. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Todos os casos abaixo são propostos. Nenhum está implementado: `docs/operacao/incidentes.md` não existe.

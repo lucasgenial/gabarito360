@@ -1,10 +1,10 @@
 # 009 — Estrutura-alvo de diretórios — Casos de uso
 
 **Natureza:** nova (candidata)
-**Perfis envolvidos:** agentes de execução e desenvolvedores; operador técnico. Nenhum perfil da matriz do [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** agentes de execução e desenvolvedores; operador técnico. Nenhum perfil da matriz do docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Casos de uso propostos, de alto nível, derivados do [docs/168](../../168-estabilizacao-turmas-e-contratos.md). **Nenhum está implementado** e nenhum pode ser executado antes da priorização (decisão §4 item 15 do [plano mestre](../../planejamento/00-plano-mestre.md)). O [docs/07](../../07-casos-de-uso.md) não tem caso de uso equivalente.
+Casos de uso propostos, de alto nível, derivados do docs/168 (`docs/168-estabilizacao-turmas-e-contratos.md`). **Nenhum está implementado** e nenhum pode ser executado antes da priorização (decisão §4 item 15 do [plano mestre](../../planejamento/00-plano-mestre.md)). O docs/07 (`docs/07-casos-de-uso.md`) não tem caso de uso equivalente.
 
 ---
 

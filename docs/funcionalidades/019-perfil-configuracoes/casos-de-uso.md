@@ -1,12 +1,12 @@
 # 019 — Meu perfil, configurações e imagem de perfil — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis (perfil e imagem); Administrador da Rede (configurações) — [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** todos os perfis (perfil e imagem); Administrador da Rede (configurações) — docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
 
-Referências: UC-011 "Editar Perfil do Usuário" e UC-012 "Configurar Sistema" de [docs/07](../../07-casos-de-uso.md). A troca de senha e de e-mail feita nesta tela está em UC-011-05 e UC-011-06 (FN-011).
+Referências: UC-011 "Editar Perfil do Usuário" e UC-012 "Configurar Sistema" de docs/07 (`docs/07-casos-de-uso.md`). A troca de senha e de e-mail feita nesta tela está em UC-011-05 e UC-011-06 (FN-011).
 
 ---
 

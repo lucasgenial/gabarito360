@@ -25,9 +25,9 @@ Registrar quem fez o quê, onde e quando em toda requisição à API, sem gravar
 
 ## 3. Fontes de verdade
 - Mockups: nenhum mockup para a tela de auditoria (docs/01 não lista). AU2 exige mockup ou aprovação explícita antes da execução.
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) (AU1, AU2), [docs/32](../../32-auditoria.md), [docs/72](../../72-au1-a-registro-auditoria.md), [docs/73](../../73-au1-b-operacao-auditoria.md), [docs/74](../../74-au1-b2-privilegios-e-fila.md), [docs/75](../../75-au1-b3-arquivos-e-restauracao.md), [docs/76](../../76-au1-ensaio-equivalente.md), [docs/80](../../80-t5-a3-outbox-auditoria.md), [docs/100](../../100-publicacao-inicial-v1-t5.md), [docs/operacao/auditoria.md](../../operacao/auditoria.md).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) (AU1, AU2), docs/32 (`docs/32-auditoria.md`), docs/72 (`docs/72-au1-a-registro-auditoria.md`), docs/73 (`docs/73-au1-b-operacao-auditoria.md`), docs/74 (`docs/74-au1-b2-privilegios-e-fila.md`), docs/75 (`docs/75-au1-b3-arquivos-e-restauracao.md`), docs/76 (`docs/76-au1-ensaio-equivalente.md`), docs/80 (`docs/80-t5-a3-outbox-auditoria.md`), docs/100 (`docs/100-publicacao-inicial-v1-t5.md`), [docs/operacao/auditoria.md](../../operacao/auditoria.md).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — contexto interno (Desenvolvedor, Suporte). Ainda não há chave de permissão de auditoria no catálogo.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — contexto interno (Desenvolvedor, Suporte). Ainda não há chave de permissão de auditoria no catálogo.
 - Plano mestre: [§2 FN-004](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

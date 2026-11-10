@@ -1,10 +1,10 @@
 # 006 — Painel técnico — Casos de uso
 
 **Natureza:** nova
-**Perfis envolvidos:** Desenvolvedor (contexto interno). Todos os demais perfis e contextos são negados. Ver [docs/03](../../03-perfis-e-permissoes.md), extensão A1.
+**Perfis envolvidos:** Desenvolvedor (contexto interno). Todos os demais perfis e contextos são negados. Ver docs/03 (`docs/03-perfis-e-permissoes.md`), extensão A1.
 **Atualizado em:** 2026-11-09
 
-Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Todos os casos abaixo são propostos a partir do docs/28 (A2) e **não estão implementados**. O [docs/07](../../07-casos-de-uso.md) não tem caso de uso equivalente.
+Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Todos os casos abaixo são propostos a partir do docs/28 (A2) e **não estão implementados**. O docs/07 (`docs/07-casos-de-uso.md`) não tem caso de uso equivalente.
 
 ---
 

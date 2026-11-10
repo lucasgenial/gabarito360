@@ -24,10 +24,10 @@ Manter a estrutura cadastral da rede: núcleos territoriais, escolas (sede, anex
   - Catálogo nacional de instituições → FN-031.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/escolas.html`, `escola-detalhe.html`, `turmas.html`, `turma-detalhe-2.html`, `aluno-cadastrar.html`, `aluno-cadastrar-redesign.html`, `aluno-editar.html`, `aluno-detalhe.html` (inventário em [docs/01](../../01-inventario-dos-mockups.md) §13–§19).
-- Documentos de origem: [docs/13](../../13-roadmap.md) MP-014..017, 035, 039; [docs/28](../../28-plano-mestre-proximos-modulos.md) A3, A4; [docs/19](../../19-plano-telas-por-perfil.md) MP-039.
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-002 de [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md); código `apps/api/app/Support/CatalogoPermissoes.php`.
+- Mockups: `mockups/escolas.html`, `escola-detalhe.html`, `turmas.html`, `turma-detalhe-2.html`, `aluno-cadastrar.html`, `aluno-cadastrar-redesign.html`, `aluno-editar.html`, `aluno-detalhe.html` (inventário em docs/01 (`docs/01-inventario-dos-mockups.md`) §13–§19).
+- Documentos de origem: docs/13 (`docs/13-roadmap.md`) MP-014..017, 035, 039; docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) A3, A4; docs/19 (`docs/19-plano-telas-por-perfil.md`) MP-039.
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-002 de docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`); código `apps/api/app/Support/CatalogoPermissoes.php`.
 - Plano mestre: [§2 FN-033](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

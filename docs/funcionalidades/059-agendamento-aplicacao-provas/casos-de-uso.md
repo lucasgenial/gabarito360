@@ -1,10 +1,10 @@
 # 059 — Marcação e aplicação de provas — Casos de uso
 
 **Natureza:** evolução de existente
-**Perfis envolvidos:** professor, professor autônomo, coordenador (marcam a data); diretor escolar e vice, diretor de núcleo (acompanham e recebem avisos); aplicador (aplica no dia); aluno (vê próximas provas). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** professor, professor autônomo, coordenador (marcam a data); diretor escolar e vice, diretor de núcleo (acompanham e recebem avisos); aplicador (aplica no dia); aluno (vê próximas provas). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-O UC-003 do [docs/07](../../07-casos-de-uso.md) (criar prova) cobre o formulário; aqui só a data de aplicação e o que decorre dela. O UC-007 (dashboards) é consumidor.
+O UC-003 do docs/07 (`docs/07-casos-de-uso.md`) (criar prova) cobre o formulário; aqui só a data de aplicação e o que decorre dela. O UC-007 (dashboards) é consumidor.
 
 ---
 

@@ -22,9 +22,9 @@ Manter um catálogo nacional de escolas e instituições de ensino superior, imp
   - Retenção dos protocolos de solicitação → FN-062.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/116](../../116-catalogo-nacional-instituicoes.md), [docs/119](../../119-ci1-a-contrato-catalogo-nacional.md), [120](../../120-ci1-b2-carga-retomavel.md), [121](../../121-ci1-b3-publicacao-versionada.md), [122](../../122-ci1-c-relacoes-e-cobertura.md), [124](../../124-ci1-d-selecao-pessoal.md), [125](../../125-ci1-e-solicitacoes-manutencao.md), [126](../../126-ci1-e-revisao-product-design.md), [129](../../129-h1-publicacao-ci1-e.md), [130](../../130-ci1-f-validacao-integrada.md).
-- Medição e pontos de uso da busca: [docs/200](../../200-f5-f6-diagnostico-catalogo.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (seção CI1-D); `CatalogoPermissoes`, `ContextoInterno`.
+- Documentos de origem: docs/116 (`docs/116-catalogo-nacional-instituicoes.md`), docs/119 (`docs/119-ci1-a-contrato-catalogo-nacional.md`), 120 (`docs/120-ci1-b2-carga-retomavel.md`), 121 (`docs/121-ci1-b3-publicacao-versionada.md`), 122 (`docs/122-ci1-c-relacoes-e-cobertura.md`), 124 (`docs/124-ci1-d-selecao-pessoal.md`), 125 (`docs/125-ci1-e-solicitacoes-manutencao.md`), 126 (`docs/126-ci1-e-revisao-product-design.md`), 129 (`docs/129-h1-publicacao-ci1-e.md`), 130 (`docs/130-ci1-f-validacao-integrada.md`).
+- Medição e pontos de uso da busca: docs/200 (`docs/200-f5-f6-diagnostico-catalogo.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (seção CI1-D); `CatalogoPermissoes`, `ContextoInterno`.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md). Sem UC no docs/07.
 - Mockups: não há; interface aprovada pelo revisor independente (docs/126).
 

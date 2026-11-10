@@ -20,10 +20,10 @@ Garantir que compartilhar uma turma não compartilhe provas entre professores: c
   - Autoria contextual por vínculo e visibilidade por atribuição docente → entregues em [FN-038](../038-disciplinas-curriculo/planejamento.md) (PR #186).
 
 ## 3. Fontes de verdade
-- Documento de origem: [docs/132](../../132-provas-autoria-cabecalho.md).
+- Documento de origem: docs/132 (`docs/132-provas-autoria-cabecalho.md`).
 - Mockups: `mockups/provas.html` (lista); "Meu espaço" aprovado em revisão independente de UI/UX (docs/132), sem mockup próprio.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`).
 - Plano mestre: [§2 FN-041](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

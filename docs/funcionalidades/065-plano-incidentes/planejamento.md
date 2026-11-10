@@ -15,7 +15,7 @@ Ter um procedimento de resposta a incidentes de segurança com dados pessoais: c
 - **Não inclui:** ferramenta automatizada de detecção ou alerta (FN-005 S1/AU3 ou candidata nova); notificações dentro do sistema (FN-057); revisão final de segurança do portal (FN-067, P7), que consome este plano; incidentes operacionais sem dados pessoais, que seguem o registro já existente em `docs/operacao/` (exemplo: incidente do painel do professor de 01/11/2026).
 
 ## 3. Fontes de verdade
-[docs/28 L5](../../28-plano-mestre-proximos-modulos.md), [docs/33 §6](../../33-lgpd-privacidade-e-consentimento.md) (RL11), [docs/38](../../38-ripd-preliminar-portal.md) (riscos R01–R11), [docs/operacao/auditoria.md](../../operacao/auditoria.md), [docs/operacao/backup.md](../../operacao/backup.md), [docs/operacao/protecao-dados.md](../../operacao/protecao-dados.md), [docs/operacao/incidente-painel-professor-2026-11-01.md](../../operacao/incidente-painel-professor-2026-11-01.md) (registro isolado, sem dados pessoais). Sem mockup. Casos de uso: [casos-de-uso.md](casos-de-uso.md).
+docs/28 L5 (`docs/28-plano-mestre-proximos-modulos.md`), docs/33 §6 (`docs/33-lgpd-privacidade-e-consentimento.md`) (RL11), docs/38 (`docs/38-ripd-preliminar-portal.md`) (riscos R01–R11), [docs/operacao/auditoria.md](../../operacao/auditoria.md), [docs/operacao/backup.md](../../operacao/backup-e-restauracao.md), [docs/operacao/protecao-dados.md](../../arquitetura/11-seguranca-e-privacidade.md), [docs/operacao/incidente-painel-professor-2026-11-01.md](../../operacao/incidentes.md) (registro isolado, sem dados pessoais). Sem mockup. Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

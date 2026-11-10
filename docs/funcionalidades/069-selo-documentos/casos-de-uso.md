@@ -1,10 +1,10 @@
 # 069 — Selo dos documentos — Casos de uso
 
 **Natureza:** nova
-**Perfis envolvidos:** todos os que imprimem ou exportam documentos (professor, coordenador, direção, núcleo, rede); Financeiro e Suporte definem a modalidade do cliente em outras funcionalidades. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** todos os que imprimem ou exportam documentos (professor, coordenador, direção, núcleo, rede); Financeiro e Suporte definem a modalidade do cliente em outras funcionalidades. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-10
 
-Nenhum caso de uso está implementado. O UC-010 do [docs/07](../../07-casos-de-uso.md) (exportar relatório/PDF) é o fluxo hospedeiro e não é repetido. O único dado existente é `clientes.modalidade`.
+Nenhum caso de uso está implementado. O UC-010 do docs/07 (`docs/07-casos-de-uso.md`) (exportar relatório/PDF) é o fluxo hospedeiro e não é repetido. O único dado existente é `clientes.modalidade`.
 
 ---
 

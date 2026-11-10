@@ -1,10 +1,10 @@
 # 070 — Identidade visual e gráficos — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis autenticados e visitantes. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** todos os perfis autenticados e visitantes. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Os casos abaixo descrevem garantias transversais de apresentação. Os dados mostrados nos gráficos pertencem às funcionalidades de origem (UC-006 e UC-007 do [docs/07](../../07-casos-de-uso.md); FN-049, FN-052, FN-053).
+Os casos abaixo descrevem garantias transversais de apresentação. Os dados mostrados nos gráficos pertencem às funcionalidades de origem (UC-006 e UC-007 do docs/07 (`docs/07-casos-de-uso.md`); FN-049, FN-052, FN-053).
 
 ---
 

@@ -20,10 +20,10 @@ Recusar fotos que não permitem leitura confiável, preservar cada tentativa de 
   - Relatórios de prova, turma e consolidados → FN-049.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/resultado.html`, `mockups/resultado-dinamico.html` ([docs/01](../../01-inventario-dos-mockups.md) seção 20). Modelo 2 de apresentação descartado (branch `design/resultado-modelo2`).
-- Documentos de origem: [docs/158](../../158-omr1-qualidade-e-tentativas.md), [docs/159](../../159-omr2-resultado-e-historico-integrado.md), [docs/160](../../160-omr3-leituras-relatorios-validacao.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-005 e UC-010 do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) §4.5 e §4.6.
+- Mockups: `mockups/resultado.html`, `mockups/resultado-dinamico.html` (docs/01 (`docs/01-inventario-dos-mockups.md`) seção 20). Modelo 2 de apresentação descartado (branch `design/resultado-modelo2`).
+- Documentos de origem: docs/158 (`docs/158-omr1-qualidade-e-tentativas.md`), docs/159 (`docs/159-omr2-resultado-e-historico-integrado.md`), docs/160 (`docs/160-omr3-leituras-relatorios-validacao.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-005 e UC-010 do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) §4.5 e §4.6.
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

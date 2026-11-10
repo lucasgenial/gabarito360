@@ -21,8 +21,8 @@ Encerrar o contrato de um cliente de forma controlada: prever o impacto, bloquea
   - Backups e restauração → FN-003.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/102](../../102-planejamento-l4-t6.md) (quadro T6-A..E), [docs/115 §12](../../115-replanejamento-provas-identidade-transferencias.md), docs/40 §8, docs/71 ("situação do cliente continua sob T6").
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — sem permissões de encerramento definidas.
+- Documentos de origem: docs/102 (`docs/102-planejamento-l4-t6.md`) (quadro T6-A..E), docs/115 §12 (`docs/115-replanejamento-provas-identidade-transferencias.md`), docs/40 §8, docs/71 ("situação do cliente continua sob T6").
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — sem permissões de encerramento definidas.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 - Mockups: não há.
 

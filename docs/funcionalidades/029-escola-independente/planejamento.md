@@ -21,8 +21,8 @@ Permitir que uma escola contrate e use o sistema diretamente, com cliente, espa�
   - Encerramento → FN-028; transferências → FN-025.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/163](../../163-escolas-independentes.md), [docs/176](../../176-reconciliacao-solicitacoes.md); sequência em docs/165.
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md).
+- Documentos de origem: docs/163 (`docs/163-escolas-independentes.md`), docs/176 (`docs/176-reconciliacao-solicitacoes.md`); sequência em docs/165.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md). Relacionado no docs/07: UC-002 (Cadastrar Escola).
 - Mockups: cadastro de escola do inventário (docs/01); as variações da modalidade independente exigem revisão UI/UX prévia (EI1-B).
 - A home pública anuncia o recurso como "Em breve" (FN-072).

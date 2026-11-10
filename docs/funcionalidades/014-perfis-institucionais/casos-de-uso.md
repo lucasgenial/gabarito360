@@ -1,7 +1,7 @@
 # 014 — Perfis institucionais — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** Secretário escolar, Vice-diretor escolar, Auxiliar de secretaria; gestores que os convidam (Admin Rede, Dir. Núcleo, Dir. Escolar, Vice-diretor com `usuario.gerir`); Suporte e Desenvolvedor (exceção) — [docs/03 §8](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** Secretário escolar, Vice-diretor escolar, Auxiliar de secretaria; gestores que os convidam (Admin Rede, Dir. Núcleo, Dir. Escolar, Vice-diretor com `usuario.gerir`); Suporte e Desenvolvedor (exceção) — docs/03 §8 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.

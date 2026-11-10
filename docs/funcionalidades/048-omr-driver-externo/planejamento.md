@@ -15,7 +15,7 @@ Permitir a correção de cartões-resposta produzidos por terceiros, com layout 
 - **Não inclui:** leitura do cartão nativo → FN-045; barreira de qualidade e tentativas → FN-047 (que deverão valer também para o novo driver).
 
 ## 3. Fontes de verdade
-[docs/08](../../08-omr.md), [docs/12](../../12-arquitetura.md) (DA-004, quadro de fases), [docs/18](../../18-omr-nativo-e-cartoes.md). Não há mockup para o cadastro de layout. Casos de uso propostos: [casos-de-uso.md](casos-de-uso.md).
+docs/08 (`docs/08-omr.md`), docs/12 (`docs/12-arquitetura.md`) (DA-004, quadro de fases), docs/18 (`docs/18-omr-nativo-e-cartoes.md`). Não há mockup para o cadastro de layout. Casos de uso propostos: [casos-de-uso.md](casos-de-uso.md).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

@@ -1,10 +1,10 @@
 # 055 — Acompanhamento pedagógico — Casos de uso
 
 **Natureza:** nova (só o visual demonstrativo existe)
-**Perfis envolvidos:** Professor, Coordenador, equipe pedagógica, Direção e Vice-direção; permissões novas a definir. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** Professor, Coordenador, equipe pedagógica, Direção e Vice-direção; permissões novas a definir. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Casos propostos a partir do [docs/177](../../177-plano-paineis-turmas.md) (P6). Nenhum está implementado como dado real; serão detalhados antes da execução, depois de FN-056 e FN-039.
+Casos propostos a partir do docs/177 (`docs/177-plano-paineis-turmas.md`) (P6). Nenhum está implementado como dado real; serão detalhados antes da execução, depois de FN-056 e FN-039.
 
 ---
 

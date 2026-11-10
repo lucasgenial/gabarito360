@@ -21,8 +21,8 @@ Dar à equipe da plataforma (Desenvolvedor, Suporte e Financeiro) um contexto de
   - Painel técnico: FN-006.
 
 ## 3. Fontes de verdade
-- Mockups: sem mockup próprio; telas aprovadas como extensão em [docs/67](../../67-a1-planejamento-e-acessos-internos.md)–[69](../../69-a1-b2-gestao-interna.md).
-- Origem: [docs/66](../../66-t4-a-base-cadastro-clientes.md), [docs/67](../../67-a1-planejamento-e-acessos-internos.md), [docs/68](../../68-a1-b-contextos-internos.md), [docs/69](../../69-a1-b2-gestao-interna.md), [docs/100](../../100-publicacao-inicial-v1-t5.md), [docs/102](../../102-planejamento-l4-t6.md); [docs/03 extensão A1](../../03-perfis-e-permissoes.md).
+- Mockups: sem mockup próprio; telas aprovadas como extensão em docs/67 (`docs/67-a1-planejamento-e-acessos-internos.md`)–69 (`docs/69-a1-b2-gestao-interna.md`).
+- Origem: docs/66 (`docs/66-t4-a-base-cadastro-clientes.md`), docs/67 (`docs/67-a1-planejamento-e-acessos-internos.md`), docs/68 (`docs/68-a1-b-contextos-internos.md`), docs/69 (`docs/69-a1-b2-gestao-interna.md`), docs/100 (`docs/100-publicacao-inicial-v1-t5.md`), docs/102 (`docs/102-planejamento-l4-t6.md`); docs/03 extensão A1 (`docs/03-perfis-e-permissoes.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 - Código: `apps/api/app/Support/ContextoInterno.php`, `TokenInterno.php`, `apps/api/app/Services/GestaoAcessosInternos.php`, `apps/api/app/Http/Controllers/Api/SelecaoInternaController.php`, `GestaoAcessoInternoController.php`, `apps/api/app/Console/Commands/IniciarDesenvolvedor.php`, `apps/web/app/Http/Controllers/AcessoInternoController.php`, `apps/web/app/Http/Controllers/Auth/VinculoController.php`.
 

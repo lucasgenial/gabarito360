@@ -22,8 +22,8 @@ Dar à equipe interna (Desenvolvedor, Suporte, Financeiro) um cadastro comercial
   - Autocadastro e checkout → FN-030 (substituído por contratação por contato).
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/66](../../66-t4-a-base-cadastro-clientes.md), [docs/71](../../71-t4-b-interface-clientes.md); dependência A1: docs/67–70 (FN-013).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (tabela de acessos internos: Desenvolvedor, Suporte e Financeiro consultam e gerem clientes).
+- Documentos de origem: docs/66 (`docs/66-t4-a-base-cadastro-clientes.md`), docs/71 (`docs/71-t4-b-interface-clientes.md`); dependência A1: docs/67–70 (FN-013).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (tabela de acessos internos: Desenvolvedor, Suporte e Financeiro consultam e gerem clientes).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md). Sem UC correspondente no docs/07.
 - Sem mockup: telas internas seguem o style system.
 

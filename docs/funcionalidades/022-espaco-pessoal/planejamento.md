@@ -23,9 +23,9 @@ Permitir que um professor use o Gabarito360 por conta própria, num espaço pess
   - Rótulo "Professor independente" → FN-027.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/63](../../63-t3-perfis-por-espaco.md), [docs/64](../../64-t3-b-dados-e-formularios-pessoais.md), [docs/65](../../65-t3-c-integracao-pessoal.md).
-- Revisão posterior: [docs/115 §10](../../115-replanejamento-provas-identidade-transferencias.md) (PA).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md), atualização T3 de 01/11/2026.
+- Documentos de origem: docs/63 (`docs/63-t3-perfis-por-espaco.md`), docs/64 (`docs/64-t3-b-dados-e-formularios-pessoais.md`), docs/65 (`docs/65-t3-c-integracao-pessoal.md`).
+- Revisão posterior: docs/115 §10 (`docs/115-replanejamento-provas-identidade-transferencias.md`) (PA).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`), atualização T3 de 01/11/2026.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md). Relacionados no docs/07: UC-001, UC-003, UC-004, UC-005, UC-007, UC-010.
 - Mockups: reaproveita as telas do professor (`mockups/` do professor); sem mockup próprio para o espaço pessoal.
 

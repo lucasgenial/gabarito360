@@ -21,10 +21,10 @@ Dar a cada pessoa uma página para ver e manter os próprios dados (nome, senha,
   - Preferências dos painéis: FN-054.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/perfil.html`, `mockups/configuracoes.html` ([inventário §24 e §25](../../01-inventario-dos-mockups.md)).
-- Origem: [docs/13](../../13-roadmap.md) MP-024, [docs/19](../../19-plano-telas-por-perfil.md) MP-040, [docs/134](../../134-pf1-b-matriz-perfis-prioritarios.md), [docs/135](../../135-pf1-c-perfis-escolares.md), [docs/136](../../136-im1-preparo-fotos.md), [docs/137](../../137-im1-avatar-cabecalho.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-011 e UC-012 de [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (`rede.configurar`).
+- Mockups: `mockups/perfil.html`, `mockups/configuracoes.html` (inventário §24 e §25 (`docs/01-inventario-dos-mockups.md`)).
+- Origem: docs/13 (`docs/13-roadmap.md`) MP-024, docs/19 (`docs/19-plano-telas-por-perfil.md`) MP-040, docs/134 (`docs/134-pf1-b-matriz-perfis-prioritarios.md`), docs/135 (`docs/135-pf1-c-perfis-escolares.md`), docs/136 (`docs/136-im1-preparo-fotos.md`), docs/137 (`docs/137-im1-avatar-cabecalho.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-011 e UC-012 de docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (`rede.configurar`).
 - Código: `apps/web/app/Http/Controllers/PerfilController.php`, `ConfiguracaoController.php`; `apps/api/app/Http/Controllers/Api/AuthController.php` (`me`, `update`), `ImagemUsuarioController.php`, `ConfiguracaoController.php`; `apps/api/app/Services/ImagemPerfil.php`; migration `2026_11_03_000010_imagem_perfil_usuarios`.
 
 ## 4. Dependências

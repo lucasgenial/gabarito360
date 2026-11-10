@@ -22,10 +22,10 @@ Levar o Gabarito360 do gabarito avulso à elaboração completa da avaliação: 
   - Cópia de provas → [FN-042](../042-duplicacao-provas/planejamento.md) (este editor define a versão seguinte do contrato de cópia).
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/02](../../02-visao-geral.md) (fases 2–5); [docs/12](../../12-arquitetura.md) ("Evolução Arquitetural Prevista"); [docs/118](../../118-cp1-contrato-duplicacao-pedagogica.md) (preparação do editor); docs/164; [docs/176](../../176-reconciliacao-solicitacoes.md).
+- Documentos de origem: docs/02 (`docs/02-visao-geral.md`) (fases 2–5); docs/12 (`docs/12-arquitetura.md`) ("Evolução Arquitetural Prevista"); docs/118 (`docs/118-cp1-contrato-duplicacao-pedagogica.md`) (preparação do editor); docs/164; docs/176 (`docs/176-reconciliacao-solicitacoes.md`).
 - Sem mockup. Exige mockup ou aprovação explícita antes de qualquer código.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — chaves a definir.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — chaves a definir.
 - Plano mestre: [§2 FN-043](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

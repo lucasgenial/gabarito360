@@ -1,7 +1,7 @@
 # 068 — Financeiro (contratos, faturas, pagamentos) — Casos de uso
 
 **Natureza:** nova, com legado de assinatura existente documentado a partir do código
-**Perfis envolvidos:** Financeiro, Desenvolvedor e Suporte (contexto interno); titular de assinatura legada; provedor de pagamento (sistema externo). Ver [docs/03](../../03-perfis-e-permissoes.md), extensão A1.
+**Perfis envolvidos:** Financeiro, Desenvolvedor e Suporte (contexto interno); titular de assinatura legada; provedor de pagamento (sistema externo). Ver docs/03 (`docs/03-perfis-e-permissoes.md`), extensão A1.
 **Atualizado em:** 2026-11-10
 
 Os casos 01 a 04 descrevem o legado do MP-027 como está no código. Os demais são propostos a partir do docs/28 (F1–F3) e do docs/163.

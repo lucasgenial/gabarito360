@@ -24,10 +24,10 @@ Permitir que o profissional parta de uma evidência de avaliação, planeje uma 
   - Avisos e lembretes → FN-057.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/177](../../177-plano-paineis-turmas.md) (P6.1–P6.4), [docs/179](../../179-execucao-paineis-turmas.md), [docs/180](../../180-correcao-dashboards-diretriz.md) (tabela 5.1).
+- Documentos de origem: docs/177 (`docs/177-plano-paineis-turmas.md`) (P6.1–P6.4), docs/179 (`docs/179-execucao-paineis-turmas.md`), docs/180 (`docs/180-correcao-dashboards-diretriz.md`) (tabela 5.1).
 - Sem mockup original; os modelos visuais são os cards demonstrativos dos painéis (`habilidades`, `intervencoes`, `reavaliacoes`, `metas`, `conselho`, `devolutivas` em `config/paineis.php`).
 - Casos de uso propostos: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md); novas chaves a definir.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`); novas chaves a definir.
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

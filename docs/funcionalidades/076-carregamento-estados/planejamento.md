@@ -4,7 +4,7 @@
 **Etapa:** Em planejamento
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5): carregamento regional aplicado dentro das entregas, nas telas que cada entrega tocar
 **Natureza:** existente documentada a partir do código (evolução parcial)
-**Origem:** UI1 — interrupção pontual antes de TU1, pedida pelo responsável em 06/11/2026 ([docs/174](../../174-ui1-carregamento-e-estados-de-erro.md)); breadcrumb, toast e carregamento progressivo nasceram na OMR2-C2 ([docs/159](../../159-omr2-resultado-e-historico-integrado.md)); UI1-R registrado na reconciliação [docs/176](../../176-reconciliacao-solicitacoes.md)
+**Origem:** UI1 — interrupção pontual antes de TU1, pedida pelo responsável em 06/11/2026 (docs/174 (`docs/174-ui1-carregamento-e-estados-de-erro.md`)); breadcrumb, toast e carregamento progressivo nasceram na OMR2-C2 (docs/159 (`docs/159-omr2-resultado-e-historico-integrado.md`)); UI1-R registrado na reconciliação docs/176 (`docs/176-reconciliacao-solicitacoes.md`)
 **Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
@@ -26,9 +26,9 @@ Dar a todas as telas um comportamento previsível de carregamento, erro e orient
   - visual Tailwind das páginas de erro: TW6 de [FN-075](../075-tailwind-ui/).
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/174](../../174-ui1-carregamento-e-estados-de-erro.md), [docs/159](../../159-omr2-resultado-e-historico-integrado.md) (OMR2-C2), [docs/176](../../176-reconciliacao-solicitacoes.md) (UI1-R).
-- ADR-195 item 8 (frontend progressivo: loader global não substitui tratamento regional) — [docs/195](../../195-adr-fundamentos-desempenho.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); relacionados UC-004 e UC-005 de [docs/07](../../07-casos-de-uso.md). Perfis: [docs/03](../../03-perfis-e-permissoes.md).
+- Documentos de origem: docs/174 (`docs/174-ui1-carregamento-e-estados-de-erro.md`), docs/159 (`docs/159-omr2-resultado-e-historico-integrado.md`) (OMR2-C2), docs/176 (`docs/176-reconciliacao-solicitacoes.md`) (UI1-R).
+- ADR-195 item 8 (frontend progressivo: loader global não substitui tratamento regional) — docs/195 (`docs/195-adr-fundamentos-desempenho.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); relacionados UC-004 e UC-005 de docs/07 (`docs/07-casos-de-uso.md`). Perfis: docs/03 (`docs/03-perfis-e-permissoes.md`).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

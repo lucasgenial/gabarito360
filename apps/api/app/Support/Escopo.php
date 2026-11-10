@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Arquivo: apps/api/app/Support/Escopo.php
- * Função: Escopo de dados por perfil (docs/03-perfis-e-permissoes.md, "Política de
+ * Função: Escopo de dados por perfil (docs/arquitetura/04-identidade-acesso-e-permissoes.md, "Política de
  *         Isolamento"). Fonte única para escolas, turmas e provas visíveis a cada usuário.
  *         null = compatibilidade anterior ao corte T2; [] = nada visível.
  */

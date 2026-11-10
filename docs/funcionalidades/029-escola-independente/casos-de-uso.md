@@ -1,10 +1,10 @@
 # 029 — Escola independente / autônoma (EI1) — Casos de uso
 
 **Natureza:** nova (casos de uso propostos, derivados do docs/163)
-**Perfis envolvidos:** Suporte, Desenvolvedor (contexto interno); Diretor Escolar e equipe da escola (cargos já aprovados); gestores da rede (assunção de custeio). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** Suporte, Desenvolvedor (contexto interno); Diretor Escolar e equipe da escola (cargos já aprovados); gestores da rede (assunção de custeio). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Todos os casos estão **Não implementados**: não há commits nem migrations de EI1. Hoje a escola só é criada dentro de um núcleo (UC-002 do [docs/07](../../07-casos-de-uso.md); UC-021-02).
+Todos os casos estão **Não implementados**: não há commits nem migrations de EI1. Hoje a escola só é criada dentro de um núcleo (UC-002 do docs/07 (`docs/07-casos-de-uso.md`); UC-021-02).
 
 ---
 

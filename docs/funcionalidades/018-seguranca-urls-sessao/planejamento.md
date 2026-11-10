@@ -22,9 +22,9 @@ Tirar das URLs tudo o que identifica acesso ou recurso: códigos de e-mail, cont
 
 ## 3. Fontes de verdade
 - Mockups: sem mudança visual de mockup; telas de apoio `auth/acesso-alterado`, `navegacao/selecionar`, `navegacao/estrutura`, `navegacao/redirecionar`.
-- Origem: [docs/165](../../165-ur1-seguranca-e-urls.md), [docs/166](../../166-ur2-dependencias-seguranca.md), [docs/167](../../167-ur3-rotas-app-contexto-sessao.md), [docs/169](../../169-ur4-recursos-sem-identificadores-url.md), [docs/170](../../170-ur4-recuperacao-vinculo-expirado.md), [docs/171](../../171-ur4-sessao-e-vinculo-unicos.md).
+- Origem: docs/165 (`docs/165-ur1-seguranca-e-urls.md`), docs/166 (`docs/166-ur2-dependencias-seguranca.md`), docs/167 (`docs/167-ur3-rotas-app-contexto-sessao.md`), docs/169 (`docs/169-ur4-recursos-sem-identificadores-url.md`), docs/170 (`docs/170-ur4-recuperacao-vinculo-expirado.md`), docs/171 (`docs/171-ur4-sessao-e-vinculo-unicos.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (vale para todos os perfis).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (vale para todos os perfis).
 - Código: `apps/web/app/Http/Middleware/` (`RecusarCredenciaisNaUrl`, `SerializarSessao`, `RevisaoAcesso`, `ExigirSessaoIntegra`, `Autenticado`, `RecursoNavegacao`, `RespostaNavegacao`, `ContextoPorAba`, `ProtegerRespostas`), `apps/web/app/Support/` (`ContextoWeb`, `SessaoWeb`, `NavegacaoWeb`, `RotasNavegacao`, `UrlContextual`), `apps/api/app/Http/Middleware/RecusarCredenciaisNaUrl.php`, `ProtegerRespostas.php`, `.github/workflows/verificacao.yml`.
 
 ## 4. Dependências

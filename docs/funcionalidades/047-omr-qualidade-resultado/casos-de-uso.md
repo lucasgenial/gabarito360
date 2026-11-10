@@ -1,10 +1,10 @@
 # 047 — Qualidade, tentativas, resultado e documentos verificáveis (OMR1–3) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** educadores com acesso à correção (Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Coordenador, Professor), Aplicador (envio), Aluno (resultado próprio), público (validação). Ver [docs/03](../../03-perfis-e-permissoes.md) §4.5 e §4.6.
+**Perfis envolvidos:** educadores com acesso à correção (Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Coordenador, Professor), Aplicador (envio), Aluno (resultado próprio), público (validação). Ver docs/03 (`docs/03-perfis-e-permissoes.md`) §4.5 e §4.6.
 **Atualizado em:** 2026-11-09
 
-Descreve o comportamento **atual** (na homologação); diferenças em relação ao planejado estão marcadas com ⚠. Amplia o UC-005 e o UC-010 do [docs/07](../../07-casos-de-uso.md).
+Descreve o comportamento **atual** (na homologação); diferenças em relação ao planejado estão marcadas com ⚠. Amplia o UC-005 e o UC-010 do docs/07 (`docs/07-casos-de-uso.md`).
 
 ---
 

@@ -1,7 +1,7 @@
 # 022 — Espaço pessoal e professor autônomo (T3) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** `professor_autonomo` (proprietário do espaço pessoal). Ver [docs/03](../../03-perfis-e-permissoes.md), atualização T3.
+**Perfis envolvidos:** `professor_autonomo` (proprietário do espaço pessoal). Ver docs/03 (`docs/03-perfis-e-permissoes.md`), atualização T3.
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Descreve o comportamento **atual**, marca com ⚠ as diferenças em relação ao planejado e aponta a subfase que as resolve.
@@ -18,7 +18,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Tela/rota:** `/app/vinculos` (seleção por aba, FN-015); `GET /api/v1/dashboard/professor` (`perfil:professor,professor_autonomo`).
 
 **Fluxo principal:**
-1. O professor autentica (UC-001 do [docs/07](../../07-casos-de-uso.md)).
+1. O professor autentica (UC-001 do docs/07 (`docs/07-casos-de-uso.md`)).
 2. Escolhe o vínculo do espaço pessoal na lista de vínculos.
 3. O painel mostra turmas e provas do espaço pessoal, com o nome do espaço no cabeçalho.
 
@@ -92,7 +92,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Escopo:** espaço pessoal
 **Pré-condições:** turma pessoal com alunos.
 **Pós-condições:** prova com `escola_id` nulo; cartões com o nome do espaço; leituras processadas na fila do espaço.
-**Tela/rota:** fluxos de UC-003 e UC-004 do [docs/07](../../07-casos-de-uso.md); `ProvaController` (ramo pessoal), fila B6.
+**Tela/rota:** fluxos de UC-003 e UC-004 do docs/07 (`docs/07-casos-de-uso.md`); `ProvaController` (ramo pessoal), fila B6.
 
 **Fluxo principal:**
 1. Segue UC-003 (criar prova e gabarito) e UC-004 (acompanhar correção).
@@ -116,7 +116,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Escopo:** espaço pessoal
 **Pré-condições:** prova corrigida.
 **Pós-condições:** relatórios e PDFs com cabeçalho "Uso autônomo".
-**Tela/rota:** UC-005, UC-006 e UC-010 do [docs/07](../../07-casos-de-uso.md); `relatorios/_cabecalho.blade.php`.
+**Tela/rota:** UC-005, UC-006 e UC-010 do docs/07 (`docs/07-casos-de-uso.md`); `relatorios/_cabecalho.blade.php`.
 
 **Fluxo principal:**
 1. O professor abre o resultado individual ou o relatório da turma/prova.

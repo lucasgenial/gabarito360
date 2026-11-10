@@ -4,7 +4,7 @@
 **Etapa:** Concluída
 **Prioridade no plano mestre:** sem posição na fila (concluída; fora das ondas do §5)
 **Natureza:** existente documentada a partir do código
-**Origem:** tronco original — auditoria de layout de 30/10/2026 ([docs/23](../../23-plano-layout-responsivo.md), etapas L0–L8)
+**Origem:** tronco original — auditoria de layout de 30/10/2026 (docs/23 (`docs/23-plano-layout-responsivo.md`), etapas L0–L8)
 **Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
@@ -24,9 +24,9 @@ Dar a todas as telas e perfis um padrão único de layout que funcione do celula
   - carregamento, estados de erro e breadcrumb: [FN-076](../076-carregamento-estados/).
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/` (inventário em [docs/01](../../01-inventario-dos-mockups.md)); style system em `style-system/`; tokens em `apps/web/public/css/app.css`.
-- Documento de origem: [docs/23](../../23-plano-layout-responsivo.md) (decisões 1 a 6 de 30/10/2026).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md). Perfis: [docs/03](../../03-perfis-e-permissoes.md) (todos os perfis usam o layout).
+- Mockups: `mockups/` (inventário em docs/01 (`docs/01-inventario-dos-mockups.md`)); style system em `style-system/`; tokens em `apps/web/public/css/app.css`.
+- Documento de origem: docs/23 (`docs/23-plano-layout-responsivo.md`) (decisões 1 a 6 de 30/10/2026).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md). Perfis: docs/03 (`docs/03-perfis-e-permissoes.md`) (todos os perfis usam o layout).
 - Plano mestre: [§2 Qualidade transversal](../../planejamento/00-plano-mestre.md), §6 (linha do docs/23).
 
 ## 4. Dependências

@@ -1,7 +1,7 @@
 # 057 — Notificações (módulo transversal) — Casos de uso
 
 **Natureza:** nova
-**Perfis envolvidos:** todos os perfis autenticados (destinatários); módulos do sistema (emissores). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** todos os perfis autenticados (destinatários); módulos do sistema (emissores). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Nenhum caso de uso está implementado. O que existe hoje com o nome "notificações" é o toast de retorno de ação (`layouts/_notificacoes.blade.php`, `js/notificacoes.js`), que lê mensagens de sessão e não persiste nada; ele fica fora desta funcionalidade.

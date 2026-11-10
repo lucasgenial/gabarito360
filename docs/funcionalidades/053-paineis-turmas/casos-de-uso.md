@@ -1,10 +1,10 @@
 # 053 — Painéis de turmas e da turma — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** quem tem `turma.ver` (cadastro) e, para os resultados, `relatorio.turma`: Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor, Coordenador, Professor, Professor autônomo; Secretário escolar e Auxiliar de secretaria só na visão administrativa. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** quem tem `turma.ver` (cadastro) e, para os resultados, `relatorio.turma`: Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor, Coordenador, Professor, Professor autônomo; Secretário escolar e Auxiliar de secretaria só na visão administrativa. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Descreve o comportamento **atual** (na homologação); diferenças em relação ao planejado estão marcadas com ⚠ e apontam a subfase do [planejamento](planejamento.md). Relaciona-se ao UC-007 do [docs/07](../../07-casos-de-uso.md).
+Descreve o comportamento **atual** (na homologação); diferenças em relação ao planejado estão marcadas com ⚠ e apontam a subfase do [planejamento](planejamento.md). Relaciona-se ao UC-007 do docs/07 (`docs/07-casos-de-uso.md`).
 
 ---
 

@@ -21,10 +21,10 @@ Ler por visão computacional os cartões-resposta fotografados, calcular a nota 
   - Resultados e relatórios → FN-049.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/acompanhar-correcao.html`, `mockups/acompanhar-correcao-turma.html` (inventário em [docs/01](../../01-inventario-dos-mockups.md), seções 11 e 12).
-- Documentos de origem: [docs/08](../../08-omr.md), [docs/18](../../18-omr-nativo-e-cartoes.md), [docs/13](../../13-roadmap.md) (MP-021, MP-033), [docs/19](../../19-plano-telas-por-perfil.md) (MP-038), [docs/12](../../12-arquitetura.md) (DA-004).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-004 do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) §4.5 e §5; código em `apps/api/app/Support/CatalogoPermissoes.php`.
+- Mockups: `mockups/acompanhar-correcao.html`, `mockups/acompanhar-correcao-turma.html` (inventário em docs/01 (`docs/01-inventario-dos-mockups.md`), seções 11 e 12).
+- Documentos de origem: docs/08 (`docs/08-omr.md`), docs/18 (`docs/18-omr-nativo-e-cartoes.md`), docs/13 (`docs/13-roadmap.md`) (MP-021, MP-033), docs/19 (`docs/19-plano-telas-por-perfil.md`) (MP-038), docs/12 (`docs/12-arquitetura.md`) (DA-004).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-004 do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) §4.5 e §5; código em `apps/api/app/Support/CatalogoPermissoes.php`.
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

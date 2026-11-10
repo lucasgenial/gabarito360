@@ -1,7 +1,7 @@
 # 025 — Transferências institucionais (TR1, TE1, UX1) — Casos de uso
 
 **Natureza:** nova (casos de uso propostos, derivados do docs/115)
-**Perfis envolvidos:** Diretor Escolar e representante escolar autorizado, Diretor de Núcleo, Administrador da Rede, Secretário de Educação, Suporte/Desenvolvedor (delegação), professor autônomo (próprio lado). Matriz proposta no [docs/115 §9](../../115-replanejamento-provas-identidade-transferencias.md); ainda não consta do [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** Diretor Escolar e representante escolar autorizado, Diretor de Núcleo, Administrador da Rede, Secretário de Educação, Suporte/Desenvolvedor (delegação), professor autônomo (próprio lado). Matriz proposta no docs/115 §9 (`docs/115-replanejamento-provas-identidade-transferencias.md`); ainda não consta do docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Todos os casos abaixo estão **Não implementados**. As chaves de permissão são propostas e dependem da aprovação da matriz TR1 (subfase 1.1).

@@ -23,7 +23,7 @@ Representar as funções reais da escola além da matriz original de oito perfis
 
 ## 3. Fontes de verdade
 - Mockups: sem mockup próprio; reutiliza as telas de equipe e convite.
-- Origem: [docs/70](../../70-a1-c-secretario-escolar.md), [docs/132](../../132-provas-autoria-cabecalho.md), [docs/133](../../133-planejamento-perfis-institucionais.md), [docs/134](../../134-pf1-b-matriz-perfis-prioritarios.md), [docs/135](../../135-pf1-c-perfis-escolares.md), [docs/139](../../139-id1-dc1-ativacao-e-sequencia.md); [docs/03 §8 (A1-C e PF1)](../../03-perfis-e-permissoes.md).
+- Origem: docs/70 (`docs/70-a1-c-secretario-escolar.md`), docs/132 (`docs/132-provas-autoria-cabecalho.md`), docs/133 (`docs/133-planejamento-perfis-institucionais.md`), docs/134 (`docs/134-pf1-b-matriz-perfis-prioritarios.md`), docs/135 (`docs/135-pf1-c-perfis-escolares.md`), docs/139 (`docs/139-id1-dc1-ativacao-e-sequencia.md`); docs/03 §8 (A1-C e PF1) (`docs/03-perfis-e-permissoes.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 - Código: `apps/api/app/Support/CatalogoPermissoes.php` (`SECRETARIO_ESCOLAR`, `VICE_DIRETOR`, `VICE_EXTRAS`, `AUXILIAR_SECRETARIA`), `PerfisEspaco.php`, `PerfisEscolares.php`, `GruposFuncionais.php`, `Cadastro.php`, `apps/api/app/Http/Controllers/Api/ExcecaoFuncionalController.php`, `apps/web/app/Http/Controllers/ExcecaoFuncionalController.php`.
 
@@ -56,6 +56,33 @@ Representar as funções reais da escola além da matriz original de oito perfis
 - **Compatibilidade:** os três perfis só existem em espaço do tipo `escola` (`PerfisEspaco::POR_TIPO`).
 - **Grupos funcionais:** administrativos (`secretario_escolar`, `auxiliar_secretaria`) não acumulam com pedagógicos (`professor`, `coordenador`, `dir_escolar`, `vice_dir_escolar`, `aplicador`) na mesma escola em vigência sobreposta, salvo exceção em `usuario_funcoes_excecoes`.
 - **Exceção:** API `GET configuracoes/funcoes/opcoes`, `POST configuracoes/funcoes/consultar` (10/min), `POST configuracoes/funcoes` (10/min); exige contexto interno de Suporte ou Desenvolvedor; versão otimista; histórico em `usuario_funcoes_eventos`; ninguém autoriza a própria exceção.
+
+### Perfis futuros (backlog)
+
+Origem: docs/133. As capacidades abaixo são limites propostos. Nenhum perfil está habilitado. Os identificadores técnicos novos são preliminares. Cada perfil depende da revisão da matriz do docs/03 antes da ativação. Novos recortes de alcance precisam valer na API, em arquivos, relatórios, filas e exportações antes da habilitação.
+
+| Função ou perfil | Alcance proposto | Capacidades e limites | Tratamento |
+|---|---|---|---|
+| Coordenador de área ou componente | Área, componentes e turmas atribuídas na escola | Acompanhamento pedagógico e de avaliações do recorte. Sem visão geral da escola por padrão | Especialização da coordenação, após FN-038. Não reutilizar Coordenador irrestrito |
+| Coordenador de curso | Curso e suas turmas ou unidades autorizadas | Organização e acompanhamento acadêmico do curso. Sem outros cursos por padrão | Futuro, após modelar cursos e unidades acadêmicas |
+| Orientador educacional ou Supervisor pedagógico | Alunos, etapas ou turmas atribuídas | Acompanhamento e intervenções autorizadas. Sem editar gabarito ou nota por padrão | Avaliar base comum com capacidades distintas. Registros reservados exigem proteção específica |
+| Gestor pedagógico de núcleo ou rede | Núcleo ou rede atribuídos | Indicadores e acompanhamento. Sem administração de contas, contratos ou edição de resultados por padrão | Separado do Administrador da rede. Priorizar consolidados |
+| Assistente docente, Monitor ou Tutor | Componentes e turmas atribuídas, com vigência | Apoio delegado. Sem reabrir correção, alterar notas ou acessar gabarito reservado por padrão | Não confundir com Aplicador |
+| Professor de AEE | Atendimentos e alunos atribuídos | Preferir Professor com lotação específica. Dados de atendimento reservado exigem capacidade e armazenamento próprios | Não concede acesso a todos os dados sensíveis da escola |
+| Responsável pelo aluno (`responsavel_aluno`) | Cada aluno com relação verificada e vigente | Consultar resultados e comunicações liberados para aquele aluno. Várias relações por conta, sem ver a turma nem outros responsáveis | Portal futuro (FN-067). Depende de identidade, vínculo responsável–aluno e regras de liberação |
+| Auditor institucional | Instituição ou caso e período autorizados | Consulta de trilhas e evidências, com minimização e registro do acesso. Sem editar eventos, provas ou resultados | Separado de Desenvolvedor e Suporte. Não é usuário direto do banco |
+| Gestor financeiro institucional | Contrato, cliente ou instituição autorizados | Assinatura, cobrança e documentos financeiros. Sem notas, gabaritos ou dados pedagógicos | Distinto do Financeiro interno da plataforma. Titularidade contratual não dá direção escolar |
+| Gestor de privacidade | Solicitação ou incidente autorizado | Acompanhar pedidos de titulares e providências atribuídas. Exportação e eliminação exigem autorização própria e auditoria | Capacidade por caso. Não cria leitura irrestrita de pessoas |
+| Autor ou Revisor de conteúdo | Banco de questões ou coleção autorizada | Redigir, revisar e publicar conforme fluxo futuro. Sem dados de alunos. Autoria e revisão são capacidades diferentes | Preparar para editor futuro, com enunciados, questões e avaliações em entidades separadas |
+
+Notas do docs/133:
+- Cargo é a denominação funcional. Perfil é o contrato de acesso. Lotação define turmas, componentes, curso, turno e intervalo. Não criar perfil de segurança novo para cada nome de cargo ou disciplina.
+- Professor substituto ou temporário usa o perfil Professor com lotação e vigência próprias. Interinidade de direção é designação explícita, datada e auditada. Não decorre do cargo de vice-diretor. Sem hierarquia numérica que faça um cargo herdar os poderes dos anteriores.
+- Diretor de campus, reitor, mantenedor e diretor adjunto mantêm o cargo preservado. O contrato de acesso só reutiliza uma base de direção depois de modelar campus e unidades. Não inventar escola nem conceder toda a rede para acomodar nomenclatura.
+- Procurador ou recenseador institucional só ganha perfil operacional com módulo de informação regulatória. Cargo cadastrado não equivale a integração com MEC ou INEP.
+- Bibliotecário, serviços gerais, portaria, transporte e alimentação podem constar de um futuro cadastro de profissionais, sem acesso a provas nem histórico acadêmico.
+- Regras antes de ativar um perfil: definir ações padrão, extras, ações proibidas, alcance e quem convida e gere o perfil. Ninguém amplia o próprio alcance. Registrar convite, aceite, início, fim, concessão, retirada e substituição. Testar a mesma pessoa em duas funções na mesma escola, em escolas diferentes, perda de lotação, revogação, início futuro e acesso direto por ID ou arquivo.
+- Transferência entre instituições continua sob FN-025. Os novos cargos não recebem essa capacidade automaticamente.
 
 ## 7. Interface
 Perfis aparecem nas telas de equipe, convite e permissões (FN-012, FN-015). Tela interna `funcoes/index` em `/configuracoes/usuarios`. Conferência por texto, sem prints.

@@ -22,9 +22,9 @@ Permitir que o Suporte atenda um usuário vendo o sistema como ele vê (S1), com
 
 ## 3. Fontes de verdade
 - Mockups: nenhum. A faixa de "ver como" e a ação na tela de membros exigem mockup ou aprovação explícita.
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) (S1, D9), [docs/32](../../32-auditoria.md) ("não há S1/impersonação"), [docs/67](../../67-a1-planejamento-e-acessos-internos.md), [docs/71](../../71-t4-b-interface-clientes.md), [docs/72](../../72-au1-a-registro-auditoria.md), [docs/77](../../77-t5-planejamento-copias.md).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) (S1, D9), docs/32 (`docs/32-auditoria.md`) ("não há S1/impersonação"), docs/67 (`docs/67-a1-planejamento-e-acessos-internos.md`), docs/71 (`docs/71-t4-b-interface-clientes.md`), docs/72 (`docs/72-au1-a-registro-auditoria.md`), docs/77 (`docs/77-t5-planejamento-copias.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md), extensão A1 ("atendimento auditado é AU3").
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`), extensão A1 ("atendimento auditado é AU3").
 - Plano mestre: [§2 FN-005](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

@@ -24,9 +24,9 @@ Preparar a plataforma para crescer sem perder segurança nem disponibilidade: li
 
 ## 3. Fontes de verdade
 - Mockups: não se aplica (infraestrutura). O widget Turnstile segue o formulário existente do Fale Conosco.
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) fase 9, [docs/167](../../167-ur3-rotas-app-contexto-sessao.md), [docs/172](../../172-ap1-plano-desempenho-e-contrato-api.md), [docs/173](../../173-ap1-contrato-http-e-operacao-independente.md), [docs/176](../../176-reconciliacao-solicitacoes.md), [docs/operacao/deploy.md](../../operacao/deploy.md), [docs/12](../../12-arquitetura.md).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) fase 9, docs/167 (`docs/167-ur3-rotas-app-contexto-sessao.md`), docs/172 (`docs/172-ap1-plano-desempenho-e-contrato-api.md`), docs/173 (`docs/173-ap1-contrato-http-e-operacao-independente.md`), docs/176 (`docs/176-reconciliacao-solicitacoes.md`), [docs/operacao/deploy.md](../../operacao/publicacao-homologacao.md), docs/12 (`docs/12-arquitetura.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (limites não mudam autorização).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (limites não mudam autorização).
 - Plano mestre: [§2 FN-007](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

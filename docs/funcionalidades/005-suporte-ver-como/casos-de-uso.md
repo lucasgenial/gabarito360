@@ -1,10 +1,10 @@
 # 005 — "Ver como" e atendimento auditado — Casos de uso
 
 **Natureza:** nova
-**Perfis envolvidos:** Suporte (contexto interno); usuário atendido (qualquer perfil escolar permitido); Desenvolvedor (consulta do registro). Ver [docs/03](../../03-perfis-e-permissoes.md), extensão A1.
+**Perfis envolvidos:** Suporte (contexto interno); usuário atendido (qualquer perfil escolar permitido); Desenvolvedor (consulta do registro). Ver docs/03 (`docs/03-perfis-e-permissoes.md`), extensão A1.
 **Atualizado em:** 2026-11-09
 
-Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Todos os casos abaixo são propostos a partir do docs/28 (S1) e **não estão implementados**. O [docs/07](../../07-casos-de-uso.md) não tem caso de uso equivalente.
+Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Todos os casos abaixo são propostos a partir do docs/28 (S1) e **não estão implementados**. O docs/07 (`docs/07-casos-de-uso.md`) não tem caso de uso equivalente.
 
 ---
 

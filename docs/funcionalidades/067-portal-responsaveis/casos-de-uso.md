@@ -1,10 +1,10 @@
 # 067 — Portal dos responsáveis — Casos de uso
 
 **Natureza:** nova
-**Perfis envolvidos:** responsável pelo aluno (sem conta de usuário); secretaria da escola (Secretário Escolar e perfis com cadastro de aluno, a confirmar em P1); Desenvolvedor e Suporte (auditoria). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** responsável pelo aluno (sem conta de usuário); secretaria da escola (Secretário Escolar e perfis com cadastro de aluno, a confirmar em P1); Desenvolvedor e Suporte (auditoria). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Todos os casos abaixo são propostos a partir do docs/28 Fase 8 e do docs/38. Nenhum está implementado. Relaciona-se ao UC-005 (resultado individual do aluno) e ao UC-010 (PDF) do [docs/07](../../07-casos-de-uso.md), que tratam a visão interna.
+Todos os casos abaixo são propostos a partir do docs/28 Fase 8 e do docs/38. Nenhum está implementado. Relaciona-se ao UC-005 (resultado individual do aluno) e ao UC-010 (PDF) do docs/07 (`docs/07-casos-de-uso.md`), que tratam a visão interna.
 
 ---
 

@@ -35,10 +35,10 @@ Pela [governança](../../planejamento/01-governanca.md), **nenhuma funcionalidad
 | [FN-053](../053-paineis-turmas/planejamento.md) | Cards de avisos dos painéis |
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/configuracoes.html` (seção Notificações); nenhum mockup da central. Inventário em [docs/01](../../01-inventario-dos-mockups.md).
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) N1–N4 e E4; [docs/177](../../177-plano-paineis-turmas.md) P5.4; [docs/115](../../115-replanejamento-provas-identidade-transferencias.md) §5 (outbox transacional de convites).
+- Mockups: `mockups/configuracoes.html` (seção Notificações); nenhum mockup da central. Inventário em docs/01 (`docs/01-inventario-dos-mockups.md`).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) N1–N4 e E4; docs/177 (`docs/177-plano-paineis-turmas.md`) P5.4; docs/115 (`docs/115-replanejamento-provas-identidade-transferencias.md`) §5 (outbox transacional de convites).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

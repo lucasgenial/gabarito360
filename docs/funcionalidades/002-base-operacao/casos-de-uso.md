@@ -1,12 +1,12 @@
 # 002 — Base de operação (backup, Redis, filas, leitura pela fila) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** Professor, Aplicador e demais perfis com `cartao.enviar` (ver [docs/03](../../03-perfis-e-permissoes.md)); operador técnico (sem perfil na matriz)
+**Perfis envolvidos:** Professor, Aplicador e demais perfis com `cartao.enviar` (ver docs/03 (`docs/03-perfis-e-permissoes.md`)); operador técnico (sem perfil na matriz)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
 
-O acompanhamento da correção pelo usuário é o UC-004 do [docs/07](../../07-casos-de-uso.md), detalhado em FN-045. Aqui ficam só o contrato assíncrono e a operação.
+O acompanhamento da correção pelo usuário é o UC-004 do docs/07 (`docs/07-casos-de-uso.md`), detalhado em FN-045. Aqui ficam só o contrato assíncrono e a operação.
 
 ---
 
@@ -143,7 +143,7 @@ O acompanhamento da correção pelo usuário é o UC-004 do [docs/07](../../07-c
 - [x] Arquivo de última cópia válida atualizado.
 - [ ] ⚠ Cifra do disco de destino e terceira cópia fora do local (pendências do docs/operacao/backup.md; decisão §4 item 11, FN-062).
 
-**Situação:** Parcial — evidência: [docs/operacao/backup.md](../../operacao/backup.md), `scripts/operacao/proxmox-backup-copia`.
+**Situação:** Parcial — evidência: [docs/operacao/backup.md](../../operacao/backup-e-restauracao.md), `scripts/operacao/proxmox-backup-copia`.
 
 ---
 
@@ -164,7 +164,7 @@ O acompanhamento da correção pelo usuário é o UC-004 do [docs/07](../../07-c
 **Critérios de aceite:**
 - [x] Restauração real registrada (RTO observado de cerca de 7 a 8,5 minutos, sem valor de SLA).
 
-**Situação:** Implementado (procedimento operacional) — evidência: [docs/52](../../52-t2-ensaio-completo-e-prontidao.md), [docs/100](../../100-publicacao-inicial-v1-t5.md), `docs/operacao/evidencias/t2-restauracao-completa-2026-11-01.json`.
+**Situação:** Implementado (procedimento operacional) — evidência: docs/52 (`docs/52-t2-ensaio-completo-e-prontidao.md`), docs/100 (`docs/100-publicacao-inicial-v1-t5.md`), `docs/operacao/evidencias/t2-restauracao-completa-2026-11-01.json`.
 
 ---
 

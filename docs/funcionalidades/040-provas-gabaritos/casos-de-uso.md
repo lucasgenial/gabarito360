@@ -1,12 +1,12 @@
 # 040 — Provas e gabaritos — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** Professor, Coordenador, Professor autônomo, Administrador da Rede (criação e edição); Diretor Escolar por extra; Diretor de Núcleo, Vice-diretor e Aplicador (consulta restrita) — ver [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** Professor, Coordenador, Professor autônomo, Administrador da Rede (criação e edição); Diretor Escolar por extra; Diretor de Núcleo, Vice-diretor e Aplicador (consulta restrita) — ver docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
 
-O fluxo de ponta a ponta está no [UC-003 do docs/07](../../07-casos-de-uso.md) (Criar Prova e Gabarito); os casos abaixo detalham o comportamento atual sem repeti-lo.
+O fluxo de ponta a ponta está no UC-003 do docs/07 (`docs/07-casos-de-uso.md`) (Criar Prova e Gabarito); os casos abaixo detalham o comportamento atual sem repeti-lo.
 
 ---
 

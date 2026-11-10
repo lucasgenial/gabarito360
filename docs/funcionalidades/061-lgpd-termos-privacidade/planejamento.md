@@ -15,10 +15,10 @@ Publicar o aviso de privacidade e as condições de uso do Gabarito360, com cana
 - **Não inclui:** termo de ciência do responsável e autorização de comunicações do portal (FN-067, P2); inventário, retenção e lista de suboperadores (FN-062); pedidos dos titulares (FN-064); cláusulas contratuais com clientes e preços (FN-068); revisão do conteúdo jurídico em si, que é decisão D14 do responsável.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/28 L1 e E8](../../28-plano-mestre-proximos-modulos.md), [docs/33 §3, §6 e §8](../../33-lgpd-privacidade-e-consentimento.md), [docs/35](../../35-previas-juridicas.md), [docs/39 §1](../../39-validacoes-l2.md) (Cloudflare Web Analytics mantido e documentado no aviso).
+- Documentos de origem: docs/28 L1 e E8 (`docs/28-plano-mestre-proximos-modulos.md`), docs/33 §3, §6 e §8 (`docs/33-lgpd-privacidade-e-consentimento.md`), docs/35 (`docs/35-previas-juridicas.md`), docs/39 §1 (`docs/39-validacoes-l2.md`) (Cloudflare Web Analytics mantido e documentado no aviso).
 - Código atual: `apps/web/resources/views/legal/termos.blade.php` e `legal/privacidade.blade.php` (prévias sem rota); `apps/web/tests/Feature/PaginasPublicasTest.php` garante 404 em `/termos` e `/privacidade`.
-- Mockups: não há mockup específico; usa o layout público (`layouts/public`) e o rodapé público (`components/rodape-publico.blade.php`). Inventário: [docs/01](../../01-inventario-dos-mockups.md) §30 (páginas sem mockup).
-- Perfis: [docs/03](../../03-perfis-e-permissoes.md). Casos de uso: [casos-de-uso.md](casos-de-uso.md).
+- Mockups: não há mockup específico; usa o layout público (`layouts/public`) e o rodapé público (`components/rodape-publico.blade.php`). Inventário: docs/01 (`docs/01-inventario-dos-mockups.md`) §30 (páginas sem mockup).
+- Perfis: docs/03 (`docs/03-perfis-e-permissoes.md`). Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

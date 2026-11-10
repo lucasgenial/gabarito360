@@ -1,7 +1,7 @@
 # 021 — Clientes e espaços (T1/T2) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis com vínculo (isolamento); Administrador da Rede e Diretor de Núcleo (criação de núcleo/escola); operador da plataforma (comandos). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** todos os perfis com vínculo (isolamento); Administrador da Rede e Diretor de Núcleo (criação de núcleo/escola); operador da plataforma (comandos). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Este documento descreve o comportamento **atual**, marca com ⚠ as diferenças em relação ao planejado e aponta a funcionalidade ou subfase que as resolve.
@@ -43,7 +43,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Escopo:** rede | núcleo
 **Pré-condições:** regime de vínculos ativo (`RegimeVinculos::exigir`); núcleo ou rede pai com cliente válido.
 **Pós-condições:** registro institucional e espaço correspondente criados na mesma transação, com o cliente herdado do pai.
-**Tela/rota:** cadastro de núcleo e de escola (UC-002 do [docs/07](../../07-casos-de-uso.md)); `POST /api/v1/nucleos`, `POST /api/v1/escolas`.
+**Tela/rota:** cadastro de núcleo e de escola (UC-002 do docs/07 (`docs/07-casos-de-uso.md`)); `POST /api/v1/nucleos`, `POST /api/v1/escolas`.
 
 **Fluxo principal:**
 1. O ator envia o cadastro do núcleo ou da escola (UC-002).

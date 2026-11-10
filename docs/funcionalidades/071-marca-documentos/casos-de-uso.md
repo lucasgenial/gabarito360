@@ -1,10 +1,10 @@
 # 071 — Marca oficial e cabeçalhos de documentos — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis autenticados, visitantes e destinatários de e-mails e documentos. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** todos os perfis autenticados, visitantes e destinatários de e-mails e documentos. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Os casos descrevem o comportamento atual, publicado só na homologação (PR #191). A emissão dos documentos em si pertence a FN-047 e FN-049 (UC-006 e UC-010 do [docs/07](../../07-casos-de-uso.md)).
+Os casos descrevem o comportamento atual, publicado só na homologação (PR #191). A emissão dos documentos em si pertence a FN-047 e FN-049 (UC-006 e UC-010 do docs/07 (`docs/07-casos-de-uso.md`)).
 
 ---
 

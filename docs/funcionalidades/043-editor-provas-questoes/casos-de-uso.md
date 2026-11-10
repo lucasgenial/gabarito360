@@ -1,7 +1,7 @@
 # 043 — Editor de provas e banco de questões — Casos de uso
 
 **Natureza:** nova (candidata; casos de uso propostos de alto nível)
-**Perfis envolvidos:** Professor, Coordenador, Professor autônomo (autoria); gestão da escola (consulta) — a confirmar no [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** Professor, Coordenador, Professor autônomo (autoria); gestão da escola (consulta) — a confirmar no docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Todos estão **Não implementados**; hoje a prova tem só configuração e gabarito ([FN-040](../040-provas-gabaritos/casos-de-uso.md)).

@@ -1,10 +1,10 @@
 # 050 — Relatório PDF da turma — Casos de uso
 
 **Natureza:** evolução de existente
-**Perfis envolvidos:** perfis pedagógicos com `relatorio.turma` (Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor, Coordenador, Professor, Professor autônomo). Ver [docs/03](../../03-perfis-e-permissoes.md) §4.6.
+**Perfis envolvidos:** perfis pedagógicos com `relatorio.turma` (Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor, Coordenador, Professor, Professor autônomo). Ver docs/03 (`docs/03-perfis-e-permissoes.md`) §4.6.
 **Atualizado em:** 2026-11-09
 
-Relaciona-se ao UC-010 do [docs/07](../../07-casos-de-uso.md) (exportar relatório em PDF).
+Relaciona-se ao UC-010 do docs/07 (`docs/07-casos-de-uso.md`) (exportar relatório em PDF).
 
 ---
 

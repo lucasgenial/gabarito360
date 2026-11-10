@@ -1,10 +1,10 @@
 # 008 — Integração contínua (MariaDB) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** agentes de execução e desenvolvedores (autores de PR); operador técnico (confere o CI antes de publicar). Nenhum perfil da matriz do [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** agentes de execução e desenvolvedores (autores de PR); operador técnico (confere o CI antes de publicar). Nenhum perfil da matriz do docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve. O [docs/07](../../07-casos-de-uso.md) não tem caso de uso equivalente.
+Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve. O docs/07 (`docs/07-casos-de-uso.md`) não tem caso de uso equivalente.
 
 ---
 
@@ -60,7 +60,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 - [ ] ⚠ Artefato final `mariadb-ci-entrega-final.json` sem localização confirmada. Resolve: subfase 8.4.
 - [ ] ⚠ Teste novo de MariaDB precisa ser incluído à mão na lista `--filter`.
 
-**Situação:** Implementado — evidência: `.github/workflows/verificacao.yml`, `scripts/ci/verificar_mariadb_descartavel.py`, [docs/181](../../181-desempenho-mariadb-ci.md).
+**Situação:** Implementado — evidência: `.github/workflows/verificacao.yml`, `scripts/ci/verificar_mariadb_descartavel.py`, docs/181 (`docs/181-desempenho-mariadb-ci.md`).
 
 ---
 

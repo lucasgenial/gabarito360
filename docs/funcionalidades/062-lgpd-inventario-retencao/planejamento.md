@@ -15,7 +15,7 @@ Manter o registro das operações com dados pessoais (finalidade, base, local, p
 - **Não inclui:** eliminação e anonimização por titular (FN-064, L4-D/E); expurgo dos registros de auditoria (FN-004); eliminação das fotos de alunos (FN-066, passo 6); avaliação residual do portal após os controles (FN-067, P7); publicação do aviso de privacidade (FN-061).
 
 ## 3. Fontes de verdade
-[docs/28 L2](../../28-plano-mestre-proximos-modulos.md), [docs/33 §6](../../33-lgpd-privacidade-e-consentimento.md), [docs/34](../../34-inventario-de-dados.md), [docs/38](../../38-ripd-preliminar-portal.md), [docs/39](../../39-validacoes-l2.md), [docs/operacao/backup.md](../../operacao/backup.md). Código: `apps/api/routes/console.php` (agendador sem rotinas de retenção). Sem mockup. Casos de uso: [casos-de-uso.md](casos-de-uso.md).
+docs/28 L2 (`docs/28-plano-mestre-proximos-modulos.md`), docs/33 §6 (`docs/33-lgpd-privacidade-e-consentimento.md`), docs/34 (`docs/34-inventario-de-dados.md`), docs/38 (`docs/38-ripd-preliminar-portal.md`), docs/39 (`docs/39-validacoes-l2.md`), [docs/operacao/backup.md](../../operacao/backup-e-restauracao.md). Código: `apps/api/routes/console.php` (agendador sem rotinas de retenção). Sem mockup. Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

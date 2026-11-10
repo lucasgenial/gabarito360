@@ -1,10 +1,10 @@
 # 058 — Visitas pedagógicas — Casos de uso
 
 **Natureza:** evolução de existente (leitura implementada; gestão não implementada)
-**Perfis envolvidos:** Diretor de Núcleo (`dir_nucleo`); escolas do núcleo como objeto. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** Diretor de Núcleo (`dir_nucleo`); escolas do núcleo como objeto. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-O UC-009 do [docs/07](../../07-casos-de-uso.md) ("Agendar Visita Pedagógica") é a origem; os casos abaixo o detalham sem repeti-lo.
+O UC-009 do docs/07 (`docs/07-casos-de-uso.md`) ("Agendar Visita Pedagógica") é a origem; os casos abaixo o detalham sem repeti-lo.
 
 ---
 

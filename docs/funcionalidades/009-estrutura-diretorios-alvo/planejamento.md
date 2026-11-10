@@ -22,7 +22,7 @@ Reorganizar o monorepo para a estrutura aceita pelo responsável — `apps/web/`
 
 ## 3. Fontes de verdade
 - Mockups: não se aplica.
-- Documentos de origem: [docs/168](../../168-estabilizacao-turmas-e-contratos.md) ("Estrutura alvo aceita pelo responsável"; "ST1 não move diretórios nem cria motores"), [docs/12](../../12-arquitetura.md).
+- Documentos de origem: docs/168 (`docs/168-estabilizacao-turmas-e-contratos.md`) ("Estrutura alvo aceita pelo responsável"; "ST1 não move diretórios nem cria motores"), docs/12 (`docs/12-arquitetura.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 - Perfis e permissões: não se aplica.
 - Plano mestre: [§2 FN-009](../../planejamento/00-plano-mestre.md), §4 item 15.

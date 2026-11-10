@@ -1,10 +1,10 @@
 # 051 — TCT/TRI, integridade e sínteses — Casos de uso
 
 **Natureza:** nova (Candidata; casos propostos de alto nível)
-**Perfis envolvidos:** a definir no plano; o docs/177 pede permissão própria para integridade. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** a definir no plano; o docs/177 pede permissão própria para integridade. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Casos derivados do [docs/177](../../177-plano-paineis-turmas.md) (P7.2–P7.4). Nenhum está implementado.
+Casos derivados do docs/177 (`docs/177-plano-paineis-turmas.md`) (P7.2–P7.4). Nenhum está implementado.
 
 ---
 

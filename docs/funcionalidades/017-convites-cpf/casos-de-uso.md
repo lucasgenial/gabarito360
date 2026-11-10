@@ -1,7 +1,7 @@
 # 017 — Vínculos e convites CPF-primeiro (VI1) — Casos de uso
 
 **Natureza:** nova
-**Perfis envolvidos:** gestores com `usuario.gerir` (Admin Rede, Dir. Núcleo, Dir. Escolar, Coordenador, Vice-diretor com extra); titulares convidados; Secretário de Educação ([docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** gestores com `usuario.gerir` (Admin Rede, Dir. Núcleo, Dir. Escolar, Coordenador, Vice-diretor com extra); titulares convidados; Secretário de Educação (docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Todos os casos abaixo são **propostos**, derivados do docs/115 §5. O comportamento atual de convites está em FN-015 (UC-015-02 a UC-015-04).

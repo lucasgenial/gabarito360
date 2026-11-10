@@ -1,10 +1,10 @@
 # 076 — Carregamento, estados de erro e navegação — Casos de uso
 
 **Natureza:** existente documentada a partir do código (parcial)
-**Perfis envolvidos:** todos os perfis autenticados; visitante nas páginas de erro públicas (ver [docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** todos os perfis autenticados; visitante nas páginas de erro públicas (ver docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
-Funcionalidade transversal. Relaciona-se a UC-004 (acompanhar correção) e UC-005 (resultado individual) de [docs/07](../../07-casos-de-uso.md), que usam o carregamento regional, o breadcrumb e o toast descritos aqui.
+Funcionalidade transversal. Relaciona-se a UC-004 (acompanhar correção) e UC-005 (resultado individual) de docs/07 (`docs/07-casos-de-uso.md`), que usam o carregamento regional, o breadcrumb e o toast descritos aqui.
 
 ---
 

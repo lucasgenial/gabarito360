@@ -18,7 +18,7 @@ Oferecer análises que vão além da nota e do percentual de acertos: medidas ps
 - **Não inclui:** GII e habilidades (P7.1) → FN-044; relatórios atuais → FN-049; cards demonstrativos dos painéis → FN-053.
 
 ## 3. Fontes de verdade
-[docs/177](../../177-plano-paineis-turmas.md) (P7), [docs/164](../../164-apresentacao-publica-pre-lancamento.md) (anúncio "Em breve"), [docs/12](../../12-arquitetura.md) (motores futuros). Sem mockup próprio. Casos de uso propostos: [casos-de-uso.md](casos-de-uso.md).
+docs/177 (`docs/177-plano-paineis-turmas.md`) (P7), docs/164 (`docs/164-apresentacao-publica-pre-lancamento.md`) (anúncio "Em breve"), docs/12 (`docs/12-arquitetura.md`) (motores futuros). Sem mockup próprio. Casos de uso propostos: [casos-de-uso.md](casos-de-uso.md).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

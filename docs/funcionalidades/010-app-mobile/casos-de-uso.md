@@ -1,10 +1,10 @@
 # 010 — Aplicativos Android e iOS — Casos de uso
 
 **Natureza:** nova (adiada)
-**Perfis envolvidos:** os mesmos da WEB, conforme [docs/03](../../03-perfis-e-permissoes.md); o foco do MP-023 é quem envia cartões (`cartao.enviar`) e quem consulta resultados.
+**Perfis envolvidos:** os mesmos da WEB, conforme docs/03 (`docs/03-perfis-e-permissoes.md`); o foco do MP-023 é quem envia cartões (`cartao.enviar`) e quem consulta resultados.
 **Atualizado em:** 2026-11-09
 
-Casos de uso propostos, de alto nível, derivados do MP-023 ([docs/13](../../13-roadmap.md)) e da fase 8 do [docs/02](../../02-visao-geral.md). **Nenhum está implementado**: não existem `apps/android` nem `apps/ios`. Os fluxos de negócio são os do [docs/07](../../07-casos-de-uso.md) e não são duplicados aqui; cada caso só registra o que muda no aplicativo.
+Casos de uso propostos, de alto nível, derivados do MP-023 (docs/13 (`docs/13-roadmap.md`)) e da fase 8 do docs/02 (`docs/02-visao-geral.md`). **Nenhum está implementado**: não existem `apps/android` nem `apps/ios`. Os fluxos de negócio são os do docs/07 (`docs/07-casos-de-uso.md`) e não são duplicados aqui; cada caso só registra o que muda no aplicativo.
 
 ---
 

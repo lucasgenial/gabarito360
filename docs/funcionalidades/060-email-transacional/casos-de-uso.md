@@ -1,10 +1,10 @@
 # 060 — E-mail transacional e Fale Conosco — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** visitante (Fale Conosco), titular da conta (senha e e-mail), gestores com `usuario.gerir` (convites), equipe do Gabarito360 (destino do Fale Conosco; teste de envio). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** visitante (Fale Conosco), titular da conta (senha e e-mail), gestores com `usuario.gerir` (convites), equipe do Gabarito360 (destino do Fale Conosco; teste de envio). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Os fluxos de login do UC-001 e de equipe do UC-008 ([docs/07](../../07-casos-de-uso.md)) não são repetidos; aqui só o que envolve e-mail. Todos os envios usam `App\Mail\EmailModelo` pela fila `padrao` e são registrados em `emails_enviados` (modelo, hash do destinatário, data), sem o corpo.
+Os fluxos de login do UC-001 e de equipe do UC-008 (docs/07 (`docs/07-casos-de-uso.md`)) não são repetidos; aqui só o que envolve e-mail. Todos os envios usam `App\Mail\EmailModelo` pela fila `padrao` e são registrados em `emails_enviados` (modelo, hash do destinatário, data), sem o corpo.
 
 ---
 

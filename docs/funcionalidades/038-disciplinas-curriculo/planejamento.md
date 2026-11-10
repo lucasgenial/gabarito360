@@ -22,9 +22,9 @@ Dar à escola um catálogo local de disciplinas e áreas do conhecimento, refere
 
 ## 3. Fontes de verdade
 - Sem mockup específico; telas aprovadas nas revisões de UI/UX do DC1 (docs/146, 157).
-- Documentos de origem: [docs/139](../../139-id1-dc1-ativacao-e-sequencia.md), [docs/142](../../142-dc1-integracao-provas-e-cp2.md), [docs/144](../../144-dc1-areas-conhecimento.md), [docs/145](../../145-dc1-autoria-contextual-e-simulados.md), [docs/146](../../146-dc1-orientacoes-recolhidas.md), [docs/148](../../148-dc1-vinculos-temporais-de-areas.md), docs/141, 143, 147, 149–151, 156, [docs/157](../../157-revisao-painel-pdf.md).
+- Documentos de origem: docs/139 (`docs/139-id1-dc1-ativacao-e-sequencia.md`), docs/142 (`docs/142-dc1-integracao-provas-e-cp2.md`), docs/144 (`docs/144-dc1-areas-conhecimento.md`), docs/145 (`docs/145-dc1-autoria-contextual-e-simulados.md`), docs/146 (`docs/146-dc1-orientacoes-recolhidas.md`), docs/148 (`docs/148-dc1-vinculos-temporais-de-areas.md`), docs/141, 143, 147, 149–151, 156, docs/157 (`docs/157-revisao-painel-pdf.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — `disciplina.gerir` (Coordenador, padrão).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — `disciplina.gerir` (Coordenador, padrão).
 - Plano mestre: [§2 FN-038](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências
@@ -60,6 +60,20 @@ Dar à escola um catálogo local de disciplinas e áreas do conhecimento, refere
 - **API:** `/v1/disciplinas` (`opcoes`, `professores`, lista paginada, CRUD, `{id}/professores`); `/v1/areas-conhecimento` (`opcoes`, lista, CRUD, `{id}/vinculos`, `{id}/desvincular`); `/v1/turmas/{turma}/disciplinas` (lista, adicionar, `{componente}`, `situacao`, `atribuicoes`, `atribuicoes/{id}/encerrar`); `/v1/provas/opcoes-disciplinas` (GET/POST). Limite 60/min.
 - **Concorrência:** `versao` obrigatória em edições; `chave` UUID nas atribuições; transação READ COMMITTED com retry de deadlock na integração curricular.
 - **Dados:** migrations aditivas (disciplinas, áreas, `disciplina_areas` com períodos, `turma_disciplinas`, `disciplina_professores`, `docente_atribuicoes`, `prova_disciplinas`, campos de autoria em `provas`). Legado de texto livre preservado sem conversão automática.
+
+### Detalhamento herdado do docs/115
+
+O que o docs/115 §6 define para DC1 e que este documento ainda não registra. O código entregue segue o docs/139 e o docs/143. Os itens abaixo são diretrizes.
+- Carga inicial planejada para o Ensino Médio: Língua Portuguesa, Língua Inglesa, Arte, Educação Física, Matemática, Biologia, Física, Química, História, Geografia, Filosofia e Sociologia. As áreas servem como agrupadores.
+- Espanhol, eletivas, projetos, componentes técnicos e outros são configuráveis pela matriz local. Não declarar como universais.
+- Para o Ensino Fundamental, oferecer conjuntos próprios (por exemplo, Ciências). Não aplicar a lista do Médio sem adaptação.
+- Não semear toda escola automaticamente. O coordenador confere matriz, ano e etapa.
+- Evitar a string solta de disciplina como chave de identidade. Inativar preserva o histórico. Renomear não reescreve o rótulo de uma aplicação antiga.
+- Permitir mais de um docente no componente quando autorizado. Registrar substituições e codocência. Bloquear duplicidade exata e sobreposição indevida sem proibir casos legítimos por UNIQUE simplista. Todos os IDs e FKs compostos pertencem à mesma escola e ao mesmo espaço.
+- A aplicação identifica o componente da turma ou a lotação vigente e a versão do material e do gabarito. Encerrar uma lotação revoga operações futuras sem apagar aplicações e notas antigas. Copiar prova para si ou para colega não herda a lotação de outro professor.
+- Migração: migrar os vínculos atuais por evidência de turma e disciplina. Os faltantes entram em fila de conciliação, sem inventar responsabilidade.
+
+Cenário de aceite (docs/115 §13): professor das turmas 1ºA, 1ºC e 1ºD duplica a prova para a 1ºB, recém-atribuída. A cópia nasce sem turmas e a publicação valida a nova lotação.
 
 ## 7. Interface
 - Web: `disciplinas.*` (lista, nova, detalhe, editar, indicar), `areas.*` (lista, nova, detalhe, editar, vincular/desvincular), componente da turma (`disciplinas.componente`, atribuir, situação, encerrar), currículo da prova (`provas.curriculo.*`, `provas.preparar`).

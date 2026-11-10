@@ -1,10 +1,10 @@
 # 007 — Limites, armazenamento externo, separação e observabilidade — Casos de uso
 
 **Natureza:** evolução de existente
-**Perfis envolvidos:** todos os usuários (limites); visitantes de páginas públicas (Turnstile); operador técnico (observabilidade). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** todos os usuários (limites); visitantes de páginas públicas (Turnstile); operador técnico (observabilidade). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para o que existe, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve. O [docs/07](../../07-casos-de-uso.md) não tem caso de uso equivalente.
+Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para o que existe, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve. O docs/07 (`docs/07-casos-de-uso.md`) não tem caso de uso equivalente.
 
 ---
 

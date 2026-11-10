@@ -1,7 +1,7 @@
 # 044 — Acervo inteligente (GII) — Casos de uso
 
 **Natureza:** nova (candidata; casos de uso propostos de alto nível)
-**Perfis envolvidos:** Professor, Coordenador, Professor autônomo — a confirmar no [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** Professor, Coordenador, Professor autônomo — a confirmar no docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Todos estão **Não implementados**; não existe motor nem acervo no código.

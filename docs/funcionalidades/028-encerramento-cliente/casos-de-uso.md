@@ -1,7 +1,7 @@
 # 028 — Encerramento de cliente (T6) — Casos de uso
 
 **Natureza:** nova (casos de uso propostos, derivados do docs/102)
-**Perfis envolvidos:** Suporte, Financeiro, Desenvolvedor (contexto interno); gestor do cliente (Administrador da Rede, Diretor Escolar ou professor autônomo proprietário). Permissões a definir no [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** Suporte, Financeiro, Desenvolvedor (contexto interno); gestor do cliente (Administrador da Rede, Diretor Escolar ou professor autônomo proprietário). Permissões a definir no docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Todos os casos estão **Não implementados**: não há schema, endpoint nem interface de T6.

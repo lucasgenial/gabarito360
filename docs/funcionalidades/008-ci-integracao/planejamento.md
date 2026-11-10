@@ -22,7 +22,7 @@ Garantir que todo PR e todo push na `main` passem por uma verificação automát
 
 ## 3. Fontes de verdade
 - Mockups: não se aplica.
-- Documentos de origem: [docs/181](../../181-desempenho-mariadb-ci.md).
+- Documentos de origem: docs/181 (`docs/181-desempenho-mariadb-ci.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 - Perfis e permissões: não se aplica.
 - Plano mestre: [§2 FN-008](../../planejamento/00-plano-mestre.md); governança §3 (subfase concluída exige CI).

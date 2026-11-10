@@ -22,10 +22,10 @@ Oferecer um acervo de itens classificados, com início pelo ENEM, que alimente a
   - Simulados ENEM de homologação (dados de teste, não acervo) → FN-038.
 
 ## 3. Fontes de verdade
-- Documentos de origem: docs/164 (apresentação pública: acervo com início pelo ENEM, sem vínculo oficial nem importação anunciada); [docs/144](../../144-dc1-areas-conhecimento.md); [docs/146](../../146-dc1-orientacoes-recolhidas.md); [docs/176](../../176-reconciliacao-solicitacoes.md); [docs/177](../../177-plano-paineis-turmas.md) P7.1.
+- Documentos de origem: docs/164 (apresentação pública: acervo com início pelo ENEM, sem vínculo oficial nem importação anunciada); docs/144 (`docs/144-dc1-areas-conhecimento.md`); docs/146 (`docs/146-dc1-orientacoes-recolhidas.md`); docs/176 (`docs/176-reconciliacao-solicitacoes.md`); docs/177 (`docs/177-plano-paineis-turmas.md`) P7.1.
 - Sem mockup.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — chaves a definir.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — chaves a definir.
 - Plano mestre: [§2 FN-044](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

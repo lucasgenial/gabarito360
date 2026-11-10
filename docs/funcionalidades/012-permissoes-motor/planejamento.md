@@ -22,9 +22,9 @@ Decidir, para cada pedido, o que a pessoa pode fazer: permissões padrão do per
   - Cadastro de escolas padronizado com o Censo (etapa 6 do docs/21): FN-033.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/perfis-equipe.html`, `mockups/membro-cadastrar.html`, `mockups/membro-editar.html` ([inventário §26–§28](../../01-inventario-dos-mockups.md)).
-- Origem: [docs/03](../../03-perfis-e-permissoes.md), [docs/21](../../21-plano-perfis-permissoes-e-telas.md), [docs/19](../../19-plano-telas-por-perfil.md), [docs/13](../../13-roadmap.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-008 de [docs/07](../../07-casos-de-uso.md).
+- Mockups: `mockups/perfis-equipe.html`, `mockups/membro-cadastrar.html`, `mockups/membro-editar.html` (inventário §26–§28 (`docs/01-inventario-dos-mockups.md`)).
+- Origem: docs/03 (`docs/03-perfis-e-permissoes.md`), docs/21 (`docs/21-plano-perfis-permissoes-e-telas.md`), docs/19 (`docs/19-plano-telas-por-perfil.md`), docs/13 (`docs/13-roadmap.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-008 de docs/07 (`docs/07-casos-de-uso.md`).
 - Código: `apps/api/app/Support/Permissao.php`, `CatalogoPermissoes.php`, `Cadastro.php`, `Escopo.php`, `apps/api/app/Http/Middleware/CheckPermissao.php`, `CheckPerfil.php`, `apps/api/app/Http/Controllers/Api/UsuarioController.php`, `apps/web/app/Http/Controllers/MembroController.php`, `apps/web/app/Support/Acesso.php` (menus).
 
 ## 4. Dependências

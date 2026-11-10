@@ -1,7 +1,7 @@
 # 018 — Segurança de URLs, sessão e dependências (UR1–UR4) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos ([docs/03](../../03-perfis-e-permissoes.md)); equipe de desenvolvimento em UC-018-07
+**Perfis envolvidos:** todos (docs/03 (`docs/03-perfis-e-permissoes.md`)); equipe de desenvolvimento em UC-018-07
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.

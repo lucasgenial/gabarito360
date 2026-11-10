@@ -23,9 +23,9 @@ Separar quem contrata (cliente), onde os dados vivem (espaço) e quem acessa (v�
   - Identidade global de pessoa e CPF com unicidade global → FN-016.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/40](../../40-clientes-espacos-e-vinculos.md) (modelo T1), [docs/41](../../41-t1-mapa-de-consultas.md) (mapa de consultas), docs/42–54 (T2-A a T2-E, ensaios e publicação).
-- Revisão posterior: [docs/115](../../115-replanejamento-provas-identidade-transferencias.md) (apêndice de 03/11 do docs/40 declara regras incompatíveis).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md).
+- Documentos de origem: docs/40 (`docs/40-clientes-espacos-e-vinculos.md`) (modelo T1), docs/41 (`docs/41-t1-mapa-de-consultas.md`) (mapa de consultas), docs/42–54 (T2-A a T2-E, ensaios e publicação).
+- Revisão posterior: docs/115 (`docs/115-replanejamento-provas-identidade-transferencias.md`) (apêndice de 03/11 do docs/40 declara regras incompatíveis).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md). Relacionados no docs/07: UC-002 (Cadastrar Escola), UC-008 (Gerenciar Equipe).
 - Sem mockup próprio: a funcionalidade não tem tela; altera o comportamento de todas as telas por escopo.
 - Plano mestre: [§2 FN-021](../../planejamento/00-plano-mestre.md).

@@ -23,9 +23,9 @@ Permitir que a mesma conta tenha vários papéis em vários espaços (por exempl
   - Login do aluno: FN-020.
 
 ## 3. Fontes de verdade
-- Mockups: sem mockup; extensões aprovadas V2-B e V2-C no [inventário de mockups](../../01-inventario-dos-mockups.md) (`auth/vinculo`, `auth/contexto`, troca no topo, gestão por vínculo).
-- Origem: [docs/40](../../40-clientes-espacos-e-vinculos.md), [docs/55](../../55-v1-estrutura-e-inventario.md)–[docs/62](../../62-v2-gestao-e-aceite-de-convites.md), [docs/100](../../100-publicacao-inicial-v1-t5.md), [docs/12](../../12-arquitetura.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001, UC-008 e UC-011 de [docs/07](../../07-casos-de-uso.md).
+- Mockups: sem mockup; extensões aprovadas V2-B e V2-C no inventário de mockups (`docs/01-inventario-dos-mockups.md`) (`auth/vinculo`, `auth/contexto`, troca no topo, gestão por vínculo).
+- Origem: docs/40 (`docs/40-clientes-espacos-e-vinculos.md`), docs/55 (`docs/55-v1-estrutura-e-inventario.md`)–docs/62 (`docs/62-v2-gestao-e-aceite-de-convites.md`), docs/100 (`docs/100-publicacao-inicial-v1-t5.md`), docs/12 (`docs/12-arquitetura.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001, UC-008 e UC-011 de docs/07 (`docs/07-casos-de-uso.md`).
 - Código: `apps/api/app/Support/ContextoVinculo.php`, `ConsultaVinculo.php`, `TokenVinculo.php`, `RegimeVinculos.php`, `GestaoVinculos.php`, `apps/api/app/Services/ConviteVinculo.php`, `ContaUsuario.php`, `ConciliarVinculos.php`, `apps/api/app/Http/Controllers/Api/SelecaoVinculoController.php`, `ConviteVinculoController.php`, `GestaoVinculoController.php`, `apps/web/app/Http/Controllers/Auth/VinculoController.php`, `ConviteVinculoController.php`, `Auth/LoginController.php` (convite de conta).
 
 ## 4. Dependências

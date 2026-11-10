@@ -25,9 +25,9 @@ Oferecer aplicativos Android e iOS em React Native, consumindo a mesma API, para
 
 ## 3. Fontes de verdade
 - Mockups: nenhum específico para aplicativo; os mockups HTML valem como referência de fluxo.
-- Documentos de origem: [docs/13](../../13-roadmap.md) (MP-001, MP-023 e Nota de Sequenciamento de 06/2026), [docs/02](../../02-visao-geral.md) (fase 8), [docs/12](../../12-arquitetura.md), [docs/18](../../18-omr-nativo-e-cartoes.md) e [docs/19](../../19-plano-telas-por-perfil.md) (princípio "celular primeiro" na WEB).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001, UC-004, UC-005 e UC-007 do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (as mesmas da WEB; a API decide).
+- Documentos de origem: docs/13 (`docs/13-roadmap.md`) (MP-001, MP-023 e Nota de Sequenciamento de 06/2026), docs/02 (`docs/02-visao-geral.md`) (fase 8), docs/12 (`docs/12-arquitetura.md`), docs/18 (`docs/18-omr-nativo-e-cartoes.md`) e docs/19 (`docs/19-plano-telas-por-perfil.md`) (princípio "celular primeiro" na WEB).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001, UC-004, UC-005 e UC-007 do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (as mesmas da WEB; a API decide).
 - Plano mestre: [§2 FN-010](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

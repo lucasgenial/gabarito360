@@ -39,7 +39,7 @@ Trocar a busca nacional por texto do catálogo — hoje `LIKE '%termo%'` sobre ~
 | 5 | Seleção de UF e município nesses fluxos | `GET /api/v1/catalogo/{ufs,municipios}`; rotas web `*/municipios` | 5.503 municípios |
 
 ## 4. Fontes de verdade
-[docs/200](../../200-f5-f6-diagnostico-catalogo.md) (medições, decisão e desenho); [FN-031](../031-catalogo-instituicoes/planejamento.md); [casos-de-uso.md](casos-de-uso.md); [docs/03](../../03-perfis-e-permissoes.md) (sem permissões novas). Sem mockup: exige UI/UX.
+docs/200 (`docs/200-f5-f6-diagnostico-catalogo.md`) (medições, decisão e desenho); [FN-031](../031-catalogo-instituicoes/planejamento.md); [casos-de-uso.md](casos-de-uso.md); docs/03 (`docs/03-perfis-e-permissoes.md`) (sem permissões novas). Sem mockup: exige UI/UX.
 
 ## 5. Dependências
 | Depende de | Por quê | Situação |

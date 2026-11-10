@@ -1,7 +1,7 @@
 # 024 — Cópias entre espaços (T5) — Casos de uso
 
 **Natureza:** existente documentada a partir do código (funcionalidade substituída em política)
-**Perfis envolvidos:** Administrador da Rede, Diretor Escolar, professor autônomo (`copia.autorizar_origem`, `copia.autorizar_destino`). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** Administrador da Rede, Diretor Escolar, professor autônomo (`copia.autorizar_origem`, `copia.autorizar_destino`). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Registro resumido dos fluxos que existem no código. ⚠ Todos seguem a **política antiga**, declarada substituída pelo docs/115 §9; o destino de código e flags depende do §4 itens 3 e 4 do [plano mestre](../../planejamento/00-plano-mestre.md). Os fluxos equivalentes da política nova estão em FN-025 (TR1/TE1/UX1).

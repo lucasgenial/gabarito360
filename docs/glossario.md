@@ -227,12 +227,12 @@ Os requisitos não funcionais da série antiga vivem hoje nos documentos donos d
 | Antigo | Assunto | Dono atual |
 |---|---|---|
 | RNF-001 | Desempenho (OMR, API, carga) | [Desempenho](arquitetura/12-desempenho.md) e FN-077 |
-| RNF-002 | Segurança (autenticação, autorização, LGPD, HTTPS, ataques comuns) | [Segurança](arquitetura/11-seguranca.md) |
-| RNF-003 | Disponibilidade, backup, integração SEGES | [Infraestrutura](arquitetura/13-infraestrutura.md) e [operação](operacao/README.md) |
+| RNF-002 | Segurança (autenticação, autorização, LGPD, HTTPS, ataques comuns) | [Segurança](arquitetura/11-seguranca-e-privacidade.md) |
+| RNF-003 | Disponibilidade, backup, integração SEGES | [Infraestrutura](arquitetura/13-infraestrutura-e-ambientes.md) e [operação](operacao/README.md) |
 | RNF-004 | Usabilidade e acessibilidade, responsividade, tema | FN-070, FN-073, FN-075 |
 | RNF-005 | Manutenibilidade e testes | [Governança](planejamento/01-governanca.md) |
 | RNF-006 | Idioma pt-BR, datas DD/MM/AAAA, vírgula decimal | Regra vigente para toda a interface |
-| RNF-007 | Banco, armazenamento de imagens, ambientes, logs | [Infraestrutura](arquitetura/13-infraestrutura.md) |
+| RNF-007 | Banco, armazenamento de imagens, ambientes, logs | [Infraestrutura](arquitetura/13-infraestrutura-e-ambientes.md) |
 | RNF-008 | Evolução futura | [Visão geral](visao-geral/README.md), seção 8 |
 
 ## Divergências encontradas

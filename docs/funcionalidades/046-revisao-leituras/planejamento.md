@@ -19,10 +19,10 @@ Permitir que o educador confira e corrija as leituras do OMR olhando a foto do c
   - Miniaturas por visibilidade (F4-A) → FN-077.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/acompanhar-correcao.html`, `mockups/resultado.html` (revisar leitura) — [docs/01](../../01-inventario-dos-mockups.md) seções 11 e 20.
-- Documentos de origem: [docs/24](../../24-plano-fotos-sob-demanda.md), [docs/25](../../25-plano-revisao-de-leituras.md), [docs/152](../../152-incidente-revisao-leituras-500.md), [docs/153](../../153-cartao-inteiro-assinatura.md), [docs/154](../../154-revisao-cartao-modal.md), [docs/155](../../155-revisao-imagem-protegida.md), [docs/157](../../157-revisao-painel-pdf.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-004 (sub-fluxo de ambíguos) e UC-005 ("Revisar leitura") do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) §4.5 e §5 ("fotos de cartões só a quem acessa a prova").
+- Mockups: `mockups/acompanhar-correcao.html`, `mockups/resultado.html` (revisar leitura) — docs/01 (`docs/01-inventario-dos-mockups.md`) seções 11 e 20.
+- Documentos de origem: docs/24 (`docs/24-plano-fotos-sob-demanda.md`), docs/25 (`docs/25-plano-revisao-de-leituras.md`), docs/152 (`docs/152-incidente-revisao-leituras-500.md`), docs/153 (`docs/153-cartao-inteiro-assinatura.md`), docs/154 (`docs/154-revisao-cartao-modal.md`), docs/155 (`docs/155-revisao-imagem-protegida.md`), docs/157 (`docs/157-revisao-painel-pdf.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-004 (sub-fluxo de ambíguos) e UC-005 ("Revisar leitura") do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) §4.5 e §5 ("fotos de cartões só a quem acessa a prova").
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

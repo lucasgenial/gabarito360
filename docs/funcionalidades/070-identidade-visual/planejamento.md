@@ -15,7 +15,7 @@ Dar ao Gabarito360 uma identidade própria (direção "Atual refinada": azul pr�
 - **Não inclui:** marca oficial (símbolo, wordmark, favicons) e cabeçalhos de documentos (FN-071); apresentação pública de pré-lançamento (FN-072); layout responsivo (FN-073); migração para Tailwind (FN-075); runtime de gráficos otimizado no F3 (FN-077).
 
 ## 3. Fontes de verdade
-[docs/26](../../26-plano-identidade-visual.md), [docs/27](../../27-plano-graficos-echarts.md), style system (`style-system/`), tokens em `apps/web/public/css/app.css` (`--accent: #1d4f9e`, `--atencao: #0b7f75`). Código: `apps/web/resources/views/components/grafico.blade.php`, `layouts/_echarts.blade.php`, `apps/web/public/js/libs/echarts-6.1.0.common.min.js` e `echarts-g360.min.js`. Casos de uso: [casos-de-uso.md](casos-de-uso.md).
+docs/26 (`docs/26-plano-identidade-visual.md`), docs/27 (`docs/27-plano-graficos-echarts.md`), style system (`style-system/`), tokens em `apps/web/public/css/app.css` (`--accent: #1d4f9e`, `--atencao: #0b7f75`). Código: `apps/web/resources/views/components/grafico.blade.php`, `layouts/_echarts.blade.php`, `apps/web/public/js/libs/echarts-6.1.0.common.min.js` e `echarts-g360.min.js`. Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

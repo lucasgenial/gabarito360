@@ -281,5 +281,5 @@ Nada desta lista vai para produção sem decisão expressa do responsável.
 
 | Data | Mudança |
 |---|---|
-| 09/11/2026 | Primeiro plano mestre, com inventário completo. Arquivado em [historico/2026-11-09-inventario-inicial.md](historico/2026-11-09-inventario-inicial.md). |
+| 09/11/2026 | Primeiro plano mestre, com inventário completo. Arquivado em [historico/2026-11-09-inventario-inicial.md](../historico/2026-11-09-inventario-inicial.md). |
 | 10/11/2026 | Plano mestre passa a ser o orquestrador da execução. A lista de funcionalidades passa para o [catálogo](../funcionalidades/README.md). Texto revisado no padrão ASD-STE100 moderado. |

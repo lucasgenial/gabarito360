@@ -19,10 +19,10 @@ Permitir reaproveitar uma prova sem tocar na original: o professor copia a próp
   - Regras de autoria e visibilidade → [FN-041](../041-autoria-provas/planejamento.md).
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/118](../../118-cp1-contrato-duplicacao-pedagogica.md), [docs/142](../../142-dc1-integracao-provas-e-cp2.md) §2, [docs/28](../../28-plano-mestre-proximos-modulos.md) A7, docs/115 §3, docs/12 (seção CP1).
-- Extensão aprovada CP1 no [docs/01](../../01-inventario-dos-mockups.md); lista em `mockups/provas.html`.
+- Documentos de origem: docs/118 (`docs/118-cp1-contrato-duplicacao-pedagogica.md`), docs/142 (`docs/142-dc1-integracao-provas-e-cp2.md`) §2, docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) A7, docs/115 §3, docs/12 (seção CP1).
+- Extensão aprovada CP1 no docs/01 (`docs/01-inventario-dos-mockups.md`); lista em `mockups/provas.html`.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — `prova.duplicar_propria` (Professor padrão; Professor autônomo). `prova.duplicar_para_professor` é só proposta.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — `prova.duplicar_propria` (Professor padrão; Professor autônomo). `prova.duplicar_para_professor` é só proposta.
 - Plano mestre: [§2 FN-042](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências
@@ -50,6 +50,22 @@ Permitir reaproveitar uma prova sem tocar na original: o professor copia a próp
 - **Aplicação da cópia:** publicar ou gerar cartões exige turmas escolhidas e gabarito publicado (`DuplicarProva::conferirAplicacao`).
 - **CP2 (proposto, docs/142):** chave `prova.duplicar_para_professor` padrão só do Coordenador; destinatário com vínculo vigente e atribuição DC1; título e motivo; idempotência por intenção; outbox transacional com notificação. Catálogo do docs/03 deve ser atualizado antes da sincronização.
 - **A7 (parcial):** `g360:importar-provas {arquivo} --escola --usuario --vinculo --turmas --ano --espaco --aplicar` cria provas com gabarito publicado a partir de JSON; não há exportação nem importação pela tela.
+
+### Detalhamento herdado do docs/115
+
+Regras de duplicação (docs/115 §2 e §3).
+- Duplicar prova cria um rascunho com IDs novos, sem turmas, cartões, notas nem alunos. Alterar as turmas da mesma prova é operação separada, com validação de lotação e estado. Nunca altera aplicação histórica.
+- Professor para si: mostrar origem, título, disciplina, responsável e o que será copiado. Sugerir título com indicação de cópia. Copiar somente itens de lista positiva. Zerar turmas, publicação, datas, correção, cartões, respostas, notas, QR, tokens, links e envios. Não gerar cartões antes de vincular novas turmas e publicar.
+- Proveniência: `prova_original_id`, `prova_raiz_id`, autor original, ator da duplicação, responsável da cópia e instante. Distinguir autoria de responsabilidade. Manter a referência mesmo se a original for arquivada. No detalhe, mostrar "Copiada de [prova]", data e responsável. O link só aparece se o usuário ainda puder ler a original. Nunca revelar título ou autor de fonte fora do escopo.
+- Coordenador para outro professor (CP2): só dentro da escola do seu vínculo. Ação "Criar cópia para professor", com professor de vínculo aceito e lotação elegível na disciplina. Não dá acesso à original nem leva as turmas do autor. O destinatário recebe um rascunho próprio e escolhe suas turmas. Registrar origem, coordenador, destinatário, motivo e digest. Notificar no sistema. O e-mail não leva dados escolares. Não usar acesso interno. Revalidar vínculo e lotação no commit e no uso posterior.
+- Permissões propostas: `prova.duplicar_propria` e `prova.duplicar_para_professor`. Professor institucional e professor autônomo copiam para si no próprio alcance. O coordenador copia só para professores da sua escola. Não inferir poderes por hierarquia.
+- Duplo clique ou reenvio da mesma intenção cria uma cópia. Uma nova intenção pode criar outra variante, com outra chave.
+- Se houver edição de enunciados fora do modelo atual, detalhar editor ou banco de questões em pacote próprio. Duplicar metadados não edita a prova textual.
+
+Cenários de aceite (docs/115 §13):
+- Professor das turmas 1ºA, 1ºC e 1ºD duplica para a 1ºB recém-atribuída. A cópia nasce sem turmas. Alterar o gabarito dela não muda a original nem recalcula notas antigas.
+- Coordenador duplica para colega das turmas 1ºD, 1ºE e 1ºF. O colega não recebe vínculos das turmas 1ºA, 1ºB e 1ºC nem leitura da original fora do escopo.
+- Duas tentativas concorrentes com a mesma chave não duplicam a prova. Uma nova intenção legítima pode criar nova cópia.
 
 ## 7. Interface
 - CP1: ação "Copiar" na lista e no detalhe elegível (`provas/_botao-copiar.blade.php`), modal nativo com origem, explicação e novo nome; após confirmar, abre o rascunho. Sem página nem rota GET própria.

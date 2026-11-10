@@ -21,10 +21,10 @@ Oferecer dois painéis — o agregado de Turmas e o de cada Turma — que mostre
   - Cadastro e organização da turma → FN-036.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/turmas.html`, `mockups/turma-detalhe-2.html` ([docs/01](../../01-inventario-dos-mockups.md) seções 13 e 14); direção de design em `docs/evidencias/paineis/`.
-- Documentos de origem: [docs/176](../../176-reconciliacao-solicitacoes.md), [docs/177](../../177-plano-paineis-turmas.md) (plano P0–P8), [docs/178](../../178-protocolo-execucao-paineis.md), [docs/179](../../179-execucao-paineis-turmas.md), [docs/180](../../180-correcao-dashboards-diretriz.md), [docs/182](../../182-p32-indicadores.md), [docs/183](../../183-paineis-estados-vazios.md), [contratos/resumo-cadastral-turmas.md](../../contratos/resumo-cadastral-turmas.md). Em conflito entre os blocos "Decisão mais recente" dos docs/177–180, vale o fim do docs/179 (PR #216) e o plano mestre (§6).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-007 do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (`turma.ver`, `relatorio.turma`, `correcao.acompanhar`).
+- Mockups: `mockups/turmas.html`, `mockups/turma-detalhe-2.html` (docs/01 (`docs/01-inventario-dos-mockups.md`) seções 13 e 14); direção de design em `docs/evidencias/paineis/`.
+- Documentos de origem: docs/176 (`docs/176-reconciliacao-solicitacoes.md`), docs/177 (`docs/177-plano-paineis-turmas.md`) (plano P0–P8), docs/178 (`docs/178-protocolo-execucao-paineis.md`), docs/179 (`docs/179-execucao-paineis-turmas.md`), docs/180 (`docs/180-correcao-dashboards-diretriz.md`), docs/182 (`docs/182-p32-indicadores.md`), docs/183 (`docs/183-paineis-estados-vazios.md`), [contratos/resumo-cadastral-turmas.md](../../contratos/resumo-cadastral-turmas.md). Em conflito entre os blocos "Decisão mais recente" dos docs/177–180, vale o fim do docs/179 (PR #216) e o plano mestre (§6).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-007 do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (`turma.ver`, `relatorio.turma`, `correcao.acompanhar`).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

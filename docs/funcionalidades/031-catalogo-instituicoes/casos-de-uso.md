@@ -1,7 +1,7 @@
 # 031 — Catálogo nacional de instituições (CI1) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** `professor_autonomo` (referências e solicitações); Suporte e Desenvolvedor (atendimento); Administrador da Rede, Diretor de Núcleo e Diretor Escolar (gestão com autoridade); operador da plataforma (importação). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** `professor_autonomo` (referências e solicitações); Suporte e Desenvolvedor (atendimento); Administrador da Rede, Diretor de Núcleo e Diretor Escolar (gestão com autoridade); operador da plataforma (importação). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável. Descreve o comportamento **atual** (publicado só na homologação) e marca com ⚠ as diferenças em relação ao planejado. Todos exigem `CATALOGO_INTERFACE_ATIVA = true`.

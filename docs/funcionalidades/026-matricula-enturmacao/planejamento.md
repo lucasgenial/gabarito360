@@ -23,8 +23,8 @@ Registrar a vida escolar do aluno no tempo: matrícula por pessoa, escola e per�
   - Aposentar as rotas `toggle` de aluno/turma → FN-036.
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/115 §7, §11, §13](../../115-replanejamento-provas-identidade-transferencias.md); adendo de 07/11 ligando MT1 ao [docs/177](../../177-plano-paineis-turmas.md); [docs/13](../../13-roadmap.md) MP-035b; [docs/28](../../28-plano-mestre-proximos-modulos.md) A5; [tu1-revisao-fluxos](../../tu1-revisao-fluxos.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (`aluno.gerir`, `aluno.desativar`, `turma.desativar`).
+- Documentos de origem: docs/115 §7, §11, §13 (`docs/115-replanejamento-provas-identidade-transferencias.md`); adendo de 07/11 ligando MT1 ao docs/177 (`docs/177-plano-paineis-turmas.md`); docs/13 (`docs/13-roadmap.md`) MP-035b; docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) A5; tu1-revisao-fluxos (`docs/tu1-revisao-fluxos.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (`aluno.gerir`, `aluno.desativar`, `turma.desativar`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md). Sem UC no docs/07.
 - Mockups: turma/alunos do inventário (docs/01); tela "Transferir aluno entre turmas" sem mockup próprio (revisão TU1).
 
@@ -54,6 +54,25 @@ Registrar a vida escolar do aluno no tempo: matrícula por pessoa, escola e per�
   - `PUT /api/v1/alunos/{id}/arquivamento` e `PUT /api/v1/turmas/{id}/arquivamento` (`aluno.desativar`/`turma.desativar`). Corpo fechado: `arquivado`, `esperado_ativo`, `versao`, `chave`, `motivo`. `READ COMMITTED` com até 3 tentativas no MariaDB.
 - **Proposto (MT1):** `matriculas` e `enturmacoes` (ou equivalentes) com FK para pessoa quando conciliada; períodos início inclusivo/fim exclusivo; `pessoa_id`/`matricula_id`/`enturmacao_id` acrescentados gradualmente; legado sem contexto marcado como tal, sem reconstrução.
 - **Desempenho:** relatórios pelo contexto histórico precisam de medição com 1000 usuários simultâneos (FN-077) antes da homologação.
+
+### Detalhamento herdado do docs/115
+
+Passos de MT1 (docs/115 §7). Os itens ainda pendentes são propostas.
+1. Criar a matrícula escolar: pessoa, escola e ano ou período.
+2. Criar enturmações temporais ligadas à matrícula. Cada uma tem turma, início, fim e motivo. O início é inclusivo e o fim é exclusivo.
+3. Considerar o ensino regular e as modalidades paralelas. Não impor um único vínculo global ao aluno.
+4. A mudança comum encerra a enturmação vigente e cria a nova no instante de corte, de forma atômica.
+5. Não mover notas nem cartões antigos para a nova turma. Cada aplicação conserva escola, turma de aplicação, disciplina, docente ou lotação, e versão da prova e do gabarito.
+6. O aluno aparece na lista atual da nova turma e mantém a linha do tempo, conforme a permissão.
+7. O relatório da turma anterior conserva as avaliações feitas lá. O relatório da turma nova separa resultados anteriores dos produzidos nela, sem contar a mesma nota duas vezes. Correção tardia de avaliação antiga pertence ao contexto original e gera versão e evento.
+
+Autonomia proposta: o Coordenador movimenta a enturmação dentro da escola. Secretaria Escolar e Direção podem movimentar conforme permissão explícita e a estrutura atual de matrícula. O professor solicita e consulta o alcance autorizado. Ele não move alunos sozinho. Matrícula entre escolas é outro fluxo (FN-025), não é um update simples de `turma_id`.
+
+Migração (docs/115 §11): adicionar `pessoa_id`, `matricula_id`, `enturmacao_id` e snapshots aos poucos. Sem data ou contexto histórico comprovado, marcar o registro como legado, sem reconstrução, e conservar a referência original. Congelar o contexto das novas aplicações antes de liberar movimentações. Relatórios distinguem turma atual de turma da avaliação. O backfill gera manifesto de mapeamentos e lista de ambiguidades, sem associação por coincidência de nome.
+
+Cenários de aceite (docs/115 §13):
+- A enturmação muda sem mover nota antiga. Relatórios de antes e depois e PDFs mantêm o contexto, inclusive com correção posterior e codocência.
+- Backup restaurado preserva cartões, respostas, notas e mapas.
 
 ## 7. Interface
 Existente: "Transferir aluno entre turmas" (página e modal na turma), com revisão antes de confirmar e aviso de que o histórico permanece na turma da avaliação; arquivar/desarquivar na turma e no aluno. MT1: linha do tempo do aluno e indicação de turma atual × turma da avaliação nos relatórios; exigir revisão UI/UX.

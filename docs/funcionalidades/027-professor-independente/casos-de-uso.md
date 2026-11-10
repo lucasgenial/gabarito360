@@ -1,7 +1,7 @@
 # 027 — Professor independente (PA1) — Casos de uso
 
 **Natureza:** evolução de existente (um caso parcial; demais propostos)
-**Perfis envolvidos:** `professor_autonomo` (proprietário do espaço pessoal); representantes da escola na integração. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** `professor_autonomo` (proprietário do espaço pessoal); representantes da escola na integração. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 ---

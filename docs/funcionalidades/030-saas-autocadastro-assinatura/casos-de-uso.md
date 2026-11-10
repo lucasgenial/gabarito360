@@ -1,7 +1,7 @@
 # 030 — Autocadastro, planos e assinatura — Casos de uso
 
 **Natureza:** existente documentada a partir do código (funcionalidade substituída em parte)
-**Perfis envolvidos:** visitante (público); titular de assinatura. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** visitante (público); titular de assinatura. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Registro resumido do que o código faz hoje. ⚠ marca a diferença em relação ao planejado no docs/13 (MP-027..029) e no docs/06 (RN-015/016); o destino depende do §4 item 5 do [plano mestre](../../planejamento/00-plano-mestre.md).

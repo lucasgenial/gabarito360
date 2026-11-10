@@ -1,10 +1,10 @@
 # 073 — Layout responsivo — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis autenticados e o visitante (ver [docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** todos os perfis autenticados e o visitante (ver docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
-Funcionalidade transversal: os casos de uso descrevem garantias de apresentação válidas para todas as telas, não um fluxo de negócio próprio. Os fluxos de negócio de cada tela estão nas FNs donas e em [docs/07](../../07-casos-de-uso.md).
+Funcionalidade transversal: os casos de uso descrevem garantias de apresentação válidas para todas as telas, não um fluxo de negócio próprio. Os fluxos de negócio de cada tela estão nas FNs donas e em docs/07 (`docs/07-casos-de-uso.md`).
 
 ---
 

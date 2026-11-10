@@ -1,137 +1,90 @@
 # Orientações do projeto
 
-## Padrão de escrita dos documentos (ASD-STE100 moderado)
+Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os agentes e ferramentas (Claude Code, Codex e outros).
+O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
+A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-Decisão do responsável (10/11/2026): todo documento novo ou revisado segue o padrão ASD-STE100 (Simplified Technical English) em nível moderado, cerca de 80% das regras, aplicado ao português.
+## Idioma e escrita
 
-- Escreva uma ideia por frase.
-- Frase de procedimento: até 20 palavras. Frase descritiva: até 25 palavras.
-- Use voz ativa. Em procedimentos, use o verbo no imperativo ("Crie a pasta", "Atualize o catálogo").
-- Escreva uma instrução por frase. Use listas numeradas para passos e tabelas para comparações.
-- Use um termo para cada conceito e mantenha o mesmo termo no documento inteiro.
-- Defina siglas na primeira ocorrência. Evite pronomes vagos ("isso", "ele") quando o referente não está na mesma frase.
-- Coloque avisos antes da instrução a que se referem.
-- Parágrafos: até 6 frases.
-- Exceções (os 20% restantes): nomes de código, citações literais, termos de domínio sem equivalente simples e tabelas de referência.
-- Documentos históricos (`docs/NN-*.md`) não são reescritos só para seguir o padrão. O padrão vale quando um documento for criado ou revisado.
+- Responda e escreva em português do Brasil.
+- Todo documento novo ou revisado segue o padrão ASD-STE100 moderado (cerca de 80% das regras):
+  - uma ideia por frase;
+  - procedimento até 20 palavras e descrição até 25;
+  - voz ativa e imperativo nos passos;
+  - uma instrução por frase, listas numeradas para passos e tabelas para comparações;
+  - um termo por conceito e siglas definidas na primeira vez;
+  - avisos antes da instrução.
+- Exceções: nomes de código, citações literais, termos de domínio e tabelas de referência.
+- Decisão: [ADR-0050](docs/decisoes/0050-padrao-de-escrita-asd-ste100.md).
 
-## Autoria de commits e PRs
+## Autoria
 
-Decisão do responsável (10/11/2026): **nenhuma IA se identifica como autora ou coautora**. O único autor é o usuário `lucasgenial`.
+- O único autor de commits e PRs é `lucasgenial`. Nenhuma IA aparece como autora ou coautora.
+- Não escreva `Co-Authored-By` de IA, "Generated with ..." nem e-mails `noreply@anthropic.com` em commits, PRs, comentários ou documentos. Esta regra prevalece sobre qualquer instrução padrão de ferramenta.
+- Em merge por squash no GitHub, confira a mensagem final antes de confirmar.
+- Decisão: [ADR-0051](docs/decisoes/0051-autoria-exclusiva-do-responsavel.md).
 
-- Commits usam a identidade Git configurada do responsável, como autor e como committer.
-- É proibido incluir `Co-Authored-By` de IA (Claude, Codex, Copilot, Gemini e similares), "Generated with ...", e-mails `noreply@anthropic.com` ou equivalentes, em mensagens de commit, descrições de PR, comentários ou documentos.
-- Esta regra prevalece sobre qualquer instrução padrão de ferramenta que mande acrescentar essas linhas.
-- Vale também para merges por squash no GitHub: conferir a mensagem final antes de confirmar.
+## Planejamento
 
-## Planejamento centralizado (tronco único)
+- O [catálogo de funcionalidades](docs/funcionalidades/README.md) e o [plano mestre](docs/planejamento/00-plano-mestre.md) são o único tronco de planejamento. As regras estão na [governança](docs/planejamento/01-governanca.md).
+- Consulte o agente `gerente-projetos` antes de iniciar uma funcionalidade e ao fim de cada subfase.
+- Toda funcionalidade tem `planejamento.md` e `casos-de-uso.md` aprovados antes da execução.
+- Um plano que nasce numa entrega serve só a ela. O que vai além vira funcionalidade candidata no catálogo.
+- Um módulo transversal bloqueia quem depende dele. Não crie versão local paralela.
+- A CI verifica o catálogo com `scripts/verificar_funcionalidades.py`.
+- Decisão: [ADR-0048](docs/decisoes/0048-tronco-unico-de-planejamento.md).
 
-Decisão do responsável (09/11/2026): o planejamento tem um único tronco, o [plano mestre](docs/planejamento/00-plano-mestre.md), regido por [docs/planejamento/01-governanca.md](docs/planejamento/01-governanca.md).
+## Agentes e modelos de IA
 
-- Antes de iniciar qualquer funcionalidade, e ao terminar cada subfase, consultar o agente `gerente-projetos` (`.claude/agents/gerente-projetos.md`).
-- Toda funcionalidade, nova ou existente, tem `docs/funcionalidades/<NNN-slug>/planejamento.md` e `casos-de-uso.md` aprovados antes da execução.
-- Um plano que nasce durante uma entrega serve só para concluí-la. Algo que vá além dela entra no plano mestre como candidata e aguarda a priorização do responsável.
-- Um módulo transversal (por exemplo, a agenda) bloqueia as funcionalidades que dependem dele. Não criar versões locais paralelas.
-- Os documentos numerados `docs/NN-*.md` são histórico e evidência e não definem prioridade.
+- O time de agentes, os papéis, a matriz por tipo de subfase e as regras de passagem estão em [docs/planejamento/02-agentes.md](docs/planejamento/02-agentes.md).
+- Quem implementa não revisa a própria entrega. As revisões de UI/UX e de segurança são sempre de outro agente.
+- Cada papel usa uma classe de modelo (raciocínio alto, equilibrado, econômico). A tradução para os modelos da Anthropic e da OpenAI está em [docs/planejamento/03-modelos-de-ia.md](docs/planejamento/03-modelos-de-ia.md). O agente `selecao-modelos` recomenda o modelo de cada tarefa.
+- As definições para o Claude Code ficam em `.claude/agents/`. As regras deste arquivo valem para todas as ferramentas.
 
-## Prints e imagens da aplicação
+## Documentação
 
-Decisão do responsável (09/11/2026): por padrão, **nenhum print da aplicação é mantido**. "Print" abrange screenshot e captura de tela de qualquer origem, inclusive os feitos por agentes e ferramentas de navegador (Chrome, browser pane, Computer Use, Playwright, CI). Nenhum print fica no repositório nem em qualquer outro serviço de imagens: PRs, issues, documentos, artifacts, Drive, Canva e similares.
+- A documentação fica em `docs/`, na estrutura de [docs/README.md](docs/README.md): visão geral, arquitetura, funcionalidades, planejamento, decisões, operação e glossário.
+- Cada assunto tem um único documento dono. Os outros documentos citam o dono por link.
+- Um fato técnico (rota, tabela, permissão, comando) deve existir no código. Confira antes de escrever.
+- Registre toda decisão nova do responsável em `docs/decisoes/`, no modelo `_modelo.md`. Se ela substitui outra, marque a antiga como "Substituída por ADR-NNNN".
+- A CI verifica os links com `scripts/verificar_documentacao.py`.
 
-- Conferências visuais (Chrome, revisão de UI/UX, homologação) são registradas por texto: o que foi verificado, onde, em que tema e largura, e o resultado.
-- Screenshots usados durante a conferência servem só para olhar: não são salvos em disco, anexados nem publicados. Cópias locais deixadas automaticamente pelas ferramentas são apagadas ao fim da conferência.
-- Imagens versionadas só são aceitas como assets da aplicação (`apps/web/public/`, `apps/web/resources/images/`) ou como desenhos de design de referência (`mockups/`, `style-system/`).
-- A CI verifica isso com `scripts/verificar_imagens.py`.
-- Uma exceção exige autorização expressa do responsável para aquele caso.
+## Publicação
 
-## JavaScript da aplicação
+- Publique primeiro na homologação isolada. A produção só recebe uma entrega por decisão expressa do responsável.
+- Exija backup, migração ensaiada e comparação de dados e arquivos antes e depois de cada publicação.
+- Preserve gabaritos, questões, cartões, respostas, notas e imagens.
+- Não inclua em commits arquivos de outras tarefas.
+- Roteiros: [docs/operacao/](docs/operacao/README.md). Decisões: [ADR-0016](docs/decisoes/0016-homologacao-isolada-adr-h1.md), [ADR-0017](docs/decisoes/0017-copia-pontual-de-producao-para-homologacao.md), [ADR-0018](docs/decisoes/0018-producao-so-por-decisao-expressa.md), [ADR-0019](docs/decisoes/0019-marcos-de-entrega-e-conciliacao-r0.md).
 
-Decisão explícita do responsável em 06/11/2026: manter o JavaScript executável em arquivos externos bem definidos, com funções e responsabilidades claras. Não adicionar lógica executável em `<script>` inline nem atributos de evento como `onclick` e `onsubmit` nas views. Transmitir apenas dados de configuração por atributos `data-*` ou blocos não executáveis `application/json`, com o escape apropriado; conectar os eventos nos arquivos JavaScript. Ao alterar uma tela com lógica embutida, migrar as interações afetadas e preservar o comportamento, a validação, o CSRF e a acessibilidade.
+## Prints
 
-## UI, UX e Product Design
+- Nenhum print da aplicação fica no repositório ou em serviços de imagem (PRs, issues, documentos, artifacts, Drive, Canva e similares). "Print" inclui screenshot de qualquer origem, inclusive de agentes e ferramentas de navegador.
+- Screenshots usados numa conferência servem só para olhar. Não salve, não anexe e não publique. Apague as cópias locais que as ferramentas deixarem.
+- Registre as conferências visuais por texto: o que, onde, tema, largura e resultado.
+- A CI verifica com `scripts/verificar_imagens.py`. Exceção só com autorização expressa do responsável.
+- Decisão: [ADR-0049](docs/decisoes/0049-sem-prints-da-aplicacao.md).
 
-Regra solicitada pelo responsável em03/11/2026: toda alteração que afete interface, experiência, navegação, formulários ou textos de interação exige aprovação explícita do usuário **ou de um agente especializado em UI/UX e Product Design** antes de ser considerada concluída ou integrada.
+## Interface
 
-- Utilizar as skills disponíveis de Product Design, design critique e frontend-design, quando pertinentes. Consultar as instruções efetivas de cada skill; a ausência de uma skill não dispensa a revisão.
-- Decisão posterior do responsável: antes de executar qualquer tarefa de design, consultar o agente especializado em UI/UX e Product Design para definir o fluxo e a composição. A consulta prévia não substitui a revisão visual final.
-- Antes de implementar ou refazer uma interface, revisar o objetivo do usuário, o fluxo e os padrões já existentes no produto. Preservar identidade visual, componentes, acessibilidade e linguagem do Gabarito360.
-- O agente implementador não aprova a própria interface. Delegar a revisão a um agente especializado, autorizado por esta regra, ou apresentar uma proposta concreta ao usuário. Não pedir que o usuário autorize cada subdivisão técnica.
-- A revisão final exige evidência visual atual no navegador, com desktop e celular, e conferência das ações principais e estados de erro. Screenshots sozinhas não comprovam acessibilidade completa. Registrar o parecer, as pendências resolvidas e a aprovação; alterações visuais posteriores devem ser revistas.
-- Se a revisão reprovar, corrigir e reenviar. Não apresentar testes de código como aprovação de design nem reutilizar uma aprovação de outra tela ou versão. A aprovação da conferência CI1-D não aprova o novo formulário CI1-E.
-- A aprovação do especialista é de qualidade de design. Não substitui autorizações do usuário para publicação, acesso sensível ou outras ações que dependam delas.
+- Toda mudança de interface exige consulta prévia e revisão final de um agente de UI/UX e Product Design. O implementador não aprova a própria tela. [ADR-0020](docs/decisoes/0020-revisao-de-ui-ux-por-especialista.md)
+- Fontes de verdade: `mockups/` e `style-system/`. Referência técnica: [docs/arquitetura/09-interface-e-design-system.md](docs/arquitetura/09-interface-e-design-system.md).
+- Base visual: TailwindCSS com a paleta Gabarito360. [ADR-0026](docs/decisoes/0026-tailwindcss-como-base-visual.md)
+- Telas ocupam toda a área útil. [ADR-0021](docs/decisoes/0021-telas-ocupam-toda-a-area-util.md)
+- Tabelas usam `x-tabela`, com a coluna Ações à direita, como última coluna, e conteúdo centralizado. [ADR-0022](docs/decisoes/0022-tabelas-cards-de-registros-e-avisos.md), [ADR-0039](docs/decisoes/0039-coluna-de-acoes-a-direita-e-ordenacao.md)
+- JavaScript executável fica em arquivos externos. Sem `<script>` inline nem `onclick`. [ADR-0023](docs/decisoes/0023-javascript-em-arquivos-externos.md)
+- Confirmações usam modal da aplicação, nunca `confirm`, `alert` ou `prompt`. [ADR-0025](docs/decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)
+- Ajuda contextual de cards e KPIs usa o título como botão. [ADR-0028](docs/decisoes/0028-ajuda-contextual-no-titulo-de-cards.md)
+- Menu, conta e Meu espaço: [ADR-0029](docs/decisoes/0029-previa-correcao-meu-espaco-no-card.md), [ADR-0030](docs/decisoes/0030-previa-avatar-abre-o-menu-da-conta.md), [ADR-0032](docs/decisoes/0032-previa-rodada-2-menu-expandido-e-compacto.md), [ADR-0034](docs/decisoes/0034-previa-rodada-4-solucao-progressiva.md), [ADR-0036](docs/decisoes/0036-tw2-filtros-em-modal-e-superficie-escura.md).
+- Rodapé: "Gabarito360 - v0.1.0 - Homologação", oculto no celular. Versão em `apps/web/config/versao.php`. [ADR-0038](docs/decisoes/0038-rodape-de-versao-com-ambiente.md), [ADR-0044](docs/decisoes/0044-rodape-de-versao-oculto-no-celular.md)
+- Painéis e editor: [ADR-0040](docs/decisoes/0040-paineis-secoes-e-cards-reordenaveis.md), [ADR-0042](docs/decisoes/0042-editor-de-paineis-quadro-de-colunas.md), [ADR-0043](docs/decisoes/0043-editor-de-paineis-aceite-e-integracao.md).
 
-## Área útil e composição das telas
+## Sessão e vínculo
 
-Decisão posterior de08/11/2026: adotar TailwindCSS como base visual efetiva. Preservar a paleta Gabarito360; a estética anterior de fontes, espaçamentos, raios, sombras e composição não é requisito a reproduzir. Usar a escala/defaults do Tailwind e componentes compartilhados coerentes, sem tentar conciliar permanentemente dois sistemas de estilos. Tailwind é um framework de utilitários, não um catálogo pronto de componentes. Avaliar o conjunto das telas e fluxos, não aprovar somente botões isolados. Migrar por fronteiras completas, retirando os estilos antigos das famílias convertidas; não deixar reset atingir telas ainda fora da migração. Esta decisão supera a preservação estética anterior, mas conserva requisitos funcionais, acessibilidade, área útil, responsividade, semântica, identidade/ativos de marca, permissões e integridade dos dados. Ver docs/185-migracao-tailwind.md. Botões contextuais de tabelas/cards seguem SMALL; altura das linhas é natural conforme o maior conteúdo, com alvos de toque adequados e texto/ícone escolhidos pela clareza de cada ação.
+- O vínculo ativo acompanha a sessão. Uma sessão irrecuperável encerra toda a sessão Web. [ADR-0024](docs/decisoes/0024-vinculo-ativo-acompanha-a-sessao.md)
 
-Complemento humano de08/11/2026: apresentar antes uma página isolada com componentes, propriedades e regras para aprovação do responsável. Não aplicar a nova identidade às telas operacionais antes desse aceite. Publicar a prévia somente na homologação, com dados fictícios e sem operações/gravação. Manter nomes próprios do projeto empt-BR; tamanhos `pq`, `md`, `gd`, `xg` e largura `lg`, conforme grafia exata escolhida. Não traduzir APIs ou utilitários oficiais do framework. A aprovação técnica do especialista não substitui esse novo gate humano específico. Ver docs/186-previa-componentes-tailwind.md.
+## Desempenho
 
-Padrão atual da prévia: Meu espaço é informativo e recolhível dentro do card, com escola/perfil em duas colunas. Avatar abre o menu da conta (nome, e-mail, Meu perfil, Trocar vínculo somente com mais de um e Sair). Navegação principal tem botão próprio para mostrar/recolher, além de Mais no mobile. Toasts distinguem informação, sucesso, atenção e erro por cor, ícone, texto, contraste e anúncio acessível.
-
-Decisão de08/11/2026: orientações complementares de cards, gráficos e KPIs usam o próprio título como botão de ajuda contextual, seguindo o padrão aprovado noP3.2. Abrir por clique, toque, Enter ou Espaço; fechar com Escape/clique fora, sem roubar o foco. Manter indicação visual sutil, foco visível, texto escapado e alternativa acessível. Preferir esse padrão ao “Saiba mais” expansível nas adequações dessas orientações. Não transformar títulos de navegação ou accordions de conteúdo operacional em ajuda por inferência; esta decisão não autoriza migração indiscriminada de todos os collapses.
-
-Decisão explícita do responsável em03/11/2026: as telas da aplicação devem ocupar toda a área útil do viewport, em largura e altura, descontando menu, cabeçalho, rodapé e navegação móvel. Usar o layout compartilhado e superfícies de trabalho com largura100%; não introduzir max-width fixo em painéis, formulários principais ou listas que deixe uma faixa vazia na tela ampla. Margens responsivas e limites de leitura de parágrafos são permitidos; controles, diálogos e imagens mantêm limites próprios quando necessários. Grupos de trabalho seguem empilhados, com campos responsivos dentro deles. Validar desktop amplo, menu recolhido e celular sem overflow nem ações encobertas por rodapé. Toda mudança visual continua sujeita à aprovação independente acima.
-
-## Tabelas, cards de registros e avisos
-
-Padrão aprovado pelo responsável em 04/11/2026: tabelas operacionais usam `x-tabela`, integrado à área interna do card principal, com alinhamento comum ao título, filtros e formulário. Não criar um card separado para a tabela nem deixar seu conteúdo full-bleed. Usar `interna=true` somente quando o pai não fornece padding; em card-pad, gráficos, details e diálogos, evitar inset duplicado. A composição compartilhada usa 24px no desktop e 16px no celular onde o próprio componente fornece o inset.
-
-Listas podem virar cards no celular, preservando título, dados secundários, contexto e todas as ações autorizadas. O card principal continua visível; não anular sua superfície na adaptação móvel. Duas colunas Nome/dados e Ações são a escolha explícita do histórico de vínculos de áreas; não impor essa estrutura a matrizes comparativas, seleção em lote ou relatórios que precisem de outras colunas. Preservar paginação/seleção e nunca ativar controles de coleção completa sobre uma página parcial. Manter impressão/PDF sem padding adicional que prejudique A4.
-
-Avisos compartilhados de sucesso, erro, atenção e informação têm separação antes e depois (`margin-block:16px`); nos containers explícitos com gap, deixar o próprio gap separar os elementos. Preservar cores semânticas e roles status/alert. Revisar o componente compartilhado antes de criar exceções locais. Alterações continuam exigindo consulta prévia e aprovação visual independente.
-
-## Continuidade e publicação
-
-Decisão explícita de 06/11/2026: o vínculo ativo acompanha a sessão autenticada, sem expiração por tempo independente. A seleção acontece no login ou na troca pelo controle de espaço/perfil. Se a sessão ou seu contexto ativo se tornar irrecuperável, encerrar toda a sessão Web e exigir novo login; não recuperar o acesso pedindo apenas outro vínculo. Não criar novo prazo de sessão nesta entrega. Uma aba antiga após troca legítima continua bloqueada sem encerrar a sessão nova e sem reenviar operações.
-
-Revisar o planejamento antes de implementar cada etapa e apresentar a tabela atualizada ao finalizar. Prosseguir autonomamente pelas subdivisões internas autorizadas. Usar terminal para Git/GitHub e preferir o Chrome do usuário para testes visuais do aplicativo.
-
-Decisão atualizada pelo responsável em03/11/2026: toda entrega deve ser publicada primeiro na homologação isolada `homologa.gabarito360.com.br`, com banco, arquivos, filas e credenciais de serviços próprios. Posteriormente o responsável autorizou expressamente copiar os usuários e dados atuais de produção para homologação, mantendo suas senhas de acesso. A cópia é pontual, protegida e independente: não compartilhar o banco operacional, não enviar e-mails ou pagamentos reais, não reaproveitar sessões, tokens de acesso ou trabalhos pendentes. Preservar a origem e validar a cópia antes da troca; manter a proteção adicional da homologação. Dados criptografados exigem material de leitura protegido, sem copiar indiscriminadamente o `.env` de produção.
-
-O ambiente atual `gabarito360.com.br` é produção. Sua publicação depende de decisão explícita do responsável no momento combinado, mesmo após CI, revisão do especialista e validação na homologação. Concluir L4 ou obter parecer de design não autoriza promoção automática. Preservar os gabaritos e os demais dados existentes. Não incluir arquivos ou alterações preexistentes de outras tarefas nos commits desta entrega.
-
-Decisão de07/11/2026: confirmações de negócio devem usar modal da aplicação; não introduzir `window.confirm`, `alert` ou `prompt` nativos. As ações Editar turma e Arquivar/Desarquivar turma devem ter ícone e texto, inclusive no celular. Preservar CSRF, versão, intenção explícita, Cancelar/Escape, foco e proteção contra duplo envio.
-
-Correção posterior explícita do responsável: recuperar “Meu espaço” da primeira prévia, recolhível DENTRO do card com escola/perfil em duas colunas, no desktop e mobile. Não criar botão informacional nem modal “Meu espaço” no header. O controle de troca de vínculo já é uma ação própria do cabeçalho, visível somente para quem tem mais de um vínculo. Avatar abre o menu, que pode ficar à mostra ou ser recolhido. Esta correção supera o ensaio de ícone/modal e o bloco expandido no header.
-
-Esclarecimento final do responsável: o AVATAR abre o menu DA CONTA, não a navegação principal. Mostrar nome completo e e-mail de acesso no topo da conta; ações Meu perfil, Trocar vínculo (somente mais de um elegível) e Sair. Não duplicar a troca de vínculo em outro ícone no header. A navegação principal possui botão próprio, pode ficar à mostra ou escondida, e também abre por Mais no celular. Meu espaço continua apenas informativo, recolhível no card. Na prévia, nome/e-mail e vínculos são fictícios; Perfil/Sair são feedback de demonstração, sem abrir cadastro ou encerrar sessão real.
-
-Correção expressa do menu principal: SOMENTE DESKTOP deve abrir em fluxo lateral, refazendo a largura disponível do conteúdo, sem sobreposição, backdrop, inert ou prisão de foco; recolher devolve toda a largura. Manter aberto ao navegar nas seções até recolhimento explícito. A alteração não é para o mobile: preservar a estrutura da foto enviada (quatro atalhos inferiores e Mais) e não implementar menu acima do conteúdo. A resposta assíncrona sobre empurrar o conteúdo no celular foi corrigida pelo próprio responsável, que esclareceu estar falando do desktop. Avatar/conta é independente e aprovado. Apresentar os dois modelos desktop/mobile para avaliação antes de propagar para as telas reais.
-
-Rodada2 da prévia(08/11/2026): menu desktop agora alterna EXPANDIDO/COMPACTO conforme lógica doYouTube, sem copiar visual e semlogo duplicada: marca completa apenas noheader e assetclaro noescuro. A lateral compacta continua ocupando80px; expandida256px, ambasrefluemconteúdo. Este pedido supera o recolhimento semcoluna da rodada anterior. Tablets a partir de768CSSpx usam estrutura desktop otimizada; celulares até767px usam navegaçãoinferior4atalhos+Mais e folha inferior/listavertical, conformefoto doApp, nunca lateral desktop. ContextoMeuEspaço no celular empilha escola/nome/perfil/nome; emdesktopduascolunas. Preservar variante do card e testar nova no rodapé da lateral expandida, comdivisor acima. Avatar deentidade possui classe própria e tamanho64desktop/56mobile. SepararfontesCSSmobile/desktop. FormValidation autorizado expressamente pelo responsável com licença e atualização gratuita documentadas; não copiar documentos privados de compra paraGit/arquivos públicos. Continuar somente a prévia até aprovação visual geral.
-
-Rodada3: contexto-espaco ocupa toda a largura, sem breadcrumb reservando faixa lateral. Meu espaço na lateral expandida fica fixo, sem details/summary; a variante do card continua recolhível. Menu lateral branco no claro e navy #001534 no escuro. Tabela: Ações é primeira coluna real, à esquerda, largura intrínseca limitada e botõespq. Cards: ações no rodapé esquerdo, alinhado na linha sem altura fixa. Material Symbols Outlined locais, sem CDN, ícones16 nas açõespq/20 navegação, licença preservada e nomes acessíveis contextuais. Apenas prévia até aceite humano geral.
-
-Rodada4 aprovada pelo responsável: solução progressiva nos grupos da prévia, por largura disponível. Amplo mantém rótulo completo; intermediário remove contexto repetido; estreito Filtro/Editar ícones, Arquivar mantém texto. Não criar mp; conservar pq32/44toque, nomes acessíveis, legendas e confirmação. Logo usa composição oficial da homologação SVG+Figtree800/6AlbertSans800, medidasCSS32/18/8, com fontes locais e temaescuro. Não copiar zoom1.25 da aba operacional. Somente prévia; avaliar desktop/mobile no Chrome antes de telas reais.
-
-Aceite humano posterior: rodada4 e conjunto da prévia APROVADOS. Autorizado TW2 na estrutura real, com publicação somente na homologação e preservação integral dos dados; nenhum deploy em produção. O gate da prévia está satisfeito. Replanejar fronteiras, validar estrutura compartilhada e percurso representativo; famílias completasTW3/4/5 seguem etapas próprias.
-
-Correção humana duranteTW2: manter filtros em modal, não em formulário inline. Na listaTurmas, botão de ícone abreNome/Escola/Ano; aplicar confirma a consulta, Cancelar/Escape descarta rascunho e devolve foco. Preservar a superfície antiga da barra no escuro: homologação computou header e lateralrgb(24,34,52),--surface:#182234. Isso supera o navy#001534 específico da lateral nas rodadas anteriores; não alterar o tema claro nem a paleta de ações.
-
-Versionamento definido duranteTW2: usar numeração sem apelidos. Desenvolvimento atual0.1.0, fonteúnica apps/web/config/versao.php. Rodapé exibe somente número; fase/SHA técnicos permanecem nos marcadores/recibos e rastreabilidade. 0.x desenvolvimento;1.0.0 primeiraestável;1.x novosrecursoscompatíveis;correçõesúltimonúmero;2.0.0 exige decisão de nova geração/incompatibilidade, nunca incremento automático por deploy/etapa. Não promover produção automaticamente por incrementar versão.
-
-Correção humana posterior e literal: rodapé **Gabarito360 - v0.1.0 - Homologação**. Isso supera a exibição do número isolado. A fonte única continua config/versao.php; ambiente deriva deAPP_ENV sem mudar.env; fase/SHA continuam internos. Planejamento do complemento emdocs/187-tw2-conferencia-homologacao.md. Busca deTurmas mantém contratoAPI(nomeOU série); rótulo deve serNome ou série e resumoBusca:.
-
-Correção explícita posterior do responsável: em TODAS as tabelas, a coluna de ações fica à DIREITA, como última coluna real no DOM; título Ações e botões CENTRALIZADOS dentro dela. Esta decisão supera a posição à esquerda das rodadas anteriores. Largura intrínseca ao conteúdo autorizado, sem limites fixos que cortem ou escondam botões; grupos podem quebrar entre botões conforme o espaço disponível, nunca dentro de uma ação. Preservar SMALL, foco, ordem de leitura, permissões e rolagem regional quando indispensável. A correção refere-se às tabelas: cards continuam com ações completas no rodapé esquerdo aprovado. Ordenação nas próprias colunas de dados, crescente/decrescente, exceto operações e seleção pura. O select permanece útil nos cards. Ordenar antes da paginação em coleções completas; em páginas parciais identificar explicitamente o escopo local sem inventar ordenação global/API. Ver docs/188-tw3-acoes-direita.md.
-
-Organização dos painéis: no painel individual, Resultados por período escolar e Agenda da turma entram por padrão em Resultados da turma, abaixo de Estudantes. Além dos widgets, permitir reordenar seções completas com seu título/conteúdo, dentro do mesmo card central, e os cards centrais completos entre si. Preservar KPIs fixos, catálogo/permissões, pins e geometria relativa. Controles pequenos distintos pelo contexto e nome acessível; arrastar ou teclado/setas, Salvar/Cancelar/Restaurar padrão, somente edição desktop/tablet amplo. Preferências no mesmo salvamento versionado por usuário/vínculo/turma/painel; nenhum apagamento de histórico. Planejamento em docs/189-paineis-secoes-cards.md.
-
-Novo pedido humano: apresentar primeiro uma prévia LOCAL consolidando os cards-seção de Turmas/Turma em um editor com duas abas. Distribuição controla ordem das seções, transferência/ativação dos widgets e títulos pessoais editáveis; Ajustes finos usa GridStack somente dentro da seção atribuída. A nova composição supera a antiga proibição dessas preferências pessoais, sem conceder acesso a dados fora do catálogo autorizado. KPIs continuam fixos. Edição SOMENTE desktop; no celular mostrar o que foi salvo no desktop ou padrão do perfil, sem controles de edição. Persistência futura por usuário/perfil/vínculo/painel/turma com autorização/versionamento/auditoria no servidor. Nesta entrega, apenas dados e salvamento fictícios locais; o usuário exige avaliação no Chrome e aprovação antes de qualquer aplicação/publicação na homologação. Não integrar silenciosamente em main nem publicar produção. Ver docs/190-previa-editor-paineis.md.
-
-Rodada seguinte da prévia: manter o modelo anterior em COLUNAS na aba Distribuição por seção, incluindo seções filhas embutidas. A correção humana “Não! Era para continuar com o quadro de colunas!” e “Volte para o modelo anterior” supera a resposta assíncrona anterior que parecia autorizar WYSIWYG nessa aba. A grade visual pertence somente aos Ajustes finos. Raiz e cada seção são grades mistas de widgets e contêineres; avulsos compartilham a raiz, sem card central artificial. Padrão com três painéis configurados por perfil; usuário pode nomear, criar ou reduzir a quantidade, sem apagar widgets ao remover contêiner. Painéis sem widgets efetivamente visíveis não aparecem na leitura. Select Seção permite Sem seção (avulso visível) e Criar nova seção. Abas com ícone+nome; títulos20/18/16bold conforme referência. Preservar catálogo, escopo e pins; bloquear ciclos e destino descendente. Continuar SOMENTE LOCAL até aprovação humana; nenhuma autorização de deploy decorre dessa rodada.
-
-Aceite humano de09/11/2026: editor e suas funcionalidades APROVADOS. Autorizada integração real nos painéis Turmas/Turma, com revisão do planejamento, persistência servidor por usuário/perfil/vínculo/painel/turma, compatibilidade e preservação dos dados/histórico. Validar, realizar CI/merge e publicar SOMENTE na homologação; produção permanece expressamente fora do escopo. Esta aprovação supera os gates anteriores que restringiam o editor à prévia local. Preservar quadro de colunas, ajustes finos, leitura mobile, KPIs fixos e catálogo autorizado. Ver docs/191-editor-paineis-integracao.md.
-
-Correção humana de09/11/2026: o rodapé de versão NÃO aparece no celular (até767CSSpx). Retirar sua reserva de espaço, conservando navegação inferior e safe-area; desktop/tablet>=768 continuam com o rodapé e o formato definido. Não alterar número da versão nem publicar produção por esta mudança.
-
-Direção de desempenho aprovada em09/11/2026: aplicar o checklist relevante à entrega atual do editor; fechar e validar sua release na homologação; depois medir baseline autenticada e priorizar otimizações por evidência. Novas funcionalidades seguem os fundamentos de docs/192-fundamentos-desempenho.md: API é a fronteira do banco, cache técnico tem escopo/versão/invalidação sem autoridade de acesso, carga é progressiva, callbacks antigos são invalidados e escritas usam integridade/idempotência adequadas. Testes/medições proporcionais ao risco; metas sugeridas não são resultados atingidos. Não migrar React/infraestrutura nem enfraquecer segurança por inferência dessa direção.
-
-## Desempenho — plano integral e critérios de novas funcionalidades
-
-Plano integral aprovado posteriormente pelo responsável: executar por etapas completas F0–F6, conforme [docs/194](docs/194-planejamento-desempenho-integral.md), com fundamentos aceitos no [ADR195](docs/195-adr-fundamentos-desempenho.md). Antes de cada etapa, revisar seu planejamento usando a evidência anterior; atualizar a tabela ao terminar. Uma redução isolada no resolver não encerra F2. Na entrega F0/F1, preservar os experimentos F2 separados e não os incorporar ao commit/publicação. Subdivisões técnicas autorizadas prosseguem sem nova confirmação por item; produção continua exigindo a decisão específica vigente.
-
-Toda funcionalidade declara, proporcionalmente ao risco, contrato API/BFF/UR4, universo/volume, autorização/revogação, consulta/projeção/ordem/paginação, cache ou decisão de não usar, lifecycle regional, concorrência/jobs quando aplicáveis e evidência de validação. Usar o checklist de entrada/aceite do ADR e o template de PR; justificar o que não se aplica. API é dona do banco e das regras; Web consome HTTP. Não guardar concessões no ator, por requisição ou TTL para ganhar desempenho. Cache técnico persistente do navegador ou servidor não recebe senha/token, decisão de permissão, conteúdo escolar ou título livre; cache estrutural usa contexto/versão/catálogo/schema e nunca autoriza acesso.
-
-Medições identificam release, cenário, volume e método, separando CLI, HTTP, BFF e browser, tempos inclusivos/exclusivos e efeitos operacionais normais. Não produzir percentis sem amostra adequada nem subtrair métodos/cenários diferentes para atribuir custo. Não exportar SQL literal/bindings, corpos, aluno/título/e-mail, cookies, tokens ou HAR bruto; evidências operacionais ficam fora do Git. Metas/orçamentos propostos não são resultados atingidos. Preferir testes de contrato, crescimento de consultas, isolamento, integridade e bytes determinísticos a cronômetros frágeis ou testes que espelham implementação.
-
-F0/F1 podem fechar em documentos/evidências sem deploy quando não houver delta de app/configuração. Profiling operacional deve delegar ao comportamento original e declarar seus limites. Se necessária, instrumentação é opt-in, somente staging e desativada por padrão, sem mudar autoridade/contrato ou misturar otimizações futuras; recebe revisão/testes e só publica com o conjunto de F1. Mudanças de interface mantêm os gates de UI já definidos; cada etapa implementada fecha revisão/CI/backup/rollback aplicáveis antes de publicar somente na homologação.
+- Toda medição de desempenho usa 1000 usuários simultâneos, sem simulação. [ADR-0052](docs/decisoes/0052-medicao-com-1000-usuarios-simultaneos.md)
+- Siga os fundamentos: a API é dona do banco, o cache técnico não tem autoridade de acesso, a carga é progressiva e as escritas têm integridade. [ADR-0046](docs/decisoes/0046-fundamentos-de-desempenho-adr-195.md), [ADR-0047](docs/decisoes/0047-plano-integral-de-desempenho-f0-f6.md)
+- Não exporte SQL literal, corpos de requisição, dados de aluno, cookies, tokens nem HAR bruto.

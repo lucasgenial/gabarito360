@@ -27,10 +27,10 @@ Dar ao servidor de produção uma base operacional segura: backup copiado e rest
   - Cópia externa dos backups da homologação → FN-003.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/acompanhar-correcao.html` (tela de câmera e acompanhamento, ver [docs/01](../../01-inventario-dos-mockups.md)).
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) fase 0, [docs/36](../../36-b6-correcoes-revisao.md), [docs/39](../../39-validacoes-l2.md) (retenção B6), [docs/operacao/backup.md](../../operacao/backup.md), [docs/operacao/deploy.md](../../operacao/deploy.md), [docs/operacao/deploy-b6-2026-10-31.md](../../operacao/deploy-b6-2026-10-31.md), [docs/58](../../58-v1-fila-e-consultas-contextuais.md) (fila com vínculo).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-004 do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (`cartao.enviar`, `correcao.acompanhar`).
+- Mockups: `mockups/acompanhar-correcao.html` (tela de câmera e acompanhamento, ver docs/01 (`docs/01-inventario-dos-mockups.md`)).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) fase 0, docs/36 (`docs/36-b6-correcoes-revisao.md`), docs/39 (`docs/39-validacoes-l2.md`) (retenção B6), [docs/operacao/backup.md](../../operacao/backup-e-restauracao.md), [docs/operacao/deploy.md](../../operacao/publicacao-homologacao.md), [docs/operacao/deploy-b6-2026-10-31.md](../../operacao/publicacao-producao.md), docs/58 (`docs/58-v1-fila-e-consultas-contextuais.md`) (fila com vínculo).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-004 do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (`cartao.enviar`, `correcao.acompanhar`).
 - Plano mestre: [§2 FN-002](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

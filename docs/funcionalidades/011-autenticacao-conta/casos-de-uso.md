@@ -1,12 +1,12 @@
 # 011 — Autenticação e conta — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis com conta ([docs/03](../../03-perfis-e-permissoes.md)), inclusive os internos (Desenvolvedor, Suporte, Financeiro)
+**Perfis envolvidos:** todos os perfis com conta (docs/03 (`docs/03-perfis-e-permissoes.md`)), inclusive os internos (Desenvolvedor, Suporte, Financeiro)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
 
-Referência geral: UC-001 "Autenticar no Sistema" de [docs/07](../../07-casos-de-uso.md). Os casos abaixo detalham UC-001 conforme o código; não o substituem.
+Referência geral: UC-001 "Autenticar no Sistema" de docs/07 (`docs/07-casos-de-uso.md`). Os casos abaixo detalham UC-001 conforme o código; não o substituem.
 
 ---
 

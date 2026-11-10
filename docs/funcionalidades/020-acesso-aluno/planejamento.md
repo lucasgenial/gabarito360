@@ -21,9 +21,9 @@ Permitir que o aluno entre com a própria conta e veja apenas os seus resultados
   - Resultado individual e relatórios (telas já existentes para a equipe): FN-049.
 
 ## 3. Fontes de verdade
-- Mockup: `mockups/dashboard-aluno.html` ([inventário §07](../../01-inventario-dos-mockups.md)).
-- Origem: [docs/19](../../19-plano-telas-por-perfil.md) MP-041 e decisão 6.4; [docs/03 §2 e §7](../../03-perfis-e-permissoes.md) (vínculo usuário↔aluno "pendente").
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-005 e UC-007 de [docs/07](../../07-casos-de-uso.md).
+- Mockup: `mockups/dashboard-aluno.html` (inventário §07 (`docs/01-inventario-dos-mockups.md`)).
+- Origem: docs/19 (`docs/19-plano-telas-por-perfil.md`) MP-041 e decisão 6.4; docs/03 §2 e §7 (`docs/03-perfis-e-permissoes.md`) (vínculo usuário↔aluno "pendente").
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-005 e UC-007 de docs/07 (`docs/07-casos-de-uso.md`).
 - Código existente: `apps/api/app/Http/Controllers/Api/DashboardController.php` (`aluno`), `apps/api/app/Support/ContextoVinculo.php` (referências de aluno por `vinculo_alunos`), `apps/web/resources/views/dashboard/aluno.blade.php`.
 
 ## 4. Dependências

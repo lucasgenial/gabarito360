@@ -2,7 +2,7 @@
 
 **Atualizado em:** 10/11/2026, por lucasgenial
 
-Este documento descreve como o Gabarito360 trata dados pessoais: papéis, bases legais, inventário, retenção, terceiros, proteção técnica, pedidos dos titulares, avatares, auditoria e o relatório de impacto preliminar. O texto é uma minuta técnica. Um advogado ou o encarregado ainda precisa revisá-lo antes de qualquer publicação. A segurança de sessão e de acesso está em [05-acesso-e-permissoes.md](05-acesso-e-permissoes.md) e em [04-contratos-api-e-web.md](04-contratos-api-e-web.md).
+Este documento descreve como o Gabarito360 trata dados pessoais: papéis, bases legais, inventário, retenção, terceiros, proteção técnica, pedidos dos titulares, avatares, auditoria e o relatório de impacto preliminar. O texto é uma minuta técnica. Um advogado ou o encarregado ainda precisa revisá-lo antes de qualquer publicação. A segurança de sessão e de acesso está em [05-acesso-e-permissoes.md](04-identidade-acesso-e-permissoes.md) e em [04-contratos-api-e-web.md](05-contratos-api-web.md).
 
 Funcionalidades relacionadas: [FN-004 auditoria](../funcionalidades/004-auditoria/planejamento.md), [FN-061 termos](../funcionalidades/061-lgpd-termos-privacidade/planejamento.md), [FN-062 inventário e retenção](../funcionalidades/062-lgpd-inventario-retencao/planejamento.md), [FN-063 proteção](../funcionalidades/063-lgpd-protecao-dados/planejamento.md), [FN-064 pedidos dos titulares](../funcionalidades/064-pedidos-titulares/planejamento.md), [FN-065 incidentes](../funcionalidades/065-plano-incidentes/planejamento.md) e [FN-066 avatares](../funcionalidades/066-avatares-alunos/planejamento.md).
 
@@ -232,7 +232,7 @@ Os passos completos de publicação estão em [publicacao-producao.md](../operac
 
 ## Segurança de sessão e acesso
 
-Este documento não repete o desenho de sessão, vínculo e permissão. Consulte [05-acesso-e-permissoes.md](05-acesso-e-permissoes.md) e [04-contratos-api-e-web.md](04-contratos-api-e-web.md). Os parâmetros verificados em 31/10/2026 são:
+Este documento não repete o desenho de sessão, vínculo e permissão. Consulte [05-acesso-e-permissoes.md](04-identidade-acesso-e-permissoes.md) e [04-contratos-api-e-web.md](05-contratos-api-web.md). Os parâmetros verificados em 31/10/2026 são:
 
 | Item | Valor |
 |---|---|
@@ -387,6 +387,16 @@ Não se guardam nomes, documentos, notas, campos enviados, resposta, query strin
 ### Política
 
 O responsável aprovou 180 dias de retenção com preservação excepcional documentada (`AUDITORIA_RETENCAO_DIAS`; `AUDITORIA_MESES_PRESERVADOS` lista os meses preservados). **Não existe expurgo, `DROP PARTITION` nem agendamento de limpeza.** O particionamento nativo por mês não se aplica: a chave UUID global conflita com a exigência de incluir o mês nas chaves únicas. A tabela vem da migration `2026_11_01_000011_criar_auditoria_eventos`. Eventos históricos anteriores à ativação não foram reconstruídos.
+
+### Alternativas avaliadas para a conservação
+
+| Alternativa | Decisão | Motivo |
+|---|---|---|
+| Particionamento nativo por mês | Rejeitada | Toda chave única precisa incluir a coluna de particionamento. O mês na chave enfraquece a unicidade global do UUID |
+| Registro global separado (ledger) | Adiada | Exige transação entre duas tabelas, migration e manutenção. Reavalie depois de medir o volume real |
+| Arquivo mensal cifrado | Adotada | Mantém o banco como fonte autoritativa e a chave UUID global. Não reduz o banco nem acelera consultas |
+
+O arquivo mensal é um pacote novo por execução, com linhas cifradas e autenticadas e um manifesto de contagem e digest. Evento tardio em mês fechado gera nova revisão e conserva a anterior. Digests detectam divergência só diante de referência confiável: não impedem adulteração conjunta por quem controla chave e cópias. A perda da `APP_KEY` impede a leitura dos arquivos e da fila. Guarde a chave separadamente. Meses preservados bloqueiam a classificação de descarte do mês inteiro. O arquivamento não autoriza expurgo. O isolamento entregue é o da credencial do job. Os privilégios reais das credenciais gerais são revisados à parte.
 
 A tela de consulta (AU2), o "ver como" (S1) e o painel técnico continuam pendentes. Hoje real e visto são a mesma identidade.
 

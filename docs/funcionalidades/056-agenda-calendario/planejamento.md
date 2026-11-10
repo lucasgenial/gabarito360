@@ -39,11 +39,11 @@ Pela [governança](../../planejamento/01-governanca.md) (§2, item 3 e "O que fi
 | [FN-017](../017-convites-cpf/planejamento.md) convites (VI1-B agendado) | Exibir vínculos com início agendado como compromisso, se o responsável confirmar esse uso | Agenda própria de convites |
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/dashboard-coordenador.html` (Agenda da semana), `mockups/dashboard-diretor-escolar.html` (Calendário de provas), `mockups/dashboard-diretor-nucleo.html` (Próximas visitas), `mockups/configuracoes.html` (Calendário letivo); inventário em [docs/01](../../01-inventario-dos-mockups.md). Não há mockup da tela completa de calendário.
-- Style system e direção de design dos painéis: [docs/180](../../180-correcao-dashboards-diretriz.md) e [docs/177](../../177-plano-paineis-turmas.md) (P2.8.5, P5).
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) §2 (CalendarJS) e Fase 7; [docs/177](../../177-plano-paineis-turmas.md) P5; [docs/179](../../179-execucao-paineis-turmas.md); [docs/189](../../189-paineis-secoes-cards.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md). UC-007 do [docs/07](../../07-casos-de-uso.md) (dashboard por perfil) é consumidor.
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md). As chaves `calendario.*` ainda não existem no catálogo.
+- Mockups: `mockups/dashboard-coordenador.html` (Agenda da semana), `mockups/dashboard-diretor-escolar.html` (Calendário de provas), `mockups/dashboard-diretor-nucleo.html` (Próximas visitas), `mockups/configuracoes.html` (Calendário letivo); inventário em docs/01 (`docs/01-inventario-dos-mockups.md`). Não há mockup da tela completa de calendário.
+- Style system e direção de design dos painéis: docs/180 (`docs/180-correcao-dashboards-diretriz.md`) e docs/177 (`docs/177-plano-paineis-turmas.md`) (P2.8.5, P5).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) §2 (CalendarJS) e Fase 7; docs/177 (`docs/177-plano-paineis-turmas.md`) P5; docs/179 (`docs/179-execucao-paineis-turmas.md`); docs/189 (`docs/189-paineis-secoes-cards.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md). UC-007 do docs/07 (`docs/07-casos-de-uso.md`) (dashboard por perfil) é consumidor.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`). As chaves `calendario.*` ainda não existem no catálogo.
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

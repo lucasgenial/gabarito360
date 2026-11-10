@@ -1,10 +1,10 @@
 # 048 — Driver OMR externo — Casos de uso
 
 **Natureza:** nova (Candidata; casos propostos de alto nível)
-**Perfis envolvidos:** a definir no plano; provavelmente Coordenador e Administrador da Rede para o cadastro de layout, e os perfis de FN-045 para o envio. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** a definir no plano; provavelmente Coordenador e Administrador da Rede para o cadastro de layout, e os perfis de FN-045 para o envio. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Casos derivados do [docs/08](../../08-omr.md). Nenhum está implementado. Serão detalhados quando a funcionalidade for priorizada.
+Casos derivados do docs/08 (`docs/08-omr.md`). Nenhum está implementado. Serão detalhados quando a funcionalidade for priorizada.
 
 ---
 

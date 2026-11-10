@@ -18,10 +18,10 @@ Gerar o relatório em PDF da turma com o mesmo recorte, as mesmas bases e as mes
   - Documentos administrativos da secretaria (P8.1.6) → a definir junto com FN-053 (variantes por perfil, P2.4).
 
 ## 3. Fontes de verdade
-- Mockup de referência: `mockups/turma-detalhe-2.html` ([docs/01](../../01-inventario-dos-mockups.md) seção 14); direção de design citada em `operacao-20261102/tu1-pdf-direcao-design.md` (fora do Git).
-- Documentos de origem: [docs/176](../../176-reconciliacao-solicitacoes.md) (TU1-PDF), [docs/177](../../177-plano-paineis-turmas.md) (P8.1), [docs/tu1-r3-dashboard-analitico.md](../../tu1-r3-dashboard-analitico.md), [docs/182](../../182-p32-indicadores.md) (bases de P3.2).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-010 do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) §4.6 (`relatorio.turma`).
+- Mockup de referência: `mockups/turma-detalhe-2.html` (docs/01 (`docs/01-inventario-dos-mockups.md`) seção 14); direção de design citada em `operacao-20261102/tu1-pdf-direcao-design.md` (fora do Git).
+- Documentos de origem: docs/176 (`docs/176-reconciliacao-solicitacoes.md`) (TU1-PDF), docs/177 (`docs/177-plano-paineis-turmas.md`) (P8.1), `docs/tu1-r3-dashboard-analitico.md`, docs/182 (`docs/182-p32-indicadores.md`) (bases de P3.2).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-010 do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) §4.6 (`relatorio.turma`).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

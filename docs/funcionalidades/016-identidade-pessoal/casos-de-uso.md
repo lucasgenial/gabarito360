@@ -1,7 +1,7 @@
 # 016 — Identidade pessoal (ID1) — Casos de uso
 
 **Natureza:** existente documentada a partir do código (UC-016-01 a 03) e nova (UC-016-04 a 06)
-**Perfis envolvidos:** operador do servidor; futuramente Admin Rede, Dir. Núcleo, Dir. Escolar, Coordenador e Secretário escolar, conforme a matriz proposta no docs/139 ([docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** operador do servidor; futuramente Admin Rede, Dir. Núcleo, Dir. Escolar, Coordenador e Secretário escolar, conforme a matriz proposta no docs/139 (docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.

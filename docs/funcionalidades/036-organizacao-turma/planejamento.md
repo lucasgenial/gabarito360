@@ -21,10 +21,10 @@ Organizar o detalhe da turma em seções claras (Visão geral, Alunos, Disciplin
   - Intervalos de matrícula e contexto histórico (MT1) → FN-026.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/turmas.html`, `turma-detalhe-2.html` ([docs/01](../../01-inventario-dos-mockups.md) §13–§14); direção de design em `docs/operacao-20261102/tu1-direcao-design.md` (citada no docs/175).
-- Documentos de origem: [docs/175](../../175-tu1-organizacao-da-turma.md), [docs/176](../../176-reconciliacao-solicitacoes.md), [tu1-revisao-fluxos](../../tu1-revisao-fluxos.md), [tu1-r3-dashboard-analitico](../../tu1-r3-dashboard-analitico.md).
+- Mockups: `mockups/turmas.html`, `turma-detalhe-2.html` (docs/01 (`docs/01-inventario-dos-mockups.md`) §13–§14); direção de design em `docs/operacao-20261102/tu1-direcao-design.md` (citada no docs/175).
+- Documentos de origem: docs/175 (`docs/175-tu1-organizacao-da-turma.md`), docs/176 (`docs/176-reconciliacao-solicitacoes.md`), tu1-revisao-fluxos (`docs/tu1-revisao-fluxos.md`), tu1-r3-dashboard-analitico (`docs/tu1-r3-dashboard-analitico.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`).
 - Plano mestre: [§2 FN-036](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

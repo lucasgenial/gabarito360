@@ -1,7 +1,7 @@
 # 038 — Disciplinas, áreas e currículo das provas (DC1) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** Coordenador (gestão); Diretor Escolar, Vice-diretor, Professor (consulta); Professor e Coordenador (provas curriculares) — ver [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** Coordenador (gestão); Diretor Escolar, Vice-diretor, Professor (consulta); Professor e Coordenador (provas curriculares) — ver docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.

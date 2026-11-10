@@ -1,7 +1,7 @@
 # 026 — Matrícula e enturmação (MT1) — Casos de uso
 
 **Natureza:** evolução de existente (UC-01 a 03 documentados a partir do código; UC-04 a 06 propostos)
-**Perfis envolvidos:** Coordenador, Diretor Escolar, Vice-diretor, Secretário Escolar (movimentação); perfis com `aluno.desativar`/`turma.desativar` (arquivamento). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** Coordenador, Diretor Escolar, Vice-diretor, Secretário Escolar (movimentação); perfis com `aluno.desativar`/`turma.desativar` (arquivamento). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para o existente, descreve o comportamento **atual** e marca com ⚠ as diferenças em relação ao planejado.

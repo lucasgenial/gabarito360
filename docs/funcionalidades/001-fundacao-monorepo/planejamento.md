@@ -25,10 +25,10 @@ Dar ao Gabarito360 a estrutura mínima sobre a qual todas as funcionalidades sã
   - Estrutura-alvo de diretórios (`apps/api/plataforma/`) → [FN-009](../009-estrutura-diretorios-alvo/planejamento.md).
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/login.html` (base da tela de login; ver [docs/01](../../01-inventario-dos-mockups.md)).
-- Documentos de origem: [docs/13](../../13-roadmap.md) (MP-001..005), [docs/12](../../12-arquitetura.md), [docs/14](../../14-plano-de-execucao.md), [docs/15](../../15-plano-de-commits.md), [docs/00](../../00-project-rules.md).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001 do [docs/07](../../07-casos-de-uso.md) (autenticação, detalhada em FN-011).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (não há permissão própria desta funcionalidade).
+- Mockups: `mockups/login.html` (base da tela de login; ver docs/01 (`docs/01-inventario-dos-mockups.md`)).
+- Documentos de origem: docs/13 (`docs/13-roadmap.md`) (MP-001..005), docs/12 (`docs/12-arquitetura.md`), docs/14 (`docs/14-plano-de-execucao.md`), docs/15 (`docs/15-plano-de-commits.md`), docs/00 (`docs/00-project-rules.md`).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001 do docs/07 (`docs/07-casos-de-uso.md`) (autenticação, detalhada em FN-011).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (não há permissão própria desta funcionalidade).
 - Plano mestre: [§2 FN-001](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

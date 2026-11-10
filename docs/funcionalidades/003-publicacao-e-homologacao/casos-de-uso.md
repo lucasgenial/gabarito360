@@ -1,7 +1,7 @@
 # 003 — Publicação, deploy e homologação isolada — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** operador técnico com root nos servidores; responsável do produto (decisão de produção). Nenhum perfil da matriz do [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** operador técnico com root nos servidores; responsável do produto (decisão de produção). Nenhum perfil da matriz do docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
@@ -30,7 +30,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Critérios de aceite:**
 - [x] `--check` não coloca aplicações em manutenção, não instala dependências e não migra.
 
-**Situação:** Implementado — evidência: `scripts/operacao/deploy.sh`, `scripts/tests/test_deploy.py`, [docs/operacao/deploy.md](../../operacao/deploy.md).
+**Situação:** Implementado — evidência: `scripts/operacao/deploy.sh`, `scripts/tests/test_deploy.py`, [docs/operacao/deploy.md](../../operacao/publicacao-homologacao.md).
 
 ---
 
@@ -115,7 +115,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 - [x] Publicação V1–T5 registrada (`a90fbf5`, 02/11/2026).
 - [ ] ⚠ Encerramento do marcador da primeira ativação registrado. Resolve: subfase 3.5.
 
-**Situação:** Parcial — evidência: `scripts/operacao/preparar-release.sh`, `scripts/operacao/publicar-fase.sh`, [docs/99](../../99-publicacao-por-fase.md), [docs/100](../../100-publicacao-inicial-v1-t5.md).
+**Situação:** Parcial — evidência: `scripts/operacao/preparar-release.sh`, `scripts/operacao/publicar-fase.sh`, docs/99 (`docs/99-publicacao-por-fase.md`), docs/100 (`docs/100-publicacao-inicial-v1-t5.md`).
 
 ---
 
@@ -145,7 +145,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 - [x] Backup e restauração completa da VM ensaiados (clone).
 - [ ] ⚠ Cópia externa dos backups da homologação. Resolve: subfase 3.7.
 
-**Situação:** Implementado — evidência: `infra/homologacao/deploy.py`, [docs/127](../../127-h1-homologacao-isolada.md), [docs/129](../../129-h1-publicacao-ci1-e.md), PR #159.
+**Situação:** Implementado — evidência: `infra/homologacao/deploy.py`, docs/127 (`docs/127-h1-homologacao-isolada.md`), docs/129 (`docs/129-h1-publicacao-ci1-e.md`), PR #159.
 
 ---
 

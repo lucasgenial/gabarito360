@@ -20,10 +20,10 @@ Dar a cada pessoa, logo após escolher o vínculo, um painel inicial com os indi
   - Integração real com a SEGES → sem plano (ver item 8).
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/dashboard-admin.html`, `dashboard-diretor-nucleo.html`, `dashboard-diretor-escolar.html`, `dashboard-coordenador.html`, `dashboard-professor.html`, `dashboard-aluno.html` ([docs/01](../../01-inventario-dos-mockups.md) seções 02–07). Secretaria e aplicador não têm mockup próprio (vieram com o MP-026).
-- Documentos de origem: [docs/13](../../13-roadmap.md) (MP-006..011), [docs/19](../../19-plano-telas-por-perfil.md) (MP-040), [docs/27](../../27-plano-graficos-echarts.md) (G3), [docs/04](../../04-requisitos-funcionais.md) RF-009.
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-007 do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) §3 (escopos por perfil).
+- Mockups: `mockups/dashboard-admin.html`, `dashboard-diretor-nucleo.html`, `dashboard-diretor-escolar.html`, `dashboard-coordenador.html`, `dashboard-professor.html`, `dashboard-aluno.html` (docs/01 (`docs/01-inventario-dos-mockups.md`) seções 02–07). Secretaria e aplicador não têm mockup próprio (vieram com o MP-026).
+- Documentos de origem: docs/13 (`docs/13-roadmap.md`) (MP-006..011), docs/19 (`docs/19-plano-telas-por-perfil.md`) (MP-040), docs/27 (`docs/27-plano-graficos-echarts.md`) (G3), docs/04 (`docs/04-requisitos-funcionais.md`) RF-009.
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-007 do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) §3 (escopos por perfil).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

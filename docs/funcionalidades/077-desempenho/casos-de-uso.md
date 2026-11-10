@@ -1,10 +1,10 @@
 # 077 — Desempenho e carga — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis (efeito transversal); operador da homologação e agentes de execução nos casos de medição e capacidade (ver [docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** todos os perfis (efeito transversal); operador da homologação e agentes de execução nos casos de medição e capacidade (ver docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
-Os fluxos de negócio dos painéis, da turma, da correção e dos relatórios estão em UC-004, UC-006 e UC-007 de [docs/07](../../07-casos-de-uso.md) e nas FNs donas. Aqui ficam as garantias de desempenho que esses fluxos recebem e os procedimentos de medição. Números citados são diagnóstico (métodos do docs/197 e docs/198), não resultados no padrão de 1000 usuários simultâneos.
+Os fluxos de negócio dos painéis, da turma, da correção e dos relatórios estão em UC-004, UC-006 e UC-007 de docs/07 (`docs/07-casos-de-uso.md`) e nas FNs donas. Aqui ficam as garantias de desempenho que esses fluxos recebem e os procedimentos de medição. Números citados são diagnóstico (métodos do docs/197 e docs/198), não resultados no padrão de 1000 usuários simultâneos.
 
 ---
 

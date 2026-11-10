@@ -1,7 +1,7 @@
 # 061 — Termos, privacidade e aceite — Casos de uso
 
 **Natureza:** evolução de existente (prévias sem rota no código; o restante é proposto)
-**Perfis envolvidos:** visitante anônimo; todos os perfis autenticados das instituições e do espaço pessoal; Desenvolvedor (publicação de versão). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** visitante anônimo; todos os perfis autenticados das instituições e do espaço pessoal; Desenvolvedor (publicação de versão). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
@@ -45,7 +45,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Tela/rota:** a definir na subfase 1.4 (tela de aceite após o login); endpoint de aceite na API.
 
 **Fluxo principal:**
-1. O usuário faz login (UC-001 do [docs/07](../../07-casos-de-uso.md)).
+1. O usuário faz login (UC-001 do docs/07 (`docs/07-casos-de-uso.md`)).
 2. O sistema detecta versão não aceita e apresenta o texto resumido com links para a íntegra.
 3. O usuário confirma o aceite.
 4. A API grava o aceite e libera a navegação.

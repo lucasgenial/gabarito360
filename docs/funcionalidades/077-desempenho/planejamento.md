@@ -4,7 +4,7 @@
 **Etapa:** Em planejamento
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5): medição com 1000 usuários simultâneos antes de qualquer abertura comercial; F6 restante quando houver uso real. A forma de obter as 1000 identidades está na Onda 0 (decisão §4 item 8)
 **Natureza:** existente documentada a partir do código
-**Origem:** tronco original (X1–X2 do [docs/28](../../28-plano-mestre-proximos-modulos.md)); ST1 nasceu do incidente da turma após UR3 ([docs/168](../../168-estabilizacao-turmas-e-contratos.md)); AP1 ([docs/172](../../172-ap1-plano-desempenho-e-contrato-api.md), [docs/173](../../173-ap1-contrato-http-e-operacao-independente.md)); série F0–F6 ([docs/192](../../192-fundamentos-desempenho.md), [docs/194](../../194-planejamento-desempenho-integral.md)–[docs/200](../../200-f5-f6-diagnostico-catalogo.md)), surgida na integração do editor e aprovada pelo responsável como plano integral
+**Origem:** tronco original (X1–X2 do docs/28 (`docs/28-plano-mestre-proximos-modulos.md`)); ST1 nasceu do incidente da turma após UR3 (docs/168 (`docs/168-estabilizacao-turmas-e-contratos.md`)); AP1 (docs/172 (`docs/172-ap1-plano-desempenho-e-contrato-api.md`), docs/173 (`docs/173-ap1-contrato-http-e-operacao-independente.md`)); série F0–F6 (docs/192 (`docs/192-fundamentos-desempenho.md`), docs/194 (`docs/194-planejamento-desempenho-integral.md`)–docs/200 (`docs/200-f5-f6-diagnostico-catalogo.md`)), surgida na integração do editor e aprovada pelo responsável como plano integral
 **Atualizado em:** 2026-11-09, por lucasgenial
 
 ## 1. Objetivo
@@ -29,9 +29,9 @@ Manter o aplicativo rápido e estável para todos os perfis com consultas propor
   - CI do MariaDB: [FN-008](../008-ci-integracao/).
 
 ## 3. Fontes de verdade
-- Documentos de origem: [docs/168](../../168-estabilizacao-turmas-e-contratos.md), [docs/172](../../172-ap1-plano-desempenho-e-contrato-api.md), [docs/173](../../173-ap1-contrato-http-e-operacao-independente.md), [docs/192](../../192-fundamentos-desempenho.md), [docs/194](../../194-planejamento-desempenho-integral.md) (plano integral e padrão de carga), [docs/195](../../195-adr-fundamentos-desempenho.md) (ADR), [docs/196](../../196-diagnostico-desempenho-f1.md), [docs/197](../../197-f2-consultas-paineis.md), [docs/198](../../198-f3-arquivos-cache.md), [docs/199](../../199-f4-carregamento-interacao.md), [docs/200](../../200-f5-f6-diagnostico-catalogo.md); X1–X2 em [docs/28](../../28-plano-mestre-proximos-modulos.md).
+- Documentos de origem: docs/168 (`docs/168-estabilizacao-turmas-e-contratos.md`), docs/172 (`docs/172-ap1-plano-desempenho-e-contrato-api.md`), docs/173 (`docs/173-ap1-contrato-http-e-operacao-independente.md`), docs/192 (`docs/192-fundamentos-desempenho.md`), docs/194 (`docs/194-planejamento-desempenho-integral.md`) (plano integral e padrão de carga), docs/195 (`docs/195-adr-fundamentos-desempenho.md`) (ADR), docs/196 (`docs/196-diagnostico-desempenho-f1.md`), docs/197 (`docs/197-f2-consultas-paineis.md`), docs/198 (`docs/198-f3-arquivos-cache.md`), docs/199 (`docs/199-f4-carregamento-interacao.md`), docs/200 (`docs/200-f5-f6-diagnostico-catalogo.md`); X1–X2 em docs/28 (`docs/28-plano-mestre-proximos-modulos.md`).
 - Regras permanentes em `AGENTS.md` ("Desempenho — plano integral e critérios de novas funcionalidades").
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); relacionados UC-004, UC-006 e UC-007 de [docs/07](../../07-casos-de-uso.md). Perfis: [docs/03](../../03-perfis-e-permissoes.md).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); relacionados UC-004, UC-006 e UC-007 de docs/07 (`docs/07-casos-de-uso.md`). Perfis: docs/03 (`docs/03-perfis-e-permissoes.md`).
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

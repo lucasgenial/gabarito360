@@ -1,12 +1,12 @@
 # 020 — Acesso próprio do aluno — Casos de uso
 
 **Natureza:** evolução de existente (código parcial, sem liberação)
-**Perfis envolvidos:** Aluno; gestores que ligam a conta ao cadastro (a definir) — [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** Aluno; gestores que ligam a conta ao cadastro (a definir) — docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Casos de alto nível; o detalhamento depende da decisão §4 item 10 do plano mestre.
 
-Referências: UC-005 "Visualizar Resultado Individual do Aluno" e UC-007 "Monitorar Desempenho (Dashboard por Perfil)" de [docs/07](../../07-casos-de-uso.md).
+Referências: UC-005 "Visualizar Resultado Individual do Aluno" e UC-007 "Monitorar Desempenho (Dashboard por Perfil)" de docs/07 (`docs/07-casos-de-uso.md`).
 
 ---
 

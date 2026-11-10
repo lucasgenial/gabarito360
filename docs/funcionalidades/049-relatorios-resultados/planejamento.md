@@ -20,10 +20,10 @@ Mostrar aos educadores e gestores o desempenho por aluno, prova, turma, escola, 
   - Consolidado da secretaria (`relatorio.secretaria`) → painel da secretaria em FN-052.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/resultado.html`, `mockups/relatorio-prova.html`, `mockups/relatorio-turma-prova.html`, relatórios dos dashboards ([docs/01](../../01-inventario-dos-mockups.md) seções 20, 22, 23).
-- Documentos de origem: [docs/13](../../13-roadmap.md) (MP-022, MP-034), [docs/04](../../04-requisitos-funcionais.md) RF-008, [docs/123](../../123-resultados-pdf-lote-hotfix.md), [docs/27](../../27-plano-graficos-echarts.md) (G2, gráficos dos relatórios).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-005, UC-006 e UC-010 do [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) §4.6.
+- Mockups: `mockups/resultado.html`, `mockups/relatorio-prova.html`, `mockups/relatorio-turma-prova.html`, relatórios dos dashboards (docs/01 (`docs/01-inventario-dos-mockups.md`) seções 20, 22, 23).
+- Documentos de origem: docs/13 (`docs/13-roadmap.md`) (MP-022, MP-034), docs/04 (`docs/04-requisitos-funcionais.md`) RF-008, docs/123 (`docs/123-resultados-pdf-lote-hotfix.md`), docs/27 (`docs/27-plano-graficos-echarts.md`) (G2, gráficos dos relatórios).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-005, UC-006 e UC-010 do docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) §4.6.
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

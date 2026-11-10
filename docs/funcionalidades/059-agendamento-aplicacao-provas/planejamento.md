@@ -25,9 +25,9 @@ Transformar a data de aplicação de cada prova em um compromisso real da agenda
   - Criação e edição da prova e do gabarito → [FN-040](../040-provas-gabaritos/planejamento.md).
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/dashboard-diretor-escolar.html` (Calendário de provas: aplicações agendadas com status), `mockups/dashboard-coordenador.html` (Agenda da semana), `mockups/criar-prova.html` (Passo 3 "Cartão & Turmas", não detalhado); inventário em [docs/01](../../01-inventario-dos-mockups.md).
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) C4 e E4; [docs/177](../../177-plano-paineis-turmas.md) P1.4.6, P1.4.7, P3.3.5, P5.4; [docs/03](../../03-perfis-e-permissoes.md) (aplicador: provas do dia da sua escola).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-003 do [docs/07](../../07-casos-de-uso.md) (criar prova) e UC-007 (dashboards) são relacionados.
+- Mockups: `mockups/dashboard-diretor-escolar.html` (Calendário de provas: aplicações agendadas com status), `mockups/dashboard-coordenador.html` (Agenda da semana), `mockups/criar-prova.html` (Passo 3 "Cartão & Turmas", não detalhado); inventário em docs/01 (`docs/01-inventario-dos-mockups.md`).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) C4 e E4; docs/177 (`docs/177-plano-paineis-turmas.md`) P1.4.6, P1.4.7, P3.3.5, P5.4; docs/03 (`docs/03-perfis-e-permissoes.md`) (aplicador: provas do dia da sua escola).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-003 do docs/07 (`docs/07-casos-de-uso.md`) (criar prova) e UC-007 (dashboards) são relacionados.
 
 ## 4. Dependências
 | Depende de | Por quê | Situação |

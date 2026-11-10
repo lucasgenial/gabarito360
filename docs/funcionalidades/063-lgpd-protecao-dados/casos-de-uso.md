@@ -1,10 +1,10 @@
 # 063 — Proteção dos dados (cifragem) — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis que cadastram ou consultam usuários, alunos, escolas e contatos; visitante do Fale Conosco; operação. Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** todos os perfis que cadastram ou consultam usuários, alunos, escolas e contatos; visitante do Fale Conosco; operação. Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
-Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Os casos abaixo descrevem garantias transversais aplicadas a fluxos já documentados em outras funcionalidades (login UC-001 e cadastros do [docs/07](../../07-casos-de-uso.md)).
+Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Os casos abaixo descrevem garantias transversais aplicadas a fluxos já documentados em outras funcionalidades (login UC-001 e cadastros do docs/07 (`docs/07-casos-de-uso.md`)).
 
 ---
 

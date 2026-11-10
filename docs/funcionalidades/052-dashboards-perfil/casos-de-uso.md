@@ -1,10 +1,10 @@
 # 052 — Painéis por perfil — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** Secretário de Educação, Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor, Coordenador, Professor, Professor autônomo, Aplicador, Aluno. Ver [docs/03](../../03-perfis-e-permissoes.md) §3.
+**Perfis envolvidos:** Secretário de Educação, Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor, Coordenador, Professor, Professor autônomo, Aplicador, Aluno. Ver docs/03 (`docs/03-perfis-e-permissoes.md`) §3.
 **Atualizado em:** 2026-11-09
 
-Descreve o comportamento **atual**; diferenças em relação ao planejado estão marcadas com ⚠. Detalha o UC-007 do [docs/07](../../07-casos-de-uso.md), sem repeti-lo.
+Descreve o comportamento **atual**; diferenças em relação ao planejado estão marcadas com ⚠. Detalha o UC-007 do docs/07 (`docs/07-casos-de-uso.md`), sem repeti-lo.
 
 ---
 

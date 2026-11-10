@@ -1,12 +1,12 @@
 # 004 — Auditoria de requisições, expurgo e tela de consulta — Casos de uso
 
 **Natureza:** existente documentada a partir do código (AU1); proposta para expurgo e AU2
-**Perfis envolvidos:** todos os usuários da API (captura); operador técnico (comandos); Desenvolvedor e Suporte (AU2, proposta). Ver [docs/03](../../03-perfis-e-permissoes.md), extensão A1.
+**Perfis envolvidos:** todos os usuários da API (captura); operador técnico (comandos); Desenvolvedor e Suporte (AU2, proposta). Ver docs/03 (`docs/03-perfis-e-permissoes.md`), extensão A1.
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
 
-O [docs/07](../../07-casos-de-uso.md) não tem caso de uso de auditoria.
+O docs/07 (`docs/07-casos-de-uso.md`) não tem caso de uso de auditoria.
 
 ---
 
@@ -86,7 +86,7 @@ O [docs/07](../../07-casos-de-uso.md) não tem caso de uso de auditoria.
 - [x] O arquivo mantém os UUIDs globais; o banco continua autoritativo.
 - [x] Nenhuma exclusão de eventos.
 
-**Situação:** Implementado — evidência: `ArquivarAuditoria`, `App\Services\ArquivoMensalAuditoria`, `ArquivoMensalAuditoriaTest`, [docs/75](../../75-au1-b3-arquivos-e-restauracao.md).
+**Situação:** Implementado — evidência: `ArquivarAuditoria`, `App\Services\ArquivoMensalAuditoria`, `ArquivoMensalAuditoriaTest`, docs/75 (`docs/75-au1-b3-arquivos-e-restauracao.md`).
 
 ---
 
@@ -106,7 +106,7 @@ O [docs/07](../../07-casos-de-uso.md) não tem caso de uso de auditoria.
 **Critérios de aceite:**
 - [x] Recuperação completa com 1,8 M eventos sintéticos registrada (tempos não são SLA).
 
-**Situação:** Implementado — evidência: PR #110, [docs/76](../../76-au1-ensaio-equivalente.md).
+**Situação:** Implementado — evidência: PR #110, docs/76 (`docs/76-au1-ensaio-equivalente.md`).
 
 ---
 

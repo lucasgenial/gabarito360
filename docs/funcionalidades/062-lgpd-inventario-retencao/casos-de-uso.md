@@ -1,7 +1,7 @@
 # 062 — Inventário de dados e retenção — Casos de uso
 
 **Natureza:** existente documentada a partir dos registros; rotinas de retenção propostas
-**Perfis envolvidos:** responsável pela plataforma (controlador/operador); operação (rotinas agendadas); visitante (lista pública). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** responsável pela plataforma (controlador/operador); operação (rotinas agendadas); visitante (lista pública). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
@@ -15,7 +15,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Escopo:** plataforma
 **Pré-condições:** nova operação, campo ou terceiro introduzido por uma funcionalidade.
 **Pós-condições:** docs/34 atualizado com finalidade, base, local, prazo e terceiros.
-**Tela/rota:** [docs/34](../../34-inventario-de-dados.md)
+**Tela/rota:** docs/34 (`docs/34-inventario-de-dados.md`)
 
 **Fluxo principal:**
 1. Uma entrega cria ou altera um tratamento de dados pessoais.
@@ -96,7 +96,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Escopo:** plataforma e instituição
 **Pré-condições:** controles do portal implementados (FN-067) e evidências reunidas.
 **Pós-condições:** risco residual de R01–R11 registrado e decisão do controlador assinada.
-**Tela/rota:** [docs/38 §8](../../38-ripd-preliminar-portal.md)
+**Tela/rota:** docs/38 §8 (`docs/38-ripd-preliminar-portal.md`)
 
 **Fluxo principal:**
 1. Para cada risco, registrar controle, versão, evidência de teste e revisor.

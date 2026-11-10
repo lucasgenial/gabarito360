@@ -22,9 +22,9 @@ Criar a identidade canônica de pessoa, acima das contas e dos cadastros locais:
 
 ## 3. Fontes de verdade
 - Mockups: nenhum; não há interface nesta fundação.
-- Origem: [docs/115 §4](../../115-replanejamento-provas-identidade-transferencias.md), [docs/138](../../138-id1-fundacao-identidade.md), [docs/139](../../139-id1-dc1-ativacao-e-sequencia.md), [docs/140](../../140-id1-referencias-provisorias.md).
+- Origem: docs/115 §4 (`docs/115-replanejamento-provas-identidade-transferencias.md`), docs/138 (`docs/138-id1-fundacao-identidade.md`), docs/139 (`docs/139-id1-dc1-ativacao-e-sequencia.md`), docs/140 (`docs/140-id1-referencias-provisorias.md`).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) (as chaves `identidade.*` ainda não constam).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) (as chaves `identidade.*` ainda não constam).
 - Código: migrations `2026_11_04_000001_fundacao_identidade_pessoal` e `2026_11_04_000002_mapas_identidade_provisoria`; `apps/api/app/Services/ConsultaIdentidadeInterna.php`, `InventarioIdentidades.php`, `PrepararIdentidadesProvisorias.php`; `apps/api/app/Support/DocumentoIdentidade.php`; comandos `g360:identidades-inventariar` e `g360:identidades-provisorias`; `config/identidade.php`.
 
 ## 4. Dependências

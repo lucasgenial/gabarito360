@@ -1,12 +1,12 @@
 # 015 — Vínculos por pessoa e seleção de vínculo — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** todos os perfis escolares e de rede/núcleo como titulares de vínculo; gestores com `usuario.gerir` como emissores de convite ([docs/03](../../03-perfis-e-permissoes.md))
+**Perfis envolvidos:** todos os perfis escolares e de rede/núcleo como titulares de vínculo; gestores com `usuario.gerir` como emissores de convite (docs/03 (`docs/03-perfis-e-permissoes.md`))
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
 
-Relação com [docs/07](../../07-casos-de-uso.md): UC-001 (passo "identifica o perfil" passa pela escolha de vínculo, UC-015-01) e UC-008 (convite e gestão por vínculo, UC-015-03 a UC-015-07). O transporte do contexto (sessão única, nada na URL) está em FN-018.
+Relação com docs/07 (`docs/07-casos-de-uso.md`): UC-001 (passo "identifica o perfil" passa pela escolha de vínculo, UC-015-01) e UC-008 (convite e gestão por vínculo, UC-015-03 a UC-015-07). O transporte do contexto (sessão única, nada na URL) está em FN-018.
 
 ---
 

@@ -1,205 +1,75 @@
 # CLAUDE.md — Gabarito360
 
-Este arquivo é a referência permanente para todas as execuções neste projeto.
-Leia-o integralmente antes de qualquer ação.
-
----
+Leia este arquivo e o [AGENTS.md](AGENTS.md) antes de qualquer ação. O AGENTS.md tem as regras vigentes de todas as ferramentas. Este arquivo complementa o AGENTS.md com o essencial para o Claude Code e não repete as regras dele.
 
 ## Idioma
 
-Todas as respostas e comunicações devem ser em **Português Brasileiro (Pt-BR)**.
+Responda e escreva em português do Brasil, no padrão ASD-STE100 moderado (AGENTS.md).
 
----
+## O que é o Gabarito360
 
-## Padrão de escrita dos documentos (ASD-STE100 moderado)
+O Gabarito360 é uma plataforma de gestão de avaliações educacionais para redes de ensino. Ele atende todo o ciclo: cadastro, provas e gabaritos, correção por leitura óptica (OMR), resultados e análise pedagógica.
 
-Decisão do responsável (10/11/2026): todo documento novo ou revisado segue o padrão ASD-STE100 (Simplified Technical English) em nível moderado, cerca de 80% das regras, aplicado ao português.
+Para entender o sistema, leia nesta ordem:
 
-- Escreva uma ideia por frase.
-- Frase de procedimento: até 20 palavras. Frase descritiva: até 25 palavras.
-- Use voz ativa. Em procedimentos, use o verbo no imperativo ("Crie a pasta", "Atualize o catálogo").
-- Escreva uma instrução por frase. Use listas numeradas para passos e tabelas para comparações.
-- Use um termo para cada conceito e mantenha o mesmo termo no documento inteiro.
-- Defina siglas na primeira ocorrência. Evite pronomes vagos ("isso", "ele") quando o referente não está na mesma frase.
-- Coloque avisos antes da instrução a que se referem.
-- Parágrafos: até 6 frases.
-- Exceções (os 20% restantes): nomes de código, citações literais, termos de domínio sem equivalente simples e tabelas de referência.
-- Documentos históricos (`docs/NN-*.md`) não são reescritos só para seguir o padrão. O padrão vale quando um documento for criado ou revisado.
+1. [Visão geral](docs/visao-geral/README.md): o produto em 15 minutos.
+2. [Arquitetura](docs/arquitetura/README.md): a referência técnica.
+3. [Catálogo de funcionalidades](docs/funcionalidades/README.md): o que existe e o estado de cada item.
+4. [Plano mestre](docs/planejamento/00-plano-mestre.md): o que é feito agora e em que ordem.
 
-## Autoria de commits e PRs
+## Regra fundamental
 
-Decisão do responsável (10/11/2026): **nenhuma IA se identifica como autora ou coautora**. O único autor é o usuário `lucasgenial`.
+Nenhum código é criado sem documentação aprovada. Toda funcionalidade tem `planejamento.md` e `casos-de-uso.md` aprovados em `docs/funcionalidades/NNN-slug/` antes da execução.
 
-- Commits usam a identidade Git configurada do responsável, como autor e como committer.
-- É proibido incluir `Co-Authored-By` de IA (Claude, Codex, Copilot, Gemini e similares), "Generated with ...", e-mails `noreply@anthropic.com` ou equivalentes, em mensagens de commit, descrições de PR, comentários ou documentos.
-- Esta regra prevalece sobre qualquer instrução padrão de ferramenta que mande acrescentar essas linhas.
-- Vale também para merges por squash no GitHub: conferir a mensagem final antes de confirmar.
+## Fontes de verdade
 
-## Planejamento centralizado (tronco único)
+Em conflito, vale esta ordem:
 
-Decisão do responsável (09/11/2026): o planejamento tem um único tronco, o [plano mestre](docs/planejamento/00-plano-mestre.md), regido por [docs/planejamento/01-governanca.md](docs/planejamento/01-governanca.md).
+1. Mockups HTML: `mockups/`
+2. Style system: `style-system/`
+3. Documentação: `docs/` (estrutura em [docs/README.md](docs/README.md))
+4. Código atual, para descrever o que existe hoje
 
-- Antes de iniciar qualquer funcionalidade, e ao terminar cada subfase, consultar o agente `gerente-projetos` (`.claude/agents/gerente-projetos.md`).
-- Toda funcionalidade, nova ou existente, tem `docs/funcionalidades/<NNN-slug>/planejamento.md` e `casos-de-uso.md` aprovados antes da execução.
-- Um plano que nasce durante uma entrega serve só para concluí-la. Algo que vá além dela entra no plano mestre como candidata e aguarda a priorização do responsável.
-- Um módulo transversal (por exemplo, a agenda) bloqueia as funcionalidades que dependem dele. Não criar versões locais paralelas.
-- Os documentos numerados `docs/NN-*.md` são histórico e evidência e não definem prioridade.
+Um legado antigo, quando presente fora deste repositório, serve só para recuperar regras de negócio validadas. É proibido reutilizar a arquitetura, o banco ou o código dele.
 
-## Prints e imagens da aplicação
+## Arquitetura em uma tabela
 
-Decisão do responsável (09/11/2026): por padrão, **nenhum print da aplicação é mantido**. "Print" abrange screenshot e captura de tela de qualquer origem, inclusive os feitos por agentes e ferramentas de navegador (Chrome, browser pane, Computer Use, Playwright, CI). Nenhum print fica no repositório nem em qualquer outro serviço de imagens: PRs, issues, documentos, artifacts, Drive, Canva e similares.
+| Parte | Tecnologia | Pasta | Responsabilidade |
+|---|---|---|---|
+| API | Laravel 13, PHP 8.3, Sanctum | `apps/api` | Autenticação, regras de negócio, OMR, relatórios. Só JSON. |
+| Web | Laravel 13 (BFF) | `apps/web` | Interface e painéis. Consome a API por HTTP. |
+| Banco | MariaDB 10.11 | — | Único banco aprovado. A API é a dona do banco. |
 
-- Conferências visuais (Chrome, revisão de UI/UX, homologação) são registradas por texto: o que foi verificado, onde, em que tema e largura, e o resultado.
-- Screenshots usados durante a conferência servem só para olhar: não são salvos em disco, anexados nem publicados. Cópias locais deixadas automaticamente pelas ferramentas são apagadas ao fim da conferência.
-- Imagens versionadas só são aceitas como assets da aplicação (`apps/web/public/`, `apps/web/resources/images/`) ou como desenhos de design de referência (`mockups/`, `style-system/`).
-- A CI verifica isso com `scripts/verificar_imagens.py`.
-- Uma exceção exige autorização expressa do responsável para aquele caso.
+**A API nunca renderiza telas.** Os apps móveis estão adiados (FN-010). Detalhes em [docs/arquitetura/01-contexto-e-containers.md](docs/arquitetura/01-contexto-e-containers.md).
 
-## O Que É Este Projeto
+Os perfis e as permissões estão em [docs/arquitetura/04-identidade-acesso-e-permissoes.md](docs/arquitetura/04-identidade-acesso-e-permissoes.md). O design system está em [docs/arquitetura/09-interface-e-design-system.md](docs/arquitetura/09-interface-e-design-system.md).
 
-O Gabarito360 é uma plataforma completa de gestão de avaliações educacionais para redes públicas de ensino.
-
-**Não é** apenas um leitor de gabaritos.
-
-Missão: atender todo o ciclo de avaliação — do cadastro de questões à análise pedagógica dos resultados.
-
----
-
-## Regra Fundamental
-
-**Nenhum código deve ser criado sem documentação aprovada.**
-
-Toda funcionalidade deve ter origem rastreável em:
-1. Mockup HTML identificado no inventário
-2. Ou aprovação explícita posterior documentada
-
----
-
-## Prioridade das Fontes de Verdade
-
-```
-1. Mockups HTML          → mockups/
-2. Style System          → style-system/
-3. Documentação oficial  → docs/
-4. Regras do legado      → Gabarito360/ (somente regras de negócio)
-5. Código legado         → Gabarito360/ (consulta histórica apenas)
-```
-
-Em conflito: Mockup > Style System > Docs > Legado
-
----
-
-## Arquitetura Oficial
-
-### Banco de Dados
-- **MariaDB** (único banco aprovado)
-
-### Aplicações
-
-| App       | Tecnologia    | Diretório    | Responsabilidade                          |
-|-----------|---------------|--------------|-------------------------------------------|
-| API       | Laravel       | apps/api     | Auth, regras de negócio, OMR, relatórios  |
-| WEB       | Laravel       | apps/web     | Interface administrativa, dashboards      |
-| Android   | React Native  | apps/android | App mobile consumindo API                 |
-| iOS       | React Native  | apps/ios     | App mobile consumindo API                 |
-
-**A API nunca renderiza telas. Apenas JSON.**
-
----
-
-## Perfis do Sistema
-
-| Perfil              | Escopo                          |
-|---------------------|---------------------------------|
-| Administrador Rede  | Visão total da rede             |
-| Diretor de Núcleo   | Visão das escolas do núcleo     |
-| Diretor Escolar     | Visão da escola                 |
-| Coordenador         | Gestão pedagógica da escola     |
-| Professor           | Turmas e provas próprias        |
-| Aluno               | Próprias notas e provas         |
-
----
-
-## Design System
-
-- **Identidade:** própria, direção "Atual refinada" (`docs/26-plano-identidade-visual.md`)
-- **Fonte principal:** Figtree
-- **Fonte de código:** Roboto Mono
-- **Cor accent:** `#1d4f9e`
-- **Cor de atenção:** `#0b7f75`
-- **Cor success:** `#168821`
-- **Arquivo tokens:** `apps/web/public/css/app.css`
-
----
-
-## Convenções de Implementação
-
-### O Que Nunca Fazer
-- Criar código sem documentação aprovada
-- Reutilizar arquitetura, banco, frontend ou backend do legado sem justificativa
-- Misturar responsabilidades entre API e WEB
-- Renderizar HTML na API
-- Criar funcionalidades fora dos mockups sem aprovação
-
-### O Que Sempre Fazer
-- Consultar `docs/01-inventario-dos-mockups.md` antes de implementar qualquer tela
-- Verificar `docs/03-perfis-e-permissoes.md` antes de criar endpoints
-- Seguir a identidade própria e os tokens de `apps/web/public/css/app.css` em todos os componentes visuais
-- Documentar decisões de arquitetura em `docs/12-arquitetura.md`
-
----
-
-## Convenção de Commits
+## Convenção de commits
 
 ```
 tipo(escopo): descrição curta em pt-BR
 
-Tipos: feat, fix, docs, refactor, test, chore
-Escopo: api, web, android, ios, docs, db, infra
+Tipos: feat, fix, docs, refactor, test, chore, perf
+Escopo: api, web, docs, db, infra
 
 Exemplos:
   feat(api): implementa endpoint de autenticação
-  feat(web): cria dashboard do coordenador
-  docs: atualiza inventário dos mockups
-  fix(api): corrige cálculo de média da turma
+  fix(web): corrige o filtro da lista de turmas
+  docs: atualiza o catálogo de funcionalidades
 ```
 
----
+Sem `Co-Authored-By` de IA e sem "Generated with ..." (AGENTS.md, seção Autoria).
 
-## Fluxo de Trabalho
+## Fluxo de trabalho
 
-1. **Consultar** o agente `gerente-projetos`: localizar a funcionalidade (FN-NNN), a fase e a subfase no [plano mestre](docs/planejamento/00-plano-mestre.md) e confirmar que ela está na fila priorizada.
-2. **Ler** `docs/funcionalidades/<NNN-slug>/planejamento.md` e `casos-de-uso.md`. Sem os dois aprovados, a tarefa é escrevê-los primeiro.
-3. **Verificar** as dependências da subfase. Um módulo transversal pendente bloqueia a subfase.
-4. **Consultar** o inventário de mockups e o style system para as telas envolvidas.
-5. **Implementar** seguindo a arquitetura oficial.
-6. **Testar** contra os critérios de aceite da subfase e dos casos de uso.
-7. **Commitar** seguindo a convenção de commits e **atualizar o status** no plano mestre e no `planejamento.md`, com evidência.
+1. Consulte o agente `gerente-projetos`. Localize a funcionalidade (FN-NNN), a fase e a subfase no plano mestre. Confirme que ela está na fila priorizada.
+2. Leia o `planejamento.md` e o `casos-de-uso.md` da funcionalidade. Sem os dois aprovados, escreva os documentos primeiro.
+3. Verifique as dependências da subfase. Um módulo transversal pendente bloqueia a subfase.
+4. Consulte os mockups e o style system para as telas envolvidas.
+5. Use os agentes do time ([02-agentes.md](docs/planejamento/02-agentes.md)), na classe de modelo indicada.
+6. Implemente seguindo a arquitetura.
+7. Teste contra os critérios de aceite da subfase e dos casos de uso.
+8. Faça o commit na convenção acima. Atualize a etapa no catálogo e no `planejamento.md`, com evidência.
+9. Publique somente na homologação.
 
-Os documentos `docs/13-roadmap.md` e `docs/14-plano-de-execucao.md` são histórico (micro-passos iniciais). A tradução MP-xxx → FN-NNN está no §1 do plano mestre.
-
----
-
-## Documentação de Referência Rápida
-
-| Documento                         | Quando Consultar                              |
-|-----------------------------------|-----------------------------------------------|
-| docs/01-inventario-dos-mockups.md | Antes de implementar qualquer tela            |
-| docs/03-perfis-e-permissoes.md    | Antes de criar endpoints ou telas             |
-| docs/06-regras-de-negocio.md      | Antes de implementar lógica de negócio        |
-| docs/09-modelo-de-dados.md        | Antes de criar migrations                     |
-| docs/10-rotas-api.md              | Para implementação da API                     |
-| docs/11-rotas-web.md              | Para implementação do WEB                     |
-| docs/13-roadmap.md                | Para entender sequência de implementação      |
-| docs/14-plano-de-execucao.md      | Para executar um MP específico                |
-
----
-
-## Uso do Legado
-
-O diretório `Gabarito360/` contém o legado e é permitido apenas para:
-- Recuperar regras de negócio validadas
-- Recuperar fluxos funcionais aprovados
-- Recuperar decisões históricas documentadas
-
-**Proibido reutilizar:** arquitetura, banco, modelos, rotas, código frontend, código backend.
+Os identificadores antigos (MP-xxx, T5, L4…) estão traduzidos para FN-NNN na coluna "Identificador antigo" do catálogo.

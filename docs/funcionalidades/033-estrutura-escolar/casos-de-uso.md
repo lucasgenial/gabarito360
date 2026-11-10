@@ -1,7 +1,7 @@
 # 033 — Núcleos, escolas, turmas e alunos — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor, Secretário Escolar, Coordenador, Professor, Professor autônomo (espaço pessoal) — ver [docs/03](../../03-perfis-e-permissoes.md)
+**Perfis envolvidos:** Administrador da Rede, Diretor de Núcleo, Diretor Escolar, Vice-diretor, Secretário Escolar, Coordenador, Professor, Professor autônomo (espaço pessoal) — ver docs/03 (`docs/03-perfis-e-permissoes.md`)
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Para uma funcionalidade existente, descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve.
@@ -47,7 +47,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Pós-condições:** escola criada; com espaços ativos, espaço da escola criado.
 **Tela/rota:** `escolas.html`; web `GET /escolas/nova`, `POST /escolas`, `GET /escolas/censo/buscar|pesquisar`; API `POST /v1/escolas`, `GET /v1/censo/escolas[/{inep}]`
 
-**Fluxo principal:** segue [UC-002 do docs/07](../../07-casos-de-uso.md), com as diferenças:
+**Fluxo principal:** segue UC-002 do docs/07 (`docs/07-casos-de-uso.md`), com as diferenças:
 1. O ator pode pesquisar a escola no Censo (INEP) e pré-preencher os dados.
 2. Obrigatórios: `nucleo_id`, `nome`, `inep` (8 dígitos, único), `tipo_rede` (estadual, municipal, federal, privada).
 3. Opcionais: sigla, tipo (sede, anexo, unidade vinculada) e escola sede, situação de funcionamento, localização, endereço, CEP, município (código IBGE), UF, coordenadas, telefone, e-mail, turnos, etapas, modalidades.

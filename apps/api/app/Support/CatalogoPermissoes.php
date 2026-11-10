@@ -4,7 +4,7 @@ namespace App\Support;
 
 /**
  * Arquivo: apps/api/app/Support/CatalogoPermissoes.php
- * Função: Catálogo de permissões de docs/03-perfis-e-permissoes.md (v2), em código.
+ * Função: Catálogo de permissões de docs/arquitetura/04-identidade-acesso-e-permissoes.md, em código.
  *         Fonte da sincronização das tabelas `permissoes` e `perfil_permissoes`.
  *         Cada linha: [chave, módulo, descrição, mapa de 8 caracteres na ordem PERFIS]
  *         onde "v" = padrão do perfil, "o" = extra concedível, "-" = nunca.

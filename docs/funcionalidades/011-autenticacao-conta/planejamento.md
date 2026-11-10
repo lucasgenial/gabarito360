@@ -24,10 +24,10 @@ Permitir que qualquer pessoa com conta ativa entre no Gabarito360 com e-mail e s
   - Limite de tentativas no login: FN-007 (X3), ver risco no §8.
 
 ## 3. Fontes de verdade
-- Mockup: `mockups/login.html` ([inventário §01](../../01-inventario-dos-mockups.md)).
-- Origem: [docs/04 RF-001](../../04-requisitos-funcionais.md), [docs/13](../../13-roadmap.md) MP-012, [docs/28](../../28-plano-mestre-proximos-modulos.md) E3/E6, [docs/165](../../165-ur1-seguranca-e-urls.md) (UR1-B: código no corpo do e-mail).
-- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001 de [docs/07](../../07-casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md).
+- Mockup: `mockups/login.html` (inventário §01 (`docs/01-inventario-dos-mockups.md`)).
+- Origem: docs/04 RF-001 (`docs/04-requisitos-funcionais.md`), docs/13 (`docs/13-roadmap.md`) MP-012, docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) E3/E6, docs/165 (`docs/165-ur1-seguranca-e-urls.md`) (UR1-B: código no corpo do e-mail).
+- Casos de uso: [casos-de-uso.md](casos-de-uso.md); UC-001 de docs/07 (`docs/07-casos-de-uso.md`).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`).
 - Código: `apps/api/app/Http/Controllers/Api/AuthController.php`, `apps/api/app/Services/ContaUsuario.php`, `apps/api/app/Http/Middleware/SenhaTrocada.php`, `apps/web/app/Http/Controllers/Auth/LoginController.php`, `apps/web/app/Http/Controllers/PerfilController.php`.
 
 ## 4. Dependências

@@ -1,7 +1,7 @@
 # 072 — Site público e apresentação — Casos de uso
 
 **Natureza:** existente documentada a partir do código
-**Perfis envolvidos:** visitante anônimo; operação (publicação da home). Ver [docs/03](../../03-perfis-e-permissoes.md).
+**Perfis envolvidos:** visitante anônimo; operação (publicação da home). Ver docs/03 (`docs/03-perfis-e-permissoes.md`).
 **Atualizado em:** 2026-11-09
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Descreve o comportamento **atual**, marca as diferenças em relação ao planejado com ⚠ e aponta a subfase que as resolve. O envio do Fale Conosco pertence a FN-060 (E7).

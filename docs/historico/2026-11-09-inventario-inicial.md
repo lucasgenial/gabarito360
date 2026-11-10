@@ -1,6 +1,6 @@
 # Inventário inicial do planejamento (09/11/2026) — histórico
 
-> **Documento histórico.** Este é o primeiro plano mestre, de 09/11/2026. Ele foi substituído em 10/11/2026 pelo [plano mestre orquestrador](../00-plano-mestre.md) e pelo [catálogo de funcionalidades](../../funcionalidades/README.md). O detalhe de cada funcionalidade está em `docs/funcionalidades/NNN-slug/planejamento.md`. Não atualize este arquivo.
+> **Documento histórico.** Este é o primeiro plano mestre, de 09/11/2026. Ele foi substituído em 10/11/2026 pelo [plano mestre orquestrador](../planejamento/00-plano-mestre.md) e pelo [catálogo de funcionalidades](../funcionalidades/README.md). O detalhe de cada funcionalidade está em `docs/funcionalidades/NNN-slug/planejamento.md`. Não atualize este arquivo.
 
 ---
 

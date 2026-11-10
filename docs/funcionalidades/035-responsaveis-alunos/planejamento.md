@@ -19,10 +19,10 @@ Registrar os responsáveis de cada aluno de forma estruturada, com contatos prot
   - Retenção e pedidos de titulares → FN-062, FN-064.
 
 ## 3. Fontes de verdade
-- Mockups: `mockups/aluno-cadastrar.html`, `aluno-cadastrar-redesign.html`, `aluno-detalhe.html` (campo "Responsável"; [docs/01](../../01-inventario-dos-mockups.md) §17, §19).
-- Documento de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) A6; docs/33 (requisitos RL de dados de menores).
+- Mockups: `mockups/aluno-cadastrar.html`, `aluno-cadastrar-redesign.html`, `aluno-detalhe.html` (campo "Responsável"; docs/01 (`docs/01-inventario-dos-mockups.md`) §17, §19).
+- Documento de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) A6; docs/33 (requisitos RL de dados de menores).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md) — hoje coberto por `aluno.gerir`/`aluno.ver`; chaves próprias a definir.
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`) — hoje coberto por `aluno.gerir`/`aluno.ver`; chaves próprias a definir.
 - Plano mestre: [§2 FN-035](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

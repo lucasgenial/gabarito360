@@ -20,9 +20,9 @@ Dar ao Desenvolvedor uma tela com o estado técnico da plataforma — filas, tra
 
 ## 3. Fontes de verdade
 - Mockups: nenhum. Exige mockup ou aprovação explícita.
-- Documentos de origem: [docs/28](../../28-plano-mestre-proximos-modulos.md) (A2), [docs/operacao/deploy.md](../../operacao/deploy.md) (serviços e falhas da fila).
+- Documentos de origem: docs/28 (`docs/28-plano-mestre-proximos-modulos.md`) (A2), [docs/operacao/deploy.md](../../operacao/publicacao-homologacao.md) (serviços e falhas da fila).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
-- Perfis e permissões: [docs/03](../../03-perfis-e-permissoes.md), extensão A1 (Desenvolvedor).
+- Perfis e permissões: docs/03 (`docs/03-perfis-e-permissoes.md`), extensão A1 (Desenvolvedor).
 - Plano mestre: [§2 FN-006](../../planejamento/00-plano-mestre.md).
 
 ## 4. Dependências

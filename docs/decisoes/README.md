@@ -14,7 +14,7 @@ Use este registro para:
 - Ver qual decisão substituiu outra.
 - Ligar uma funcionalidade (FN) às decisões que a afetam.
 
-As regras operacionais curtas para agentes estão na [proposta de AGENTS.md enxuto](_proposta-agents-enxuto.md).
+As regras vigentes resumidas estão no [AGENTS.md](../../AGENTS.md), com links para estes registros.
 
 ## Como registrar uma decisão nova
 
