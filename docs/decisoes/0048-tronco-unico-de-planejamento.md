@@ -14,7 +14,7 @@ agents_resumo:
   - "O catálogo de funcionalidades e o plano mestre são o único tronco de planejamento. As regras estão em `docs/planejamento/01-governanca.md`. A CI verifica o catálogo com `scripts/verificar_funcionalidades.py`."
   - "Consulte o agente `gerente-projetos` antes de iniciar uma funcionalidade e ao fim de cada subfase. Toda funcionalidade tem `planejamento.md` e `casos-de-uso.md` aprovados antes da execução."
   - "Um plano que nasce numa entrega serve só a ela. O que vai além vira funcionalidade candidata no catálogo."
-  - "Um módulo transversal bloqueia quem depende dele. Não crie versão local paralela."
+  - "Um módulo transversal bloqueia quem depende dele. Não crie versão local paralela. Um PR que altera `apps/` cita a FN (`FN: FN-NNN`) e atualiza o `planejamento.md` dela; a CI verifica com `scripts/verificar_fn_no_pr.py`."
 ---
 # ADR-0048 — O planejamento tem um único tronco: o plano mestre, regido pela governança, com catálogo de funcionalidades
 
@@ -49,5 +49,6 @@ Decisão do responsável: o planejamento tem um único tronco, o [plano mestre](
 
 ## Verificação
 
+- A CI reprova um PR que altera `apps/` sem citar uma FN do catálogo ou sem atualizar o `planejamento.md` dela (regra `R-FN-NO-PR`, FN-078 subfase 3.3).
 - `scripts/verificar_funcionalidades.py` verifica a consistência entre catálogo e `planejamento.md` na CI.
 - O agente existe em `.claude/agents/gerente-projetos.md`.

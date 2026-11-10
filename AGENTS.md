@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 3.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 4.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -27,7 +27,7 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 - O catálogo de funcionalidades e o plano mestre são o único tronco de planejamento. As regras estão em `docs/planejamento/01-governanca.md`. A CI verifica o catálogo com `scripts/verificar_funcionalidades.py`.
 - Consulte o agente `gerente-projetos` antes de iniciar uma funcionalidade e ao fim de cada subfase. Toda funcionalidade tem `planejamento.md` e `casos-de-uso.md` aprovados antes da execução.
 - Um plano que nasce numa entrega serve só a ela. O que vai além vira funcionalidade candidata no catálogo.
-- Um módulo transversal bloqueia quem depende dele. Não crie versão local paralela. ([ADR-0048](docs/decisoes/0048-tronco-unico-de-planejamento.md))
+- Um módulo transversal bloqueia quem depende dele. Não crie versão local paralela. Um PR que altera `apps/` cita a FN (`FN: FN-NNN`) e atualiza o `planejamento.md` dela; a CI verifica com `scripts/verificar_fn_no_pr.py`. ([ADR-0048](docs/decisoes/0048-tronco-unico-de-planejamento.md))
 
 ## Princípios executáveis
 
