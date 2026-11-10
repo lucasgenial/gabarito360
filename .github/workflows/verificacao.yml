@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: python3 -m unittest scripts/tests/test_verificar_autoria.py scripts/tests/test_principios.py scripts/tests/test_regras_codigo.py scripts/tests/test_fn_no_pr.py scripts/tests/test_conformidade_fn.py
+      - run: python3 -m unittest scripts/tests/test_verificar_autoria.py scripts/tests/test_principios.py scripts/tests/test_regras_codigo.py scripts/tests/test_fn_no_pr.py scripts/tests/test_conformidade_fn.py scripts/tests/test_dependencias.py
       - name: Executar as regras ativas dos princípios (docs/decisoes/regras.yml)
         env:
           EVENTO: ${{ github.event_name }}

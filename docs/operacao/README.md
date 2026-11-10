@@ -32,6 +32,7 @@ A topologia completa está em [13-infraestrutura-e-ambientes.md](../arquitetura/
 | [Auditoria](auditoria.md) | Conferir a auditoria, gerar a cópia mensal cifrada e ensaiar a recuperação |
 | [E-mail](email.md) | Configurar o domínio, testar o envio e entender os modelos |
 | [Incidentes](incidentes.md) | Tratar um incidente e consultar os incidentes já registrados |
+| [Atualização de dependências](dependencias.md) | Tratar alertas e PRs do Dependabot; adotar o PR do robô em nome do responsável |
 
 ## Evidências
 

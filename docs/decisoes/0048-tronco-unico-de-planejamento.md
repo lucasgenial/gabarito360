@@ -50,5 +50,6 @@ Decisão do responsável: o planejamento tem um único tronco, o [plano mestre](
 ## Verificação
 
 - A CI reprova um PR que altera `apps/` sem citar uma FN do catálogo ou sem atualizar o `planejamento.md` dela (regra `R-FN-NO-PR`, FN-078 subfase 3.3).
+- Exceção (FN-078 subfase 4.2): um PR que só altera manifestos e travas de dependências (`composer.json`, `composer.lock`, `package.json`, `package-lock.json`, `requirements*.txt`) é manutenção e não cita FN.
 - `scripts/verificar_funcionalidades.py` verifica a consistência entre catálogo e `planejamento.md` na CI.
 - O agente existe em `.claude/agents/gerente-projetos.md`.

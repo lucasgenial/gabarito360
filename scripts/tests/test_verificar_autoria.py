@@ -55,6 +55,15 @@ class VerificarAutoriaTest(unittest.TestCase):
         self.assertEqual(len(erros), 1)
         self.assertIn('marca de IA', erros[0])
 
+    def test_autor_dependabot_reprova(self):
+        self.commit('chore(deps): bump x from 1 to 2', autor='dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>')
+        _, erros = self.verificar()
+        self.assertTrue(any('robô' in e for e in erros), erros)
+
+    def test_assinatura_de_robo_na_mensagem_reprova(self):
+        self.commit('chore(deps): atualiza x\n\nSigned-off-by: dependabot[bot] <support@github.com>')
+        self.assertEqual(len(self.verificar()[1]), 1)
+
     def test_coautoria_minuscula_de_codex_reprova(self):
         self.commit('docs: ajusta\n\nco-authored-by: Codex <codex@openai.com>')
         self.assertEqual(len(self.verificar()[1]), 1)

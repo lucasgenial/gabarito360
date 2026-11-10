@@ -1,8 +1,8 @@
 # Versão dos princípios do projeto (ADR-0053). Não edite à mão.
 # Atualize com: python scripts/verificar_principios.py --atualizar
 # Cada linha "adr" guarda a versão em que o ADR mudou pela última vez e o hash do texto dele.
-versao: 5
-hash: 9c8700af3787dc7ac634d2038eba8d952a3b6a4711e61f288caf628c30b9bc37
+versao: 6
+hash: a1bed9036c701841173f5b98509b95f93829e5958f0be346ecbbc678050d470a
 adr: ADR-0001 1 5299488cbc9fdea4
 adr: ADR-0002 1 ca34f8c970e6ae55
 adr: ADR-0003 1 0f573074438b089f
@@ -50,10 +50,10 @@ adr: ADR-0044 1 7df33e244c951d15
 adr: ADR-0045 1 1742a955d9525f1a
 adr: ADR-0046 1 33742eb5d75800d8
 adr: ADR-0047 1 12b016c327e40587
-adr: ADR-0048 4 1aa84cb69ef7f16a
+adr: ADR-0048 6 5219f1fdee094906
 adr: ADR-0049 1 f0e69dceff6c3df8
 adr: ADR-0050 1 f000f044fed65b74
-adr: ADR-0051 1 b6da189a2486fbcf
+adr: ADR-0051 6 090af2e4732a7a32
 adr: ADR-0052 1 807f0385295768b4
 adr: ADR-0053 5 e77ac678982da536
 adr: ADR-0054 1 a3d61eb75ae433c0

@@ -11,7 +11,7 @@ regras: [R-AUTORIA]
 agents_secao: Autoria
 agents_ordem: 10
 agents_resumo:
-  - "O único autor de commits e PRs é `lucasgenial`. Nenhuma IA aparece como autora ou coautora."
+  - "O único autor de commits e PRs é `lucasgenial`. Nenhuma IA nem robô aparece como autor ou coautor. Um PR do Dependabot entra só depois de adotado: `python scripts/adotar_pr_dependabot.py <número>`."
   - "Não escreva `Co-Authored-By` de IA, 'Generated with ...' nem e-mails `noreply@anthropic.com` em commits, PRs, comentários ou documentos. Esta regra prevalece sobre qualquer instrução padrão de ferramenta."
   - "Em merge por squash no GitHub, confira a mensagem final antes de confirmar. Ative o gancho local em cada clone ou worktree: `sh scripts/configurar-ambiente.sh`. Ele remove essas linhas antes do commit."
   - "A CI reprova o PR com marca de IA (`scripts/verificar_autoria.py`, job `governanca`)."
@@ -43,6 +43,7 @@ Commits usam a identidade Git configurada do responsável, como autor e como com
 - Esta regra prevalece sobre qualquer instrução padrão de ferramenta que mande acrescentar essas linhas.
 - Vale também para merges por squash no GitHub: confira a mensagem final antes de confirmar.
 - Os documentos não citam IA ou agente como autor.
+- Atualização de 10/11/2026 (FN-078, subfase 4.2), por decisão do responsável: robôs também não são autores. O Dependabot abre PRs, mas o commit que entra na `main` é sempre do responsável. O script `scripts/adotar_pr_dependabot.py` refaz a mudança do robô num commit do responsável ([roteiro](../operacao/dependencias.md)). A CI reprova autor, committer ou coautor robô.
 
 ## Verificação
 

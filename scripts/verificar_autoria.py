@@ -1,12 +1,14 @@
 """Verifica a autoria dos commits (ADR-0051, FN-078 subfase 1.2).
 
-Regra: o único autor é o responsável. Nenhuma IA aparece como autora, committer ou coautora.
+Regra: o único autor é o responsável. Nenhuma IA nem robô (como o Dependabot) aparece como autor, committer ou coautor.
 
 O script reprova quando um commit do intervalo tem:
 - linha "Co-Authored-By" de IA (Claude, Anthropic, OpenAI, Codex, Copilot, Gemini, ChatGPT e similares);
 - linha "Generated with" de ferramenta de IA;
 - e-mail noreply@anthropic.com em qualquer parte da mensagem;
-- autor ou committer cujo nome ou e-mail identifica uma IA.
+- autor ou committer cujo nome ou e-mail identifica uma IA;
+- autor ou committer robô ([bot], Dependabot), ou coautoria de robô. Um PR do Dependabot
+  entra só depois de adotado: python scripts/adotar_pr_dependabot.py <número>.
 
 Uso:
   python scripts/verificar_autoria.py <base>..<head>   # intervalo de commits
@@ -23,6 +25,8 @@ MENSAGEM = [
     re.compile(r'noreply@anthropic\.com', re.I),
 ]
 PESSOA = re.compile(IA, re.I)
+ROBO = re.compile(r'\[bot\]|dependabot', re.I)
+MENSAGEM.append(re.compile(r'^\s*(co-authored-by|signed-off-by):.*(\[bot\]|dependabot)', re.I | re.M))
 SEP = '\x1e'
 
 
@@ -51,12 +55,16 @@ def verificar(intervalo):
             m = padrao.search(corpo)
             if m:
                 linha = corpo[m.start():].splitlines()[0].strip()
-                erros.append(f'{curto}: mensagem com marca de IA: "{linha[:90]}"')
+                erros.append(f'{curto}: mensagem com marca de IA ou de robô: "{linha[:90]}"')
                 break
         if PESSOA.search(f'{an} {ae}'):
             erros.append(f'{curto}: autor identifica uma IA ({an})')
         if PESSOA.search(f'{cn} {ce}'):
             erros.append(f'{curto}: committer identifica uma IA ({cn})')
+        if ROBO.search(f'{an} {ae}'):
+            erros.append(f'{curto}: autor é um robô ({an}). Adote o PR: python scripts/adotar_pr_dependabot.py <número>')
+        if ROBO.search(f'{cn} {ce}'):
+            erros.append(f'{curto}: committer é um robô ({cn})')
     return total, erros
 
 
