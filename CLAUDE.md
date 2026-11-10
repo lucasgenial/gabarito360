@@ -144,12 +144,15 @@ Exemplos:
 
 ## Fluxo de Trabalho
 
-1. **Ler** o MP (Micro-Passo) correspondente em `docs/14-plano-de-execucao.md`
-2. **Verificar** dependências do MP no `docs/13-roadmap.md`
-3. **Consultar** inventário de mockups para funcionalidades envolvidas
-4. **Implementar** seguindo a arquitetura oficial
-5. **Testar** contra os critérios de aceite do MP
-6. **Commitar** seguindo a convenção de commits
+1. **Consultar** o agente `gerente-projetos`: localizar a funcionalidade (FN-NNN), a fase e a subfase no [plano mestre](docs/planejamento/00-plano-mestre.md) e confirmar que ela está na fila priorizada.
+2. **Ler** `docs/funcionalidades/<NNN-slug>/planejamento.md` e `casos-de-uso.md`. Sem os dois aprovados, a tarefa é escrevê-los primeiro.
+3. **Verificar** as dependências da subfase. Um módulo transversal pendente bloqueia a subfase.
+4. **Consultar** o inventário de mockups e o style system para as telas envolvidas.
+5. **Implementar** seguindo a arquitetura oficial.
+6. **Testar** contra os critérios de aceite da subfase e dos casos de uso.
+7. **Commitar** seguindo a convenção de commits e **atualizar o status** no plano mestre e no `planejamento.md`, com evidência.
+
+Os documentos `docs/13-roadmap.md` e `docs/14-plano-de-execucao.md` são histórico (micro-passos iniciais). A tradução MP-xxx → FN-NNN está no §1 do plano mestre.
 
 ---
 
