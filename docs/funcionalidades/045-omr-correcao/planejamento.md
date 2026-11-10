@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Observação de estado:** com ressalva: teste com cartão impresso real pendente
 **Prioridade no plano mestre:** fora das ondas (funcionalidade concluída); a ressalva é pendência do §3 sem onda própria. O §5 é PROPOSTA, ainda não aprovada.
 **Natureza:** existente documentada a partir do código

@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** trilha paralela de baixo risco da Onda 1 (proposta), se o responsável aceitar: "FN-065 (plano de incidentes, só documento)"
 **Natureza:** nova (documento operacional, sem código de produto)
 **Origem:** tronco original — docs/28 Fase 2, pacote L5; requisito RL11 do docs/33

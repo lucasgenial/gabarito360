@@ -23,7 +23,7 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 
 
 def gerar():
-    versao, _ = P.ler_versao()
+    versao = P.ler_versao()[0]
     por_secao = {s: [] for s in P.SECOES}
     for adr_id, caminho, c, erro in P.adrs():
         if erro or not c or c.get('estado') != 'Aceita' or 'agents_secao' not in c:

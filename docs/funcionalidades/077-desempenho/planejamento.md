@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5): medição com 1000 usuários simultâneos antes de qualquer abertura comercial; F6 restante quando houver uso real. A forma de obter as 1000 identidades está na Onda 0 (decisão §4 item 8)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original (X1–X2 do docs/28 (`docs/28-plano-mestre-proximos-modulos.md`)); ST1 nasceu do incidente da turma após UR3 (docs/168 (`docs/168-estabilizacao-turmas-e-contratos.md`)); AP1 (docs/172 (`docs/172-ap1-plano-desempenho-e-contrato-api.md`), docs/173 (`docs/173-ap1-contrato-http-e-operacao-independente.md`)); série F0–F6 (docs/192 (`docs/192-fundamentos-desempenho.md`), docs/194 (`docs/194-planejamento-desempenho-integral.md`)–docs/200 (`docs/200-f5-f6-diagnostico-catalogo.md`)), surgida na integração do editor e aprovada pelo responsável como plano integral

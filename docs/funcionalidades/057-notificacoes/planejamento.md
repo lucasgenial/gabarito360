@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Observação de estado:** MÓDULO TRANSVERSAL
 **Prioridade no plano mestre:** Onda 1, ordem 2 (PROPOSTA do §5, ainda não aprovada): N1 → N2 → N3
 **Natureza:** nova

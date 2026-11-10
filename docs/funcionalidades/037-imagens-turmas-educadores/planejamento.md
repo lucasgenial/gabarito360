@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem onda própria; IMG-N e IMG-P listados como órfãos (§3); entregues na fila de produção §7 ("Organização da turma e imagens", PR #208, #209)
 **Natureza:** existente documentada a partir do código
 **Origem:** ramo do TU1-R3 (docs/tu-img-avatar-foto.md), registrado como funcionalidade; docs/176, docs/177 (P3.1.3)

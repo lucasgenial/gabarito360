@@ -2,6 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** aguardando priorização; a PROPOSTA de ondas (§5) a coloca na Onda 1, ordem 3 (P4.1–P4.3), e o §4 item 7 recomenda priorizá-la junto com FN-056
 **Natureza:** nova (só existe o widget demonstrativo dos painéis)
 **Origem:** surgiu como ramo da entrega dos painéis de turmas (docs/177 P4, docs/179, docs/180; identificador local "PL1")

@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em execução
+**Conforme princípios:** versão 5
 **Posição no plano mestre:** Onda 0, ordem 0.0 (urgente, por decisão do responsável em 10/11/2026)
 **Natureza:** nova
 **Origem:** surgiu na reestruturação da documentação em 10/11/2026; decisão registrada no [ADR-0053](../../decisoes/0053-principios-executaveis-e-mutaveis.md)
@@ -69,7 +70,7 @@ O problema que esta funcionalidade resolve: princípios definidos no início do 
 | 3.1 | Testes das regras vigentes: JavaScript externo, sem `confirm`/`alert`/`prompt`, API só JSON, tabelas com `x-tabela`, rodapé de versão, sem prints, autoria | Cada regra verificável vigente tem teste ativo na CI | Entregue | 5 regras novas ativas na CI com `scripts/verificar_regras_codigo.py`: `R-JS-EXTERNO`, `R-SEM-DIALOGO-NATIVO`, `R-API-SO-JSON`, `R-TABELA-PADRAO`, `R-VERSAO-RODAPE`. Sem prints e autoria já estavam ativas. Total: 11 regras ativas. 6 testes em `scripts/tests/test_regras_codigo.py` |
 | 3.2 | Linha de base das violações conhecidas: `docs/decisoes/linha-de-base.json` | Violação nova reprova; violação antiga não reprova; a contagem só pode diminuir | Entregue | `docs/decisoes/linha-de-base.json` com 67 violações antigas: 49 de JavaScript inline (20 views), 13 diálogos nativos (9 arquivos), 3 tabelas fora de `x-tabela` (`home/index`, `turmas/_modelos`), 1 view de tela na API (`welcome.blade.php`) e 1 versão escrita à mão (`apps/web/.../welcome.blade.php`). A chave não depende do número da linha. Violação corrigida exige reduzir a linha de base; a CI recusa linha de base maior que a da `main` |
 | 3.3 | Vínculo código ↔ FN ↔ documentação: PR que altera `apps/` cita uma FN e atualiza o `planejamento.md` dela | Um PR com mudança em `apps/` sem FN ou sem atualização do planejamento reprova | Entregue | `scripts/verificar_fn_no_pr.py`, regra `R-FN-NO-PR` ativa. Lê a FN no título e na descrição do PR e nas mensagens dos commits. Exige o `planejamento.md` de uma FN citada no mesmo PR. Modelo de PR com o campo `FN:`. 6 testes em `scripts/tests/test_fn_no_pr.py`. Os 8 PRs anteriores com mudança em `apps/` não citavam FN; a regra vale daqui em diante |
-| 3.4 | Versão dos princípios por funcionalidade: campo "Conforme princípios" no `planejamento.md` | Um PR que altera uma funcionalidade validada com princípios superados por ADR que a afeta reprova | Pendente | |
+| 3.4 | Versão dos princípios por funcionalidade: campo "Conforme princípios" no `planejamento.md` | Um PR que altera uma funcionalidade validada com princípios superados por ADR que a afeta reprova | Entregue | Campo `Conforme princípios` nos 78 planejamentos (versão 1; a FN-078 na versão atual). `VERSAO` guarda a versão em que cada ADR mudou (histórico real: ADR-0004 na 2, ADR-0053 na 3 e na 5, ADR-0048 na 4). `scripts/verificar_conformidade_fn.py`, regra `R-VERSAO-PRINCIPIOS-FN` ativa. 6 testes em `scripts/tests/test_conformidade_fn.py`. Todas as 13 regras do registro estão ativas |
 | 4.1 | Modelo de PR e modelos de issue (nova funcionalidade candidata, correção, decisão do responsável) | Um PR ou issue novo abre no formato certo | Pendente | |
 | 4.2 | Varredura de segredos com bloqueio no envio e Dependabot | As duas opções estão ativas no repositório | Parcial | Varredura de segredos e bloqueio no envio já estavam ativos em 10/11/2026; Dependabot pendente |
 | 5.1 | Agente de impacto: `scripts/impacto_principio.py` e definição em `.claude/agents/` | Um ADR novo ou alterado gera a lista de funcionalidades afetadas, as subfases de adequação e o `AGENTS.md` regerado, sem ação humana | Pendente | |
@@ -121,3 +122,4 @@ Nenhum até agora.
 | 2026-11-10 | Subfases 2.1 a 2.3 entregues: campos nos ADRs, registro de regras, versão dos princípios e AGENTS.md gerado | lucasgenial |
 | 2026-11-10 | Subfases 3.1 e 3.2 entregues: 5 regras de código ativas e linha de base com 67 violações antigas | lucasgenial |
 | 2026-11-10 | Subfase 3.3 entregue: PR que altera `apps/` cita a FN e atualiza o planejamento dela | lucasgenial |
+| 2026-11-10 | Subfase 3.4 entregue: versão dos princípios por funcionalidade e revalidação obrigatória antes de alterar o código | lucasgenial |

@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Pendência remanescente (índices e particionamento) remetida a FN-077/X1.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 Fase 3 (T1, T2); docs/40–54

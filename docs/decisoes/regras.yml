@@ -90,6 +90,7 @@
 
 - id: R-VERSAO-PRINCIPIOS-FN
   adr: ADR-0053
-  estado: planejada
+  estado: ativa
   gravidade: bloqueia
+  comando: python3 scripts/verificar_conformidade_fn.py {INTERVALO}
   descricao: Funcionalidade alterada está validada na versão atual dos princípios.

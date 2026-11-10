@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem onda própria. O hotfix de leituras 500 e a revisão (PR #182–#187) estão na fila de produção (§7) e entram na Onda 0 apenas se o responsável aprovar a decisão §4 item 2 (promoção em blocos). R3 (limiares) não tem onda. O §5 é PROPOSTA.
 **Natureza:** existente documentada a partir do código
 **Origem:** incidente de produção de 30/10/2026 (processos PHP esgotados) → docs/24 e docs/25; hotfixes e melhorias da revisão nos docs/152–157

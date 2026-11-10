@@ -2,6 +2,7 @@
 
 **Implementação:** Substituída
 **Etapa:** Substituída
+**Conforme princípios:** versão 1
 **Observação de estado:** parcial
 **Prioridade no plano mestre:** sem posição nas ondas do §5; depende da decisão do §4 item 5. Preços e cobrança seguem para FN-068 (Onda 4).
 **Natureza:** existente documentada a partir do código

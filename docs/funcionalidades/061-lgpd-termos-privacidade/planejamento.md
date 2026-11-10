@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 4 (proposta), item "061 termos e privacidade (L1)", dependente de D13 e D14
 **Natureza:** evolução de existente (prévias sem rota já no código; publicação, aceite e cookies novos)
 **Origem:** tronco original — docs/28 Fase 2, pacote L1; requisitos RL7, RL15 e RL16 do docs/33; prévias do docs/35; E8 passo 3 (termos e privacidade adiados para L1)

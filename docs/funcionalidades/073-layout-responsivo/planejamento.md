@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem posição na fila (concluída; fora das ondas do §5)
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — auditoria de layout de 30/10/2026 (docs/23 (`docs/23-plano-layout-responsivo.md`), etapas L0–L8)

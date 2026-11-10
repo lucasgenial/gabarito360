@@ -2,6 +2,7 @@
 
 **Implementação:** Em homologação
 **Etapa:** Em homologação
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem posição nas ondas do §5; está na fila de produção do §7 (bloco "Catálogo de instituições", PR #152–#158, #160), aguardando a decisão do §4 item 2.
 **Natureza:** existente documentada a partir do código
 **Origem:** docs/115 §10 e docs/116 (complemento pedido pelo responsável em 03/11/2026); docs/119–126, 129, 130

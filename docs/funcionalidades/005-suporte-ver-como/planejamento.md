@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 4 (junto com FN-004 AU2 e FN-006), dependente de D9 e de AU1
 **Natureza:** nova
 **Origem:** tronco original — docs/28 (S1); AU3 citado como fase separada nos docs/67, 71, 72 e 77, sem documento próprio

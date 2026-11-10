@@ -2,6 +2,7 @@
 
 **Implementação:** Adiada
 **Etapa:** Adiada
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Futuro (sem prioridade); pendência do §3: confirmar a manutenção do adiamento
 **Natureza:** nova
 **Origem:** tronco original — docs/13 MP-023 (Android) e iOS; docs/02 fase 8 (mobile offline); parte não entregue de MP-001

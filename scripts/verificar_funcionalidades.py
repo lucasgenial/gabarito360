@@ -6,6 +6,7 @@ Regras:
 3. Implementação e Etapa do cabeçalho do planejamento.md são iguais às do catálogo.
 4. O plano mestre só cita FN que existem no catálogo.
 5. Os valores de Implementação e Etapa pertencem às listas da governança.
+6. Todo planejamento.md declara "Conforme princípios: versão N", com N até a versão atual (FN-078 3.4).
 """
 import re
 import sys
@@ -14,6 +15,9 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 FUNC = RAIZ / 'docs' / 'funcionalidades'
 PLANO = RAIZ / 'docs' / 'planejamento' / '00-plano-mestre.md'
+_VERSAO = RAIZ / 'docs' / 'decisoes' / 'VERSAO'
+_m = re.search(r'^versao:\s*(\d+)', _VERSAO.read_text(encoding='utf-8'), re.M) if _VERSAO.exists() else None
+VERSAO_PRINCIPIOS = int(_m.group(1)) if _m else 0
 
 IMPLEMENTACAO = {'Concluída', 'Em homologação', 'Parcial', 'Pendente', 'Adiada', 'Substituída', 'Candidata'}
 ETAPA = {'Candidata', 'Priorizada', 'Em planejamento', 'Planejamento aprovado', 'Em execução',
@@ -58,6 +62,11 @@ for fn, dados in sorted(linhas.items()):
             erros.append(f'{pasta.name}/planejamento.md: Implementação difere do catálogo ("{dados["impl"]}")')
         if not etapa or etapa.group(1).strip() != dados['etapa']:
             erros.append(f'{pasta.name}/planejamento.md: Etapa difere do catálogo ("{dados["etapa"]}")')
+        conforme = re.search(r'^\*\*Conforme princípios:\*\* versão (\d+)\s*$', texto, re.M)
+        if not conforme:
+            erros.append(f'{pasta.name}/planejamento.md: falta "**Conforme princípios:** versão N" (FN-078 subfase 3.4)')
+        elif int(conforme.group(1)) > VERSAO_PRINCIPIOS:
+            erros.append(f'{pasta.name}/planejamento.md: Conforme princípios {conforme.group(1)} maior que a versão atual ({VERSAO_PRINCIPIOS})')
 
 if PLANO.is_file():
     citados = set(re.findall(r'FN-(\d{3})', PLANO.read_text(encoding='utf-8')))

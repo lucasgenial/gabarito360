@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 4 (PROPOSTA do §5): depois de FN-068; depende de decisão comercial
 **Natureza:** nova
 **Origem:** tronco original — docs/28 R1 (Fase 5). Equivalência: R1 (selo dos documentos, docs/28) → FN-069; não confundir com R1–R3 das fotos leves (docs/25), que são FN-046 ([plano mestre §1.2](../../planejamento/00-plano-mestre.md))

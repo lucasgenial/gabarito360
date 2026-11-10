@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** trilha contínua de qualidade (aplicada dentro das entregas, sem fila própria); medição com 1000 usuários antes de qualquer abertura comercial (FN-077)
 **Natureza:** evolução de existente (há partes isoladas no código: limites por rota, Turnstile no contato, grupos PHP separados, mutex local de sessão)
 **Origem:** tronco original — docs/28 fase 9 (X3–X6); AP1-L (docs/176); mutex de sessão do docs/167 (UR3); separação física da API (docs/172, 173)

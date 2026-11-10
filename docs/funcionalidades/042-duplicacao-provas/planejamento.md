@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA, §5) — CP2, depende de DC1 (feito) e de FN-057; CP1 na fila de produção §7 (PR #151)
 **Natureza:** existente documentada a partir do código (CP1) com evolução pendente (CP2, A7)
 **Origem:** tronco — docs/28 A7; docs/115 §3; docs/118 (CP1); docs/142 §2 (CP2)

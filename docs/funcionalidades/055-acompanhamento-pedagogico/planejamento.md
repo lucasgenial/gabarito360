@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 2, depois de FN-056 (agenda) e FN-039 (períodos letivos). O §5 é PROPOSTA.
 **Natureza:** nova (só o visual demonstrativo existe)
 **Origem:** ramo de TU1-R3 (Atenção e Top 5) pelos painéis de turmas — docs/177 P6, docs/179, docs/180

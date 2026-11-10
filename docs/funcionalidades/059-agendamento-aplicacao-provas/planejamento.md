@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Observação de estado:** aguarda FN-056 e FN-057
 **Prioridade no plano mestre:** Onda 2 (PROPOSTA do §5), depende de 056 e 057
 **Natureza:** evolução de existente (a data de aplicação da prova e as consultas derivadas existem; o agendamento como evento, os avisos e o registro de aplicação não existem)

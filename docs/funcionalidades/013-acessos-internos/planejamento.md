@@ -2,6 +2,7 @@
 
 **Implementação:** Concluída
 **Etapa:** Concluída
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem posição nas ondas do §5 (concluída). Nenhuma pendência funcional; a recuperação do Desenvolvedor segue manual.
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/28 (A1), docs/66–69, docs/100, docs/102

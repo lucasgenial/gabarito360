@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 3 (proposta), dentro do "pacote de retenção" junto com FN-064, FN-066 e o expurgo de FN-004
 **Natureza:** existente documentada a partir dos registros (inventário e RIPD); retenção aprovada ainda sem código
 **Origem:** tronco original — docs/28 Fase 2, pacote L2; requisitos RL2, RL6, RL12 e RL13 do docs/33

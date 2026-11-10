@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** trilha contínua de qualidade (§5): TW3 restante a TW6 aplicados dentro das entregas, nas telas que cada entrega tocar; janela própria para TW4–TW6 proposta só depois da Onda 2 (proposta, não aprovada)
 **Natureza:** existente documentada a partir do código (evolução parcial)
 **Origem:** pedido transversal durante P3.2 ("ações SMALL", docs/184 (`docs/184-acoes-small-tabelas.md`)), substituído pela decisão do responsável de adotar Tailwind (docs/185 (`docs/185-migracao-tailwind.md`)) em 08/11/2026; UX-D e UX-T recuperados na reconciliação docs/176 (`docs/176-reconciliacao-solicitacoes.md`)

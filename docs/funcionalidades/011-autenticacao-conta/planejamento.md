@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** sem posição própria nas ondas do §5. As pendências seguem por outras frentes: testes reais de E6 em FN-060 (Onda 2), autocadastro na decisão §4 item 5 (FN-030).
 **Natureza:** existente documentada a partir do código
 **Origem:** tronco original — docs/13 MP-012, docs/04 RF-001, docs/28 E3/E6

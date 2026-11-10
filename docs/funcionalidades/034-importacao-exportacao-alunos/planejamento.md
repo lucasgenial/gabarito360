@@ -2,6 +2,7 @@
 
 **Implementação:** Pendente
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 3 (PROPOSTA, §5) — depende de FN-026 e de e-mail (FN-060)
 **Natureza:** evolução de existente (só há o comando de terminal `g360:importar-alunos`)
 **Origem:** tronco original — docs/13 MP-016 (importação por planilha), docs/28 A5, docs/70, docs/134

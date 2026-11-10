@@ -1,4 +1,60 @@
 # Versão dos princípios do projeto (ADR-0053). Não edite à mão.
 # Atualize com: python scripts/verificar_principios.py --atualizar
-versao: 4
-hash: 6db16b65baedfd974802056a70337146cfa95045261660d3b9aecc752e7f25bf
+# Cada linha "adr" guarda a versão em que o ADR mudou pela última vez e o hash do texto dele.
+versao: 5
+hash: 9c8700af3787dc7ac634d2038eba8d952a3b6a4711e61f288caf628c30b9bc37
+adr: ADR-0001 1 5299488cbc9fdea4
+adr: ADR-0002 1 ca34f8c970e6ae55
+adr: ADR-0003 1 0f573074438b089f
+adr: ADR-0004 2 f4ac8b59f1583c94
+adr: ADR-0005 1 9f85b35d54167021
+adr: ADR-0006 1 6b2e4fa7f091411f
+adr: ADR-0007 1 330f80f32429bea5
+adr: ADR-0008 1 5d1b9981df431fc3
+adr: ADR-0009 1 416c6fc9ed4af612
+adr: ADR-0010 1 228156fe7b3a547f
+adr: ADR-0011 1 9234ab2bfc422ac0
+adr: ADR-0012 1 f8cdd4f7a4df9926
+adr: ADR-0013 1 46c44c4894669112
+adr: ADR-0014 1 c0345fdcd4ab69c1
+adr: ADR-0015 1 8ca09365e0cdc84e
+adr: ADR-0016 1 16b24f6552bec498
+adr: ADR-0017 1 154f0d89071ed72e
+adr: ADR-0018 1 9091a66647647190
+adr: ADR-0019 1 8f0ab8ea4bc956a2
+adr: ADR-0020 1 5146469dcb2a07f5
+adr: ADR-0021 1 18ae04dcbae9f02d
+adr: ADR-0022 1 f0372b8ef314e52d
+adr: ADR-0023 1 fc6234005f604ede
+adr: ADR-0024 1 448e4c786b947ffc
+adr: ADR-0025 1 e909c7201c85cb59
+adr: ADR-0026 1 a6838ec180bc561d
+adr: ADR-0027 1 632be32aab562167
+adr: ADR-0028 1 63bae82c71c3d5e2
+adr: ADR-0029 1 c49d3829092135a1
+adr: ADR-0030 1 c2fe0826590d9f40
+adr: ADR-0031 1 230fd6cd9dbf5354
+adr: ADR-0032 1 bd5c7b1325bc2263
+adr: ADR-0033 1 c3a3dba13373ab76
+adr: ADR-0034 1 2754c20f08cc02c8
+adr: ADR-0035 1 fc90bbd32051ee2c
+adr: ADR-0036 1 907c30ca4b746819
+adr: ADR-0037 1 1bf0109a2abdd552
+adr: ADR-0038 1 274c172e292a877a
+adr: ADR-0039 1 604f687a602a31ad
+adr: ADR-0040 1 9004e2f6fb59c7ae
+adr: ADR-0041 1 e239aad1cd4017e2
+adr: ADR-0042 1 4773c9f8c2a6b7be
+adr: ADR-0043 1 2d191da1c65c180b
+adr: ADR-0044 1 7df33e244c951d15
+adr: ADR-0045 1 1742a955d9525f1a
+adr: ADR-0046 1 33742eb5d75800d8
+adr: ADR-0047 1 12b016c327e40587
+adr: ADR-0048 4 1aa84cb69ef7f16a
+adr: ADR-0049 1 f0e69dceff6c3df8
+adr: ADR-0050 1 f000f044fed65b74
+adr: ADR-0051 1 b6da189a2486fbcf
+adr: ADR-0052 1 807f0385295768b4
+adr: ADR-0053 5 e77ac678982da536
+adr: ADR-0054 1 a3d61eb75ae433c0
+adr: ADR-0055 1 d869b902eeb65c7a

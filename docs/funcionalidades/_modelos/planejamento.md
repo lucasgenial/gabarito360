@@ -2,6 +2,7 @@
 
 **Implementação:** <Concluída | Em homologação | Parcial | Pendente | Adiada | Substituída | Candidata> (igual ao catálogo)
 **Etapa:** <Candidata | Priorizada | Em planejamento | Planejamento aprovado | Em execução | Em homologação | Concluída | Adiada | Substituída> (igual ao catálogo)
+**Conforme princípios:** versão <N> (versão dos princípios contra a qual este planejamento foi revalidado; veja docs/decisoes/VERSAO)
 **Posição no plano mestre:** <onda e ordem, ou "fora das ondas">
 **Natureza:** <nova | existente documentada a partir do código | evolução de existente>
 **Origem:** <tronco original (docs/13 MP-xxx, docs/28 pacote) | surgiu na entrega <x> em <data>>

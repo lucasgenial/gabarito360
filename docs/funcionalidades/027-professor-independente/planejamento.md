@@ -2,6 +2,7 @@
 
 **Implementação:** Parcial
 **Etapa:** Em planejamento
+**Conforme princípios:** versão 1
 **Prioridade no plano mestre:** Onda 3 — Ciclo de vida de dados pessoais e institucional (depende de FN-016 e da revisão formal de T3)
 **Natureza:** evolução de existente (FN-022)
 **Origem:** docs/115 §10 e §12 (PA1), docs/124 (CI1-D)
