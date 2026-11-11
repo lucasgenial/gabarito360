@@ -922,7 +922,6 @@ Termos usados neste documento:
   4. O servidor lê e o resultado aparece na revisão da prova (FN-046), não no leitor visual.
 - **Ramo (b) — indisponível:**
   1. O sistema mostra "Este aparelho não atende aos requisitos do leitor. Use outro aparelho."
-  2. O sistema lista o que falta, por exemplo "Navegador sem suporte a WebAssembly."
 - **Ramo (c) — transcrição manual (só regiões abertas):**
   1. O leitor mostra o recorte da região aberta sem texto.
   2. O professor digita a transcrição no leitor visual (UC-079-16).
@@ -931,7 +930,7 @@ Termos usados neste documento:
 - 1a. Falta só a IA local (objetivas funcionam): as objetivas são lidas no aparelho. As abertas seguem o ramo escolhido na D-2. Não há leitura de IA no servidor.
 - 1b. Aparelho fraco, mas capaz: o sistema avisa "A leitura pode demorar neste aparelho." e continua.
 
-**Regras de negócio:** o motor do servidor continua existindo como hoje. Os requisitos mínimos do aparelho são definidos no planejamento depois da D-4. Os do modelo vêm da FN-080.
+**Regras de negócio:** a mensagem ao usuário é simples: diz só se o aparelho suporta ou não o leitor ou o Escriba ("Este aparelho suporta o Escriba" / "Este aparelho não tem suporte ao Escriba"). Ela não lista recursos, motivos nem o que falta (decisão do responsável em 11/11/2026). O detalhe técnico fica só no registro técnico. O motor do servidor continua existindo como hoje. Os requisitos mínimos do aparelho são definidos no planejamento depois da D-4. Os do modelo vêm da FN-080.
 
 **Critérios de aceite:**
 - [ ] Todo aparelho sem capacidade recebe uma mensagem com o motivo.

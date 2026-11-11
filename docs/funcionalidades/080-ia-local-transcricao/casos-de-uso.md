@@ -248,7 +248,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 
 **Critérios de aceite:**
 - [ ] O aparelho sem capacidade faz zero requisições aos arquivos do modelo (log de rede).
-- [ ] A mensagem cita o recurso que falta e a ação possível.
+- [ ] A mensagem diz só "Este aparelho não tem suporte ao Escriba" e a ação possível. Ela não lista recursos nem motivos (decisão do responsável em 11/11/2026).
 - [ ] Nenhum dado vai a terceiros, em qualquer opção.
 
 **Situação:** Não implementado
