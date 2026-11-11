@@ -932,7 +932,7 @@ Termos usados neste documento:
 4. Se o usuário não aceita, o sistema não lê a folha neste aparelho e volta à escolha da entrada.
 
 **Fluxos alternativos e de erro:**
-- 1a. Falta só o Escriba (as objetivas funcionam): o aparelho lê as objetivas. Só as regiões abertas vão ao modo servidor.
+- 1a. Falta só o Escriba (as objetivas funcionam): o aparelho lê as objetivas. As regiões abertas vão ao modo servidor, com 1 crédito por aluno × prova.
 - 1b. Aparelho fraco, mas capaz: o sistema avisa "A leitura pode demorar neste aparelho." e continua.
 - 2a. Região aberta e usuário sem modo servidor: o usuário ainda digita a transcrição no leitor visual (UC-079-16).
 
