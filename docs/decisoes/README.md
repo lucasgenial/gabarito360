@@ -102,6 +102,7 @@ As regras de código usam a [linha de base](linha-de-base.json) das violações 
 | [ADR-0057](0057-app-responsivo-em-todas-as-faixas.md) | O app é responsivo; toda tela e todo mockup atendem a todas as faixas de aparelho | 11/11/2026 | Aceita | Todas com interface |
 | [ADR-0058](0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md) | A leitura de provas roda no aparelho, com paridade total; o aparelho sem capacidade usa o modo servidor, com fila e créditos | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md), [FN-080](../funcionalidades/080-ia-local-transcricao/planejamento.md) |
 | [ADR-0059](0059-aplicador-ve-a-leitura-sem-corrigir.md) | O aplicador vê a leitura da folha atual, antes de salvar, sem corrigir | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md) |
+| [ADR-0060](0060-arquitetura-de-execucao-da-leitura.md) | Arquitetura de execução da leitura (objetivas e Escriba) no aparelho e no servidor | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md), [FN-080](../funcionalidades/080-ia-local-transcricao/planejamento.md) |
 
 ## Origem dos identificadores antigos
 

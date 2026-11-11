@@ -1,7 +1,7 @@
 # Estudo — Arquitetura de execução do Leitor360 e do Escriba
 
 **Data:** 2026-11-11, por lucasgenial
-**Situação:** proposta para aprovação do responsável. Depois da aprovação, as decisões viram o ADR-0060 e entram nas subfases 1.1 (FN-079) e 1.x (FN-080).
+**Situação:** aprovado pelo responsável em 11/11/2026 (E-1 a E-6). As decisões estão no [ADR-0060](../../decisoes/0060-arquitetura-de-execucao-da-leitura.md).
 **Funcionalidades:** [FN-079 Leitor360](planejamento.md) (D-4, D-5, §6.4) e [FN-080 Escriba](../080-ia-local-transcricao/planejamento.md).
 
 Marcas: **[F]** fato com fonte; **[M]** medido nesta pesquisa; **[I]** inferência, a medir na prova de viabilidade.
@@ -121,7 +121,7 @@ Medir, com fotos reais do conjunto de referência:
 6. A CSP mínima que funciona com o Pyodide isolado no Worker.
 7. No Escriba: CER e erro de fórmula por quantização e runtime; taxa de saídas idênticas entre aparelho e servidor; tempo por região em cada aparelho e no Xeon; tamanho e tempo do download; sucesso da exportação do modelo ajustado.
 
-## 6. Decisões para o responsável
+## 6. Decisões (aprovadas em 11/11/2026)
 
 | Item | Recomendação |
 |---|---|

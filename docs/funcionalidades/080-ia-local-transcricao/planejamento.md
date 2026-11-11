@@ -2,7 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
-**Conforme princípios:** versão 14
+**Conforme princípios:** versão 15
 **Posição no plano mestre:** fora das ondas (candidata; aguarda priorização do responsável)
 **Natureza:** nova
 **Origem:** surgiu na conversa de planejamento do Leitor360 (FN-079) em 2026-11-11
@@ -68,7 +68,7 @@ O responsável conduz o trabalho do modelo: seleção, dados, ajuste fino e comp
 
 ## 3. Fontes de verdade
 
-- Estudo da arquitetura de execução (modelo-base, runtime no navegador, no servidor e no app, paridade): [FN-079, estudo](../079-leitor360/estudo-arquitetura-execucao.md), decisões E-4 a E-6.
+- Estudo da arquitetura de execução (modelo-base, runtime no navegador, no servidor e no app, paridade): [FN-079, estudo](../079-leitor360/estudo-arquitetura-execucao.md), decisões E-4 a E-6, aprovadas em 11/11/2026 ([ADR-0060](../../decisoes/0060-arquitetura-de-execucao-da-leitura.md)): Qwen3.5-0.8B (reserva 2B), ONNX com transformers.js no navegador e no servidor, paridade por arquivo com hash, mesmo pré-processamento e decodificação gulosa, com meta medida.
 
 - Decisões do responsável de 2026-11-11, registradas na conversa de planejamento do Leitor360.
 - Leitor360: [FN-079](../079-leitor360/planejamento.md), método `transcricao-manuscrita` e caso UC-079-11.

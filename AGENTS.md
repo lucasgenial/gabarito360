@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 14.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 15.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -32,6 +32,10 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 - Não existe uso offline. Nada é persistido no aparelho. O envio leva a imagem original, reduzida a 2400 px. O servidor não relê: quem confere é sempre o usuário. Leitura com dificuldade pede nova imagem, reenvio sem custo (modo servidor) ou revisão manual, que é o caminho principal.
 - Aparelho sem capacidade usa o modo servidor: fila, aviso prévio de créditos e de fila, e marcador de identificação no arquivo. O marcador só encaminha: o QR prevalece. Os créditos de correção existem só no servidor: um por correção de prova de um aluno.
 - A correção da prova não fecha com folha pendente. A folha pode ser salva com pendências e corrigida depois, na revisão. ([ADR-0058](docs/decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md))
+- As objetivas são lidas pelo Pyodide (versão fixa, hoje 314.0.7) num Web Worker do navegador e pelo mesmo Pyodide em Node no servidor, com o mesmo lockfile. A leitura usa OpenCV 4.11.0.86 e NumPy 2.4.6, as versões do Pyodide. O Python nativo fica só para gerar PDF.
+- A CSP libera `'unsafe-eval'` e `'wasm-unsafe-eval'` só no Worker do leitor, nunca na página inteira.
+- O Escriba parte do Qwen3.5-0.8B (reserva: 2B), em ONNX, com transformers.js no navegador (WebGPU) e no servidor (Node). O mesmo arquivo de modelo, com hash, roda nos dois lados.
+- Paridade do Escriba: mesmo arquivo, mesmo pré-processamento, mesmo prompt e decodificação gulosa, com meta medida de saídas idênticas e de CER. Igualdade total entre GPU e CPU não é exigida. ([ADR-0060](docs/decisoes/0060-arquitetura-de-execucao-da-leitura.md))
 
 ## Princípios executáveis
 

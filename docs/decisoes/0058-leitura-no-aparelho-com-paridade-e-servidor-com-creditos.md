@@ -55,7 +55,7 @@ O responsável decidiu o conjunto abaixo em 11/11/2026. O planejamento da FN-079
 - O sistema de créditos de correção ainda não existe. Ele está na FN-081 (candidata) e bloqueia as subfases 4.3 e 6.3 da FN-079.
 - O preço do crédito e o formato do marcador (proposta: segmento XMP no JPEG) são definidos nas subfases.
 - ⚠ Sem releitura no servidor, a proteção contra resultado adulterado no cliente depende da conferência humana, da imagem original guardada, da nota só no servidor e da auditoria.
-- ⚠ Não está confirmado o que o Pyodide empacota de OpenCV e NumPy. A subfase 1.1 decide a saída (D-5).
+- A tecnologia e as versões de execução estão no [ADR-0060](0060-arquitetura-de-execucao-da-leitura.md).
 - Esta decisão não substitui ADR anterior.
 
 ## Verificação

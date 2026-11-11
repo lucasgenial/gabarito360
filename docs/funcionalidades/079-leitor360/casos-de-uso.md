@@ -121,7 +121,7 @@ Termos usados neste documento:
 - 6a. Versão em cache diferente da vigente: o sistema descarta a versão antiga e baixa a nova. A leitura nunca usa versão não vigente.
 - 6b. Um arquivo tem sha256 diferente do manifesto: o Worker apaga o arquivo, não executa e baixa de novo.
 
-**Regras de negócio:** o núcleo roda por Pyodide, com paridade total entre aparelho e servidor (D-4, mesmo código e mesma versão). OpenCV e NumPy têm as mesmas versões nos dois lados (D-5; ⚠ falta confirmar o que o Pyodide empacota). Nenhum arquivo vem de CDN, PyPI ou Hugging Face. A versão do motor acompanha cada resultado enviado (UC-079-19). Só uma versão aprovada no UC-079-24 pode ser vigente. O cache guarda só os arquivos do manifesto (planejamento §6.8).
+**Regras de negócio:** o núcleo roda por Pyodide, com paridade total entre aparelho e servidor (D-4, mesmo código e mesma versão). OpenCV e NumPy têm as mesmas versões nos dois lados (D-5 e ADR-0060: Pyodide 314.0.7, OpenCV 4.11.0.86 e NumPy 2.4.6; o servidor roda o mesmo Pyodide em Node). Nenhum arquivo vem de CDN, PyPI ou Hugging Face. A versão do motor acompanha cada resultado enviado (UC-079-19). Só uma versão aprovada no UC-079-24 pode ser vigente. O cache guarda só os arquivos do manifesto (planejamento §6.8).
 
 **Critérios de aceite:**
 - [ ] Na segunda abertura no mesmo aparelho, o leitor fica pronto sem novo download do núcleo.
@@ -1082,7 +1082,7 @@ Termos usados neste documento:
 **Fluxos alternativos e de erro:**
 - 1a. Uma folha com sha256 diferente do manifesto: a execução reprova.
 - 4a. Um alvo difere do instantâneo numa folha: a versão é recusada. O relatório lista a folha, o alvo e a diferença.
-- 4b. Versões diferentes de OpenCV ou NumPy entre aparelho e servidor: a versão é recusada. A D-5 exige as mesmas versões nos dois lados. O relatório lista a diferença de versão. (⚠ Falta confirmar o que o Pyodide empacota.)
+- 4b. Versões diferentes de OpenCV ou NumPy entre aparelho e servidor: a versão é recusada. A D-5 exige as mesmas versões nos dois lados. O relatório lista a diferença de versão. As versões fixadas estão no ADR-0060.
 - 5a. Falta o registro de um dos 4 navegadores: a versão não é publicada.
 - 6a. Defeito descoberto numa versão vigente: a versão sai da lista aceita na hora e do manifesto (planejamento §6.4, regra 10).
 

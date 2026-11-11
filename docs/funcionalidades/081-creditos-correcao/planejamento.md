@@ -2,7 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
-**Conforme princípios:** versão 14
+**Conforme princípios:** versão 15
 **Posição no plano mestre:** fora das ondas (candidata; próxima documentação, aguarda priorização do responsável)
 **Natureza:** nova
 **Origem:** surgiu no planejamento do Leitor360 (FN-079) e do Escriba (FN-080) em 2026-11-11, com o modo servidor
