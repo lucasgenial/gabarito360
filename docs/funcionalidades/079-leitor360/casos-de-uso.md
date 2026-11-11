@@ -941,6 +941,112 @@ Termos usados neste documento:
 
 ---
 
+## UC-079-26 — Corrigir pelo modo servidor (fila e créditos)
+
+**Ator:** Professor, Professor autônomo, Coordenador, Diretor Escolar, Administrador da Rede; Aplicador envia a captura, sem corrigir
+**Permissão:** `cartao.enviar`; `leitura.transcrever` para as regiões abertas (D-9); `correcao.alterar` para conferir e corrigir no leitor
+**Escopo:** prova no escopo do vínculo ativo; créditos do escopo cobrado
+**Pré-condições:** UC-079-01 em andamento; o aparelho não processa (UC-079-23), o lote passou do limite do aparelho (UC-079-07, 4d) ou o usuário escolheu o modo servidor; saldo de créditos suficiente (⚠ dependência abaixo).
+**Pós-condições:** folha processada no servidor com o mesmo resultado que o aparelho daria; créditos consumidos por folha processada; folha aberta no leitor visual para conferência.
+**Tela/rota:** tela H do mockup `mockups/leitor360.html` (`data-tela="sem-ia"`, "Aparelho sem capacidade para o Escriba"); modal de aviso da aplicação ([ADR-0025](../../decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)). Envio pela rota atual `POST v1/provas/{id}/cartoes`, com o campo `modo = servidor` e sem `leitura` nas regiões que o servidor lê ([planejamento §6.6](planejamento.md#66-api-proposta)). Regras: [planejamento §6.12](planejamento.md#612-modo-servidor-leitura-no-servidor-com-fila-e-créditos).
+
+**Fluxo principal:**
+1. O sistema abre o modal de aviso antes do primeiro envio da sessão. O modal tem dois textos exatos:
+   - "Os créditos de correção serão consumidos."
+   - "A correção não é instantânea. Ela entra numa fila, e você recebe um aviso quando terminar."
+2. O usuário confirma o modal. Sem confirmação, nada é enviado.
+3. O usuário captura ou escolhe uma foto. O sistema trata cada foto como um envio, com `envio_id` e idempotência próprios.
+4. O aparelho decodifica o QR e identifica prova, aluno e página. Ele não executa o núcleo inteiro.
+5. O aparelho grava o marcador na imagem (proposta: segmento XMP no JPEG) com prova, aluno, página, versão do mapa e `envio_id`.
+6. O sistema envia a imagem. O servidor revalida permissão, escopo, vínculo e a relação aluno × prova × turma.
+7. O servidor põe a imagem na fila da prova indicada pelo marcador, sem etapa só para identificar a folha.
+8. O app mostra a posição na fila e o tempo estimado. O usuário pode sair da tela.
+9. O servidor lê a folha com o mesmo núcleo e, para as regiões abertas, com o mesmo Escriba, nas mesmas versões do aparelho (D-4, D-5).
+10. O sistema avisa o usuário ao terminar (FN-057; até ela existir, aviso no app, na tela da prova).
+11. O usuário abre a folha no leitor visual e confere (UC-079-14). Ele pode salvar com pendências (UC-079-17).
+
+**Fluxos alternativos e de erro:**
+- 1a. O usuário toca em **Cancelar** no modal: nada é enviado, e o sistema volta à escolha da entrada.
+- 1b. O aviso aparece de novo a cada sessão do Leitor360.
+- 4a. Sem QR legível no aparelho: a imagem vai sem marcador, e o servidor identifica a folha como hoje.
+- 5a. Marcador forjado ou adulterado (outra prova, outro aluno): o marcador só encaminha. O servidor revalida e decodifica o QR da imagem. O QR prevalece, e a folha vai para revisão. O marcador nunca muda a prova nem o aluno.
+- 6a. Marcador de prova ou aluno fora do escopo do usuário: o servidor recusa a folha com a mensagem do UC-079-09, 2b.
+- 6b. A barreira de qualidade recusa a imagem: a folha fica **Recusada** com a mensagem do código. Ela não consome créditos.
+- 8a. O usuário sai da tela: a fila continua. Ao voltar, ele vê o estado de cada folha.
+- 9a. Prova mista com só o Escriba faltando no aparelho: o aparelho lê as objetivas, e o servidor transcreve só as regiões abertas. Só essas regiões consomem créditos.
+- 9b. A fila tem falha no servidor: a folha fica **Erro** com "Não foi possível ler esta folha. Capture de novo ou escolha outro arquivo." Ela não consome créditos.
+- 10a. Sem conexão durante o envio: a folha não é enviada, e nada fica guardado no aparelho (D-7, D-8). O sistema mostra "Sem conexão. Esta folha ainda não foi salva."
+- 11a. Divergência de leitura: segue o UC-079-20.
+- 11b. O usuário quer corrigir a transcrição: ele digita no leitor visual (UC-079-16).
+- 3b. Saldo de créditos insuficiente ou sistema de créditos indisponível: o sistema bloqueia o envio e mostra "Os créditos de correção acabaram." (texto proposto). ⚠ O sistema de créditos não existe; ver as regras.
+
+**Regras de negócio:**
+- **Consumo de créditos (proposta):** por folha processada no servidor. Em prova mista com só o Escriba faltando, só as regiões abertas consomem. A unidade e o preço vêm da FN de créditos.
+- **Não consome:** o processamento no aparelho; a imagem recusada pela barreira de qualidade; a folha com erro do servidor (proposta).
+- **Paridade:** para a mesma imagem, o resultado do servidor é igual ao do aparelho. O conjunto de referência prova isso (UC-079-24).
+- **O marcador só encaminha** (recomendação, a confirmar). O QR da imagem decide prova e aluno.
+- **Dados:** a imagem já vai ao servidor em todo envio (D-12). O modo servidor não envia nada a terceiros.
+- **⚠ Dependência:** o sistema de créditos de correção não existe no código nem tem FN. Ele bloqueia as subfases 4.3 e 6.3 ([planejamento §8](planejamento.md#8-riscos-e-decisões-pendentes-do-responsável)).
+
+**Critérios de aceite:**
+- [ ] O modal mostra os dois textos exatos e exige confirmação antes do primeiro envio da sessão.
+- [ ] Cada foto é um envio com `envio_id` próprio; um reenvio não duplica.
+- [ ] O aparelho não executa o núcleo inteiro no modo servidor: só identifica e grava o marcador.
+- [ ] Um marcador forjado não muda a prova nem o aluno da folha; o QR prevalece.
+- [ ] Sem QR legível, a imagem vai sem marcador e o servidor a identifica.
+- [ ] A tela mostra a posição na fila e o tempo estimado, e o usuário pode sair dela.
+- [ ] O usuário recebe um aviso quando a folha termina.
+- [ ] Para a mesma imagem, o resultado do servidor tem paridade de 100% com o do aparelho, nas mesmas versões.
+- [ ] Os créditos consomem por folha processada no servidor; o processamento no aparelho e a imagem recusada não consomem.
+- [ ] Numa prova mista com só o Escriba faltando, só as regiões abertas consomem.
+- [ ] Sem créditos, o envio é bloqueado com mensagem.
+- [ ] Conferência registrada por texto nas larguras do ADR-0057, temas claro e escuro.
+
+**Situação:** Não implementado — o servidor lê hoje cada foto enviada (UC-045-02) e a fila alta existe (`FilaCartoes`). Não existem o marcador, a posição na fila, o aviso ao terminar, o campo `modo` nem o sistema de créditos. Mockup aprovado em 11/11/2026 (tela H).
+
+---
+
+## UC-079-27 — Impedir o fechamento da correção com folha pendente
+
+**Ator:** usuário com `correcao.fechar` (perfis conforme o [catálogo de permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md))
+**Permissão:** `correcao.fechar`
+**Escopo:** prova no escopo do vínculo ativo
+**Pré-condições:** prova com a correção aberta; pelo menos uma folha salva com pendência (D-11, UC-079-17).
+**Pós-condições:** a correção continua aberta, e o usuário vê quais folhas pedem revisão.
+**Tela/rota:** acompanhamento da correção (web `correcao.show`, botão de fechar). Rota web atual `POST /provas/{id}/correcao/fechar` (`CorrecaoController::fechar`, nome `correcao.fechar`). Rota da API atual `POST v1/provas/{id}/correcao/fechar` (`CartaoController::fecharCorrecao`, middleware `permissao:correcao.fechar`). Modal da aplicação com a lista; revisão em web `correcao.revisao`.
+
+**Fluxo principal:**
+1. O usuário toca em **Fechar correção** no acompanhamento.
+2. O sistema confere a permissão e o escopo.
+3. A API confere se a prova tem folha com pendência.
+4. A API recusa o fechamento e devolve a lista das folhas pendentes.
+5. O sistema abre um modal da aplicação, sem diálogo nativo, com o texto "Esta correção não pode ser fechada. Há folhas com pendência." e a lista das folhas.
+6. Cada folha da lista tem o botão **Revisar**, que abre a revisão da prova nessa folha (UC-046-01).
+7. Depois que o usuário resolve todas as pendências, o fechamento é aceito como hoje.
+
+**Fluxos alternativos e de erro:**
+- 3a. Sem folha pendente: a API fecha a correção como hoje e responde "Correção fechada."
+- 3b. Correção já fechada: a API responde como hoje, sem alterar nada.
+- 4a. Folha pendente ainda em leitura no modo servidor (UC-079-26): ela conta como pendente. A lista mostra "Em leitura no servidor".
+- 4b. Usuário sem `correcao.fechar`: 403, como hoje. O botão não aparece.
+- 5a. Lista longa: o modal mostra as primeiras folhas e a contagem total.
+- 6a. A folha pendente é de aluno fora do escopo do usuário: ela entra só na contagem, sem nome nem link.
+
+**Regras de negócio:** a trava vale na API, e não só na tela. A pendência é a do glossário deste documento (marcação dupla, marcação fraca ou não lida). Os avisos (em branco) não travam. A mensagem usa modal da aplicação ([ADR-0025](../../decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)). A reabertura (`correcao.reabrir`) não muda.
+
+**Critérios de aceite:**
+- [ ] Com uma folha pendente, a API recusa o fechamento e não grava `correcao_fechada_em`.
+- [ ] A recusa vale também para chamada direta à API, sem passar pela tela.
+- [ ] O modal lista as folhas pendentes, cada uma com acesso à revisão.
+- [ ] Questão em branco não trava o fechamento.
+- [ ] Sem pendências, o fechamento continua como hoje.
+- [ ] Nenhum diálogo nativo do navegador é usado na recusa.
+- [ ] Conferência registrada por texto a 360, 768 e 1280 px, temas claro e escuro.
+
+**Situação:** Parcial — o fechamento existe e não confere pendências: a API grava `correcao_fechada_em` e `correcao_fechada_por` (`CartaoController::fecharCorrecao`), e a tela pede só uma confirmação (`data-correcao-confirmar` em `correcao/show.blade.php`). A trava, a lista e o modal são novos. A marca "com pendência" da folha depende do UC-079-17.
+
+---
+
 ## Grupo F — Qualidade do motor
 
 ## UC-079-24 — Validar uma versão do motor contra o conjunto de referência antes de publicar
@@ -1027,17 +1133,27 @@ A disponibilidade por aparelho está no [planejamento §6.3](planejamento.md#63-
 | Webcam (computador) | UC-079-04 | Também para o aplicador |
 | Foto de arquivo | UC-079-05 | Também para o aplicador |
 | PDF de uma folha | UC-079-06 | Aplicador: não previsto (a confirmar) |
-| Lote de PDFs | UC-079-07 | Aplicador: não previsto (a confirmar); computador fraco: D-3 |
-| Aparelho sem capacidade | UC-079-23 | D-2 |
+| Lote de PDFs | UC-079-07 | Aplicador: não previsto (a confirmar); acima do limite do aparelho, modo servidor |
+| Aparelho sem capacidade | UC-079-23 | Mensagem simples e oferta do modo servidor |
+| Modo servidor (fila e créditos) | UC-079-26 | Depende do sistema de créditos (sem FN) |
 
-Casos comuns a todas as entradas: UC-079-08 (barreira), UC-079-09 (QR), UC-079-14 a UC-079-18 (leitor visual), UC-079-19 a UC-079-22 (servidor e integridade), UC-079-24 e UC-079-25 (qualidade do motor).
+Casos comuns a todas as entradas: UC-079-08 (barreira), UC-079-09 (QR), UC-079-14 a UC-079-18 (leitor visual), UC-079-19 a UC-079-22 e UC-079-27 (servidor e integridade), UC-079-24 e UC-079-25 (qualidade do motor).
 
 ### (b) Tipo de documento × método
 
 | Tipo de documento | `objetiva-bolhas` (OpenCV, no aparelho) | `transcricao-manuscrita` (IA local, FN-080) | Mapa de respostas | Situação |
 |---|---|---|---|---|
 | Cartão-resposta à parte | UC-079-10, UC-079-15 | — | Derivado do cartão (N, K, `layout.grade()`) | Leitura existe no servidor (FN-045); no aparelho, proposta |
-| Página da prova é o gabarito | UC-079-10, UC-079-13, UC-079-15 | — | FN-043 (por página) | Depende da FN-043 e da D-10 |
+| Página da prova é o gabarito | UC-079-10, UC-079-13, UC-079-15 | — | FN-043 (por página) | Depende da FN-043 (QR novo com página, D-10) |
 | Prova aberta | — | UC-079-11, UC-079-16 | FN-043 | Depende da FN-043 e da FN-080 |
 | Prova mista | UC-079-10, UC-079-12, UC-079-15 | UC-079-11, UC-079-12, UC-079-16 | FN-043 | Depende da FN-043 e da FN-080 |
 | Layout de terceiros (futuro) | A FN-048 decide | — | A FN-048 decide | Candidata |
+
+---
+
+## Histórico de versões
+
+| Versão | Data | Mudança | Por |
+|---|---|---|---|
+| 1 | 2026-11-11 | Casos de uso iniciais | lucasgenial |
+| 2 | 2026-11-11 | Decisões D-1 a D-13, modo servidor (UC-079-26), trava de fechamento (UC-079-27) | lucasgenial |
