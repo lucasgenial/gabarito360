@@ -28,7 +28,8 @@ Em conflito, vale esta ordem ([ADR-0056](docs/decisoes/0056-app-atual-como-refer
 1. Mockup novo aprovado pelo responsável, feito sobre a casca, os componentes e o CSS reais de `apps/web`
 2. App atual: views, componentes e CSS de `apps/web` na `main` (o que a homologação publica)
 3. Documentação: `docs/` (estrutura em [docs/README.md](docs/README.md))
-4. `mockups/` e `style-system/`: históricos, só para consultar escopo e textos originais
+4. Design system do app: `style-system/` (tokens, componentes, faixas por aparelho), derivado do item 2
+5. `mockups/` originais e `style-system/historico/`: históricos, só para consultar escopo e textos originais
 
 ## O app é responsivo (regra)
 
@@ -69,7 +70,7 @@ Sem `Co-Authored-By` de IA e sem "Generated with ..." (AGENTS.md, seção Autori
 1. Consulte o agente `gerente-projetos`. Localize a funcionalidade (FN-NNN), a fase e a subfase no plano mestre. Confirme que ela está na fila priorizada.
 2. Leia o `planejamento.md` e o `casos-de-uso.md` da funcionalidade. Sem os dois aprovados, escreva os documentos primeiro.
 3. Verifique as dependências da subfase. Um módulo transversal pendente bloqueia a subfase.
-4. Consulte as telas atuais do app (views e CSS de `apps/web`) e o mockup aprovado da funcionalidade. `mockups/` e `style-system/` são históricos (ADR-0056).
+4. Consulte as telas atuais do app (views e CSS de `apps/web`) e o mockup aprovado da funcionalidade. Use o design system em `style-system/`. Os mockups originais são históricos (ADR-0056).
 5. Use os agentes do time ([02-agentes.md](docs/planejamento/02-agentes.md)), na classe de modelo indicada.
 6. Implemente seguindo a arquitetura.
 7. Teste contra os critérios de aceite da subfase e dos casos de uso.

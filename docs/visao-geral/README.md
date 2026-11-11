@@ -157,7 +157,7 @@ Estas regras vêm da constituição original do projeto e continuam vigentes:
 - O código do sistema anterior não é reutilizado. Só regras de negócio validadas podem ser consultadas.
 - A arquitetura deve comportar a evolução: banco de questões, várias versões de prova, OMR externo e aplicativo móvel offline.
 
-A regra "nenhuma funcionalidade sem mockup" da constituição original foi substituída pelo fluxo de planejamento da [governança](../planejamento/01-governanca.md). Desde 11/11/2026, a referência visual é o app atual, e `mockups/` e `style-system/` originais são históricos ([ADR-0056](../decisoes/0056-app-atual-como-referencia-visual.md)).
+A regra "nenhuma funcionalidade sem mockup" da constituição original foi substituída pelo fluxo de planejamento da [governança](../planejamento/01-governanca.md). Desde 11/11/2026, a referência visual é o app atual, o design system dele fica em `style-system/`, e os mockups originais são históricos ([ADR-0056](../decisoes/0056-app-atual-como-referencia-visual.md)).
 
 ## 9. Para continuar
 

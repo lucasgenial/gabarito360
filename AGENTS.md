@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 10.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 11.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -72,7 +72,7 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 
 - Toda mudança de interface exige consulta prévia e revisão final de um agente de UI/UX e Product Design.
 - O implementador não aprova a própria tela. ([ADR-0020](docs/decisoes/0020-revisao-de-ui-ux-por-especialista.md))
-- A referência visual é o app atual: as views, os componentes e o CSS de `apps/web` na `main`, que a homologação publica. As pastas `mockups/` e `style-system/` são históricas.
+- A referência visual é o app atual: as views, os componentes e o CSS de `apps/web` na `main`, que a homologação publica. O design system do app fica em `style-system/` (espelho do Design System no claude.ai). Os mockups originais (`mockups/` e `style-system/historico/`) são históricos.
 - Todo mockup novo usa a casca, os componentes e o CSS reais de `apps/web/public/css/`. Ele não cria um visual paralelo. CSS próprio do mockup fica mínimo e usa só os tokens existentes. ([ADR-0056](docs/decisoes/0056-app-atual-como-referencia-visual.md))
 - O app é responsivo. Toda tela e todo mockup atendem a todas as faixas: celular pequeno, celular, tablet (retrato e paisagem), notebook, desktop e telas grandes até 4K (3840 px), com regras próprias para toque.
 - Confira cada tela nas larguras de referência 320, 360, 390, 720, 768, 1024, 1280, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. Registre a conferência por texto (ADR-0049).

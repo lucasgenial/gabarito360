@@ -1,6 +1,6 @@
 ---
 id: ADR-0056
-titulo: O app atual é a referência visual; mockups/ e style-system/ são históricos
+titulo: O app atual é a referência visual; style-system/ é o design system do app; os mockups originais são históricos
 estado: Aceita
 substituida_por: []
 data: 2026-11-11
@@ -11,10 +11,10 @@ regras: []
 agents_secao: Interface
 agents_ordem: 15
 agents_resumo:
-  - "A referência visual é o app atual: as views, os componentes e o CSS de `apps/web` na `main`, que a homologação publica. As pastas `mockups/` e `style-system/` são históricas."
+  - "A referência visual é o app atual: as views, os componentes e o CSS de `apps/web` na `main`, que a homologação publica. O design system do app fica em `style-system/` (espelho do Design System no claude.ai). Os mockups originais (`mockups/` e `style-system/historico/`) são históricos."
   - "Todo mockup novo usa a casca, os componentes e o CSS reais de `apps/web/public/css/`. Ele não cria um visual paralelo. CSS próprio do mockup fica mínimo e usa só os tokens existentes."
 ---
-# ADR-0056 — O app atual é a referência visual; `mockups/` e `style-system/` são históricos
+# ADR-0056 — O app atual é a referência visual; `style-system/` é o design system do app; os mockups originais são históricos
 
 **Data:** 2026-11-11
 **Estado:** Aceita
@@ -38,6 +38,8 @@ O responsável decidiu: "Faça um arranjo para respeitar o system design atual. 
    - carrega o CSS real de `apps/web/public/css/`;
    - limita o CSS próprio ao que é novo, com os tokens existentes.
 4. Em conflito sobre interface, vale esta ordem: (1) mockup novo aprovado pelo responsável e feito conforme o item 3; (2) app atual; (3) documentação em `docs/`; (4) `mockups/` e `style-system/` históricos.
+
+5. Em 11/11/2026, o responsável pediu um design system completo, tirado da homologação, disponível como base nos dois lugares. O `style-system/` passou a guardar esse design system (tokens nos dois temas, tipografia, espaçamento, componentes com prévia que carrega o CSS real, faixas por aparelho e divergências). Ele espelha o artifact "Gabarito360 — Design System" no claude.ai. Os arquivos antigos do `style-system/` foram para `style-system/historico/`.
 
 ## Consequências
 

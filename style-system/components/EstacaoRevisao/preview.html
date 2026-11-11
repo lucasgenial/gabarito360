@@ -1,0 +1,28 @@
+<!-- @dsCard group="Correção" height=560 width=1280 -->
+<!doctype html>
+<html lang="pt-BR">
+<head><link rel="stylesheet" href="../../../apps/web/public/css/app-conteudo-legado.css"><link rel="stylesheet" href="../../../apps/web/public/css/tabelas.css"><link rel="stylesheet" href="../../../apps/web/public/css/marca.css"><link rel="stylesheet" href="../../../apps/web/public/css/estado-tela.css"><link rel="stylesheet" href="../../../apps/web/public/css/painel-indicadores.css"><link rel="stylesheet" href="../../../apps/web/public/css/arquivamento.css"><link rel="stylesheet" href="../../../apps/web/public/css/estrutura-app.css"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Estação de revisão — prévia</title><style>/* Só a moldura da prévia; usa tokens. */.ds-legenda{font-size:12px;line-height:16px;color:var(--muted);margin:0 0 8px}.ds-linha{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}</style></head>
+<body class="area-logada tw2-app tela-revisao">
+<main style="padding:16px">
+<div class="g-pagina"><div style="min-width:0;"><h1 class="page-title">Revisar leituras</h1><p class="page-sub">Matemática</p></div></div>
+<div class="rev-estacao" id="rev-estacao">
+  <div class="card card-pad rev-cartao"><div id="rev-conteudo">
+    <div class="row-between rev-topo"><div><b>João Pereira</b><div class="exam-meta">7º ano A</div></div><div class="rev-progresso">Questão 7 · Faltam 4</div></div>
+    <div class="rev-trabalho"><div id="rev-previa" class="rev-previa rev-imagem-restrita"><div class="rev-recorte" role="img" aria-label="Linha da questão 7 no cartão" style="aspect-ratio:7.000"></div><div id="rev-recorte-feedback" role="status" aria-live="polite" tabindex="-1" hidden></div></div><div class="rev-respostas">
+      <div class="rev-visualizar"><button type="button" class="btn btn-ghost btn-sm" id="rev-ver-cartao" data-revisao-acao="cartao">Visualizar gabarito</button></div>
+      <p class="rev-leitura">Leitura do sistema: B e C (marcação incerta)</p>
+      <div class="rev-opcoes" style="--rev-alternativas:5"><button type="button" class="btn rev-resposta" data-revisao-resposta="A">A</button><button type="button" class="btn rev-resposta" data-revisao-resposta="B">B</button><button type="button" class="btn rev-resposta" data-revisao-resposta="C">C</button><button type="button" class="btn rev-resposta" data-revisao-resposta="D">D</button><button type="button" class="btn rev-resposta" data-revisao-resposta="E">E</button></div>
+      <div class="rev-opcoes rev-opcoes-extra"><button type="button" class="btn rev-resposta-extra" data-revisao-resposta="BRANCO">Em branco</button><button type="button" class="btn rev-resposta-extra" data-revisao-resposta="ANULADA">Anulada</button></div>
+      <p id="rev-salvamento" class="rev-salvamento" role="status" aria-live="polite"></p>
+      <div class="rev-acoes"><button type="button" class="btn btn-secondary btn-sm" data-revisao-acao="voltar">Voltar</button><button type="button" class="btn btn-secondary btn-sm" data-revisao-acao="pular">Pular</button></div>
+      <p class="rev-teclas">Teclado: A a E respondem, 0 deixa em branco e X anula.</p>
+    </div></div>
+  </div></div>
+  <aside class="card rev-documento-painel" id="rev-documento-painel" aria-labelledby="rev-painel-titulo">
+    <header class="rev-modal-cabecalho"><div><h2 id="rev-painel-titulo">Cartão-resposta completo</h2><p id="rev-painel-contexto">João Pereira · 7º ano A</p></div></header>
+    <div id="rev-documento-desktop" class="rev-documento-destino"><div id="rev-leitor"></div></div>
+  </aside>
+</div>
+</main>
+</body>
+</html>

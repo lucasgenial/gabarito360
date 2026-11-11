@@ -1,0 +1,21 @@
+<!-- @dsCard group="Diálogos" height=520 -->
+<!doctype html>
+<html lang="pt-BR">
+<head><link rel="stylesheet" href="../../../apps/web/public/css/app-conteudo-legado.css"><link rel="stylesheet" href="../../../apps/web/public/css/tabelas.css"><link rel="stylesheet" href="../../../apps/web/public/css/marca.css"><link rel="stylesheet" href="../../../apps/web/public/css/estado-tela.css"><link rel="stylesheet" href="../../../apps/web/public/css/painel-indicadores.css"><link rel="stylesheet" href="../../../apps/web/public/css/arquivamento.css"><link rel="stylesheet" href="../../../apps/web/public/css/estrutura-app.css"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Filtros em modal — prévia</title><style>/* Só a moldura da prévia; usa tokens. */.ds-legenda{font-size:12px;line-height:16px;color:var(--muted);margin:0 0 8px}.ds-linha{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}</style></head>
+<body class="area-logada tw2-app tela-turmas">
+<main style="padding:16px">
+<p class="tw2-filtros-aplicados" style="margin-top:0">Dados filtrados: Busca: 7º; escola: Escola Municipal Rio Doce; ano letivo: 2026.</p>
+<dialog class="tw2-filtros-dialog" open aria-labelledby="filtros-titulo" style="position:static">
+  <form method="GET">
+    <div class="modal-head"><h2 id="filtros-titulo">Filtrar turmas</h2><button type="button" class="modal-close" aria-label="Fechar filtros">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label for="f-busca">Busca</label><input class="input" id="f-busca" name="busca" value="7º"></div>
+      <div class="field"><label for="f-escola">Escola</label><select class="select" id="f-escola" name="escola"><option>Escola Municipal Rio Doce</option></select></div>
+      <div class="field"><label for="f-ano">Ano letivo</label><select class="select" id="f-ano" name="ano"><option>2026</option></select></div>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn btn-ghost">Limpar campos</button><button type="button" class="btn btn-secondary">Cancelar</button><button class="btn btn-primary" type="submit">Aplicar filtros</button></div>
+  </form>
+</dialog>
+</main>
+</body>
+</html>

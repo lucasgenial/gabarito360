@@ -2,7 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
-**Conforme princípios:** versão 10
+**Conforme princípios:** versão 11
 **Posição no plano mestre:** fora das ondas (candidata; aguarda priorização do responsável)
 **Natureza:** evolução de existente
 **Origem:** surgiu na conversa de planejamento do responsável em 2026-11-11 (leitura no aparelho do usuário)

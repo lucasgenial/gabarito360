@@ -13,8 +13,9 @@ Em conflito, vale a ordem abaixo ([ADR-0056](../decisoes/0056-app-atual-como-ref
 1. Mockup novo aprovado pelo responsável, feito sobre a casca, os componentes e o CSS reais de `apps/web` (exemplo: `mockups/leitor360.html`, FN-079).
 2. App atual: views Blade, componentes e CSS de `apps/web` na `main`, que é o código publicado na homologação.
 3. Documentação oficial em `docs/`.
-4. `mockups/` e `style-system/` originais: **históricos**. Servem para consultar o escopo e os textos de uma tela. Não decidem o visual. O manifesto antigo é `mockups/DESIGN-MANIFEST.json`.
-5. Regras do legado (somente regra de negócio).
+4. Design system do app em `style-system/`: tokens nos dois temas, tipografia, espaçamento, componentes com prévia que carrega o CSS real, faixas por aparelho e divergências. Ele espelha o artifact "Gabarito360 — Design System" no claude.ai e deriva do item 2.
+5. `mockups/` originais e `style-system/historico/`: **históricos**. Servem para consultar o escopo e os textos de uma tela. Não decidem o visual. O manifesto antigo é `mockups/DESIGN-MANIFEST.json`.
+6. Regras do legado (somente regra de negócio).
 
 Regras:
 
