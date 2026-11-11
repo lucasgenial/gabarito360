@@ -779,7 +779,7 @@ Termos usados neste documento:
 - 3a. Mesma chave e mesmo conteúdo: a API devolve o envio existente. Nada é duplicado.
 - 3b. Mesma chave e conteúdo diferente: 409 `chave_reutilizada`. Nada é alterado.
 - 3c. Chave usada em outra prova: 409. A folha fica **Erro** com "Esta folha já foi enviada para outra prova."
-- 3d. `correcoes[]` de quem não tem `correcao.alterar`: 403. A folha fica pendente para o professor conferir na revisão. ⚠ Inferência, não decisão: a proteção contra resultado adulterado é a conferência humana, a imagem original guardada, a nota só no servidor e a auditoria.
+- 3d. `correcoes[]` de quem não tem `correcao.alterar`: 403. Regra do responsável (11/11/2026): nas objetivas, a leitura do aplicador sem pendência vale sem o professor; a questão com pendência (marcação dupla, fraca ou não lida) fica para o professor conferir na revisão. As questões abertas e dissertativas sempre precisam da conferência do professor, num módulo próprio feito com o professor (fora da FN-079). A proteção contra resultado adulterado é a imagem original guardada, a nota só no servidor, os eventos encadeados e a auditoria.
 - 4a. sha256 diferente: 422 `imagem_divergente`. "A imagem chegou incompleta. Envie de novo." O sistema reenvia uma vez.
 - 5a. QR ou aluno diferente do decodificado no servidor: 422 `identificacao_divergente`.
 - 5b. Estado ou confiança incoerente com `detectadas`: 422 `leitura_inconsistente`. O evento é registrado.
@@ -829,7 +829,7 @@ Termos usados neste documento:
 **Fluxos alternativos e de erro:**
 - (a)-2a. O usuário não envia nova imagem: a folha segue para a revisão manual.
 - (b)-3a. O usuário reenvia e a dificuldade continua: a folha vai para a revisão manual, sem novo crédito.
-- (b)-3b. A folha enviada por quem não tem `correcao.alterar` (aplicador) fica pendente para o professor conferir na revisão. ⚠ Inferência, não decisão.
+- (b)-3b. Folha enviada por quem não tem `correcao.alterar` (aplicador): Regra do responsável (11/11/2026): nas objetivas, a leitura do aplicador sem pendência vale sem o professor; a questão com pendência (marcação dupla, fraca ou não lida) fica para o professor conferir na revisão. As questões abertas e dissertativas sempre precisam da conferência do professor, num módulo próprio feito com o professor (fora da FN-079).
 
 **Regras de negócio:** a nota é sempre calculada no servidor, só sem pendências. A proteção contra resultado adulterado é a conferência humana, a imagem original guardada, a nota só no servidor e a auditoria. Toda dificuldade registra a versão do motor e a versão do mapa. Muitas dificuldades da mesma versão do motor alertam a equipe técnica (UC-079-25).
 
@@ -839,7 +839,7 @@ Termos usados neste documento:
 - [ ] No modo servidor, o usuário reenvia só os alunos com problema, sem nova cobrança de crédito.
 - [ ] Todo problema de qualidade da imagem leva à verificação manual do usuário.
 - [ ] A revisão manual está disponível em toda folha com dificuldade.
-- [ ] Uma folha enviada por quem não tem `correcao.alterar` fica pendente para o professor.
+- [ ] Objetivas do aplicador sem pendência são gravadas sem o professor; questões com pendência ficam para o professor; abertas sempre vão para a conferência do professor.
 - [ ] A decisão está registrada na [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md).
 
 **Situação:** Não implementado — reaproveitável: a fila de revisão (`CartaoController::revisao`) e o motor do servidor (`NativoOmrDriver`, `omr/ler_cartao.py`).
