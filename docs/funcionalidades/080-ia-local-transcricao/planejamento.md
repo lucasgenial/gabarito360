@@ -68,6 +68,8 @@ O responsável conduz o trabalho do modelo: seleção, dados, ajuste fino e comp
 
 ## 3. Fontes de verdade
 
+- Estudo da arquitetura de execução (modelo-base, runtime no navegador, no servidor e no app, paridade): [FN-079, estudo](../079-leitor360/estudo-arquitetura-execucao.md), decisões E-4 a E-6.
+
 - Decisões do responsável de 2026-11-11, registradas na conversa de planejamento do Leitor360.
 - Leitor360: [FN-079](../079-leitor360/planejamento.md), método `transcricao-manuscrita` e caso UC-079-11.
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
