@@ -2,7 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
-**Conforme princípios:** versão 13
+**Conforme princípios:** versão 14
 **Posição no plano mestre:** fora das ondas (candidata; aguarda priorização do responsável)
 **Natureza:** evolução de existente
 **Origem:** surgiu na conversa de planejamento do responsável em 2026-11-11 (leitura no aparelho do usuário)
@@ -62,7 +62,7 @@ Hoje toda leitura roda no servidor. O `ProcessarCartaoJob` executa o `ler_cartao
 - Barreira de qualidade no servidor, tentativas numeradas e histórico imutável → [FN-047](../047-omr-qualidade-resultado/planejamento.md). O Leitor360 grava nesses registros e não cria registros paralelos.
 - Leitura de cartões de terceiros → [FN-048](../048-omr-driver-externo/planejamento.md). A FN-048 decide se o layout de terceiros vira método no aparelho, driver no servidor ou os dois. Ela também decide se usa o mapa de respostas, com origem própria. A barreira atual exige os 4 marcadores do cartão nativo.
 - Resultados, relatórios e PDFs → [FN-049](../049-relatorios-resultados/planejamento.md).
-- Permissões e créditos de IA (cobrança por uso) → sem FN hoje. Decisão D-9 e risco na seção 8.
+- Créditos de correção (saldo, consumo, compra e limite incluso) → [FN-081](../081-creditos-correcao/planejamento.md).
 
 ## 3. Fontes de verdade
 
@@ -93,7 +93,7 @@ Hoje toda leitura roda no servidor. O `ProcessarCartaoJob` executa o `ler_cartao
 | FN-077 desempenho | Medição da API com 1000 usuários simultâneos | Parcial |
 | FN-062 lgpd-inventario-retencao | Inventário e retenção de imagens, transcrições e recortes | Parcial |
 | FN-080 Escriba (IA local de transcrição) | Fornece o modelo e o runtime do método `transcricao-manuscrita`. Bloqueia só as subfases 6.x. | Candidata |
-| Créditos de correção (sem FN) | O modo servidor (§6.12) consome créditos. Não existe sistema nem FN de créditos. Bloqueia só a 4.3 e a 6.3. | A registrar |
+| [FN-081](../081-creditos-correcao/planejamento.md) creditos-correcao | O modo servidor (§6.12) consome créditos. O sistema de créditos ainda não existe. Bloqueia só a 4.3 e a 6.3. | Candidata |
 | FN-057 notificacoes | Aviso ao usuário quando a fila do modo servidor termina. Até ela existir, o aviso aparece no app, na tela da prova. | Pendente |
 | FN-043 editor-provas-questoes | Usa o contrato do mapa de respostas v1 (subfase 5.1) e produz os mapas de provas mistas e de provas em que a página é o gabarito. Bloqueia só as subfases 7.x. | Candidata |
 
@@ -146,7 +146,7 @@ Os portões das decisões pendentes estão no §8.
 | 3.5 | Lote de PDFs digitalizados com fila pausável (UC-079-07) | Com os lotes de 40 e 200 páginas, no computador de referência: nenhuma tarefa longa acima de 50 ms na thread principal; o pico de memória com 200 páginas fica até 1,2 × o pico com 40 páginas (proposta), medido via CDP. Pausar, retomar e recarregar a página não perdem nem duplicam folhas nem `envio_id`. | Pendente | |
 | 4.1 | Contrato de envio do resultado e da imagem (API e BFF) (UC-079-19, UC-079-21, UC-079-22) | A D-1, a D-7, a D-8 e a D-12 estão decididas. A API segue o §6.6 inteiro. Os testes Feature do §6.6 ("Testes do contrato") passam. Os testes de regressão do §6.6 passam sem alteração. A rota foi medida com 1000 usuários simultâneos (§6.10). A revisão de segurança aprova. | Pendente | |
 | 4.2 | Leitura com dificuldade: nova imagem, reenvio sem custo e revisão manual, conforme D-1 (UC-079-20) | O servidor não relê a leitura do aparelho. O Escriba no aparelho pede nova imagem e/ou revisão manual. No modo servidor, o usuário reenvia só os alunos com problema, sem cobrar crédito, ou manda para a revisão manual. Problema de qualidade sempre exige revisão manual. Testes cobrem os três caminhos. | Pendente | |
-| 4.3 | Modo servidor para as objetivas: aviso de créditos e fila, identificação e marcador no aparelho, leitura no servidor com o mesmo núcleo, aviso ao terminar (§6.12; UC-079-23, UC-079-26) | Existe o sistema de créditos de correção (nova FN). O aviso aparece antes do primeiro envio. O servidor lê a imagem marcada sem etapa de identificação e com paridade de 100% com o núcleo do aparelho. O marcador forjado não muda prova nem aluno (teste). O consumo de crédito é registrado por folha. O usuário recebe o aviso de fim. Os testes de regressão do §6.6 passam sem alteração. | Pendente | |
+| 4.3 | Modo servidor para as objetivas: aviso de créditos e fila, identificação e marcador no aparelho, leitura no servidor com o mesmo núcleo, aviso ao terminar (§6.12; UC-079-23, UC-079-26) | A FN-081 (créditos de correção) está entregue. O aviso aparece antes do primeiro envio. O servidor lê a imagem marcada sem etapa de identificação e com paridade de 100% com o núcleo do aparelho. O marcador forjado não muda prova nem aluno (teste). O consumo de crédito é registrado por folha. O usuário recebe o aviso de fim. Os testes de regressão do §6.6 passam sem alteração. | Pendente | |
 | 5.1 | Mapa de respostas v1 derivado do cartão atual e preparado para a FN-043 (UC-079-10, UC-079-12) | Para todo N de 1 a 100 e K de 3 a 5, um teste compara `layout.bolinhas()`, `ImagensCartao::recorte()` e o mapa derivado. Ele roda num job com Python e PHP (hoje o job `testes` não instala OpenCV). O despacho lê pelo mapa com paridade de 100%. O mapa é versionado e imutável depois da aplicação. Os testes do §6.2, regra 6, passam. | Pendente | |
 | 6.1 | Método `transcricao-manuscrita` (depende da FN-080) (UC-079-11) | A D-9 está decidida. O método segue a interface do §6.1. Os critérios de qualidade da transcrição vêm da FN-080. O teste de rede do §6.8 passa: nenhum dado sai do aparelho para outra origem. | Pendente | |
 | 6.2 | Correção da transcrição no leitor visual e armazenamento dos trechos com o recorte (UC-079-16) | Antes de começar: os itens do §6.8, regra 12, estão cumpridos. Imagem e texto aparecem lado a lado. Os trechos corrigidos e o recorte vão ao servidor, com sha256 do recorte, num disco privado (§6.7). A saída escapa o texto (§6.8, regra 11). | Pendente | |
@@ -156,7 +156,7 @@ Os portões das decisões pendentes estão no §8.
 | 8.1 | Métricas de leitura (UC-079-25) | A API registra, por versão do motor: taxa de revisão, correções do usuário por estado e alunos reenviados por dificuldade no modo servidor. Um teste valida o esquema e recusa os campos proibidos do §6.8, regra 13. | Pendente | |
 | 8.2 | Validação contínua do motor e apoio ao ajuste de limiares com a FN-046 (R3) (UC-079-24, UC-079-25) | A CI publica uma versão nova do motor só com paridade de 100% e sem queda de acerto em nenhuma categoria (§6.9). Uma proposta de limiar novo usa as métricas da 8.1. | Pendente | |
 
-Ordem de execução: 0.1, 0.2, 1.1, 1.2, 1.3, 2.1 a 2.4, 3.1 a 3.5, 4.1 a 4.3, 5.1, 8.1, 8.2. As subfases 6.x e 7.x esperam a FN-080 e a FN-043. A 4.3 e a 6.3 esperam também a FN de créditos de correção. Até a 5.1, o despacho tem um só método e usa N e K do QR, como a leitura atual.
+Ordem de execução: 0.1, 0.2, 1.1, 1.2, 1.3, 2.1 a 2.4, 3.1 a 3.5, 4.1 a 4.3, 5.1, 8.1, 8.2. As subfases 6.x e 7.x esperam a FN-080 e a FN-043. A 4.3 e a 6.3 esperam também a FN-081 (créditos de correção). Até a 5.1, o despacho tem um só método e usa N e K do QR, como a leitura atual.
 
 ⚠ A subfase 4.1 é a primeira que altera o fluxo de produção. Até ela, o Leitor360 pode existir na homologação sem mudar o envio atual.
 
@@ -588,7 +588,7 @@ Regras:
 6. **Sem QR legível no aparelho.** A imagem vai sem marcador, e o servidor identifica como hoje.
 7. **Fila e aviso.** O app mostra a posição na fila e o tempo estimado. O usuário pode sair da tela. Quando termina, ele recebe um aviso (FN-057; até ela existir, um aviso no app, na tela da prova). Depois ele confere no leitor visual (UC-079-14), e a folha pode ser salva com pendências, que travam o fechamento da correção (D-11).
 8. **Paridade.** O servidor usa o mesmo núcleo, nas mesmas versões (D-4, D-5), e o mesmo Escriba, na mesma versão publicada para os aparelhos (FN-080). Para a mesma imagem, o resultado é igual ao do aparelho. O conjunto de referência prova isso.
-9. **Créditos.** A unidade é **uma correção de prova de um aluno** (aluno × prova). Várias páginas do mesmo aluno na mesma prova contam 1 crédito. O processamento no aparelho nunca consome. Sem saldo, o envio é recusado. O preço vem da FN de créditos.
+9. **Créditos.** A unidade é **uma correção de prova de um aluno** (aluno × prova). Várias páginas do mesmo aluno na mesma prova contam 1 crédito. O processamento no aparelho nunca consome. Sem saldo, o envio é recusado. O preço e o titular do saldo vêm da [FN-081](../081-creditos-correcao/planejamento.md).
 11. **Dificuldade no servidor.** Se o Escriba do servidor tem dificuldade com um aluno, o usuário pode reenviar só os alunos com problema, **sem cobrar crédito**, e/ou mandar para a revisão manual. A revisão manual é sempre o caminho principal.
 12. **Qualidade.** Problema de qualidade da imagem sempre exige que o usuário verifique a prova manualmente.
 10. **Dados.** A imagem já vai ao servidor em todo envio (D-12). O modo servidor não envia nada a terceiros. O processamento roda no ambiente do responsável, no Brasil.
@@ -706,7 +706,7 @@ Riscos:
 | Diferença de decodificação entre navegador e servidor | Paridade falha por EXIF ou recodificação, sobretudo no Safari | D-12 e §6.1, regra 5; categorias de EXIF no conjunto |
 | Geometria em três lugares (`layout.py`, `ImagensCartao::recorte()`, núcleo do aparelho) | Recorte e leitura desalinhados | Mapa de respostas como fonte única (5.1) |
 | Medição de 1000 usuários numa rota de escrita | O [12 Desempenho](../../arquitetura/12-desempenho.md) prevê carga só de leitura | Espaço de teste isolado e decisão do responsável (§6.10) |
-| Créditos de correção não existem | O modo servidor (§6.12) consome créditos, mas não existe sistema de créditos no código nem FN que o defina (a FN-068 não define créditos) | Nova FN candidata de créditos de correção, a registrar por decisão do responsável. As subfases 4.3 e 6.3 não publicam sem ela. |
+| Créditos de correção não existem | O modo servidor (§6.12) consome créditos, mas o sistema de créditos ainda não existe no código (FN-081, candidata) | FN-081 criada como candidata; é a próxima documentação. As subfases 4.3 e 6.3 não publicam sem ela. |
 | Fila do modo servidor longa | A VM atual não tem GPU; o Escriba no servidor pode levar segundos por resposta (⚠ inferência, sem medição) | Medir na 6.3; decidir GPU dedicada, limite por hora ou prioridade por plano |
 | Marcador forjado na imagem | Um cliente adulterado declara outra prova ou outro aluno | O marcador só encaminha. O servidor revalida permissão e escopo e decodifica o QR na leitura; o QR prevalece (§6.12, regra 5) |
 | Lote em memória no celular | Aba fechada pelo sistema perde o lote | Chaves por página (§6.5). Sem fila offline (D-7 decidida: sem conexão, nada é salvo) |

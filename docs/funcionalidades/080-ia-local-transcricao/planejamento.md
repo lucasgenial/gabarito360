@@ -2,7 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
-**Conforme princípios:** versão 13
+**Conforme princípios:** versão 14
 **Posição no plano mestre:** fora das ondas (candidata; aguarda priorização do responsável)
 **Natureza:** nova
 **Origem:** surgiu na conversa de planejamento do Leitor360 (FN-079) em 2026-11-11
@@ -82,7 +82,7 @@ O responsável conduz o trabalho do modelo: seleção, dados, ajuste fino e comp
 | FN-079 Leitor360 | Define a interface do método `transcricao-manuscrita`, o perfil de capacidade e as regras de distribuição | Candidata |
 | FN-043 editor-provas-questoes | Produz o mapa de respostas com as regiões abertas e o tipo esperado | Candidata |
 | FN-010 app-mobile | Alvo nativo do modelo | Adiada |
-| Créditos de correção (sem FN) | Bloqueiam o Escriba no servidor (§8.3); o sistema de créditos não existe | Sem FN |
+| [FN-081](../081-creditos-correcao/planejamento.md) creditos-correcao | Bloqueia o Escriba no servidor (§8.3); o sistema de créditos ainda não existe | Candidata |
 | [FN-057 notificações](../057-notificacoes/planejamento.md) | Aviso ao usuário quando a transcrição no servidor termina; até lá, aviso no app | Pendente |
 | FN-061 e FN-062 LGPD | Base de consentimento, inventário e retenção para os dados de treino | Parcial |
 

@@ -269,7 +269,7 @@ Decisão D-2 da [FN-079](../079-leitor360/planejamento.md#612-modo-servidor-leit
 **Ator:** usuário do Leitor360; servidor do Gabarito360 (executa o Escriba)
 **Permissão:** `leitura.transcrever`; o servidor revalida permissão, escopo e vínculo a cada envio
 **Escopo:** servidor do Gabarito360, no ambiente do responsável, no Brasil
-**Pré-condições:** UC-080-09 concluído; o usuário aceitou o modo servidor; existe saldo de créditos de correção (sistema de créditos sem FN, bloqueia este caso); a prova tem regiões abertas. A unidade de crédito é uma correção de prova de um aluno (aluno × prova).
+**Pré-condições:** UC-080-09 concluído; o usuário aceitou o modo servidor; existe saldo de créditos de correção (sistema de créditos na FN-081, candidata, bloqueia este caso); a prova tem regiões abertas. A unidade de crédito é uma correção de prova de um aluno (aluno × prova).
 **Pós-condições:** a transcrição está registrada com origem "servidor" e a versão do Escriba; o usuário foi avisado; a conferência humana está pendente.
 **Tela/rota:** Leitor360 (FN-079 §6.12 e UC-079-26); aviso pela FN-057, ou no app até ela existir
 

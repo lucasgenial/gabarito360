@@ -1146,7 +1146,7 @@ A disponibilidade por aparelho está no [planejamento §6.3](planejamento.md#63-
 | PDF de uma folha | UC-079-06 | Aplicador: não previsto (a confirmar) |
 | Lote de PDFs | UC-079-07 | Aplicador: não previsto (a confirmar); acima do limite do aparelho, modo servidor |
 | Aparelho sem capacidade | UC-079-23 | Mensagem simples e oferta do modo servidor |
-| Modo servidor (fila e créditos) | UC-079-26 | Depende do sistema de créditos (sem FN) |
+| Modo servidor (fila e créditos) | UC-079-26 | Depende da [FN-081](../081-creditos-correcao/planejamento.md) (créditos de correção) |
 
 Casos comuns a todas as entradas: UC-079-08 (barreira), UC-079-09 (QR), UC-079-14 a UC-079-18 (leitor visual), UC-079-19 a UC-079-22 e UC-079-27 (servidor e integridade), UC-079-24 e UC-079-25 (qualidade do motor).
 
