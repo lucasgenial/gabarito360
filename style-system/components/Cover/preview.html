@@ -1,0 +1,40 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="pt-BR">
+<head><link rel="stylesheet" href="../../../apps/web/public/css/app-conteudo-legado.css"><link rel="stylesheet" href="../../../apps/web/public/css/tabelas.css"><link rel="stylesheet" href="../../../apps/web/public/css/marca.css"><link rel="stylesheet" href="../../../apps/web/public/css/estado-tela.css"><link rel="stylesheet" href="../../../apps/web/public/css/painel-indicadores.css"><link rel="stylesheet" href="../../../apps/web/public/css/arquivamento.css"><link rel="stylesheet" href="../../../apps/web/public/css/estrutura-app.css"><meta charset="utf-8"><title>Gabarito360 — capa</title>
+<style>
+html,body{margin:0;background:var(--bg)}
+.capa{position:relative;width:960px;height:288px;overflow:hidden;background:var(--bg)}
+.capa svg{position:absolute;left:0;top:0}
+.laje{fill:var(--g360-navy)}
+[data-theme="dark"] .laje{fill:var(--faixa)}
+.azul{fill:var(--accent)}
+.ceu{fill:var(--g360-blue)}
+.verde{fill:var(--atencao)}
+.tinta{fill:var(--accent-light)}
+.bolha{fill:none;stroke:var(--accent-light);stroke-width:2}
+.bolha.marcada{fill:var(--g360-blue);stroke:var(--g360-blue)}
+.texto{position:absolute;left:48px;bottom:48px;max-width:440px}
+.nome{margin:0;font-family:var(--font-marca);font-weight:800;font-size:64px;line-height:.95;color:var(--fg);letter-spacing:0}
+.lema{margin:8px 0 0;font-size:14px;line-height:20px;color:var(--muted)}
+</style></head>
+<body>
+<div class="capa">
+<svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+<!--
+blocos: g360-navy (laje 192x288; faixa no escuro), accent 288x144, g360-blue 144x144, atencao 144x72, accent-light 144x72 — lados em múltiplos de space-6 (24) e space-12 (48); cantos retos (radius-sm 4 é quase reto; o sistema é de cantos pequenos).
+arranjo: uma laje alta à esquerda da caixa e satélites em grade modular à direita, sangrando no topo, no fundo e na direita.
+padrão: grade de bolhas de cartão-resposta (5 alternativas x 8 questões), uma marcada por linha em g360-blue — linha "motivo literal" + "grade de pontos": o produto lê bolhas marcadas.
+passos e raios: passo space-6 (24 px); bolha r=7 (36 px de .bubble reduzida à grade); traço 2 px em accent-light.
+-->
+<rect class="laje" x="480" y="0" width="192" height="288"/>
+<rect class="azul" x="672" y="0" width="288" height="144"/>
+<rect class="ceu" x="672" y="144" width="144" height="144"/>
+<rect class="verde" x="816" y="144" width="144" height="72"/>
+<rect class="tinta" x="816" y="216" width="144" height="72"/>
+<circle class="bolha" cx="528" cy="60" r="7"/><circle class="bolha marcada" cx="552" cy="60" r="7"/><circle class="bolha" cx="576" cy="60" r="7"/><circle class="bolha" cx="600" cy="60" r="7"/><circle class="bolha" cx="624" cy="60" r="7"/><circle class="bolha" cx="528" cy="84" r="7"/><circle class="bolha" cx="552" cy="84" r="7"/><circle class="bolha" cx="576" cy="84" r="7"/><circle class="bolha marcada" cx="600" cy="84" r="7"/><circle class="bolha" cx="624" cy="84" r="7"/><circle class="bolha marcada" cx="528" cy="108" r="7"/><circle class="bolha" cx="552" cy="108" r="7"/><circle class="bolha" cx="576" cy="108" r="7"/><circle class="bolha" cx="600" cy="108" r="7"/><circle class="bolha" cx="624" cy="108" r="7"/><circle class="bolha" cx="528" cy="132" r="7"/><circle class="bolha" cx="552" cy="132" r="7"/><circle class="bolha" cx="576" cy="132" r="7"/><circle class="bolha" cx="600" cy="132" r="7"/><circle class="bolha marcada" cx="624" cy="132" r="7"/><circle class="bolha" cx="528" cy="156" r="7"/><circle class="bolha" cx="552" cy="156" r="7"/><circle class="bolha marcada" cx="576" cy="156" r="7"/><circle class="bolha" cx="600" cy="156" r="7"/><circle class="bolha" cx="624" cy="156" r="7"/><circle class="bolha" cx="528" cy="180" r="7"/><circle class="bolha" cx="552" cy="180" r="7"/><circle class="bolha marcada" cx="576" cy="180" r="7"/><circle class="bolha" cx="600" cy="180" r="7"/><circle class="bolha" cx="624" cy="180" r="7"/><circle class="bolha" cx="528" cy="204" r="7"/><circle class="bolha marcada" cx="552" cy="204" r="7"/><circle class="bolha" cx="576" cy="204" r="7"/><circle class="bolha" cx="600" cy="204" r="7"/><circle class="bolha" cx="624" cy="204" r="7"/><circle class="bolha" cx="528" cy="228" r="7"/><circle class="bolha" cx="552" cy="228" r="7"/><circle class="bolha" cx="576" cy="228" r="7"/><circle class="bolha marcada" cx="600" cy="228" r="7"/><circle class="bolha" cx="624" cy="228" r="7"/>
+</svg>
+<div class="texto"><h1 class="nome">Gabarito360</h1><p class="lema">Avaliação escolar com leitura de cartões-resposta por foto.</p></div>
+</div>
+</body>
+</html>

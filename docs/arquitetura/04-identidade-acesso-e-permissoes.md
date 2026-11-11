@@ -327,6 +327,8 @@ Os perfis `professor_autonomo`, `secretario_escolar`, `vice_dir_escolar` e `auxi
 | `correcao.fechar` | Fechar a correção | — | ✓ | — | ✓ | ✓ | ✓ | — | — |
 | `correcao.reabrir` | Reabrir a correção e alterar com ela fechada | — | ✓ | — | ✓ | ✓ | ○ | — | — |
 
+Para o aplicador, `cartao.enviar` mostra as marcações lidas só da folha atual, antes de salvar, para refazer a foto. O aplicador não corrige e não vê gabarito, nota, folhas anteriores, folha salva, leitura do servidor nem imagens de outros envios ([ADR-0059](../decisoes/0059-aplicador-ve-a-leitura-sem-corrigir.md)).
+
 ### 6.6 Resultados e relatórios
 
 | Chave | Ação | SEC | ADM | NUC | DIR | COO | PRO | APL | ALU |

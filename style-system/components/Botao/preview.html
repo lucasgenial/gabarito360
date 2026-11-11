@@ -1,0 +1,30 @@
+<!-- @dsCard group="Ações" height=300 -->
+<!doctype html>
+<html lang="pt-BR">
+<head><link rel="stylesheet" href="../../../apps/web/public/css/app-conteudo-legado.css"><link rel="stylesheet" href="../../../apps/web/public/css/tabelas.css"><link rel="stylesheet" href="../../../apps/web/public/css/marca.css"><link rel="stylesheet" href="../../../apps/web/public/css/estado-tela.css"><link rel="stylesheet" href="../../../apps/web/public/css/painel-indicadores.css"><link rel="stylesheet" href="../../../apps/web/public/css/arquivamento.css"><link rel="stylesheet" href="../../../apps/web/public/css/estrutura-app.css"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Botão — prévia</title><style>/* Só a moldura da prévia; usa tokens. */.ds-legenda{font-size:12px;line-height:16px;color:var(--muted);margin:0 0 8px}.ds-linha{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}</style></head>
+<body class="area-logada tw2-app">
+<main style="padding:16px">
+<p class="ds-legenda">Legado: todas as telas, exceto Turmas</p>
+<div class="ds-linha">
+  <button class="btn btn-primary" type="button">Salvar</button>
+  <button class="btn btn-secondary" type="button">Cancelar</button>
+  <button class="btn btn-ghost" type="button">Limpar</button>
+  <button class="btn btn-success" type="button">Publicar</button>
+  <button class="btn btn-secondary btn-sm" type="button">Ver</button>
+  <button type="submit" class="btn btn-secondary g360-arquivar-acao btn-sm" aria-label="Arquivar turma" title="Arquivar turma"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16v13H4zM3 3h18v5H3zM9 12h6"/></svg> <span>Arquivar<span class="acao-turma-contexto"> turma</span></span></button>
+</div>
+<div class="tw2-app tela-turmas">
+  <p class="ds-legenda">TW2: telas de Turmas</p>
+  <div class="ds-linha">
+    <button class="btn btn-primary" type="button">+ Nova turma</button>
+    <button class="btn btn-secondary" type="button"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z"/></svg> Editar</button>
+    <button class="btn btn-ghost" type="button">Limpar campos</button>
+    <button class="btn btn-success" type="button">Publicar</button>
+    <button class="btn btn-danger" type="button">Excluir</button>
+    <button class="btn btn-secondary" type="button" disabled>Desabilitado</button>
+    <button class="btn btn-secondary" type="button" aria-label="Filtrar turmas" title="Filtrar turmas"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18l-7 8v7l-4 2v-9z"/></svg></button>
+  </div>
+</div>
+</main>
+</body>
+</html>

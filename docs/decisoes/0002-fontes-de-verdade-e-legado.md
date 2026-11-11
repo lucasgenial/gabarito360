@@ -11,11 +11,11 @@ regras: []
 agents_secao: Interface
 agents_ordem: 20
 agents_resumo:
-  - "Fontes de verdade de interface: `mockups/` e `style-system/`. Referência técnica: `docs/arquitetura/09-interface-e-design-system.md`."
+  - "Documentação aprovada antes do código. O legado só fornece regras de negócio. A ordem das fontes de interface está no ADR-0056. Referência técnica: `docs/arquitetura/09-interface-e-design-system.md`."
 ---
 # ADR-0002 — Nenhum código nasce sem documentação aprovada; mockups e style system vencem a documentação; o legado só fornece regras
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 11/11/2026, por lucasgenial
 **Data:** 2026-06-16
 **Estado:** Aceita
 **Decisor:** responsável (lucasgenial)
@@ -43,6 +43,7 @@ O diretório do legado serve para recuperar regras de negócio validadas, fluxos
 - Antes de implementar uma tela, consulte o inventário dos mockups.
 - Antes de criar endpoints, consulte a matriz de perfis e permissões.
 - É proibido criar funcionalidades fora dos mockups sem aprovação.
+- Desde 11/11/2026, a ordem das fontes de interface é a do [ADR-0056](0056-app-atual-como-referencia-visual.md): o app atual vence os `mockups/` e o `style-system/` originais, que viraram históricos. O resto desta decisão continua valendo.
 - Desde 09/11/2026, a aprovação da funcionalidade também exige `planejamento.md` e `casos-de-uso.md` aprovados (ver [ADR-0048](0048-tronco-unico-de-planejamento.md)).
 
 ## Verificação

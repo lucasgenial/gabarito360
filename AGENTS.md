@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 7.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 15.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -28,6 +28,14 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 - Consulte o agente `gerente-projetos` antes de iniciar uma funcionalidade e ao fim de cada subfase. Toda funcionalidade tem `planejamento.md` e `casos-de-uso.md` aprovados antes da execução.
 - Um plano que nasce numa entrega serve só a ela. O que vai além vira funcionalidade candidata no catálogo.
 - Um módulo transversal bloqueia quem depende dele. Não crie versão local paralela. Um PR que altera `apps/` cita a FN (`FN: FN-NNN`) e atualiza o `planejamento.md` dela; a CI verifica com `scripts/verificar_fn_no_pr.py`. ([ADR-0048](docs/decisoes/0048-tronco-unico-de-planejamento.md))
+- A leitura das folhas (núcleo OMR e Escriba) roda no aparelho, para reduzir o custo do servidor. Aparelho e servidor usam o mesmo código, as mesmas versões de OpenCV e NumPy e o mesmo modelo e versão do Escriba (paridade total). A nota é calculada só no servidor.
+- Não existe uso offline. Nada é persistido no aparelho. O envio leva a imagem original, reduzida a 2400 px. O servidor não relê: quem confere é sempre o usuário. Leitura com dificuldade pede nova imagem, reenvio sem custo (modo servidor) ou revisão manual, que é o caminho principal.
+- Aparelho sem capacidade usa o modo servidor: fila, aviso prévio de créditos e de fila, e marcador de identificação no arquivo. O marcador só encaminha: o QR prevalece. Os créditos de correção existem só no servidor: um por correção de prova de um aluno.
+- A correção da prova não fecha com folha pendente. A folha pode ser salva com pendências e corrigida depois, na revisão. ([ADR-0058](docs/decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md))
+- As objetivas são lidas pelo Pyodide (versão fixa, hoje 314.0.7) num Web Worker do navegador e pelo mesmo Pyodide em Node no servidor, com o mesmo lockfile. A leitura usa OpenCV 4.11.0.86 e NumPy 2.4.6, as versões do Pyodide. O Python nativo fica só para gerar PDF.
+- A CSP libera `'unsafe-eval'` e `'wasm-unsafe-eval'` só no Worker do leitor, nunca na página inteira.
+- O Escriba parte do Qwen3.5-0.8B (reserva: 2B), em ONNX, com transformers.js no navegador (WebGPU) e no servidor (Node). O mesmo arquivo de modelo, com hash, roda nos dois lados.
+- Paridade do Escriba: mesmo arquivo, mesmo pré-processamento, mesmo prompt e decodificação gulosa, com meta medida de saídas idênticas e de CER. Igualdade total entre GPU e CPU não é exigida. ([ADR-0060](docs/decisoes/0060-arquitetura-de-execucao-da-leitura.md))
 
 ## Princípios executáveis
 
@@ -72,7 +80,12 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 
 - Toda mudança de interface exige consulta prévia e revisão final de um agente de UI/UX e Product Design.
 - O implementador não aprova a própria tela. ([ADR-0020](docs/decisoes/0020-revisao-de-ui-ux-por-especialista.md))
-- Fontes de verdade de interface: `mockups/` e `style-system/`. Referência técnica: `docs/arquitetura/09-interface-e-design-system.md`. ([ADR-0002](docs/decisoes/0002-fontes-de-verdade-e-legado.md))
+- A referência visual é o app atual: as views, os componentes e o CSS de `apps/web` na `main`, que a homologação publica. O design system do app fica em `style-system/` (espelho do Design System no claude.ai). Os mockups originais (`mockups/` e `style-system/historico/`) são históricos.
+- Todo mockup novo usa a casca, os componentes e o CSS reais de `apps/web/public/css/`. Ele não cria um visual paralelo. CSS próprio do mockup fica mínimo e usa só os tokens existentes. ([ADR-0056](docs/decisoes/0056-app-atual-como-referencia-visual.md))
+- O app é responsivo. Toda tela e todo mockup atendem a todas as faixas: celular pequeno, celular, tablet (retrato e paisagem), notebook, desktop e telas grandes até 4K (3840 px), com regras próprias para toque.
+- Confira cada tela nas larguras de referência 320, 360, 390, 720, 768, 1024, 1280, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. Registre a conferência por texto (ADR-0049).
+- Use os cortes canônicos (400, 720/721, 767/768, 1023/1024, 1099/1100, 1279/1280 px e altura 699/700 px), `pointer: coarse` e consultas de contêiner. Um corte novo exige registro no design system. ([ADR-0057](docs/decisoes/0057-app-responsivo-em-todas-as-faixas.md))
+- Documentação aprovada antes do código. O legado só fornece regras de negócio. A ordem das fontes de interface está no ADR-0056. Referência técnica: `docs/arquitetura/09-interface-e-design-system.md`. ([ADR-0002](docs/decisoes/0002-fontes-de-verdade-e-legado.md))
 - Use o TailwindCSS com a paleta Gabarito360 como base visual. ([ADR-0026](docs/decisoes/0026-tailwindcss-como-base-visual.md))
 - As telas ocupam toda a área útil. ([ADR-0021](docs/decisoes/0021-telas-ocupam-toda-a-area-util.md))
 - Tabelas usam `x-tabela`, dentro do card principal. ([ADR-0022](docs/decisoes/0022-tabelas-cards-de-registros-e-avisos.md))
@@ -94,6 +107,8 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 ## Sessão e vínculo
 
 - O vínculo ativo acompanha a sessão. Uma sessão irrecuperável encerra toda a sessão Web. ([ADR-0024](docs/decisoes/0024-vinculo-ativo-acompanha-a-sessao.md))
+- O aplicador (APL, chave `cartao.enviar`, só na data de aplicação) vê as marcações lidas apenas da folha atual, antes de salvar, para refazer a foto. Ele não corrige: não tem `correcao.alterar`.
+- O aplicador nunca vê gabarito, nota, folhas anteriores, folha já salva, leitura vinda do servidor nem imagens de outros envios. ([ADR-0059](docs/decisoes/0059-aplicador-ve-a-leitura-sem-corrigir.md))
 
 ## Desempenho
 

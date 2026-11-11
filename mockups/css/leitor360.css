@@ -1,0 +1,172 @@
+/* ============================================================
+   Mockup Leitor360 (FN-079) — CSS próprio mínimo.
+   A casca, os cards, botões, tabelas, câmera, estação de revisão e modais
+   vêm do CSS real de apps/web/public/css (carregado no HTML).
+   Prefixos: mk- = barra do mockup (não faz parte da tela); lr- = novidade do Leitor360.
+   Só tokens existentes (--accent, --atencao, --surface…). Faixas iguais às do app:
+   767 px (celular), 1023 px (tablet), 1099/1100 px (estação de revisão), 720 px (tabelas).
+   ============================================================ */
+
+/* ---------- Barra do mockup (não faz parte da tela) ---------- */
+.mk-barra { position: sticky; top: 0; z-index: 2000; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 8px 12px; background: var(--faixa); color: #fff; font: 13px/1.3 system-ui, sans-serif; }
+.mk-barra strong { margin-right: 8px; }
+.mk-barra label { display: inline-flex; gap: 6px; align-items: center; }
+.mk-barra select, .mk-barra button { min-height: 36px; font: inherit; border-radius: 6px; border: 1px solid #ffffff66; background: #ffffff1f; color: #fff; padding: 6px 10px; cursor: pointer; }
+.mk-barra select option { color: #111; }
+.mk-barra button[aria-pressed="true"] { background: #fff; color: var(--faixa); }
+.mk-barra :is(select, button):focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.mk-barra .mk-nota { opacity: .85; margin-left: auto; }
+.mk-barra output { font-weight: 600; }
+.mk-quadro { padding: 16px; background: var(--surface-2); min-height: calc(100dvh - 52px); overflow: hidden; }
+.mk-quadro iframe { display: block; border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow-md); transform-origin: 0 0; }
+.mk-oculto { display: none !important; }
+.mk-pendente { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px;
+  background: var(--warn-light); color: var(--warn-fg); border: 1px dashed var(--warn-fg); }
+.mk-pendente::before { content: "Pendente:"; font-weight: 700; }
+@media (max-width: 767px) { .mk-barra .mk-nota { margin-left: 0; } }
+
+/* ---------- Telas do mockup ---------- */
+.tela-mk { display: none; }
+.tela-mk.ativa { display: block; }
+
+/* ---------- Ler folhas: card #camera evoluído ---------- */
+.lr-preparo { margin-bottom: 12px; }
+.lr-trilho { height: 6px; border-radius: 99px; background: var(--surface); margin-top: 8px; overflow: hidden; }
+.lr-trilho > div { height: 100%; background: var(--accent); }
+.lr-capacidades { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.lr-entradas { display: flex; flex-wrap: wrap; gap: 10px; }
+.lr-entradas .lr-entrada { flex: 1 1 180px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; padding: 16px; min-height: 44px; text-align: left; white-space: normal; }
+.lr-entrada-rotulo { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; }
+.lr-entrada-desc { font-size: 13px; font-weight: 400; line-height: 1.35; }
+.lr-entradas + .page-sub { margin-top: 12px; }
+.lr-thumb { display: block; padding: 0; overflow: hidden; cursor: default; }
+.lr-thumb svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- Fotos e PDF / Lote / Resumo ---------- */
+.lr-soltar { display: grid; justify-items: center; gap: 8px; padding: 28px 16px; border: 2px dashed var(--border); border-radius: var(--radius-lg); text-align: center; color: var(--muted); font-size: 14px; }
+.lr-soltar b { color: var(--fg); font-size: 16px; }
+.lr-filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.lr-filtros .btn { min-height: 44px; }
+.lr-rodape-acoes, .lr-salvar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-top: 16px; }
+.lr-lista { padding-left: 20px; line-height: 1.8; font-size: 14px; margin-bottom: 16px; }
+.tela-correcao .lr-lote-topo { margin-top: 0; }
+
+/* ---------- Leitor visual: estação de revisão com a folha à esquerda ---------- */
+.rev-pdf-pagina svg { display: block; flex-shrink: 0; background: #fff; box-shadow: var(--shadow-sm); }
+/* O SVG faz o papel do canvas/imagem reais; anula o teto de 340 px de .card svg[viewBox] (app-conteudo-legado.css). */
+.tela-mk :is(.rev-pdf-pagina, .lr-recorte, .lr-thumb) svg[viewBox]:not(.nav-icone), .rev-cartao-modal .rev-pdf-pagina svg[viewBox] { max-height: none; }
+.lr-questoes { list-style: none; margin: 4px 0 8px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
+.lr-q { width: 100%; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 4px; line-height: 1.15;
+  border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--fg); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.lr-q small { font-size: 11px; font-weight: 400; color: var(--muted); }
+.lr-q:hover { background: var(--surface-2); }
+.lr-q:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.lr-q.lr-pend { border: 2px solid var(--atencao); background: var(--atencao-light); }
+.lr-q.lr-pend small { color: var(--atencao); font-weight: 600; }
+.lr-q.lr-branco { border-style: dashed; }
+.lr-q.lr-corrigida { border-color: var(--success); background: var(--success-light); }
+.lr-q[aria-current="true"] { box-shadow: inset 0 -3px 0 var(--accent); border-color: var(--accent); }
+.lr-legenda { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.lr-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.lr-leg { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--border); background: var(--surface); }
+.lr-leg-pend { border: 2px solid var(--atencao); background: var(--atencao-light); }
+.lr-leg-branco { border-style: dashed; }
+.lr-leg-ok { border-color: var(--success); background: var(--success-light); }
+.lr-trab-titulo { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.tela-revisao .lr-recorte { padding: 6px; aspect-ratio: auto; }
+.lr-recorte svg { display: block; width: 100%; height: auto; }
+.tela-revisao .rev-opcoes .rev-resposta[aria-pressed="true"] { background: var(--accent); color: var(--accent-on); }
+.tela-revisao .rev-opcoes-extra { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+.lr-salvar { border-top: 1px solid var(--border-soft); padding-top: 12px; }
+.rev-cartao-modal .rev-leitor { flex: 1; }
+
+/* ---------- Abertas, textos e mistas (FN-079 e FN-080) ---------- */
+.lr-card-titulo { font-size: 17px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.lr-sub { font-size: 15px; font-weight: 700; margin: 16px 0 8px; }
+.lr-grupo { font-size: 13px; font-weight: 700; color: var(--fg-2); margin: 12px 0 6px; display: flex; gap: 6px; align-items: center; }
+.lr-tipo { display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 4px; border-radius: var(--radius-md); background: var(--surface-2); color: var(--fg-2); font-size: 14px; font-weight: 700; }
+.lr-motores, .lr-grade-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 12px; margin-bottom: 4px; }
+.lr-motor { border: 1px solid var(--border-soft); border-radius: var(--radius-md); padding: 12px 14px; background: var(--surface); min-width: 0; }
+.lr-motor-cabeca { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.lr-trilho-claro { background: var(--surface-2); margin: 8px 0; }
+.lr-linha-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.lr-capacidade { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 8px 16px; margin-bottom: 16px; font-size: 14px; }
+.lr-capacidade div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border-soft); min-width: 0; }
+.lr-capacidade dt { color: var(--muted); }
+.lr-capacidade dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.lr-envios { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.lr-envios li { padding: 10px 12px; border: 1px solid var(--border-soft); border-radius: 8px; font-size: 14px; }
+.lr-estados { margin-top: 12px; font-size: 14px; }
+.lr-estados summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
+.lr-ramos { padding-left: 20px; font-size: 14px; line-height: 1.6; margin-bottom: 16px; display: grid; gap: 6px; }
+.lr-regioes { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 6px; }
+.lr-regiao { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 6px 10px; text-align: left; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--fg); font: inherit; font-size: 13px; cursor: pointer; }
+.lr-regiao:hover { background: var(--surface-2); }
+.lr-regiao:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.lr-regiao-txt { display: flex; flex-direction: column; min-width: 0; }
+.lr-regiao-txt small { color: var(--muted); }
+.lr-regiao.lr-pend { border: 2px solid var(--atencao); background: var(--atencao-light); }
+.lr-regiao.lr-pend small { color: var(--atencao); font-weight: 600; }
+.lr-regiao.lr-corrigida { border-color: var(--success); background: var(--success-light); }
+.lr-regiao[aria-current="true"] { box-shadow: inset 0 -3px 0 var(--accent); border-color: var(--accent); }
+.lr-trab-titulo:focus { outline: none; }
+.lr-trab-titulo:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.lr-trechos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.lr-trechos li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border: 1px dashed var(--atencao); border-radius: var(--radius-md); font-size: 14px; }
+.lr-trechos li[aria-current="true"] { border-style: solid; border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.lr-trecho-acoes { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+.lr-trecho-campo.lr-baixo .input { border-color: var(--atencao); }
+.lr-latex { font-family: var(--font-code); }
+.lr-previa-formula { min-height: 44px; padding: 8px 12px; border-radius: var(--radius-md); background: var(--surface-2); color: var(--fg); font-size: 18px; overflow-x: auto; }
+.lr-previa-erro { margin: 4px 0 0; }
+.lr-desenho-estado { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; color: var(--fg-2); margin: 8px 0 12px; }
+.lr-contagem { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0 0 12px; font-size: 14px; }
+.lr-contagem div { display: flex; gap: 6px; }
+.lr-contagem dt { color: var(--muted); }
+.lr-contagem dd { margin: 0; font-weight: 700; }
+.lr-paragrafos { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.lr-paragrafo { border: 1px solid var(--border-soft); border-radius: var(--radius-md); padding: 10px 12px; }
+.lr-paragrafo-atual { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.lr-paragrafo-cabeca { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 6px; font-size: 14px; }
+.lr-paragrafo .input { width: 100%; }
+.lr-quebra-pagina { text-align: center; font-size: 13px; font-weight: 700; color: var(--accent); padding: 4px 0; border-top: 2px dashed var(--border); }
+.lr-paginas-abas { display: flex; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--border-soft); }
+.lr-paginas-abas .btn { min-height: 44px; }
+.lr-pag-nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin: 4px 0 8px; }
+.lr-pag-nav output { font-weight: 700; }
+.lr-paginas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.lr-paginas li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border-soft); border-radius: var(--radius-md); }
+.lr-paginas li[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.lr-pag-icone { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); font-weight: 700; flex: none; }
+.lr-pag-txt { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 14px; }
+.lr-pag-txt small { flex-basis: 100%; color: var(--muted); }
+.rev-cartao-modal .lr-copia { flex: 1; }
+@media (max-width: 1099px) { .lr-paginas-abas { display: none; } }
+/* Até 767 px (casca de celular): recorte e campo primeiro, listas depois (UC-079-16: o recorte fica visível ao digitar) */
+@media (max-width: 767px) {
+  .lr-conteudo { display: flex; flex-direction: column; }
+  .lr-conteudo > .rev-topo { order: 0; }
+  .lr-conteudo > .rev-trabalho { order: 1; margin-bottom: 8px; }
+  .lr-conteudo > :not(.rev-topo):not(.rev-trabalho):not(.lr-salvar) { order: 2; }
+  .lr-conteudo > .lr-salvar { order: 3; }
+}
+
+/* ---------- Câmera e webcam: acréscimos ao .cam-tela real ---------- */
+.lr-cam-contador { flex: none !important; font-size: 13px; font-weight: 400; opacity: .9; }
+.cam-tela .lr-cam-encerrar { width: auto; padding: 0 14px; border-radius: 22px; font-size: 14px; }
+.cam-tela :is(button, input):focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.cam-ultimo .lr-cam-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+body.lr-camera-aberta .nav-mobile-app { display: none; }
+@media (max-width: 767px) {
+  .lr-cam-contador { display: none; }
+  .cam-topo { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) { .tela-mk * { transition: none !important; animation: none !important; } }
+
+/* Alvos de toque: mesma faixa do app (estrutura-app.css: pointer:coarse e até 767 px) */
+@media (pointer: coarse), (max-width: 767px) {
+  .tela-mk .btn, .cam-ultimo .btn { min-height: 44px; }
+  .tela-mk summary { min-height: 44px; display: flex; align-items: center; }
+}
