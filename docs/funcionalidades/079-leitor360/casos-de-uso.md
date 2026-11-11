@@ -56,17 +56,17 @@ Termos usados neste documento:
 
 **Fluxo principal:**
 1. O usuário abre a prova em Corrigir.
-2. O usuário toca em **Ler folhas**.
+2. No card de leitura da página **Correção da prova** (`#camera`, tela 1 do mockup), o usuário escolhe uma entrada: **Fotografar folhas**, **Usar a webcam**, **Enviar fotos da galeria** ou **Enviar PDF**.
 3. O sistema confere a permissão, o escopo e a situação da correção.
 4. O sistema carrega o mapa de respostas da prova.
 5. O sistema executa o UC-079-02 (capacidade do aparelho).
-6. O sistema mostra as entradas disponíveis neste aparelho: **Câmera**, **Webcam**, **Fotos**, **PDF de uma folha**, **Lote de PDFs**.
+6. O sistema mostra as entradas disponíveis neste aparelho: **Fotografar folhas**, **Usar a webcam**, **Enviar fotos da galeria**, **Enviar PDF**, **Lote de PDFs** (rótulos do mockup aprovado).
 7. O usuário escolhe uma entrada. O fluxo segue no grupo B.
 
 **Fluxos alternativos e de erro:**
 - 1a. Aplicador: o sistema abre direto o modo do dia. Ele lista só as provas com data de aplicação igual a hoje. A tela não mostra nota, gabarito nem relatório.
 - 1b. Aplicador sem prova no dia: estado vazio "Nenhuma prova para aplicar hoje."
-- 3a. Correção fechada sem `correcao.reabrir`: o sistema mostra a mensagem atual "A correção desta prova foi fechada por … em …. Para enviar, excluir ou alterar cartões, peça à coordenação para reabrir a correção." O botão **Ler folhas** fica desabilitado.
+- 3a. Correção fechada sem `correcao.reabrir`: o sistema mostra a mensagem atual "A correção desta prova foi fechada por … em …. Para enviar, excluir ou alterar cartões, peça à coordenação para reabrir a correção." O botão as entradas do card de leitura ficam desabilitadas.
 - 3b. Prova não publicada: "A prova precisa estar publicada para receber cartões."
 - 3c. Gabarito não publicado: "Publique o gabarito antes de ler as folhas." (texto proposto).
 - 4a. Prova sem mapa próprio (todas as provas atuais): o sistema deriva o mapa do cartão atual (N, K, `layout.grade()`). O usuário não vê diferença.
@@ -74,17 +74,17 @@ Termos usados neste documento:
 - 4c. O mapa muda de versão durante a sessão: o próximo envio recebe `layout_divergente`. O leitor recarrega o mapa e relê as folhas não enviadas.
 - 6a. Entrada sem suporte no aparelho: o botão aparece desabilitado com o motivo em uma linha. Exemplo: "Este aparelho não tem câmera disponível."
 
-**Variações por aparelho:** as entradas são escolhidas pela capacidade detectada (câmera traseira via `facingMode`, webcam via `enumerateDevices`), não pela largura. Um tablet com câmera traseira recebe **Câmera**. No celular, a lista é vertical e **Câmera** vem primeiro. No computador, **Webcam** e **Lote de PDFs** vêm primeiro.
+**Variações por aparelho:** as entradas são escolhidas pela capacidade detectada (câmera traseira via `facingMode`, webcam via `enumerateDevices`), não pela largura. Um tablet com câmera traseira recebe **Fotografar folhas**. No celular, a lista é vertical e **Fotografar folhas** vem primeiro. No computador, **Usar a webcam** e **Lote de PDFs** vêm primeiro.
 
-**Regras de negócio:** correção fechada e aplicador só no dia ([08 Regras de negócio](../../arquitetura/08-regras-de-negocio.md), RN-COR-13; [04](../../arquitetura/04-identidade-acesso-e-permissoes.md)). O mapa de respostas é a única fonte de posição e tipo das questões. O leitor não decide o tipo do documento sozinho. Até a 4.1, **Ler folhas** existe só na homologação. Na 4.1, ele substitui **Fotografar cartões** e **Enviar fotos da galeria** (planejamento §7). A orientação de captura fica na ajuda do título do card ([ADR-0028](../../decisoes/0028-ajuda-contextual-no-titulo-de-cards.md)).
+**Regras de negócio:** correção fechada e aplicador só no dia ([08 Regras de negócio](../../arquitetura/08-regras-de-negocio.md), RN-COR-13; [04](../../arquitetura/04-identidade-acesso-e-permissoes.md)). O mapa de respostas é a única fonte de posição e tipo das questões. O leitor não decide o tipo do documento sozinho. Até a 4.1, o card de leitura existe só na homologação. Na 4.1, ele substitui **Fotografar cartões** e **Enviar fotos da galeria** (planejamento §7). A orientação de captura fica na ajuda do título do card ([ADR-0028](../../decisoes/0028-ajuda-contextual-no-titulo-de-cards.md)).
 
 **Critérios de aceite:**
-- [ ] Um usuário sem `cartao.enviar` não vê **Ler folhas** e recebe 403 na rota proposta.
+- [ ] Um usuário sem `cartao.enviar` não vê o card de leitura e recebe 403 na rota proposta.
 - [ ] O aplicador vê só provas com data de aplicação igual a hoje.
 - [ ] A resposta do mapa ao aplicador não contém gabarito, pesos nem alternativas corretas.
 - [ ] Uma prova atual (sem FN-043) abre com o mapa derivado de N, K e `layout.grade()`, com as mesmas posições do `omr/layout.py`.
-- [ ] Com a correção fechada e sem `correcao.reabrir`, **Ler folhas** fica desabilitado e a mensagem de bloqueio aparece.
-- [ ] Um tablet com câmera traseira oferece **Câmera**.
+- [ ] Com a correção fechada e sem `correcao.reabrir`, as entradas do card de leitura ficam desabilitadas e a mensagem de bloqueio aparece.
+- [ ] Um tablet com câmera traseira oferece **Fotografar folhas**.
 - [ ] Conferência registrada por texto em celular (360 px), tablet (768 px) e computador (1280 px), temas claro e escuro.
 
 **Situação:** Parcial — reaproveita a entrada atual de correção e o modo só-câmera do aplicador (`CorrecaoController::show`, view `correcao.camera`). Mapa de respostas, rota do leitor e tela de escolha: não implementados.
@@ -111,7 +111,7 @@ Termos usados neste documento:
 
 **Fluxos alternativos e de erro:**
 - 1a. Página sem HTTPS: câmera e webcam ficam indisponíveis. O sistema mostra "A câmera só funciona em conexão segura." Fotos e PDF continuam disponíveis.
-- 2a. O mapa exige `transcricao-manuscrita` e o aparelho não tem capacidade para a IA local: o sistema mostra a mensagem simples do UC-079-23 e oferece o modo servidor para as regiões abertas (UC-079-26). As objetivas seguem no aparelho.
+- 2a. O mapa exige `transcricao-manuscrita` e o aparelho não tem capacidade para o Escriba: o sistema mostra a mensagem simples do UC-079-23 e oferece o modo servidor para as regiões abertas (UC-079-26). As objetivas seguem no aparelho.
 - 2b. O aparelho não executa o núcleo de leitura (sem WebAssembly ou memória insuficiente): o sistema mostra a mensagem simples do UC-079-23 e oferece o modo servidor (UC-079-26).
 - 4a. Falha no download: "Não foi possível preparar o leitor. Verifique a conexão e tente de novo." e botão **Tentar de novo**.
 - 4b. Cache cheio ou bloqueado (navegação privada): o sistema baixa o núcleo só para a sessão e avisa "O leitor vai baixar os arquivos de novo na próxima vez."
@@ -223,7 +223,7 @@ Termos usados neste documento:
 **Tela/rota:** tela 5 do planejamento §7. Base: seletor `input type=file` com `multiple`.
 
 **Fluxo principal:**
-1. O usuário toca em **Fotos**.
+1. O usuário toca em **Enviar fotos da galeria**.
 2. O usuário escolhe uma ou várias imagens JPG, PNG, WEBP ou HEIC.
 3. O sistema converte o HEIC no aparelho com a biblioteca local `heic-to-1.6.7.js`.
 4. O sistema cria uma folha por imagem na fila da sessão.
@@ -263,7 +263,7 @@ Termos usados neste documento:
 **Tela/rota:** tela 5 do planejamento §7.
 
 **Fluxo principal:**
-1. O usuário toca em **PDF de uma folha**.
+1. O usuário toca em **Enviar PDF**.
 2. O usuário escolhe um arquivo PDF.
 3. O sistema abre o PDF no aparelho, num Web Worker.
 4. O sistema transforma a página em imagem entre 200 e 300 DPI.
@@ -274,7 +274,7 @@ Termos usados neste documento:
 - 2a. Arquivo não é PDF: "Escolha um arquivo PDF."
 - 3a. PDF protegido por senha: "Este PDF tem senha. Remova a senha e envie de novo."
 - 3b. PDF corrompido: "Não foi possível abrir o PDF. Escolha outro arquivo."
-- 3c. PDF com mais de uma página: modal "Este PDF tem 12 páginas. Ler como lote?" com botões **Ler como lote** (UC-079-07) e **Cancelar**.
+- 3c. PDF com mais de uma página: modal "Este PDF tem 42 páginas" com o texto "Ler as 42 páginas neste aparelho leva alguns minutos. Você pode pausar e retomar." e botões **Ler as 42 páginas** (UC-079-07) e **Escolher outro arquivo**.
 
 **Variações por tipo de documento:** no cartão à parte, uma página = uma folha. Na página da prova como gabarito, uma página = uma folha de um aluno; as outras páginas chegam em outras folhas (UC-079-13).
 
@@ -307,12 +307,12 @@ Termos usados neste documento:
 5. O sistema mostra o progresso: "Lote: 12 de 40 páginas lidas."
 6. O sistema separa as páginas em três abas com contagem: **Sem pendências**, **Para conferir** e **Recusadas**.
 7. O usuário abre **Para conferir** e confere as folhas no leitor visual (UC-079-14 a UC-079-17).
-8. O usuário toca em **Salvar sem pendências**. O modal "Salvar 28 folhas sem pendências?" oferece **Salvar 28 folhas** e **Voltar**.
+8. O usuário toca em **Salvar sem pendências**. O modal "Salvar 28 folhas sem pendências?" com o texto "As 28 folhas sem pendências serão salvas e enviadas. As 6 para conferir continuam no lote." oferece **Salvar 28 folhas** e **Voltar**.
 9. O usuário escolhe **Encerrar**. O sistema mostra o resumo (UC-079-18).
 
 **Fluxos alternativos e de erro:**
 - 4a. O usuário toca em **Pausar**: o sistema termina a página atual e para. O botão vira **Retomar**.
-- 4b. O usuário recarrega a página ou fecha a aba: o aparelho não guarda nada (D-8). O sistema pede os arquivos de novo: "Escolha de novo os arquivos do lote para continuar." A API recusa como repetida a página já recebida, pela chave derivada do sha256 da página (proposta, a validar na 3.5).
+- 4b. O usuário recarrega a página ou fecha a aba: o aparelho não guarda imagem nem leitura (D-8), só a chave de envio e o estado de cada página (planejamento §6.8, regra 5). O sistema pede os arquivos de novo: "Escolha de novo os arquivos do lote para continuar." A API recusa como repetida a página já recebida, pela chave derivada do sha256 da página (proposta, a validar na 3.5).
 - 4c. O aparelho fica sem memória: o sistema pausa o lote e mostra "O aparelho ficou sem memória. Feche outras abas e toque em Retomar."
 - 4d. Lote acima do limite de páginas do aparelho (D-3, limite definido na 1.2): o navegador lê as páginas até o limite, com estimativa de tempo. As páginas acima do limite seguem o modo servidor, com aviso de créditos e de fila (UC-079-26).
 - 4e. Perda de conexão (D-7): o lote pausa. Nada é salvo e nada fica guardado no aparelho. O sistema mostra "Sem conexão. O lote está pausado." Quando a conexão volta, o usuário toca em **Retomar**.
@@ -320,7 +320,7 @@ Termos usados neste documento:
 - 6a. Página sem marcadores: entra em **Recusadas** com o motivo da barreira.
 - 6b. Página de outra prova: tratada no UC-079-09.
 - 6c. PDF de scanner frente e verso com versos em branco: o verso fica em **Recusadas** como `pagina_em_branco`, separado das recusas de qualidade. Ele não conta como pendência.
-- 9a. **Cancelar lote** com folhas não salvas: modal "Cancelar o lote?" com o texto "As páginas já salvas continuam salvas. As outras serão descartadas." e botões **Cancelar lote** e **Voltar**.
+- 9a. **Cancelar lote** com folhas não salvas: modal "Cancelar o lote?" com o texto "36 páginas já foram lidas e salvas na sessão. As outras 84 não serão lidas." (números de exemplo) e botões **Cancelar o lote** e **Continuar o lote**.
 
 **Variações por tipo de documento:** no cartão à parte, uma página = um aluno. Na página da prova como gabarito, várias páginas = um aluno, agrupadas pelo QR (UC-079-13). Nas abertas e mistas, a transcrição (UC-079-11) pode deixar o lote bem mais lento (a medir na FN-080).
 
@@ -398,7 +398,7 @@ Termos usados neste documento:
 - 1b. O usuário escolhe o aluno na lista da turma. Busca por nome ou matrícula.
 - 1c. QR legível sem o prefixo `G360` ou com campos inválidos: tratado como sem QR (1a).
 - 1d. Aplicador sem `correcao.alterar`: a folha segue **Sem aluno**. A vinculação fica para a coordenação ou o professor (UC-045-05).
-- 2a. QR de outra prova da mesma escola, acessível ao usuário: modal "Esta folha é de outra prova" com o texto "O QR indica a prova {nome}. Ler esta folha nessa prova?" e botões **Ler na outra prova** e **Descartar folha**. O mapa da outra prova só chega depois da checagem de escopo (planejamento §6.2, regra 8).
+- 2a. QR de outra prova da mesma escola, acessível ao usuário: modal "Esta folha é de outra prova" com o texto "O QR indica {nome da prova}, da mesma escola." e "Você pode ler esta folha naquela prova ou descartá-la." e botões **Ler em {nome da prova}** e **Descartar folha**. O mapa da outra prova só chega depois da checagem de escopo (planejamento §6.2, regra 8).
 - 2b. QR de prova indisponível ao usuário ou de outra escola: "O QR indica outra prova que não está disponível para correção neste acesso. Confira o cartão e a prova." (texto atual). A folha é descartada.
 - 2c. Cartão impresso com outra quantidade de questões ou alternativas: "Este cartão tem um formato diferente da prova. Confira o cartão." (código atual `layout_divergente`).
 - 2d. Página da prova enviada como cartão, ou o contrário: `layout_divergente`, com a mesma mensagem.
@@ -620,7 +620,7 @@ Termos usados neste documento:
 5. O sistema vai para a próxima pendência.
 
 **Fluxos alternativos e de erro:**
-- 1a. Aplicador: ele não corrige (D-6). A questão segue para conferência no servidor (UC-046-01).
+- 1a. Aplicador: ele não corrige (D-6). A questão fica pendente para o professor conferir na revisão (UC-046-01).
 - 3a. No computador, o usuário usa o teclado: A a E respondem, 0 deixa em branco, X anula, N vai à próxima pendência, Ctrl+Enter salva. A linha de ajuda mostra todos os atalhos. Os atalhos ficam inativos com foco em campo de texto, em `select` ou com diálogo aberto.
 - 3b. O usuário toca em **Desfazer**: a questão volta à leitura original.
 - 3c. **Manter leitura** aparece só quando a leitura tem uma alternativa (estado `fraca` com letra). Em `dupla`, `nao_lido` e `fraca` sem letra, o botão não aparece.
@@ -684,17 +684,17 @@ Termos usados neste documento:
 **Fluxo principal:**
 1. O usuário toca em **Salvar folha** (ou Ctrl+Enter).
 2. O sistema envia a imagem e o resultado ao servidor (UC-079-19).
-3. O sistema abre o modal "Folha salva" com o texto "A leitura de Ana Souza foi salva. 12 folhas nesta sessão."
+3. O sistema abre o modal "Folha salva" com o texto "A folha de Ana Souza foi salva. 13 folhas nesta sessão." e "O envio ao servidor continua em segundo plano."
 4. O modal oferece **Continuar** (botão principal, foco inicial) e **Encerrar**.
 5. Com **Continuar**, o sistema volta à entrada: a câmera reabre, ou a próxima folha da fila abre no leitor.
 6. Com **Encerrar**, o sistema mostra o resumo (UC-079-18).
 
 **Fluxos alternativos e de erro:**
-- 1a. Restam pendências (D-11): modal "Salvar com pendências?" com o texto "3 questões vão para a revisão da prova." e botões **Salvar com pendências** e **Voltar**. A folha e a prova ficam marcadas "com pendência". As pendências seguem para a revisão atual (UC-046-01), onde o usuário as corrige depois. A correção da prova não pode ser fechada enquanto houver folha com pendência (UC-079-27). Os avisos (em branco) não contam.
+- 1a. Restam pendências (D-11): modal "Salvar com pendências?" com o texto "Ainda há 2 questões para conferir. Se salvar agora, a folha fica marcada com pendência. Você confere depois, na revisão. A correção da prova só pode ser fechada sem pendências." e botões **Salvar com pendências** e **Voltar e conferir**. A folha e a prova ficam marcadas "com pendência". As pendências seguem para a revisão atual (UC-046-01), onde o usuário as corrige depois. A correção da prova não pode ser fechada enquanto houver folha com pendência (UC-079-27). Os avisos (em branco) não contam.
 - 1b. Aplicador: sempre salva. As pendências vão para a revisão da coordenação ou do professor.
 - 1c. O usuário toca em **Descartar folha**: a folha sai da fila, e a imagem sai da memória.
 - 2a. Sem conexão (D-7): o sistema não salva a folha e mostra "Sem conexão. Esta folha ainda não foi salva." A folha continua na tela. Quando a conexão volta, o sistema salva a folha. Nada fica guardado no aparelho (D-8).
-- 3a. Folha sem aluno identificado: o texto é "A folha sem aluno identificado foi salva. 12 folhas nesta sessão."
+- 3a. Folha sem aluno identificado: o texto é "A folha sem aluno identificado foi salva. 13 folhas nesta sessão."
 - 4a. Lote com a próxima folha já lida: **Continuar** abre direto a próxima folha **Para conferir**.
 - 4b. Enter aciona **Continuar**. Esc fecha o modal e mostra a folha salva só para leitura, com a faixa "Folha salva" e os botões **Continuar** e **Encerrar** no rodapé do leitor. A folha salva não aceita nova correção no aparelho.
 
@@ -857,9 +857,9 @@ Termos usados neste documento:
 
 **Fluxo principal:**
 1. O leitor identifica um aluno que já tem leitura na prova.
-2. O leitor mostra o modal "Este aluno já tem leitura" com o texto "A nova folha vai para conferência. A correção atual não muda até alguém aplicar a nova tentativa."
-3. O modal oferece **Enviar como nova tentativa** e **Descartar esta folha**.
-4. Com **Enviar como nova tentativa**, o servidor cria a tentativa (`HistoricoCartao::propor`).
+2. O leitor mostra o modal "Este aluno já tem leitura" com o texto "{Aluno} já tem uma folha lida nesta prova. A nova folha vira uma tentativa. A coordenação escolhe qual vale (FN-047)."
+3. O modal oferece **Salvar como nova tentativa** e **Descartar folha**.
+4. Com **Salvar como nova tentativa**, o servidor cria a tentativa (`HistoricoCartao::propor`).
 5. O usuário com `correcao.alterar` aplica ou descarta a tentativa depois (UC-047-03).
 
 **Fluxos alternativos e de erro:**
@@ -958,7 +958,7 @@ Termos usados neste documento:
 **Tela/rota:** tela H do mockup `mockups/leitor360.html` (`data-tela="sem-ia"`, "Aparelho sem capacidade para o Escriba"); modal de aviso da aplicação ([ADR-0025](../../decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)). Envio pela rota atual `POST v1/provas/{id}/cartoes`, com o campo `modo = servidor` e sem `leitura` nas regiões que o servidor lê ([planejamento §6.6](planejamento.md#66-api-proposta)). Regras: [planejamento §6.12](planejamento.md#612-modo-servidor-leitura-no-servidor-com-fila-e-créditos).
 
 **Fluxo principal:**
-1. O sistema abre o modal de aviso antes do primeiro envio da sessão. O modal tem dois textos exatos:
+1. O sistema abre o modal "Usar a correção no servidor?" antes do primeiro envio da sessão. Os botões são **Cancelar** e **Usar a correção no servidor**. O modal tem dois textos exatos:
    - "Os créditos de correção serão consumidos."
    - "A correção não é instantânea. Ela entra numa fila, e você recebe um aviso quando terminar."
 2. O usuário confirma o modal. Sem confirmação, nada é enviado.
@@ -989,14 +989,14 @@ Termos usados neste documento:
 - 3b. Sem saldo de créditos (confirmado) ou sistema de créditos indisponível: o sistema recusa o envio e mostra "Os créditos de correção acabaram." (texto proposto). O sistema de créditos não existe ainda; ver a dependência nas regras.
 
 **Regras de negócio:**
-- **Consumo de créditos:** a unidade é uma correção de prova de um aluno (aluno × prova). Várias páginas do mesmo aluno na mesma prova valem 1 crédito. Não há cobrança por folha nem por região. O preço vem da FN de créditos.
+- **Consumo de créditos:** a unidade é uma correção de prova de um aluno (aluno × prova). Várias páginas do mesmo aluno na mesma prova valem 1 crédito. Não há cobrança por folha nem por região. O preço vem da [FN-081](../081-creditos-correcao/planejamento.md).
 - **Reenvio:** reenviar só os alunos com problema não cobra crédito de novo.
 - **Sem saldo:** o envio é recusado (confirmado).
 - **Não consome:** o processamento no aparelho; a imagem recusada pela barreira de qualidade; a folha com erro do servidor; o reenvio de aluno com problema.
 - **Paridade:** para a mesma imagem, o resultado do servidor é igual ao do aparelho. O conjunto de referência prova isso (UC-079-24).
 - **O marcador só encaminha** (confirmado). Se ele diverge do QR, vale o QR e a folha vai para revisão.
 - **Dados:** a imagem já vai ao servidor em todo envio (D-12). O modo servidor não envia nada a terceiros.
-- **⚠ Dependência:** o sistema de créditos de correção não existe no código nem tem FN. Ele bloqueia as subfases 4.3 e 6.3 ([planejamento §8](planejamento.md#8-riscos-e-decisões-pendentes-do-responsável)).
+- **⚠ Dependência:** o sistema de créditos de correção não existe no código. A [FN-081](../081-creditos-correcao/planejamento.md) (candidata) é a dona. Ele bloqueia as subfases 4.3 e 6.3 ([planejamento §8](planejamento.md#8-riscos-e-decisões-pendentes-do-responsável)).
 
 **Critérios de aceite:**
 - [ ] O modal mostra os dois textos exatos e exige confirmação antes do primeiro envio da sessão.
@@ -1031,8 +1031,8 @@ Termos usados neste documento:
 2. O sistema confere a permissão e o escopo.
 3. A API confere se a prova tem folha com pendência.
 4. A API recusa o fechamento e devolve a lista das folhas pendentes.
-5. O sistema abre um modal da aplicação, sem diálogo nativo, com o texto "Esta correção não pode ser fechada. Há folhas com pendência." e a lista das folhas.
-6. Cada folha da lista tem o botão **Revisar**, que abre a revisão da prova nessa folha (UC-046-01).
+5. O sistema abre um modal da aplicação, sem diálogo nativo, com o título "A correção ainda tem pendências", o texto "2 folhas estão com questões para conferir: {nomes}." e "A correção só pode ser fechada depois que todas as pendências forem conferidas." Os botões são **Voltar** e **Conferir pendências**.
+6. **Conferir pendências** abre a revisão da prova na primeira folha pendente (UC-046-01).
 7. Depois que o usuário resolve todas as pendências, o fechamento é aceito como hoje.
 
 **Fluxos alternativos e de erro:**
@@ -1048,7 +1048,7 @@ Termos usados neste documento:
 **Critérios de aceite:**
 - [ ] Com uma folha pendente, a API recusa o fechamento e não grava `correcao_fechada_em`.
 - [ ] A recusa vale também para chamada direta à API, sem passar pela tela.
-- [ ] O modal lista as folhas pendentes, cada uma com acesso à revisão.
+- [ ] O modal lista as folhas pendentes e leva à revisão.
 - [ ] Questão em branco não trava o fechamento.
 - [ ] Sem pendências, o fechamento continua como hoje.
 - [ ] Nenhum diálogo nativo do navegador é usado na recusa.

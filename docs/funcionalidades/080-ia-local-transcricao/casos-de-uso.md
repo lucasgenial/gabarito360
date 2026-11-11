@@ -165,7 +165,6 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 1. O modelo devolve a confiança de cada trecho.
 2. O Leitor360 compara a confiança com o limiar definido.
 3. O leitor visual destaca os trechos abaixo do limiar, lado a lado com o recorte.
-
 4. Se a imagem está ruim ou a confiança é baixa, o Escriba pede uma nova imagem e/ou a revisão manual do usuário.
 
 **Regras de negócio:** o limiar é a definir e é calibrado no conjunto de referência. Quem confere a leitura é sempre o usuário. Não há decisão automática.
