@@ -64,8 +64,11 @@ def main(numero):
     if ROBO.search(f'{nome} {email}') or not nome or not email:
         raise SystemExit(f'A identidade do git local não é a do responsável: {nome} <{email}>.')
 
-    rodar('git', 'fetch', '-q', 'origin', 'main', f'pull/{numero}/head')
-    diff = subprocess.run(['git', 'diff', '--binary', 'origin/main...FETCH_HEAD'], cwd=RAIZ,
+    # Uma ref local por PR. Com duas refs no mesmo fetch, o FETCH_HEAD aponta para a primeira (a main),
+    # e o diff sai vazio.
+    ref_pr = f'refs/remotes/origin/dependabot-pr-{numero}'
+    rodar('git', 'fetch', '-q', '-f', 'origin', 'main', f'pull/{numero}/head:{ref_pr}')
+    diff = subprocess.run(['git', 'diff', '--binary', f'origin/main...{ref_pr}'], cwd=RAIZ,
                           capture_output=True, check=True).stdout
     if not diff.strip():
         raise SystemExit(f'O PR #{numero} não tem diferença em relação à main.')
