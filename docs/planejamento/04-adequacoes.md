@@ -24,11 +24,11 @@ Para ver quantos arquivos cada ADR alcança hoje, rode `python scripts/impacto_p
 | [ADR-0053](../decisoes/0053-principios-executaveis-e-mutaveis.md) | 7 | Princípios executáveis, versionados e mutáveis | teste (R-PRINCIPIOS, R-AGENTS-GERADO, R-VERSAO-PRINCIPIOS-FN, R-IMPACTO-GERADO) | 75 | `docs/decisoes/**`, `AGENTS.md`, `scripts/**` |
 | [ADR-0002](../decisoes/0002-fontes-de-verdade-e-legado.md) | 8 | Documentação antes do código; mockups e style system vencem; legado só dá regras | revisao-ia | 76 | `mockups/**`, `style-system/**`, `docs/**` |
 | [ADR-0057](../decisoes/0057-app-responsivo-em-todas-as-faixas.md) | 10 | O app é responsivo; toda tela e todo mockup atendem a todas as faixas de aparelho | revisao-ia | 76 | `apps/web/resources/views/**`, `apps/web/public/css/**`, `apps/web/public/js/**`, `mockups/**`, `style-system/**` |
-| [ADR-0056](../decisoes/0056-app-atual-como-referencia-visual.md) | 11 | O app atual é a referência visual; style-system/ é o design system do app; os mockups originais são históricos | revisao-ia | 78 | `mockups/**`, `style-system/**`, `apps/web/resources/views/**`, `apps/web/public/css/**` |
+| [ADR-0056](../decisoes/0056-app-atual-como-referencia-visual.md) | 11 | O app atual é a referência visual; style-system/ é o design system do app; os mockups originais são históricos | revisao-ia | 76 | `mockups/**`, `style-system/**`, `apps/web/resources/views/**`, `apps/web/public/css/**` |
 
 ## 2. Subfases de adequação por funcionalidade
 
-78 funcionalidade(s) com adequação pendente.
+76 funcionalidade(s) com adequação pendente.
 
 | FN | Funcionalidade | Etapa | Conforme | Subfase de adequação |
 |---|---|---|---|---|
@@ -108,5 +108,3 @@ Para ver quantos arquivos cada ADR alcança hoje, rode `python scripts/impacto_p
 | [FN-076](../funcionalidades/076-carregamento-estados/planejamento.md) | Carregamento, estados de erro e navegação | Em planejamento | versão 1 | Revalidar contra ADR-0002, ADR-0004, ADR-0048, ADR-0053, ADR-0056, ADR-0057 e subir para a versão 11 |
 | [FN-077](../funcionalidades/077-desempenho/planejamento.md) | Desempenho e carga | Em planejamento | versão 1 | Revalidar contra ADR-0002, ADR-0004, ADR-0048, ADR-0053, ADR-0056, ADR-0057 e subir para a versão 11 |
 | [FN-078](../funcionalidades/078-governanca-executavel/planejamento.md) | Governança executável: princípios verificados e propagados automaticamente | Em execução | versão 7 | Revalidar contra ADR-0002, ADR-0056, ADR-0057 e subir para a versão 11 |
-| [FN-079](../funcionalidades/079-leitor360/planejamento.md) | Leitor360: motor de leitura de provas | Candidata | versão 10 | Revalidar contra ADR-0056 e subir para a versão 11 |
-| [FN-080](../funcionalidades/080-ia-local-transcricao/planejamento.md) | IA local de transcrição de respostas manuscritas | Candidata | versão 10 | Revalidar contra ADR-0056 e subir para a versão 11 |
