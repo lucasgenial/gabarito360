@@ -925,15 +925,20 @@ Termos usados neste documento:
 - **Ramo (c) — transcrição manual (só regiões abertas):**
   1. O leitor mostra o recorte da região aberta sem texto.
   2. O professor digita a transcrição no leitor visual (UC-079-16).
+- **Ramo (d) — Escriba no servidor, com fila (fase futura, decidida pelo responsável em 11/11/2026; FN-080 §8.3):**
+  1. O sistema avisa "Este aparelho não tem suporte ao Escriba. As respostas abertas serão transcritas no servidor. Você recebe um aviso quando terminar."
+  2. As objetivas são lidas no aparelho e conferidas na hora. As abertas ficam "Aguardando o Escriba".
+  3. O sistema mostra a posição na fila e o tempo estimado. O usuário pode sair da tela.
+  4. Quando a transcrição termina, o usuário recebe um aviso e confere as abertas no leitor visual (UC-079-16).
 
 **Fluxos alternativos e de erro:**
-- 1a. Falta só a IA local (objetivas funcionam): as objetivas são lidas no aparelho. As abertas seguem o ramo escolhido na D-2. Não há leitura de IA no servidor.
+- 1a. Falta só a IA local (objetivas funcionam): as objetivas são lidas no aparelho. As abertas seguem o ramo escolhido na D-2. Nesta fase, não há leitura de IA no servidor; o ramo (d) vem numa fase futura.
 - 1b. Aparelho fraco, mas capaz: o sistema avisa "A leitura pode demorar neste aparelho." e continua.
 
 **Regras de negócio:** a mensagem ao usuário é simples: diz só se o aparelho suporta ou não o leitor ou o Escriba ("Este aparelho suporta o Escriba" / "Este aparelho não tem suporte ao Escriba"). Ela não lista recursos, motivos nem o que falta (decisão do responsável em 11/11/2026). O detalhe técnico fica só no registro técnico. O motor do servidor continua existindo como hoje. Os requisitos mínimos do aparelho são definidos no planejamento depois da D-4. Os do modelo vêm da FN-080.
 
 **Critérios de aceite:**
-- [ ] Todo aparelho sem capacidade recebe uma mensagem com o motivo.
+- [ ] Todo aparelho sem capacidade recebe a mensagem simples (suporta ou não suporta), sem motivo nem lista de recursos.
 - [ ] O ramo escolhido na D-2 é registrado em ADR antes da implementação.
 - [ ] No ramo (a), uma folha lida no servidor tem origem da leitura "servidor".
 - [ ] Um aparelho sem capacidade para a IA não baixa o modelo.

@@ -150,7 +150,7 @@ A interface do método (entrada, saída, estados e confiança da região) perten
 
 ### 6.2 Regras
 
-- Nenhum dado sai do aparelho para terceiros. A inferência é local. O envio de imagem e resultado ao servidor do Gabarito360 segue a FN-079.
+- Nenhum dado sai do aparelho para terceiros. Nesta fase, a inferência é local (a fila no servidor é evolução futura, §8.3). O envio de imagem e resultado ao servidor do Gabarito360 segue a FN-079.
 - Registre a versão do modelo com cada transcrição. O servidor guarda essa versão junto do resultado.
 - Confira a licença da variante do Qwen antes da subfase 1.1. A licença precisa permitir uso comercial em SaaS e distribuição do modelo ajustado.
 - O modelo segue as regras de distribuição da [FN-079 §6.4](../079-leitor360/planejamento.md#64-núcleo-de-leitura-decisão-d-4): origem própria, sem download de Hugging Face em tempo de execução (`allowRemoteModels` falso ou equivalente), manifesto com sha256 por arquivo, SBOM e formato sem código executável (ONNX, GGUF ou safetensors, nunca pickle).
@@ -204,7 +204,21 @@ Esta FN não tem tela própria. As telas de preparo do modelo, de progresso do d
 | Licença do modelo-base | Restrição comercial bloqueia o uso no SaaS | Conferir a licença antes de 1.1 |
 | Confiança mal calibrada | O leitor visual não destaca trechos errados | Medir a calibração (§5.1) |
 
-### 8.3 Ideias futuras (sem FN)
+### 8.3 Evolução decidida: Escriba no servidor, com fila
+
+Decisão do responsável em 11/11/2026. **Nesta fase, o Escriba roda só no aparelho.** Numa fase futura, quando o aparelho não tiver suporte, as imagens das respostas abertas sobem ao servidor. Um servidor dedicado roda o mesmo Escriba e transcreve. O usuário espera numa fila.
+
+Diretrizes para essa fase (a detalhar numa subfase própria, com mockup aprovado antes do código):
+
+1. **Só as abertas vão para a fila.** As objetivas continuam sendo lidas no aparelho e conferidas na hora. Numa prova mista, as abertas ficam "Aguardando o Escriba". Numa produção textual, a folha inteira espera.
+2. **Espera assíncrona.** O usuário envia e pode sair da tela. O app mostra a posição na fila e um tempo estimado. Quando a transcrição termina, o usuário recebe um aviso e abre o leitor visual para conferir (UC-079-16). A conferência humana continua obrigatória.
+3. **Mesmo modelo, mesma versão.** O servidor usa a mesma versão do Escriba publicada para os aparelhos. A origem da transcrição ("aparelho" ou "servidor") e a versão ficam registradas com o resultado.
+4. **Texto da tela.** Continua simples, sem motivo nem lista de recursos. Proposta: "Este aparelho não tem suporte ao Escriba. As respostas abertas serão transcritas no servidor. Você recebe um aviso quando terminar." A tela mostra a posição na fila, por exemplo: "Na fila do Escriba: posição 12, cerca de 8 min".
+5. **Custo e créditos.** A transcrição no servidor gasta processamento do Gabarito360, e não do aparelho. Ela segue a regra das funcionalidades caras: limite incluso no plano e crédito avulso acima do limite. A transcrição no aparelho continua sem crédito (D-9 da FN-079).
+6. **Dados.** A imagem já vai ao servidor hoje (FN-079). A transcrição no servidor não envia nada a terceiros. O servidor dedicado fica no ambiente do responsável, no Brasil. Um serviço externo exige análise de transferência e entra na lista de terceiros do [11](../../arquitetura/11-seguranca-e-privacidade.md).
+7. **Infraestrutura (risco).** ⚠ Inferência, sem medição: a VM atual (Xeon E5-2650 v4, 16 GB, sem GPU) deve transcrever devagar, vários segundos por resposta. Em semana de provas a fila pode ficar longa. A fase precisa medir o tempo por resposta e decidir entre GPU dedicada, limite de folhas por hora ou prioridade por plano.
+
+### 8.4 Ideias futuras (sem FN)
 
 - Correção automática de respostas abertas. Exige decisão do responsável e nova FN candidata.
 
@@ -220,3 +234,4 @@ Nenhum.
 | 2026-11-11 | A IA recebe o nome Escriba, por decisão do responsável | lucasgenial |
 | 2026-11-11 | Regra de interface: as telas falam em "recursos do Escriba", nunca em baixar uma IA ou um modelo | lucasgenial |
 | 2026-11-11 | Revisão independente (ui-ux, qualidade-testes, seguranca-privacidade, gerente-projetos) aplicada | lucasgenial |
+| 2026-11-11 | Evolução decidida (§8.3): no futuro, o aparelho sem suporte envia as abertas ao Escriba no servidor, com fila. Nesta fase, só no aparelho | lucasgenial |
