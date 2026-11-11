@@ -397,7 +397,7 @@ O que a API faz:
 
 1. Valida o corpo e a permissão (`cartao.enviar`), como hoje. Recusa campos proibidos (`nota`, `acertos`), como hoje. A API grava em `cartao_envios` o sha256 da imagem e o sha256 canônico de `leitura`. Um reenvio com a mesma chave e o mesmo conteúdo devolve o envio existente. Com a mesma chave e conteúdo diferente, a API responde 409 `chave_reutilizada` e não altera nada.
 2. Confere o sha256 da imagem recebida contra `imagem_sha256`. Se diferir, recusa com 422 `imagem_divergente`.
-   - 2a. A API classifica o envio pela permissão do ator, não pelo perfil. `correcoes[]` de quem não tem `correcao.alterar` é recusado com 403. Regra do responsável (11/11/2026): nas objetivas, a leitura do aplicador sem pendência vale sem o professor; a questão com pendência (marcação dupla, fraca ou não lida) fica para o professor conferir na revisão. As questões abertas e dissertativas sempre precisam da conferência do professor, num módulo próprio feito com o professor (fora da FN-079).
+   - 2a. A API classifica o envio pela permissão do ator, não pelo perfil. `correcoes[]` de quem não tem `correcao.alterar` é recusado com 403. Regra do responsável (11/11/2026): nas objetivas, a leitura do aplicador sem pendência vale sem o professor; a questão com pendência (marcação dupla, fraca ou não lida) fica para o professor conferir na revisão. As questões abertas e dissertativas são **corrigidas** pelo professor, num módulo à parte (fora da FN-079). Conferência é acertar erro de leitura do cartão ou da prova; correção é corrigir e avaliar a resposta.
    - 2b. Para todo ator, a API recalcula `estado` e `confianca` de cada região a partir de `detectadas` (frações por opção), com os limiares da versão do motor. Se não coincidir, recusa com 422 `leitura_inconsistente` e registra o evento.
    - 2c. Uma região com valor diferente da leitura original do motor só é aceita como item de `correcoes[]`, nunca em `regioes[]`.
    - 2d. A API decodifica o QR da imagem recebida, com a mesma biblioteca do servidor, em toda folha com `leitura`. Prova, aluno, N, K e L vêm do QR decodificado no servidor. Se diferirem de `leitura.qr` ou de `aluno_id`, a API recusa com 422 `identificacao_divergente`. A folha sem QR segue a vinculação manual (`correcao.alterar`).
@@ -544,7 +544,7 @@ Verificações (Playwright):
 
 ### 6.10 Desempenho
 
-1. O custo de CPU da leitura sai do servidor e vai para o aparelho. O servidor passa a receber, validar e gravar. O servidor não relê nenhum envio (D-1). Objetivas do aplicador sem pendência valem sem o professor; pendências e abertas vão para o professor (§6.6, item 2a).
+1. O custo de CPU da leitura sai do servidor e vai para o aparelho. O servidor passa a receber, validar e gravar. O servidor não relê nenhum envio (D-1). Objetivas do aplicador sem pendência valem sem o professor; as pendências vão para a conferência do professor; as abertas são corrigidas pelo professor num módulo à parte (§6.6, item 2a).
 2. A rota de envio com `leitura` é medida com 1000 usuários simultâneos ([ADR-0052](../../decisoes/0052-medicao-com-1000-usuarios-simultaneos.md)), sem simulação, na subfase 4.1. A medição usa dados fictícios e um espaço de teste.
 3. A medição compara: envio atual (servidor lê) e envio com `leitura`. O relatório traz média, p50, p95, p99, pedidos por segundo, erros e CPU e memória da VM.
 4. ⚠ O [12 Desempenho](../../arquitetura/12-desempenho.md) (Padrão de carga, item 5) diz que a carga é só de leitura. O envio de cartão escreve. A medição exige um espaço de teste isolado e a decisão do responsável.

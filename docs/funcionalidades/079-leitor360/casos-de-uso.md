@@ -33,6 +33,8 @@ Termos usados neste documento:
 | Método de leitura | Um módulo que lê um tipo de região de resposta. Hoje: `objetiva-bolhas`. Proposto: `transcricao-manuscrita` (FN-080). |
 | Núcleo de leitura | O código de visão computacional que o Leitor360 executa no aparelho (D-4) e, com a mesma versão, no servidor. |
 | Modo servidor | O caminho em que o servidor processa a folha, com fila e consumo de créditos de correção, quando o aparelho não processa (UC-079-26). |
+| Conferência | Acertar um erro de leitura do cartão-resposta ou da própria prova (marcação lida errada, transcrição do Escriba errada). É o que o leitor visual faz. |
+| Correção (de questão aberta) | Corrigir e avaliar a resposta aberta ou dissertativa. É feita pelo professor num módulo à parte, fora do Leitor360. |
 | Marcador | O segmento de metadados que o aparelho grava na imagem com prova, aluno, página, versão do mapa e `envio_id`. Só encaminha a folha. |
 | Folha com pendência | Folha salva com questões ainda por conferir (D-11). Ela trava o fechamento da correção (UC-079-27). |
 | Leitor visual | A tela de conferência e correção da leitura, no estilo de um aplicativo de digitalização. |
@@ -779,7 +781,7 @@ Termos usados neste documento:
 - 3a. Mesma chave e mesmo conteúdo: a API devolve o envio existente. Nada é duplicado.
 - 3b. Mesma chave e conteúdo diferente: 409 `chave_reutilizada`. Nada é alterado.
 - 3c. Chave usada em outra prova: 409. A folha fica **Erro** com "Esta folha já foi enviada para outra prova."
-- 3d. `correcoes[]` de quem não tem `correcao.alterar`: 403. Regra do responsável (11/11/2026): nas objetivas, a leitura do aplicador sem pendência vale sem o professor; a questão com pendência (marcação dupla, fraca ou não lida) fica para o professor conferir na revisão. As questões abertas e dissertativas sempre precisam da conferência do professor, num módulo próprio feito com o professor (fora da FN-079). A proteção contra resultado adulterado é a imagem original guardada, a nota só no servidor, os eventos encadeados e a auditoria.
+- 3d. `correcoes[]` de quem não tem `correcao.alterar`: 403. Regra do responsável (11/11/2026): nas objetivas, a leitura do aplicador sem pendência vale sem o professor; a questão com pendência (marcação dupla, fraca ou não lida) fica para o professor conferir na revisão. As questões abertas e dissertativas são **corrigidas** pelo professor, num módulo à parte (fora da FN-079). Conferência é acertar erro de leitura do cartão ou da prova; correção é corrigir e avaliar a resposta. A proteção contra resultado adulterado é a imagem original guardada, a nota só no servidor, os eventos encadeados e a auditoria.
 - 4a. sha256 diferente: 422 `imagem_divergente`. "A imagem chegou incompleta. Envie de novo." O sistema reenvia uma vez.
 - 5a. QR ou aluno diferente do decodificado no servidor: 422 `identificacao_divergente`.
 - 5b. Estado ou confiança incoerente com `detectadas`: 422 `leitura_inconsistente`. O evento é registrado.
@@ -829,7 +831,7 @@ Termos usados neste documento:
 **Fluxos alternativos e de erro:**
 - (a)-2a. O usuário não envia nova imagem: a folha segue para a revisão manual.
 - (b)-3a. O usuário reenvia e a dificuldade continua: a folha vai para a revisão manual, sem novo crédito.
-- (b)-3b. Folha enviada por quem não tem `correcao.alterar` (aplicador): Regra do responsável (11/11/2026): nas objetivas, a leitura do aplicador sem pendência vale sem o professor; a questão com pendência (marcação dupla, fraca ou não lida) fica para o professor conferir na revisão. As questões abertas e dissertativas sempre precisam da conferência do professor, num módulo próprio feito com o professor (fora da FN-079).
+- (b)-3b. Folha enviada por quem não tem `correcao.alterar` (aplicador): Regra do responsável (11/11/2026): nas objetivas, a leitura do aplicador sem pendência vale sem o professor; a questão com pendência (marcação dupla, fraca ou não lida) fica para o professor conferir na revisão. As questões abertas e dissertativas são **corrigidas** pelo professor, num módulo à parte (fora da FN-079). Conferência é acertar erro de leitura do cartão ou da prova; correção é corrigir e avaliar a resposta.
 
 **Regras de negócio:** a nota é sempre calculada no servidor, só sem pendências. A proteção contra resultado adulterado é a conferência humana, a imagem original guardada, a nota só no servidor e a auditoria. Toda dificuldade registra a versão do motor e a versão do mapa. Muitas dificuldades da mesma versão do motor alertam a equipe técnica (UC-079-25).
 
@@ -839,7 +841,7 @@ Termos usados neste documento:
 - [ ] No modo servidor, o usuário reenvia só os alunos com problema, sem nova cobrança de crédito.
 - [ ] Todo problema de qualidade da imagem leva à verificação manual do usuário.
 - [ ] A revisão manual está disponível em toda folha com dificuldade.
-- [ ] Objetivas do aplicador sem pendência são gravadas sem o professor; questões com pendência ficam para o professor; abertas sempre vão para a conferência do professor.
+- [ ] Objetivas do aplicador sem pendência são gravadas sem o professor; questões com pendência ficam para o professor; abertas são corrigidas pelo professor no módulo de correção, à parte.
 - [ ] A decisão está registrada na [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md).
 
 **Situação:** Não implementado — reaproveitável: a fila de revisão (`CartaoController::revisao`) e o motor do servidor (`NativoOmrDriver`, `omr/ler_cartao.py`).
