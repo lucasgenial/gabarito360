@@ -24,16 +24,29 @@
   <strong>Mockup Leitor360 · FN-079</strong>
   <label>Tela
     <select id="mk-tela">
-      <option value="entrada">1. Ler folhas (acompanhamento)</option>
-      <option value="camera">2. Câmera no celular</option>
-      <option value="webcam">3. Webcam no computador</option>
-      <option value="arquivos">4. Fotos e PDF</option>
-      <option value="lote">5. Lote de PDFs digitalizados</option>
-      <option value="leitor" selected>6. Leitor visual (objetivas)</option>
-      <option value="transcricao">7. Conferir transcrição (FN-080)</option>
-      <option value="modais">8. Modais do leitor</option>
-      <option value="resumo">9. Resumo do lote</option>
-      <option value="sem-capacidade">10. Aparelho sem capacidade</option>
+      <optgroup label="Objetivas e entrada">
+        <option value="entrada">1. Ler folhas (acompanhamento)</option>
+        <option value="camera">2. Câmera no celular</option>
+        <option value="webcam">3. Webcam no computador</option>
+        <option value="arquivos">4. Fotos e PDF</option>
+        <option value="lote">5. Lote de PDFs digitalizados</option>
+        <option value="leitor" selected>6. Leitor visual (objetivas)</option>
+        <option value="modais">7. Modais do leitor</option>
+        <option value="resumo">8. Resumo do lote</option>
+        <option value="sem-capacidade">9. Aparelho sem capacidade</option>
+      </optgroup>
+      <optgroup label="Abertas, textos e mistas">
+        <option value="ia-preparo">A. Preparar a IA no aparelho</option>
+        <option value="aberta">B. Resposta aberta curta</option>
+        <option value="formula">C. Fórmula</option>
+        <option value="desenho">D. Desenho</option>
+        <option value="redacao">E. Produção textual longa</option>
+        <option value="mista">F. Prova mista (objetivas + abertas)</option>
+        <option value="paginas">G. Várias páginas (página é o gabarito)</option>
+        <option value="sem-ia">H. Aparelho sem capacidade para IA</option>
+        <option value="aberta-manual">H2. Transcrição manual (ramo c da D-2)</option>
+        <option value="resumo-misto">I. Resumo do lote misto</option>
+      </optgroup>
     </select>
   </label>
   <label>Aparelho
@@ -332,33 +345,7 @@
   </div>
 </section>
 
-<!-- ===================== 7. TRANSCRIÇÃO (FN-080) ===================== -->
-<section class="tela-mk" data-tela="transcricao" data-corpo="tela-revisao" aria-labelledby="t7">
-  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir transcrição</span></li></ol></nav>
-  <div class="g-pagina">
-    <div style="min-width:0;"><div class="eyebrow">Leitor360 · prova mista · página 2 de 3</div><h1 class="page-title" id="t7">Conferir transcrição — questão 21</h1><p class="page-sub">A IA só lê. Ela não corrige. Confira o texto antes de salvar.</p></div>
-    <div class="g-pagina-acoes"><span class="mk-pendente">Depende da FN-080 e da D-9</span></div>
-  </div>
-  <div class="rev-estacao lr-estacao">
-    <aside class="card rev-documento-painel lr-painel-livre" aria-labelledby="t7-resp">
-      <header class="rev-modal-cabecalho"><div><h2 id="t7-resp">Resposta do aluno</h2><p>Ana Beatriz Souza · 9º A</p></div></header>
-      <div class="rev-leitor-area">
-        <div class="lr-manuscrito">A área do triângulo é base vezes altura dividido por dois. Como a base é 8 e a altura é <mark class="lr-trecho">6</mark>, a área é 24 cm².<br>Fórmula: A = b·h/2</div>
-        <p class="page-sub" style="margin-top:8px;">Trecho marcado: confiança baixa.</p>
-      </div>
-    </aside>
-    <div class="card card-pad rev-cartao">
-      <div class="field"><label for="t7-texto">Texto transcrito</label>
-        <textarea class="input" id="t7-texto" rows="6">A área do triângulo é base vezes altura dividido por dois. Como a base é 8 e a altura é 6, a área é 24 cm².</textarea></div>
-      <div class="field"><label for="t7-formula">Fórmula (LaTeX)</label>
-        <input class="input" id="t7-formula" value="A = \frac{b \cdot h}{2}">
-        <div class="field-help">Prévia: <span class="lr-formula">A = b·h / 2</span></div></div>
-      <div class="lr-salvar"><span class="badge badge-warn">1 trecho para conferir</span><button type="button" class="btn btn-primary">Confirmar transcrição</button></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== 8. MODAIS ===================== -->
+<!-- ===================== 7. MODAIS ===================== -->
 <section class="tela-mk" data-tela="modais" data-corpo="tela-correcao" aria-labelledby="t8">
   <div class="g-pagina"><div style="min-width:0;"><h1 class="page-title" id="t8">Modais do leitor</h1><p class="page-sub">Todos usam o modal da aplicação (ADR-0025). Escolha um para abrir.</p></div></div>
   <div class="card card-pad">
@@ -373,11 +360,15 @@
       <button type="button" class="btn btn-secondary" data-modal="salvar-lote">Salvar 28 folhas?</button>
       <button type="button" class="btn btn-secondary" data-modal="descartar">Descartar a folha?</button>
       <button type="button" class="btn btn-secondary" data-modal="fechada">Correção fechada</button>
+      <button type="button" class="btn btn-secondary" data-modal="descartar-edicao">Descartar a edição?</button>
+      <button type="button" class="btn btn-secondary" data-modal="pagina-repetida">Esta página já foi lida</button>
+      <button type="button" class="btn btn-secondary" data-modal="falta-pagina">Falta a página 2</button>
+      <button type="button" class="btn btn-secondary" data-modal="cancelar-ia">Cancelar o download da IA?</button>
     </div>
   </div>
 </section>
 
-<!-- ===================== 9. RESUMO ===================== -->
+<!-- ===================== 8. RESUMO ===================== -->
 <section class="tela-mk" data-tela="resumo" data-corpo="tela-correcao" aria-labelledby="t9">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Resumo da sessão</span></li></ol></nav>
   <div class="g-pagina">
@@ -415,7 +406,7 @@
   </div>
 </section>
 
-<!-- ===================== 10. SEM CAPACIDADE ===================== -->
+<!-- ===================== 9. SEM CAPACIDADE ===================== -->
 <section class="tela-mk" data-tela="sem-capacidade" data-corpo="tela-correcao" aria-labelledby="t10">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><span aria-current="page">Correção da prova</span></li></ol></nav>
   <div class="row-between" style="margin-top:12px;">
@@ -430,6 +421,248 @@
     </ul>
     <div class="lr-entradas">
       <label class="btn btn-primary lr-entrada" style="cursor:pointer;"><span class="lr-entrada-rotulo">Enviar fotos para o servidor</span><small class="lr-entrada-desc">A leitura acontece no servidor, sem conferência na hora.</small><input type="file" accept="image/*" multiple style="display:none;"></label>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     GRUPO "ABERTAS, TEXTOS E MISTAS" (FN-079 UC-02/11/12/13/14/16/17/23 e FN-080 UC-01 a 09)
+     ===================================================================== -->
+
+<!-- ===================== A. PREPARAR A IA NO APARELHO (UC-080-01, UC-079-02) ===================== -->
+<section class="tela-mk" data-tela="ia-preparo" data-corpo="tela-correcao" aria-labelledby="ta">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><span aria-current="page">Correção da prova</span></li></ol></nav>
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title" id="ta">Avaliação 3 — Matemática 9º ano</h1>
+      <p class="page-sub">Prova mista: 8 objetivas e 4 abertas · 9º A · aplicado em 11/11/2026</p>
+    </div>
+    <button class="btn btn-ghost" type="button" data-ir="arquivos">Envio manual</button>
+  </div>
+  <div class="card card-pad" id="camera-ia" style="margin-top:16px;">
+    <h2 class="lr-card-titulo">Preparando o leitor neste aparelho</h2>
+    <div class="lr-motores" role="list">
+      <div class="lr-motor" role="listitem">
+        <div class="lr-motor-cabeca"><b>Leitor de objetivas</b><span class="badge badge-success badge-dot">Pronto</span></div>
+        <p class="page-sub">Versão 1.4.0 · já estava neste aparelho.</p>
+      </div>
+      <div class="lr-motor" role="listitem">
+        <div class="lr-motor-cabeca"><b>IA de transcrição</b><span class="badge badge-info">Baixando 62%</span></div>
+        <p class="page-sub" id="ia-progresso-txt" role="status">Preparando a IA de transcrição… 62% · 412 de 664 MB</p>
+        <div class="lr-trilho lr-trilho-claro" role="progressbar" aria-label="Download da IA de transcrição" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62"><div style="width:62%"></div></div>
+        <div class="lr-linha-acoes"><button type="button" class="btn btn-sm btn-ghost" data-modal="cancelar-ia">Cancelar o download</button></div>
+      </div>
+    </div>
+    <div class="g-aviso info" role="status">Na primeira vez, o leitor baixa os arquivos de leitura. Use Wi-Fi se puder. Você já pode ler as objetivas. As respostas abertas ficam <b>Aguardando a IA</b> até o download terminar.</div>
+    <h3 class="lr-sub">O que este aparelho tem</h3>
+    <dl class="lr-capacidade">
+      <div><dt>WebGPU</dt><dd><span class="badge badge-success badge-dot">Disponível</span></dd></div>
+      <div><dt>Memória aproximada</dt><dd>8 GB</dd></div>
+      <div><dt>Espaço livre para o cache</dt><dd>2,1 GB</dd></div>
+      <div><dt>WebAssembly com SIMD</dt><dd><span class="badge badge-success badge-dot">Disponível</span></dd></div>
+      <div><dt>Conexão segura (HTTPS)</dt><dd><span class="badge badge-success badge-dot">Sim</span></dd></div>
+      <div><dt>Origem dos arquivos</dt><dd>Servidor do Gabarito360 · sha256 conferido</dd></div>
+    </dl>
+    <div class="lr-entradas">
+      <button type="button" class="btn btn-primary lr-entrada" data-ir="camera"><span class="lr-entrada-rotulo">Fotografar folhas</span><small class="lr-entrada-desc">As objetivas são lidas agora.</small></button>
+      <button type="button" class="btn btn-secondary lr-entrada" data-ir="arquivos"><span class="lr-entrada-rotulo">Enviar fotos ou PDF</span><small class="lr-entrada-desc">Uma página por arquivo ou várias.</small></button>
+      <button type="button" class="btn btn-secondary lr-entrada" data-ir="lote"><span class="lr-entrada-rotulo">Lote de PDFs</span><small class="lr-entrada-desc">A transcrição não roda em lote no celular.</small></button>
+    </div>
+    <p class="page-sub" style="margin-top:12px;">Neste acompanhamento: 2 folhas lidas · 1 aguardando a IA.</p>
+    <ul class="lr-envios" aria-label="Folhas desta sessão">
+      <li><b>Ana Beatriz Souza</b> · 9º A — <span class="badge badge-success">Objetivas lidas</span> <span class="badge badge-muted">Abertas: aguardando a IA</span></li>
+      <li><b>Bruno Lima</b> · 9º A — <span class="badge badge-success">Objetivas lidas</span> <span class="badge badge-muted">Abertas: aguardando a IA</span></li>
+    </ul>
+    <details class="lr-estados"><summary>Outros estados desta tela</summary>
+      <div class="g-aviso erro" role="alert">Não foi possível preparar a IA de transcrição. Verifique a conexão e tente de novo. <button type="button" class="btn btn-sm btn-secondary">Tentar de novo</button></div>
+      <div class="g-aviso atencao" role="status">Este navegador não guarda arquivos (navegação privada). A IA vai baixar os arquivos de novo na próxima vez.</div>
+      <div class="g-aviso info" role="status">Prova só com objetivas: a IA de transcrição não é baixada.</div>
+    </details>
+  </div>
+</section>
+
+<!-- ===================== B. RESPOSTA ABERTA CURTA (UC-079-11, UC-079-16, UC-080-02, UC-080-06) ===================== -->
+<section class="tela-mk" data-tela="aberta" data-corpo="tela-revisao" aria-labelledby="tb">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir resposta aberta</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="tb">Conferir resposta aberta</h1><p class="page-sub">A IA só lê. Ela não corrige. Confira o texto antes de salvar.</p></div>
+    <div class="g-pagina-acoes"><span class="mk-pendente">D-9: permissão da IA</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+  </div>
+  <div class="rev-estacao lr-estacao" data-estacao-mista="q9"></div>
+</section>
+
+<!-- ===================== C. FÓRMULA (UC-080-03) ===================== -->
+<section class="tela-mk" data-tela="formula" data-corpo="tela-revisao" aria-labelledby="tc">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir fórmula</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="tc">Conferir fórmula</h1><p class="page-sub">A IA só lê. Ela não corrige. Confira a notação antes de salvar.</p></div>
+    <div class="g-pagina-acoes"><span class="mk-pendente">Notação LaTeX a confirmar (FN-080 §8.1)</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+  </div>
+  <div class="rev-estacao lr-estacao" data-estacao-mista="q10"></div>
+</section>
+
+<!-- ===================== D. DESENHO (UC-080-04) ===================== -->
+<section class="tela-mk" data-tela="desenho" data-corpo="tela-revisao" aria-labelledby="td">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir desenho</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="td">Conferir desenho</h1><p class="page-sub">A IA só lê. Ela não corrige. O desenho fica guardado como imagem.</p></div>
+    <div class="g-pagina-acoes"><span class="mk-pendente">Descrição de desenho: quando pedir (FN-080 §8.1)</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+  </div>
+  <div class="rev-estacao lr-estacao" data-estacao-mista="q11"></div>
+</section>
+
+<!-- ===================== E. PRODUÇÃO TEXTUAL LONGA (UC-080-05) ===================== -->
+<section class="tela-mk" data-tela="redacao" data-corpo="tela-revisao" aria-labelledby="te">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir produção textual</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 4 — Língua Portuguesa 9º ano · redação</div><h1 class="page-title" id="te">Conferir produção textual</h1><p class="page-sub">A IA só lê. Ela não corrige nem dá nota. Confira cada parágrafo.</p></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+  </div>
+  <div class="rev-estacao lr-estacao">
+    <aside class="card rev-documento-painel" aria-labelledby="te-painel">
+      <header class="rev-modal-cabecalho"><div><h2 id="te-painel">Folhas da redação</h2><p>Carla Mendes · 9º B · páginas 2 e 3</p></div></header>
+      <div class="lr-paginas-abas" role="group" aria-label="Página mostrada">
+        <button type="button" class="btn btn-sm btn-primary" data-pagina-redacao="2" aria-pressed="true">Página 2</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-pagina-redacao="3" aria-pressed="false">Página 3</button>
+      </div>
+      <div class="rev-documento-destino">
+        <div class="rev-leitor">
+          <div class="rev-leitor-ferramentas" aria-label="Controles da folha"><button type="button" class="btn btn-ghost" data-menos aria-label="Diminuir folha">−</button><output data-zoom aria-label="Ampliação da folha">Ajustado</output><button type="button" class="btn btn-ghost" data-mais aria-label="Ampliar folha">+</button><button type="button" class="btn btn-ghost" data-ajustar>Ajustar à página</button></div>
+          <div class="rev-leitor-area" tabindex="0" role="region" aria-label="Página da redação">
+            <div class="rev-pdf-pagina rev-imagem-restrita"><svg id="redacao-folha" data-ajuste viewBox="0 0 210 297" role="img" aria-label="Página manuscrita da redação. A lista de parágrafos é o equivalente acessível."></svg></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="card card-pad rev-cartao"><div id="redacao-conteudo"></div></div>
+  </div>
+</section>
+
+<!-- ===================== F. PROVA MISTA (UC-079-12, UC-079-14) ===================== -->
+<section class="tela-mk" data-tela="mista" data-corpo="tela-revisao" aria-labelledby="tf">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir folha</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · prova mista · folha 5 de 31</div><h1 class="page-title" id="tf">Conferir folha</h1><p class="page-sub">Objetivas lidas pelas bolhas e abertas transcritas pela IA. A IA só lê; não corrige.</p></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+  </div>
+  <div class="rev-estacao lr-estacao" data-estacao-mista="q3"></div>
+</section>
+
+<!-- ===================== G. PÁGINA É O GABARITO, VÁRIAS PÁGINAS (UC-079-13) ===================== -->
+<section class="tela-mk" data-tela="paginas" data-corpo="tela-revisao" aria-labelledby="tg">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Páginas do aluno</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 4 — Língua Portuguesa 9º ano · a prova é o gabarito</div><h1 class="page-title" id="tg">Páginas do aluno</h1><p class="page-sub">O QR de cada página diz o aluno e a página. A ordem de captura não importa.</p></div>
+    <div class="g-pagina-acoes"><span class="mk-pendente">D-10: página no QR</span><button type="button" class="btn btn-ghost" data-modal="sair">Sair do leitor</button></div>
+  </div>
+  <div class="rev-estacao lr-estacao">
+    <aside class="card rev-documento-painel" aria-labelledby="tg-painel">
+      <header class="rev-modal-cabecalho"><div><h2 id="tg-painel">Página <span data-pag-atual>3</span> de 3</h2><p>Eduardo Prado · 9º B</p></div></header>
+      <div class="rev-documento-destino">
+        <div class="rev-leitor">
+          <div class="rev-leitor-ferramentas" aria-label="Controles da folha"><button type="button" class="btn btn-ghost" data-menos aria-label="Diminuir folha">−</button><output data-zoom aria-label="Ampliação da folha">Ajustado</output><button type="button" class="btn btn-ghost" data-mais aria-label="Ampliar folha">+</button><button type="button" class="btn btn-ghost" data-ajustar>Ajustar à página</button></div>
+          <div class="rev-leitor-area" tabindex="0" role="region" aria-label="Página da prova">
+            <div class="rev-pdf-pagina rev-imagem-restrita"><svg id="paginas-folha" data-ajuste viewBox="0 0 210 297" role="img" aria-label="Página da prova com as respostas do aluno. A lista de páginas é o equivalente acessível."></svg></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="card card-pad rev-cartao"><div id="paginas-conteudo"></div></div>
+  </div>
+</section>
+
+<!-- ===================== H. APARELHO SEM CAPACIDADE PARA A IA (UC-080-09, UC-079-23) ===================== -->
+<section class="tela-mk" data-tela="sem-ia" data-corpo="tela-correcao" aria-labelledby="th">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><span aria-current="page">Correção da prova</span></li></ol></nav>
+  <div class="row-between" style="margin-top:12px;">
+    <div><h1 class="page-title" id="th">Avaliação 3 — Matemática 9º ano</h1><p class="page-sub">Prova mista: 8 objetivas e 4 abertas · 9º A · aplicado em 11/11/2026</p></div>
+  </div>
+  <div class="card card-pad" style="margin-top:16px;">
+    <div class="g-aviso atencao" role="status" style="margin-top:0;">Este aparelho não consegue transcrever as respostas abertas. Falta <b>WebGPU</b> no navegador e a memória (cerca de 3 GB) é menor que a exigida pela IA (6 GB). A IA não será baixada neste aparelho.</div>
+    <div class="lr-grade-2">
+      <div class="lr-motor">
+        <div class="lr-motor-cabeca"><b>Objetivas</b><span class="badge badge-success badge-dot">Continuam neste aparelho</span></div>
+        <p class="page-sub">As bolhas são lidas aqui, e você confere no leitor visual como sempre.</p>
+      </div>
+      <div class="lr-motor">
+        <div class="lr-motor-cabeca"><b>Respostas abertas</b><span class="badge badge-warn">Depende de decisão</span></div>
+        <p class="page-sub">O que acontece com as abertas ainda será decidido. <span class="mk-pendente">D-2</span></p>
+      </div>
+    </div>
+    <h3 class="lr-sub">Ramos possíveis da D-2 para as abertas</h3>
+    <ol class="lr-ramos">
+      <li><b>(a) Ler no servidor.</b> Não existe leitura de IA no servidor hoje. Este ramo exige um novo serviço.</li>
+      <li><b>(b) Indisponível neste aparelho.</b> "Este aparelho não atende aos requisitos da transcrição. Use outro aparelho para as respostas abertas."</li>
+      <li><b>(c) Transcrição manual pelo professor.</b> O leitor mostra o recorte da resposta sem texto, e você digita a transcrição.</li>
+    </ol>
+    <div class="lr-entradas">
+      <button type="button" class="btn btn-primary lr-entrada" data-ir="camera"><span class="lr-entrada-rotulo">Ler só as objetivas</span><small class="lr-entrada-desc">As abertas ficam marcadas como "transcrição indisponível".</small></button>
+      <button type="button" class="btn btn-secondary lr-entrada" data-ir="aberta-manual"><span class="lr-entrada-rotulo">Ver o ramo (c)</span><small class="lr-entrada-desc">Transcrição manual no leitor visual.</small></button>
+    </div>
+  </div>
+</section>
+
+<!-- Ramo (c) da D-2: transcrição manual no leitor visual -->
+<section class="tela-mk" data-tela="aberta-manual" data-corpo="tela-revisao" aria-labelledby="th2">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="sem-ia">Correção da prova</a></li><li><span aria-current="page">Transcrição manual</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · ramo (c) da D-2 · sem IA neste aparelho</div><h1 class="page-title" id="th2">Transcrever resposta aberta</h1><p class="page-sub">Este aparelho não transcreve. Digite o que o aluno escreveu. A transcrição não é correção.</p></div>
+    <div class="g-pagina-acoes"><span class="mk-pendente">D-2</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+  </div>
+  <div class="rev-estacao lr-estacao" data-estacao-mista="q9" data-manual="1"></div>
+</section>
+
+<!-- ===================== I. RESUMO DO LOTE MISTO (UC-079-18) ===================== -->
+<section class="tela-mk" data-tela="resumo-misto" data-corpo="tela-correcao" aria-labelledby="ti">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Resumo da sessão</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Avaliação 3 — Matemática 9º ano · prova mista</div><h1 class="page-title" id="ti">Resumo da sessão</h1><p class="page-sub">Sessão encerrada às 11:20 · lida neste aparelho · a IA só leu, não corrigiu</p></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-secondary" data-ir="ia-preparo">Ler mais folhas</button><button type="button" class="btn btn-primary" data-ir="entrada">Ver acompanhamento</button></div>
+  </div>
+  <div class="g-aviso info" role="status">2 folhas ainda estão sendo enviadas. Não feche esta página.</div>
+  <div class="progress-head lr-lote-topo">
+    <div class="card card-pad">
+      <h2 class="lr-card-titulo"><span class="lr-tipo" aria-hidden="true">◉</span> Objetivas</h2>
+      <div class="stat-row">
+        <div class="correcao-pct"><b>31</b><span>folhas lidas</span></div>
+        <div class="stat-grid">
+          <div><div class="v">248</div><div class="l">Questões lidas</div></div>
+          <div><div class="v">19</div><div class="l">Corrigidas à mão</div></div>
+          <div><div class="v">4</div><div class="l">Foram para a revisão</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <h2 class="lr-card-titulo"><span class="lr-tipo" aria-hidden="true">✎</span> Respostas abertas</h2>
+      <div class="stat-row">
+        <div class="correcao-pct"><b>124</b><span>respostas transcritas</span></div>
+        <div class="stat-grid">
+          <div><div class="v">109</div><div class="l">Conferidas</div></div>
+          <div><div class="v">11</div><div class="l">Pendentes</div></div>
+          <div><div class="v">3</div><div class="l">Ilegíveis</div></div>
+          <div><div class="v">29</div><div class="l">Desenhos guardados</div></div>
+          <div><div class="v">1</div><div class="l">Transcrição indisponível</div></div>
+        </div>
+      </div>
+      <div class="progress-track" role="progressbar" aria-label="Transcrições conferidas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88"><div style="width:88%"></div></div>
+      <p class="page-sub" style="margin-top:8px;">109 de 124 transcrições conferidas (88%).</p>
+    </div>
+  </div>
+  <div class="card card-pad" style="margin-top:20px;">
+    <h3 style="font-size:17px;margin-bottom:12px;">Folhas da sessão <span class="badge badge-muted">31</span></h3>
+    <div class="tabela-conjunto tabela-integrada" data-tabela data-modo="lista">
+      <div class="tabela-area">
+        <table class="table tabela-padrao">
+          <caption class="sr-only">Folhas da sessão com objetivas e abertas</caption>
+          <thead><tr><th scope="col">Aluno</th><th scope="col">Objetivas</th><th scope="col">Abertas</th><th scope="col">Envio</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead>
+          <tbody>
+            <tr><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Ana Beatriz Souza</strong> · 9º A</div></td><td data-rotulo="Objetivas"><div class="tabela-valor"><span class="badge badge-success badge-dot">8 lidas</span></div></td><td data-rotulo="Abertas"><div class="tabela-valor"><span class="badge badge-success badge-dot">4 conferidas</span></div></td><td data-rotulo="Envio"><div class="tabela-valor"><span class="badge badge-success">Enviada</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary">Ver</button></div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Bruno Lima</strong> · 9º A</div></td><td data-rotulo="Objetivas"><div class="tabela-valor"><span class="badge badge-success badge-dot">8 lidas</span></div></td><td data-rotulo="Abertas"><div class="tabela-valor"><span class="badge badge-warn">2 pendentes</span> <span class="badge badge-muted">1 ilegível</span></div></td><td data-rotulo="Envio"><div class="tabela-valor"><span class="badge badge-muted">Enviando…</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary" data-ir="aberta">Conferir</button></div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Davi Rocha</strong> · 9º A</div></td><td data-rotulo="Objetivas"><div class="tabela-valor"><span class="badge badge-warn">1 para a revisão</span></div></td><td data-rotulo="Abertas"><div class="tabela-valor"><span class="badge badge-muted">Sem IA</span> Transcrição indisponível no aparelho.</div></td><td data-rotulo="Envio"><div class="tabela-valor"><span class="badge badge-success">Enviada</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary">Ver</button></div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Carla Mendes</strong> · 9º B</div></td><td data-rotulo="Objetivas"><div class="tabela-valor"><span class="badge badge-success badge-dot">8 lidas</span></div></td><td data-rotulo="Abertas"><div class="tabela-valor"><span class="badge badge-warn">Falta a página 2</span></div></td><td data-rotulo="Envio"><div class="tabela-valor"><span class="badge badge-muted">Aguardando envio</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary" data-ir="paginas">Ver páginas</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </section>
