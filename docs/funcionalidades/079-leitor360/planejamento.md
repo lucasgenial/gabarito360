@@ -1,7 +1,7 @@
 # 079 — Leitor360: motor de leitura de provas — Planejamento
 
-**Implementação:** Candidata
-**Etapa:** Candidata
+**Implementação:** Pendente
+**Etapa:** Planejamento aprovado
 **Conforme princípios:** versão 15
 **Posição no plano mestre:** fora das ondas (candidata; aguarda priorização do responsável)
 **Natureza:** evolução de existente
@@ -131,7 +131,7 @@ Os portões das decisões (todas tomadas) estão no §8.
 
 | Subfase | Entrega | Critério de pronto | Status | Evidência |
 |---|---|---|---|---|
-| 0.1 | Planejamento, casos de uso e mockups das telas e modais do §7 | O responsável aprova o `planejamento.md`, o `casos-de-uso.md` e os mockups das telas e modais do §7 (desktop e celular). As telas 9 e 10 podem esperar a FN-043 e a FN-080. A D-6 está decidida (opção b) e o mockup traz a variante do aplicador. O responsável confirma os números marcados como proposta. A revisão de UI/UX está registrada por texto. | Em andamento | Mockup `mockups/leitor360.html` aprovado por inteiro pelo responsável em 11/11/2026 (commit 80c1669). Decisões D-1 a D-13 tomadas. Faltam a aprovação do planejamento e dos casos de uso, a confirmação dos números propostos e a revisão de UI/UX. |
+| 0.1 | Planejamento, casos de uso e mockups das telas e modais do §7 | O responsável aprova o `planejamento.md`, o `casos-de-uso.md` e os mockups das telas e modais do §7 (desktop e celular). As telas 9 e 10 podem esperar a FN-043 e a FN-080. A D-6 está decidida (opção b) e o mockup traz a variante do aplicador. O responsável confirma os números marcados como proposta. A revisão de UI/UX está registrada por texto. | Concluída | Planejamento, casos de uso e mockup aprovados pelo responsável em 11/11/2026 (PR #272) |
 | 0.2 | Conjunto de referência e linha de base da leitura atual no servidor (UC-079-24, UC-079-25) | A D-13 está decidida. O conjunto tem o tamanho aprovado. Proposta: pelo menos 300 folhas (150 fotos de celular, 50 de webcam e 100 páginas de PDF digitalizado a 200 e 300 DPI) e pelo menos 10 exemplos de cada categoria do §6.9. A anotação segue o processo do §6.9, item 8. O manifesto está versionado. Um relatório registra, para a leitura atual: acerto por questão e por categoria, taxa de revisão, falsos "lido" e tempo por folha (p50, p95) na VM de homologação. | Pendente | |
 | 1.1 | Prova de viabilidade do núcleo de leitura no navegador (D-4, D-5) (UC-079-10, UC-079-24) | O núcleo escolhido tem paridade de 100% com o instantâneo do servidor: alternativa, estado, código da barreira e QR idênticos em cada questão; diferença de confiança até 0,01 (proposta). Na CI, o job `paridade-leitor` roda os três alvos do §6.9, item 4. Firefox, Safari iOS e Chrome Android têm o registro por texto do §6.9, item 4. As versões de OpenCV e NumPy estão registradas. | Pendente | |
 | 1.2 | Empacotamento do núcleo: Web Worker, carregamento sob demanda, cache, manifesto e versão do motor (UC-079-02, UC-079-10) | A leitura de uma folha não gera tarefa longa (acima de 50 ms) na thread principal. O núcleo baixa uma vez por versão e fica em cache. O Worker confere o sha256 de cada arquivo (§6.4, regra 7). O orçamento de download (definido na 1.1) é respeitado. A leitura de um cartão de 45 questões cumpre a meta do §6.10, item 5. A versão do motor aparece no resultado. | Pendente | |
@@ -727,3 +727,4 @@ Nenhum.
 | 2026-11-11 | Correções do responsável: sem releitura pelo servidor (D-1); crédito por correção de prova do aluno; reenvio sem custo; qualidade exige revisão manual; marcador confirmado | lucasgenial |
 | 2026-11-11 | Estudo da arquitetura de execução (objetivas e Escriba; celular, computador e servidor), com as decisões E-1 a E-6 para aprovação | lucasgenial |
 | 2026-11-11 | Estudo aprovado pelo responsável (E-1 a E-6); ADR-0060 | lucasgenial |
+| 2026-11-11 | Planejamento e casos de uso aprovados pelo responsável; subfase 0.1 concluída; etapa Planejamento aprovado | lucasgenial |

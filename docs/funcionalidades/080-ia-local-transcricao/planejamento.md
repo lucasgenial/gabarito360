@@ -1,7 +1,7 @@
 # 080 — Escriba: IA local de transcrição — Planejamento
 
-**Implementação:** Candidata
-**Etapa:** Candidata
+**Implementação:** Pendente
+**Etapa:** Planejamento aprovado
 **Conforme princípios:** versão 15
 **Posição no plano mestre:** fora das ondas (candidata; aguarda priorização do responsável)
 **Natureza:** nova
@@ -96,7 +96,7 @@ Cada subfase registra na coluna Evidência o relatório versionado (texto, sem p
 
 | Subfase | Entrega | Critério de pronto | Status | Evidência |
 |---|---|---|---|---|
-| 0.1 | Plano completo | `planejamento.md` e `casos-de-uso.md` aprovados pelo responsável; decisões de §8 tomadas ou com prazo; metas numéricas do §5.1 fixadas antes da 1.2 | Pendente | |
+| 0.1 | Plano completo | `planejamento.md` e `casos-de-uso.md` aprovados pelo responsável; decisões de §8 tomadas ou com prazo; metas numéricas do §5.1 fixadas antes da 1.2 | Concluída | Planejamento, casos de uso e mockup aprovados pelo responsável em 11/11/2026 (PR #272) |
 | 0.2 | Conjunto de referência de manuscritos | Termo aprovado pelo encarregado; RIPD do treino registrado; o conjunto está no inventário (FN-062); base legal e consentimento registrados (§6.3); amostras pseudonimizadas; transcrição esperada anotada por duas pessoas por região; separação entre treino e referência; tamanho mínimo definido (proposta: pelo menos 200 regiões) | Pendente | |
 | 1.1 | Seleção da variante do Qwen | Licença conferida e compatível com uso comercial; variantes comparadas no conjunto de referência | Pendente | |
 | 1.2 | Linha de base de qualidade | CER e erro de fórmulas da variante escolhida medidos com as definições do §5.1 e registrados | Pendente | |
@@ -245,3 +245,4 @@ Nenhum.
 | 2026-11-11 | Evolução decidida (§8.3): o aparelho sem suporte envia as abertas ao Escriba no servidor, com fila (versão inicial; substituída pela linha seguinte, que o inclui no plano) | lucasgenial |
 | 2026-11-11 | Alinhado às decisões D-1 a D-13 da FN-079; Escriba no servidor com fila e créditos entra no plano | lucasgenial |
 | 2026-11-11 | Correções do responsável: crédito por correção de prova do aluno, reenvio sem custo, revisão manual como caminho principal | lucasgenial |
+| 2026-11-11 | Planejamento e casos de uso aprovados pelo responsável; subfase 0.1 concluída; etapa Planejamento aprovado | lucasgenial |
