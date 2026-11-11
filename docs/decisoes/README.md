@@ -98,6 +98,8 @@ As regras de código usam a [linha de base](linha-de-base.json) das violações 
 | [ADR-0053](0053-principios-executaveis-e-mutaveis.md) | Os princípios são executáveis, versionados e podem mudar a qualquer momento; a verificação é automática | 10/11/2026 | Aceita | Todas; [FN-078](../funcionalidades/078-governanca-executavel/planejamento.md) |
 | [ADR-0054](0054-time-de-agentes-e-modelos-multifornecedor.md) | Time de agentes e modelos de IA de mais de um fornecedor | 10/11/2026 | Aceita | Todas |
 | [ADR-0055](0055-estrutura-da-documentacao-e-documento-dono.md) | Estrutura da documentação e documento dono de cada assunto | 10/11/2026 | Aceita | Todas |
+| [ADR-0056](0056-app-atual-como-referencia-visual.md) | O app atual é a referência visual; `mockups/` e `style-system/` são históricos | 11/11/2026 | Aceita | Todas com interface |
+| [ADR-0057](0057-app-responsivo-em-todas-as-faixas.md) | O app é responsivo; toda tela e todo mockup atendem a todas as faixas de aparelho | 11/11/2026 | Aceita | Todas com interface |
 
 ## Origem dos identificadores antigos
 

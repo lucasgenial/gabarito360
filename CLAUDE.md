@@ -23,12 +23,16 @@ Nenhum código é criado sem documentação aprovada. Toda funcionalidade tem `p
 
 ## Fontes de verdade
 
-Em conflito, vale esta ordem:
+Em conflito, vale esta ordem ([ADR-0056](docs/decisoes/0056-app-atual-como-referencia-visual.md)):
 
-1. Mockups HTML: `mockups/`
-2. Style system: `style-system/`
+1. Mockup novo aprovado pelo responsável, feito sobre a casca, os componentes e o CSS reais de `apps/web`
+2. App atual: views, componentes e CSS de `apps/web` na `main` (o que a homologação publica)
 3. Documentação: `docs/` (estrutura em [docs/README.md](docs/README.md))
-4. Código atual, para descrever o que existe hoje
+4. `mockups/` e `style-system/`: históricos, só para consultar escopo e textos originais
+
+## O app é responsivo (regra)
+
+Toda tela e todo mockup atendem a todas as faixas: celular pequeno, celular, tablet, notebook, desktop e telas grandes até 4K. Confira nas larguras 320, 360, 390, 768, 1024, 1366, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. As faixas e os cortes estão no [ADR-0057](docs/decisoes/0057-app-responsivo-em-todas-as-faixas.md) e no design system (`style-system/`).
 
 Um legado antigo, quando presente fora deste repositório, serve só para recuperar regras de negócio validadas. É proibido reutilizar a arquitetura, o banco ou o código dele.
 
@@ -65,7 +69,7 @@ Sem `Co-Authored-By` de IA e sem "Generated with ..." (AGENTS.md, seção Autori
 1. Consulte o agente `gerente-projetos`. Localize a funcionalidade (FN-NNN), a fase e a subfase no plano mestre. Confirme que ela está na fila priorizada.
 2. Leia o `planejamento.md` e o `casos-de-uso.md` da funcionalidade. Sem os dois aprovados, escreva os documentos primeiro.
 3. Verifique as dependências da subfase. Um módulo transversal pendente bloqueia a subfase.
-4. Consulte os mockups e o style system para as telas envolvidas.
+4. Consulte as telas atuais do app (views e CSS de `apps/web`) e o mockup aprovado da funcionalidade. `mockups/` e `style-system/` são históricos (ADR-0056).
 5. Use os agentes do time ([02-agentes.md](docs/planejamento/02-agentes.md)), na classe de modelo indicada.
 6. Implemente seguindo a arquitetura.
 7. Teste contra os critérios de aceite da subfase e dos casos de uso.

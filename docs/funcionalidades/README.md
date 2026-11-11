@@ -1,6 +1,6 @@
 # Catálogo de funcionalidades do Gabarito360
 
-**Atualizado em:** 10/11/2026
+**Atualizado em:** 11/11/2026
 
 ## Para que serve este catálogo
 
@@ -72,7 +72,7 @@ Em 10/11/2026, todos os documentos estão em rascunho e aguardam aprovação. Po
 Faça estes passos com o agente `gerente-projetos`:
 
 1. Verifique se a funcionalidade já existe neste catálogo. Se existe, use a funcionalidade existente.
-2. Use o próximo número livre de FN. A numeração continua a partir de FN-079.
+2. Use o próximo número livre de FN. A numeração continua a partir de FN-081.
 3. Adicione uma linha nesta tabela. Use Implementação "Candidata" e Etapa "Candidata".
 4. Crie a pasta `NNN-slug/` com os dois documentos, a partir dos modelos.
 5. No `planejamento.md`, registre a origem (por exemplo, "surgiu na entrega dos painéis").
@@ -162,3 +162,5 @@ Faça estes passos com o agente `gerente-projetos`:
 | FN-076 | Carregamento, estados de erro e navegação | UI1, UI1-R; carregamento progressivo e breadcrumb (OMR2-C2) | Qualidade transversal | Parcial | Em planejamento | [planejamento](076-carregamento-estados/planejamento.md) · [casos de uso](076-carregamento-estados/casos-de-uso.md) |
 | FN-077 | Desempenho e carga | F0–F4, F6, PERF-01..15, FUND-01..10 desempenho (docs/192–200); X1, X2; ST1, AP1-A..E | Qualidade transversal | Parcial | Em planejamento | [planejamento](077-desempenho/planejamento.md) · [casos de uso](077-desempenho/casos-de-uso.md) |
 | FN-078 | Governança executável: princípios verificados e propagados automaticamente | — (nova, ADR-0053) | Qualidade transversal | Parcial | Em execução | [planejamento](078-governanca-executavel/planejamento.md) · [casos de uso](078-governanca-executavel/casos-de-uso.md) |
+| FN-079 | Leitor360: motor de leitura de provas | — (nova, 11/11/2026) | Correção e OMR | Candidata | Candidata | [planejamento](079-leitor360/planejamento.md) · [casos de uso](079-leitor360/casos-de-uso.md) |
+| FN-080 | IA local de transcrição de respostas manuscritas | — (nova, 11/11/2026) | Correção e OMR | Candidata | Candidata | [planejamento](080-ia-local-transcricao/planejamento.md) · [casos de uso](080-ia-local-transcricao/casos-de-uso.md) |

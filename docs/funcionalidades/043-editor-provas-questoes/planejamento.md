@@ -6,7 +6,7 @@
 **Prioridade no plano mestre:** Futuro (candidatas sem prioridade, §5); aguarda priorização do responsável
 **Natureza:** nova
 **Origem:** tronco original — docs/02 e docs/12 (fases pós-MVP 2–5); docs/118; docs/164 (frente anunciada "Em breve" na home)
-**Atualizado em:** 2026-11-09, por lucasgenial
+**Atualizado em:** 2026-11-11, por lucasgenial
 
 Planejamento enxuto. Não há plano técnico; nada pode ser executado antes da priorização e da aprovação destes documentos.
 
@@ -36,8 +36,9 @@ Levar o Gabarito360 do gabarito avulso à elaboração completa da avaliação: 
 | FN-038 disciplinas-curriculo | Classificação curricular das questões | Em homologação |
 | FN-041 autoria-provas | Autoria e visibilidade do conteúdo | Em homologação |
 | FN-045 omr-correcao | Cartão por versão (refatoração prevista no docs/12) | Concluída |
+| FN-079 Leitor360 | Define o contrato do mapa de respostas v1 (subfase 5.1) que esta FN produz | Candidata |
 
-**Funcionalidades que dependem desta:** FN-049 (relatório por tema), FN-044 (GII conecta-se à elaboração de provas), FN-053 (P7.1), FN-051.
+**Funcionalidades que dependem desta:** FN-049 (relatório por tema), FN-044 (GII conecta-se à elaboração de provas), FN-053 (P7.1), FN-051; FN-079 (subfases 7.1 e 7.2: lê provas mistas e provas em que a página é o gabarito pelo mapa de respostas que esta FN produz); FN-080 (regiões abertas com tipo esperado).
 
 ## 5. Fases e subfases
 | Subfase | Entrega | Critério de pronto | Status | Evidência |
@@ -47,7 +48,7 @@ Levar o Gabarito360 do gabarito avulso à elaboração completa da avaliação: 
 | 1.2 (fase 3) | Montador de provas | A definir | Pendente | — |
 | 1.3 (fase 4) | Múltiplas versões | A definir | Pendente | — |
 | 1.4 (fase 5) | Discursivas e pontuação avançada | A definir | Pendente | — |
-| 1.5 | Formatos digital e misto; marcações na página | A definir | Pendente | — |
+| 1.5 | Formatos digital e misto; marcações na página. Produz o mapa de respostas no contrato da [FN-079 §6.2](../079-leitor360/planejamento.md) e o QR com página (decisão D-10 da FN-079). | A definir | Pendente | — |
 | 1.6 | Relatório por tema | A definir | Pendente | pendência de FN-049 |
 
 ## 6. Contrato técnico (diretrizes já registradas)
@@ -73,3 +74,4 @@ Nenhum.
 | Data | Mudança | Por |
 |---|---|---|
 | 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |
+| 2026-11-11 | Nota de dependência: esta FN produz o mapa de respostas que o Leitor360 (FN-079) consome | lucasgenial |

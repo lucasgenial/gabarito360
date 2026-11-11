@@ -1,6 +1,6 @@
 # Visão geral do Gabarito360
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 11/11/2026, por lucasgenial
 
 Este documento descreve o que é o Gabarito360, que problema ele resolve, quem o usa e como as peças se ligam. A leitura leva cerca de 15 minutos e dispensa conhecimento técnico.
 
@@ -157,7 +157,7 @@ Estas regras vêm da constituição original do projeto e continuam vigentes:
 - O código do sistema anterior não é reutilizado. Só regras de negócio validadas podem ser consultadas.
 - A arquitetura deve comportar a evolução: banco de questões, várias versões de prova, OMR externo e aplicativo móvel offline.
 
-A regra "nenhuma funcionalidade sem mockup" da constituição original foi substituída pelo fluxo de planejamento da [governança](../planejamento/01-governanca.md). Os mockups e o `style-system/` continuam como referência de design.
+A regra "nenhuma funcionalidade sem mockup" da constituição original foi substituída pelo fluxo de planejamento da [governança](../planejamento/01-governanca.md). Desde 11/11/2026, a referência visual é o app atual, e `mockups/` e `style-system/` originais são históricos ([ADR-0056](../decisoes/0056-app-atual-como-referencia-visual.md)).
 
 ## 9. Para continuar
 

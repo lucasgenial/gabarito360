@@ -1,6 +1,6 @@
 # Interface e design system
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 11/11/2026, por lucasgenial
 
 Este documento descreve a interface do Gabarito360 como ela existe na branch atual: fontes de verdade visuais, identidade, Tailwind, layout, tabelas, carregamento, gráficos, acessibilidade e inventário das telas por perfil. Os painéis de turmas e o editor têm documento próprio: [Painéis e editor](10-paineis-e-editor.md).
 
@@ -8,19 +8,36 @@ Funcionalidades relacionadas: FN-052 (painéis por perfil), FN-066 (avatares), F
 
 ## 1. Fontes de verdade visuais
 
-Em conflito, vale a ordem abaixo (CLAUDE.md e AGENTS.md):
+Em conflito, vale a ordem abaixo ([ADR-0056](../decisoes/0056-app-atual-como-referencia-visual.md), desde 11/11/2026):
 
-1. `mockups/` — telas HTML aprovadas. O manifesto é `mockups/DESIGN-MANIFEST.json`.
-2. `style-system/` — espelho do manifesto e das telas de desenho.
+1. Mockup novo aprovado pelo responsável, feito sobre a casca, os componentes e o CSS reais de `apps/web` (exemplo: `mockups/leitor360.html`, FN-079).
+2. App atual: views Blade, componentes e CSS de `apps/web` na `main`, que é o código publicado na homologação.
 3. Documentação oficial em `docs/`.
-4. Regras do legado (somente regra de negócio).
+4. `mockups/` e `style-system/` originais: **históricos**. Servem para consultar o escopo e os textos de uma tela. Não decidem o visual. O manifesto antigo é `mockups/DESIGN-MANIFEST.json`.
+5. Regras do legado (somente regra de negócio).
 
 Regras:
 
 - A pasta `mockups/` e a pasta `style-system/` guardam desenho de referência. Elas não são código de produção.
-- Toda tela nova precisa de origem rastreável: mockup, ou aprovação posterior documentada.
+- Toda tela nova precisa de origem rastreável: mockup novo aprovado, ou aprovação posterior documentada.
+- Um mockup novo carrega o CSS de `apps/web/public/css/` por caminho relativo, usa a casca e os componentes reais e limita o CSS próprio ao que é novo, com os tokens existentes (ADR-0056).
 - A pasta `previas/` e `apps/web/public/previas/` guardam páginas isoladas de aprovação (componentes Tailwind, editor de painéis). Elas usam dados fictícios e não chamam a API.
 - Imagens versionadas só são aceitas como assets da aplicação (`apps/web/public/`, `apps/web/resources/images/`) ou como desenhos de design. O script `scripts/verificar_imagens.py` confere isso na CI. Nenhum print da aplicação é mantido.
+
+### 1.1 O app é responsivo (regra)
+
+Toda tela e todo mockup atendem a todas as faixas de aparelho ([ADR-0057](../decisoes/0057-app-responsivo-em-todas-as-faixas.md)):
+
+| Faixa | Largura | Regras principais |
+|---|---|---|
+| Celular pequeno | até 400 px | Uma coluna, sem rolagem horizontal. |
+| Celular | até 767 px | Navegação inferior e folha "Mais" (ADR-0032). Lateral oculta. Rodapé de versão oculto (ADR-0044). Tabelas em cards. Alvos de 44 px. |
+| Tablet retrato | 768 a 1023 px | Lateral disponível, margem de 16 px. Alvos de 44 px em telas de toque. |
+| Tablet paisagem e notebook | 1024 a 1439 px | Lateral de 256 px ou 80 px. Painéis laterais de trabalho a partir de 1100 px. |
+| Desktop | 1440 a 1919 px | Layout completo, área útil inteira (ADR-0021). |
+| Telas grandes | 1920 a 3840 px | Escala 1,125 a partir de 1920 px, 1,25 a partir de 2560 px e 1,5 a partir de 3200 px. |
+
+Larguras de referência para conferir: 320, 360, 390, 768, 1024, 1366, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. Em telas de toque (`pointer: coarse`), os alvos têm 44 px. Componentes que dependem do espaço usam `@container`. Um corte novo exige registro no design system.
 
 O inventário original tinha 30 telas mockadas. O Gabarito360 acrescentou telas sem mockup, sempre com aprovação posterior: planos, checkout, assinatura, painéis da secretaria e do aplicador, seleção de vínculo, cópias entre espaços, disciplinas, catálogo de instituições e outras. A tabela da seção 11 resume o inventário atual.
 
