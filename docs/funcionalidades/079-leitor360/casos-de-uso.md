@@ -767,13 +767,13 @@ Termos usados neste documento:
 3. A API confere permissão, escopo, correção aberta e conteúdo da chave.
 4. A API confere o sha256 recebido com a imagem recebida. Esse hash garante só a integridade do transporte.
 5. A API decodifica o QR da imagem e recalcula estado e confiança a partir de `detectadas`.
-6. A API faz a verificação barata (dimensões, tipo e decodificação) e, conforme a ⚠ D-1, a releitura e a barreira completa (FN-047).
+6. A API faz a verificação barata (dimensões, tipo e decodificação) e, conforme a D-1, a releitura e a barreira completa (FN-047): uma amostra das folhas (proposta: 10%), toda folha com correção do usuário e 100% dos envios de quem não tem `correcao.alterar` (UC-079-20).
 7. A API grava, numa transação que revalida o acesso, a imagem, o resultado e as decisões do usuário.
 8. A API calcula a nota quando não há pendências.
 9. A API responde com o estado do envio. O indicador da folha muda para **Enviada**.
 
 **Fluxos alternativos e de erro:**
-- 2a. Sem conexão: o envio espera e tenta de novo com intervalo crescente. O indicador mostra **Aguardando conexão**. ⚠ A fila sem conexão depende da D-7.
+- 2a. Sem conexão (D-7): o envio não acontece e a folha não é salva. O leitor mostra "Sem conexão. Esta folha ainda não foi salva." Quando a conexão volta, o sistema envia a folha que está na tela, com a mesma chave. Não existe fila offline, e nada fica guardado no aparelho (D-8).
 - 2b. Tempo esgotado (30 s, como hoje): o sistema tenta de novo com a mesma chave.
 - 2c. Reenvio de folha `recusada` pelo servidor com imagem nova: usa nova `envio_id`.
 - 3a. Mesma chave e mesmo conteúdo: a API devolve o envio existente. Nada é duplicado.
@@ -812,24 +812,16 @@ Termos usados neste documento:
 **Pós-condições:** leitura confirmada; ou divergência registrada e encaminhada para decisão.
 **Tela/rota:** tela 13 do planejamento §7: rótulo **Divergência aparelho × servidor** na revisão da prova (web `correcao.revisao`).
 
-**Fluxo principal:**
-⚠ Depende da D-1. Em todos os ramos, o servidor relê sempre os envios de quem não tem `correcao.alterar` e as folhas com `correcoes[]`. Ramos possíveis:
-
-- **Ramo (a) — o servidor relê todas as folhas:**
-  1. O servidor lê a imagem com o motor do servidor.
-  2. O servidor compara questão por questão com a leitura do aparelho, sem contar as decisões do usuário.
-  3. Sem diferença, a leitura fica confirmada.
-- **Ramo (b) — o servidor relê uma amostra:**
-  1. O servidor sorteia as folhas da amostra (taxa proposta: 10%). Nenhum campo do cliente muda o sorteio.
-  2. O servidor compara como no ramo (a).
-  3. As folhas fora da amostra ficam com a leitura do aparelho.
-- **Ramo (c) — o servidor relê só em contestação:**
-  1. O servidor guarda a leitura do aparelho.
-  2. O servidor relê quando alguém contesta o resultado.
+**Fluxo principal (D-1, ramo b — amostra):**
+1. O servidor escolhe as folhas a reler. São três grupos: uma amostra sorteada (taxa proposta: 10%), toda folha com correção do usuário em `correcoes[]` e 100% dos envios de quem não tem `correcao.alterar`. Nenhum campo do cliente muda o sorteio.
+2. O servidor lê a imagem com o motor do servidor, que tem o mesmo código e a mesma versão do aparelho (D-4).
+3. O servidor compara questão por questão com a leitura do aparelho, sem contar as decisões do usuário.
+4. Sem diferença, a leitura fica confirmada.
+5. As folhas fora dos três grupos ficam com a leitura do aparelho.
 
 **Fluxos alternativos e de erro:**
 - 2a. Divergência numa questão sem decisão do usuário: a questão vai para a revisão com o rótulo **Divergência aparelho × servidor**. A nota espera a decisão.
-- 2b. Divergência numa questão já decidida pelo usuário: a decisão do usuário prevalece. A divergência fica só registrada (proposta, a confirmar na D-1).
+- 2b. Divergência numa questão já decidida pelo usuário: a decisão do usuário prevalece. A divergência vira pendência de revisão e nunca troca a decisão em silêncio.
 - 2c. Muitas divergências da mesma versão do motor: o sistema alerta a equipe técnica (UC-079-25).
 
 **Regras de negócio:** a nota é sempre calculada no servidor. Toda divergência fica registrada com as duas leituras, a versão do motor e a versão do mapa.
@@ -838,7 +830,10 @@ Termos usados neste documento:
 - [ ] Toda divergência registrada mostra as duas leituras e as versões.
 - [ ] Uma questão divergente sem decisão não entra na nota antes da decisão.
 - [ ] Um envio de quem não tem `correcao.alterar` é sempre relido.
-- [ ] O ramo escolhido na D-1 é registrado em ADR antes da implementação.
+- [ ] Toda folha com correção do usuário é relida.
+- [ ] A divergência numa questão decidida pelo usuário vira pendência de revisão e não troca a decisão.
+- [ ] O sorteio da amostra não depende de nenhum campo do cliente.
+- [ ] A decisão está registrada na [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md).
 
 **Situação:** Não implementado — reaproveitável: o motor do servidor (`NativoOmrDriver`, `omr/ler_cartao.py`) e a fila de revisão (`CartaoController::revisao`).
 
@@ -899,7 +894,7 @@ Termos usados neste documento:
 - 1b. Aplicador depois do dia da aplicação: "Esta prova não está mais disponível para aplicação hoje."
 - 1c. A correção fecha entre o recebimento e a gravação: a transação de gravação recusa o envio (planejamento §6.6, "Revalidação na gravação").
 - 3a. A coordenação reabre a correção: o usuário toca em **Tentar enviar de novo**. A fila retoma com as mesmas chaves.
-- 5a. Folhas não enviadas no aparelho: ⚠ a retenção depende da D-8. Recomendação: só em memória, apagadas ao sair.
+- 5a. Folhas não enviadas no aparelho (D-8): nada é persistido. As folhas ficam só em memória e são apagadas ao sair. A foto e os dados vão ao servidor e ao banco.
 
 **Regras de negócio:** correção fechada ([08](../../arquitetura/08-regras-de-negocio.md), RN-COR-13). A API revalida espaço, vínculo, `cartao.enviar` e bloqueio na gravação, como o job faz hoje. A leitura no aparelho não dá direito a gravar.
 
@@ -923,38 +918,26 @@ Termos usados neste documento:
 **Pós-condições:** o usuário sabe o que pode fazer neste aparelho.
 **Tela/rota:** tela 12 do planejamento §7 (componente `x-aviso`).
 
-**Fluxo principal:**
-⚠ Depende da D-2 (decisão única para a FN-079 e a FN-080). Ramos possíveis:
-
-- **Ramo (a) — cair para o servidor:**
-  1. O sistema avisa "Este aparelho não consegue ler as folhas. As fotos serão lidas no servidor."
-  2. A captura continua igual.
-  3. O sistema envia só a imagem, como no fluxo atual (UC-045-02).
-  4. O servidor lê e o resultado aparece na revisão da prova (FN-046), não no leitor visual.
-- **Ramo (b) — indisponível:**
-  1. O sistema mostra "Este aparelho não atende aos requisitos do leitor. Use outro aparelho."
-- **Ramo (c) — transcrição manual (só regiões abertas):**
-  1. O leitor mostra o recorte da região aberta sem texto.
-  2. O professor digita a transcrição no leitor visual (UC-079-16).
-- **Ramo (d) — Escriba no servidor, com fila (fase futura, decidida pelo responsável em 11/11/2026; FN-080 §8.3):**
-  1. O sistema avisa "Este aparelho não tem suporte ao Escriba. As respostas abertas serão transcritas no servidor. Você recebe um aviso quando terminar."
-  2. As objetivas são lidas no aparelho e conferidas na hora. As abertas ficam "Aguardando o Escriba".
-  3. O sistema mostra a posição na fila e o tempo estimado. O usuário pode sair da tela.
-  4. Quando a transcrição termina, o usuário recebe um aviso e confere as abertas no leitor visual (UC-079-16).
+**Fluxo principal (D-2):**
+1. O sistema mostra a mensagem simples do resultado: "Este aparelho suporta o Escriba" ou "Este aparelho não tem suporte ao Escriba". Para o núcleo de leitura, o texto equivalente diz só se o aparelho suporta ou não o leitor.
+2. O sistema oferece o modo servidor (UC-079-26). O usuário continua corrigindo pelo app.
+3. Se o usuário aceita, o UC-079-26 assume a folha, com o aviso de créditos e de fila.
+4. Se o usuário não aceita, o sistema não lê a folha neste aparelho e volta à escolha da entrada.
 
 **Fluxos alternativos e de erro:**
-- 1a. Falta só a IA local (objetivas funcionam): as objetivas são lidas no aparelho. As abertas seguem o ramo escolhido na D-2. Nesta fase, não há leitura de IA no servidor; o ramo (d) vem numa fase futura.
+- 1a. Falta só o Escriba (as objetivas funcionam): o aparelho lê as objetivas. Só as regiões abertas vão ao modo servidor.
 - 1b. Aparelho fraco, mas capaz: o sistema avisa "A leitura pode demorar neste aparelho." e continua.
+- 2a. Região aberta e usuário sem modo servidor: o usuário ainda digita a transcrição no leitor visual (UC-079-16).
 
-**Regras de negócio:** a mensagem ao usuário é simples: diz só se o aparelho suporta ou não o leitor ou o Escriba ("Este aparelho suporta o Escriba" / "Este aparelho não tem suporte ao Escriba"). Ela não lista recursos, motivos nem o que falta (decisão do responsável em 11/11/2026). O detalhe técnico fica só no registro técnico. O motor do servidor continua existindo como hoje. Os requisitos mínimos do aparelho são definidos no planejamento depois da D-4. Os do modelo vêm da FN-080.
+**Regras de negócio:** a mensagem ao usuário é simples e nunca lista recursos, motivos nem o que falta (decisão do responsável em 11/11/2026). O detalhe técnico fica só no registro técnico. O motor do servidor continua existindo. Os requisitos mínimos do aparelho ficam no planejamento. Os do modelo vêm da FN-080. A decisão está na [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md).
 
 **Critérios de aceite:**
 - [ ] Todo aparelho sem capacidade recebe a mensagem simples (suporta ou não suporta), sem motivo nem lista de recursos.
-- [ ] O ramo escolhido na D-2 é registrado em ADR antes da implementação.
-- [ ] No ramo (a), uma folha lida no servidor tem origem da leitura "servidor".
+- [ ] A mensagem sempre vem com a oferta do modo servidor (UC-079-26).
 - [ ] Um aparelho sem capacidade para a IA não baixa o modelo.
+- [ ] Uma folha lida no servidor tem origem da leitura "servidor".
 
-**Situação:** Não implementado — o fluxo atual de leitura no servidor (UC-045-02) existe e serve de base para o ramo (a).
+**Situação:** Não implementado — o fluxo atual de leitura no servidor (UC-045-02) existe e serve de base para o modo servidor.
 
 ---
 
@@ -965,7 +948,7 @@ Termos usados neste documento:
 **Ator:** equipe técnica, com decisão do responsável
 **Permissão:** não se aplica (processo de publicação do motor)
 **Escopo:** rede
-**Pré-condições:** nova versão do núcleo de leitura, dos limiares, da barreira ou de um método; local do conjunto decidido (⚠ D-13).
+**Pré-condições:** nova versão do núcleo de leitura, dos limiares, da barreira ou de um método; conjunto de referência guardado na VM do responsável, com manifesto no Git (D-13).
 **Pós-condições:** versão aprovada e vigente; ou versão recusada com o relatório das diferenças.
 **Tela/rota:** sem tela. Job `paridade-leitor` na CI e página de autoteste fora da CI (planejamento §6.9).
 
@@ -980,11 +963,11 @@ Termos usados neste documento:
 **Fluxos alternativos e de erro:**
 - 1a. Uma folha com sha256 diferente do manifesto: a execução reprova.
 - 4a. Um alvo difere do instantâneo numa folha: a versão é recusada. O relatório lista a folha, o alvo e a diferença.
-- 4b. Versões diferentes de OpenCV ou NumPy entre aparelho e servidor: ⚠ depende da D-5. O conjunto mostra se a diferença muda algum resultado.
+- 4b. Versões diferentes de OpenCV ou NumPy entre aparelho e servidor: a versão é recusada. A D-5 exige as mesmas versões nos dois lados. O relatório lista a diferença de versão. (⚠ Falta confirmar o que o Pyodide empacota.)
 - 5a. Falta o registro de um dos 4 navegadores: a versão não é publicada.
 - 6a. Defeito descoberto numa versão vigente: a versão sai da lista aceita na hora e do manifesto (planejamento §6.4, regra 10).
 
-**Regras de negócio:** conteúdo mínimo, anotação, armazenamento e regra de dados reais: [planejamento §6.9](planejamento.md#69-conjunto-de-referência). Nenhuma imagem do conjunto entra no Git. O núcleo depende da D-4.
+**Regras de negócio:** conteúdo mínimo, anotação, armazenamento e regra de dados reais: [planejamento §6.9](planejamento.md#69-conjunto-de-referência). Nenhuma imagem do conjunto entra no Git: o Git guarda só o manifesto (D-13). O servidor e o aparelho usam o mesmo núcleo (D-4), e a CI confere a paridade também para o modo servidor.
 
 **Critérios de aceite:**
 - [ ] O conjunto de referência tem fotos reais de cartão impresso (pendência da FN-045, subfase 1.3).
