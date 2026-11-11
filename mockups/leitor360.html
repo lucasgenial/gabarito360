@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Acompanhar correção — Leitor360 (mockup FN-079) — Gabarito360</title>
+<!--
+  Mockup do Leitor360 (FN-079) sobre a casca e o CSS reais de apps/web (ADR-0056).
+  CSS na mesma ordem de layouts/app.blade.php. As telas de correção somam leituras-resultados.css (correcao/show).
+  Só o CSS próprio do leitor (prefixo lr-) e a barra do mockup (prefixo mk-) ficam em css/leitor360.css.
+-->
+<link rel="stylesheet" href="../apps/web/public/css/app-conteudo-legado.css" />
+<link rel="stylesheet" href="../apps/web/public/css/tabelas.css" />
+<link rel="stylesheet" href="../apps/web/public/css/leituras-resultados.css" />
+<link rel="stylesheet" href="../apps/web/public/css/marca.css" />
+<link rel="stylesheet" href="../apps/web/public/css/estrutura-app.css" />
+<link rel="stylesheet" href="css/leitor360.css" />
+<script src="js/leitor360.js" defer></script>
+</head>
+<body class="area-logada tw2-app com-release tela-correcao">
+
+<!-- ============ Barra do mockup (não faz parte da tela) ============ -->
+<div class="mk-barra" id="mk-barra" role="region" aria-label="Navegação do mockup (não faz parte da tela)">
+  <strong>Mockup Leitor360 · FN-079</strong>
+  <label>Tela
+    <select id="mk-tela">
+      <option value="entrada">1. Ler folhas (acompanhamento)</option>
+      <option value="camera">2. Câmera no celular</option>
+      <option value="webcam">3. Webcam no computador</option>
+      <option value="arquivos">4. Fotos e PDF</option>
+      <option value="lote">5. Lote de PDFs digitalizados</option>
+      <option value="leitor" selected>6. Leitor visual (objetivas)</option>
+      <option value="transcricao">7. Conferir transcrição (FN-080)</option>
+      <option value="modais">8. Modais do leitor</option>
+      <option value="resumo">9. Resumo do lote</option>
+      <option value="sem-capacidade">10. Aparelho sem capacidade</option>
+    </select>
+  </label>
+  <label>Aparelho
+    <select id="mk-aparelho">
+      <option value="0">Esta janela (sem moldura)</option>
+      <option value="320x568">Celular pequeno · 320 px</option>
+      <option value="360x740">Celular · 360 px</option>
+      <option value="390x844">Celular · 390 px</option>
+      <option value="720x1024">Celular largo · 720 px</option>
+      <option value="768x1024">Tablet retrato · 768 px</option>
+      <option value="1024x768">Tablet paisagem · 1024 px</option>
+      <option value="1280x800">Notebook · 1280 px</option>
+      <option value="1440x900">Desktop · 1440 px</option>
+      <option value="1920x1080">Desktop grande · 1920 px</option>
+      <option value="2560x1440">2K · 2560 px</option>
+      <option value="3840x2160">4K · 3840 px</option>
+    </select>
+  </label>
+  <output id="mk-escala" aria-live="polite"></output>
+  <button type="button" id="mk-tema" aria-pressed="false">Tema escuro</button>
+  <span class="mk-nota">Dados fictícios · sem prints (ADR-0049)</span>
+</div>
+
+<div class="mk-quadro mk-oculto" id="mk-quadro"><iframe id="mk-iframe" title="Visualização do mockup na largura do aparelho escolhido"></iframe></div>
+
+<div id="mk-app">
+<a class="estrutura-pular" href="#conteudo-principal">Pular para o conteúdo</a>
+<div id="g360-notificacoes" class="no-print" aria-label="Notificações"></div>
+<div class="estrutura-app">
+<!-- ===== Cabeçalho: layouts/app.blade.php ===== -->
+<header class="cabecalho-app">
+  <div class="cabecalho-app-marca">
+    <button type="button" id="menu-recolher" class="controle-estrutura menu-desktop-app" aria-controls="menu-lateral-app" aria-expanded="true" aria-label="Recolher menu principal" title="Recolher menu principal"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg></button>
+    <a class="marca-estrutura" href="#" aria-label="Gabarito360 — Painel"><span class="g360-marca g360-marca-sm g360-marca-horizontal" data-marca-theme="auto" role="img" aria-label="Gabarito360" aria-hidden="true">
+      <span class="g360-simbolo" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12421.36 11262.83" fill-rule="evenodd" clip-rule="evenodd"><path class="g360-simbolo-check" fill="#0588FC" d="M6182.16,5442.62 L4803.36,4100.11 L3443.6,5362.07 L6208.66,8044.66 L12421.36,2192.86 L11242.24,1056.76 L11044.17,853.22 Z"/><path class="g360-simbolo-circulo" fill="#001534" stroke="#373435" stroke-width="20.7" stroke-miterlimit="22.9256" d="M9378.33 6087.19l1733.67 -1715.24c71.24,311.88 116.75,634.11 134.07,964.53 162.49,3100.48 -2219.24,5745.67 -5319.73,5908.16 -3100.48,162.49 -5745.66,-2219.25 -5908.15,-5319.74 -162.49,-3100.48 2219.24,-5745.66 5319.72,-5908.15 1555.64,-81.52 3167.32,605.45 4237.64,1574.32l-1409.72 1248.11c-717.05,-645.93 -1680.56,-1018.23 -2720.46,-963.73 -2079.15,108.96 -3676.31,1882.79 -3567.35,3961.94 108.97,2079.16 1882.8,3676.32 3961.94,3567.36 1775.87,-93.06 3228.53,-1642.49 3538.37,-3317.55z"/></svg></span>
+      <span class="g360-wordmark" aria-hidden="true">Gabarito<span class="g360-numeros">3<span class="g360-six">6</span>0</span></span>
+    </span></a>
+  </div>
+  <div class="controles-cabecalho-app">
+    <button type="button" class="controle-estrutura" id="theme-toggle" aria-label="Mudar para tema escuro" title="Mudar para tema escuro"></button>
+    <div class="conta-container-app">
+      <button type="button" id="user-menu-trigger" class="controle-estrutura avatar-conta-app" aria-label="Abrir opções da conta" aria-expanded="false" title="Opções da conta"><span class="avatar-usuario" aria-hidden="true"><span class="avatar-aluno avatar-aluno--azul avatar-catalogo-educadores avatar-aluno--sm" aria-hidden="true"><span class="avatar-iniciais">MT</span></span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== Lateral: Acesso::menu() do perfil Professor (Painel, Provas, Corrigir, Turmas, Relatórios) ===== -->
+<aside class="lateral-app" id="menu-lateral-app" aria-label="Menu principal">
+  <nav class="lateral-app-itens">
+    <a href="#" title="Painel" aria-label="Painel"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg><span>Painel</span></a>
+    <a href="#" title="Provas" aria-label="Provas"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z"/></svg><span>Provas</span></a>
+    <a href="#" title="Corrigir" aria-label="Corrigir" class="active" aria-current="page"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"/></svg><span>Corrigir</span></a>
+    <a href="#" title="Turmas" aria-label="Turmas"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M0-240v-63q0-43 44-70t116-27q13 0 25 .5t23 2.5q-14 21-21 44t-7 48v65H0Zm240 0v-65q0-32 17.5-58.5T307-410q32-20 76.5-30t96.5-10q53 0 97.5 10t76.5 30q32 20 49 46.5t17 58.5v65H240Zm540 0v-65q0-26-6.5-49T754-397q11-2 22.5-2.5t23.5-.5q72 0 116 26.5t44 70.5v63H780Zm-455-80h311q-10-20-55.5-35T480-370q-55 0-100.5 15T325-320ZM160-440q-33 0-56.5-23.5T80-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T160-440Zm640 0q-33 0-56.5-23.5T720-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T800-440Zm-320-40q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T600-600q0 50-34.5 85T480-480Zm0-80q17 0 28.5-11.5T520-600q0-17-11.5-28.5T480-640q-17 0-28.5 11.5T440-600q0 17 11.5 28.5T480-560Zm1 240Zm-1-280Z"/></svg><span>Turmas</span></a>
+    <a href="#" title="Relatórios" aria-label="Relatórios"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M640-160v-280h160v280H640Zm-240 0v-640h160v640H400Zm-240 0v-440h160v440H160Z"/></svg><span>Relatórios</span></a>
+  </nav>
+  <!-- components/contexto-ativo.blade.php (fixo) -->
+  <section class="espaco-lateral-app" aria-label="Meu espaço"><h2>Meu espaço</h2>
+    <dl class="contexto-dados">
+      <div><dt>Minha escola</dt><dd>Colégio Estadual Monte Verde</dd></div>
+      <div><dt>Meu perfil</dt><dd>Professor</dd></div>
+    </dl>
+  </section>
+</aside>
+
+<div class="corpo-app">
+<main class="conteudo-app" id="conteudo-principal">
+  <!-- components/contexto-ativo.blade.php (recolhível, ADR-0029) -->
+  <div class="contexto-conteudo"><details class="contexto-ativo">
+    <summary class="contexto-resumo">
+      <span class="contexto-resumo-titulo">Meu espaço</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+    </summary>
+    <dl class="contexto-dados">
+      <div><dt>Minha escola</dt><dd>Colégio Estadual Monte Verde</dd></div>
+      <div><dt>Meu perfil</dt><dd>Professor</dd></div>
+    </dl>
+  </details></div>
+
+<!-- ===================== 1. LER FOLHAS = correcao/show com o card #camera evoluído ===================== -->
+<section class="tela-mk" data-tela="entrada" data-corpo="tela-correcao" aria-labelledby="t1">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><span aria-current="page">Correção da prova</span></li></ol></nav>
+
+  <div class="row-between" style="margin-top:12px;">
+    <div>
+      <h1 class="page-title" id="t1">Avaliação 2 — Matemática 9º ano</h1>
+      <p class="page-sub">Matemática · 9º A · 9º B · aplicado em 11/11/2026</p>
+    </div>
+    <button class="btn btn-ghost" type="button" data-ir="arquivos">Envio manual</button>
+  </div>
+
+  <!-- Correção aberta/fechada (correcao/show) -->
+  <div class="card card-pad no-print" style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+    <div style="flex:1;min-width:220px;font-size:14px;"><b>Correção aberta</b><div style="font-size:12px;color:var(--muted);">Ao terminar, feche a correção para evitar alterações.</div></div>
+    <button type="button" class="btn btn-secondary" data-modal="fechar-correcao"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Fechar correção</button>
+  </div>
+
+  <!-- correcao/_camera.blade.php evoluído: as 5 entradas do Leitor360 no lugar dos 2 botões -->
+  <div class="card card-pad" id="camera" style="margin-top:16px;scroll-margin-top:90px;">
+    <div class="g-aviso info lr-preparo" role="status" style="margin-top:0;">
+      Preparando o leitor… 45%. Você já pode capturar; as folhas esperam o leitor ficar pronto.
+      <div class="lr-trilho" aria-hidden="true"><div style="width:45%"></div></div>
+    </div>
+    <div class="lr-capacidades" aria-label="O que este aparelho oferece">
+      <span class="badge badge-success badge-dot">Leitura de objetivas neste aparelho</span>
+      <span class="badge badge-success badge-dot">Câmera traseira</span>
+      <span class="badge badge-muted badge-dot">Transcrição por IA indisponível neste aparelho</span>
+    </div>
+    <div class="lr-entradas">
+      <button type="button" class="btn btn-primary lr-entrada" data-ir="camera"><span class="lr-entrada-rotulo"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Fotografar folhas</span><small class="lr-entrada-desc">A foto sai sozinha quando os 4 cantos aparecem.</small></button>
+      <button type="button" class="btn btn-secondary lr-entrada" data-ir="webcam"><span class="lr-entrada-rotulo"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg> Usar a webcam</span><small class="lr-entrada-desc">Segure a folha diante da câmera do computador.</small></button>
+      <button type="button" class="btn btn-secondary lr-entrada" data-ir="arquivos"><span class="lr-entrada-rotulo"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Enviar fotos da galeria</span><small class="lr-entrada-desc">JPG, PNG, WEBP ou HEIC. Uma ou várias.</small></button>
+      <button type="button" class="btn btn-secondary lr-entrada" data-modal="pdf-paginas"><span class="lr-entrada-rotulo"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H5v20h14V7zM14 2v6h5M8 13h8M8 17h5"/></svg> Enviar PDF</span><small class="lr-entrada-desc">Arquivo digitalizado, uma página por aluno.</small></button>
+      <button type="button" class="btn btn-secondary lr-entrada" data-ir="lote"><span class="lr-entrada-rotulo"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16v13H4zM3 3h18v5H3zM9 12h6"/></svg> Lote de PDFs</span><small class="lr-entrada-desc">Várias folhas digitalizadas. Pause e retome.</small></button>
+    </div>
+    <p class="page-sub">Inclua a folha inteira e os quatro quadrados pretos. A leitura acontece neste aparelho; você confere cada folha antes de salvar.</p>
+    <details><summary>Saiba mais sobre a foto e a leitura</summary><p>Não corte as bordas. Use boa luz e mantenha a câmera firme, de frente para a folha. As guias verdes indicam enquadramento. O QR identifica aluno e prova. A folha e o resultado vão para o servidor só depois de você salvar. O aplicador vê só Fotografar, Webcam e Galeria, apenas no dia da aplicação, e não vê nota nem gabarito. <span class="mk-pendente">D-6 pendente: o aplicador vê as marcações lidas?</span></p></details>
+    <p id="envios-resumo" class="page-sub" role="status">Neste acompanhamento: 3 fotos · 2 concluídas · 1 precisa de ação.</p>
+    <ul id="envios" aria-label="Envios de cartões" style="list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;">
+      <li style="padding:10px 12px;border:1px solid var(--border-soft);border-radius:8px;font-size:14px;"><b>Ana Beatriz Souza</b> · 9º A — <span class="badge badge-warn">3 p/ conferir</span> <button type="button" class="btn btn-sm btn-secondary" data-ir="leitor">Abrir no leitor</button></li>
+      <li style="padding:10px 12px;border:1px solid var(--border-soft);border-radius:8px;font-size:14px;"><b>Bruno Lima</b> · 9º A — <span class="badge badge-success">salva e enviada</span></li>
+      <li style="padding:10px 12px;border:1px solid var(--border-soft);border-radius:8px;font-size:14px;"><b>Carlos Eduardo Nunes</b> · 9º A — <span class="badge badge-success">salva e enviada</span></li>
+    </ul>
+  </div>
+
+  <div class="progress-head">
+    <div class="card card-pad" id="regiao-progresso" aria-busy="false">
+      <div class="stat-row">
+        <div class="correcao-pct"><b>55,26%</b><span>dos alunos previstos</span></div>
+        <div class="stat-grid">
+          <div><div class="v">21</div><div class="l">Correções concluídas</div></div>
+          <div><div class="v">38</div><div class="l">Alunos previstos</div></div>
+          <div><div class="v">15</div><div class="l">Sem cartão</div></div>
+          <div><div class="v">1</div><div class="l">Em processamento</div></div>
+          <div><div class="v">2</div><div class="l">Precisam de revisão</div></div>
+          <div><div class="v">24</div><div class="l">Cartões recebidos</div></div>
+        </div>
+      </div>
+      <p class="page-sub">21 de 38 alunos com correção concluída.</p><p class="page-sub">1 cartão(ões) sem aluno identificado.</p>
+      <div class="progress-track" role="progressbar" aria-label="Correções concluídas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55.26"><div style="width:55.26%"></div></div>
+    </div>
+    <div class="card card-pad">
+      <h3 style="font-size:16px;margin-bottom:8px;">Leituras para revisar</h3>
+      <p style="margin-bottom:12px;">3 questões de 2 cartão(ões) aguardam sua decisão.</p>
+      <button type="button" class="btn btn-primary" data-ir="leitor">Revisar leituras (3)</button>
+    </div>
+  </div>
+
+  <div class="card card-pad" style="margin-top:20px;" id="corrigidos">
+    <div class="row-between" style="flex-wrap:wrap;margin-bottom:12px;">
+      <h3 style="font-size:17px;">Cartões recebidos <span class="badge badge-muted">24</span></h3>
+      <input class="input" type="search" placeholder="Buscar aluno…" aria-label="Buscar aluno" style="max-width:240px;">
+    </div>
+    <ul class="corr-list">
+      <li class="corr-item"><div class="corr-thumb lr-thumb"><svg data-folha="mini" viewBox="0 0 210 297" aria-hidden="true"></svg></div><div class="corr-info"><b>Ana Beatriz Souza</b><div style="color:var(--muted);">9º A · 2026001</div><div style="margin-top:4px;"><span class="badge badge-warn">3 p/ revisar</span></div><div class="corr-acoes"><button type="button" class="btn btn-sm btn-ghost">Ver foto</button><button type="button" class="btn btn-sm btn-ghost" data-ir="leitor">Revisar leitura</button></div></div><div></div></li>
+      <li class="corr-item"><div class="corr-thumb lr-thumb"><svg data-folha="mini" viewBox="0 0 210 297" aria-hidden="true"></svg></div><div class="corr-info"><b>Bruno Lima</b><div style="color:var(--muted);">9º A · 2026002</div><div style="margin-top:4px;"><span class="badge badge-success">lido</span></div><div class="corr-acoes"><button type="button" class="btn btn-sm btn-ghost">Ver foto</button><button type="button" class="btn btn-sm btn-secondary">Acertos e erros</button></div></div><div><div class="corr-nota corr-nota-aprovada">8,5</div><div style="font-size:11px;color:var(--muted);text-align:right;">17/20</div></div></li>
+      <li class="corr-item"><div class="corr-thumb lr-thumb"><svg data-folha="mini" viewBox="0 0 210 297" aria-hidden="true"></svg></div><div class="corr-info"><b>Carlos Eduardo Nunes</b><div style="color:var(--muted);">9º A · 2026003</div><div style="margin-top:4px;"><span class="badge badge-success">lido</span></div><div class="corr-acoes"><button type="button" class="btn btn-sm btn-ghost">Ver foto</button><button type="button" class="btn btn-sm btn-secondary">Acertos e erros</button></div></div><div><div class="corr-nota corr-nota-reprovada">5,0</div><div style="font-size:11px;color:var(--muted);text-align:right;">10/20</div></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== 2 e 3. CÂMERA E WEBCAM = visor .cam-tela real (correcao/_camera) ===================== -->
+<section class="tela-mk" data-tela="camera" data-corpo="tela-correcao" aria-label="Câmera do Leitor360"></section>
+<section class="tela-mk" data-tela="webcam" data-corpo="tela-correcao" aria-label="Webcam do Leitor360"></section>
+
+<!-- ===================== 4. FOTOS E PDF ===================== -->
+<section class="tela-mk" data-tela="arquivos" data-corpo="tela-correcao" aria-labelledby="t4">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Enviar fotos ou PDF</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Avaliação 2 — Matemática 9º ano</div><h1 class="page-title" id="t4">Enviar fotos ou PDF</h1><p class="page-sub">Cada página vira uma folha. Você confere as que tiverem pendências.</p></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-modal="sair">Sair do leitor</button><button type="button" class="btn btn-secondary" data-ir="resumo">Encerrar</button></div>
+  </div>
+  <div class="card card-pad">
+    <div class="lr-soltar"><b>Arraste fotos ou um PDF para cá</b><span>JPG, PNG, WEBP, HEIC ou PDF</span><label class="btn btn-secondary" style="cursor:pointer;">Escolher arquivos<input type="file" accept="image/*,application/pdf" multiple style="display:none;"></label></div>
+    <div class="tabela-conjunto tabela-integrada" data-tabela data-modo="lista" style="margin-top:20px;">
+      <div class="tabela-area">
+        <table class="table tabela-padrao">
+          <caption class="sr-only">Folhas desta sessão</caption>
+          <thead><tr><th scope="col">Arquivo</th><th scope="col">Aluno</th><th scope="col">Situação</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead>
+          <tbody>
+            <tr><td class="tabela-principal" data-rotulo="Arquivo"><div class="tabela-valor">IMG_2031.jpg</div></td><td data-rotulo="Aluno"><div class="tabela-valor">Ana Beatriz Souza · 9º A</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-warn">3 para conferir</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary" data-ir="leitor">Conferir</button></div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Arquivo"><div class="tabela-valor">IMG_2032.jpg</div></td><td data-rotulo="Aluno"><div class="tabela-valor">Carlos Eduardo Nunes · 9º A</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-success badge-dot">Sem pendências</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary" data-ir="leitor">Abrir</button></div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Arquivo"><div class="tabela-valor">prova-davi.pdf (pág. 1)</div></td><td data-rotulo="Aluno"><div class="tabela-valor">Davi Rocha · 9º B</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-muted">Aguardando o leitor</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">—</div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Arquivo"><div class="tabela-valor">IMG_2035.heic</div></td><td data-rotulo="Aluno"><div class="tabela-valor"><span style="color:var(--danger)">Aluno não identificado</span></div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-warn">Escolher aluno</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary">Escolher aluno</button></div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Arquivo"><div class="tabela-valor">IMG_2036.jpg</div></td><td data-rotulo="Aluno"><div class="tabela-valor">—</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-danger badge-dot">Recusada</span> Foto sem nitidez.</div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-ghost">Trocar arquivo</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 5. LOTE ===================== -->
+<section class="tela-mk" data-tela="lote" data-corpo="tela-correcao" aria-labelledby="t5">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Lote de PDFs</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Avaliação 2 — Matemática 9º ano</div><h1 class="page-title" id="t5">Lote de PDFs digitalizados</h1><p class="page-sub">3 arquivos · 120 páginas · leitura neste computador</p></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-secondary">Pausar</button><button type="button" class="btn btn-ghost" data-modal="cancelar-lote">Cancelar o lote</button></div>
+  </div>
+  <div class="progress-head lr-lote-topo">
+    <div class="card card-pad" role="status" aria-live="polite">
+      <div class="stat-row">
+        <div class="correcao-pct"><b>31%</b><span>das páginas lidas</span></div>
+        <div class="stat-grid">
+          <div><div class="v">37</div><div class="l">Páginas lidas</div></div>
+          <div><div class="v">120</div><div class="l">Páginas no lote</div></div>
+          <div><div class="v">~3 min</div><div class="l">Tempo restante</div></div>
+        </div>
+      </div>
+      <p class="page-sub">Lendo a página 37 de 120. As páginas já lidas estão salvas na sessão.</p>
+      <div class="progress-track" role="progressbar" aria-label="Páginas lidas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="31"><div style="width:31%"></div></div>
+    </div>
+    <div class="card card-pad">
+      <!-- components/carregando.blade.php -->
+      <div class="g360-carregando g360-carregando-linhas" role="status">
+        <div class="g360-carga-marca"><span aria-hidden="true"><span class="g360-marca-carregando"></span></span><span>Lendo turma-9b.pdf, página 7…</span></div>
+        <div class="g360-skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+  <div class="card card-pad" style="margin-top:20px;">
+    <div class="lr-filtros" role="group" aria-label="Mostrar páginas">
+      <button type="button" class="btn btn-sm btn-primary" aria-pressed="true">Sem pendências (28)</button>
+      <button type="button" class="btn btn-sm btn-secondary" aria-pressed="false">Para conferir (6)</button>
+      <button type="button" class="btn btn-sm btn-secondary" aria-pressed="false">Recusadas (3)</button>
+    </div>
+    <div class="tabela-conjunto tabela-integrada" data-tabela data-modo="lista">
+      <div class="tabela-area">
+        <table class="table tabela-padrao">
+          <caption class="sr-only">Páginas do lote sem pendências</caption>
+          <thead><tr><th scope="col">Página</th><th scope="col">Aluno</th><th scope="col">Turma</th><th scope="col">Situação</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead>
+          <tbody>
+            <tr><td data-rotulo="Página"><div class="tabela-valor">turma-9a.pdf · 1</div></td><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Ana Beatriz Souza</strong></div></td><td data-rotulo="Turma"><div class="tabela-valor">9º A</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-success badge-dot">Sem pendências</span> <span class="badge badge-muted">2 em branco</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary" data-ir="leitor">Abrir</button></div></td></tr>
+            <tr><td data-rotulo="Página"><div class="tabela-valor">turma-9a.pdf · 2</div></td><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Bruno Lima</strong></div></td><td data-rotulo="Turma"><div class="tabela-valor">9º A</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-success badge-dot">Sem pendências</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary" data-ir="leitor">Abrir</button></div></td></tr>
+            <tr><td data-rotulo="Página"><div class="tabela-valor">turma-9a.pdf · 3</div></td><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Carlos Eduardo Nunes</strong></div></td><td data-rotulo="Turma"><div class="tabela-valor">9º A</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-success badge-dot">Sem pendências</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary" data-ir="leitor">Abrir</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="lr-rodape-acoes"><span class="page-sub">Verso em branco não conta como pendência.</span><button type="button" class="btn btn-primary" data-modal="salvar-lote">Salvar 28 folhas sem pendências</button></div>
+  </div>
+  <p style="margin-top:12px;"><span class="mk-pendente">D-3 pendente: lote em computador fraco roda no navegador ou no servidor?</span></p>
+</section>
+
+<!-- ===================== 6. LEITOR VISUAL = estação de revisão real evoluída (correcao/revisao + correcao-revisao.js) ===================== -->
+<section class="tela-mk" data-tela="leitor" data-corpo="tela-revisao" aria-labelledby="t6">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir folha</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · folha 13 de 38</div><h1 class="page-title" id="t6">Conferir folha</h1><p class="page-sub">Matemática</p></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-modal="sair">Sair do leitor</button></div>
+  </div>
+
+  <div class="rev-estacao lr-estacao" id="rev-estacao">
+    <aside class="card rev-documento-painel" id="rev-documento-painel" aria-labelledby="rev-painel-titulo">
+      <header class="rev-modal-cabecalho"><div><h2 id="rev-painel-titulo">Folha completa</h2><p id="rev-painel-contexto">Ana Beatriz Souza · 9º A</p></div></header>
+      <div id="rev-documento-desktop" class="rev-documento-destino">
+        <!-- HTML que leitor-cartao.js gera, com a folha em SVG no lugar do canvas -->
+        <div id="rev-leitor" class="rev-leitor">
+          <div class="rev-leitor-ferramentas" aria-label="Controles da folha">
+            <button type="button" class="btn btn-ghost" data-menos aria-label="Diminuir folha">−</button>
+            <output data-zoom aria-label="Ampliação da folha">Ajustado</output>
+            <button type="button" class="btn btn-ghost" data-mais aria-label="Ampliar folha">+</button>
+            <button type="button" class="btn btn-ghost" data-ajustar>Ajustar à página</button>
+          </div>
+          <div class="rev-leitor-area" tabindex="0" role="region" aria-label="Folha da aluna com as questões destacadas">
+            <div class="rev-pdf-pagina rev-imagem-restrita" data-folha-area><svg id="folha-principal" data-folha="principal" viewBox="0 0 210 297" role="img" aria-label="Imagem da folha. A lista de questões é o equivalente acessível."></svg></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="card card-pad rev-cartao"><div id="rev-conteudo">
+      <div class="row-between rev-topo"><div><b>Ana Beatriz Souza</b><div class="exam-meta">9º A · identificada pelo QR</div></div><div class="rev-progresso" id="lr-progresso" role="status">3 questões para conferir · 2 em branco</div></div>
+      <ul class="lr-questoes" id="lr-questoes" aria-label="Questões da folha"></ul>
+      <div class="lr-legenda" aria-hidden="true"><span><i class="lr-leg lr-leg-pend"></i>Para conferir</span><span><i class="lr-leg lr-leg-branco"></i>Em branco</span><span><i class="lr-leg lr-leg-ok"></i>Corrigida</span></div>
+      <div class="rev-trabalho">
+        <h2 class="lr-trab-titulo" id="lr-trab-titulo">Questão 4 · para conferir</h2>
+        <div id="rev-previa" class="rev-previa rev-imagem-restrita"><div class="rev-recorte lr-recorte" role="img" id="lr-recorte-rotulo" aria-label="Linha da questão no cartão"><svg id="lr-recorte" viewBox="0 0 120 14" aria-hidden="true"></svg></div></div>
+        <div class="rev-respostas">
+          <div class="rev-visualizar"><button type="button" class="btn btn-ghost btn-sm" id="rev-ver-cartao">Ver folha inteira</button></div>
+          <p class="rev-leitura" id="lr-leitura">Leitura do sistema: B e D (marcação incerta)</p>
+          <div class="rev-opcoes" id="lr-opcoes" style="--rev-alternativas:5"></div>
+          <div class="rev-opcoes rev-opcoes-extra" id="lr-opcoes-extra"></div>
+          <p id="rev-salvamento" class="rev-salvamento" role="status" aria-live="polite"></p>
+          <div class="rev-acoes">
+            <button type="button" class="btn btn-secondary btn-sm" id="lr-voltar">Voltar</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="prox-pend">Próxima pendência</button>
+          </div>
+          <div class="lr-salvar">
+            <button type="button" class="btn btn-ghost" data-modal="descartar">Descartar folha</button>
+            <button type="button" class="btn btn-primary" id="salvar-folha">Salvar folha</button>
+          </div>
+          <p class="rev-teclas">Teclado: A a E respondem, 0 deixa em branco, X anula, N vai à próxima pendência e Ctrl+Enter salva.</p>
+        </div>
+      </div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===================== 7. TRANSCRIÇÃO (FN-080) ===================== -->
+<section class="tela-mk" data-tela="transcricao" data-corpo="tela-revisao" aria-labelledby="t7">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir transcrição</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · prova mista · página 2 de 3</div><h1 class="page-title" id="t7">Conferir transcrição — questão 21</h1><p class="page-sub">A IA só lê. Ela não corrige. Confira o texto antes de salvar.</p></div>
+    <div class="g-pagina-acoes"><span class="mk-pendente">Depende da FN-080 e da D-9</span></div>
+  </div>
+  <div class="rev-estacao lr-estacao">
+    <aside class="card rev-documento-painel lr-painel-livre" aria-labelledby="t7-resp">
+      <header class="rev-modal-cabecalho"><div><h2 id="t7-resp">Resposta do aluno</h2><p>Ana Beatriz Souza · 9º A</p></div></header>
+      <div class="rev-leitor-area">
+        <div class="lr-manuscrito">A área do triângulo é base vezes altura dividido por dois. Como a base é 8 e a altura é <mark class="lr-trecho">6</mark>, a área é 24 cm².<br>Fórmula: A = b·h/2</div>
+        <p class="page-sub" style="margin-top:8px;">Trecho marcado: confiança baixa.</p>
+      </div>
+    </aside>
+    <div class="card card-pad rev-cartao">
+      <div class="field"><label for="t7-texto">Texto transcrito</label>
+        <textarea class="input" id="t7-texto" rows="6">A área do triângulo é base vezes altura dividido por dois. Como a base é 8 e a altura é 6, a área é 24 cm².</textarea></div>
+      <div class="field"><label for="t7-formula">Fórmula (LaTeX)</label>
+        <input class="input" id="t7-formula" value="A = \frac{b \cdot h}{2}">
+        <div class="field-help">Prévia: <span class="lr-formula">A = b·h / 2</span></div></div>
+      <div class="lr-salvar"><span class="badge badge-warn">1 trecho para conferir</span><button type="button" class="btn btn-primary">Confirmar transcrição</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 8. MODAIS ===================== -->
+<section class="tela-mk" data-tela="modais" data-corpo="tela-correcao" aria-labelledby="t8">
+  <div class="g-pagina"><div style="min-width:0;"><h1 class="page-title" id="t8">Modais do leitor</h1><p class="page-sub">Todos usam o modal da aplicação (ADR-0025). Escolha um para abrir.</p></div></div>
+  <div class="card card-pad">
+    <div class="lr-filtros">
+      <button type="button" class="btn btn-secondary" data-modal="salva">Folha salva</button>
+      <button type="button" class="btn btn-secondary" data-modal="pendencias">Salvar com pendências?</button>
+      <button type="button" class="btn btn-secondary" data-modal="sair">Sair do leitor?</button>
+      <button type="button" class="btn btn-secondary" data-modal="outra-prova">Folha de outra prova</button>
+      <button type="button" class="btn btn-secondary" data-modal="ja-lida">Aluno já tem leitura</button>
+      <button type="button" class="btn btn-secondary" data-modal="pdf-paginas">PDF com 42 páginas</button>
+      <button type="button" class="btn btn-secondary" data-modal="cancelar-lote">Cancelar o lote?</button>
+      <button type="button" class="btn btn-secondary" data-modal="salvar-lote">Salvar 28 folhas?</button>
+      <button type="button" class="btn btn-secondary" data-modal="descartar">Descartar a folha?</button>
+      <button type="button" class="btn btn-secondary" data-modal="fechada">Correção fechada</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 9. RESUMO ===================== -->
+<section class="tela-mk" data-tela="resumo" data-corpo="tela-correcao" aria-labelledby="t9">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Resumo da sessão</span></li></ol></nav>
+  <div class="g-pagina">
+    <div style="min-width:0;"><div class="eyebrow">Avaliação 2 — Matemática 9º ano</div><h1 class="page-title" id="t9">Resumo da sessão</h1><p class="page-sub">Sessão encerrada às 10:42 · lida neste aparelho</p></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-secondary" data-ir="entrada">Ler mais folhas</button><button type="button" class="btn btn-primary" data-ir="entrada">Ver acompanhamento</button></div>
+  </div>
+  <div class="g-aviso info" role="status">3 folhas ainda estão sendo enviadas. Não feche esta página.</div>
+  <div class="card card-pad">
+    <div class="stat-row">
+      <div class="correcao-pct"><b>32</b><span>folhas salvas</span></div>
+      <div class="stat-grid">
+        <div><div class="v">29</div><div class="l">Enviadas ao servidor</div></div>
+        <div><div class="v">3</div><div class="l">Aguardando envio</div></div>
+        <div><div class="v">7</div><div class="l">Corrigidas à mão</div></div>
+        <div><div class="v">2</div><div class="l">Sem aluno identificado</div></div>
+      </div>
+    </div>
+    <div class="progress-track" role="progressbar" aria-label="Folhas enviadas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90.6"><div style="width:90.6%"></div></div>
+  </div>
+  <div class="card card-pad" style="margin-top:20px;">
+    <h3 style="font-size:17px;margin-bottom:12px;">Folhas da sessão <span class="badge badge-muted">32</span></h3>
+    <div class="tabela-conjunto tabela-integrada" data-tabela data-modo="lista">
+      <div class="tabela-area">
+        <table class="table tabela-padrao">
+          <caption class="sr-only">Folhas da sessão</caption>
+          <thead><tr><th scope="col">Aluno</th><th scope="col">Turma</th><th scope="col">Situação</th><th class="tabela-coluna-acoes" scope="col">Ações</th></tr></thead>
+          <tbody>
+            <tr><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Ana Beatriz Souza</strong></div></td><td data-rotulo="Turma"><div class="tabela-valor">9º A</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-success badge-dot">Enviada</span> <span class="badge badge-info">3 corrigidas à mão</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary">Ver</button></div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><span style="color:var(--danger)">Aluno não identificado</span> (IMG_2035)</div></td><td data-rotulo="Turma"><div class="tabela-valor">—</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-warn">Vincular aluno</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor"><button type="button" class="btn btn-sm btn-secondary">Escolher aluno</button></div></td></tr>
+            <tr><td class="tabela-principal" data-rotulo="Aluno"><div class="tabela-valor"><strong>Davi Rocha</strong></div></td><td data-rotulo="Turma"><div class="tabela-valor">9º B</div></td><td data-rotulo="Situação"><div class="tabela-valor"><span class="badge badge-muted">Enviando…</span></div></td><td class="tabela-acoes" data-rotulo="Ações"><div class="tabela-valor">—</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 10. SEM CAPACIDADE ===================== -->
+<section class="tela-mk" data-tela="sem-capacidade" data-corpo="tela-correcao" aria-labelledby="t10">
+  <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><span aria-current="page">Correção da prova</span></li></ol></nav>
+  <div class="row-between" style="margin-top:12px;">
+    <div><h1 class="page-title" id="t10">Avaliação 2 — Matemática 9º ano</h1><p class="page-sub">Matemática · 9º A · 9º B · aplicado em 11/11/2026</p></div>
+  </div>
+  <div class="card card-pad" id="camera-sem" style="margin-top:16px;">
+    <div class="g-aviso atencao" role="status" style="margin-top:0;">Este aparelho não consegue ler as folhas aqui. O navegador não oferece o recurso necessário (WebAssembly) ou a memória é insuficiente.</div>
+    <h3 style="font-size:16px;margin-bottom:8px;">O que você pode fazer</h3>
+    <ul class="lr-lista">
+      <li>Enviar as fotos para o servidor ler, como hoje. <span class="mk-pendente">D-2 pendente</span></li>
+      <li>Abrir o Gabarito360 em outro aparelho ou num navegador atualizado.</li>
+    </ul>
+    <div class="lr-entradas">
+      <label class="btn btn-primary lr-entrada" style="cursor:pointer;"><span class="lr-entrada-rotulo">Enviar fotos para o servidor</span><small class="lr-entrada-desc">A leitura acontece no servidor, sem conferência na hora.</small><input type="file" accept="image/*" multiple style="display:none;"></label>
+    </div>
+  </div>
+</section>
+
+</main>
+  <footer class="rodape-app" aria-label="Versão do software">Gabarito360 - v0.1.0 - Homologação</footer>
+</div><!-- .corpo-app -->
+</div><!-- .estrutura-app -->
+
+<!-- ===== Navegação inferior: Acesso::menuCelular() do Professor (Painel, Corrigir, Provas, Turmas + Mais) ===== -->
+<nav class="nav-mobile-app" aria-label="Menu principal (celular)">
+  <a href="#"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg><span>Painel</span></a>
+  <a href="#" class="active" aria-current="page"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"/></svg><span>Corrigir</span></a>
+  <a href="#"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z"/></svg><span>Provas</span></a>
+  <a href="#"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M0-240v-63q0-43 44-70t116-27q13 0 25 .5t23 2.5q-14 21-21 44t-7 48v65H0Zm240 0v-65q0-32 17.5-58.5T307-410q32-20 76.5-30t96.5-10q53 0 97.5 10t76.5 30q32 20 49 46.5t17 58.5v65H240Zm540 0v-65q0-26-6.5-49T754-397q11-2 22.5-2.5t23.5-.5q72 0 116 26.5t44 70.5v63H780Zm-455-80h311q-10-20-55.5-35T480-370q-55 0-100.5 15T325-320ZM160-440q-33 0-56.5-23.5T80-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T160-440Zm640 0q-33 0-56.5-23.5T720-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T800-440Zm-320-40q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T600-600q0 50-34.5 85T480-480Zm0-80q17 0 28.5-11.5T520-600q0-17-11.5-28.5T480-640q-17 0-28.5 11.5T440-600q0 17 11.5 28.5T480-560Zm1 240Zm-1-280Z"/></svg><span>Turmas</span></a>
+  <button type="button" class="nav-inferior-mais" aria-expanded="false" aria-controls="nav-folha" aria-haspopup="dialog"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z"/></svg><span>Mais</span></button>
+</nav>
+<dialog class="menu-mobile-app" id="nav-folha" aria-labelledby="menu-mobile-titulo">
+  <header><h2 id="menu-mobile-titulo">Menu</h2><button type="button" data-fechar>Fechar</button></header>
+  <nav aria-label="Todas as opções">
+    <a href="#"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg>Painel</a>
+    <a href="#"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z"/></svg>Provas</a>
+    <a href="#" class="active" aria-current="page"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M480-260q75 0 127.5-52.5T660-440q0-75-52.5-127.5T480-620q-75 0-127.5 52.5T300-440q0 75 52.5 127.5T480-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29ZM160-120q-33 0-56.5-23.5T80-200v-480q0-33 23.5-56.5T160-760h126l74-80h240l74 80h126q33 0 56.5 23.5T880-680v480q0 33-23.5 56.5T800-120H160Zm0-80h640v-480H638l-73-80H395l-73 80H160v480Zm320-240Z"/></svg>Corrigir</a>
+    <a href="#"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M0-240v-63q0-43 44-70t116-27q13 0 25 .5t23 2.5q-14 21-21 44t-7 48v65H0Zm240 0v-65q0-32 17.5-58.5T307-410q32-20 76.5-30t96.5-10q53 0 97.5 10t76.5 30q32 20 49 46.5t17 58.5v65H240Zm540 0v-65q0-26-6.5-49T754-397q11-2 22.5-2.5t23.5-.5q72 0 116 26.5t44 70.5v63H780Zm-455-80h311q-10-20-55.5-35T480-370q-55 0-100.5 15T325-320ZM160-440q-33 0-56.5-23.5T80-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T160-440Zm640 0q-33 0-56.5-23.5T720-520q0-34 23.5-57t56.5-23q34 0 57 23t23 57q0 33-23 56.5T800-440Zm-320-40q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T600-600q0 50-34.5 85T480-480Zm0-80q17 0 28.5-11.5T520-600q0-17-11.5-28.5T480-640q-17 0-28.5 11.5T440-600q0 17 11.5 28.5T480-560Zm1 240Zm-1-280Z"/></svg>Turmas</a>
+    <a href="#"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M640-160v-280h160v280H640Zm-240 0v-640h160v640H400Zm-240 0v-440h160v440H160Z"/></svg>Relatórios</a>
+    <a href="#"><svg class="icone-estrutura" viewBox="0 -960 960 960" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm240-320q33 0 56.5-23.5T560-640q0-33-23.5-56.5T480-720q-33 0-56.5 23.5T400-640q0 33 23.5 56.5T480-560Zm0-80Zm0 400Z"/></svg>Meu perfil</a>
+  </nav>
+</dialog>
+
+<!-- ===== Visor ao vivo real (correcao/_camera.blade.php): fica aberto nas telas Câmera e Webcam ===== -->
+<div id="cam-tela" class="cam-tela" hidden>
+  <canvas id="cam-canvas" role="img" aria-label="Imagem simulada da câmera com a folha e as guias dos 4 cantos"></canvas>
+  <div class="cam-topo">
+    <span id="cam-dica" aria-live="polite">Falta o canto inferior direito. Afaste um pouco o celular.</span>
+    <span class="lr-cam-contador" id="lr-cam-contador">12 folhas · 2 para conferir</span>
+    <button type="button" class="cam-btn-redondo lr-cam-encerrar" data-ir="resumo">Encerrar</button>
+    <button type="button" class="cam-btn-redondo" id="cam-fechar" aria-label="Sair do leitor" data-modal="sair">✕</button>
+  </div>
+  <div id="cam-ultimo" class="cam-ultimo"></div>
+  <div class="cam-base">
+    <button type="button" class="cam-btn-redondo" id="cam-luz" aria-label="Lanterna" aria-pressed="false"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l-1 5H9z"/><path d="M9 8l1 13h4l1-13"/><path d="M12 12v3"/></svg></button>
+    <button type="button" class="cam-disparo" id="cam-disparo" aria-label="Tirar foto" data-ir="leitor"></button>
+    <label class="cam-auto"><input type="checkbox" id="cam-auto-chk" checked style="width:20px;height:20px;"> Auto</label>
+  </div>
+</div>
+
+<!-- ===== Leitor de documento no celular: dialog real de correcao/revisao.blade.php ===== -->
+<dialog id="rev-cartao-modal" class="rev-cartao-modal" aria-labelledby="rev-cartao-titulo" aria-describedby="rev-cartao-contexto">
+  <header class="rev-modal-cabecalho">
+    <div><h2 id="rev-cartao-titulo">Folha completa</h2><p id="rev-cartao-contexto">Ana Beatriz Souza · 9º A</p></div>
+    <button type="button" class="btn btn-secondary" id="rev-cartao-fechar" aria-label="Fechar folha">Fechar</button>
+  </header>
+  <div id="rev-documento-mobile" class="rev-documento-destino"></div>
+</dialog>
+
+<!-- ===== Modal da aplicação (.modal-backdrop > .modal, igual a provas/show e alunos/show) ===== -->
+<div class="modal-backdrop" id="mk-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mk-modal-titulo" tabindex="-1">
+    <div class="modal-head"><h2 id="mk-modal-titulo"></h2><button type="button" class="modal-close" data-fechar aria-label="Fechar">&times;</button></div>
+    <div class="modal-body" id="mk-modal-corpo"></div>
+    <div class="modal-foot" id="mk-modal-pe"></div>
+  </div>
+</div>
+</div><!-- #mk-app -->
+
+</body>
+</html>
