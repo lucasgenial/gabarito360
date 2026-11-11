@@ -160,7 +160,7 @@
       <button type="button" class="btn btn-secondary lr-entrada" data-ir="lote"><span class="lr-entrada-rotulo"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16v13H4zM3 3h18v5H3zM9 12h6"/></svg> Lote de PDFs</span><small class="lr-entrada-desc">Várias folhas digitalizadas. Pause e retome.</small></button>
     </div>
     <p class="page-sub">Inclua a folha inteira e os quatro quadrados pretos. A leitura acontece neste aparelho; você confere cada folha antes de salvar.</p>
-    <details><summary>Saiba mais sobre a foto e a leitura</summary><p>Não corte as bordas. Use boa luz e mantenha a câmera firme, de frente para a folha. As guias verdes indicam enquadramento. O QR identifica aluno e prova. A folha e o resultado vão para o servidor só depois de você salvar. O aplicador vê só Fotografar, Webcam e Galeria, apenas no dia da aplicação, e não vê nota nem gabarito. <span class="mk-pendente">D-6 pendente: o aplicador vê as marcações lidas?</span></p></details>
+    <details><summary>Saiba mais sobre a foto e a leitura</summary><p>Não corte as bordas. Use boa luz e mantenha a câmera firme, de frente para a folha. As guias verdes indicam enquadramento. O QR identifica aluno e prova. A folha e o resultado vão para o servidor só depois de você salvar. O aplicador vê só Fotografar, Webcam e Galeria, apenas no dia da aplicação. Ele vê as marcações lidas da folha atual para refazer a foto, mas não corrige e não vê nota nem gabarito.</p></details>
     <p id="envios-resumo" class="page-sub" role="status">Neste acompanhamento: 3 fotos · 2 concluídas · 1 precisa de ação.</p>
     <ul id="envios" aria-label="Envios de cartões" style="list-style:none;padding:0;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;">
       <li style="padding:10px 12px;border:1px solid var(--border-soft);border-radius:8px;font-size:14px;"><b>Ana Beatriz Souza</b> · 9º A — <span class="badge badge-warn">3 p/ conferir</span> <button type="button" class="btn btn-sm btn-secondary" data-ir="leitor">Abrir no leitor</button></li>
@@ -285,7 +285,7 @@
     </div>
     <div class="lr-rodape-acoes"><span class="page-sub">Verso em branco não conta como pendência.</span><button type="button" class="btn btn-primary" data-modal="salvar-lote">Salvar 28 folhas sem pendências</button></div>
   </div>
-  <p style="margin-top:12px;"><span class="mk-pendente">D-3 pendente: lote em computador fraco roda no navegador ou no servidor?</span></p>
+  <div class="g-aviso info" style="margin-top:12px;">Cada página abre como imagem e é lida em segundo plano. O resultado entra nesta tabela, e o envio já fica preparado. Acima do limite deste computador, as páginas vão para a correção no servidor, com aviso de créditos e de fila.</div>
 </section>
 
 <!-- ===================== 6. LEITOR VISUAL = estação de revisão real evoluída (correcao/revisao + correcao-revisao.js) ===================== -->
@@ -414,7 +414,7 @@
     <div class="g-aviso atencao" role="status" style="margin-top:0;">Este aparelho não consegue ler as folhas aqui.</div>
     <h3 style="font-size:16px;margin-bottom:8px;">O que você pode fazer</h3>
     <ul class="lr-lista">
-      <li>Enviar as fotos para o servidor ler, como hoje. <span class="mk-pendente">D-2 pendente</span></li>
+      <li>Usar a correção no servidor: as fotos são lidas lá, numa fila, e os créditos de correção são consumidos. <button type="button" class="btn btn-sm btn-primary" data-modal="modo-servidor">Usar a correção no servidor</button></li>
       <li>Abrir o Gabarito360 em outro aparelho ou num navegador atualizado.</li>
     </ul>
     <div class="lr-entradas">
@@ -476,7 +476,7 @@
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir resposta aberta</span></li></ol></nav>
   <div class="g-pagina">
     <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="tb">Conferir resposta aberta</h1><p class="page-sub">O Escriba só lê. Ele não corrige. Confira o texto antes de salvar.</p></div>
-    <div class="g-pagina-acoes"><span class="mk-pendente">D-9: permissão do Escriba</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
   </div>
   <div class="rev-estacao lr-estacao" data-estacao-mista="q9"></div>
 </section>
@@ -543,7 +543,7 @@
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Páginas do aluno</span></li></ol></nav>
   <div class="g-pagina">
     <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 4 — Língua Portuguesa 9º ano · a prova é o gabarito</div><h1 class="page-title" id="tg">Páginas do aluno</h1><p class="page-sub">O QR de cada página diz o aluno e a página. A ordem de captura não importa.</p></div>
-    <div class="g-pagina-acoes"><span class="mk-pendente">D-10: página no QR</span><button type="button" class="btn btn-ghost" data-modal="sair">Sair do leitor</button></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-modal="sair">Sair do leitor</button></div>
   </div>
   <div class="rev-estacao lr-estacao">
     <aside class="card rev-documento-painel" aria-labelledby="tg-painel">
@@ -568,42 +568,35 @@
     <div><h1 class="page-title" id="th">Avaliação 3 — Matemática 9º ano</h1><p class="page-sub">Prova mista: 8 objetivas e 4 abertas · 9º A · aplicado em 11/11/2026</p></div>
   </div>
   <div class="card card-pad" style="margin-top:16px;">
-    <div class="g-aviso atencao" role="status" style="margin-top:0;">Este aparelho não tem suporte ao Escriba. As respostas abertas não são transcritas aqui.</div>
+    <div class="g-aviso atencao" role="status" style="margin-top:0;">Este aparelho não tem suporte ao Escriba. As respostas abertas serão transcritas no servidor.</div>
     <div class="lr-grade-2">
       <div class="lr-motor">
         <div class="lr-motor-cabeca"><b>Objetivas</b><span class="badge badge-success badge-dot">Continuam neste aparelho</span></div>
         <p class="page-sub">As bolhas são lidas aqui, e você confere no leitor visual como sempre.</p>
       </div>
       <div class="lr-motor">
-        <div class="lr-motor-cabeca"><b>Respostas abertas</b><span class="badge badge-warn">Depende de decisão</span></div>
-        <p class="page-sub">O que acontece com as abertas ainda será decidido. <span class="mk-pendente">D-2</span></p>
+        <div class="lr-motor-cabeca"><b>Respostas abertas</b><span class="badge badge-info badge-dot">Na fila do Escriba</span></div>
+        <p class="page-sub">Posição 12, cerca de 8 min. Você pode sair desta tela; você recebe um aviso quando terminar.</p>
       </div>
     </div>
-    <h3 class="lr-sub">Ramos possíveis da D-2 para as abertas</h3>
-    <ol class="lr-ramos">
-      <li><b>(a) Ler no servidor.</b> O servidor não tem o Escriba nesta fase.</li>
-      <li><b>(b) Indisponível neste aparelho.</b> "Este aparelho não atende aos requisitos da transcrição. Use outro aparelho para as respostas abertas."</li>
-      <li><b>(c) Transcrição manual pelo professor.</b> O leitor mostra o recorte da resposta sem texto, e você digita a transcrição.</li>
-    </ol>
-    <h3 class="lr-sub">Fase futura (decidida): fila do Escriba no servidor</h3>
-    <div class="g-aviso info" role="status">Este aparelho não tem suporte ao Escriba. As respostas abertas serão transcritas no servidor. Você recebe um aviso quando terminar.</div>
-    <div class="lr-motor">
-      <div class="lr-motor-cabeca"><b>Respostas abertas</b><span class="badge badge-info badge-dot">Na fila do Escriba</span></div>
-      <p class="page-sub">Posição 12, cerca de 8 min. Você pode sair desta tela; as objetivas já podem ser conferidas.</p>
-    </div>
+    <ul class="lr-lista">
+      <li>Os créditos de correção serão consumidos.</li>
+      <li>A correção não é instantânea. Ela entra numa fila, e você recebe um aviso quando terminar.</li>
+      <li>Cada foto vai sozinha. Este aparelho identifica o aluno, a prova e a página antes de enviar.</li>
+    </ul>
     <div class="lr-entradas">
-      <button type="button" class="btn btn-primary lr-entrada" data-ir="camera"><span class="lr-entrada-rotulo">Ler só as objetivas</span><small class="lr-entrada-desc">As abertas ficam marcadas como "transcrição indisponível".</small></button>
-      <button type="button" class="btn btn-secondary lr-entrada" data-ir="aberta-manual"><span class="lr-entrada-rotulo">Ver o ramo (c)</span><small class="lr-entrada-desc">Transcrição manual no leitor visual.</small></button>
+      <button type="button" class="btn btn-primary lr-entrada" data-modal="modo-servidor"><span class="lr-entrada-rotulo">Usar a correção no servidor</span><small class="lr-entrada-desc">As objetivas continuam aqui; as abertas vão para a fila.</small></button>
+      <button type="button" class="btn btn-secondary lr-entrada" data-ir="aberta-manual"><span class="lr-entrada-rotulo">Ver a transcrição manual</span><small class="lr-entrada-desc">Você também pode digitar ou corrigir a transcrição no leitor.</small></button>
     </div>
   </div>
 </section>
 
-<!-- Ramo (c) da D-2: transcrição manual no leitor visual -->
+<!-- Transcrição manual no leitor visual (corrigir ou digitar a transcrição) -->
 <section class="tela-mk" data-tela="aberta-manual" data-corpo="tela-revisao" aria-labelledby="th2">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="sem-ia">Correção da prova</a></li><li><span aria-current="page">Transcrição manual</span></li></ol></nav>
   <div class="g-pagina">
-    <div style="min-width:0;"><div class="eyebrow">Leitor360 · ramo (c) da D-2 · sem o Escriba neste aparelho</div><h1 class="page-title" id="th2">Transcrever resposta aberta</h1><p class="page-sub">Este aparelho não transcreve. Digite o que o aluno escreveu. A transcrição não é correção.</p></div>
-    <div class="g-pagina-acoes"><span class="mk-pendente">D-2</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · transcrição manual</div><h1 class="page-title" id="th2">Transcrever resposta aberta</h1><p class="page-sub">Este aparelho não transcreve. Digite o que o aluno escreveu. A transcrição não é correção.</p></div>
+    <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
   </div>
   <div class="rev-estacao lr-estacao" data-estacao-mista="q9" data-manual="1"></div>
 </section>

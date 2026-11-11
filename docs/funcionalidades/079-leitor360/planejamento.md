@@ -93,6 +93,8 @@ Hoje toda leitura roda no servidor. O `ProcessarCartaoJob` executa o `ler_cartao
 | FN-077 desempenho | Medição da API com 1000 usuários simultâneos | Parcial |
 | FN-062 lgpd-inventario-retencao | Inventário e retenção de imagens, transcrições e recortes | Parcial |
 | FN-080 Escriba (IA local de transcrição) | Fornece o modelo e o runtime do método `transcricao-manuscrita`. Bloqueia só as subfases 6.x. | Candidata |
+| Créditos de correção (sem FN) | O modo servidor (§6.12) consome créditos. Não existe sistema nem FN de créditos. Bloqueia só a 4.3 e a 6.3. | A registrar |
+| FN-057 notificacoes | Aviso ao usuário quando a fila do modo servidor termina. Até ela existir, o aviso aparece no app, na tela da prova. | Pendente |
 | FN-043 editor-provas-questoes | Usa o contrato do mapa de respostas v1 (subfase 5.1) e produz os mapas de provas mistas e de provas em que a página é o gabarito. Bloqueia só as subfases 7.x. | Candidata |
 
 **Funcionalidades que dependem desta:**
@@ -133,7 +135,7 @@ Os portões das decisões pendentes estão no §8.
 | 1.1 | Prova de viabilidade do núcleo de leitura no navegador (D-4, D-5) (UC-079-10, UC-079-24) | O núcleo escolhido tem paridade de 100% com o instantâneo do servidor: alternativa, estado, código da barreira e QR idênticos em cada questão; diferença de confiança até 0,01 (proposta). Na CI, o job `paridade-leitor` roda os três alvos do §6.9, item 4. Firefox, Safari iOS e Chrome Android têm o registro por texto do §6.9, item 4. As versões de OpenCV e NumPy estão registradas. | Pendente | |
 | 1.2 | Empacotamento do núcleo: Web Worker, carregamento sob demanda, cache, manifesto e versão do motor (UC-079-02, UC-079-10) | A leitura de uma folha não gera tarefa longa (acima de 50 ms) na thread principal. O núcleo baixa uma vez por versão e fica em cache. O Worker confere o sha256 de cada arquivo (§6.4, regra 7). O orçamento de download (definido na 1.1) é respeitado. A leitura de um cartão de 45 questões cumpre a meta do §6.10, item 5. A versão do motor aparece no resultado. | Pendente | |
 | 1.3 | Perfil de capacidade do aparelho (UC-079-02, UC-079-23) | Numa matriz de pelo menos 8 aparelhos de teste (proposta), com celulares e computadores novos e antigos, o perfil classifica cada par entrada × método conforme a tabela do §6.3, sem erro. | Pendente | |
-| 2.1 | Leitor visual para objetivas, com abertura pela prova e modo do aplicador (UC-079-01, UC-079-10, UC-079-14, UC-079-15, UC-079-17) | A D-6 e a D-11 estão decididas. Os critérios de aceite do UC-079-01, UC-079-14, UC-079-15 e UC-079-17 passam. A revisão de UI/UX registra a aprovação por texto. O código novo não usa `alert()` (§7). | Pendente | |
+| 2.1 | Leitor visual para objetivas, com abertura pela prova e modo do aplicador (UC-079-01, UC-079-10, UC-079-14, UC-079-15, UC-079-17) | A D-6 e a D-11 estão decididas. O fechamento da correção é recusado enquanto houver folha com pendência (teste). Os critérios de aceite do UC-079-01, UC-079-14, UC-079-15 e UC-079-17 passam. A revisão de UI/UX registra a aprovação por texto. O código novo não usa `alert()` (§7). | Pendente | |
 | 2.2 | Barreira de qualidade no aparelho (UC-079-08) | No conjunto de referência, a decisão (aprovada ou recusada) e o código de recusa têm paridade de 100%. | Pendente | |
 | 2.3 | Identificação pelo QR no aparelho (UC-079-09) | No conjunto de referência, prova, aluno, N, K e língua têm paridade de 100%. QR de outra prova e folha sem QR seguem o caso de uso. A vinculação manual pelo leitor funciona, e o aplicador não vincula. | Pendente | |
 | 2.4 | Resumo do lote ao encerrar (UC-079-18) | Antes da 4.1: os números do resumo são iguais aos estados da fila local, conferidos por teste `node --test` com fila simulada. Depois da 4.1: um teste de ponta a ponta compara o resumo com `GET .../envios/{chave}` de cada folha. | Pendente | |
@@ -144,16 +146,17 @@ Os portões das decisões pendentes estão no §8.
 | 3.5 | Lote de PDFs digitalizados com fila pausável (UC-079-07) | Com os lotes de 40 e 200 páginas, no computador de referência: nenhuma tarefa longa acima de 50 ms na thread principal; o pico de memória com 200 páginas fica até 1,2 × o pico com 40 páginas (proposta), medido via CDP. Pausar, retomar e recarregar a página não perdem nem duplicam folhas nem `envio_id`. | Pendente | |
 | 4.1 | Contrato de envio do resultado e da imagem (API e BFF) (UC-079-19, UC-079-21, UC-079-22) | A D-1, a D-7, a D-8 e a D-12 estão decididas. A API segue o §6.6 inteiro. Os testes Feature do §6.6 ("Testes do contrato") passam. Os testes de regressão do §6.6 passam sem alteração. A rota foi medida com 1000 usuários simultâneos (§6.10). A revisão de segurança aprova. | Pendente | |
 | 4.2 | Conferência no servidor e tratamento de divergência, conforme D-1 (UC-079-20) | A política escolhida em D-1 está implementada e testada. A amostra é sorteada só no servidor. Toda divergência fica registrada e visível para quem tem `correcao.acompanhar`. | Pendente | |
-| 4.3 | Atendimento ao aparelho sem capacidade, conforme D-2 e D-3 (UC-079-23) | O aparelho sem capacidade segue a opção decidida. Com a opção "servidor lê", o fluxo atual continua idêntico (envio só da imagem). Os testes de regressão do §6.6 passam sem alteração. | Pendente | |
+| 4.3 | Modo servidor para as objetivas: aviso de créditos e fila, identificação e marcador no aparelho, leitura no servidor com o mesmo núcleo, aviso ao terminar (§6.12; UC-079-23, UC-079-26) | Existe o sistema de créditos de correção (nova FN). O aviso aparece antes do primeiro envio. O servidor lê a imagem marcada sem etapa de identificação e com paridade de 100% com o núcleo do aparelho. O marcador forjado não muda prova nem aluno (teste). O consumo de crédito é registrado por folha. O usuário recebe o aviso de fim. Os testes de regressão do §6.6 passam sem alteração. | Pendente | |
 | 5.1 | Mapa de respostas v1 derivado do cartão atual e preparado para a FN-043 (UC-079-10, UC-079-12) | Para todo N de 1 a 100 e K de 3 a 5, um teste compara `layout.bolinhas()`, `ImagensCartao::recorte()` e o mapa derivado. Ele roda num job com Python e PHP (hoje o job `testes` não instala OpenCV). O despacho lê pelo mapa com paridade de 100%. O mapa é versionado e imutável depois da aplicação. Os testes do §6.2, regra 6, passam. | Pendente | |
 | 6.1 | Método `transcricao-manuscrita` (depende da FN-080) (UC-079-11) | A D-9 está decidida. O método segue a interface do §6.1. Os critérios de qualidade da transcrição vêm da FN-080. O teste de rede do §6.8 passa: nenhum dado sai do aparelho para outra origem. | Pendente | |
 | 6.2 | Correção da transcrição no leitor visual e armazenamento dos trechos com o recorte (UC-079-16) | Antes de começar: os itens do §6.8, regra 12, estão cumpridos. Imagem e texto aparecem lado a lado. Os trechos corrigidos e o recorte vão ao servidor, com sha256 do recorte, num disco privado (§6.7). A saída escapa o texto (§6.8, regra 11). | Pendente | |
+| 6.3 | Escriba no servidor, com fila (FN-080 §8.3; UC-079-26) | A 4.3 está pronta. O servidor usa o mesmo modelo e a mesma versão do Escriba publicada para os aparelhos. Só as regiões abertas vão para a fila. O relatório mede o tempo por resposta na VM e propõe a capacidade (GPU, limite por hora ou prioridade). | Pendente | |
 | 7.1 | Prova mista, com despacho de várias regiões e métodos pelo mapa (depende da FN-043) (UC-079-12) | Numa prova mista do conjunto de referência: paridade de 100% nas objetivas e transcrição dentro das metas da FN-080 nas abertas. | Pendente | |
 | 7.2 | Prova em que a página é o gabarito, com várias páginas (depende da FN-043) (UC-079-13) | A D-10 está decidida. Uma prova de várias páginas do conjunto de referência é identificada página a página, com paridade de 100% nas objetivas. | Pendente | |
 | 8.1 | Métricas de leitura (UC-079-25) | A API registra, por versão do motor: taxa de revisão, correções do usuário por estado e divergências aparelho × servidor. Um teste valida o esquema e recusa os campos proibidos do §6.8, regra 13. | Pendente | |
 | 8.2 | Validação contínua do motor e apoio ao ajuste de limiares com a FN-046 (R3) (UC-079-24, UC-079-25) | A CI publica uma versão nova do motor só com paridade de 100% e sem queda de acerto em nenhuma categoria (§6.9). Uma proposta de limiar novo usa as métricas da 8.1. | Pendente | |
 
-Ordem de execução: 0.1, 0.2, 1.1, 1.2, 1.3, 2.1 a 2.4, 3.1 a 3.5, 4.1 a 4.3, 5.1, 8.1, 8.2. As subfases 6.x e 7.x esperam a FN-080 e a FN-043. Até a 5.1, o despacho tem um só método e usa N e K do QR, como a leitura atual.
+Ordem de execução: 0.1, 0.2, 1.1, 1.2, 1.3, 2.1 a 2.4, 3.1 a 3.5, 4.1 a 4.3, 5.1, 8.1, 8.2. As subfases 6.x e 7.x esperam a FN-080 e a FN-043. A 4.3 e a 6.3 esperam também a FN de créditos de correção. Até a 5.1, o despacho tem um só método e usa N e K do QR, como a leitura atual.
 
 ⚠ A subfase 4.1 é a primeira que altera o fluxo de produção. Até ela, o Leitor360 pode existir na homologação sem mudar o envio atual.
 
@@ -189,7 +192,7 @@ Regras do motor:
 2. O núcleo de leitura é um só para todas as entradas. A entrada só entrega uma imagem.
 3. A nota nunca é calculada no aparelho. O aparelho não recebe o gabarito oficial (`gabarito_questoes`).
 4. O motor publica uma versão (`motor_versao`) e cada método publica a sua versão.
-5. Recomendação da D-12 (pendente): o núcleo lê sempre os bytes do arquivo que vai ao servidor. Ele decodifica esses bytes com `cv2.imdecode` dentro do núcleo, nunca com canvas. O `imagem_sha256` é calculado sobre esses mesmos bytes. A imagem enviada é a original da captura, ou a página renderizada do PDF, antes da retificação. A orientação EXIF é aplicada antes da codificação final. O arquivo enviado não tem tag de orientação.
+5. D-12 decidida (a): o núcleo lê sempre os bytes do arquivo que vai ao servidor. Ele decodifica esses bytes com `cv2.imdecode` dentro do núcleo, nunca com canvas. O `imagem_sha256` é calculado sobre esses mesmos bytes. A imagem enviada é a original da captura, ou a página renderizada do PDF, antes da retificação. A orientação EXIF é aplicada antes da codificação final. O arquivo enviado não tem tag de orientação.
 
 **Interface de um método de leitura:**
 
@@ -303,14 +306,14 @@ Tabela aparelho × entrada × método (proposta; a 1.3 confirma por medição):
 | Celular recente (navegador) | Câmera | Disponível | Conforme FN-080 |
 | Celular recente | Foto e PDF de uma folha | Disponível | Conforme FN-080 |
 | Celular recente | Lote de PDF | Degradado: lote pequeno, sem paralelismo | Indisponível no lote |
-| Celular antigo ou sem WebAssembly | Qualquer | Indisponível no aparelho; segue D-2 | Indisponível; segue D-2 |
+| Celular antigo ou sem WebAssembly | Qualquer | Indisponível no aparelho; modo servidor (§6.12) | Indisponível no aparelho; modo servidor (§6.12) |
 | Computador | Webcam com resolução suficiente | Disponível | Conforme FN-080 |
 | Computador | Webcam abaixo do mínimo (3.2) | Degradado: aviso e sugestão de foto ou PDF | Indisponível |
 | Computador | Foto, PDF e lote de PDF | Disponível | Conforme FN-080 |
-| Computador fraco | Lote de PDF | Degradado; segue D-3 | Indisponível |
+| Computador fraco | Lote de PDF | Degradado; acima do limite, modo servidor (D-3, §6.12) | Modo servidor (§6.12) |
 | App nativo (FN-010) | Todas | Disponível (mesmo núcleo, D-4) | Disponível (FN-080) |
 
-"Degradado" significa: funciona com limite e aviso. "Indisponível" significa: o Leitor360 não oferece. O que acontece depois segue D-2.
+"Degradado" significa: funciona com limite e aviso. "Indisponível" significa: o Leitor360 não oferece. O que é indisponível no aparelho segue o modo servidor (§6.12), com aviso de créditos e de fila.
 
 ### 6.4 Núcleo de leitura (decisão D-4)
 
@@ -358,7 +361,7 @@ Regras de carregamento:
 
 ⚠ Todas as rotas e campos abaixo são **novos** e **propostos**. Hoje a rota de envio aceita só imagem (`imagem: required|image|max:10240`), e não aceita PDF nem resultado.
 
-**Decisão proposta:** estender a rota atual `POST v1/provas/{id}/cartoes` com um campo opcional `leitura`. Assim, o envio mantém a mesma chave de idempotência, o mesmo lock por chave (`FilaCartoes::receber`), o mesmo registro em `cartao_envios` e a mesma regra de tentativas. Sem o campo `leitura`, a rota funciona como hoje (D-2).
+**Decisão proposta:** estender a rota atual `POST v1/provas/{id}/cartoes` com um campo opcional `leitura`. Assim, o envio mantém a mesma chave de idempotência, o mesmo lock por chave (`FilaCartoes::receber`), o mesmo registro em `cartao_envios` e a mesma regra de tentativas. Sem o campo `leitura`, a rota funciona como hoje. O modo servidor (§6.12) envia a imagem com o marcador e sem `leitura`.
 
 Fluxo: navegador → Web (BFF, rota `correcao.upload`, com UR4) → API. O navegador nunca fala com a API.
 
@@ -366,10 +369,11 @@ Corpo (multipart):
 
 | Campo | Tipo | Regra |
 |---|---|---|
-| `imagem` | arquivo de imagem | Obrigatório, como hoje. Qual imagem vai depende da D-12. Recomendação: sempre a original da captura, ou a página renderizada do PDF, com EXIF aplicado e sem tag de orientação (§6.1, regra 5). |
+| `imagem` | arquivo de imagem | Obrigatório, como hoje. D-12 decidida (a): sempre a original da captura, ou a página renderizada do PDF, com EXIF aplicado e sem tag de orientação (§6.1, regra 5). |
 | `envio_id` | UUID | Como hoje. Gerado no aparelho por folha. Garante idempotência. |
 | `aluno_id` | inteiro | Opcional. Como hoje. É só indício: o servidor decide pelo QR (item 2d). |
 | `leitura` | JSON | Opcional e novo. Estrutura abaixo. |
+| `modo` | texto | Novo. `aparelho` (com `leitura`) ou `servidor` (modo servidor, §6.12, sem `leitura` nas regiões que o servidor lê). Registra o consumo de créditos. |
 
 Estrutura de `leitura`:
 
@@ -493,7 +497,7 @@ Recortes e transcrições ficam num disco privado, sem link público. Eles são 
 |---|---|---|---|---|
 | ADM, DIR, COO, PRO | Sim (`cartao.enviar`) | Sim | Sim (`correcao.alterar`) | Não no Leitor360; nota só nas telas de resultado |
 | NUC | Não (sem `cartao.enviar`) | — | — | — |
-| APL (aplicador) | Sim, só em prova com `data_aplicacao` = hoje, como hoje | Depende de D-6 | Não (sem `correcao.alterar`) | Não |
+| APL (aplicador) | Sim, só em prova com `data_aplicacao` = hoje, como hoje | Sim, só a folha atual, antes de salvar (D-6) | Não (sem `correcao.alterar`) | Não |
 
 A tabela mostra o padrão dos perfis. As permissões são por usuário. A API decide pela permissão do ator, não pelo perfil (§6.6, item 2a).
 
@@ -506,10 +510,10 @@ Regras:
 5. O `sessionStorage` guarda só a chave de envio, o estado e o sha256 da página. Ele não guarda aluno, respostas nem QR. Hoje `cartoes-fila.js` já guarda só chaves e estados de envio.
 6. Se houver Service Worker, ele usa lista positiva de URLs do manifesto. Ele nunca intercepta nem guarda rotas da API, do BFF, de imagens ou do mapa.
 7. A página do Leitor360 usa `Cache-Control: no-store` e revoga toda URL `blob:` depois do uso. O leitor apaga a memória (imagens, buffers, recortes) e encerra os Workers nestes casos: envio concluído, Encerrar, 401/403/419, logout em outra aba (`BroadcastChannel`), troca de vínculo e inatividade de 15 minutos (proposta).
-8. A IA local (FN-080) roda só no aparelho. Nenhuma imagem, texto ou recorte vai a terceiros.
+8. O Escriba (FN-080) roda no aparelho e, no modo servidor, no servidor do Gabarito360 (§6.12). Nenhuma imagem, texto ou recorte vai a terceiros.
 9. As imagens e os recortes no servidor seguem a mesma proteção atual: rota autenticada, `no-store`, só `correcao.acompanhar`, nunca aplicador.
 10. A retenção de transcrições e recortes segue a FN-062. Hoje não existe expurgo no código.
-11. A transcrição é texto não confiável. Ela é escapada em toda saída (Blade `{{ }}`, `textContent`). A fórmula é renderizada com KaTeX (ou equivalente) com `trust: false` e sem HTML. A API limita o tamanho por região a 20.000 caracteres (proposta) e recusa caracteres de controle. A transcrição tem `origem = aparelho` e o status "não verificada no servidor". Ela nunca entra em nota nem em correção automática futura sem conferência humana registrada.
+11. A transcrição é texto não confiável. Ela é escapada em toda saída (Blade `{{ }}`, `textContent`). A fórmula é renderizada com KaTeX (ou equivalente) com `trust: false` e sem HTML. A API limita o tamanho por região a 20.000 caracteres (proposta) e recusa caracteres de controle. A transcrição tem `origem = aparelho` ou `origem = servidor` e o status "não verificada no servidor". Ela nunca entra em nota nem em correção automática futura sem conferência humana registrada.
 12. Antes da subfase 6.2:
     - o inventário ([11 Segurança e privacidade](../../arquitetura/11-seguranca-e-privacidade.md), O07) inclui transcrições, recortes e a leitura bruta guardada nos eventos;
     - o relatório de impacto (RL13) cobre a transcrição de manuscritos de menores;
@@ -559,7 +563,33 @@ O resultado vem do cliente. Por isso, o servidor não confia nele sem verificaç
 6. Cada envio com `leitura` gera um evento em `cartao_tentativa_eventos` (append-only, encadeado por hash: colunas `sha256` e `anterior_sha256`, existe). O evento guarda a origem, as versões e o resultado bruto.
 7. A API aceita só versões do motor da lista vigente (§6.6, regra de versão). Uma versão retirada deixa de ser aceita na hora.
 8. Um resultado adulterado no cliente não muda a nota sem deixar rastro. A releitura (amostra ou total, D-1), a releitura obrigatória de quem não tem `correcao.alterar` e a contestação mostram a diferença.
-9. Recomendação da D-12 (pendente): o aparelho envia sempre a imagem **original** da captura (ou a página renderizada do PDF), nunca só a retificada. A retificação é refeita no servidor na releitura.
+9. D-12 decidida (a): o aparelho envia sempre a imagem **original** da captura (ou a página renderizada do PDF), nunca só a retificada. A retificação é refeita no servidor na releitura.
+
+### 6.12 Modo servidor: leitura no servidor com fila e créditos
+
+Decisão do responsável em 11/11/2026 (D-2, [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md)). O processamento no aparelho existe para reduzir o custo do servidor. Quando o aparelho não consegue processar, o usuário continua corrigindo pelo app, e o servidor processa. Esse processamento consome créditos de correção.
+
+Quando o modo servidor entra:
+
+- o perfil de capacidade (§6.3) marca o núcleo de leitura como indisponível: as objetivas vão para o servidor;
+- o perfil marca o Escriba como indisponível: só as regiões abertas vão para o servidor; as objetivas continuam no aparelho, se o núcleo roda;
+- o lote de PDF passa do limite do computador (D-3): as páginas acima do limite vão para o servidor.
+
+Regras:
+
+1. **Aviso antes do primeiro envio.** O usuário vê, num modal da aplicação (ADR-0025), duas informações e confirma:
+   - "Os créditos de correção serão consumidos."
+   - "A correção não é instantânea. Ela entra numa fila, e você recebe um aviso quando terminar."
+   O texto não explica o motivo nem lista o que falta no aparelho (UC-079-23). O aviso aparece de novo a cada sessão do Leitor360.
+2. **Foto por foto.** Cada folha é um envio, com o `envio_id` e a idempotência atuais.
+3. **No máximo a identificação no aparelho.** O aparelho decodifica o QR e identifica a prova, o aluno e a página. Proposta: o leitor de QR nativo do navegador (`BarcodeDetector`) ou um leitor leve, sem o núcleo inteiro (a medir na 1.3).
+4. **Marcador no arquivo.** O aparelho grava na imagem um marcador com prova, aluno, página, versão do mapa e `envio_id`. Assim, ao chegar ao servidor, a imagem vai direto para a fila da prova certa, sem uma etapa só para descobrir de quem é a folha, que página é ou que prova é. Proposta de formato: um segmento de metadados no JPEG (XMP, com espaço de nomes próprio). O formato final é decidido na 4.3.
+5. **O marcador só encaminha** (recomendação minha, a confirmar). Ele é uma declaração do cliente. O servidor revalida permissão, escopo, vínculo e a relação aluno × prova × turma antes de aceitar. O QR é decodificado de novo durante a leitura, que já o processa. Se o QR diverge do marcador, o QR prevalece e a folha vai para revisão.
+6. **Sem QR legível no aparelho.** A imagem vai sem marcador, e o servidor identifica como hoje.
+7. **Fila e aviso.** O app mostra a posição na fila e o tempo estimado. O usuário pode sair da tela. Quando termina, ele recebe um aviso (FN-057; até ela existir, um aviso no app, na tela da prova). Depois ele confere no leitor visual (UC-079-14), e a folha pode ser salva com pendências, que travam o fechamento da correção (D-11).
+8. **Paridade.** O servidor usa o mesmo núcleo, nas mesmas versões (D-4, D-5), e o mesmo Escriba, na mesma versão publicada para os aparelhos (FN-080). Para a mesma imagem, o resultado é igual ao do aparelho. O conjunto de referência prova isso.
+9. **Créditos.** Proposta: o consumo é por folha processada no servidor. Numa prova mista em que só o Escriba falta, consomem só as regiões abertas. O processamento no aparelho nunca consome. Uma imagem recusada pela barreira de qualidade não consome. A unidade e o preço vêm da FN de créditos.
+10. **Dados.** A imagem já vai ao servidor em todo envio (D-12). O modo servidor não envia nada a terceiros. O processamento roda no ambiente do responsável, no Brasil.
 
 ## 7. Interface
 
@@ -621,21 +651,23 @@ Gates: consulta prévia ao agente de UI/UX na 0.1 e revisão final em cada subfa
 
 ## 8. Riscos e decisões pendentes do responsável
 
-| Item | Opções | Recomendação | Decisão |
-|---|---|---|---|
-| D-1 Palavra final quando aparelho e servidor discordam | (a) O servidor relê toda folha e prevalece; (b) o servidor relê uma amostra e a divergência vai para revisão; (c) o servidor relê só em contestação | (b) no início, com amostra alta: 10% (proposta) e toda folha com correção do usuário. As métricas da 8.1 reduzem a amostra depois. A amostra nunca é menor que 100% para envios de quem não tem `correcao.alterar`. O resultado conferido pelo usuário prevalece. A divergência vira pendência de revisão, nunca troca silenciosa. A opção (a) anula o ganho de custo. | Pendente |
-| D-2 Aparelho sem capacidade de leitura ou de IA (decisão única; a FN-080 segue esta) | (a) O servidor lê (fluxo atual); (b) indisponível, com aviso; (c) transcrição manual pelo professor no leitor visual | Objetivas: (a), porque o fluxo atual já existe e não custa nada novo. Transcrição: (b) ou (c) nesta fase, porque não há leitura de IA no servidor. **Futuro, decidido pelo responsável em 11/11/2026:** ramo (d), as abertas vão para o Escriba no servidor, com fila ([FN-080 §8.3](../080-ia-local-transcricao/planejamento.md#83-evolução-decidida-escriba-no-servidor-com-fila)). | Pendente |
-| D-3 Lote de PDFs em computador fraco | (a) Navegador, com limite e aviso; (b) servidor lê o lote | (a), com limite de páginas por lote definido na 1.2. Acima do limite, (b) pelo fluxo atual, página a página. | Pendente |
-| D-4 Núcleo de leitura | (a) Pyodide com `ler_cartao.py`; (b) OpenCV.js reescrito; (c) C++ compilado para WebAssembly e nativo | (a), travado pelo conjunto de referência. Reavaliar (c) quando a FN-010 voltar (§6.4). Se o núcleo exigir `'unsafe-eval'` na CSP, o responsável decide aqui. | Pendente |
-| D-5 Versões de OpenCV e NumPy | O servidor exige `opencv-python-headless>=5.0.0.93` e `numpy>=2.5.4` (`apps/api/omr/requirements.txt`). Opções: (a) aceitar versões diferentes no aparelho com paridade provada pelo conjunto de referência; (b) fixar a mesma versão nos dois lados | (a), com as versões registradas no resultado. ⚠ Não confirmei se o Pyodide empacota OpenCV 5 nem NumPy 2.5.4. Também está a confirmar se o `QRCodeDetector` está na compilação do Pyodide. | Pendente |
-| D-6 O que o aplicador vê | (a) Só captura, como hoje; (b) vê as marcações lidas para refazer a captura, sem corrigir; (c) vê e corrige | (b). O aplicador vê só a folha atual, antes de salvar. Ele não navega para folhas anteriores, não reabre folha salva e não vê leitura vinda do servidor. Ele não corrige (não tem `correcao.alterar`). Ele nunca vê gabarito, nota ou imagem de outros envios. O mapa e a resposta de envio a ele não trazem nome de outros alunos além do identificado pelo QR. A decisão vira ADR e entra no 04 como regra da chave `cartao.enviar` para APL. | Pendente |
-| D-7 Fila local sem conexão | (a) Não aceitar; (b) fila só com chaves; imagem e resultado só em memória, enquanto a aba está aberta; (c) fila persistente com imagem (offline completo, FN-010 10.3) | (b): reenvio na mesma aba quando a conexão volta. (c) fica para a FN-010, com avaliação de LGPD. | Pendente |
-| D-8 Retenção de imagens no aparelho | (a) Nada persistido, só memória; (b) persistido cifrado até o envio; (c) persistido por prazo | (a), com as regras 4 a 7 do §6.8. Nenhuma imagem de aluno persiste no navegador, sobretudo no computador compartilhado da escola. | Pendente |
-| D-9 Permissão e créditos da transcrição por IA | (a) Chave nova `leitura.transcrever`, sem crédito, porque a IA roda no aparelho; (b) chave nova e consumo de crédito, como as funcionalidades de IA do plano de cobrança; (c) sem chave nova, usar `correcao.alterar` | (a) agora. Reavaliar o crédito na FN-080, porque o custo da IA local fica no aparelho e não no servidor. | Pendente |
-| D-10 Página da folha no QR | O QR atual (`G360\|P\|A\|N\|K\|L`) não traz a página. Provas de várias páginas (UC-079-13) precisam dela. (a) Formato novo de QR definido pela FN-043; (b) página deduzida da ordem de captura | (a), com o leitor aceitando os dois formatos de QR | Pendente |
-| D-11 Salvar folha com questões não conferidas | (a) Bloquear até conferir tudo; (b) permitir "Salvar com pendências", e as questões vão para a revisão da FN-046 (UC-079-17) | (b), para não bloquear o aplicador nem o lote | Pendente |
-| D-12 Imagem enviada ao servidor | (a) A original da captura (ou a página renderizada do PDF), reduzida a 2400 px como hoje, com EXIF aplicado e sem tag de orientação; (b) a página retificada | (a). O núcleo lê exatamente esses bytes com `cv2.imdecode` (§6.1, regra 5). O servidor relê com o mesmo preparo, e a auditoria vê a foto real (§6.11, item 9). Com (b), a releitura não reproduz a leitura original. | Pendente |
-| D-13 Local do conjunto de referência | (a) Armazenamento privado na VM do responsável, com acesso autenticado pela CI; (b) artefato privado num serviço externo | (a). O conjunto fica fora do Git; o Git guarda só o manifesto (§6.9, item 7). Com (b), o serviço entra na lista de terceiros do [11](../../arquitetura/11-seguranca-e-privacidade.md). | Pendente |
+**Todas as decisões D-1 a D-13 foram tomadas pelo responsável em 11/11/2026.** A coluna "Decisão" registra a escolha. As consequências estão nos casos de uso (versão 2) e nos ADRs [0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md) e [0059](../../decisoes/0059-aplicador-ve-a-leitura-sem-corrigir.md).
+
+| Item | Opções | Decisão (11/11/2026) |
+|---|---|---|
+| D-1 Palavra final quando aparelho e servidor discordam | (a) O servidor relê toda folha e prevalece; (b) o servidor relê uma amostra e a divergência vai para revisão; (c) o servidor relê só em contestação | **(b).** Amostra inicial de 10% (proposta) e toda folha com correção do usuário. Envios de quem não tem `correcao.alterar`: 100%. O resultado conferido pelo usuário prevalece. A divergência vira pendência de revisão, nunca troca silenciosa. As métricas da 8.1 reduzem a amostra depois. |
+| D-2 Aparelho sem capacidade de leitura ou de IA (decisão única; a FN-080 segue esta) | (a) O servidor lê; (b) indisponível; (c) transcrição manual; (d) modo servidor com fila e créditos | **Modo servidor (§6.12).** O usuário continua corrigindo pelo app. O aparelho identifica a folha e marca a imagem; o servidor lê com o mesmo núcleo e o mesmo Escriba, numa fila, e consome créditos de correção. O usuário é avisado antes. A transcrição manual (c) continua disponível no leitor visual para corrigir qualquer transcrição. |
+| D-3 Lote de PDFs em computador fraco | (a) Navegador, com limite e aviso; (b) servidor lê o lote | **(a)**, com limite de páginas por lote definido na 1.2. Acima do limite, as páginas seguem o modo servidor (§6.12), com aviso de créditos e de fila. |
+| D-4 Núcleo de leitura | (a) Pyodide com `ler_cartao.py`; (b) OpenCV.js reescrito; (c) C++ compilado para WebAssembly e nativo | **(a), com paridade total:** o que roda no aparelho roda igual no servidor (mesmo código e mesma versão). Reavaliar (c) quando a FN-010 voltar (§6.4). Se o núcleo exigir `'unsafe-eval'` na CSP, a decisão volta ao responsável. |
+| D-5 Versões de OpenCV e NumPy | (a) Versões diferentes com paridade provada; (b) a mesma versão nos dois lados | **(b).** Aparelho e servidor usam as mesmas versões. Se o Pyodide não empacotar as versões do servidor, a 1.1 escolhe uma das saídas: o servidor passa a usar as versões do pacote do aparelho, ou o build do núcleo empacota as versões do servidor. ⚠ Não confirmei o que o Pyodide empacota (OpenCV 5, NumPy 2.5.4, `QRCodeDetector`). |
+| D-6 O que o aplicador vê | (a) Só captura; (b) vê as marcações lidas para refazer a captura, sem corrigir; (c) vê e corrige | **(b).** Só a folha atual, antes de salvar. Sem navegar para folhas anteriores, sem reabrir folha salva, sem leitura vinda do servidor. Sem gabarito, nota ou imagem de outros envios. Regra da chave `cartao.enviar` para APL ([ADR-0059](../../decisoes/0059-aplicador-ve-a-leitura-sem-corrigir.md)). |
+| D-7 Uso sem conexão | (a) Não aceitar; (b) fila só com chaves, em memória; (c) fila persistente com imagem | **(a).** O sistema web não funciona sem internet. Sem conexão, o Leitor360 não abre e não salva. Se a conexão cai durante a leitura, a folha na tela não é salva até a conexão voltar, e nada fica guardado no aparelho. |
+| D-8 Retenção de imagens no aparelho | (a) Nada persistido, só memória; (b) persistido cifrado; (c) persistido por prazo | **(a).** A foto e os dados vão para o servidor e para o banco. Nada fica no aparelho (§6.8, regras 4 a 7). |
+| D-9 Permissão e créditos da transcrição | (a) Chave nova `leitura.transcrever`, sem crédito; (b) chave nova e crédito; (c) sem chave nova | **(a).** A transcrição no aparelho não consome crédito. A leitura e a transcrição no servidor (modo servidor, §6.12) consomem créditos de correção. |
+| D-10 Página da folha no QR | (a) Formato novo de QR definido pela FN-043; (b) página deduzida da ordem de captura | **(a)**, e o leitor aceita os dois formatos de QR. |
+| D-11 Salvar folha com questões não conferidas | (a) Bloquear até conferir tudo; (b) "Salvar com pendências" | **(b), com trava no fechamento.** A folha pode ser salva com pendências e fica marcada "com pendência"; a pendência pode ser corrigida depois, na revisão da prova. A correção da prova **não pode ser fechada** enquanto houver folha com pendência. No PDF e no lote, cada página abre como imagem, folha por folha; a análise roda em segundo plano, cada resultado entra na tabela da página, e os dados de envio já são preparados nesse momento. O mockup aprovado já segue esta regra. |
+| D-12 Imagem enviada ao servidor | (a) A original da captura, reduzida a 2400 px, com EXIF aplicado; (b) a página retificada | **(a).** No modo servidor, a imagem leva também o marcador de identificação (§6.12). |
+| D-13 Local do conjunto de referência | (a) Armazenamento privado na VM do responsável; (b) serviço externo | **(a).** O Git guarda só o manifesto (§6.9, item 7). |
 
 Portões das decisões por subfase:
 
@@ -672,8 +704,10 @@ Riscos:
 | Diferença de decodificação entre navegador e servidor | Paridade falha por EXIF ou recodificação, sobretudo no Safari | D-12 e §6.1, regra 5; categorias de EXIF no conjunto |
 | Geometria em três lugares (`layout.py`, `ImagensCartao::recorte()`, núcleo do aparelho) | Recorte e leitura desalinhados | Mapa de respostas como fonte única (5.1) |
 | Medição de 1000 usuários numa rota de escrita | O [12 Desempenho](../../arquitetura/12-desempenho.md) prevê carga só de leitura | Espaço de teste isolado e decisão do responsável (§6.10) |
-| Custo de IA e créditos | Não existe permissão nem crédito de IA; o método de transcrição roda no aparelho, mas a cobrança por uso não está definida | D-9 antes da 6.1 |
-| Lote em memória no celular | Aba fechada pelo sistema perde o lote | Chaves por página (§6.5); D-7 |
+| Créditos de correção não existem | O modo servidor (§6.12) consome créditos, mas não existe sistema de créditos no código nem FN que o defina (a FN-068 não define créditos) | Nova FN candidata de créditos de correção, a registrar por decisão do responsável. As subfases 4.3 e 6.3 não publicam sem ela. |
+| Fila do modo servidor longa | A VM atual não tem GPU; o Escriba no servidor pode levar segundos por resposta (⚠ inferência, sem medição) | Medir na 6.3; decidir GPU dedicada, limite por hora ou prioridade por plano |
+| Marcador forjado na imagem | Um cliente adulterado declara outra prova ou outro aluno | O marcador só encaminha. O servidor revalida permissão e escopo e decodifica o QR na leitura; o QR prevalece (§6.12, regra 5) |
+| Lote em memória no celular | Aba fechada pelo sistema perde o lote | Chaves por página (§6.5). Sem fila offline (D-7 decidida: sem conexão, nada é salvo) |
 
 ## 9. Ramos desta entrega
 
@@ -687,3 +721,4 @@ Nenhum.
 | 2026-11-11 | Revisão independente (ui-ux, qualidade-testes, seguranca-privacidade, gerente-projetos) aplicada | lucasgenial |
 | 2026-11-11 | D-2: registrado o ramo futuro (d), Escriba no servidor com fila (FN-080 §8.3) | lucasgenial |
 | 2026-11-11 | Mockup aprovado por inteiro pelo responsável (subfase 0.1) | lucasgenial |
+| 2026-11-11 | Decisões D-1 a D-13 tomadas pelo responsável. Modo servidor com fila e créditos (§6.12, subfases 4.3 e 6.3). ADR-0058 e ADR-0059. Casos de uso na versão 2 | lucasgenial |
