@@ -444,7 +444,7 @@
         + '<div class="lr-linha-acoes"><button type="button" class="btn btn-secondary" data-acao="desfazer-ilegivel">Desfazer ilegível</button><button type="button" class="btn btn-secondary btn-sm" data-acao="prox-pend">Próxima pendência</button></div></div>';
     }
     h += manual ? '<div class="g-aviso atencao" role="status">Este aparelho não transcreve. Digite o que o aluno escreveu, olhando o recorte.</div>'
-      : '<p class="rev-leitura">Transcrição do Escriba · modelo 0.3.1 · o Escriba só lê; não corrige.</p>';
+      : '<p class="rev-leitura">Transcrição do Escriba · versão 0.3.1 · o Escriba só lê; não corrige.</p>';
     if (r.conferida) h += '<div class="g-aviso sucesso" role="status">Transcrição conferida. Você ainda pode editar.</div>';
     if (r.esperado === 'texto') {
       h += '<div class="field"><label for="campo-' + r.id + '">' + (manual ? 'Transcrição manual' : 'Texto transcrito') + '</label><textarea class="input" rows="4" id="campo-' + r.id + '" data-campo="texto"></textarea></div>';
@@ -848,7 +848,7 @@
     'descartar-edicao': ['Descartar a edição?', '<p>Você mudou a transcrição e ainda não confirmou. Se sair agora, a edição será descartada.</p><p class="page-sub">A transcrição original do Escriba continua guardada.</p>', [['Descartar', 'btn-ghost', 'entrada'], ['Voltar', 'btn-primary']]],
     'pagina-repetida': ['Esta página já foi lida', '<p>A <strong>página 1</strong> de <strong>Eduardo Prado</strong> já foi lida (IMG_2207). A nova foto é IMG_2210.</p><p class="page-sub">A página anterior só é trocada se você escolher Substituir.</p>', [['Manter a anterior', 'btn-secondary'], ['Substituir', 'btn-primary']]],
     'falta-pagina': ['Falta a página 2', '<p><strong>Eduardo Prado</strong> tem as páginas 1 e 3. Falta a página 2.</p><p class="page-sub">Se salvar agora, as páginas lidas vão para o envio e o aluno aparece no resumo como "Faltam páginas".</p>', [['Ler a página 2', 'btn-secondary', 'camera'], ['Salvar sem a página 2', 'btn-primary', '#salva']]],
-    'cancelar-ia': ['Cancelar o download do Escriba?', '<p>O download para e a parte já baixada é apagada. As objetivas continuam sendo lidas neste aparelho.</p><p class="page-sub">As respostas abertas ficam "Aguardando o Escriba" até você baixar de novo.</p>', [['Continuar o download', 'btn-secondary'], ['Cancelar o download', 'btn-primary']]],
+    'cancelar-ia': ['Cancelar o download dos recursos do Escriba?', '<p>O download para e a parte já baixada é apagada. As objetivas continuam sendo lidas neste aparelho.</p><p class="page-sub">As respostas abertas ficam "Aguardando o Escriba" até você baixar de novo.</p>', [['Continuar o download', 'btn-secondary'], ['Cancelar o download', 'btn-primary']]],
     'fechar-correcao': ['Fechar a correção?', '<p>Depois disso só a coordenação ou a direção poderá alterar, excluir, incluir ou reabrir.</p>', [['Cancelar', 'btn-secondary'], ['Fechar correção', 'btn-primary']]]
   };
   var ultimoFoco = null;

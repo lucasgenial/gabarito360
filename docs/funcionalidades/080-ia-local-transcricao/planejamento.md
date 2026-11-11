@@ -16,6 +16,8 @@ Neste documento, "(proposta)" junto de um número significa: proposta do planeja
 
 **Nome:** a IA se chama **Escriba** (decisão do responsável em 11/11/2026). O nome diz o que ela faz: copia fielmente a letra do aluno, sem opinar. Nas telas, use "Escriba". Em texto técnico, "Escriba (IA local de transcrição)" na primeira menção.
 
+**Regra de interface (decisão do responsável em 11/11/2026):** nenhuma tela diz que o aparelho baixa "uma IA" ou "um modelo". O texto fala dos **recursos do Escriba**. Exemplos: "Baixando os recursos do Escriba… 62%", "Cancelar o download dos recursos do Escriba?", "Escriba indisponível neste aparelho". "Modelo", "IA" e "pesos" ficam só nos documentos técnicos.
+
 O Leitor360 precisa ler respostas manuscritas de provas abertas e mistas. Exemplo: produção textual. Esta funcionalidade entrega um modelo de visão e linguagem **local**, que roda no aparelho do usuário (smartphone e computador) de forma transparente.
 
 O modelo transcreve a letra do aluno em três tipos de saída:
@@ -216,4 +218,5 @@ Nenhum.
 |---|---|---|
 | 2026-11-11 | Funcionalidade registrada como candidata | lucasgenial |
 | 2026-11-11 | A IA recebe o nome Escriba, por decisão do responsável | lucasgenial |
+| 2026-11-11 | Regra de interface: as telas falam em "recursos do Escriba", nunca em baixar uma IA ou um modelo | lucasgenial |
 | 2026-11-11 | Revisão independente (ui-ux, qualidade-testes, seguranca-privacidade, gerente-projetos) aplicada | lucasgenial |
