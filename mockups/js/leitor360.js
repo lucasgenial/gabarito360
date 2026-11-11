@@ -178,7 +178,7 @@
 
   /* =====================================================================
      Abertas, textos e mistas (FN-079 UC-11/12/13/14/16 e FN-080 UC-02 a 06)
-     Folha e manuscritos simulados em SVG. A IA só lê; nada aqui calcula nota.
+     Folha e manuscritos simulados em SVG. O Escriba só lê; nada aqui calcula nota.
      ===================================================================== */
   var MANUS = '"Segoe Script","Bradley Hand","Comic Sans MS",cursive', TINTA = '#1b2a6b', LIMIAR = 0.6;
   var TIPO = { objetiva: ['◉', 'Objetiva'], texto: ['✎', 'Texto'], formula: ['∑', 'Fórmula'], desenho: ['△', 'Desenho'] };
@@ -444,7 +444,7 @@
         + '<div class="lr-linha-acoes"><button type="button" class="btn btn-secondary" data-acao="desfazer-ilegivel">Desfazer ilegível</button><button type="button" class="btn btn-secondary btn-sm" data-acao="prox-pend">Próxima pendência</button></div></div>';
     }
     h += manual ? '<div class="g-aviso atencao" role="status">Este aparelho não transcreve. Digite o que o aluno escreveu, olhando o recorte.</div>'
-      : '<p class="rev-leitura">Transcrição da IA · modelo 0.3.1 · a IA só lê; não corrige.</p>';
+      : '<p class="rev-leitura">Transcrição do Escriba · modelo 0.3.1 · o Escriba só lê; não corrige.</p>';
     if (r.conferida) h += '<div class="g-aviso sucesso" role="status">Transcrição conferida. Você ainda pode editar.</div>';
     if (r.esperado === 'texto') {
       h += '<div class="field"><label for="campo-' + r.id + '">' + (manual ? 'Transcrição manual' : 'Texto transcrito') + '</label><textarea class="input" rows="4" id="campo-' + r.id + '" data-campo="texto"></textarea></div>';
@@ -845,10 +845,10 @@
     'salvar-lote': ['Salvar 28 folhas sem pendências?', '<p>As 28 folhas sem pendências serão salvas e enviadas. As 6 para conferir continuam no lote.</p>', [['Voltar', 'btn-secondary'], ['Salvar 28 folhas', 'btn-primary']]],
     descartar: ['Descartar a folha?', '<p>A imagem e as correções desta folha saem da sessão. Nada foi enviado ainda.</p>', [['Voltar', 'btn-secondary'], ['Descartar folha', 'btn-primary']]],
     fechada: ['Correção fechada', '<p>A correção desta prova foi fechada por <strong>Paulo Andrade</strong> às 10:15. As folhas não salvas não podem ser enviadas.</p><p class="page-sub">Peça à coordenação para reabrir a correção.</p>', [['Entendi', 'btn-primary', 'resumo']]],
-    'descartar-edicao': ['Descartar a edição?', '<p>Você mudou a transcrição e ainda não confirmou. Se sair agora, a edição será descartada.</p><p class="page-sub">A transcrição original da IA continua guardada.</p>', [['Descartar', 'btn-ghost', 'entrada'], ['Voltar', 'btn-primary']]],
+    'descartar-edicao': ['Descartar a edição?', '<p>Você mudou a transcrição e ainda não confirmou. Se sair agora, a edição será descartada.</p><p class="page-sub">A transcrição original do Escriba continua guardada.</p>', [['Descartar', 'btn-ghost', 'entrada'], ['Voltar', 'btn-primary']]],
     'pagina-repetida': ['Esta página já foi lida', '<p>A <strong>página 1</strong> de <strong>Eduardo Prado</strong> já foi lida (IMG_2207). A nova foto é IMG_2210.</p><p class="page-sub">A página anterior só é trocada se você escolher Substituir.</p>', [['Manter a anterior', 'btn-secondary'], ['Substituir', 'btn-primary']]],
     'falta-pagina': ['Falta a página 2', '<p><strong>Eduardo Prado</strong> tem as páginas 1 e 3. Falta a página 2.</p><p class="page-sub">Se salvar agora, as páginas lidas vão para o envio e o aluno aparece no resumo como "Faltam páginas".</p>', [['Ler a página 2', 'btn-secondary', 'camera'], ['Salvar sem a página 2', 'btn-primary', '#salva']]],
-    'cancelar-ia': ['Cancelar o download da IA?', '<p>O download para e a parte já baixada é apagada. As objetivas continuam sendo lidas neste aparelho.</p><p class="page-sub">As respostas abertas ficam "Aguardando a IA" até você baixar de novo.</p>', [['Continuar o download', 'btn-secondary'], ['Cancelar o download', 'btn-primary']]],
+    'cancelar-ia': ['Cancelar o download do Escriba?', '<p>O download para e a parte já baixada é apagada. As objetivas continuam sendo lidas neste aparelho.</p><p class="page-sub">As respostas abertas ficam "Aguardando o Escriba" até você baixar de novo.</p>', [['Continuar o download', 'btn-secondary'], ['Cancelar o download', 'btn-primary']]],
     'fechar-correcao': ['Fechar a correção?', '<p>Depois disso só a coordenação ou a direção poderá alterar, excluir, incluir ou reabrir.</p>', [['Cancelar', 'btn-secondary'], ['Fechar correção', 'btn-primary']]]
   };
   var ultimoFoco = null;

@@ -1,4 +1,4 @@
-# 080 — IA local de transcrição — Planejamento
+# 080 — Escriba: IA local de transcrição — Planejamento
 
 **Implementação:** Candidata
 **Etapa:** Candidata
@@ -13,6 +13,8 @@ Planejamento preliminar. Não há plano técnico aprovado. Nada é executado ant
 Neste documento, "(proposta)" junto de um número significa: proposta do planejamento, a confirmar pelo responsável na 0.1.
 
 ## 1. Objetivo
+
+**Nome:** a IA se chama **Escriba** (decisão do responsável em 11/11/2026). O nome diz o que ela faz: copia fielmente a letra do aluno, sem opinar. Nas telas, use "Escriba". Em texto técnico, "Escriba (IA local de transcrição)" na primeira menção.
 
 O Leitor360 precisa ler respostas manuscritas de provas abertas e mistas. Exemplo: produção textual. Esta funcionalidade entrega um modelo de visão e linguagem **local**, que roda no aparelho do usuário (smartphone e computador) de forma transparente.
 
@@ -213,4 +215,5 @@ Nenhum.
 | Data | Mudança | Por |
 |---|---|---|
 | 2026-11-11 | Funcionalidade registrada como candidata | lucasgenial |
+| 2026-11-11 | A IA recebe o nome Escriba, por decisão do responsável | lucasgenial |
 | 2026-11-11 | Revisão independente (ui-ux, qualidade-testes, seguranca-privacidade, gerente-projetos) aplicada | lucasgenial |

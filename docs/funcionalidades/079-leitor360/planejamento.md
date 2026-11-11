@@ -92,7 +92,7 @@ Hoje toda leitura roda no servidor. O `ProcessarCartaoJob` executa o `ler_cartao
 | FN-012 permissoes-motor | Chaves `cartao.enviar`, `correcao.*`; chave nova, se D-6 ou D-9 exigirem | Concluída |
 | FN-077 desempenho | Medição da API com 1000 usuários simultâneos | Parcial |
 | FN-062 lgpd-inventario-retencao | Inventário e retenção de imagens, transcrições e recortes | Parcial |
-| FN-080 IA local de transcrição | Fornece o modelo e o runtime do método `transcricao-manuscrita`. Bloqueia só as subfases 6.x. | Candidata |
+| FN-080 Escriba (IA local de transcrição) | Fornece o modelo e o runtime do método `transcricao-manuscrita`. Bloqueia só as subfases 6.x. | Candidata |
 | FN-043 editor-provas-questoes | Usa o contrato do mapa de respostas v1 (subfase 5.1) e produz os mapas de provas mistas e de provas em que a página é o gabarito. Bloqueia só as subfases 7.x. | Candidata |
 
 **Funcionalidades que dependem desta:**

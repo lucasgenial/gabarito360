@@ -36,7 +36,7 @@
         <option value="sem-capacidade">9. Aparelho sem capacidade</option>
       </optgroup>
       <optgroup label="Abertas, textos e mistas">
-        <option value="ia-preparo">A. Preparar a IA no aparelho</option>
+        <option value="ia-preparo">A. Preparar o Escriba no aparelho</option>
         <option value="aberta">B. Resposta aberta curta</option>
         <option value="formula">C. Fórmula</option>
         <option value="desenho">D. Desenho</option>
@@ -152,7 +152,7 @@
     <div class="lr-capacidades" aria-label="O que este aparelho oferece">
       <span class="badge badge-success badge-dot">Leitura de objetivas neste aparelho</span>
       <span class="badge badge-success badge-dot">Câmera traseira</span>
-      <span class="badge badge-muted badge-dot">Transcrição por IA indisponível neste aparelho</span>
+      <span class="badge badge-muted badge-dot">Escriba (transcrição por IA) indisponível neste aparelho</span>
     </div>
     <div class="lr-entradas">
       <button type="button" class="btn btn-primary lr-entrada" data-ir="camera"><span class="lr-entrada-rotulo"><svg class="nav-icone" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg> Fotografar folhas</span><small class="lr-entrada-desc">A foto sai sozinha quando os 4 cantos aparecem.</small></button>
@@ -363,7 +363,7 @@
       <button type="button" class="btn btn-secondary" data-modal="descartar-edicao">Descartar a edição?</button>
       <button type="button" class="btn btn-secondary" data-modal="pagina-repetida">Esta página já foi lida</button>
       <button type="button" class="btn btn-secondary" data-modal="falta-pagina">Falta a página 2</button>
-      <button type="button" class="btn btn-secondary" data-modal="cancelar-ia">Cancelar o download da IA?</button>
+      <button type="button" class="btn btn-secondary" data-modal="cancelar-ia">Cancelar o download do Escriba?</button>
     </div>
   </div>
 </section>
@@ -429,7 +429,7 @@
      GRUPO "ABERTAS, TEXTOS E MISTAS" (FN-079 UC-02/11/12/13/14/16/17/23 e FN-080 UC-01 a 09)
      ===================================================================== -->
 
-<!-- ===================== A. PREPARAR A IA NO APARELHO (UC-080-01, UC-079-02) ===================== -->
+<!-- ===================== A. PREPARAR O ESCRIBA NO APARELHO (UC-080-01, UC-079-02) ===================== -->
 <section class="tela-mk" data-tela="ia-preparo" data-corpo="tela-correcao" aria-labelledby="ta">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><span aria-current="page">Correção da prova</span></li></ol></nav>
   <div class="row-between" style="margin-top:12px;">
@@ -448,12 +448,12 @@
       </div>
       <div class="lr-motor" role="listitem">
         <div class="lr-motor-cabeca"><b>IA de transcrição</b><span class="badge badge-info">Baixando 62%</span></div>
-        <p class="page-sub" id="ia-progresso-txt" role="status">Preparando a IA de transcrição… 62% · 412 de 664 MB</p>
-        <div class="lr-trilho lr-trilho-claro" role="progressbar" aria-label="Download da IA de transcrição" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62"><div style="width:62%"></div></div>
+        <p class="page-sub" id="ia-progresso-txt" role="status">Preparando o Escriba (IA de transcrição)… 62% · 412 de 664 MB</p>
+        <div class="lr-trilho lr-trilho-claro" role="progressbar" aria-label="Download do Escriba" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62"><div style="width:62%"></div></div>
         <div class="lr-linha-acoes"><button type="button" class="btn btn-sm btn-ghost" data-modal="cancelar-ia">Cancelar o download</button></div>
       </div>
     </div>
-    <div class="g-aviso info" role="status">Na primeira vez, o leitor baixa os arquivos de leitura. Use Wi-Fi se puder. Você já pode ler as objetivas. As respostas abertas ficam <b>Aguardando a IA</b> até o download terminar.</div>
+    <div class="g-aviso info" role="status">Na primeira vez, o leitor baixa os arquivos de leitura. Use Wi-Fi se puder. Você já pode ler as objetivas. As respostas abertas ficam <b>Aguardando o Escriba</b> até o download terminar.</div>
     <h3 class="lr-sub">O que este aparelho tem</h3>
     <dl class="lr-capacidade">
       <div><dt>WebGPU</dt><dd><span class="badge badge-success badge-dot">Disponível</span></dd></div>
@@ -468,15 +468,15 @@
       <button type="button" class="btn btn-secondary lr-entrada" data-ir="arquivos"><span class="lr-entrada-rotulo">Enviar fotos ou PDF</span><small class="lr-entrada-desc">Uma página por arquivo ou várias.</small></button>
       <button type="button" class="btn btn-secondary lr-entrada" data-ir="lote"><span class="lr-entrada-rotulo">Lote de PDFs</span><small class="lr-entrada-desc">A transcrição não roda em lote no celular.</small></button>
     </div>
-    <p class="page-sub" style="margin-top:12px;">Neste acompanhamento: 2 folhas lidas · 1 aguardando a IA.</p>
+    <p class="page-sub" style="margin-top:12px;">Neste acompanhamento: 2 folhas lidas · 1 aguardando o Escriba.</p>
     <ul class="lr-envios" aria-label="Folhas desta sessão">
-      <li><b>Ana Beatriz Souza</b> · 9º A — <span class="badge badge-success">Objetivas lidas</span> <span class="badge badge-muted">Abertas: aguardando a IA</span></li>
-      <li><b>Bruno Lima</b> · 9º A — <span class="badge badge-success">Objetivas lidas</span> <span class="badge badge-muted">Abertas: aguardando a IA</span></li>
+      <li><b>Ana Beatriz Souza</b> · 9º A — <span class="badge badge-success">Objetivas lidas</span> <span class="badge badge-muted">Abertas: aguardando o Escriba</span></li>
+      <li><b>Bruno Lima</b> · 9º A — <span class="badge badge-success">Objetivas lidas</span> <span class="badge badge-muted">Abertas: aguardando o Escriba</span></li>
     </ul>
     <details class="lr-estados"><summary>Outros estados desta tela</summary>
-      <div class="g-aviso erro" role="alert">Não foi possível preparar a IA de transcrição. Verifique a conexão e tente de novo. <button type="button" class="btn btn-sm btn-secondary">Tentar de novo</button></div>
-      <div class="g-aviso atencao" role="status">Este navegador não guarda arquivos (navegação privada). A IA vai baixar os arquivos de novo na próxima vez.</div>
-      <div class="g-aviso info" role="status">Prova só com objetivas: a IA de transcrição não é baixada.</div>
+      <div class="g-aviso erro" role="alert">Não foi possível preparar o Escriba. Verifique a conexão e tente de novo. <button type="button" class="btn btn-sm btn-secondary">Tentar de novo</button></div>
+      <div class="g-aviso atencao" role="status">Este navegador não guarda arquivos (navegação privada). O Escriba vai baixar os arquivos de novo na próxima vez.</div>
+      <div class="g-aviso info" role="status">Prova só com objetivas: o Escriba não é baixado.</div>
     </details>
   </div>
 </section>
@@ -485,8 +485,8 @@
 <section class="tela-mk" data-tela="aberta" data-corpo="tela-revisao" aria-labelledby="tb">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir resposta aberta</span></li></ol></nav>
   <div class="g-pagina">
-    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="tb">Conferir resposta aberta</h1><p class="page-sub">A IA só lê. Ela não corrige. Confira o texto antes de salvar.</p></div>
-    <div class="g-pagina-acoes"><span class="mk-pendente">D-9: permissão da IA</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="tb">Conferir resposta aberta</h1><p class="page-sub">O Escriba só lê. Ele não corrige. Confira o texto antes de salvar.</p></div>
+    <div class="g-pagina-acoes"><span class="mk-pendente">D-9: permissão do Escriba</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
   </div>
   <div class="rev-estacao lr-estacao" data-estacao-mista="q9"></div>
 </section>
@@ -495,7 +495,7 @@
 <section class="tela-mk" data-tela="formula" data-corpo="tela-revisao" aria-labelledby="tc">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir fórmula</span></li></ol></nav>
   <div class="g-pagina">
-    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="tc">Conferir fórmula</h1><p class="page-sub">A IA só lê. Ela não corrige. Confira a notação antes de salvar.</p></div>
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="tc">Conferir fórmula</h1><p class="page-sub">O Escriba só lê. Ele não corrige. Confira a notação antes de salvar.</p></div>
     <div class="g-pagina-acoes"><span class="mk-pendente">Notação LaTeX a confirmar (FN-080 §8.1)</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
   </div>
   <div class="rev-estacao lr-estacao" data-estacao-mista="q10"></div>
@@ -505,7 +505,7 @@
 <section class="tela-mk" data-tela="desenho" data-corpo="tela-revisao" aria-labelledby="td">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir desenho</span></li></ol></nav>
   <div class="g-pagina">
-    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="td">Conferir desenho</h1><p class="page-sub">A IA só lê. Ela não corrige. O desenho fica guardado como imagem.</p></div>
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 3 — Matemática 9º ano · folha 5 de 31</div><h1 class="page-title" id="td">Conferir desenho</h1><p class="page-sub">O Escriba só lê. Ele não corrige. O desenho fica guardado como imagem.</p></div>
     <div class="g-pagina-acoes"><span class="mk-pendente">Descrição de desenho: quando pedir (FN-080 §8.1)</span><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
   </div>
   <div class="rev-estacao lr-estacao" data-estacao-mista="q11"></div>
@@ -515,7 +515,7 @@
 <section class="tela-mk" data-tela="redacao" data-corpo="tela-revisao" aria-labelledby="te">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir produção textual</span></li></ol></nav>
   <div class="g-pagina">
-    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 4 — Língua Portuguesa 9º ano · redação</div><h1 class="page-title" id="te">Conferir produção textual</h1><p class="page-sub">A IA só lê. Ela não corrige nem dá nota. Confira cada parágrafo.</p></div>
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · Avaliação 4 — Língua Portuguesa 9º ano · redação</div><h1 class="page-title" id="te">Conferir produção textual</h1><p class="page-sub">O Escriba só lê. Ele não corrige nem dá nota. Confira cada parágrafo.</p></div>
     <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
   </div>
   <div class="rev-estacao lr-estacao">
@@ -542,7 +542,7 @@
 <section class="tela-mk" data-tela="mista" data-corpo="tela-revisao" aria-labelledby="tf">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Conferir folha</span></li></ol></nav>
   <div class="g-pagina">
-    <div style="min-width:0;"><div class="eyebrow">Leitor360 · prova mista · folha 5 de 31</div><h1 class="page-title" id="tf">Conferir folha</h1><p class="page-sub">Objetivas lidas pelas bolhas e abertas transcritas pela IA. A IA só lê; não corrige.</p></div>
+    <div style="min-width:0;"><div class="eyebrow">Leitor360 · prova mista · folha 5 de 31</div><h1 class="page-title" id="tf">Conferir folha</h1><p class="page-sub">Objetivas lidas pelas bolhas e abertas transcritas pelo Escriba. O Escriba só lê; não corrige.</p></div>
     <div class="g-pagina-acoes"><button type="button" class="btn btn-ghost" data-sair-edicao>Sair do leitor</button></div>
   </div>
   <div class="rev-estacao lr-estacao" data-estacao-mista="q3"></div>
@@ -571,14 +571,14 @@
   </div>
 </section>
 
-<!-- ===================== H. APARELHO SEM CAPACIDADE PARA A IA (UC-080-09, UC-079-23) ===================== -->
+<!-- ===================== H. APARELHO SEM CAPACIDADE PARA O ESCRIBA (UC-080-09, UC-079-23) ===================== -->
 <section class="tela-mk" data-tela="sem-ia" data-corpo="tela-correcao" aria-labelledby="th">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><span aria-current="page">Correção da prova</span></li></ol></nav>
   <div class="row-between" style="margin-top:12px;">
     <div><h1 class="page-title" id="th">Avaliação 3 — Matemática 9º ano</h1><p class="page-sub">Prova mista: 8 objetivas e 4 abertas · 9º A · aplicado em 11/11/2026</p></div>
   </div>
   <div class="card card-pad" style="margin-top:16px;">
-    <div class="g-aviso atencao" role="status" style="margin-top:0;">Este aparelho não consegue transcrever as respostas abertas. Falta <b>WebGPU</b> no navegador e a memória (cerca de 3 GB) é menor que a exigida pela IA (6 GB). A IA não será baixada neste aparelho.</div>
+    <div class="g-aviso atencao" role="status" style="margin-top:0;">Este aparelho não consegue transcrever as respostas abertas. Falta <b>WebGPU</b> no navegador e a memória (cerca de 3 GB) é menor que a exigida pelo Escriba (6 GB). O Escriba não será baixado neste aparelho.</div>
     <div class="lr-grade-2">
       <div class="lr-motor">
         <div class="lr-motor-cabeca"><b>Objetivas</b><span class="badge badge-success badge-dot">Continuam neste aparelho</span></div>
@@ -616,7 +616,7 @@
 <section class="tela-mk" data-tela="resumo-misto" data-corpo="tela-correcao" aria-labelledby="ti">
   <nav class="breadcrumb breadcrumb-dinamico" aria-label="Caminho da página"><ol><li><a href="#">Início</a></li><li><a href="#" data-ir="entrada">Correção da prova</a></li><li><span aria-current="page">Resumo da sessão</span></li></ol></nav>
   <div class="g-pagina">
-    <div style="min-width:0;"><div class="eyebrow">Avaliação 3 — Matemática 9º ano · prova mista</div><h1 class="page-title" id="ti">Resumo da sessão</h1><p class="page-sub">Sessão encerrada às 11:20 · lida neste aparelho · a IA só leu, não corrigiu</p></div>
+    <div style="min-width:0;"><div class="eyebrow">Avaliação 3 — Matemática 9º ano · prova mista</div><h1 class="page-title" id="ti">Resumo da sessão</h1><p class="page-sub">Sessão encerrada às 11:20 · lida neste aparelho · o Escriba só leu, não corrigiu</p></div>
     <div class="g-pagina-acoes"><button type="button" class="btn btn-secondary" data-ir="ia-preparo">Ler mais folhas</button><button type="button" class="btn btn-primary" data-ir="entrada">Ver acompanhamento</button></div>
   </div>
   <div class="g-aviso info" role="status">2 folhas ainda estão sendo enviadas. Não feche esta página.</div>

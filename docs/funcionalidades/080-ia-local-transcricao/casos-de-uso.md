@@ -1,4 +1,4 @@
-# 080 — IA local de transcrição — Casos de uso
+# 080 — Escriba: IA local de transcrição — Casos de uso
 
 **Natureza:** nova (candidata; casos de uso preliminares de alto nível)
 **Perfis envolvidos:** perfis que leem respostas abertas no Leitor360 (os mesmos de `cartao.enviar` e `correcao.alterar`, a confirmar na FN-079); responsável pelo modelo (papel técnico, fora dos perfis da aplicação). Ver [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md). A permissão de uso da IA segue a decisão D-9 da FN-079.
