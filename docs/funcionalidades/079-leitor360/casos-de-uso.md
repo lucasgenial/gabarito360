@@ -1,14 +1,16 @@
 # 079 — Leitor360: motor de leitura de provas — Casos de uso
 
 **Natureza:** evolução de existente
-**Perfis envolvidos:** Administrador da Rede, Diretor Escolar, Coordenador, Professor e Professor autônomo (leem, conferem e corrigem); Aplicador (captura no modo do dia; o que ele vê depende da D-6); Diretor de Núcleo (só acompanha, pela FN-045); equipe técnica (qualidade do motor). Ver [permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md).
+**Perfis envolvidos:** Administrador da Rede, Diretor Escolar, Coordenador, Professor e Professor autônomo (leem, conferem e corrigem); Aplicador (captura no modo do dia; vê só as marcações da folha atual, conforme a D-6); Diretor de Núcleo (só acompanha, pela FN-045); equipe técnica (qualidade do motor). Ver [permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md).
+**Versão:** 2 (11/11/2026) — decisões D-1 a D-13 tomadas; modo servidor com fila e créditos.
 **Atualizado em:** 2026-11-11
 
 Cada caso de uso é verificável. Os critérios viram testes ou conferências registradas por texto. Este documento descreve comportamento **proposto**. Rotas, tabelas e campos novos aparecem como "proposta". O que já existe aparece com o nome do código.
 
 Documentos donos (este documento cita, não repete):
 
-- Decisões pendentes D-1 a D-13: [planejamento §8](planejamento.md#8-riscos-e-decisões-pendentes-do-responsável). Este documento cita cada uma pelo código, com ⚠.
+- Decisões D-1 a D-13, todas tomadas: [planejamento §8](planejamento.md#8-riscos-e-decisões-pendentes-do-responsável). Este documento cita cada uma pelo código.
+- Modo servidor: [planejamento §6.12](planejamento.md#612-modo-servidor-leitura-no-servidor-com-fila-e-créditos) e [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md).
 - Telas e modais a mockar: lista única no [planejamento §7](planejamento.md#7-interface). Nenhuma tela é aprovada sem mockup e revisão do agente `ui-ux`.
 - Contrato da API, erros e testes do contrato: [planejamento §6.6](planejamento.md#66-api-proposta).
 - Limiares e correspondência de estados: [planejamento §6.1](planejamento.md#61-arquitetura-em-camadas-do-motor).
@@ -29,7 +31,10 @@ Termos usados neste documento:
 | Aviso | Questão em branco seguro. Tem rótulo e ícone na lista, mas não entra no contador nem vai para a revisão. |
 | Mapa de respostas | O documento versionado que diz, para cada página de uma prova, onde está cada região de resposta, qual é o tipo e qual método de leitura a lê. A FN-043 produz o mapa. Até lá, o Leitor360 deriva o mapa do cartão atual. |
 | Método de leitura | Um módulo que lê um tipo de região de resposta. Hoje: `objetiva-bolhas`. Proposto: `transcricao-manuscrita` (FN-080). |
-| Núcleo de leitura | O código de visão computacional que o Leitor360 executa no aparelho (D-4). |
+| Núcleo de leitura | O código de visão computacional que o Leitor360 executa no aparelho (D-4) e, com a mesma versão, no servidor. |
+| Modo servidor | O caminho em que o servidor processa a folha, com fila e consumo de créditos de correção, quando o aparelho não processa (UC-079-26). |
+| Marcador | O segmento de metadados que o aparelho grava na imagem com prova, aluno, página, versão do mapa e `envio_id`. Só encaminha a folha. |
+| Folha com pendência | Folha salva com questões ainda por conferir (D-11). Ela trava o fechamento da correção (UC-079-27). |
 | Leitor visual | A tela de conferência e correção da leitura, no estilo de um aplicativo de digitalização. |
 | Conjunto de referência | O conjunto de imagens e PDFs com o resultado esperado. Cada folha tem a verdade anotada por pessoas e o instantâneo do servidor. |
 | Paridade | Igualdade com o instantâneo do servidor. Portão de 100%. |
@@ -106,15 +111,15 @@ Termos usados neste documento:
 
 **Fluxos alternativos e de erro:**
 - 1a. Página sem HTTPS: câmera e webcam ficam indisponíveis. O sistema mostra "A câmera só funciona em conexão segura." Fotos e PDF continuam disponíveis.
-- 2a. O mapa exige `transcricao-manuscrita` e o aparelho não tem capacidade para a IA local: ⚠ depende da D-2. Ver UC-079-23.
-- 2b. O aparelho não executa o núcleo de leitura (sem WebAssembly ou memória insuficiente): ⚠ depende da D-2. Ver UC-079-23.
+- 2a. O mapa exige `transcricao-manuscrita` e o aparelho não tem capacidade para a IA local: o sistema mostra a mensagem simples do UC-079-23 e oferece o modo servidor para as regiões abertas (UC-079-26). As objetivas seguem no aparelho.
+- 2b. O aparelho não executa o núcleo de leitura (sem WebAssembly ou memória insuficiente): o sistema mostra a mensagem simples do UC-079-23 e oferece o modo servidor (UC-079-26).
 - 4a. Falha no download: "Não foi possível preparar o leitor. Verifique a conexão e tente de novo." e botão **Tentar de novo**.
 - 4b. Cache cheio ou bloqueado (navegação privada): o sistema baixa o núcleo só para a sessão e avisa "O leitor vai baixar os arquivos de novo na próxima vez."
 - 4c. O usuário toca em **Cancelar** durante o download: o download para, e o cache parcial é apagado.
 - 6a. Versão em cache diferente da vigente: o sistema descarta a versão antiga e baixa a nova. A leitura nunca usa versão não vigente.
 - 6b. Um arquivo tem sha256 diferente do manifesto: o Worker apaga o arquivo, não executa e baixa de novo.
 
-**Regras de negócio:** o núcleo e as versões de OpenCV e NumPy dependem da D-4 e da D-5. Nenhum arquivo vem de CDN, PyPI ou Hugging Face. A versão do motor acompanha cada resultado enviado (UC-079-19). Só uma versão aprovada no UC-079-24 pode ser vigente. O cache guarda só os arquivos do manifesto (planejamento §6.8).
+**Regras de negócio:** o núcleo roda por Pyodide, com paridade total entre aparelho e servidor (D-4, mesmo código e mesma versão). OpenCV e NumPy têm as mesmas versões nos dois lados (D-5; ⚠ falta confirmar o que o Pyodide empacota). Nenhum arquivo vem de CDN, PyPI ou Hugging Face. A versão do motor acompanha cada resultado enviado (UC-079-19). Só uma versão aprovada no UC-079-24 pode ser vigente. O cache guarda só os arquivos do manifesto (planejamento §6.8).
 
 **Critérios de aceite:**
 - [ ] Na segunda abertura no mesmo aparelho, o leitor fica pronto sem novo download do núcleo.
@@ -125,7 +130,7 @@ Termos usados neste documento:
 - [ ] Uma folha capturada durante o preparo fica **Aguardando o leitor** e é lida quando o núcleo fica pronto.
 - [ ] O tempo de preparo na primeira vez é medido e registrado por tipo de aparelho (meta no planejamento §6.10).
 
-**Situação:** Não implementado — não existe núcleo de leitura no navegador (nenhuma menção a Pyodide, OpenCV.js ou WASM no código).
+**Situação:** Não implementado — não existe núcleo de leitura no navegador (nenhuma menção a Pyodide, OpenCV.js ou WASM no código). O aparelho não persiste nada além do cache dos arquivos do manifesto (D-8).
 
 ---
 
@@ -156,7 +161,7 @@ Termos usados neste documento:
 - 4a. O usuário prefere disparar: toca em **Fotografar**.
 - 4b. Prova em que a página é o gabarito: as guias seguem os marcadores da página definidos pelo mapa. A dica mostra a página esperada quando o QR já foi lido. Exemplo: "Página 2 de 3." (UC-079-13).
 
-**Regras de negócio:** captura a 1920×1080 com redução a 2400 px e JPEG 0,88, como hoje. A imagem enviada ao servidor depende da ⚠ D-12. Recomendação: a original da captura, com EXIF aplicado, lida pelo núcleo a partir dos mesmos bytes (planejamento §6.1, regra 5). Em provas abertas, a resolução mínima pode ser maior (a medir na FN-080).
+**Regras de negócio:** captura a 1920×1080 com redução a 2400 px e JPEG 0,88, como hoje. A imagem enviada ao servidor é a original da captura, reduzida a 2400 px e com EXIF aplicado (D-12), lida pelo núcleo a partir dos mesmos bytes (planejamento §6.1, regra 5). No modo servidor, a imagem leva o marcador (UC-079-26). Em provas abertas, a resolução mínima pode ser maior (a medir na FN-080).
 
 **Critérios de aceite:**
 - [ ] A captura automática dispara só depois de 4 análises consecutivas com os 4 marcadores detectados.
@@ -235,7 +240,7 @@ Termos usados neste documento:
 
 **Variações por aparelho:** no celular, o seletor oferece a galeria e a câmera do sistema (`capture`). No computador, o usuário também pode arrastar as imagens para a área "Solte as fotos aqui".
 
-**Regras de negócio:** limite de 10 MB por imagem (API atual). Quantidade máxima por seleção: proposta na 3.3, a confirmar pelo responsável. A imagem enviada segue a ⚠ D-12. Hoje o `heic-to` é usado só nas imagens de usuário, aluno e turma, não na correção.
+**Regras de negócio:** limite de 10 MB por imagem (API atual). Quantidade máxima por seleção: proposta na 3.3, a confirmar pelo responsável. A imagem enviada é a original reduzida a 2400 px, com EXIF aplicado (D-12). Hoje o `heic-to` é usado só nas imagens de usuário, aluno e turma, não na correção.
 
 **Critérios de aceite:**
 - [ ] Cada imagem válida vira exatamente uma folha na fila.
@@ -273,7 +278,7 @@ Termos usados neste documento:
 
 **Variações por tipo de documento:** no cartão à parte, uma página = uma folha. Na página da prova como gabarito, uma página = uma folha de um aluno; as outras páginas chegam em outras folhas (UC-079-13).
 
-**Regras de negócio:** o PDF.js segue as regras de segurança do planejamento §6.5 (`isEvalSupported: false`, sem scripts, limite de páginas e de tamanho). A página renderizada é a imagem enviada ao servidor (⚠ D-12). O PDF de entrada não vai ao servidor.
+**Regras de negócio:** o PDF.js segue as regras de segurança do planejamento §6.5 (`isEvalSupported: false`, sem scripts, limite de páginas e de tamanho). A página renderizada é a imagem enviada ao servidor, reduzida a 2400 px (D-12). O PDF de entrada não vai ao servidor.
 
 **Critérios de aceite:**
 - [ ] Um PDF de uma página gera exatamente uma folha.
@@ -307,10 +312,10 @@ Termos usados neste documento:
 
 **Fluxos alternativos e de erro:**
 - 4a. O usuário toca em **Pausar**: o sistema termina a página atual e para. O botão vira **Retomar**.
-- 4b. O usuário recarrega a página: a lista de páginas e as chaves de envio continuam (planejamento §6.5). Ao fechar a aba, o sistema pede os arquivos de novo: "Escolha de novo os arquivos do lote para continuar." A API recusa como repetida a página já recebida, pela chave derivada do sha256 da página (proposta, a validar na 3.5).
+- 4b. O usuário recarrega a página ou fecha a aba: o aparelho não guarda nada (D-8). O sistema pede os arquivos de novo: "Escolha de novo os arquivos do lote para continuar." A API recusa como repetida a página já recebida, pela chave derivada do sha256 da página (proposta, a validar na 3.5).
 - 4c. O aparelho fica sem memória: o sistema pausa o lote e mostra "O aparelho ficou sem memória. Feche outras abas e toque em Retomar."
-- 4d. Computador fraco (lote muito lento): ⚠ depende da D-3. Ramos possíveis: (a) o navegador continua, mais devagar, com estimativa de tempo; (b) o sistema oferece enviar o lote ao servidor para leitura lá.
-- 4e. Perda de conexão: as leituras continuam no aparelho. O envio espera a conexão. ⚠ A fila sem conexão depende da D-7.
+- 4d. Lote acima do limite de páginas do aparelho (D-3, limite definido na 1.2): o navegador lê as páginas até o limite, com estimativa de tempo. As páginas acima do limite seguem o modo servidor, com aviso de créditos e de fila (UC-079-26).
+- 4e. Perda de conexão (D-7): o lote pausa. Nada é salvo e nada fica guardado no aparelho. O sistema mostra "Sem conexão. O lote está pausado." Quando a conexão volta, o usuário toca em **Retomar**.
 - 4f. A versão do motor muda durante o lote (422 `motor_desatualizado`): o lote pausa, baixa a vigente e relê as folhas salvas e ainda não enviadas. As correções do usuário são mantidas quando a nova leitura tem o mesmo valor. Quando o valor muda, a questão volta a ser pendência.
 - 6a. Página sem marcadores: entra em **Recusadas** com o motivo da barreira.
 - 6b. Página de outra prova: tratada no UC-079-09.
@@ -321,12 +326,16 @@ Termos usados neste documento:
 
 **Variações por aparelho:** no computador, o lote é a entrada principal. No celular, o lote fica disponível com o aviso "Lotes grandes podem demorar no celular." e limite de páginas definido na 1.2.
 
+**Regra do PDF (D-11):** cada página do PDF abre como imagem, folha por folha. A análise corre em segundo plano. O resultado de cada página entra na tabela da página do lote. Os dados de envio de cada folha (chave de envio, sha256 e versão do motor) já ficam preparados nesse momento.
+
 **Regras de negócio:** só uma página fica em memória por Worker. A ordem do lote não decide o aluno: o QR decide. Nenhuma página é salva sem passar pela barreira de qualidade. A lista de páginas usa `x-tabela` no card principal, com a coluna **Ações** à direita ([ADR-0022](../../decisoes/0022-tabelas-cards-de-registros-e-avisos.md), [ADR-0039](../../decisoes/0039-coluna-de-acoes-a-direita-e-ordenacao.md)).
 
 **Critérios de aceite:**
 - [ ] Nenhuma tarefa longa acima de 50 ms ocorre na thread principal durante o lote (`PerformanceObserver`).
 - [ ] **Pausar** para depois da página atual; **Retomar** continua da página seguinte.
-- [ ] Ao recarregar ou reabrir os mesmos arquivos, as páginas já salvas não são enviadas de novo, e nenhuma `envio_id` duplica.
+- [ ] Ao reabrir os mesmos arquivos, as páginas já salvas não são enviadas de novo, e nenhuma `envio_id` duplica.
+- [ ] Sem conexão, o lote pausa, nada é salvo e nada fica guardado no aparelho.
+- [ ] Páginas acima do limite do aparelho seguem o modo servidor só depois do aviso confirmado (UC-079-26).
 - [ ] Os lotes de 40 e 200 páginas são lidos no computador de referência em tempo medido e registrado (meta proposta na 3.5).
 - [ ] O pico de memória da aba, medido via CDP (`Performance.getMetrics`, `JSHeapUsedSize` e memória do Worker), com 200 páginas fica até 1,2 × o pico com 40 páginas (proposta).
 - [ ] **Salvar sem pendências** nunca salva sem o modal de confirmação.
@@ -357,7 +366,7 @@ Termos usados neste documento:
 
 **Variações por entrada:** na câmera e na webcam, a recusa aparece sobre o vídeo, e a câmera continua aberta. Na foto, no PDF e no lote, a folha fica **Recusada** na fila, com o motivo e as ações **Remover** e **Trocar imagem**.
 
-**Regras de negócio:** a barreira no aparelho usa a mesma regra e os mesmos limites da barreira do servidor (FN-047). O servidor faz sempre uma verificação barata (dimensões, tipo e decodificação). A barreira completa roda de novo no servidor sempre que o servidor relê, conforme a ⚠ D-1 e o planejamento §6.6. Uma folha recusada no aparelho não vai ao servidor.
+**Regras de negócio:** a barreira no aparelho usa a mesma regra e os mesmos limites da barreira do servidor (FN-047). O servidor faz sempre uma verificação barata (dimensões, tipo e decodificação). A barreira completa roda de novo no servidor sempre que o servidor relê, conforme a D-1 (UC-079-20) e o planejamento §6.6. Uma folha recusada no aparelho não vai ao servidor.
 
 **Critérios de aceite:**
 - [ ] No conjunto de referência, a barreira no aparelho tem paridade de 100% (decisão e código).
@@ -396,7 +405,7 @@ Termos usados neste documento:
 - 3a. Aluno fora das turmas: "O aluno não pertence às turmas desta prova." (texto atual).
 - 3b. Aluno já tem leitura: ver UC-079-21.
 
-**Regras de negócio:** o QR envia a folha para a prova certa da mesma escola e espaço, como hoje. N e K do QR prevalecem sobre a prova. QR atual: `G360|P{prova}|A{aluno}|N|K|L`. O servidor decodifica de novo o QR da imagem e decide prova e aluno (planejamento §6.6, item 2d). ⚠ O QR atual não traz página. A forma de identificar a página depende da D-10.
+**Regras de negócio:** o QR envia a folha para a prova certa da mesma escola e espaço, como hoje. N e K do QR prevalecem sobre a prova. QR atual: `G360|P{prova}|A{aluno}|N|K|L`. O servidor decodifica de novo o QR da imagem e decide prova e aluno (planejamento §6.6, item 2d). O QR atual não traz página. O QR novo traz a página (D-10, FN-043), e o leitor aceita os dois formatos.
 
 **Critérios de aceite:**
 - [ ] No conjunto de referência, o QR lido no aparelho tem paridade de 100%.
@@ -438,14 +447,14 @@ Termos usados neste documento:
 - [ ] A leitura de um cartão de 45 questões cumpre a meta do planejamento §6.10, item 5, no celular e no computador de referência (subfase 1.2).
 - [ ] Todo resultado carrega a versão do motor.
 
-**Situação:** Parcial — reaproveita a lógica de `omr/ler_cartao.py` e `omr/layout.py` (cv2 + numpy). Hoje roda só no servidor. A forma de rodar no aparelho depende da D-4 e da D-5.
+**Situação:** Parcial — reaproveita a lógica de `omr/ler_cartao.py` e `omr/layout.py` (cv2 + numpy). Hoje roda só no servidor. No aparelho, o núcleo roda por Pyodide, com as mesmas versões do servidor (D-4, D-5).
 
 ---
 
 ## UC-079-11 — Ler respostas abertas (método transcricao-manuscrita)
 
 **Ator:** sistema
-**Permissão:** `cartao.enviar`. Uso da IA: ⚠ depende da D-9.
+**Permissão:** `cartao.enviar` para enviar a folha; `leitura.transcrever` (chave nova, D-9) para usar a IA local. A transcrição no aparelho não consome crédito. No modo servidor, a transcrição consome créditos de correção (UC-079-26).
 **Escopo:** regiões abertas do mapa de respostas
 **Pré-condições:** folha identificada; mapa com regiões do tipo aberta, com `tipo_esperado`; modelo de IA local pronto no aparelho (UC-080-01).
 **Pós-condições:** cada região aberta tem a lista de trechos, o recorte da imagem e a confiança.
@@ -459,7 +468,7 @@ Termos usados neste documento:
 5. O sistema marca as regiões de baixa confiança como pendência.
 
 **Fluxos alternativos e de erro:**
-- 2a. Modelo não carregado ou aparelho sem capacidade: ⚠ depende da D-2. A região fica **Não lida — transcrição indisponível**. Ver UC-079-23.
+- 2a. Modelo não carregado ou aparelho sem capacidade: o sistema mostra a mensagem simples do UC-079-23 e oferece o modo servidor para as regiões abertas (UC-079-26). Se o usuário não aceita, a região fica **Não lida — transcrição indisponível**. O usuário ainda pode digitar a transcrição no leitor (UC-079-16).
 - 3a. Região em branco: o sistema marca **Em branco**.
 - 3b. Desenho sem texto: o modelo devolve um trecho do tipo desenho. O sistema guarda o recorte.
 - 3c. Tempo esgotado na região: a região fica **Não lida**. As outras continuam.
@@ -497,7 +506,7 @@ Termos usados neste documento:
 
 **Fluxos alternativos e de erro:**
 - 2a. Tipo de região sem método disponível: a região fica **Não lida — método indisponível**. As outras regiões são lidas.
-- 5a. Transcrição indisponível no aparelho: ⚠ depende da D-2. As objetivas seguem normalmente.
+- 5a. Transcrição indisponível no aparelho: as objetivas seguem normalmente no aparelho. Só as regiões abertas vão ao modo servidor (UC-079-26), e só consomem crédito essas regiões.
 
 **Regras de negócio:** o leitor segue o mapa e não deduz o tipo da questão. Um novo método entra sem mudar o leitor visual nem o despacho (planejamento §6.1).
 
@@ -515,7 +524,7 @@ Termos usados neste documento:
 **Ator:** sistema; usuário da sessão para completar páginas
 **Permissão:** `cartao.enviar`
 **Escopo:** páginas da prova no mapa de respostas
-**Pré-condições:** mapa de respostas com páginas, vindo da FN-043; QR com página, conforme a ⚠ D-10.
+**Pré-condições:** mapa de respostas com páginas, vindo da FN-043; QR novo com página (D-10).
 **Pós-condições:** as páginas do aluno ficam agrupadas numa única leitura do aluno.
 **Tela/rota:** no leitor visual, faixa "Página 2 de 3" e lista de páginas do aluno. Tela 9 do planejamento §7.
 

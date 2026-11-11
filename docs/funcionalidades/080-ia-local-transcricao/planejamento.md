@@ -82,6 +82,8 @@ O responsável conduz o trabalho do modelo: seleção, dados, ajuste fino e comp
 | FN-079 Leitor360 | Define a interface do método `transcricao-manuscrita`, o perfil de capacidade e as regras de distribuição | Candidata |
 | FN-043 editor-provas-questoes | Produz o mapa de respostas com as regiões abertas e o tipo esperado | Candidata |
 | FN-010 app-mobile | Alvo nativo do modelo | Adiada |
+| Créditos de correção (sem FN) | Bloqueiam o Escriba no servidor (§8.3); o sistema de créditos não existe | Sem FN |
+| [FN-057 notificações](../057-notificacoes/planejamento.md) | Aviso ao usuário quando a transcrição no servidor termina; até lá, aviso no app | Pendente |
 | FN-061 e FN-062 LGPD | Base de consentimento, inventário e retenção para os dados de treino | Parcial |
 
 **Funcionalidades que dependem desta:** FN-079. Esta FN fornece o modelo e bloqueia só as subfases 6.x da FN-079 (UC-079-11 e UC-079-16).
@@ -150,7 +152,7 @@ A interface do método (entrada, saída, estados e confiança da região) perten
 
 ### 6.2 Regras
 
-- Nenhum dado sai do aparelho para terceiros. Nesta fase, a inferência é local (a fila no servidor é evolução futura, §8.3). O envio de imagem e resultado ao servidor do Gabarito360 segue a FN-079.
+- A inferência é local. Ela roda no aparelho e, no modo servidor (§8.3), no servidor do Gabarito360, no ambiente do responsável. Nenhum dado vai a terceiros em nenhum dos dois casos. O envio de imagem e resultado ao servidor do Gabarito360 segue a FN-079.
 - Registre a versão do modelo com cada transcrição. O servidor guarda essa versão junto do resultado.
 - Confira a licença da variante do Qwen antes da subfase 1.1. A licença precisa permitir uso comercial em SaaS e distribuição do modelo ajustado.
 - O modelo segue as regras de distribuição da [FN-079 §6.4](../079-leitor360/planejamento.md#64-núcleo-de-leitura-decisão-d-4): origem própria, sem download de Hugging Face em tempo de execução (`allowRemoteModels` falso ou equivalente), manifesto com sha256 por arquivo, SBOM e formato sem código executável (ONNX, GGUF ou safetensors, nunca pickle).
@@ -182,7 +184,7 @@ Esta FN não tem tela própria. As telas de preparo do modelo, de progresso do d
 |---|---|---|---|
 | Variante do Qwen e licença | Variantes pequenas de visão do Qwen | Comparar as variantes no conjunto de referência (1.1) e escolher a menor que atinge as metas | Pendente |
 | Metas de tamanho e latência por classe de aparelho | Valores definidos pelo responsável | Definir as classes de aparelho primeiro, depois as metas | Pendente |
-| Aparelho sem capacidade | Decisão única: D-2 da [FN-079](../079-leitor360/planejamento.md#8-riscos-e-decisões-pendentes-do-responsável) | — | Pendente |
+| Aparelho sem capacidade | Decisão única: D-2 da [FN-079](../079-leitor360/planejamento.md#8-riscos-e-decisões-pendentes-do-responsável) | — | Decidida: modo servidor (FN-079 D-2, [§6.12](../079-leitor360/planejamento.md#612-modo-servidor-leitura-no-servidor-com-fila-e-créditos)) |
 | Origem e consentimento dos dados de treino | Provas das turmas do responsável com consentimento / escolas parceiras / dados sintéticos / combinação | Começar com amostra pequena e consentida, nas regras do §6.3 | Pendente |
 | Formato de saída de fórmulas | LaTeX / MathML / outro | LaTeX, a confirmar pelo responsável | Pendente |
 | Formato de saída de desenhos | Só recorte / recorte e descrição sempre / descrição sob demanda | Recorte sempre; descrição só se necessária | Pendente |
@@ -204,17 +206,21 @@ Esta FN não tem tela própria. As telas de preparo do modelo, de progresso do d
 | Licença do modelo-base | Restrição comercial bloqueia o uso no SaaS | Conferir a licença antes de 1.1 |
 | Confiança mal calibrada | O leitor visual não destaca trechos errados | Medir a calibração (§5.1) |
 
-### 8.3 Evolução decidida: Escriba no servidor, com fila
+### 8.3 Decidido: Escriba no servidor, com fila e créditos
 
-Decisão do responsável em 11/11/2026. **Nesta fase, o Escriba roda só no aparelho.** Numa fase futura, quando o aparelho não tiver suporte, as imagens das respostas abertas sobem ao servidor. Um servidor dedicado roda o mesmo Escriba e transcreve. O usuário espera numa fila.
+Decisão do responsável em 11/11/2026 (D-2 da FN-079, [§6.12](../079-leitor360/planejamento.md#612-modo-servidor-leitura-no-servidor-com-fila-e-créditos), [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md)). O Escriba no servidor faz parte do plano. Ele é o modo servidor da FN-079, na subfase 6.3 da FN-079. Em ordem, vem depois da versão no aparelho. Quando o aparelho não tem suporte, as imagens das respostas abertas sobem ao servidor. O servidor roda o mesmo Escriba e transcreve. O usuário espera numa fila e gasta créditos de correção.
 
-Diretrizes para essa fase (a detalhar numa subfase própria, com mockup aprovado antes do código):
+Diretrizes para o modo servidor (a detalhar na subfase 6.3 da FN-079, com mockup aprovado antes do código):
 
 1. **Só as abertas vão para a fila.** As objetivas continuam sendo lidas no aparelho e conferidas na hora. Numa prova mista, as abertas ficam "Aguardando o Escriba". Numa produção textual, a folha inteira espera.
 2. **Espera assíncrona.** O usuário envia e pode sair da tela. O app mostra a posição na fila e um tempo estimado. Quando a transcrição termina, o usuário recebe um aviso e abre o leitor visual para conferir (UC-079-16). A conferência humana continua obrigatória.
-3. **Mesmo modelo, mesma versão.** O servidor usa a mesma versão do Escriba publicada para os aparelhos. A origem da transcrição ("aparelho" ou "servidor") e a versão ficam registradas com o resultado.
-4. **Texto da tela.** Continua simples, sem motivo nem lista de recursos. Proposta: "Este aparelho não tem suporte ao Escriba. As respostas abertas serão transcritas no servidor. Você recebe um aviso quando terminar." A tela mostra a posição na fila, por exemplo: "Na fila do Escriba: posição 12, cerca de 8 min".
-5. **Custo e créditos.** A transcrição no servidor gasta processamento do Gabarito360, e não do aparelho. Ela segue a regra das funcionalidades caras: limite incluso no plano e crédito avulso acima do limite. A transcrição no aparelho continua sem crédito (D-9 da FN-079).
+3. **Paridade: mesmo modelo, mesma versão.** O servidor usa o mesmo Escriba, na mesma versão publicada para os aparelhos. Para a mesma imagem, o resultado é igual nos dois lados. A origem da transcrição ("aparelho" ou "servidor") e a versão ficam registradas com o resultado.
+4. **Texto da tela.** Continua simples, sem motivo nem lista de recursos. A mensagem de capacidade é "Este aparelho não tem suporte ao Escriba". Antes do primeiro envio, a tela mostra os dois avisos exatos do modo servidor (FN-079 §6.12, regra 1):
+   - "Os créditos de correção serão consumidos."
+   - "A correção não é instantânea. Ela entra numa fila, e você recebe um aviso quando terminar."
+
+   A tela mostra a posição na fila, por exemplo: "Na fila do Escriba: posição 12, cerca de 8 min".
+5. **Custo e créditos.** A transcrição no servidor gasta processamento do Gabarito360, e não do aparelho. Ela consome créditos de correção (D-9 da FN-079). Proposta: só as regiões abertas consomem. A transcrição no aparelho nunca consome crédito. O sistema de créditos de correção ainda não existe e não tem FN. Ele bloqueia o Escriba no servidor.
 6. **Dados.** A imagem já vai ao servidor hoje (FN-079). A transcrição no servidor não envia nada a terceiros. O servidor dedicado fica no ambiente do responsável, no Brasil. Um serviço externo exige análise de transferência e entra na lista de terceiros do [11](../../arquitetura/11-seguranca-e-privacidade.md).
 7. **Infraestrutura (risco).** ⚠ Inferência, sem medição: a VM atual (Xeon E5-2650 v4, 16 GB, sem GPU) deve transcrever devagar, vários segundos por resposta. Em semana de provas a fila pode ficar longa. A fase precisa medir o tempo por resposta e decidir entre GPU dedicada, limite de folhas por hora ou prioridade por plano.
 
@@ -235,3 +241,4 @@ Nenhum.
 | 2026-11-11 | Regra de interface: as telas falam em "recursos do Escriba", nunca em baixar uma IA ou um modelo | lucasgenial |
 | 2026-11-11 | Revisão independente (ui-ux, qualidade-testes, seguranca-privacidade, gerente-projetos) aplicada | lucasgenial |
 | 2026-11-11 | Evolução decidida (§8.3): no futuro, o aparelho sem suporte envia as abertas ao Escriba no servidor, com fila. Nesta fase, só no aparelho | lucasgenial |
+| 2026-11-11 | Alinhado às decisões D-1 a D-13 da FN-079; Escriba no servidor com fila e créditos entra no plano | lucasgenial |

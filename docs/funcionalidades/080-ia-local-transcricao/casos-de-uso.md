@@ -1,7 +1,8 @@
 # 080 — Escriba: IA local de transcrição — Casos de uso
 
 **Natureza:** nova (candidata; casos de uso preliminares de alto nível)
-**Perfis envolvidos:** perfis que leem respostas abertas no Leitor360 (os mesmos de `cartao.enviar` e `correcao.alterar`, a confirmar na FN-079); responsável pelo modelo (papel técnico, fora dos perfis da aplicação). Ver [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md). A permissão de uso da IA segue a decisão D-9 da FN-079.
+**Perfis envolvidos:** perfis que leem respostas abertas no Leitor360 (os mesmos de `cartao.enviar` e `correcao.alterar`, a confirmar na FN-079); responsável pelo modelo (papel técnico, fora dos perfis da aplicação). Ver [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md). A permissão de uso do Escriba é a chave nova `leitura.transcrever` (D-9 da FN-079). No aparelho não há crédito. No servidor, a transcrição consome créditos de correção.
+**Versão:** 2 (11/11/2026) — alinhado às decisões D-1 a D-13 da FN-079 e ao modo servidor.
 **Atualizado em:** 2026-11-11
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Nenhum caso está implementado. Os números de tamanho, tempo e qualidade são metas a definir pelo responsável ([planejamento §5.1](planejamento.md)). O Leitor360 ([FN-079](../079-leitor360/casos-de-uso.md)) chama este modelo pelo método `transcricao-manuscrita`.
@@ -11,7 +12,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 ## UC-080-01 — Baixar e preparar o modelo no aparelho
 
 **Ator:** usuário do Leitor360 (o download é transparente)
-**Permissão:** a mesma da leitura de respostas abertas na FN-079 (⚠ D-9 da FN-079)
+**Permissão:** `leitura.transcrever` (D-9 da FN-079), sem crédito no aparelho
 **Escopo:** aparelho do usuário
 **Pré-condições:** a prova tem regiões abertas no mapa de respostas; o aparelho passou na detecção de capacidade (UC-079-02).
 **Pós-condições:** o modelo está no cache do aparelho, com versão e integridade conferidas.
@@ -27,7 +28,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 - 1a. O modelo vigente já está no cache: o Leitor360 carrega o modelo sem download.
 - 2a. A conexão cai: o download retoma depois, sem recomeçar do zero (a confirmar no plano).
 - 3a. A integridade falha: o Leitor360 apaga o arquivo e baixa de novo.
-- 4a. O aparelho não aguenta o modelo: vai para UC-080-09.
+- 4a. O aparelho não aguenta o modelo: vai para UC-080-09 e, com o aviso confirmado, para UC-080-10.
 
 **Regras de negócio:** só a prova com região aberta pede o modelo. Provas só objetivas não baixam o modelo. Nenhum arquivo vem de CDN ou do Hugging Face em tempo de execução. O modelo usa formato sem código executável.
 
@@ -234,21 +235,80 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 ## UC-080-09 — Atender aparelho sem capacidade
 
 **Ator:** Leitor360
-**Permissão:** herdada da sessão do Leitor360
+**Permissão:** `leitura.transcrever`
 **Escopo:** aparelho do usuário
-**Pré-condições:** a detecção de capacidade indica que o aparelho não aguenta o modelo (memória, WebGPU, WASM ou tempo).
-**Pós-condições:** pendente da decisão do responsável.
-**Tela/rota:** Leitor360 (FN-079, UC-079-23; sem mockup)
+**Pré-condições:** a detecção de capacidade indica que o aparelho não aguenta o Escriba (memória, WebGPU, WASM ou tempo).
+**Pós-condições:** o usuário sabe que o aparelho não tem suporte e recebe a oferta do modo servidor.
+**Tela/rota:** Leitor360 (FN-079, UC-079-23 e UC-079-26; mockup `mockups/leitor360.html` aprovado em 11/11/2026)
 
-⚠ O comportamento está pendente. Opções na D-2 da [FN-079](../079-leitor360/planejamento.md#8-riscos-e-decisões-pendentes-do-responsável) (decisão única). A detecção pertence à FN-079 §6.3; esta FN fornece os requisitos mínimos do modelo.
+Decisão D-2 da [FN-079](../079-leitor360/planejamento.md#612-modo-servidor-leitura-no-servidor-com-fila-e-créditos): o aparelho sem capacidade continua corrigindo pelo app, e o servidor transcreve as regiões abertas. A detecção pertence à FN-079 §6.3; esta FN fornece os requisitos mínimos do Escriba.
 
-**Fluxo principal (provisório):**
+**Fluxo principal:**
 1. O Leitor360 detecta a falta de capacidade antes do download.
-2. O Leitor360 informa o usuário e aplica a opção decidida pelo responsável.
+2. O Leitor360 mostra a mensagem simples "Este aparelho não tem suporte ao Escriba".
+3. O Leitor360 oferece o modo servidor (FN-079 UC-079-26).
+4. O usuário aceita e o fluxo segue no UC-080-10.
+
+**Fluxos alternativos e de erro:**
+- 4a. O usuário não aceita: as objetivas continuam no aparelho e as regiões abertas ficam sem transcrição. A folha pode ser salva com pendências (D-11 da FN-079).
 
 **Critérios de aceite:**
-- [ ] O aparelho sem capacidade faz zero requisições aos arquivos do modelo (log de rede).
-- [ ] A mensagem diz só "Este aparelho não tem suporte ao Escriba" e a ação possível. Ela não lista recursos nem motivos (decisão do responsável em 11/11/2026).
-- [ ] Nenhum dado vai a terceiros, em qualquer opção.
+- [ ] O aparelho sem capacidade faz zero requisições aos arquivos do Escriba (log de rede).
+- [ ] A mensagem diz só "Este aparelho não tem suporte ao Escriba" e a oferta do modo servidor. Ela não lista recursos nem motivos (decisão do responsável em 11/11/2026).
+- [ ] Nenhum dado vai a terceiros.
 
 **Situação:** Não implementado
+
+---
+
+## UC-080-10 — Transcrever no servidor, com fila
+
+**Ator:** usuário do Leitor360; servidor do Gabarito360 (executa o Escriba)
+**Permissão:** `leitura.transcrever`; o servidor revalida permissão, escopo e vínculo a cada envio
+**Escopo:** servidor do Gabarito360, no ambiente do responsável, no Brasil
+**Pré-condições:** UC-080-09 concluído; o usuário aceitou o modo servidor; existe saldo de créditos de correção (sistema de créditos sem FN, bloqueia este caso); a prova tem regiões abertas.
+**Pós-condições:** a transcrição está registrada com origem "servidor" e a versão do Escriba; o usuário foi avisado; a conferência humana está pendente.
+**Tela/rota:** Leitor360 (FN-079 §6.12 e UC-079-26); aviso pela FN-057, ou no app até ela existir
+
+**Fluxo principal:**
+1. O Leitor360 mostra um modal com os dois avisos: "Os créditos de correção serão consumidos." e "A correção não é instantânea. Ela entra numa fila, e você recebe um aviso quando terminar."
+2. O usuário confirma. O aviso reaparece a cada sessão do Leitor360.
+3. O Leitor360 envia a imagem de cada folha, foto por foto, com o marcador quando o QR foi lido.
+4. O servidor revalida permissão e escopo. O QR prevalece sobre o marcador.
+5. O servidor põe só as regiões abertas na fila. As objetivas seguem no aparelho, se o núcleo roda.
+6. O app mostra a posição na fila e o tempo estimado. O usuário pode sair da tela.
+7. O servidor roda o mesmo Escriba, na mesma versão publicada para os aparelhos, e registra a origem "servidor" e a versão.
+8. O servidor avisa o usuário ao terminar.
+9. O usuário confere a transcrição no leitor visual (UC-079-16). A conferência humana é obrigatória.
+
+**Fluxos alternativos e de erro:**
+- 1a. O usuário cancela o modal: nada é enviado e nenhum crédito é consumido.
+- 3a. A barreira de qualidade recusa a imagem: o servidor não consome crédito.
+- 4a. O QR diverge do marcador: o QR prevalece e a folha vai para revisão.
+- 4b. A permissão ou o escopo não confere: o servidor recusa o envio.
+- 7a. O Escriba falha na região: a região fica como não lida e o crédito dessa região não é consumido (proposta).
+- Sem saldo de créditos: o servidor recusa o envio e o app informa o usuário.
+
+**Regras de negócio:** o servidor nunca altera a nota nem decide a resposta. Só as regiões abertas consomem créditos (proposta). O processamento no aparelho nunca consome. Nenhum dado vai a terceiros.
+
+**Critérios de aceite:**
+- [ ] O modal mostra exatamente os dois avisos, sem motivo nem lista de recursos, antes do primeiro envio.
+- [ ] Para a mesma imagem, o servidor e o aparelho produzem a mesma transcrição, com a mesma versão do Escriba (conjunto de referência da FN-079).
+- [ ] Só as regiões abertas entram na fila e consomem créditos.
+- [ ] Toda transcrição guarda a origem ("servidor") e a versão do Escriba.
+- [ ] Uma imagem recusada pela barreira de qualidade não consome crédito.
+- [ ] O usuário vê a posição na fila e pode sair da tela sem perder o envio.
+- [ ] O usuário recebe um aviso ao terminar.
+- [ ] A transcrição só vale depois da conferência humana.
+- [ ] O log de rede do servidor não mostra requisição a terceiros durante a inferência.
+
+**Situação:** Não implementado
+
+---
+
+## Histórico de versões
+
+| Versão | Data | Mudança | Por |
+|---|---|---|---|
+| 1 | 2026-11-11 | Casos de uso preliminares UC-080-01 a UC-080-09 | lucasgenial |
+| 2 | 2026-11-11 | Alinhado às decisões D-1 a D-13 da FN-079; UC-080-09 decidido; UC-080-10 (Escriba no servidor, com fila) | lucasgenial |
