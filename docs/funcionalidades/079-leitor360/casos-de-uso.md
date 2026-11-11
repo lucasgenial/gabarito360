@@ -2,7 +2,7 @@
 
 **Natureza:** evolução de existente
 **Perfis envolvidos:** Administrador da Rede, Diretor Escolar, Coordenador, Professor e Professor autônomo (leem, conferem e corrigem); Aplicador (captura no modo do dia; vê só as marcações da folha atual, conforme a D-6); Diretor de Núcleo (só acompanha, pela FN-045); equipe técnica (qualidade do motor). Ver [permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md).
-**Versão:** 2 (11/11/2026) — decisões D-1 a D-13 tomadas; modo servidor com fila e créditos.
+**Versão:** 2.1 (11/11/2026) — decisões D-1 a D-13 tomadas; modo servidor com fila e créditos; sem releitura pelo servidor.
 **Atualizado em:** 2026-11-11
 
 Cada caso de uso é verificável. Os critérios viram testes ou conferências registradas por texto. Este documento descreve comportamento **proposto**. Rotas, tabelas e campos novos aparecem como "proposta". O que já existe aparece com o nome do código.
@@ -362,11 +362,11 @@ Termos usados neste documento:
 3. Com a folha adequada, o sistema segue para a identificação (UC-079-09).
 
 **Fluxos alternativos e de erro:**
-- 1a. Folha recusada: o sistema mostra a mensagem do código. Mensagens e códigos: `omr/qualidade.py` e [UC-047-01](../047-omr-qualidade-resultado/casos-de-uso.md). Códigos atuais: `baixa_resolucao`, `marcadores_incompletos`, `marcador_cortado`, `geometria_insegura`, `sem_nitidez`, `imagem_ilegivel`.
+- 1a. Folha recusada: o sistema mostra a mensagem do código. Todo problema de qualidade exige que o usuário verifique a prova manualmente (revisão manual); não há decisão automática. Mensagens e códigos: `omr/qualidade.py` e [UC-047-01](../047-omr-qualidade-resultado/casos-de-uso.md). Códigos atuais: `baixa_resolucao`, `marcadores_incompletos`, `marcador_cortado`, `geometria_insegura`, `sem_nitidez`, `imagem_ilegivel`.
 
 **Variações por entrada:** na câmera e na webcam, a recusa aparece sobre o vídeo, e a câmera continua aberta. Na foto, no PDF e no lote, a folha fica **Recusada** na fila, com o motivo e as ações **Remover** e **Trocar imagem**.
 
-**Regras de negócio:** a barreira no aparelho usa a mesma regra e os mesmos limites da barreira do servidor (FN-047). O servidor faz sempre uma verificação barata (dimensões, tipo e decodificação). A barreira completa roda de novo no servidor sempre que o servidor relê, conforme a D-1 (UC-079-20) e o planejamento §6.6. Uma folha recusada no aparelho não vai ao servidor.
+**Regras de negócio:** a barreira no aparelho usa a mesma regra e os mesmos limites da barreira do servidor (FN-047). O servidor faz sempre uma verificação barata (dimensões, tipo e decodificação). O servidor não relê a folha. Uma folha recusada no aparelho não vai ao servidor.
 
 **Critérios de aceite:**
 - [ ] No conjunto de referência, a barreira no aparelho tem paridade de 100% (decisão e código).
@@ -506,7 +506,7 @@ Termos usados neste documento:
 
 **Fluxos alternativos e de erro:**
 - 2a. Tipo de região sem método disponível: a região fica **Não lida — método indisponível**. As outras regiões são lidas.
-- 5a. Transcrição indisponível no aparelho: as objetivas seguem normalmente no aparelho. Só as regiões abertas vão ao modo servidor (UC-079-26), e só consomem crédito essas regiões.
+- 5a. Transcrição indisponível no aparelho: as objetivas seguem normalmente no aparelho. As regiões abertas vão ao modo servidor (UC-079-26). O crédito é por correção da prova do aluno (aluno × prova), sem divisão por região.
 
 **Regras de negócio:** o leitor segue o mapa e não deduz o tipo da questão. Um novo método entra sem mudar o leitor visual nem o despacho (planejamento §6.1).
 
@@ -767,7 +767,7 @@ Termos usados neste documento:
 3. A API confere permissão, escopo, correção aberta e conteúdo da chave.
 4. A API confere o sha256 recebido com a imagem recebida. Esse hash garante só a integridade do transporte.
 5. A API decodifica o QR da imagem e recalcula estado e confiança a partir de `detectadas`.
-6. A API faz a verificação barata (dimensões, tipo e decodificação) e, conforme a D-1, a releitura e a barreira completa (FN-047): uma amostra das folhas (proposta: 10%), toda folha com correção do usuário e 100% dos envios de quem não tem `correcao.alterar` (UC-079-20).
+6. A API faz só a verificação barata (dimensões, tipo e decodificação) e grava. O servidor não relê a folha. Quem confere a leitura é o usuário (UC-079-20).
 7. A API grava, numa transação que revalida o acesso, a imagem, o resultado e as decisões do usuário.
 8. A API calcula a nota quando não há pendências.
 9. A API responde com o estado do envio. O indicador da folha muda para **Enviada**.
@@ -779,16 +779,16 @@ Termos usados neste documento:
 - 3a. Mesma chave e mesmo conteúdo: a API devolve o envio existente. Nada é duplicado.
 - 3b. Mesma chave e conteúdo diferente: 409 `chave_reutilizada`. Nada é alterado.
 - 3c. Chave usada em outra prova: 409. A folha fica **Erro** com "Esta folha já foi enviada para outra prova."
-- 3d. `correcoes[]` de quem não tem `correcao.alterar`: 403. O servidor relê a folha.
+- 3d. `correcoes[]` de quem não tem `correcao.alterar`: 403. A folha fica pendente para o professor conferir na revisão. ⚠ Inferência, não decisão: a proteção contra resultado adulterado é a conferência humana, a imagem original guardada, a nota só no servidor e a auditoria.
 - 4a. sha256 diferente: 422 `imagem_divergente`. "A imagem chegou incompleta. Envie de novo." O sistema reenvia uma vez.
 - 5a. QR ou aluno diferente do decodificado no servidor: 422 `identificacao_divergente`.
 - 5b. Estado ou confiança incoerente com `detectadas`: 422 `leitura_inconsistente`. O evento é registrado.
-- 6a. A barreira do servidor recusa uma folha que o aparelho aprovou: a folha fica **Recusada** com a mensagem do código. O evento entra nas métricas (UC-079-25).
+- 6a. A verificação barata do servidor recusa uma folha que o aparelho aprovou: a folha fica **Recusada** com a mensagem do código, e o usuário verifica a prova manualmente. O evento entra nas métricas (UC-079-25).
 - 6b. Versão do motor fora da lista aceita: 422 `motor_desatualizado`. O cliente relê a folha com a versão vigente, sem nova ação do usuário, e reenvia com a mesma `envio_id`. O leitor mostra "O leitor foi atualizado. A folha foi lida de novo." Se o valor de uma questão mudar, ela volta a ser pendência.
 - 7a. Correção fechada ou acesso revogado entre o envio e a gravação: o envio fica `recusado` e nada é gravado (UC-079-22).
 - 9a. Aplicador: a resposta traz só identificação, estado e aluno, como hoje.
 
-**Regras de negócio:** a API é dona do banco. O resultado do aparelho é uma proposta de leitura. A conferência no servidor segue o UC-079-20. A nota é calculada só no servidor. O autor é o usuário da sessão, e o momento é o do servidor. O envio vai para a fila alta, como hoje (`FilaCartoes`).
+**Regras de negócio:** a API é dona do banco. O resultado do aparelho é uma proposta de leitura. A conferência da leitura é sempre do usuário (UC-079-20). A nota é calculada só no servidor. O autor é o usuário da sessão, e o momento é o do servidor. O envio vai para a fila alta, como hoje (`FilaCartoes`).
 
 **Critérios de aceite:**
 - [ ] Um reenvio com a mesma chave e o mesmo conteúdo não cria segundo cartão.
@@ -803,39 +803,46 @@ Termos usados neste documento:
 
 ---
 
-## UC-079-20 — Conferir no servidor a leitura feita no aparelho e tratar divergência
+## UC-079-20 — Tratar leitura com dificuldade (nova imagem, reenvio sem custo ou revisão manual)
 
-**Ator:** sistema (servidor); Professor, Coordenador, Diretor Escolar ou Administrador da Rede para decidir a divergência
-**Permissão:** sistema: não se aplica; decidir: `correcao.alterar`
-**Escopo:** prova no escopo
-**Pré-condições:** resultado do aparelho recebido (UC-079-19).
-**Pós-condições:** leitura confirmada; ou divergência registrada e encaminhada para decisão.
-**Tela/rota:** tela 13 do planejamento §7: rótulo **Divergência aparelho × servidor** na revisão da prova (web `correcao.revisao`).
+**Ator:** Professor, Coordenador, Diretor Escolar ou Administrador da Rede; sistema (Escriba)
+**Permissão:** `cartao.enviar` para reenviar; `correcao.alterar` para a revisão manual
+**Escopo:** prova no escopo do vínculo ativo
+**Pré-condições:** folha lida com dificuldade: imagem ruim, ou o Escriba teve dificuldade (UC-079-11).
+**Pós-condições:** nova imagem recebida; ou folha reenviada sem novo crédito; ou folha na revisão manual.
+**Tela/rota:** leitor visual (UC-079-14) e revisão da prova (web `correcao.revisao`).
 
-**Fluxo principal (D-1, ramo b — amostra):**
-1. O servidor escolhe as folhas a reler. São três grupos: uma amostra sorteada (taxa proposta: 10%), toda folha com correção do usuário em `correcoes[]` e 100% dos envios de quem não tem `correcao.alterar`. Nenhum campo do cliente muda o sorteio.
-2. O servidor lê a imagem com o motor do servidor, que tem o mesmo código e a mesma versão do aparelho (D-4).
-3. O servidor compara questão por questão com a leitura do aparelho, sem contar as decisões do usuário.
-4. Sem diferença, a leitura fica confirmada.
-5. As folhas fora dos três grupos ficam com a leitura do aparelho.
+**Regra geral:** o servidor não relê folha e não sorteia amostra. Quem confere a leitura é sempre o usuário. Problema de qualidade da imagem sempre exige que o usuário verifique a prova manualmente. Não há decisão automática.
+
+**Fluxo principal (a): Escriba ativo no aparelho com imagem ruim**
+1. O Escriba detecta que a imagem não permite ler a região.
+2. O Escriba pede uma nova imagem e/ou a revisão manual do usuário.
+3. O usuário captura a nova imagem ou confere a prova manualmente no leitor visual (UC-079-14).
+
+**Fluxo principal (b): modo servidor com dificuldade do Escriba do servidor**
+1. O servidor termina a leitura e marca os alunos com problema.
+2. O sistema mostra ao usuário a lista desses alunos.
+3. O usuário escolhe **Reenviar só os alunos com problema** e/ou **Revisar manualmente**.
+4. No reenvio, o sistema não cobra crédito de novo (UC-079-26).
+5. A revisão manual é o caminho principal. O usuário confere a folha no leitor visual.
 
 **Fluxos alternativos e de erro:**
-- 2a. Divergência numa questão sem decisão do usuário: a questão vai para a revisão com o rótulo **Divergência aparelho × servidor**. A nota espera a decisão.
-- 2b. Divergência numa questão já decidida pelo usuário: a decisão do usuário prevalece. A divergência vira pendência de revisão e nunca troca a decisão em silêncio.
-- 2c. Muitas divergências da mesma versão do motor: o sistema alerta a equipe técnica (UC-079-25).
+- (a)-2a. O usuário não envia nova imagem: a folha segue para a revisão manual.
+- (b)-3a. O usuário reenvia e a dificuldade continua: a folha vai para a revisão manual, sem novo crédito.
+- (b)-3b. A folha enviada por quem não tem `correcao.alterar` (aplicador) fica pendente para o professor conferir na revisão. ⚠ Inferência, não decisão.
 
-**Regras de negócio:** a nota é sempre calculada no servidor. Toda divergência fica registrada com as duas leituras, a versão do motor e a versão do mapa.
+**Regras de negócio:** a nota é sempre calculada no servidor, só sem pendências. A proteção contra resultado adulterado é a conferência humana, a imagem original guardada, a nota só no servidor e a auditoria. Toda dificuldade registra a versão do motor e a versão do mapa. Muitas dificuldades da mesma versão do motor alertam a equipe técnica (UC-079-25).
 
 **Critérios de aceite:**
-- [ ] Toda divergência registrada mostra as duas leituras e as versões.
-- [ ] Uma questão divergente sem decisão não entra na nota antes da decisão.
-- [ ] Um envio de quem não tem `correcao.alterar` é sempre relido.
-- [ ] Toda folha com correção do usuário é relida.
-- [ ] A divergência numa questão decidida pelo usuário vira pendência de revisão e não troca a decisão.
-- [ ] O sorteio da amostra não depende de nenhum campo do cliente.
+- [ ] O servidor não relê nenhuma folha e não sorteia amostra.
+- [ ] Com imagem ruim no aparelho, o Escriba pede nova imagem e/ou revisão manual.
+- [ ] No modo servidor, o usuário reenvia só os alunos com problema, sem nova cobrança de crédito.
+- [ ] Todo problema de qualidade da imagem leva à verificação manual do usuário.
+- [ ] A revisão manual está disponível em toda folha com dificuldade.
+- [ ] Uma folha enviada por quem não tem `correcao.alterar` fica pendente para o professor.
 - [ ] A decisão está registrada na [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md).
 
-**Situação:** Não implementado — reaproveitável: o motor do servidor (`NativoOmrDriver`, `omr/ler_cartao.py`) e a fila de revisão (`CartaoController::revisao`).
+**Situação:** Não implementado — reaproveitável: a fila de revisão (`CartaoController::revisao`) e o motor do servidor (`NativoOmrDriver`, `omr/ler_cartao.py`).
 
 ---
 
@@ -946,8 +953,8 @@ Termos usados neste documento:
 **Ator:** Professor, Professor autônomo, Coordenador, Diretor Escolar, Administrador da Rede; Aplicador envia a captura, sem corrigir
 **Permissão:** `cartao.enviar`; `leitura.transcrever` para as regiões abertas (D-9); `correcao.alterar` para conferir e corrigir no leitor
 **Escopo:** prova no escopo do vínculo ativo; créditos do escopo cobrado
-**Pré-condições:** UC-079-01 em andamento; o aparelho não processa (UC-079-23), o lote passou do limite do aparelho (UC-079-07, 4d) ou o usuário escolheu o modo servidor; saldo de créditos suficiente (⚠ dependência abaixo).
-**Pós-condições:** folha processada no servidor com o mesmo resultado que o aparelho daria; créditos consumidos por folha processada; folha aberta no leitor visual para conferência.
+**Pré-condições:** UC-079-01 em andamento; o aparelho não processa (UC-079-23), o lote passou do limite do aparelho (UC-079-07, 4d) ou o usuário escolheu o modo servidor; saldo de créditos suficiente (dependência do sistema de créditos, abaixo).
+**Pós-condições:** folha processada no servidor com o mesmo resultado que o aparelho daria; créditos consumidos por correção de prova de aluno (aluno × prova); folha aberta no leitor visual para conferência.
 **Tela/rota:** tela H do mockup `mockups/leitor360.html` (`data-tela="sem-ia"`, "Aparelho sem capacidade para o Escriba"); modal de aviso da aplicação ([ADR-0025](../../decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)). Envio pela rota atual `POST v1/provas/{id}/cartoes`, com o campo `modo = servidor` e sem `leitura` nas regiões que o servidor lê ([planejamento §6.6](planejamento.md#66-api-proposta)). Regras: [planejamento §6.12](planejamento.md#612-modo-servidor-leitura-no-servidor-com-fila-e-créditos).
 
 **Fluxo principal:**
@@ -971,20 +978,23 @@ Termos usados neste documento:
 - 4a. Sem QR legível no aparelho: a imagem vai sem marcador, e o servidor identifica a folha como hoje.
 - 5a. Marcador forjado ou adulterado (outra prova, outro aluno): o marcador só encaminha. O servidor revalida e decodifica o QR da imagem. O QR prevalece, e a folha vai para revisão. O marcador nunca muda a prova nem o aluno.
 - 6a. Marcador de prova ou aluno fora do escopo do usuário: o servidor recusa a folha com a mensagem do UC-079-09, 2b.
-- 6b. A barreira de qualidade recusa a imagem: a folha fica **Recusada** com a mensagem do código. Ela não consome créditos.
+- 6b. A barreira de qualidade recusa a imagem: a folha fica **Recusada** com a mensagem do código. O usuário verifica a prova manualmente. Ela não consome créditos.
 - 8a. O usuário sai da tela: a fila continua. Ao voltar, ele vê o estado de cada folha.
-- 9a. Prova mista com só o Escriba faltando no aparelho: o aparelho lê as objetivas, e o servidor transcreve só as regiões abertas. Só essas regiões consomem créditos.
+- 9a. Prova mista com só o Escriba faltando no aparelho: o aparelho lê as objetivas, e o servidor transcreve as regiões abertas. O crédito é um só por aluno × prova, sem divisão por região.
 - 9b. A fila tem falha no servidor: a folha fica **Erro** com "Não foi possível ler esta folha. Capture de novo ou escolha outro arquivo." Ela não consome créditos.
+- 9c. O Escriba do servidor teve dificuldade com um aluno: o usuário reenvia só os alunos com problema, sem cobrar crédito de novo, e/ou segue para a revisão manual (UC-079-20).
 - 10a. Sem conexão durante o envio: a folha não é enviada, e nada fica guardado no aparelho (D-7, D-8). O sistema mostra "Sem conexão. Esta folha ainda não foi salva."
-- 11a. Divergência de leitura: segue o UC-079-20.
+- 11a. Leitura com dificuldade: segue o UC-079-20 (nova imagem, reenvio sem custo ou revisão manual).
 - 11b. O usuário quer corrigir a transcrição: ele digita no leitor visual (UC-079-16).
-- 3b. Saldo de créditos insuficiente ou sistema de créditos indisponível: o sistema bloqueia o envio e mostra "Os créditos de correção acabaram." (texto proposto). ⚠ O sistema de créditos não existe; ver as regras.
+- 3b. Sem saldo de créditos (confirmado) ou sistema de créditos indisponível: o sistema recusa o envio e mostra "Os créditos de correção acabaram." (texto proposto). O sistema de créditos não existe ainda; ver a dependência nas regras.
 
 **Regras de negócio:**
-- **Consumo de créditos (proposta):** por folha processada no servidor. Em prova mista com só o Escriba faltando, só as regiões abertas consomem. A unidade e o preço vêm da FN de créditos.
-- **Não consome:** o processamento no aparelho; a imagem recusada pela barreira de qualidade; a folha com erro do servidor (proposta).
+- **Consumo de créditos:** a unidade é uma correção de prova de um aluno (aluno × prova). Várias páginas do mesmo aluno na mesma prova valem 1 crédito. Não há cobrança por folha nem por região. O preço vem da FN de créditos.
+- **Reenvio:** reenviar só os alunos com problema não cobra crédito de novo.
+- **Sem saldo:** o envio é recusado (confirmado).
+- **Não consome:** o processamento no aparelho; a imagem recusada pela barreira de qualidade; a folha com erro do servidor; o reenvio de aluno com problema.
 - **Paridade:** para a mesma imagem, o resultado do servidor é igual ao do aparelho. O conjunto de referência prova isso (UC-079-24).
-- **O marcador só encaminha** (recomendação, a confirmar). O QR da imagem decide prova e aluno.
+- **O marcador só encaminha** (confirmado). Se ele diverge do QR, vale o QR e a folha vai para revisão.
 - **Dados:** a imagem já vai ao servidor em todo envio (D-12). O modo servidor não envia nada a terceiros.
 - **⚠ Dependência:** o sistema de créditos de correção não existe no código nem tem FN. Ele bloqueia as subfases 4.3 e 6.3 ([planejamento §8](planejamento.md#8-riscos-e-decisões-pendentes-do-responsável)).
 
@@ -997,12 +1007,13 @@ Termos usados neste documento:
 - [ ] A tela mostra a posição na fila e o tempo estimado, e o usuário pode sair dela.
 - [ ] O usuário recebe um aviso quando a folha termina.
 - [ ] Para a mesma imagem, o resultado do servidor tem paridade de 100% com o do aparelho, nas mesmas versões.
-- [ ] Os créditos consomem por folha processada no servidor; o processamento no aparelho e a imagem recusada não consomem.
-- [ ] Numa prova mista com só o Escriba faltando, só as regiões abertas consomem.
-- [ ] Sem créditos, o envio é bloqueado com mensagem.
+- [ ] O crédito consome por correção de prova de aluno (aluno × prova); várias páginas do mesmo aluno na mesma prova consomem 1 crédito.
+- [ ] O processamento no aparelho e a imagem recusada não consomem.
+- [ ] O reenvio só dos alunos com problema não cobra crédito.
+- [ ] Sem saldo, o envio é recusado com mensagem.
 - [ ] Conferência registrada por texto nas larguras do ADR-0057, temas claro e escuro.
 
-**Situação:** Não implementado — o servidor lê hoje cada foto enviada (UC-045-02) e a fila alta existe (`FilaCartoes`). Não existem o marcador, a posição na fila, o aviso ao terminar, o campo `modo` nem o sistema de créditos. Mockup aprovado em 11/11/2026 (tela H).
+**Situação:** Não implementado — o servidor lê hoje cada foto enviada (UC-045-02) e a fila alta existe (`FilaCartoes`). Não existem o marcador, a posição na fila, o aviso ao terminar, o campo `modo` nem o sistema de créditos (dependência). Mockup aprovado em 11/11/2026 (tela H).
 
 ---
 
@@ -1101,7 +1112,7 @@ Termos usados neste documento:
    - tempo de leitura;
    - questões destacadas por estado;
    - questões alteradas pelo usuário em relação à leitura;
-   - divergências aparelho × servidor (UC-079-20).
+   - leituras com dificuldade e reenvios (UC-079-20).
 2. A equipe agrega as métricas por versão do motor.
 3. A equipe propõe novos limiares com base nas decisões reais dos usuários.
 4. A nova versão passa pelo UC-079-24 antes de valer.
@@ -1157,3 +1168,4 @@ Casos comuns a todas as entradas: UC-079-08 (barreira), UC-079-09 (QR), UC-079-1
 |---|---|---|---|
 | 1 | 2026-11-11 | Casos de uso iniciais | lucasgenial |
 | 2 | 2026-11-11 | Decisões D-1 a D-13, modo servidor (UC-079-26), trava de fechamento (UC-079-27) | lucasgenial |
+| 2.1 | 2026-11-11 | Correções do responsável: crédito por correção de prova do aluno; sem releitura pelo servidor; reenvio sem custo; qualidade exige revisão manual; marcador confirmado | lucasgenial |

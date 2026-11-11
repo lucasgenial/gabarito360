@@ -2,7 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
-**Conforme princípios:** versão 12
+**Conforme princípios:** versão 13
 **Posição no plano mestre:** fora das ondas (candidata; aguarda priorização do responsável)
 **Natureza:** nova
 **Origem:** surgiu na conversa de planejamento do Leitor360 (FN-079) em 2026-11-11
@@ -220,7 +220,7 @@ Diretrizes para o modo servidor (a detalhar na subfase 6.3 da FN-079, com mockup
    - "A correção não é instantânea. Ela entra numa fila, e você recebe um aviso quando terminar."
 
    A tela mostra a posição na fila, por exemplo: "Na fila do Escriba: posição 12, cerca de 8 min".
-5. **Custo e créditos.** A transcrição no servidor gasta processamento do Gabarito360, e não do aparelho. Ela consome créditos de correção (D-9 da FN-079). Proposta: só as regiões abertas consomem. A transcrição no aparelho nunca consome crédito. O sistema de créditos de correção ainda não existe e não tem FN. Ele bloqueia o Escriba no servidor.
+5. **Custo e créditos.** A transcrição no servidor gasta processamento do Gabarito360, e não do aparelho. Ela consome créditos de correção (D-9 da FN-079). A unidade de crédito é uma correção de prova de um aluno (aluno × prova). Várias páginas do mesmo aluno na mesma prova custam um crédito. Sem saldo, o envio é recusado. Se o Escriba no servidor tem dificuldade, o usuário pode reenviar só os alunos com problema, sem cobrar crédito de novo, e/ou mandar a folha para a revisão manual. A revisão manual é o caminho principal. No aparelho, com imagem ruim, o Escriba pede uma nova imagem e/ou a revisão manual. A transcrição no aparelho nunca consome crédito. O sistema de créditos de correção ainda não existe e não tem FN. Ele bloqueia o Escriba no servidor.
 6. **Dados.** A imagem já vai ao servidor hoje (FN-079). A transcrição no servidor não envia nada a terceiros. O servidor dedicado fica no ambiente do responsável, no Brasil. Um serviço externo exige análise de transferência e entra na lista de terceiros do [11](../../arquitetura/11-seguranca-e-privacidade.md).
 7. **Infraestrutura (risco).** ⚠ Inferência, sem medição: a VM atual (Xeon E5-2650 v4, 16 GB, sem GPU) deve transcrever devagar, vários segundos por resposta. Em semana de provas a fila pode ficar longa. A fase precisa medir o tempo por resposta e decidir entre GPU dedicada, limite de folhas por hora ou prioridade por plano.
 
@@ -242,3 +242,4 @@ Nenhum.
 | 2026-11-11 | Revisão independente (ui-ux, qualidade-testes, seguranca-privacidade, gerente-projetos) aplicada | lucasgenial |
 | 2026-11-11 | Evolução decidida (§8.3): no futuro, o aparelho sem suporte envia as abertas ao Escriba no servidor, com fila. Nesta fase, só no aparelho | lucasgenial |
 | 2026-11-11 | Alinhado às decisões D-1 a D-13 da FN-079; Escriba no servidor com fila e créditos entra no plano | lucasgenial |
+| 2026-11-11 | Correções do responsável: crédito por correção de prova do aluno, reenvio sem custo, revisão manual como caminho principal | lucasgenial |

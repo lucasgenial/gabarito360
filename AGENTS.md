@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 12.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 13.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -29,8 +29,8 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 - Um plano que nasce numa entrega serve só a ela. O que vai além vira funcionalidade candidata no catálogo.
 - Um módulo transversal bloqueia quem depende dele. Não crie versão local paralela. Um PR que altera `apps/` cita a FN (`FN: FN-NNN`) e atualiza o `planejamento.md` dela; a CI verifica com `scripts/verificar_fn_no_pr.py`. ([ADR-0048](docs/decisoes/0048-tronco-unico-de-planejamento.md))
 - A leitura das folhas (núcleo OMR e Escriba) roda no aparelho, para reduzir o custo do servidor. Aparelho e servidor usam o mesmo código, as mesmas versões de OpenCV e NumPy e o mesmo modelo e versão do Escriba (paridade total). A nota é calculada só no servidor.
-- Não existe uso offline. Nada é persistido no aparelho. O envio leva a imagem original, reduzida a 2400 px. O servidor relê uma amostra das folhas e todas as de quem não tem `correcao.alterar`; a decisão do usuário prevalece e a divergência vira pendência, nunca troca silenciosa.
-- Aparelho sem capacidade usa o modo servidor: fila, aviso prévio de créditos e de fila, e marcador de identificação no arquivo. O marcador só encaminha: o QR prevalece. Os créditos de correção existem só no servidor.
+- Não existe uso offline. Nada é persistido no aparelho. O envio leva a imagem original, reduzida a 2400 px. O servidor não relê: quem confere é sempre o usuário. Leitura com dificuldade pede nova imagem, reenvio sem custo (modo servidor) ou revisão manual, que é o caminho principal.
+- Aparelho sem capacidade usa o modo servidor: fila, aviso prévio de créditos e de fila, e marcador de identificação no arquivo. O marcador só encaminha: o QR prevalece. Os créditos de correção existem só no servidor: um por correção de prova de um aluno.
 - A correção da prova não fecha com folha pendente. A folha pode ser salva com pendências e corrigida depois, na revisão. ([ADR-0058](docs/decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md))
 
 ## Princípios executáveis
