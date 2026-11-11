@@ -559,8 +559,8 @@ Termos usados neste documento:
 
 ## UC-079-14 — Conferir a leitura no leitor visual
 
-**Ator:** Professor, Professor autônomo, Coordenador, Diretor Escolar, Administrador da Rede; Aplicador conforme a D-6
-**Permissão:** `cartao.enviar` para abrir. Ver as marcações lidas, para o Aplicador: ⚠ depende da D-6.
+**Ator:** Professor, Professor autônomo, Coordenador, Diretor Escolar, Administrador da Rede; Aplicador, com visão restrita (D-6, [ADR-0059](../../decisoes/0059-aplicador-ve-a-leitura-sem-corrigir.md))
+**Permissão:** `cartao.enviar` para abrir. O Aplicador vê as marcações lidas da folha atual com essa mesma permissão e não corrige.
 **Escopo:** folha da sessão
 **Pré-condições:** folha lida (grupo C).
 **Pós-condições:** nenhuma alteração até o usuário corrigir ou salvar.
@@ -580,7 +580,7 @@ Termos usados neste documento:
 - 2a. Sem pendências: o contador mostra "Nenhuma questão para conferir." e o botão **Salvar folha** fica em destaque.
 - 2b. Transcrição em andamento: a região mostra "Transcrevendo…" (UC-079-12).
 - 2c. Folha lida antes do núcleo ficar pronto: estado **Aguardando o leitor** (UC-079-02).
-- 5a. Aplicador: ⚠ depende da D-6. Ramos possíveis: (a) vê só a folha atual e as marcações lidas, antes de salvar, sem gabarito, acerto ou nota, para refazer a captura; (b) vê só "Folha lida" ou "Refaça a foto", sem marcações. Em nenhum ramo ele vê gabarito, acerto, nota ou folhas anteriores.
+- 5a. Aplicador (D-6): vê só as marcações lidas da folha atual, antes de salvar, para refazer a foto se preciso. Ele não corrige. Ele não vê gabarito, acerto, nota, folhas anteriores nem folhas de outros.
 - 6a. O usuário toca em **Sair do leitor** ou no Voltar do sistema: segue a regra de saída do planejamento §7 (modal "Sair do leitor?" com folhas não enviadas).
 
 **Variações por aparelho (régua do 09):**
@@ -595,6 +595,7 @@ Termos usados neste documento:
 - [ ] Uma questão em branco seguro aparece como aviso, fora do contador e fora da revisão.
 - [ ] **Próxima pendência** percorre todas as pendências, em ordem.
 - [ ] O leitor não mostra gabarito, acerto ou nota a nenhum perfil.
+- [ ] O aplicador vê as marcações só da folha atual, antes de salvar, e não vê folhas anteriores nem de outros.
 - [ ] Os destaques são distinguíveis sem depender só da cor (rótulo, ícone e forma).
 - [ ] Conferência registrada por texto a 360, 768 e 1280 px, temas claro e escuro.
 
@@ -605,7 +606,7 @@ Termos usados neste documento:
 ## UC-079-15 — Corrigir uma questão objetiva no leitor
 
 **Ator:** Professor, Professor autônomo, Coordenador, Diretor Escolar, Administrador da Rede
-**Permissão:** `correcao.alterar` (Aplicador: ⚠ D-6; ele não tem `correcao.alterar`)
+**Permissão:** `correcao.alterar` (o Aplicador não tem `correcao.alterar` e não corrige; D-6)
 **Escopo:** folha da sessão; correção aberta ou ator com `correcao.reabrir`
 **Pré-condições:** folha aberta no leitor visual.
 **Pós-condições:** resposta da questão definida no aparelho e marcada como **Conferida pelo usuário**; a alteração vai ao servidor em `correcoes[]` no envio (UC-079-19).
@@ -619,7 +620,7 @@ Termos usados neste documento:
 5. O sistema vai para a próxima pendência.
 
 **Fluxos alternativos e de erro:**
-- 1a. Aplicador: ⚠ depende da D-6. Ele não corrige. A questão segue para conferência no servidor (UC-046-01).
+- 1a. Aplicador: ele não corrige (D-6). A questão segue para conferência no servidor (UC-046-01).
 - 3a. No computador, o usuário usa o teclado: A a E respondem, 0 deixa em branco, X anula, N vai à próxima pendência, Ctrl+Enter salva. A linha de ajuda mostra todos os atalhos. Os atalhos ficam inativos com foco em campo de texto, em `select` ou com diálogo aberto.
 - 3b. O usuário toca em **Desfazer**: a questão volta à leitura original.
 - 3c. **Manter leitura** aparece só quando a leitura tem uma alternativa (estado `fraca` com letra). Em `dupla`, `nao_lido` e `fraca` sem letra, o botão não aparece.
@@ -677,22 +678,22 @@ Termos usados neste documento:
 **Permissão:** `cartao.enviar`
 **Escopo:** folha da sessão
 **Pré-condições:** folha aberta no leitor visual.
-**Pós-condições:** folha na fila de envio (UC-079-19); sessão continua com a próxima folha, ou termina com o resumo (UC-079-18).
+**Pós-condições:** folha enviada ao servidor (UC-079-19) e, se houver pendências, marcada "com pendência" (D-11); sessão continua com a próxima folha, ou termina com o resumo (UC-079-18).
 **Tela/rota:** tela 7 e modais do planejamento §7 ([ADR-0025](../../decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)).
 
 **Fluxo principal:**
 1. O usuário toca em **Salvar folha** (ou Ctrl+Enter).
-2. O sistema coloca a imagem e o resultado na fila de envio.
+2. O sistema envia a imagem e o resultado ao servidor (UC-079-19).
 3. O sistema abre o modal "Folha salva" com o texto "A leitura de Ana Souza foi salva. 12 folhas nesta sessão."
 4. O modal oferece **Continuar** (botão principal, foco inicial) e **Encerrar**.
 5. Com **Continuar**, o sistema volta à entrada: a câmera reabre, ou a próxima folha da fila abre no leitor.
 6. Com **Encerrar**, o sistema mostra o resumo (UC-079-18).
 
 **Fluxos alternativos e de erro:**
-- 1a. ⚠ Depende da D-11. Ramo recomendado (b): restam pendências; modal "Salvar com pendências?" com o texto "3 questões vão para a revisão da prova." e botões **Salvar com pendências** e **Voltar**. As pendências seguem para a revisão atual (UC-046-01). Os avisos (em branco) não contam.
+- 1a. Restam pendências (D-11): modal "Salvar com pendências?" com o texto "3 questões vão para a revisão da prova." e botões **Salvar com pendências** e **Voltar**. A folha e a prova ficam marcadas "com pendência". As pendências seguem para a revisão atual (UC-046-01), onde o usuário as corrige depois. A correção da prova não pode ser fechada enquanto houver folha com pendência (UC-079-27). Os avisos (em branco) não contam.
 - 1b. Aplicador: sempre salva. As pendências vão para a revisão da coordenação ou do professor.
 - 1c. O usuário toca em **Descartar folha**: a folha sai da fila, e a imagem sai da memória.
-- 2a. Sem conexão: a folha entra na fila mesmo assim. O modal mostra "A folha será enviada quando a conexão voltar." ⚠ A fila sem conexão depende da D-7.
+- 2a. Sem conexão (D-7): o sistema não salva a folha e mostra "Sem conexão. Esta folha ainda não foi salva." A folha continua na tela. Quando a conexão volta, o sistema salva a folha. Nada fica guardado no aparelho (D-8).
 - 3a. Folha sem aluno identificado: o texto é "A folha sem aluno identificado foi salva. 12 folhas nesta sessão."
 - 4a. Lote com a próxima folha já lida: **Continuar** abre direto a próxima folha **Para conferir**.
 - 4b. Enter aciona **Continuar**. Esc fecha o modal e mostra a folha salva só para leitura, com a faixa "Folha salva" e os botões **Continuar** e **Encerrar** no rodapé do leitor. A folha salva não aceita nova correção no aparelho.
@@ -703,7 +704,8 @@ Termos usados neste documento:
 - [ ] O modal aparece depois de toda folha salva.
 - [ ] **Continuar** leva à próxima captura em até um toque.
 - [ ] Nenhuma confirmação usa diálogo nativo do navegador.
-- [ ] Uma folha com pendências salva vai para a revisão da prova (UC-046-01).
+- [ ] Uma folha com pendências salva vai para a revisão da prova (UC-046-01) e fica marcada "com pendência".
+- [ ] Sem conexão, a folha não é salva, a mensagem "Sem conexão. Esta folha ainda não foi salva." aparece, e a folha é salva quando a conexão volta, sem cópia no aparelho.
 - [ ] Depois de Esc, a folha salva não aceita correção.
 
 **Situação:** Não implementado — hoje a câmera envia direto e mostra "Foto capturada. Coloque o próximo cartão." (`correcao-camera.js`). O padrão de modal da aplicação existe (ADR-0025).
