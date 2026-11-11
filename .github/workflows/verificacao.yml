@@ -158,7 +158,14 @@ jobs:
           sudo python3 scripts/tests/test_deploy.py
           sudo python3 scripts/tests/test_pausa_backup.py
           sudo python3 scripts/tests/test_confirmar_backup.py
-      - run: sudo apt-get update && sudo apt-get install -y nginx php-cli
+      # A imagem ubuntu do runner já traz nginx e PHP. O apt só roda se faltar algum,
+      # para a CI não depender dos espelhos do Ubuntu (falha de rede em 11/11/2026).
+      - run: |
+          if command -v nginx >/dev/null && command -v php >/dev/null; then
+            nginx -v; php -v | head -1
+          else
+            sudo apt-get -o Acquire::Retries=5 update && sudo apt-get -o Acquire::Retries=5 install -y nginx php-cli
+          fi
       - run: sudo python3 scripts/tests/test_publico_nginx.py
       - run: sudo python3 scripts/tests/test_publicar_home.py
 
