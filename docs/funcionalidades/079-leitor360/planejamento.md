@@ -2,7 +2,7 @@
 
 **Implementação:** Candidata
 **Etapa:** Candidata
-**Conforme princípios:** versão 9
+**Conforme princípios:** versão 10
 **Posição no plano mestre:** fora das ondas (candidata; aguarda priorização do responsável)
 **Natureza:** evolução de existente
 **Origem:** surgiu na conversa de planejamento do responsável em 2026-11-11 (leitura no aparelho do usuário)
@@ -563,7 +563,7 @@ O resultado vem do cliente. Por isso, o servidor não confia nele sem verificaç
 
 ## 7. Interface
 
-O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-faixas.md)). Cada tela e cada modal do Leitor360 é conferido nas larguras 320, 360, 390, 768, 1024, 1366, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro, com registro por texto. O mockup tem seletor de aparelho com essas larguras.
+O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-faixas.md)). Cada tela e cada modal do Leitor360 é conferido nas larguras 320, 360, 390, 720, 768, 1024, 1280, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro, com registro por texto. O mockup tem seletor de aparelho com essas larguras.
 
 Não há desenho aprovado neste documento. As telas abaixo precisam de mockup aprovado e revisão de UI/UX antes de código.
 

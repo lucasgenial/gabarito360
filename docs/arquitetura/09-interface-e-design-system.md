@@ -30,14 +30,15 @@ Toda tela e todo mockup atendem a todas as faixas de aparelho ([ADR-0057](../dec
 
 | Faixa | Largura | Regras principais |
 |---|---|---|
-| Celular pequeno | até 400 px | Uma coluna, sem rolagem horizontal. |
-| Celular | até 767 px | Navegação inferior e folha "Mais" (ADR-0032). Lateral oculta. Rodapé de versão oculto (ADR-0044). Tabelas em cards. Alvos de 44 px. |
-| Tablet retrato | 768 a 1023 px | Lateral disponível, margem de 16 px. Alvos de 44 px em telas de toque. |
-| Tablet paisagem e notebook | 1024 a 1439 px | Lateral de 256 px ou 80 px. Painéis laterais de trabalho a partir de 1100 px. |
-| Desktop | 1440 a 1919 px | Layout completo, área útil inteira (ADR-0021). |
-| Telas grandes | 1920 a 3840 px | Escala 1,125 a partir de 1920 px, 1,25 a partir de 2560 px e 1,5 a partir de 3200 px. |
+| Celular pequeno | 320 a 400 px | Casca de celular. Tabelas em cards. Ações de página viram ícone de 44 px em contêiner abaixo de 24rem. |
+| Celular | 401 a 720 px | Navegação inferior e folha "Mais" (ADR-0032). Lateral e rodapé de versão ocultos (ADR-0044). Tabelas em cards. Alvos de 44 px. |
+| Celular largo e tablet pequeno | 721 a 767 px | Casca ainda de celular. A tabela volta a ser tabela, com rolagem dentro do card. |
+| Tablet retrato | 768 a 1023 px | Lateral compacta (80 px) por padrão, margem lateral de 16 px, rodapé de versão visível. Alvos de 44 px em telas de toque. |
+| Tablet paisagem e notebook | 1024 a 1279 px | Lateral compacta por padrão. Edição de painéis disponível a partir de 1024 px de largura e 700 px de altura. Painel lateral de documento a partir de 1100 px. |
+| Notebook e desktop | 1280 a 1919 px | Lateral expandida (256 px) por padrão. As telas ocupam toda a área útil (ADR-0021). |
+| Telas grandes | 1920 a 3840 px (4K) | Área logada sem escala de interface (`.tw2-app` fixa a escala em 1); as grades crescem pela área útil. A escala 1,125, 1,25 e 1,5 vale só nas páginas públicas e de acesso. ⚠ Lacuna: a área logada não tem regra própria para 4K; a decisão fica com o responsável. |
 
-Larguras de referência para conferir: 320, 360, 390, 768, 1024, 1366, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. Em telas de toque (`pointer: coarse`), os alvos têm 44 px. Componentes que dependem do espaço usam `@container`. Um corte novo exige registro no design system.
+Larguras de referência para conferir: 320, 360, 390, 720, 768, 1024, 1280, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. Em telas de toque (`pointer: coarse`), os alvos têm 44 px. Componentes que dependem do espaço usam `@container`. Um corte novo exige registro no design system.
 
 O inventário original tinha 30 telas mockadas. O Gabarito360 acrescentou telas sem mockup, sempre com aprovação posterior: planos, checkout, assinatura, painéis da secretaria e do aplicador, seleção de vínculo, cópias entre espaços, disciplinas, catálogo de instituições e outras. A tabela da seção 11 resume o inventário atual.
 

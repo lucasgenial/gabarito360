@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 9.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 10.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -75,8 +75,8 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 - A referência visual é o app atual: as views, os componentes e o CSS de `apps/web` na `main`, que a homologação publica. As pastas `mockups/` e `style-system/` são históricas.
 - Todo mockup novo usa a casca, os componentes e o CSS reais de `apps/web/public/css/`. Ele não cria um visual paralelo. CSS próprio do mockup fica mínimo e usa só os tokens existentes. ([ADR-0056](docs/decisoes/0056-app-atual-como-referencia-visual.md))
 - O app é responsivo. Toda tela e todo mockup atendem a todas as faixas: celular pequeno, celular, tablet (retrato e paisagem), notebook, desktop e telas grandes até 4K (3840 px), com regras próprias para toque.
-- Confira cada tela nas larguras de referência 320, 360, 390, 768, 1024, 1366, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. Registre a conferência por texto (ADR-0049).
-- Use os cortes canônicos (767/768, 1023/1024, 1099/1100, 1439/1440, 1920, 2560, 3200 px), `pointer: coarse` e consultas de contêiner. Um corte novo exige registro no design system. ([ADR-0057](docs/decisoes/0057-app-responsivo-em-todas-as-faixas.md))
+- Confira cada tela nas larguras de referência 320, 360, 390, 720, 768, 1024, 1280, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. Registre a conferência por texto (ADR-0049).
+- Use os cortes canônicos (400, 720/721, 767/768, 1023/1024, 1099/1100, 1279/1280 px e altura 699/700 px), `pointer: coarse` e consultas de contêiner. Um corte novo exige registro no design system. ([ADR-0057](docs/decisoes/0057-app-responsivo-em-todas-as-faixas.md))
 - Documentação aprovada antes do código. O legado só fornece regras de negócio. A ordem das fontes de interface está no ADR-0056. Referência técnica: `docs/arquitetura/09-interface-e-design-system.md`. ([ADR-0002](docs/decisoes/0002-fontes-de-verdade-e-legado.md))
 - Use o TailwindCSS com a paleta Gabarito360 como base visual. ([ADR-0026](docs/decisoes/0026-tailwindcss-como-base-visual.md))
 - As telas ocupam toda a área útil. ([ADR-0021](docs/decisoes/0021-telas-ocupam-toda-a-area-util.md))

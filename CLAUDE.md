@@ -32,7 +32,7 @@ Em conflito, vale esta ordem ([ADR-0056](docs/decisoes/0056-app-atual-como-refer
 
 ## O app é responsivo (regra)
 
-Toda tela e todo mockup atendem a todas as faixas: celular pequeno, celular, tablet, notebook, desktop e telas grandes até 4K. Confira nas larguras 320, 360, 390, 768, 1024, 1366, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. As faixas e os cortes estão no [ADR-0057](docs/decisoes/0057-app-responsivo-em-todas-as-faixas.md) e no design system (`style-system/`).
+Toda tela e todo mockup atendem a todas as faixas: celular pequeno, celular, tablet, notebook, desktop e telas grandes até 4K. Confira nas larguras 320, 360, 390, 720, 768, 1024, 1280, 1440, 1920, 2560 e 3840 px, nos temas claro e escuro. As faixas e os cortes estão no [ADR-0057](docs/decisoes/0057-app-responsivo-em-todas-as-faixas.md) e no design system (`style-system/`).
 
 Um legado antigo, quando presente fora deste repositório, serve só para recuperar regras de negócio validadas. É proibido reutilizar a arquitetura, o banco ou o código dele.
 
