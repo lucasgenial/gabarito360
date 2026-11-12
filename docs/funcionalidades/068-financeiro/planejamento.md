@@ -29,7 +29,7 @@ Dar ao Gabarito360 acesso contextual e limitado às capacidades financeiras que 
 - **Inclui:**
   - **Adequação aos princípios** (subfases 0.2 e 0.3): revalidação contra os ADRs vigentes, antes de qualquer código.
   - **Porta `BillingClient`** e **cliente da API** do aplicativo financeiro, conforme o contrato. **[Diretriz]**
-  - **Simulador de integração** para testes, sem carteira, sem débito real e sem cobrança retroativa (contrato §9). **[Proposto]**
+  - **Simulador genérico da porta `BillingClient`**, primeira entrega da integração, para desenvolvimento e homologação (contrato §9). O processamento educacional é real; só a resposta financeira é simulada. **[Diretriz]**
   - **Referências externas** opacas: conta e operação no aplicativo financeiro. **[Histórico]**
   - **Experiência financeira limitada:** exibir saldo, limites e histórico recebidos do aplicativo financeiro, no contexto do usuário; e encaminhar o usuário às ações financeiras permitidas. **[Diretriz]**
   - **Situação do legado** do MP-027, sem desligá-lo (§6.3). **[Diretriz]**
@@ -91,7 +91,7 @@ Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 | 0.1 (MP-027) Legado de assinatura | Tabelas `planos`, `assinaturas` e `pagamentos`; `MercadoPagoService`; `GET /planos`; `assinaturas/minha` e `cancelar`; webhook do Mercado Pago; checkout desativado (409, contratação por contato) | — | Substituída em parte (código ativo) | commit de68d3f; PR #59; `AssinaturaController`, `WebhookController`, `ContratacaoContatoTest` |
 | 0.2 Adequação aos princípios | Revalidação contra ADR-0002, ADR-0004, ADR-0048, ADR-0053, ADR-0056, ADR-0057, ADR-0058 e ADR-0061 (versão de 11/11); cabeçalho no modelo atual; fronteira com a FN-081 | O campo "Conforme princípios" sobe para a versão vigente | Entregue (documentação) | PR #274, commit `ca6109d5` |
 | 0.3 Reorientação para o aplicativo financeiro externo | Escopo trocado: experiência limitada, integração e legado; F1, F2 e F3 antigas superadas; contrato com dono único | "Conforme princípios" na versão 18; nenhum financeiro local no planejamento | Entregue (documentação) | PR #274 |
-| 1.1 Porta `BillingClient` e simulador de integração | Porta, simulador e testes dos cenários do contrato §9 | Os cenários do contrato §9 passam; a falha da API não ativa o simulador (teste); nenhuma migration financeira | Pendente | — |
+| 1.1 Primeira entrega da integração: porta `BillingClient` e simulador genérico | Porta; simulador com os cenários do contrato §9.2; estado fictício separado das tabelas do produto, reiniciável e identificado como simulação; ativação explícita só em desenvolvimento e homologação | Os nove cenários do contrato §9.2 passam em testes automatizados; um teste de ponta a ponta percorre login, envio, fila, processamento real, `READY_FOR_REVIEW` e conferência com o simulador; a falha da API real não ativa o simulador (teste); a configuração de produção não ativa o simulador (teste); nenhuma migration financeira | Pendente | — |
 | 1.2 Cliente da API do aplicativo financeiro | Implementação real da porta, com credencial técnica de escopo limitado | O aplicativo financeiro existe; os testes de isolamento do contrato §8 passam; medição com 1000 usuários simultâneos ([ADR-0052](../../decisoes/0052-medicao-com-1000-usuarios-simultaneos.md)) | Pendente (bloqueada pela dependência externa) | — |
 | 2.0 Mockup da experiência financeira limitada | Saldo, limites e histórico do contexto; encaminhamento às ações financeiras; sobre a casca e o CSS reais de `apps/web`, em todas as faixas do ADR-0057 | O responsável aprova o mockup; a revisão de UI/UX é de outro agente (ADR-0020) | Pendente | — |
 | 2.1 Telas da experiência financeira limitada | Conforme o mockup aprovado | O usuário vê só o próprio contexto; conferência por texto em todas as larguras de referência | Pendente | — |
@@ -109,6 +109,7 @@ Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 - Nenhuma migration desta FN cria carteira, ledger, lotes, saldo, preço ou esquema financeiro. **[Diretriz]**
 - A credencial técnica do Gabarito360 fica no servidor, fora do repositório, com escopo limitado às capacidades do contrato §3. Ela não administra o financeiro. **[Diretriz]**
 - A indisponibilidade da API financeira nunca ativa o simulador nem libera consumo. **[Diretriz]**
+- O simulador só funciona com ativação explícita no servidor, em desenvolvimento e homologação. O estado dele é fictício, separado das tabelas do produto, reiniciável e sem valor comercial. Ele nunca é migrado para o aplicativo financeiro (contrato §9.3 e §9.4). **[Diretriz]**
 
 ### 6.2 Autorização e dados
 
@@ -160,6 +161,7 @@ O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-f
 | **Contratos, faturas, cobranças e notas fiscais do cliente institucional** (antigas F1 e F2) | (a) Ficam no aplicativo financeiro; (b) ficam no Gabarito360 como registro não financeiro | (a). A diretriz reserva pagamentos e auditoria financeira ao aplicativo externo. ⚠ Interpretação desta revisão: contratos, faturas e notas fiscais não aparecem por nome na diretriz | **Pendente** (confirmar) |
 | **Papel do perfil interno Financeiro e do cadastro comercial** depois do aplicativo externo | (a) Só navegação ao aplicativo financeiro; (b) consulta limitada no Gabarito360; (c) manter como hoje | — | **Pendente** |
 | **Lugar das ações humanas financeiras** (compra de créditos, limites por professor) | Painel externo, navegação integrada ou tela limitada no Gabarito360 | Nenhuma opção guarda credencial financeira global no Gabarito360 (contrato §8) | **Pendente** |
+| **Piloto em produção com simulação** | (a) Não ter piloto; (b) piloto com o simulador em produção, com regras próprias | — | **Pendente.** Não habilitado. Sem decisão expressa, a produção não ativa o simulador |
 | **Protocolo de contingência** | Ver o contrato §10 | Nenhuma autorização sem serviço disponível ou sem concessão válida | **Pendente** |
 | **Conflito: "sem devolução de valores já pagos" × pendência jurídica 1** (arrependimento, CDC art. 49, reembolso e pacote parcialmente consumido) | (a) [RN-EIN-08](../../arquitetura/08-regras-de-negocio.md) vale só no escopo original (transição entre instituições); (b) estender à compra de créditos; (c) suspender a RN-EIN-08 até a revisão jurídica | (a). A compra de créditos por pessoa pode atrair o CDC art. 49. **Conflito registrado até a revisão jurídica.** Separar o aplicativo não encerra a pendência | **Pendente** |
 | **Pendência técnica: entidade única de aluno + aplicação** (`correction_subject_id`) | Ver a [FN-081 §8](../081-creditos-correcao/planejamento.md), que é dona do item | — | **Pendente** |
@@ -175,7 +177,8 @@ O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-f
 | Risco | Efeito | Mitigação |
 |---|---|---|
 | Recriar o financeiro dentro do Gabarito360 "temporariamente" | Duas verdades comerciais e migração de saldos | Proibição do ADR-0061; verificação de migrations pelo agente de conformidade |
-| Simulador ligado em produção ou ativado por falha | Consumo sem autorização e cobrança contestável | Ativação só por configuração explícita de teste; teste de falha da API (subfase 1.1) |
+| Simulador ligado em produção ou ativado por falha | Consumo sem autorização e cobrança contestável | Ativação explícita só em desenvolvimento e homologação; testes de falha da API e da configuração de produção (subfase 1.1) |
+| Estado fictício confundido com saldo real | Valor de teste tratado como preço, cota ou crédito | Estado separado, identificado como simulação e nunca migrado; valores de teste não definem preços, planos nem cotas |
 | Credencial do Gabarito360 com poder administrativo | Um comprometimento alcança o financeiro inteiro | Escopo mínimo da credencial e testes de isolamento (contrato §8) |
 | Latência ou queda da API financeira | O modo servidor fica indisponível | Recusa clara, leitura no aparelho e revisão manual continuam; medição da integração (contrato §10) |
 | Desligar o legado sem investigação | Perda de dados ou de pagamento em curso | Subfase 3.1 própria, com autorização |
@@ -191,3 +194,4 @@ Nenhum aberto.
 | 2026-11-09 | Documento criado a partir do inventário e do código | lucasgenial |
 | 2026-11-11 | Subfase 0.2 de adequação: cabeçalho no modelo atual; citações aos documentos antigos trocadas pelos destinos do mapa; RN-015 passou a RN-GER-09 (Substituída); interface em todas as faixas do ADR-0057; conciliação do legado com o esquema `billing_` do ADR-0061; fronteira com a FN-081 declarada; pendências novas no §8 | lucasgenial |
 | 2026-11-12 | Subfase 0.3: reorientação para o aplicativo financeiro externo ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md), revisão de 12/11/2026). A FN passou a ser dona da experiência limitada, da integração e do legado. F1, F2 e F3 antigas e a conciliação com o esquema `billing_` foram superadas. O contrato passou ao [14 Integração com o aplicativo financeiro](../../arquitetura/14-integracao-financeira.md) | lucasgenial |
+| 2026-11-12 | Simulador genérico da porta `BillingClient` como primeira entrega da integração (subfase 1.1): processamento educacional real, cenários configuráveis, estado fictício separado e ativação só em desenvolvimento e homologação; piloto em produção pendente | lucasgenial |

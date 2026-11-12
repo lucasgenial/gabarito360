@@ -48,7 +48,7 @@ Fora do escopo dos dois produtos, sem decisão específica: ERP escolar, folha d
 |---|---|---|
 | Porta `BillingClient` | Interface única do Gabarito360 com o financeiro. O resto do código não conhece o aplicativo externo. | [Histórico] |
 | Cliente da API | Implementação da porta que chama o aplicativo financeiro real. | [Diretriz] |
-| Simulador de integração | Implementação da porta só para testes (§9). | [Proposto] |
+| Simulador de integração | Implementação genérica da porta para desenvolvimento e homologação; primeira entrega da integração (§9). | [Diretriz] |
 | Registro operacional da correção | Identidade da submissão, correlação das chamadas e resultado da integração (§6). | [Histórico] |
 | Referências externas | Identificadores opacos de conta e de operação no aplicativo financeiro. | [Histórico] |
 
@@ -56,7 +56,7 @@ Os nomes `authorize`, `reserve`, `commit`, `release` e `getBalance` vêm do hist
 
 **É proibido no Gabarito360:**
 
-- carteira, lotes de crédito, ledger ou saldo autoritativo;
+- carteira, lotes de crédito, ledger ou saldo autoritativo (o estado fictício do simulador, §9.3, não é saldo autoritativo);
 - preço, franquia ou regra comercial fixos no código ou em tabela local;
 - esquema financeiro local, inclusive tabelas com o prefixo `billing_` que guardem saldo ou movimentação;
 - motor de cálculo de consumo, de ordem de fontes ou de validade de créditos;
@@ -172,17 +172,56 @@ As notificações do aplicativo financeiro ao Gabarito360 servem só para manter
 
 A separação reduz o alcance de uma credencial comprometida. Ela não elimina o risco: a credencial ainda pode ser usada dentro das ações autorizadas. Por isso, o desenho exige limites, revogação, rastreabilidade e testes de isolamento. Referências de apoio: OWASP Microservices Security Cheat Sheet, OWASP Authorization Cheat Sheet e OWASP API5:2023 (Broken Function Level Authorization).
 
-## 9. Simulador de integração
+## 9. Simulador de integração (primeira entrega)
 
-**[Proposto]** Antes de o aplicativo financeiro existir, os testes do Gabarito360 usam um simulador da porta `BillingClient`.
+**[Diretriz]** A ausência do aplicativo financeiro não bloqueia os testes do Gabarito360. A primeira entrega da integração é um **simulador genérico da porta `BillingClient`**. Ele serve a qualquer recurso tarifado, não só à correção.
 
-1. O simulador não tem carteira, ledger nem débito real. Ele só devolve as respostas do §7.
-2. Ele cobre os cenários: autorizado, recusado sem saldo, limite do professor atingido, contexto sem permissão, repetição, conflito de chave e indisponibilidade.
-3. O uso é explícito, por configuração do ambiente de teste. Ele fica isolado de cobrança real.
-4. O simulador não desliga nem amplia permissões educacionais. `cartao.enviar` e as demais chaves continuam valendo.
-5. Um consumo feito no simulador nunca vira cobrança nem dívida retroativa.
-6. **[Diretriz]** A indisponibilidade da API real nunca ativa o simulador. Ela também não ativa um modo "autoriza tudo".
-7. O simulador não é o antigo `LocalBillingAdapter`. Aquele adaptador guardava carteira e ledger no banco do Gabarito360 e foi superado (ADR-0061).
+### 9.1 O que é real e o que é simulado
+
+| Real (o produto roda de verdade) | Simulado (só a resposta financeira) |
+|---|---|
+| Login, vínculo e permissões educacionais | Autorização de consumo |
+| Aplicação, submissão, envio e reenvio | Saldo, franquia e limites |
+| Fila, processamento e leitura | Reserva |
+| `READY_FOR_REVIEW`, conferência e fechamento da correção | Confirmação (`COMMIT`) e liberação (`RELEASE`) |
+| Registro operacional da submissão (§6) | Extrato |
+
+O simulador não simula a correção. O processamento educacional é o mesmo do modo real. Só a chamada à porta `BillingClient` recebe uma resposta simulada.
+
+### 9.2 Cenários
+
+O simulador aceita cenários configuráveis. Cada cenário produz a resposta do §7 correspondente.
+
+1. Autorizado.
+2. Sem saldo (sem franquia e sem crédito).
+3. Limite da instituição atingido.
+4. Limite do professor atingido.
+5. Permissão ou contexto recusado.
+6. Repetição idempotente (mesma chave, mesmo efeito).
+7. Reserva, `COMMIT` e `RELEASE`, inclusive reserva que expira.
+8. Tempo de resposta esgotado (timeout).
+9. Indisponibilidade.
+
+Os cenários atendem a testes automatizados, testes manuais e testes de ponta a ponta. A forma de escolher o cenário é definida na implementação (subfase 1.1 da [FN-068](../funcionalidades/068-financeiro/planejamento.md)).
+
+### 9.3 Estado fictício
+
+1. O simulador mantém saldo, extrato e limites fictícios. Eles mudam de forma coerente com as transições: a reserva retém, o `COMMIT` consome, o `RELEASE` devolve e a repetição não muda nada.
+2. O estado do simulador fica separado das tabelas do produto. Ele pode ser reiniciado a qualquer momento.
+3. Toda tela e todo registro que mostra esse estado o identifica como simulação.
+4. O estado fictício não tem valor comercial. Ele nunca é migrado para o aplicativo financeiro.
+5. O simulador não é carteira, ledger nem motor financeiro. Ele não aplica ordem de consumo, validade de lotes, preço nem regra comercial.
+6. Os valores usados nos cenários são de teste. Eles não definem preços, planos nem cotas.
+
+### 9.4 Ativação
+
+1. O simulador só funciona com ativação explícita, por configuração no servidor.
+2. Ambientes autorizados: desenvolvimento e homologação.
+3. **[Pendente]** Piloto em produção com simulação. Ele não está habilitado e não deve ser habilitado sem decisão expressa do responsável.
+4. A falha da API real nunca ativa o simulador. Ela também não ativa um modo "autoriza tudo".
+5. Com o simulador ativo, não existe pagamento, dívida nem cobrança retroativa. Um consumo simulado nunca vira cobrança real.
+6. O simulador não desliga nem amplia permissões educacionais. `cartao.enviar` e as demais chaves continuam valendo.
+7. O simulador não é o antigo `LocalBillingAdapter`. Aquele adaptador guardava carteira e ledger no banco do Gabarito360 e foi superado ([ADR-0061](../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md)).
 
 ## 10. Falhas e disponibilidade
 
@@ -221,4 +260,5 @@ O código atual tem o legado do MP-027: tabelas `planos`, `assinaturas` e `pagam
 | Entidade de aplicação e formato do `correction_subject_id` | [FN-081 §8](../funcionalidades/081-creditos-correcao/planejamento.md) |
 | Quantidades por plano (D-3) e formato da compra avulsa (D-4) | [FN-081 §8](../funcionalidades/081-creditos-correcao/planejamento.md) |
 | Pendências jurídicas 1 (compra, arrependimento e reembolso) e 2 (autoria e licença das questões) | [FN-068 §8](../funcionalidades/068-financeiro/planejamento.md) |
+| Piloto em produção com o simulador | §9.4; decisão expressa do responsável. Não habilitado |
 | Infraestrutura, marca definitiva e meios de pagamento do aplicativo financeiro | Fora deste repositório |

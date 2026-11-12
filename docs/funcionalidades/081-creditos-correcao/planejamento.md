@@ -68,19 +68,36 @@ O processamento no aparelho do usuário não custa nada ao Gabarito360. O proces
 | FN-004 auditoria | Trilha de concessões e consumos | Parcial |
 | FN-057 notificacoes | Alerta de saldo baixo (proposta) | Em planejamento |
 
-**Funcionalidades que dependem desta:** FN-079 (subfase 4.3, modo servidor das objetivas) e FN-080 / FN-079 6.3 (Escriba no servidor). Elas não publicam o modo servidor sem esta FN.
+**Funcionalidades que dependem desta:** FN-079 (subfase 4.3, modo servidor das objetivas) e FN-080 / FN-079 6.3 (Escriba no servidor). Para desenvolvimento e homologação, elas precisam das subfases 1.0 e 1.1 desta FN, com o simulador. A ativação comercial do modo servidor exige a subfase 3.1 e os requisitos de ativação comercial do §5.
 
 ## 5. Fases e subfases (preliminares)
 
 | Subfase | Entrega | Critério de pronto | Status | Evidência |
 |---|---|---|---|---|
-| 0.1 | Planejamento, casos de uso e mockups aprovados, com os detalhes da D-2 e as decisões D-3 e D-4 respondidas | O responsável aprova os documentos e o mockup das telas de saldo e extrato | Pendente | |
+| 0.1 | Planejamento, casos de uso e mockups aprovados para desenvolvimento e homologação | O responsável aprova os documentos e o mockup das telas de saldo e extrato. **D-3, D-4 e os detalhes comerciais da D-2 não bloqueiam esta subfase** | Pendente | |
 | 1.0 | Identidade da submissão (`correction_subject_id`) | A pendência técnica do §8 está resolvida, com unicidade de aluno + aplicação no banco do Gabarito360 | Pendente | |
-| 1.1 | Ciclo de consumo da correção pela porta `BillingClient`, contra o simulador (FN-068 1.1) | Os testes A, C a H do §6.7 passam; a concorrência no MariaDB não gera dois pedidos de consumo definitivo; nenhuma migration financeira | Pendente | |
+| 1.1 | Ciclo de consumo da correção pela porta `BillingClient`, contra o simulador genérico (FN-068 1.1), com processamento educacional real | Os testes A, C a H do §6.7 passam; um teste de ponta a ponta vai do envio à conferência com o simulador; a concorrência no MariaDB não gera dois pedidos de consumo definitivo; nenhuma migration financeira | Pendente | |
 | 1.2 | Consumo integrado ao modo servidor (FN-079 4.3) | Sem franquia e sem crédito, o envio é recusado antes de entrar na fila; o `COMMIT` só ocorre em `READY_FOR_REVIEW` | Pendente | |
 | 2.1 | Telas de saldo e extrato | Conforme mockup aprovado; dados recebidos do aplicativo financeiro; responsivo em todas as faixas (ADR-0057) | Pendente | |
 | 3.1 | Integração com o aplicativo financeiro real (franquia, compra avulsa e limites por professor executados por ele) | O aplicativo financeiro existe; a FN-068 1.2 está entregue; o teste B do §6.7 segue o protocolo aprovado | Pendente (bloqueada pela dependência externa) | |
 | 4.1 | Créditos por contribuição validada | O Gabarito360 informa só a contribuição aprovada pela curadoria; o aplicativo financeiro concede na carteira pessoal de quem contribuiu | Pendente | |
+
+### 5.1 Requisitos de teste e requisitos de ativação comercial
+
+**[Diretriz]** A ausência do aplicativo financeiro não bloqueia o desenvolvimento nem a homologação. Os requisitos se dividem assim.
+
+| Requisito | Desenvolvimento e homologação (com o simulador) | Ativação comercial |
+|---|---|---|
+| Identidade aluno + aplicação (`correction_subject_id`, subfase 1.0) | **Bloqueia.** É dependência técnica real | Bloqueia |
+| Porta `BillingClient` e simulador genérico (FN-068 1.1) | Bloqueia | Bloqueia |
+| Aplicativo financeiro real e cliente da API (FN-068 1.2) | Não bloqueia | Bloqueia |
+| D-3 (quantidades por plano) | Não bloqueia | Bloqueia |
+| D-4 (formato da compra avulsa) | Não bloqueia | Bloqueia |
+| Detalhes comerciais da D-2 (quem define limites, padrão e fim do ciclo) | Não bloqueia; o simulador cobre os cenários de limite | Bloqueia |
+| Pendências jurídicas 1 e 2 | Não bloqueiam | Bloqueiam as operações comerciais e de distribuição de conteúdo que dependem delas |
+| Protocolo de contingência | Não bloqueia; o simulador cobre timeout e indisponibilidade | Bloqueia a contingência; sem protocolo, a falha só recusa |
+
+Os valores usados nos testes (saldo, limites e quantidades fictícios) não definem preços, planos nem cotas.
 
 ## 6. Contrato técnico
 
@@ -149,7 +166,7 @@ Toda consulta e todo ciclo de consumo passam pela porta `BillingClient`, segundo
 | G | Professor no limite mensal, com saldo na instituição | O envio é recusado; nenhum crédito passa à carteira pessoal |
 | H | Consumo feito com o simulador | Nenhuma cobrança real nem dívida retroativa; as permissões educacionais não mudam |
 
-Os testes A e C a H rodam contra o simulador de integração (FN-068 1.1). O teste B depende do protocolo de contingência.
+Os testes A e C a H rodam contra o simulador genérico (FN-068 1.1), com processamento educacional real: só a resposta financeira é simulada. O teste B depende do protocolo de contingência.
 
 ## 7. Interface
 
@@ -168,9 +185,9 @@ O responsável respondeu as decisões D-1 a D-9 em 11/11/2026. O registro da ses
 | Item | Opções | Recomendação | Decisão |
 |---|---|---|---|
 | D-1 Titular do saldo | (a) Professor; (b) escola; (c) núcleo; (d) conforme o eixo da assinatura | — | **Decidida (11/11/2026):** cada operação tem um único contexto de cobrança (professor, escola ou núcleo), sem recurso automático a outro contexto. O crédito pessoal não financia operação institucional ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) §5) |
-| D-2 Quem da escola ou do núcleo pode consumir o saldo daquele contexto | (a) Todo professor do escopo; (b) só quem o responsável autoriza; (c) cota por professor | — | **Decidida em parte (12/11/2026):** o responsável financeiro institucional compra créditos para a entidade e administra limites mensais de consumo por professor. Isso é governança do consumo, não transferência para a carteira pessoal. Renovar o limite não cria créditos. O aplicativo financeiro aplica o limite (§6.2, item 10a). ⚠ **Pendente:** quem é o responsável financeiro em cada contexto, quem altera limites, o padrão para professor sem limite definido e o fim do ciclo |
-| D-3 Quantidade de franquia por plano | Quantidade por plano e ciclo de renovação (mensal, anual) | Definir junto com os preços da FN-068, na mesma sessão | **Pendente** |
-| D-4 Formato da compra avulsa | Pacotes fixos ou quantidade livre; preço por crédito | Pacotes fixos | **Pendente** |
+| D-2 Quem da escola ou do núcleo pode consumir o saldo daquele contexto | (a) Todo professor do escopo; (b) só quem o responsável autoriza; (c) cota por professor | — | **Decidida em parte (12/11/2026):** o responsável financeiro institucional compra créditos para a entidade e administra limites mensais de consumo por professor. Isso é governança do consumo, não transferência para a carteira pessoal. Renovar o limite não cria créditos. O aplicativo financeiro aplica o limite (§6.2, item 10a). ⚠ **Pendente:** quem é o responsável financeiro em cada contexto, quem altera limites, o padrão para professor sem limite definido e o fim do ciclo. Esses detalhes não bloqueiam desenvolvimento nem homologação (§5.1) |
+| D-3 Quantidade de franquia por plano | Quantidade por plano e ciclo de renovação (mensal, anual) | Definir junto com os preços, no aplicativo financeiro | **Pendente.** Não bloqueia desenvolvimento nem homologação (§5.1) |
+| D-4 Formato da compra avulsa | Pacotes fixos ou quantidade livre; preço por crédito | Pacotes fixos | **Pendente.** Não bloqueia desenvolvimento nem homologação (§5.1) |
 | D-5 Validade | (a) Não vence; (b) o incluso vence e o avulso não; (c) tudo vence | — | **Decidida (11/11/2026):** comprado sem expiração por padrão; promocional e recompensa com validade por política; franquia vence no fim do ciclo. Requisito do aplicativo financeiro |
 | D-6 Correção recusada pela barreira de qualidade | (a) Não cobra; (b) cobra, porque o servidor processou | — | **Decidida (11/11/2026):** (a) não cobra. Imagem inutilizável, página faltando, estrutura não reconhecida e processamento interrompido geram `RELEASE` (§6.4) |
 | D-7 Transferência e compartilhamento | (a) Proibidos; (b) permitidos dentro da organização | — | **Decidida (11/11/2026):** (a) proibidos. Créditos não são sacáveis, conversíveis em dinheiro, transferíveis nem negociáveis. O núcleo delega franquia à escola por alocação explícita, o que não é transferência de crédito (ADR-0061 §5) |
@@ -200,3 +217,4 @@ Nenhum ainda.
 | 2026-11-11 | Criado como candidata, com as regras já decididas no Leitor360 e as perguntas da próxima sessão | lucasgenial |
 | 2026-11-11 | Decisões de billing de 11/11/2026 incorporadas: identidade por `correction_subject_id` no lugar de "aluno × prova"; reenvio nunca cobra; regras de reserva, `COMMIT` e `RELEASE`; respostas a D-1, D-5, D-6, D-7, D-8 e D-9; créditos por contribuição validada no escopo. A arquitetura passou ao [ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) | lucasgenial |
 | 2026-11-12 | Reorientação para o aplicativo financeiro externo ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md), revisão de 12/11/2026): a autoridade sobre saldo, reserva e contabilização passou ao aplicativo financeiro; o Gabarito360 guarda só o registro operacional; regras da correção preservadas; D-2 decidida em parte (limites mensais por professor); testes F, G e H; evidência da pendência aluno + aplicação trazida para o §8 | lucasgenial |
+| 2026-11-12 | §5.1: requisitos de teste separados dos de ativação comercial. D-3, D-4 e os detalhes comerciais da D-2 não bloqueiam desenvolvimento e homologação; a identidade aluno + aplicação continua dependência técnica real. Subfase 1.1 com o simulador genérico e processamento real | lucasgenial |

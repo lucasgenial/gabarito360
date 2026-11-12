@@ -218,26 +218,39 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 
 ---
 
-## UC-068-14 — Testar a integração com o simulador
+## UC-068-14 — Testar a correção de ponta a ponta com o simulador
 
-**Ator:** desenvolvedor; CI
-**Permissão:** ambiente de teste
-**Escopo:** testes automatizados e homologação, por configuração explícita
-**Pré-condições:** subfase 1.1
-**Pós-condições:** nenhuma cobrança real nem dívida retroativa
-**Tela/rota:** não se aplica
+**Ator:** desenvolvedor; testador na homologação; CI
+**Permissão:** as permissões educacionais reais do usuário de teste
+**Escopo:** desenvolvimento e homologação, com o simulador ativado no servidor
+**Pré-condições:** subfase 1.1; simulador ativado por configuração explícita
+**Pós-condições:** a correção fica real; o saldo, o extrato e os limites mudam só no estado fictício; nenhuma cobrança real nem dívida retroativa
+**Tela/rota:** as telas reais do produto; a tela financeira mostra a marca de simulação
 
 **Fluxo principal:**
-1. O ambiente de teste liga o simulador por configuração explícita.
-2. O teste escolhe o cenário: autorizado, recusado sem saldo, limite do professor atingido, contexto sem permissão, repetição, conflito ou indisponível.
-3. O Gabarito360 reage como reagiria à resposta real.
+1. O testador escolhe um cenário do contrato §9.2 e, se precisar, reinicia o estado fictício.
+2. O testador entra com um usuário real de teste e envia uma submissão ao modo servidor.
+3. O Gabarito360 pede a autorização à porta. O simulador responde conforme o cenário.
+4. A submissão segue a fila e o processamento reais até `READY_FOR_REVIEW`.
+5. O Gabarito360 pede o `COMMIT`. O simulador consome no estado fictício.
+6. O testador confere a correção e vê o saldo e o extrato fictícios, marcados como simulação.
+
+**Fluxos alternativos e de erro:**
+- 3a. Cenário sem saldo, limite atingido ou permissão recusada: o envio é recusado antes da fila.
+- 3b. Cenário de timeout ou indisponibilidade: o envio é recusado (UC-068-15).
+- 4a. A submissão falha: o Gabarito360 pede o `RELEASE`, e o estado fictício devolve a reserva.
+- 2a. Reenvio da mesma submissão: o simulador reconhece a repetição e não consome de novo.
 
 **Regras de negócio:** contrato [14](../../arquitetura/14-integracao-financeira.md) §9.
 
 **Critérios de aceite:**
-- [ ] O simulador não tem carteira, ledger nem débito.
+- [ ] O processamento, a fila, a leitura e a conferência são os reais. A correção não é simulada.
+- [ ] O saldo e o extrato fictícios mudam de forma coerente com reserva, `COMMIT`, `RELEASE` e repetição.
+- [ ] O estado fictício fica separado das tabelas do produto e pode ser reiniciado.
+- [ ] O simulador não tem carteira, ledger nem motor financeiro.
 - [ ] O simulador não muda nenhuma permissão educacional.
-- [ ] Um consumo feito no simulador nunca vira cobrança real.
+- [ ] Um consumo simulado nunca vira cobrança real nem é migrado.
+- [ ] Sem ativação explícita, ou em produção, o simulador não responde.
 
 **Situação:** Não implementado — subfase 1.1.
 
@@ -278,3 +291,4 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 | 1 | 2026-11-10 | Casos de uso criados a partir do código e do tronco original | lucasgenial |
 | 2 | 2026-11-11 | Subfase 0.2 de adequação: citações aos documentos antigos trocadas pelos destinos do mapa; RN-015 passou a RN-GER-09 e as regras da escola autônoma a RN-EIN; UC-068-09 (compra avulsa de créditos) e UC-068-10 (catálogo) acrescentados; fronteira com a FN-081 declarada | lucasgenial |
 | 3 | 2026-11-12 | Reorientação para o aplicativo financeiro externo: UC-068-05 a UC-068-10 superados; UC-068-11 ajustado; UC-068-12 a UC-068-15 acrescentados (experiência limitada, ação financeira, simulador e indisponibilidade) | lucasgenial |
+| 4 | 2026-11-12 | UC-068-14 reescrito: teste de ponta a ponta com o simulador genérico, processamento real e estado fictício | lucasgenial |
