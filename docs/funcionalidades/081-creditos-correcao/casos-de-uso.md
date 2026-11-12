@@ -250,7 +250,7 @@ Termos usados aqui (um termo por conceito):
 
 **Critérios de aceite:**
 - [ ] A reconciliação não duplica consumo (teste B).
-- [ ] Nenhum dado de billing fica no aparelho.
+- [ ] O aparelho não persiste dados financeiros e não guarda concessão de contingência nem autorização.
 - [ ] Sem concessão válida, nada é autorizado.
 - [ ] A queda da API financeira nunca ativa o simulador.
 - [ ] A carteira nunca fica negativa por falha técnica.

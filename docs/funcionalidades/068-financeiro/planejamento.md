@@ -92,7 +92,7 @@ Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 | 0.2 Adequação aos princípios | Revalidação contra ADR-0002, ADR-0004, ADR-0048, ADR-0053, ADR-0056, ADR-0057, ADR-0058 e ADR-0061 (versão de 11/11); cabeçalho no modelo atual; fronteira com a FN-081 | O campo "Conforme princípios" sobe para a versão vigente | Entregue (documentação) | PR #274, commit `ca6109d5` |
 | 0.3 Reorientação para o aplicativo financeiro externo | Escopo trocado: experiência limitada, integração e legado; F1, F2 e F3 antigas superadas; contrato com dono único | "Conforme princípios" na versão 18; nenhum financeiro local no planejamento | Entregue (documentação) | PR #274 |
 | 1.1 Primeira entrega da integração: porta `BillingClient` e simulador genérico | Porta; simulador com os cenários do contrato §9.2; estado fictício separado das tabelas do produto, reiniciável e identificado como simulação; ativação explícita só em desenvolvimento e homologação | Os nove cenários do contrato §9.2 passam em testes automatizados; um teste de ponta a ponta percorre login, envio, fila, processamento real, `READY_FOR_REVIEW` e conferência com o simulador; a falha da API real não ativa o simulador (teste); a configuração de produção não ativa o simulador (teste); nenhuma migration financeira | Pendente | — |
-| 1.2 Cliente da API do aplicativo financeiro | Implementação real da porta, com credencial técnica de escopo limitado | O aplicativo financeiro existe; os testes de isolamento do contrato §8 passam; medição com 1000 usuários simultâneos ([ADR-0052](../../decisoes/0052-medicao-com-1000-usuarios-simultaneos.md)) | Pendente (bloqueada pela dependência externa) | — |
+| 1.2 Cliente da API do aplicativo financeiro | Implementação real da mesma porta do simulador, com credencial técnica de escopo limitado | O aplicativo financeiro existe; a API real passa nos cenários do contrato §9.2 e na validação contra o contrato antes da troca; `correction_subject_id`, reenvio sem cobrança nova e isolamento dos contextos continuam iguais; os testes de isolamento do contrato §8 passam; medição com 1000 usuários simultâneos ([ADR-0052](../../decisoes/0052-medicao-com-1000-usuarios-simultaneos.md)) | Pendente (bloqueada pela dependência externa) | — |
 | 2.0 Mockup da experiência financeira limitada | Saldo, limites e histórico do contexto; encaminhamento às ações financeiras; sobre a casca e o CSS reais de `apps/web`, em todas as faixas do ADR-0057 | O responsável aprova o mockup; a revisão de UI/UX é de outro agente (ADR-0020) | Pendente | — |
 | 2.1 Telas da experiência financeira limitada | Conforme o mockup aprovado | O usuário vê só o próprio contexto; conferência por texto em todas as larguras de referência | Pendente | — |
 | 3.1 Destino do legado do MP-027 | Investigação e proposta para checkout, assinaturas, webhook, dados e tabelas | O responsável autoriza o destino em tarefa própria. Nada é desligado antes | Pendente | — |
@@ -117,6 +117,7 @@ Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 - O aplicativo financeiro confere a identidade e as permissões da ação humana. O Gabarito360 não decide sozinho que um usuário é responsável financeiro. **[Diretriz]**
 - **[Pendente]** O lugar das ações humanas: painel externo, navegação integrada ou tela limitada no Gabarito360 (contrato §8).
 - Nenhuma chamada da integração leva dado pedagógico, foto, resposta ou nome de aluno (contrato §5).
+- O cliente (navegador ou aparelho) só exibe, de forma temporária, os dados financeiros autorizados. Ele não os persiste e não recebe credenciais técnicas ou administrativas (ADR-0061). **[Diretriz]**
 - O perfil interno Financeiro não vê dados de alunos. Hoje ele usa `cliente.ver` e `cliente.gerir`. Chaves novas precisam de aprovação.
 - Volume baixo (meta de 100 instituições). Os históricos são paginados.
 
@@ -187,6 +188,8 @@ O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-f
 
 Nenhum aberto.
 
+**Próxima entrega:** subfase 1.1, implementação da porta `BillingClient` e do simulador genérico (contrato §9). Ela segue o fluxo do projeto: planejamento aprovado, consulta ao `gerente-projetos` e PR próprio com `FN: FN-068`.
+
 ## 10. Histórico
 
 | Data | Mudança | Por |
@@ -195,3 +198,4 @@ Nenhum aberto.
 | 2026-11-11 | Subfase 0.2 de adequação: cabeçalho no modelo atual; citações aos documentos antigos trocadas pelos destinos do mapa; RN-015 passou a RN-GER-09 (Substituída); interface em todas as faixas do ADR-0057; conciliação do legado com o esquema `billing_` do ADR-0061; fronteira com a FN-081 declarada; pendências novas no §8 | lucasgenial |
 | 2026-11-12 | Subfase 0.3: reorientação para o aplicativo financeiro externo ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md), revisão de 12/11/2026). A FN passou a ser dona da experiência limitada, da integração e do legado. F1, F2 e F3 antigas e a conciliação com o esquema `billing_` foram superadas. O contrato passou ao [14 Integração com o aplicativo financeiro](../../arquitetura/14-integracao-financeira.md) | lucasgenial |
 | 2026-11-12 | Simulador genérico da porta `BillingClient` como primeira entrega da integração (subfase 1.1): processamento educacional real, cenários configuráveis, estado fictício separado e ativação só em desenvolvimento e homologação; piloto em produção pendente | lucasgenial |
+| 2026-11-12 | Regra do cliente: exibição temporária de dados autorizados, sem persistir; API real valida a mesma porta contra o contrato antes da troca (subfase 1.2); próxima entrega registrada (subfase 1.1) | lucasgenial |

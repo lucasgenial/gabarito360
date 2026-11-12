@@ -47,7 +47,7 @@ Fora do escopo dos dois produtos, sem decisão específica: ERP escolar, folha d
 | Componente | Função | Marca |
 |---|---|---|
 | Porta `BillingClient` | Interface única do Gabarito360 com o financeiro. O resto do código não conhece o aplicativo externo. | [Histórico] |
-| Cliente da API | Implementação da porta que chama o aplicativo financeiro real. | [Diretriz] |
+| Cliente da API | Implementação da porta que chama o aplicativo financeiro real. Ela implementa a mesma porta que o simulador e é validada contra este contrato antes da troca. | [Diretriz] |
 | Simulador de integração | Implementação genérica da porta para desenvolvimento e homologação; primeira entrega da integração (§9). | [Diretriz] |
 | Registro operacional da correção | Identidade da submissão, correlação das chamadas e resultado da integração (§6). | [Histórico] |
 | Referências externas | Identificadores opacos de conta e de operação no aplicativo financeiro. | [Histórico] |
@@ -64,6 +64,10 @@ Os nomes `authorize`, `reserve`, `commit`, `release` e `getBalance` vêm do hist
 - conexão ao banco do aplicativo financeiro.
 
 O registro operacional não é débito financeiro. Ele não é fonte de saldo.
+
+**No cliente (navegador ou aparelho). [Diretriz]** A tela pode exibir, de forma temporária, dados financeiros autorizados para o usuário. O cliente não persiste esses dados. Ele não mantém saldo autoritativo, carteira, concessão de contingência nem autorização financeira. Ele nunca recebe credenciais técnicas ou administrativas.
+
+**Troca do simulador pela API real. [Diretriz]** O simulador e o cliente da API implementam a mesma porta. Antes da troca, o cliente da API passa pelos mesmos cenários do §9.2 e pelos testes de isolamento do §8. O resto do Gabarito360 não muda na troca. A identidade `correction_subject_id`, o reenvio sem cobrança nova e o isolamento dos contextos continuam iguais.
 
 ## 3. Capacidades do contrato
 

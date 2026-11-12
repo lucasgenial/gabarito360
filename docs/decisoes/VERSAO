@@ -2,7 +2,7 @@
 # Atualize com: python scripts/verificar_principios.py --atualizar
 # Cada linha "adr" guarda a versão em que o ADR mudou pela última vez e o hash do texto dele.
 versao: 18
-hash: c13efde04724a5f48bcba9a5d3baa6088a3c42fe9cf5060004761f18809a388f
+hash: af1a93c2542c3ca0536c02bf3f88ef73d4786a1ac778a63135f5d81efa92c59f
 adr: ADR-0001 1 5299488cbc9fdea4
 adr: ADR-0002 8 4e10635ff207dff9
 adr: ADR-0003 1 0f573074438b089f
@@ -63,4 +63,4 @@ adr: ADR-0057 10 5e007b662b4332ba
 adr: ADR-0058 16 526f1541e93ead86
 adr: ADR-0059 12 c5344e32bddbd585
 adr: ADR-0060 15 705110c9478604a8
-adr: ADR-0061 18 7263d2d71f7fb027
+adr: ADR-0061 18 5de0ab3d99e68016

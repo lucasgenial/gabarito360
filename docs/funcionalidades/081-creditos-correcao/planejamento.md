@@ -176,7 +176,7 @@ Regra do mockup ([ADR-0056](../../decisoes/0056-app-atual-como-referencia-visual
 
 Telas previstas (mockup na subfase 0.1): saldo no Leitor360 (já no modal do modo servidor), página de saldo e extrato, aviso de limite do professor e alerta de saldo baixo. A compra avulsa e a gestão de limites são ações financeiras humanas: o lugar delas está pendente na [FN-068 §8](../068-financeiro/planejamento.md).
 
-A interface mostra o saldo recebido do aplicativo financeiro. Ela não calcula saldo. O desenho histórico mostrava o saldo comercial total, mesmo em contingência.
+A interface mostra o saldo recebido do aplicativo financeiro. Ela não calcula saldo. A exibição é temporária: o aparelho não persiste dados financeiros (ADR-0061). O desenho histórico mostrava o saldo comercial total, mesmo em contingência.
 
 ## 8. Riscos e decisões pendentes do responsável
 
@@ -218,3 +218,4 @@ Nenhum ainda.
 | 2026-11-11 | Decisões de billing de 11/11/2026 incorporadas: identidade por `correction_subject_id` no lugar de "aluno × prova"; reenvio nunca cobra; regras de reserva, `COMMIT` e `RELEASE`; respostas a D-1, D-5, D-6, D-7, D-8 e D-9; créditos por contribuição validada no escopo. A arquitetura passou ao [ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) | lucasgenial |
 | 2026-11-12 | Reorientação para o aplicativo financeiro externo ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md), revisão de 12/11/2026): a autoridade sobre saldo, reserva e contabilização passou ao aplicativo financeiro; o Gabarito360 guarda só o registro operacional; regras da correção preservadas; D-2 decidida em parte (limites mensais por professor); testes F, G e H; evidência da pendência aluno + aplicação trazida para o §8 | lucasgenial |
 | 2026-11-12 | §5.1: requisitos de teste separados dos de ativação comercial. D-3, D-4 e os detalhes comerciais da D-2 não bloqueiam desenvolvimento e homologação; a identidade aluno + aplicação continua dependência técnica real. Subfase 1.1 com o simulador genérico e processamento real | lucasgenial |
+| 2026-11-12 | Regra do aparelho alinhada ao ADR-0061: exibição temporária, sem persistir dados financeiros | lucasgenial |

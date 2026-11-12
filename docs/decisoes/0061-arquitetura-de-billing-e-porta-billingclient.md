@@ -14,7 +14,7 @@ agents_resumo:
   - "O financeiro (catálogo, planos, assinaturas, pagamentos, créditos, franquias, reservas, consumo e auditoria financeira) é um aplicativo externo independente, com código, banco, credenciais e implantação próprios. Nome de trabalho: M3 Core. Ele é futuro e não bloqueia o Gabarito360."
   - "O Gabarito360 fala com o financeiro só pela porta `BillingClient`, por integração. O contrato está em `docs/arquitetura/14-integracao-financeira.md`. Não crie no Gabarito360 carteira, ledger, lotes, saldo autoritativo, preço nem esquema financeiro local. O `LocalBillingAdapter` foi superado."
   - "O Gabarito360 não acessa o banco financeiro nem guarda credencial administrativa ou segredo de gateway. O aplicativo financeiro autentica o Gabarito360 e autoriza cada ação. Ações humanas financeiras exigem identidade e permissão próprias."
-  - "Cada operação tarifada tem um único contexto (professor, escola ou núcleo), sem recurso automático a outro. Sem autorização válida, o envio ao servidor é recusado. A queda da API financeira nunca ativa o simulador nem libera tudo. A primeira entrega é um simulador genérico da porta, ativado só por configuração em desenvolvimento e homologação: o processamento educacional é real, e só a resposta financeira é simulada, sem cobrança real nem retroativa. Nada de billing fica no aparelho. Não desligue o legado do MP-027 sem tarefa própria."
+  - "Cada operação tarifada tem um único contexto (professor, escola ou núcleo), sem recurso automático a outro. Sem autorização válida, o envio ao servidor é recusado. A queda da API financeira nunca ativa o simulador nem libera tudo. A primeira entrega é um simulador genérico da porta, ativado só por configuração em desenvolvimento e homologação: o processamento educacional é real, e só a resposta financeira é simulada, sem cobrança real nem retroativa. O aparelho só exibe, de forma temporária, dados financeiros autorizados: ele não os persiste e não decide autorização. Não desligue o legado do MP-027 sem tarefa própria."
 ---
 # ADR-0061 — O financeiro é um aplicativo externo independente, e o Gabarito360 fala com ele pela porta `BillingClient`
 
@@ -92,7 +92,9 @@ Os controles técnicos que concretizam estes pontos são **[Proposto]** e estão
 - O estado do simulador é fictício, separado das tabelas do produto, reiniciável e identificado como simulação. Ele não tem valor comercial, nunca é migrado e não é carteira, ledger nem motor financeiro.
 - O simulador só funciona com ativação explícita no servidor, em desenvolvimento e homologação. Ele não gera pagamento, dívida nem cobrança retroativa, e não libera permissões educacionais.
 - **[Pendente]** Piloto em produção com simulação. Ele não está habilitado.
-- Nada de billing fica no aparelho do usuário.
+- A tela pode exibir, de forma temporária, dados financeiros autorizados para o usuário (saldo, limites e histórico do contexto).
+- O aparelho não persiste esses dados. Ele não guarda saldo autoritativo, carteira nem concessão de contingência, e não decide autorização financeira.
+- O cliente nunca recebe credenciais técnicas nem administrativas.
 
 ### 7. Legado **[Diretriz]**
 
@@ -126,7 +128,10 @@ A versão de 11/11/2026 desta decisão continua no [registro histórico](../hist
 - É proibido guardar no Gabarito360 credencial administrativa do aplicativo financeiro ou segredo de gateway.
 - É proibido ativar o simulador, ou liberar o consumo, porque a API financeira caiu.
 - É proibido ativar o simulador em produção sem decisão expressa do responsável.
-- É proibido guardar saldo, franquia, concessão ou reserva no aparelho do usuário.
+- É proibido persistir no aparelho (armazenamento do navegador ou do aparelho) os dados financeiros exibidos.
+- É proibido manter no cliente saldo autoritativo, carteira, concessão de contingência ou autorização financeira.
+- É proibido expor ao cliente credenciais técnicas ou administrativas.
+- A API real implementa a mesma porta `BillingClient` que o simulador. Ela é validada contra o [contrato](../arquitetura/14-integracao-financeira.md) antes da troca.
 - As regras funcionais da correção são da [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md).
 - A experiência financeira limitada, a integração e o legado são da [FN-068](../funcionalidades/068-financeiro/planejamento.md).
 - A identidade da cobrança da correção é `correction_subject_id` (aluno × aplicação) ([ADR-0058](0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md), item 8).
@@ -135,13 +140,14 @@ A versão de 11/11/2026 desta decisão continua no [registro histórico](../hist
 
 ## Verificação
 
-Revisão de IA (`revisao-ia`): em cada PR da FN-068 e da FN-081, o agente de conformidade confere seis pontos.
+Revisão de IA (`revisao-ia`): em cada PR da FN-068 e da FN-081, o agente de conformidade confere sete pontos.
 
 1. O código fala com o financeiro só pela porta `BillingClient`.
 2. Nenhuma migration do Gabarito360 cria carteira, ledger, lotes, saldo, preço ou tabela financeira nova. O estado do simulador fica separado das tabelas do produto.
 3. Nenhuma configuração do Gabarito360 tem conexão ao banco financeiro, credencial administrativa ou segredo de gateway.
 4. Nenhum caminho de código ativa o simulador, ou autoriza consumo, quando a API financeira falha. A configuração de produção não ativa o simulador.
-5. Nenhum dado de billing vai ao aparelho.
+5. O cliente só exibe dados financeiros autorizados, de forma temporária. Ele não os persiste, não guarda saldo autoritativo, carteira nem concessão de contingência, não decide autorização e não recebe credenciais técnicas ou administrativas.
 6. O legado do MP-027 só muda em tarefa própria, autorizada.
+7. A troca do simulador pela API real só ocorre depois de a API real passar na validação contra o contrato.
 
 Os testes obrigatórios do consumo da correção estão na [FN-081 §6.7](../funcionalidades/081-creditos-correcao/planejamento.md).
