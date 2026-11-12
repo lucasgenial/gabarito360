@@ -508,7 +508,7 @@ Termos usados neste documento:
 
 **Fluxos alternativos e de erro:**
 - 2a. Tipo de região sem método disponível: a região fica **Não lida — método indisponível**. As outras regiões são lidas.
-- 5a. Transcrição indisponível no aparelho: as objetivas seguem normalmente no aparelho. As regiões abertas vão ao modo servidor (UC-079-26). O crédito é por correção da prova do aluno (aluno × prova), sem divisão por região.
+- 5a. Transcrição indisponível no aparelho: as objetivas seguem normalmente no aparelho. As regiões abertas vão ao modo servidor (UC-079-26). O crédito é por submissão do aluno na aplicação (`correction_subject_id`), sem divisão por região.
 
 **Regras de negócio:** o leitor segue o mapa e não deduz o tipo da questão. Um novo método entra sem mudar o leitor visual nem o despacho (planejamento §6.1).
 
@@ -934,7 +934,7 @@ Termos usados neste documento:
 4. Se o usuário não aceita, o sistema não lê a folha neste aparelho e volta à escolha da entrada.
 
 **Fluxos alternativos e de erro:**
-- 1a. Falta só o Escriba (as objetivas funcionam): o aparelho lê as objetivas. As regiões abertas vão ao modo servidor, com 1 crédito por aluno × prova.
+- 1a. Falta só o Escriba (as objetivas funcionam): o aparelho lê as objetivas. As regiões abertas vão ao modo servidor, com 1 crédito por `correction_subject_id`.
 - 1b. Aparelho fraco, mas capaz: o sistema avisa "A leitura pode demorar neste aparelho." e continua.
 - 2a. Região aberta e usuário sem modo servidor: o usuário ainda digita a transcrição no leitor visual (UC-079-16).
 
@@ -956,7 +956,7 @@ Termos usados neste documento:
 **Permissão:** `cartao.enviar`; `leitura.transcrever` para as regiões abertas (D-9); `correcao.alterar` para conferir e corrigir no leitor
 **Escopo:** prova no escopo do vínculo ativo; créditos do escopo cobrado
 **Pré-condições:** UC-079-01 em andamento; o aparelho não processa (UC-079-23), o lote passou do limite do aparelho (UC-079-07, 4d) ou o usuário escolheu o modo servidor; saldo de créditos suficiente (dependência do sistema de créditos, abaixo).
-**Pós-condições:** folha processada no servidor com o mesmo resultado que o aparelho daria; créditos consumidos por correção de prova de aluno (aluno × prova); folha aberta no leitor visual para conferência.
+**Pós-condições:** folha processada no servidor com o mesmo resultado que o aparelho daria; créditos consumidos por submissão do aluno na aplicação (`correction_subject_id`); folha aberta no leitor visual para conferência.
 **Tela/rota:** tela H do mockup `mockups/leitor360.html` (`data-tela="sem-ia"`, "Aparelho sem capacidade para o Escriba"); modal de aviso da aplicação ([ADR-0025](../../decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)). Envio pela rota atual `POST v1/provas/{id}/cartoes`, com o campo `modo = servidor` e sem `leitura` nas regiões que o servidor lê ([planejamento §6.6](planejamento.md#66-api-proposta)). Regras: [planejamento §6.12](planejamento.md#612-modo-servidor-leitura-no-servidor-com-fila-e-créditos).
 
 **Fluxo principal:**
@@ -982,7 +982,7 @@ Termos usados neste documento:
 - 6a. Marcador de prova ou aluno fora do escopo do usuário: o servidor recusa a folha com a mensagem do UC-079-09, 2b.
 - 6b. A barreira de qualidade recusa a imagem: a folha fica **Recusada** com a mensagem do código. O usuário verifica a prova manualmente. Ela não consome créditos.
 - 8a. O usuário sai da tela: a fila continua. Ao voltar, ele vê o estado de cada folha.
-- 9a. Prova mista com só o Escriba faltando no aparelho: o aparelho lê as objetivas, e o servidor transcreve as regiões abertas. O crédito é um só por aluno × prova, sem divisão por região.
+- 9a. Prova mista com só o Escriba faltando no aparelho: o aparelho lê as objetivas, e o servidor transcreve as regiões abertas. O crédito é um só por `correction_subject_id`, sem divisão por região.
 - 9b. A fila tem falha no servidor: a folha fica **Erro** com "Não foi possível ler esta folha. Capture de novo ou escolha outro arquivo." Ela não consome créditos.
 - 9c. O Escriba do servidor teve dificuldade com um aluno: o usuário reenvia só os alunos com problema, sem cobrar crédito de novo, e/ou segue para a revisão manual (UC-079-20).
 - 10a. Sem conexão durante o envio: a folha não é enviada, e nada fica guardado no aparelho (D-7, D-8). O sistema mostra "Sem conexão. Esta folha ainda não foi salva."
@@ -991,7 +991,7 @@ Termos usados neste documento:
 - 3b. Sem saldo de créditos (confirmado) ou sistema de créditos indisponível: o sistema recusa o envio e mostra "Os créditos de correção acabaram." (texto proposto). O sistema de créditos não existe ainda; ver a dependência nas regras.
 
 **Regras de negócio:**
-- **Consumo de créditos:** a unidade é uma correção de prova de um aluno (aluno × prova). Várias páginas do mesmo aluno na mesma prova valem 1 crédito. Não há cobrança por folha nem por região. O preço vem da [FN-081](../081-creditos-correcao/planejamento.md).
+- **Consumo de créditos:** a unidade é uma submissão de um aluno em uma aplicação de prova (`correction_subject_id`). Várias páginas da mesma submissão valem 1 crédito. Não há cobrança por folha nem por região. Qualquer reenvio da mesma submissão não cobra. O preço e as regras vêm da [FN-081](../081-creditos-correcao/planejamento.md).
 - **Reenvio:** reenviar só os alunos com problema não cobra crédito de novo.
 - **Sem saldo:** o envio é recusado (confirmado).
 - **Não consome:** o processamento no aparelho; a imagem recusada pela barreira de qualidade; a folha com erro do servidor; o reenvio de aluno com problema.
@@ -1009,7 +1009,7 @@ Termos usados neste documento:
 - [ ] A tela mostra a posição na fila e o tempo estimado, e o usuário pode sair dela.
 - [ ] O usuário recebe um aviso quando a folha termina.
 - [ ] Para a mesma imagem, o resultado do servidor tem paridade de 100% com o do aparelho, nas mesmas versões.
-- [ ] O crédito consome por correção de prova de aluno (aluno × prova); várias páginas do mesmo aluno na mesma prova consomem 1 crédito.
+- [ ] O crédito consome por `correction_subject_id`; várias páginas da mesma submissão consomem 1 crédito.
 - [ ] O processamento no aparelho e a imagem recusada não consomem.
 - [ ] O reenvio só dos alunos com problema não cobra crédito.
 - [ ] Sem saldo, o envio é recusado com mensagem.

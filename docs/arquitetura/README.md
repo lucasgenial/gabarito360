@@ -1,8 +1,8 @@
 # Arquitetura do Gabarito360
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
-Este documento é o índice da referência técnica do Gabarito360. Ele lista os treze documentos de arquitetura e diz o que cada um explica.
+Este documento é o índice da referência técnica do Gabarito360. Ele lista os catorze documentos de arquitetura e diz o que cada um explica.
 
 ## Como usar esta pasta
 
@@ -30,6 +30,7 @@ Cada assunto tem um único documento dono. Os outros documentos citam o dono por
 | 11 | [Segurança e privacidade](11-seguranca-e-privacidade.md) | Proteção de dados, LGPD, auditoria e dependências. |
 | 12 | [Desempenho](12-desempenho.md) | Critérios, medições e otimizações. |
 | 13 | [Infraestrutura e ambientes](13-infraestrutura-e-ambientes.md) | Servidores, processos, homologação e produção. |
+| 14 | [Integração com o aplicativo financeiro](14-integracao-financeira.md) | Contrato com o aplicativo financeiro externo: capacidades, contextos, dados mínimos, consumo, respostas, credenciais, simulador e falhas. |
 
 ## Mapa rápido por pergunta
 
@@ -41,6 +42,7 @@ Cada assunto tem um único documento dono. Os outros documentos citam o dono por
 | Como um cartão fotografado vira nota? | [06](06-omr-e-documentos.md) |
 | Quem pode ver o quê? | [04](04-identidade-acesso-e-permissoes.md) |
 | Como publicar uma versão? | [Operação](../operacao/README.md) |
+| Onde ficam saldo, créditos e pagamentos? | [14](14-integracao-financeira.md) |
 
 ## Documentos relacionados
 

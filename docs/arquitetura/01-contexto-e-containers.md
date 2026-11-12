@@ -1,6 +1,6 @@
 # Contexto e containers
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
 Este documento descreve o Gabarito360 como o modelo C4 mostra: o contexto do sistema (nível 1) e seus containers (nível 2). Os fatos vêm do código da branch `docs/planejamento-centralizado`.
 
@@ -29,7 +29,8 @@ Os perfis, os vínculos e as permissões estão em [04 Identidade, acesso e perm
 | Servidor de e-mail | Convites, recuperação de senha, confirmação de e-mail. | Configurado em `config/mail.php`. Em desenvolvimento, o e-mail vai para o log. |
 | Cloudflare Turnstile | Verificação anti-robô em formulários públicos. | Desligado por padrão (`TURNSTILE_ENABLED=false`). |
 | Cloudflare Tunnel | Entrega o tráfego HTTPS ao servidor. | O Web confia no cabeçalho `X-Forwarded-Proto`. |
-| Mercado Pago | Webhook de cobrança. | A contratação é assistida (FN-030, substituída). A rota do webhook ainda existe na API. |
+| Mercado Pago | Webhook de cobrança. | A contratação é assistida (FN-030, substituída). A rota do webhook ainda existe na API (legado do MP-027). |
+| Aplicativo financeiro (futuro) | Autoriza e contabiliza o consumo tarifado; dono de saldo, créditos, planos e pagamentos. | Ainda não existe. Código, banco, credenciais e implantação separados. A API fala com ele só pela porta `BillingClient` ([14](14-integracao-financeira.md), [ADR-0061](../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md)). |
 | Arquivos públicos do Censo, do IBGE e do catálogo nacional | Cadastro de escolas e instituições. | São importados por comandos Artisan. Não há consulta externa em tempo de uso. |
 
 ### Diagrama de contexto
@@ -153,6 +154,7 @@ Ambientes, hosts e publicação estão em [13 Infraestrutura e ambientes](13-inf
 | Motor OMR por driver | A interface `OmrDriverInterface` permite trocar o motor (`nativo` ou `simulado`). |
 | Leitura pela fila | O envio da foto não bloqueia a tela. |
 | Atualização por consulta (polling) | A tela consulta o estado. Não há WebSocket. |
+| Financeiro em aplicativo externo | O Gabarito360 não guarda saldo, carteira nem preço. Ele pede autorização pela porta `BillingClient` ([ADR-0061](../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md)). |
 
 Os registros completos estão em [Decisões (ADRs)](../decisoes/README.md).
 

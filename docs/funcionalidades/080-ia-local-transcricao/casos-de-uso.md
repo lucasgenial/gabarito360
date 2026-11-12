@@ -2,7 +2,7 @@
 
 **Natureza:** nova (candidata; casos de uso preliminares de alto nível)
 **Perfis envolvidos:** perfis que leem respostas abertas no Leitor360 (os mesmos de `cartao.enviar` e `correcao.alterar`, a confirmar na FN-079); responsável pelo modelo (papel técnico, fora dos perfis da aplicação). Ver [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md). A permissão de uso do Escriba é a chave nova `leitura.transcrever` (D-9 da FN-079). No aparelho não há crédito. No servidor, a transcrição consome créditos de correção.
-**Versão:** 2.1 (11/11/2026) — alinhado às decisões D-1 a D-13 da FN-079 e ao modo servidor; crédito por aluno × prova e revisão manual.
+**Versão:** 2.1 (11/11/2026) — alinhado às decisões D-1 a D-13 da FN-079 e ao modo servidor; crédito por `correction_subject_id` e revisão manual.
 **Atualizado em:** 2026-11-11
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Nenhum caso está implementado. Os números de tamanho, tempo e qualidade são metas a definir pelo responsável ([planejamento §5.1](planejamento.md)). O Leitor360 ([FN-079](../079-leitor360/casos-de-uso.md)) chama este modelo pelo método `transcricao-manuscrita`.
@@ -268,7 +268,7 @@ Decisão D-2 da [FN-079](../079-leitor360/planejamento.md#612-modo-servidor-leit
 **Ator:** usuário do Leitor360; servidor do Gabarito360 (executa o Escriba)
 **Permissão:** `leitura.transcrever`; o servidor revalida permissão, escopo e vínculo a cada envio
 **Escopo:** servidor do Gabarito360, no ambiente do responsável, no Brasil
-**Pré-condições:** UC-080-09 concluído; o usuário aceitou o modo servidor; existe saldo de créditos de correção (sistema de créditos na FN-081, candidata, bloqueia este caso); a prova tem regiões abertas. A unidade de crédito é uma correção de prova de um aluno (aluno × prova).
+**Pré-condições:** UC-080-09 concluído; o usuário aceitou o modo servidor; existe saldo de créditos de correção (sistema de créditos na FN-081, candidata, bloqueia este caso); a prova tem regiões abertas. A unidade de crédito é uma submissão de um aluno em uma aplicação de prova (`correction_subject_id`).
 **Pós-condições:** a transcrição está registrada com origem "servidor" e a versão do Escriba; o usuário foi avisado; a conferência humana está pendente.
 **Tela/rota:** Leitor360 (FN-079 §6.12 e UC-079-26); aviso pela FN-057, ou no app até ela existir
 
@@ -291,12 +291,12 @@ Decisão D-2 da [FN-079](../079-leitor360/planejamento.md#612-modo-servidor-leit
 - 7a. O Escriba tem dificuldade com um aluno: o usuário pode reenviar só os alunos com problema, sem cobrar crédito de novo, e/ou mandar a folha para a revisão manual. A revisão manual é o caminho principal.
 - Sem saldo de créditos: o servidor recusa o envio (confirmado) e o app informa o usuário.
 
-**Regras de negócio:** o servidor nunca altera a nota nem decide a resposta. Um crédito vale uma correção de prova de um aluno (aluno × prova); várias páginas do mesmo aluno na mesma prova custam um crédito. O servidor não relê por conta própria. Quem confere a leitura é sempre o usuário. ⚠ Inferência, não decisão: as leituras de quem não tem `correcao.alterar` ficam como pendência para o professor conferir. A proteção contra resultado adulterado é a conferência humana, a imagem original guardada, a nota só no servidor e a auditoria. O processamento no aparelho nunca consome. Nenhum dado vai a terceiros.
+**Regras de negócio:** o servidor nunca altera a nota nem decide a resposta. Um crédito vale uma submissão de um aluno em uma aplicação de prova (`correction_subject_id`); várias páginas da mesma submissão custam um crédito. O servidor não relê por conta própria. Quem confere a leitura é sempre o usuário. ⚠ Inferência, não decisão: as leituras de quem não tem `correcao.alterar` ficam como pendência para o professor conferir. A proteção contra resultado adulterado é a conferência humana, a imagem original guardada, a nota só no servidor e a auditoria. O processamento no aparelho nunca consome. Nenhum dado vai a terceiros.
 
 **Critérios de aceite:**
 - [ ] O modal mostra exatamente os dois avisos, sem motivo nem lista de recursos, antes do primeiro envio.
 - [ ] Para a mesma imagem, o servidor e o aparelho produzem a mesma transcrição, com a mesma versão do Escriba (conjunto de referência da FN-079).
-- [ ] Só as regiões abertas entram na fila. O consumo é de um crédito por aluno × prova.
+- [ ] Só as regiões abertas entram na fila. O consumo é de um crédito por `correction_subject_id`.
 - [ ] Várias páginas do mesmo aluno na mesma prova consomem um crédito.
 - [ ] Sem saldo, o envio é recusado.
 - [ ] O reenvio dos alunos com problema não cobra crédito de novo.

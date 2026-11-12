@@ -13,11 +13,12 @@ agents_ordem: 60
 agents_resumo:
   - "A leitura das folhas (núcleo OMR e Escriba) roda no aparelho, para reduzir o custo do servidor. Aparelho e servidor usam o mesmo código, as mesmas versões de OpenCV e NumPy e o mesmo modelo e versão do Escriba (paridade total). A nota é calculada só no servidor."
   - "Não existe uso offline. Nada é persistido no aparelho. O envio leva a imagem original, reduzida a 2400 px. O servidor não relê: quem confere é sempre o usuário. Leitura com dificuldade pede nova imagem, reenvio sem custo (modo servidor) ou revisão manual, que é o caminho principal."
-  - "Aparelho sem capacidade usa o modo servidor: fila, aviso prévio de créditos e de fila, e marcador de identificação no arquivo. O marcador só encaminha: o QR prevalece. Os créditos de correção existem só no servidor: um por correção de prova de um aluno."
+  - "Aparelho sem capacidade usa o modo servidor: fila, aviso prévio de créditos e de fila, e marcador de identificação no arquivo. O marcador só encaminha: o QR prevalece. Os créditos de correção existem só no servidor: um por submissão de um aluno em uma aplicação de prova (`correction_subject_id`)."
   - "A correção da prova não fecha com folha pendente. A folha pode ser salva com pendências e corrigida depois, na revisão."
 ---
 # ADR-0058 — Leitura de provas no aparelho, com paridade e modo servidor com créditos
 
+**Atualizado em:** 11/11/2026, por lucasgenial (item 8: identidade da cobrança e reenvio)
 **Data:** 2026-11-11
 **Estado:** Aceita
 **Decisor:** responsável (lucasgenial)
@@ -44,7 +45,8 @@ O responsável decidiu o conjunto abaixo em 11/11/2026. O planejamento da FN-079
    - O aparelho identifica a folha pelo QR (prova, aluno e página) e grava um marcador de identificação no arquivo de imagem. O servidor não processa só para identificar.
    - O marcador só encaminha. O servidor revalida permissão e escopo. Se o QR diverge do marcador, o QR prevalece.
    - Sem QR legível, a imagem vai sem marcador.
-8. **Créditos só no servidor.** O processamento no aparelho nunca consome créditos. O modo servidor consome um crédito de correção por correção de prova de um aluno (aluno × prova), qualquer que seja o número de páginas. Sem saldo, o envio é recusado. O reenvio por dificuldade do servidor não cobra. A chave `leitura.transcrever` não cobra crédito no aparelho.
+8. **Créditos só no servidor.** O processamento no aparelho nunca consome créditos. O modo servidor consome um crédito de correção por submissão de um aluno em uma aplicação de prova (`correction_subject_id`), qualquer que seja o número de páginas. Sem saldo, o envio é recusado. Qualquer reenvio ou nova foto do mesmo `correction_subject_id` não cobra, com ou sem marca de dificuldade do servidor. A chave `leitura.transcrever` não cobra crédito no aparelho.
+   - **Correção de 11/11/2026.** A identidade anterior era "aluno × prova". Ela foi superada pelo `correction_subject_id` (aluno × aplicação) na mesma data, junto do [ADR-0061](0061-arquitetura-de-billing-e-porta-billingclient.md). As regras operacionais do consumo estão na [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md).
 9. **Correção com trava (D-11, opção b).** A folha pode ser salva com pendências e fica marcada "com pendência". A revisão corrige a pendência depois. A correção da prova não fecha enquanto houver folha pendente.
 
 ## Consequências

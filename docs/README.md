@@ -1,6 +1,6 @@
 # Documentação do Gabarito360
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
 Esta é a porta de entrada da documentação. Uma pessoa ou um agente de IA entende o sistema inteiro lendo só estes documentos.
 
@@ -21,7 +21,7 @@ Esta é a porta de entrada da documentação. Uma pessoa ou um agente de IA ente
 | Pasta | Nível | Conteúdo |
 |---|---|---|
 | `visao-geral/` | Introdução | O produto, o público, os perfis, os módulos e o estado atual. Leitura fácil, sem jargão. |
-| `arquitetura/` | Referência técnica | Contexto, containers, modelo de dados, acesso e permissões, contratos, regras de negócio, interface, segurança, desempenho e infraestrutura. |
+| `arquitetura/` | Referência técnica | Contexto, containers, modelo de dados, acesso e permissões, contratos, regras de negócio, interface, segurança, desempenho, infraestrutura e integração com o aplicativo financeiro. |
 | `funcionalidades/` | Funcionalidades | Catálogo e, para cada funcionalidade, o planejamento e os casos de uso. |
 | `planejamento/` | Execução | Plano mestre (orquestrador) e governança. |
 | `decisoes/` | Decisões | Um registro de decisão de arquitetura (ADR) por arquivo, com data, contexto e consequência. |
