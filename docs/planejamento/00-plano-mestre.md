@@ -60,6 +60,7 @@ Uma subfase só termina quando passa por todos os portões aplicáveis.
 | Item | Situação em 10/11/2026 |
 |---|---|
 | Em execução | Nenhuma funcionalidade. A execução aguarda a aprovação deste plano. |
+| **Atualização de 12/11/2026 (FN-068)** | A FN-068 foi reorientada para "Plano e uso, integração financeira e legado" ([ADR-0062](../decisoes/0062-plano-e-uso-e-central-do-cliente.md)). **Entrega atual (documental):** subfase 0.4 (adequação aos princípios; **entregue (documentação)**: `seguranca-privacidade` fez a revalidação de acesso, dados pessoais e privacidade, e o campo "Conforme princípios" subiu para 19 na FN-068 e na FN-081) e subfase 2.2 (documentação; aguarda a aprovação do responsável). O ADR-0062 está aceito no texto. Ele passa a valer na `main` só depois da aprovação do responsável e do merge do PR desta subfase. **Prioridade (decisão do responsável de 12/11/2026):** só a FN-068 documental e as adequações da FN-081; isso não prioriza a implementação da FN-081 nem a da subfase 1.1. Subfases 2.0 e 2.1 superadas (PR #275 fechado sem merge, SHA `4a10ea2d`, branch preservada). Mockup (subfase 2.3) **não autorizado**. Destino do legado do MP-027: pendente, em tarefa própria. Nenhuma funcionalidade passa ao estado "Em execução". |
 | Próximo passo | Onda 0: FN-078 (governança executável), a partir da subfase 6.1 (subfases 1.1 a 5.1 entregues; 6.1 depende de decisão do responsável); depois, decisões do responsável (seção 5) e aprovação dos documentos da Onda 1. |
 | Última entrega | FN-077 Desempenho, etapas F0 a F4, publicadas na homologação em 09/11/2026. |
 
@@ -110,7 +111,7 @@ Trilha paralela de baixo risco, se o responsável aceitar: FN-065 (plano de inci
 | 3 | FN-035 Responsáveis dos alunos | A6 | FN-016 |
 | 3 | FN-033 Estrutura escolar | A3, A4 | — |
 | 4 | FN-061 Termos e privacidade | L1 | Decisões D13 e D14 |
-| 4 | FN-068 Financeiro, depois FN-069 Selo | F1 a F3; R1 | Decisão comercial |
+| 4 | FN-068 Plano e uso, integração financeira e legado, depois FN-069 Selo | Documentação priorizada em 12/11/2026 (subfases 0.4 e 2.2); mockup (2.3) e implementação aguardam autorização; R1 | A implementação depende de decisão comercial e do aplicativo externo |
 | 4 | FN-029 Escola independente | EI1-B a EI1-G | FN-068 |
 | 4 | FN-028 Encerramento de cliente | T6-A a T6-E | FN-064, FN-068 |
 | 4 | FN-067 Portal dos responsáveis | P1 a P8 | FN-035, FN-061, FN-062, FN-069, D10 |
@@ -152,7 +153,7 @@ Cada decisão recebe um estudo antes da resposta. O estudo compara as opções e
 | 2 | Regra de produção: revogar o gate L4 (docs/102) a favor do ADR-H1 (docs/127) e promover em blocos | FN-003, FN-018, FN-046, FN-064 | Revogar; promover primeiro o bloco de segurança | Aberta |
 | 3 | Política T5 (cópias entre espaços) contra o docs/115 (transferências) | FN-024, FN-025 | Declarar T5 substituída; desligar as flags `COPIAS_*` em produção até TR1 | Aberta |
 | 4 | Aceite visual da tela antiga de T5 | FN-024 | Dispensar; fazer o aceite na nova tela (UX1) | Aberta |
-| 5 | Autocadastro e assinatura online (MP-027, 028, 029) | FN-030, FN-068 | Declarar substituídos; desativar o código remanescente do Mercado Pago | Aberta |
+| 5 | Autocadastro e assinatura online (MP-027, 028, 029) | FN-030, FN-068 | Declarar substituídos. Destino do código remanescente do Mercado Pago: pendente, a investigar e decidir em tarefa própria (FN-068 subfase 3.1). Nada é desligado | Aberta |
 | 6 | Matrizes de permissão de identidade (ID1) e de disciplinas (DC1) | FN-016, FN-017, FN-038 | Aprovar a matriz ID1 do docs/139; registrar a matriz DC1 em vigor no docs/03 | Aberta |
 | 7 | Escopo da agenda e biblioteca de calendário (prova de conceito C1) | FN-056, FN-039 | Concluir a prova de conceito com critérios; priorizar FN-039 junto | Aberta |
 | 8 | Identidades para a carga de 1000 usuários | FN-077 | Contas sintéticas só na homologação; gerador fora da VM | Aberta |

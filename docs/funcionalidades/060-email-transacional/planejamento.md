@@ -19,7 +19,7 @@ Fazer o Gabarito360 enviar e receber e-mail com o próprio domínio, de forma co
   - Provas agendadas e lembretes → [FN-059](../059-agendamento-aplicacao-provas/planejamento.md) (modelos da fase 4).
   - Importação de alunos → [FN-034](../034-importacao-exportacao-alunos/planejamento.md) (modelo `importacao-concluida`, fase 3).
   - Convite por CPF e outbox de convites (VI1) → [FN-017](../017-convites-cpf/planejamento.md).
-  - Pagamentos (`assinatura-pagamento`) → [FN-068](../068-financeiro/planejamento.md); resultado ao responsável (`portal-resultado`) → [FN-067](../067-portal-responsaveis/planejamento.md).
+  - Pagamentos (`assinatura-pagamento`) → aplicativo financeiro externo ([ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md)); a [FN-068](../068-financeiro/planejamento.md) cuida de Plano e uso, da integração e do legado; resultado ao responsável (`portal-resultado`) → [FN-067](../067-portal-responsaveis/planejamento.md).
 
 ## 3. Fontes de verdade
 - Mockups: não há mockup de e-mail; formulário Fale Conosco segue a identidade atual (docs/28 E7; inventário docs/01 (`docs/01-inventario-dos-mockups.md`), seção de páginas SaaS).
