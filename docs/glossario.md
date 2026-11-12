@@ -1,6 +1,6 @@
 # Glossário
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
 Este documento define os termos do domínio e os termos técnicos do Gabarito360. Cada conceito tem um único termo. Em caso de dúvida de interpretação, este glossário prevalece.
 
@@ -30,7 +30,9 @@ Este documento define os termos do domínio e os termos técnicos do Gabarito360
 
 | Termo | Definição |
 |---|---|
-| Cliente | Organização ou pessoa que contrata o sistema: rede, escola independente ou professor autônomo (FN-021). |
+| Cliente | Cadastro local de uma rede, escola independente ou professor autônomo (FN-021 e FN-023). O campo `contrato_referencia` só aponta evidência externa e não é contrato. Cliente não é a conta contratante. Dono: [documento 07](arquitetura/07-clientes-espacos-e-vinculos.md). |
+| Pessoa | Identidade canônica de um ser humano, registrada em `pessoas`. Não é a conta de acesso, o vínculo nem a conta contratante. Dono: [documento 04, seção 1](arquitetura/04-identidade-acesso-e-permissoes.md#1-conceitos). |
+| Instituição | Organização atendida: rede, núcleo ou escola. No Gabarito360, o espaço representa a instituição. Não é a conta contratante. Dono: [documento 04, seção 1](arquitetura/04-identidade-acesso-e-permissoes.md#1-conceitos). |
 | Espaço | Área de trabalho de um cliente. Tipos: rede, núcleo, escola e pessoal. Os dados de espaços diferentes não se misturam. |
 | Espaço pessoal | Espaço de um professor autônomo. Só o proprietário o usa (FN-022). |
 | Vínculo | Ligação de uma pessoa com um espaço, com perfil e período. Uma pessoa pode ter vários (FN-015). |
@@ -96,6 +98,26 @@ Este documento define os termos do domínio e os termos técnicos do Gabarito360
 | Toast | Aviso flutuante e temporário após uma ação. |
 | Stepper | Fluxo em etapas com indicador de progresso. |
 | Skeleton | Esboço de carregamento exibido enquanto os dados chegam (FN-076). |
+
+### 1.5 Plano e uso
+
+Estes termos seguem a reorientação da FN-068. As marcas **[Diretriz]** e **[Pendente]** têm o sentido do [contrato 14](arquitetura/14-integracao-financeira.md). A implementação ainda não existe.
+
+| Termo | Definição |
+|---|---|
+| Plano e uso | **[Diretriz]** Área do Gabarito360 que mostra, por vínculo, as informações autorizadas recebidas do aplicativo financeiro externo: plano, recursos, ciclo, quantidades, disponibilidade e consumo. Não mantém catálogo, preço nem saldo. Dono: [ADR-0062](decisoes/0062-plano-e-uso-e-central-do-cliente.md) e FN-068. |
+| Central do cliente | **[Diretriz]** Área do aplicativo financeiro externo. Atende o professor autônomo e o representante institucional: compra, mudança de plano, contratação e capacidade. Dono: [ADR-0062](decisoes/0062-plano-e-uso-e-central-do-cliente.md). |
+| Conta de acesso | Credencial de entrada de uma pessoa (registro em `usuarios`). Não é conta contratante. Dono: [documento 04](arquitetura/04-identidade-acesso-e-permissoes.md). |
+| Conta contratante | **[Diretriz]** Parte que contrata o serviço. Fica no aplicativo financeiro externo, e o Gabarito360 não a guarda. É distinta de Cliente (cadastro local), de Pessoa e de Conta de acesso. Pode corresponder a uma escola, e cada professor consulta pelo seu vínculo. Dono: [documento 04](arquitetura/04-identidade-acesso-e-permissoes.md) e [contrato 14](arquitetura/14-integracao-financeira.md). |
+| Contratação | **[Diretriz]** Acordo vigente de uma conta contratante: plano, cobertura e recursos. Fica no aplicativo financeiro externo. Dono: [contrato 14](arquitetura/14-integracao-financeira.md). |
+| Cobertura | Fato de a contratação ou o vínculo incluir um recurso. Sem cobertura, a operação não segue. É diferente de saldo. Dono: [contrato 14](arquitetura/14-integracao-financeira.md). |
+| Franquia por recurso | Quantidade incluída no plano para um recurso, por ciclo. Não é carteira comum. Unidades de recursos diferentes nunca se somam. Dono: [contrato 14](arquitetura/14-integracao-financeira.md) e FN-081. |
+| Crédito adicional | Quantidade extra de um recurso, obtida na Central do cliente além da franquia. Dono: [contrato 14](arquitetura/14-integracao-financeira.md). |
+| Uso livre monitorado | **[Diretriz]** Modalidade institucional com medição e sem bloqueio local. A instituição acompanha e pede ajustes. Só o Financeiro do aplicativo externo ajusta. O comportamento ao ultrapassar a referência é **[Pendente]**. Dono: [ADR-0062](decisoes/0062-plano-e-uso-e-central-do-cliente.md). |
+| Referência de uso livre | **[Diretriz]** Valor de acompanhamento do uso livre. Não é limite bloqueante nem cobertura contratual, e o percentual não se aplica a ela. Dono: [ADR-0062](decisoes/0062-plano-e-uso-e-central-do-cliente.md). |
+| Capacidade limitada | **[Diretriz]** Modalidade institucional com limite. O financeiro institucional autorizado administra a capacidade na Central, dentro do contratado. Dono: [ADR-0062](decisoes/0062-plano-e-uso-e-central-do-cliente.md). |
+| Reserva | Quantidade separada para uma operação em processamento. Ainda não é consumo confirmado e pode ser liberada. Dono: [contrato 14](arquitetura/14-integracao-financeira.md) e FN-081. |
+| Consumo confirmado | Quantidade usada por uma operação concluída. Reserva e confirmação da mesma operação contam uma vez. Dono: [contrato 14](arquitetura/14-integracao-financeira.md) e FN-081. |
 
 ## 2. Termos técnicos
 

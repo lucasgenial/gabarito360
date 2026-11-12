@@ -1,6 +1,6 @@
 # Identidade, acesso e permissões
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
 Este documento descreve como o Gabarito360 autentica uma conta, escolhe o contexto de acesso e decide o que cada perfil pode fazer. Ele inclui o catálogo oficial de perfis e permissões, o motor de permissões (`App\Support\Permissao`), os acessos internos, a identidade pessoal e a imagem de perfil.
 
@@ -15,7 +15,11 @@ Este documento é o dono do catálogo de perfis e permissões. Para o modelo de 
 | Conta (identidade) | Registro em `usuarios`. Tem e-mail, senha e dados pessoais. A conta não pertence a uma escola. |
 | Pessoa | Identidade canônica em `pessoas` (seção 10). Ainda não se liga às contas. |
 | Espaço | Dono dos dados. Tipos: pessoal, escola, núcleo, rede. Veja o documento 07. |
+| Conta de acesso | Mesmo registro que "Conta (identidade)". Este termo distingue a credencial de entrada da pessoa e da contratação. |
 | Vínculo | Relação de uma conta com um espaço, com perfil, situação e vigência (`usuario_vinculos`). |
+| Instituição | Organização atendida: rede, núcleo ou escola. No Gabarito360, o espaço representa a instituição. |
+| Conta contratante | Parte que contrata o serviço. Fica no aplicativo financeiro externo. O Gabarito360 não a guarda. [Diretriz] ([ADR-0062](../decisoes/0062-plano-e-uso-e-central-do-cliente.md)) |
+| Contratação | Acordo vigente entre a conta contratante e o produto: plano, cobertura e recursos. Fica no aplicativo financeiro externo. |
 | Contexto ativo | O vínculo (ou acesso interno) selecionado na sessão. Só ele define perfil, permissões e escopo. |
 | Perfil | Papel do vínculo. Define o escopo e as permissões padrão. |
 | Escopo | Até onde o usuário enxerga: secretaria, rede, núcleo, escola ou turmas. A API sempre verifica o escopo. |
@@ -24,6 +28,8 @@ Este documento é o dono do catálogo de perfis e permissões. Para o modelo de 
 | Extra (o) | Permissão que o perfil não tem, mas que um gestor pode conceder a uma pessoa. |
 | Nunca (—) | Permissão que o perfil não pode receber, nem como extra. |
 | Retirada | Remoção de uma permissão padrão de um vínculo específico. |
+
+Pessoa, conta de acesso, perfil, vínculo, instituição, conta contratante e contratação são conceitos distintos. Nenhum deles substitui outro. A área Plano e uso do Gabarito360 consulta o aplicativo financeiro externo pelo vínculo ativo. A contratação não muda de titular quando o vínculo muda. Veja [ADR-0062](../decisoes/0062-plano-e-uso-e-central-do-cliente.md) e o [contrato de integração](14-integracao-financeira.md).
 
 ## 2. Autenticação e conta
 
@@ -80,7 +86,7 @@ O token de identidade não expira por tempo (`sanctum.expiration = null`). A dec
 | Perfil | Chave | Espaço | Faz (resumo) | Não faz |
 |---|---|---|---|---|
 | Secretário de Educação | `secretario_educacao` | Secretaria | Relatórios consolidados das redes da secretaria. Somente leitura. | Operar escola, prova, correção ou usuários. |
-| Administrador da Rede | `admin_rede` | Rede | Tudo dentro da rede. | Ver outras redes. A titularidade da assinatura é separada. |
+| Administrador da Rede | `admin_rede` | Rede | Tudo dentro da rede. | Ver outras redes. A titularidade da assinatura é separada (legado: a conta de acesso é a titular; veja a seção 12). |
 | Diretor de Núcleo | `dir_nucleo` | Núcleo | Cadastra, edita e desativa escolas e anexos do núcleo. Gere diretores e coordenadores. Vê relatórios do núcleo. | Criar prova, corrigir, cadastrar professor ou aluno. |
 | Diretor Escolar | `dir_escolar` | Escola | Edita dados e logo da escola. Gere a equipe, as turmas e os alunos. Acompanha e reabre correções. | Cadastrar escola, criar ou editar prova e gabarito (só como extra). |
 | Vice-diretor Escolar | `vice_dir_escolar` | Escola | Acompanha toda a escola. Gestão só por extra concedido. | Conceder permissões. Herdar poderes da direção. |
@@ -101,6 +107,8 @@ Rótulo de interface proposto para o autônomo: "Professor independente". A chav
 | Desenvolvedor | `desenvolvedor` | Consulta e gere clientes. Gere Suporte e Financeiro. Gere exceções funcionais. Atende pedidos de titulares. | Dados pedagógicos neste contexto. Gerir outro Desenvolvedor ou a si mesmo. |
 | Suporte | `suporte` | Consulta e gere clientes. Gere exceções funcionais. Atende protocolos atribuídos. | Dados pedagógicos neste contexto. |
 | Financeiro | `financeiro` | Consulta e gere clientes. | Dados pedagógicos. |
+
+O perfil Financeiro não tem tela em Plano e uso. A administração financeira da empresa fica no aplicativo financeiro externo. O papel futuro deste perfil é **[Pendente]** (FN-068, seção 8). Esta nota não altera permissões.
 
 ### 3.3 Compatibilidade entre perfil e tipo de espaço
 
@@ -453,6 +461,9 @@ Estas decisões do responsável estão vigentes.
 - Gravar um perfil interno no campo legado da conta não concede acesso.
 - A flag `ACESSOS_INTERNOS_ATIVOS` (`config/acessos_internos.php`) está desligada por padrão. Sem ela, as rotas internas respondem 403 ou 404.
 - Cada uso revalida conta ativa, titularidade, perfil, vigência, situação e versão.
+- O perfil `financeiro` não dá acesso a Plano e uso. A visão de vários clientes pertence ao aplicativo financeiro externo. O papel futuro do perfil é **[Pendente]**. Veja a seção 3.2.
+
+**Representante institucional — [Pendente].** Não existe perfil nem chave de permissão para "representante institucional" ou "responsável financeiro". O código não tem chave financeira em `CatalogoPermissoes`. Nenhum papel financeiro é deduzido de perfil pedagógico ou de direção. Quem vê o resumo institucional e quem abre a Central do cliente pela instituição aguardam decisão do responsável. O aplicativo financeiro externo confirma o papel em cada ação. Este documento não cria chave nova.
 
 ### 9.2 Seleção e token
 
@@ -578,7 +589,7 @@ O avatar do topo usa um botão de 44×44 px e um círculo de 36×36 px com borda
 - **Cartão de outra prova.** O QR direciona o cartão para a prova correta da mesma escola e espaço. Se não for possível, o envio é recusado com motivo.
 - **Aplicador.** Nunca recebe nota, gabarito ou relatório. Só provas com data de aplicação igual a hoje.
 - **Arquivos.** Fotos de cartões e PDFs só chegam a quem acessa a prova. URLs de imagem carregam ator, espaço e versão do acesso. Revogar o acesso invalida os links.
-- **Assinatura.** Só o titular da conta vê e gere plano, pagamentos e cancelamento. Isso independe do perfil (FN-030, substituída).
+- **Assinatura.** Só o titular da conta vê e gere plano, pagamentos e cancelamento. Isso independe do perfil (FN-030, substituída). **Limitação do legado:** o MP-027 usa a conta de acesso como titular (`assinaturas.titular_id` = id do usuário). Essa regra descreve o legado, que segue como está (FN-068, subfase 3.1). No modelo novo, a titularidade contratual é da conta contratante, no aplicativo financeiro externo. A gestão acontece na Central do cliente ([ADR-0062](../decisoes/0062-plano-e-uso-e-central-do-cliente.md)).
 - **Conta individual antiga.** O modelo antigo dava ao professor de conta individual as permissões de diretor numa escola criada para ele. Esse modelo foi substituído pelo Professor Autônomo em espaço pessoal. Não crie contas dessa forma.
 - **Jobs.** Jobs transportam IDs de ator, vínculo e espaço e revalidam o contexto antes de ler e antes de gravar.
 - **Rate limit.** Rotas sensíveis têm `throttle` próprio (valores nas tabelas deste documento).

@@ -1,8 +1,10 @@
 # Clientes, espaços e vínculos
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
-Este documento descreve como o Gabarito360 separa quem contrata (cliente), onde os dados ficam (espaço) e quem acessa (vínculo). Ele cobre os espaços de rede, núcleo, escola e pessoal, as instituições, o espaço pessoal do professor autônomo, o cadastro de clientes (T4) e o corte T2 que isolou os dados por espaço.
+Este documento descreve como o Gabarito360 separa o cadastro local do cliente, onde os dados ficam (espaço) e quem acessa (vínculo). Ele cobre os espaços de rede, núcleo, escola e pessoal, as instituições, o espaço pessoal do professor autônomo, o cadastro de clientes (T4) e o corte T2 que isolou os dados por espaço.
+
+O cliente é um cadastro local. Ele não é a conta contratante, que fica no aplicativo financeiro externo. Veja [04, seção 1](04-identidade-acesso-e-permissoes.md#1-conceitos).
 
 Para tabelas e colunas, leia [03](03-modelo-de-dados.md). Para perfis, permissões e contexto ativo, leia [04](04-identidade-acesso-e-permissoes.md). Funcionalidades relacionadas: FN-021, FN-022, FN-023, FN-015, FN-024, FN-025, FN-027, FN-028, FN-031.
 
@@ -10,7 +12,7 @@ Para tabelas e colunas, leia [03](03-modelo-de-dados.md). Para perfis, permissõ
 
 | Conceito | Definição | Regra principal |
 |---|---|---|
-| Cliente | Contratante e pagador. Tem modalidade comercial. | Um cliente pode custear vários espaços. Pagar não concede acesso a dados pedagógicos. |
+| Cliente | Cadastro local de quem o sistema atende. Tem modalidade comercial. Não é a conta contratante. | Um cliente pode custear vários espaços. Pagar não concede acesso a dados pedagógicos. |
 | Espaço | Unidade de propriedade e de isolamento dos registros. Tipos: pessoal, escola, núcleo, rede. | Cada registro pedagógico tem exatamente um espaço proprietário. |
 | Vínculo | Relação de uma conta com um espaço e um perfil, com vigência e situação. | A mesma conta pode ser professora numa escola e diretora em outra. Cada contexto usa um vínculo por vez. |
 
@@ -18,7 +20,7 @@ A hierarquia institucional continua sendo rede, núcleo, escola. O cliente não 
 
 ```mermaid
 flowchart LR
-  C[Cliente contratante] --> E[Espaços custeados]
+  C["Cliente (cadastro local)"] --> E[Espaços custeados]
   U[Conta de usuário] --> V[Vínculo: perfil e vigência]
   V --> E
   E --> D[Dados de um único espaço]
@@ -80,7 +82,7 @@ A consulta de espaços não devolve usuários, CPF, e-mail, alunos, provas ou no
 
 ### 3.3 Limites
 
-- Contratos completos, cobrança e faturas pertencem ao financeiro (FN-068).
+- Contratos completos, cobrança e faturas pertencem ao aplicativo financeiro externo. A área Plano e uso (FN-068) só exibe informações autorizadas dele ([ADR-0062](../decisoes/0062-plano-e-uso-e-central-do-cliente.md)).
 - O cadastro de clientes não substitui a auditoria geral (FN-004).
 - Cliente provisório `interno` só existe após conciliação aprovada. Ele não implica contrato jurídico nem titularidade.
 
