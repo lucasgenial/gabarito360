@@ -1,26 +1,19 @@
 ---
 id: ADR-0061
 titulo: O financeiro é um aplicativo externo independente, e o Gabarito360 fala com ele pela porta BillingClient
-estado: Aceita
-substituida_por: []
+estado: Substituída
+substituida_por: [ADR-0062]
 data: 2026-11-11
 afeta_funcionalidades: [FN-068, FN-081]
 afeta_caminhos: ["apps/api/**", "apps/web/**"]
 verificacao: revisao-ia
 regras: []
-agents_secao: Planejamento
-agents_ordem: 70
-agents_resumo:
-  - "O financeiro (catálogo, planos, assinaturas, pagamentos, créditos, franquias, reservas, consumo e auditoria financeira) é um aplicativo externo independente, com código, banco, credenciais e implantação próprios. Nome de trabalho: M3 Core. Ele é futuro e não bloqueia o Gabarito360."
-  - "O Gabarito360 fala com o financeiro só pela porta `BillingClient`, por integração. O contrato está em `docs/arquitetura/14-integracao-financeira.md`. Não crie no Gabarito360 carteira, ledger, lotes, saldo autoritativo, preço nem esquema financeiro local. O `LocalBillingAdapter` foi superado."
-  - "O Gabarito360 não acessa o banco financeiro nem guarda credencial administrativa ou segredo de gateway. O aplicativo financeiro autentica o Gabarito360 e autoriza cada ação. Ações humanas financeiras exigem identidade e permissão próprias."
-  - "Cada operação tarifada tem um único contexto (professor, escola ou núcleo), sem recurso automático a outro. Sem autorização válida, o envio ao servidor é recusado. A queda da API financeira nunca ativa o simulador nem libera tudo. A primeira entrega é um simulador genérico da porta, ativado só por configuração em desenvolvimento e homologação: o processamento educacional é real, e só a resposta financeira é simulada, sem cobrança real nem retroativa. O aparelho só exibe, de forma temporária, dados financeiros autorizados: ele não os persiste e não decide autorização. Não desligue o legado do MP-027 sem tarefa própria."
 ---
 # ADR-0061 — O financeiro é um aplicativo externo independente, e o Gabarito360 fala com ele pela porta `BillingClient`
 
-**Atualizado em:** 12/11/2026, por lucasgenial (revisão: financeiro externo; `LocalBillingAdapter` superado)
+**Atualizado em:** 12/11/2026, por lucasgenial (revisão: financeiro externo; `LocalBillingAdapter` superado; substituição parcial pelo ADR-0062: Plano e uso e Central do cliente)
 **Data:** 2026-11-11
-**Estado:** Aceita
+**Estado:** Substituída por [ADR-0062](0062-plano-e-uso-e-central-do-cliente.md) (parcial: os §1, §3, §4, §6 e §7 e as Consequências continuam vigentes e estão reafirmados no ADR-0062; mudaram a finalidade do §2 e o lugar e a forma da governança institucional do §5)
 **Decisor:** responsável (lucasgenial)
 **Origem:** sessão de decisão do responsável em 11/11/2026 ([registro histórico](../historico/2026-11-11-decisoes-billing.md)); diretriz do responsável de 12/11/2026, que retoma a intenção de 06/11/2026 de ter o billing em outro aplicativo
 **Afeta:** [FN-068](../funcionalidades/068-financeiro/planejamento.md), [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md); [14 Integração com o aplicativo financeiro](../arquitetura/14-integracao-financeira.md); [01 Contexto e containers](../arquitetura/01-contexto-e-containers.md)

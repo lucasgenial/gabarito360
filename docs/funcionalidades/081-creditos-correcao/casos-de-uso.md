@@ -1,12 +1,14 @@
 # 081 — Créditos de correção — Casos de uso
 
 **Natureza:** nova (candidata; casos de uso preliminares de alto nível)
-**Perfis envolvidos:** professor, coordenação e direção que corrigem pelo Leitor360 no modo servidor; responsável pelo contexto de cobrança (professor, escola ou núcleo); responsável financeiro institucional (limites por professor); perfil Financeiro (só totais); aplicativo financeiro (sistema externo). Ver [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md).
+**Perfis envolvidos:** professor, coordenação e direção que corrigem pelo Leitor360 no modo servidor; professor autônomo, no próprio contexto de cobrança; representante institucional **[Pendente]** (pede ajuste ou gere a capacidade na Central do cliente, conforme a modalidade); aplicativo externo (sistema externo). O perfil interno `financeiro` não é ator da consulta de uso (a consulta está em Plano e uso, [FN-068](../068-financeiro/casos-de-uso.md)). Ver [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md).
 **Atualizado em:** 2026-11-12
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto. Nenhum caso está implementado. As regras estão no [planejamento §6](planejamento.md). As decisões abertas estão no [planejamento §8](planejamento.md).
 
 O saldo, a carteira, a franquia, a reserva e a contabilização ficam no aplicativo financeiro externo ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md)). O Gabarito360 pede e registra o resultado pela porta `BillingClient`, segundo o [contrato](../../arquitetura/14-integracao-financeira.md). Até o aplicativo financeiro existir, os testes usam o simulador de integração.
+
+A consulta de cobertura, disponibilidade, consumo e extrato é de **Plano e uso** ([FN-068](../068-financeiro/casos-de-uso.md), UC-068-16 a UC-068-27; [ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md)). A compra, a mudança de plano e a gestão de limites e de capacidade acontecem na Central do cliente, no aplicativo externo. Esta FN mantém as regras de consumo da correção.
 
 Termos usados aqui (um termo por conceito):
 
@@ -39,7 +41,7 @@ Termos usados aqui (um termo por conceito):
 5. O Gabarito360 pede a confirmação do consumo (`COMMIT`). O aplicativo financeiro grava um único evento de consumo.
 
 **Fluxos alternativos e de erro:**
-- 2a. O aplicativo financeiro recusa (sem saldo, limite atingido ou sem permissão): UC-081-02.
+- 2a. O aplicativo financeiro recusa (sem saldo, limite do professor atingido na capacidade limitada, ou sem permissão): UC-081-02. No uso livre, o Gabarito360 não recusa pela referência de acompanhamento (sem recusa pela referência: ver a pré-condição do UC-081-11).
 - 4a. A submissão não atende aos critérios: UC-081-03 (`RELEASE`).
 - 5a. A mesma mensagem da fila chega duas vezes: a mesma chave produz um único `COMMIT`.
 
@@ -69,10 +71,10 @@ Termos usados aqui (um termo por conceito):
 **Fluxo principal:**
 1. O usuário tenta enviar.
 2. O sistema recusa antes de a submissão entrar na fila.
-3. O sistema mostra a recusa e, para quem pode, os caminhos: comprar créditos, pedir alocação de franquia ao núcleo ou alterar o plano. Essas ações acontecem no aplicativo financeiro ([FN-068](../068-financeiro/casos-de-uso.md), UC-068-13).
+3. O sistema mostra a recusa e, para quem pode, os caminhos: comprar adicionais, pedir ajuste ou alteração de plano. Essas ações acontecem na Central do cliente, no aplicativo externo. O Gabarito360 só oferece a entrada contextual em Plano e uso ([FN-068](../068-financeiro/casos-de-uso.md), UC-068-19, UC-068-20, UC-068-22 e UC-068-23). A ação nova usa o vínculo ativo.
 
 **Fluxos alternativos e de erro:**
-- 2a. Limite mensal do professor atingido: o envio é recusado, mesmo com saldo na instituição (UC-081-11).
+- 2a. Limite mensal do professor atingido, na instituição com capacidade limitada: o envio é recusado, mesmo com saldo na instituição (UC-081-11). A referência do uso livre não é esse limite.
 - 2b. O aplicativo financeiro não responde: o envio é recusado. O simulador não é ativado ([FN-068](../068-financeiro/casos-de-uso.md), UC-068-15).
 - 2c. Existe concessão válida para contingência: UC-081-08 (protocolo pendente).
 
@@ -259,22 +261,30 @@ Termos usados aqui (um termo por conceito):
 
 ---
 
-## UC-081-09 — Ver saldo e extrato
+## UC-081-09 — Ver disponibilidade e extrato (em Plano e uso)
 
-**Ator:** responsável pelo contexto de cobrança e quem consome (D-2); Financeiro (só totais)
-**Pré-condições:** o contexto tem saldo ou histórico.
+> A consulta é de **Plano e uso**. Os casos [UC-068-16](../068-financeiro/casos-de-uso.md) (autônomo), UC-068-17 (institucional) e UC-068-27 (uso ligado a uma correção) descrevem a tela, os estados e os critérios. Este caso guarda só a regra de consumo que a tela mostra.
+
+**Ator:** quem consome e, quando a decisão sobre o perfil existir, o representante institucional **[Pendente]** (D-2)
+**Pré-condições:** o contexto tem disponibilidade ou histórico.
 **Pós-condições:** nenhuma.
+**Tela/rota:** Plano e uso (mockup na subfase 2.3 da FN-068; rota a definir na subfase 2.4).
 
 **Fluxo principal:**
-1. O usuário abre a página de créditos.
-2. O Gabarito360 consulta o aplicativo financeiro e mostra o saldo, a franquia do ciclo, o limite do professor (quando houver) e o extrato recebidos.
-3. O extrato mostra aluno e aplicação apenas para quem tem acesso à prova.
+1. O usuário abre Plano e uso, pelo menu da conta ou por um aviso contextual.
+2. O Gabarito360 consulta o aplicativo externo e mostra o que ele informa: disponibilidade, franquia do ciclo, limite aplicável (quando houver) e extrato.
+3. O extrato mostra aluno e aplicação apenas para quem tem acesso local autorizado, existente e validado. Na dúvida, o detalhe é negado ("Dado restrito").
 
 **Critérios de aceite:**
-- [ ] O saldo exibido é o recebido do aplicativo financeiro. O Gabarito360 não calcula saldo.
-- [ ] O Financeiro não vê nomes de alunos.
-- [ ] Os nomes de alunos não vão ao aplicativo financeiro; o Gabarito360 junta aluno e aplicação ao extrato só para quem tem acesso à prova.
-- [ ] Sem resposta do aplicativo financeiro, a tela mostra erro, não saldo antigo como atual.
+- [ ] Os valores exibidos são os recebidos do aplicativo externo. O Gabarito360 não calcula nem guarda saldo (T, R).
+- [ ] O perfil interno `financeiro` não tem tela em Plano e uso e não vê nomes de alunos (T).
+- [ ] Os nomes de alunos não vão ao aplicativo externo. A carga trocada tem só a referência opaca (`correction:{correction_subject_id}`) e os dados de cobertura e consumo (T, E).
+- [ ] O Gabarito360 junta aluno e aplicação ao extrato no próprio banco, no momento do pedido, por uma permissão **existente cuja proteção seja demonstrada** mais o `Escopo` do vínculo ativo. "Acesso à prova" não basta como critério (R, T). Ver [FN-081 §6.5](planejamento.md) item 19 e [FN-068 §6.4.5](../068-financeiro/planejamento.md).
+- [ ] Sem a autorização local validada, e na dúvida, a resposta da API traz "Dado restrito" no detalhe. A linha de consumo continua visível (T).
+- [ ] Nenhuma chave é escolhida por "parecer restritiva". A chave exata é **[Pendente]** até a demonstração (R).
+- [ ] O texto do detalhe restrito e a linha de consumo visível aparecem no mockup (M).
+- [ ] Sem resposta do aplicativo externo, a tela mostra erro, não valor antigo como atual (T, M).
+- [ ] No uso livre, a tela não mostra percentual sobre a referência nem indicador de esgotamento (T, M).
 
 **Situação:** Não implementado.
 
@@ -314,10 +324,10 @@ Termos usados aqui (um termo por conceito):
 
 ## UC-081-11 — Consumir dentro do limite mensal do professor
 
-**Ator:** professor que corrige no modo servidor com o saldo da instituição; responsável financeiro institucional (define o limite)
-**Permissão:** `cartao.enviar`; o limite e a permissão são conferidos pelo aplicativo financeiro
+**Ator:** professor que corrige no modo servidor com a capacidade da instituição. Quem define o limite é o financeiro institucional autorizado, na Central do cliente (perfil do representante **[Pendente]**).
+**Permissão:** `cartao.enviar`; o limite e a permissão são conferidos pelo aplicativo externo
 **Escopo:** contexto institucional (escola ou núcleo) da operação
-**Pré-condições:** o responsável financeiro institucional definiu um limite mensal para o professor no aplicativo financeiro.
+**Pré-condições:** a instituição tem a modalidade de **capacidade limitada** e um limite mensal do professor definido na Central do cliente, pelo financeiro institucional autorizado. Este caso não vale para o **uso livre monitorado**. Nele, a referência de acompanhamento não é limite bloqueante, e o Gabarito360 não recusa o envio por ela. Só o Financeiro do aplicativo externo ajusta a referência, e o comportamento ao ultrapassá-la é **[Pendente]**.
 **Pós-condições:** o consumo conta no limite do professor e no saldo da instituição; nenhum crédito vai à carteira pessoal.
 **Tela/rota:** Leitor360, modal do modo servidor; aviso de limite (mockup na subfase 0.1)
 
@@ -327,17 +337,19 @@ Termos usados aqui (um termo por conceito):
 3. Dentro do limite, o consumo segue o UC-081-01.
 
 **Fluxos alternativos e de erro:**
-- 2a. Limite atingido: o envio é recusado, mesmo com saldo na instituição. O professor vê o aviso do limite. Ele não vê o saldo da instituição sem permissão própria.
+- 2a. Limite do professor atingido (capacidade limitada): o envio é recusado, mesmo com saldo na instituição. O professor vê o aviso do limite. Ele não vê o saldo da instituição sem permissão própria.
 - 2b. Saldo da instituição esgotado: UC-081-02.
 
-**Regras de negócio:** planejamento §6.2, item 10a, e §8 (D-2). [ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) §5.
+**Regras de negócio:** planejamento §6.2, item 10a, e §8 (D-2). [ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) §5; [ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md) §3 (modalidades; referência de acompanhamento, limite bloqueante e cobertura contratual são conceitos diferentes).
 
 **Critérios de aceite:**
-- [ ] O limite atingido recusa o envio (teste G).
+- [ ] Na capacidade limitada, o limite do professor atingido recusa o envio (teste G).
 - [ ] O limite não transfere crédito para a carteira pessoal do professor.
 - [ ] Renovar o limite no mês seguinte não cria créditos para a instituição.
 - [ ] O Gabarito360 não guarda nem calcula o limite.
-- [ ] ⚠ Quem define o limite, o padrão sem limite e o fim do ciclo dependem dos detalhes pendentes da D-2.
+- [ ] A modalidade vem do contrato, nunca da natureza (pública ou privada) da escola.
+- [ ] No uso livre, o envio segue a autorização do aplicativo externo (teste I). O Gabarito360 não recusa o envio pela referência de acompanhamento, e a tela não mostra percentual nem indicador de esgotamento (ver [FN-068](../068-financeiro/casos-de-uso.md), UC-068-22). Sem autorização do aplicativo externo, o envio continua recusado (UC-081-02). O comportamento ao ultrapassar a referência é **[Pendente]**.
+- [ ] ⚠ Quem pode alterar o limite, o padrão sem limite, a distribuição e o fim do ciclo dependem dos detalhes pendentes da D-2.
 
 **Situação:** Não implementado.
 
@@ -350,3 +362,6 @@ Termos usados aqui (um termo por conceito):
 | 1 | 2026-11-11 | Casos de uso preliminares, com as regras decididas no Leitor360 | lucasgenial |
 | 2 | 2026-11-11 | Reescritos com as decisões de billing de 11/11/2026: identidade por `correction_subject_id`, reenvio sem custo, `NOT_DELIVERED`, alocação de franquia, contingência e créditos por contribuição validada | lucasgenial |
 | 3 | 2026-11-12 | Reorientação para o aplicativo financeiro externo: saldo, reserva, compra, franquia, alocação e concessão passam a ser executadas por ele; UC-081-08 com protocolo pendente; UC-081-11 (limite mensal do professor) acrescentado | lucasgenial |
+| 4 | 2026-11-12 | Adequação derivada da reorientação para Plano e uso (ADR-0062): ator "Financeiro (só totais)" retirado; UC-081-09 aponta para Plano e uso; UC-081-02 aponta para a Central do cliente e para os casos novos da FN-068; UC-081-11 cita as modalidades e diz que o limite é definido na Central. Regras de consumo, identidade, `READY_FOR_REVIEW`, `NOT_DELIVERED` e reenvio não mudaram | lucasgenial |
+| 5 | 2026-11-12 | UC-081-09: critérios com a regra completa do detalhe pedagógico (permissão existente com proteção demonstrada, `Escopo`, "Dado restrito", chave pendente) e com o meio de prova de cada um; cabeçalho: "responsável pelo contexto de cobrança (escola ou núcleo)" trocado por "representante institucional [Pendente]" | lucasgenial |
+| 6 | 2026-11-12 | Alcance do limite bloqueante: o limite do professor vale só na capacidade limitada (UC-081-01, UC-081-02 e UC-081-11); UC-081-11 cita o ADR-0062 §3 e diz que, no uso livre, o envio segue a autorização do aplicativo externo, sem recusa pela referência; UC-081-01, fluxo 2a, com remissão mais clara à pré-condição do UC-081-11; critério do uso livre com meio de prova (teste I) | lucasgenial |

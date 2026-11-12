@@ -1,6 +1,6 @@
 # Registro de decisões do Gabarito360
 
-**Atualizado em:** 10/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
 Este documento descreve o registro das decisões do responsável e lista os ADRs (registros de decisão de arquitetura e de produto) vigentes e superados.
 
@@ -103,7 +103,8 @@ As regras de código usam a [linha de base](linha-de-base.json) das violações 
 | [ADR-0058](0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md) | A leitura de provas roda no aparelho, com paridade total; o aparelho sem capacidade usa o modo servidor, com fila e créditos | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md), [FN-080](../funcionalidades/080-ia-local-transcricao/planejamento.md) |
 | [ADR-0059](0059-aplicador-ve-a-leitura-sem-corrigir.md) | O aplicador vê a leitura da folha atual, antes de salvar, sem corrigir | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md) |
 | [ADR-0060](0060-arquitetura-de-execucao-da-leitura.md) | Arquitetura de execução da leitura (objetivas e Escriba) no aparelho e no servidor | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md), [FN-080](../funcionalidades/080-ia-local-transcricao/planejamento.md) |
-| [ADR-0061](0061-arquitetura-de-billing-e-porta-billingclient.md) | O financeiro é um aplicativo externo independente, e o Gabarito360 fala com ele pela porta `BillingClient` (revisão de 12/11/2026 superou o `LocalBillingAdapter`) | 11/11/2026 | Aceita | [FN-068](../funcionalidades/068-financeiro/planejamento.md), [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md) |
+| [ADR-0061](0061-arquitetura-de-billing-e-porta-billingclient.md) | O financeiro é um aplicativo externo independente, e o Gabarito360 fala com ele pela porta `BillingClient` (revisão de 12/11/2026 superou o `LocalBillingAdapter`) | 11/11/2026 | Substituída por [ADR-0062](0062-plano-e-uso-e-central-do-cliente.md) (parcial: os §1, §3, §4, §6 e §7 e as Consequências continuam vigentes e estão reafirmados no ADR-0062) | [FN-068](../funcionalidades/068-financeiro/planejamento.md), [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md) |
+| [ADR-0062](0062-plano-e-uso-e-central-do-cliente.md) | O Gabarito360 mostra Plano e uso por vínculo; a contratação e a gestão comercial ficam na Central do cliente, no aplicativo externo | 12/11/2026 | Aceita | [FN-068](../funcionalidades/068-financeiro/planejamento.md), [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md) |
 
 ## Origem dos identificadores antigos
 
@@ -124,6 +125,7 @@ As regras de código usam a [linha de base](linha-de-base.json) das violações 
 | [ADR-0033](0033-previa-rodada-3-contexto-icones-e-acoes.md) rodada 3 (ações à esquerda; lateral navy) | [ADR-0039](0039-coluna-de-acoes-a-direita-e-ordenacao.md) e [ADR-0036](0036-tw2-filtros-em-modal-e-superficie-escura.md) | Ações à direita nas tabelas; superfície escura da homologação |
 | [ADR-0037](0037-versionamento-sem-apelidos.md) versão só com número | [ADR-0038](0038-rodape-de-versao-com-ambiente.md) rodapé literal | O rodapé passou a mostrar versão e ambiente |
 | [ADR-0041](0041-editor-de-paineis-previa-local.md) editor só em prévia local | [ADR-0043](0043-editor-de-paineis-aceite-e-integracao.md) aceite e integração | O responsável aprovou o editor |
+| [ADR-0061](0061-arquitetura-de-billing-e-porta-billingclient.md) módulo financeiro limitado (§2) e governança institucional no Gabarito360 (§5) | [ADR-0062](0062-plano-e-uso-e-central-do-cliente.md) Plano e uso e Central do cliente | O Gabarito360 só mostra plano, cobertura e uso por vínculo; a contratação e a gestão comercial vão para a Central do cliente externa; as demais regras do ADR-0061 continuam e estão reafirmadas no ADR-0062 |
 
 ## Decisões pendentes (sem ADR)
 

@@ -15,7 +15,7 @@ Exibir, nas impressões e nos PDFs, a divulgação do Gabarito360 conforme a mod
 - **Inclui:** regra central `Selo::do(espaco)`; componente `components/selo-documento.blade.php`; CSS de impressão; aplicação a impressões e PDFs de todos os relatórios e aos geradores `omr/gerar_resultado.py` e `omr/gerar_cartoes.py`; mesmo texto para todos; o bloco não aparece na tela.
 - **Não inclui:**
   - Cabeçalhos e marca oficial dos documentos (`<x-marca>`, identidade nos relatórios) → [FN-071](../071-marca-documentos/planejamento.md).
-  - Definição e alteração da modalidade do cliente → [FN-023](../023-cadastro-clientes/planejamento.md); contratos, cortesia e cobrança → [FN-068](../068-financeiro/planejamento.md).
+  - Definição e alteração da modalidade do cliente → [FN-023](../023-cadastro-clientes/planejamento.md); contratos, cortesia e cobrança → aplicativo financeiro externo ([ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md)); a [FN-068](../068-financeiro/planejamento.md) cuida de Plano e uso, da integração e do legado.
   - Impressão e PDF do portal dos responsáveis (P6) → [FN-067](../067-portal-responsaveis/planejamento.md), que consome este selo.
   - Relatórios em si → [FN-049](../049-relatorios-resultados/planejamento.md) e [FN-050](../050-relatorio-turma-pdf/planejamento.md).
 

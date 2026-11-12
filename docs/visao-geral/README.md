@@ -1,6 +1,6 @@
 # Visão geral do Gabarito360
 
-**Atualizado em:** 11/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
 Este documento descreve o que é o Gabarito360, que problema ele resolve, quem o usa e como as peças se ligam. A leitura leva cerca de 15 minutos e dispensa conhecimento técnico.
 
@@ -122,7 +122,7 @@ O [catálogo](../funcionalidades/README.md) tem 77 funcionalidades em 14 domíni
 | Agenda e notificações | Calendário, notificações, visitas, aplicação de provas | FN-056 a FN-059 |
 | Comunicação e e-mail | E-mail transacional e Fale Conosco | FN-060 |
 | LGPD e portal | Termos, retenção, cifragem, pedidos dos titulares, portal dos responsáveis | FN-061 a FN-067 |
-| Financeiro | Contratos, faturas, selo dos documentos | FN-068, FN-069 |
+| Plano e uso, selo dos documentos | Plano e uso: plano, recursos, disponibilidade e consumo vindos do aplicativo financeiro externo, sem catálogo, preço nem saldo próprios. Contratos, faturas e compras ficam na Central do cliente, no aplicativo externo. Selo dos documentos | FN-068, FN-069 |
 | Público e marca | Identidade visual, marca oficial, site público | FN-070 a FN-072 |
 | Qualidade transversal | Layout responsivo, tabelas, Tailwind, carregamento, desempenho | FN-073 a FN-077 |
 
@@ -142,7 +142,7 @@ Os números abaixo vêm do [catálogo](../funcionalidades/README.md) em 10/11/20
 
 **O que funciona:** provas e gabaritos, geração de cartões, leitura OMR com revisão, resultados e relatórios, painéis por perfil, motor de permissões, acessos internos, clientes, espaços e vínculos.
 
-**O que ainda não existe:** agenda, notificações, portal dos responsáveis, financeiro, acesso próprio do aluno, importação de alunos por tela e a maior parte da área de dados pessoais (pedidos dos titulares completos, retenção).
+**O que ainda não existe:** agenda, notificações, portal dos responsáveis, a área Plano e uso, acesso próprio do aluno, importação de alunos por tela e a maior parte da área de dados pessoais (pedidos dos titulares completos, retenção).
 
 Em 10/11/2026, nenhuma funcionalidade está em execução. Os documentos de planejamento estão em rascunho e aguardam a aprovação do responsável. A ordem de trabalho está no [plano mestre](../planejamento/00-plano-mestre.md). As regras de trabalho estão na [governança](../planejamento/01-governanca.md).
 

@@ -1,6 +1,6 @@
 # Interface e design system
 
-**Atualizado em:** 11/11/2026, por lucasgenial
+**Atualizado em:** 12/11/2026, por lucasgenial
 
 Este documento descreve a interface do Gabarito360 como ela existe na branch atual: fontes de verdade visuais, identidade, Tailwind, layout, tabelas, carregamento, gráficos, acessibilidade e inventário das telas por perfil. Os painéis de turmas e o editor têm documento próprio: [Painéis e editor](10-paineis-e-editor.md).
 
@@ -164,6 +164,8 @@ Decisões do responsável:
 | Contexto ativo | Bloco "Meu espaço" informativo na lateral e no topo do conteúdo (escola e perfil) |
 | Rodapé | `Gabarito360 - v0.1.0 - Homologação` (texto literal do responsável). Aparece só quando há `release.sha`. Fica oculto até 767 px |
 | Pular para o conteúdo | Link inicial `#conteudo-principal` |
+
+**Menu da conta e Plano e uso.** No código atual, o menu do avatar mostra "Assinatura e cobrança" (`route('assinatura.index')`, rota `/assinatura`) quando a sessão tem `auth_titular` e o contexto não é interno (`apps/web/resources/views/layouts/app.blade.php`). Esse item é legado e convive durante a transição. O destino-alvo é "Plano e uso" no menu da conta, como entrada única ao fim da transição ([ADR-0062](../decisoes/0062-plano-e-uso-e-central-do-cliente.md)). Nenhuma rota nem menu muda agora. O layout depende do mockup da FN-068, subfase 2.3, que cobre todas as telas nas 11 larguras e nos 2 temas.
 
 O menu vem de `App\Support\Acesso` (`apps/web/app/Support/Acesso.php`). Cada item exige permissão efetiva. A API continua sendo quem decide o acesso aos dados. A versão do produto vem de `apps/web/config/versao.php`; a fase e o SHA vêm de `release.php`.
 
