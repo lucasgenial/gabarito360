@@ -52,7 +52,7 @@ Dar ao Gabarito360 acesso contextual e limitado às capacidades financeiras que 
 
 A ordem das fontes é a do [ADR-0056](../../decisoes/0056-app-atual-como-referencia-visual.md).
 
-1. **Mockup aprovado:** não existe mockup da experiência financeira limitada. Ele é obrigatório antes da subfase 2.1.
+1. **Mockup aprovado:** ainda não há. O mockup funcional [`mockups/financeiro.html`](../../../mockups/financeiro.html) (subfase 2.0) está em revisão. Ele só vale como referência depois da aprovação do responsável. Ele é obrigatório antes das subfases 1.1 e 2.1.
 2. **App atual:** as views, os componentes e o CSS de `apps/web` na `main`. As telas do contexto interno de `clientes/*` (FN-023) e a tela legada `/assinatura` são o ponto de partida.
 3. **Documentação:**
    - [ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) (financeiro externo) e [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md) item 8 (identidade da cobrança da correção).
@@ -93,7 +93,7 @@ Casos de uso: [casos-de-uso.md](casos-de-uso.md).
 | 0.3 Reorientação para o aplicativo financeiro externo | Escopo trocado: experiência limitada, integração e legado; F1, F2 e F3 antigas superadas; contrato com dono único | "Conforme princípios" na versão 18; nenhum financeiro local no planejamento | Entregue (documentação) | PR #274 |
 | 1.1 Primeira entrega da integração: porta `BillingClient` e simulador genérico | Porta; simulador com os cenários do contrato §9.2; estado fictício separado das tabelas do produto, reiniciável e identificado como simulação; ativação explícita só em desenvolvimento e homologação | Os nove cenários do contrato §9.2 passam em testes automatizados; um teste de ponta a ponta percorre login, envio, fila, processamento real, `READY_FOR_REVIEW` e conferência com o simulador; a falha da API real não ativa o simulador (teste); a configuração de produção não ativa o simulador (teste); nenhuma migration financeira | Pendente | — |
 | 1.2 Cliente da API do aplicativo financeiro | Implementação real da mesma porta do simulador, com credencial técnica de escopo limitado | O aplicativo financeiro existe; a API real passa nos cenários do contrato §9.2 e na validação contra o contrato antes da troca; `correction_subject_id`, reenvio sem cobrança nova e isolamento dos contextos continuam iguais; os testes de isolamento do contrato §8 passam; medição com 1000 usuários simultâneos ([ADR-0052](../../decisoes/0052-medicao-com-1000-usuarios-simultaneos.md)) | Pendente (bloqueada pela dependência externa) | — |
-| 2.0 Mockup da experiência financeira limitada | Saldo, limites e histórico do contexto; encaminhamento às ações financeiras; sobre a casca e o CSS reais de `apps/web`, em todas as faixas do ADR-0057 | O responsável aprova o mockup; a revisão de UI/UX é de outro agente (ADR-0020) | Pendente | — |
+| 2.0 Mockup da experiência financeira limitada | Saldo, limites e histórico do contexto; encaminhamento às ações financeiras; sobre a casca e o CSS reais de `apps/web`, em todas as faixas do ADR-0057 | O responsável aprova o mockup; a revisão de UI/UX é de outro agente (ADR-0020) | **Em andamento (entrega atual).** Mockup funcional pronto para aprovação; não aprovado | `mockups/financeiro.html`, `mockups/css/financeiro.css`, `mockups/js/financeiro.js`; conferência no §7.1 |
 | 2.1 Telas da experiência financeira limitada | Conforme o mockup aprovado | O usuário vê só o próprio contexto; conferência por texto em todas as larguras de referência | Pendente | — |
 | 3.1 Destino do legado do MP-027 | Investigação e proposta para checkout, assinaturas, webhook, dados e tabelas | O responsável autoriza o destino em tarefa própria. Nada é desligado antes | Pendente | — |
 | ~~1.1 (F1) Modelo comercial e fiscal~~ | Contratos, faturas, cobranças, pagamentos, notas fiscais, catálogo e assinaturas no banco do Gabarito360 | — | **Superada (12/11/2026).** Direção reservada ao aplicativo financeiro (ADR-0061 §1) | — |
@@ -154,6 +154,40 @@ O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-f
 - **O mockup vem antes das telas** (subfase 2.0). A revisão de UI/UX é de outro agente ([ADR-0020](../../decisoes/0020-revisao-de-ui-ux-por-especialista.md)).
 - A conferência é registrada por texto, sem prints ([ADR-0049](../../decisoes/0049-sem-prints-da-aplicacao.md)).
 
+### 7.1 Mockup funcional da subfase 2.0 (em revisão)
+
+O mockup [`mockups/financeiro.html`](../../../mockups/financeiro.html) cobre esta FN e a subfase 0.1 da [FN-081](../081-creditos-correcao/planejamento.md). Ele usa a casca, os componentes e o CSS reais de `apps/web/public/css/` (ADR-0056). O CSS próprio fica em `mockups/css/financeiro.css` e o JavaScript em `mockups/js/financeiro.js` (ADR-0023).
+
+**Como abrir e testar.**
+
+1. Abra `mockups/financeiro.html` no navegador, a partir do clone do repositório. Não precisa de servidor.
+2. Use a barra do mockup para escolher a tela, o perfil e contexto, a situação, a simulação da homologação, o aparelho e o tema.
+3. Ou use a URL: `?tela=visao|extrato|limites|leitor&perfil=prof-pessoal|prof-escola|resp-escola|resp-nucleo|financeiro&cenario=sucesso|carregando|vazio|sem-saldo|limite|negado|indisponivel&sim=1&tema=dark`.
+
+**Limites do protótipo.** Os dados são fictícios e identificados. O estado fica só na memória da página. Não há API, cobrança, carteira, saldo calculado nem integração real. Os valores não definem preços, planos nem cotas. Pendências aparecem com o selo "Pendente de decisão".
+
+**Conferência automática (12/11/2026, por texto, sem prints).** Chrome sem interface, por CDP, em 1.280 combinações: 4 telas × 5 perfis × situações × 11 larguras (320 a 3840 px) × temas claro e escuro. Resultado: nenhum erro de console, nenhuma rolagem horizontal da página e nenhum alvo de toque abaixo de 44 px abaixo de 1024 px. Interações conferidas: filtros em modal com foco no primeiro campo; filtro aplicado; detalhe em modal; Esc fecha e devolve o foco; abas com setas; encaminhamento ao aplicativo financeiro; recusa por limite do professor sem mostrar o saldo da escola.
+
+**Revisão independente de UI/UX (ADR-0020).** Houve consulta prévia (fluxo e composição) e revisão final por outro agente, o `ui-ux`. Veredito da revisão: **aprovado com ressalvas**, sem bloqueios. A revisão foi estática: leitura integral do HTML, do CSS e do JavaScript, e conferência dos tokens e das classes no CSS real. Ela não abriu o navegador. As ressalvas tratadas nesta entrega:
+
+1. O menu lateral e a navegação inferior seguem o perfil: o núcleo não vê Corrigir; o Financeiro interno vê só Painel e Créditos.
+2. Os botões dizem o destino: "Abrir compra no aplicativo financeiro", "Abrir limite no aplicativo financeiro" e "Abrir alocação no aplicativo financeiro". A ação de compra aparece num só lugar.
+3. As pendências ficam num bloco recolhível por tela, "Pendências de decisão nesta tela", com texto real no HTML.
+4. O foco volta ao botão Filtrar depois de aplicar os filtros e ao botão Atualizar depois do carregamento.
+5. A troca de aba não rola a página.
+6. A tabela usa a marcação do `x-tabela`: `.tabela-valor` nas células e `tabela-coluna-acoes` no cabeçalho de Ações.
+7. A franquia diz "restantes", com números coerentes entre a visão e as alocações.
+8. Os textos internos saíram da interface ("D-4" e "pendência jurídica 1").
+9. "Revisar manualmente" mostra um aviso de protótipo.
+10. O acesso negado não tem texto de planejamento.
+11. O carregamento da visão tem uma só região `role="status"`.
+12. Os estilos inline saíram do JavaScript. O HTML guarda só o `style="min-width:0;"` do `x-pagina` real.
+13. Um perfil sem a aba Limites volta à Visão, com aviso.
+
+O sinal "+" dos movimentos não depende mais da cor verde, porque o contraste de `--success` no tema escuro não foi confirmado. A revisão não conferiu no navegador a hierarquia visual nem o contraste renderizado. Essa conferência visual fica para o responsável, junto da aprovação.
+
+**Aprovação do responsável:** pendente. A subfase 2.0 só conclui com ela.
+
 ## 8. Riscos e decisões pendentes do responsável
 
 | Item | Opções | Recomendação | Decisão |
@@ -188,7 +222,15 @@ O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-f
 
 Nenhum aberto.
 
-**Próxima entrega:** subfase 1.1, implementação da porta `BillingClient` e do simulador genérico (contrato §9). Ela segue o fluxo do projeto: planejamento aprovado, consulta ao `gerente-projetos` e PR próprio com `FN: FN-068`.
+**Entrega atual:** subfase 2.0, mockup funcional da experiência financeira limitada, compartilhado com a subfase 0.1 da FN-081.
+
+Ordem até a implementação:
+
+1. Concluir a documentação e o mockup (subfase 2.0).
+2. Obter a aprovação do responsável para o mockup, o planejamento e os casos de uso.
+3. Só depois implementar: subfase 1.1 (porta `BillingClient` e simulador genérico, contrato §9) e subfase 2.1 (telas). Cada uma em PR próprio com `FN: FN-068`, depois da consulta ao `gerente-projetos`.
+
+A numeração das subfases não muda. A etapa continua "Em planejamento" até a aprovação.
 
 ## 10. Histórico
 
@@ -199,3 +241,4 @@ Nenhum aberto.
 | 2026-11-12 | Subfase 0.3: reorientação para o aplicativo financeiro externo ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md), revisão de 12/11/2026). A FN passou a ser dona da experiência limitada, da integração e do legado. F1, F2 e F3 antigas e a conciliação com o esquema `billing_` foram superadas. O contrato passou ao [14 Integração com o aplicativo financeiro](../../arquitetura/14-integracao-financeira.md) | lucasgenial |
 | 2026-11-12 | Simulador genérico da porta `BillingClient` como primeira entrega da integração (subfase 1.1): processamento educacional real, cenários configuráveis, estado fictício separado e ativação só em desenvolvimento e homologação; piloto em produção pendente | lucasgenial |
 | 2026-11-12 | Regra do cliente: exibição temporária de dados autorizados, sem persistir; API real valida a mesma porta contra o contrato antes da troca (subfase 1.2); próxima entrega registrada (subfase 1.1) | lucasgenial |
+| 2026-11-12 | Subfase 2.0 registrada como entrega atual, com o mockup funcional `mockups/financeiro.html` em revisão; a implementação (1.1 e 2.1) espera a aprovação do responsável | lucasgenial |

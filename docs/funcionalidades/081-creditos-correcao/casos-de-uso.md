@@ -64,7 +64,7 @@ Termos usados aqui (um termo por conceito):
 **Escopo:** contexto de cobrança da operação
 **Pré-condições:** o aplicativo financeiro recusa a autorização, ou não responde.
 **Pós-condições:** nada é enviado; nada é cobrado.
-**Tela/rota:** Leitor360, modal da aplicação ([ADR-0025](../../decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)).
+**Tela/rota:** Leitor360, modal da aplicação ([ADR-0025](../../decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md)); `mockups/financeiro.html`, tela 4, situações sem saldo, limite atingido, acesso negado e indisponível.
 
 **Fluxo principal:**
 1. O usuário tenta enviar.
@@ -264,6 +264,7 @@ Termos usados aqui (um termo por conceito):
 **Ator:** responsável pelo contexto de cobrança e quem consome (D-2); Financeiro (só totais)
 **Pré-condições:** o contexto tem saldo ou histórico.
 **Pós-condições:** nenhuma.
+**Tela/rota:** `mockups/financeiro.html`, telas 1 (Visão) e 2 (Histórico, com filtros e detalhe em modal); "Dado restrito" para quem não tem acesso à prova
 
 **Fluxo principal:**
 1. O usuário abre a página de créditos.
@@ -319,7 +320,7 @@ Termos usados aqui (um termo por conceito):
 **Escopo:** contexto institucional (escola ou núcleo) da operação
 **Pré-condições:** o responsável financeiro institucional definiu um limite mensal para o professor no aplicativo financeiro.
 **Pós-condições:** o consumo conta no limite do professor e no saldo da instituição; nenhum crédito vai à carteira pessoal.
-**Tela/rota:** Leitor360, modal do modo servidor; aviso de limite (mockup na subfase 0.1)
+**Tela/rota:** Leitor360, modal do modo servidor; `mockups/financeiro.html`, perfil "Professor · escola", telas 1 e 4, situação "Limite atingido"; tela 3 para o responsável
 
 **Fluxo principal:**
 1. O professor envia uma submissão no contexto da instituição.
@@ -350,3 +351,4 @@ Termos usados aqui (um termo por conceito):
 | 1 | 2026-11-11 | Casos de uso preliminares, com as regras decididas no Leitor360 | lucasgenial |
 | 2 | 2026-11-11 | Reescritos com as decisões de billing de 11/11/2026: identidade por `correction_subject_id`, reenvio sem custo, `NOT_DELIVERED`, alocação de franquia, contingência e créditos por contribuição validada | lucasgenial |
 | 3 | 2026-11-12 | Reorientação para o aplicativo financeiro externo: saldo, reserva, compra, franquia, alocação e concessão passam a ser executadas por ele; UC-081-08 com protocolo pendente; UC-081-11 (limite mensal do professor) acrescentado | lucasgenial |
+| 4 | 2026-11-12 | UC-081-02, UC-081-09 e UC-081-11 ligados ao mockup funcional compartilhado `mockups/financeiro.html` (em revisão) | lucasgenial |

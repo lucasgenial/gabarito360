@@ -168,7 +168,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Escopo:** só o contexto do vínculo ativo (pessoal, escola ou núcleo)
 **Pré-condições:** subfases 1.1 e 2.1 entregues
 **Pós-condições:** nenhuma; nada é gravado como saldo no Gabarito360
-**Tela/rota:** a desenhar na subfase 2.0
+**Tela/rota:** `mockups/financeiro.html`, telas 1 (Visão) e 2 (Histórico), por perfil e situação; mockup em revisão (subfase 2.0). Rota real a definir na subfase 2.1
 
 **Fluxo principal:**
 1. O usuário abre a área financeira do contexto.
@@ -198,7 +198,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Escopo:** contexto do vínculo ativo
 **Pré-condições:** decidido o lugar das ações humanas (planejamento §8)
 **Pós-condições:** a ação acontece no aplicativo financeiro; o Gabarito360 só mostra o resultado
-**Tela/rota:** a definir
+**Tela/rota:** `mockups/financeiro.html`: botões "Comprar créditos" e "Ajustar limite" abrem o modal de encaminhamento "Abrir aplicativo financeiro". O lugar real da ação continua pendente
 
 **Fluxo principal:**
 1. O responsável escolhe comprar créditos para a entidade ou ajustar o limite mensal de um professor.
@@ -263,7 +263,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Escopo:** envio ao modo servidor
 **Pré-condições:** o cliente da API real está configurado; o aplicativo financeiro não responde
 **Pós-condições:** nenhum consumo autorizado sem resposta válida
-**Tela/rota:** Leitor360, modo servidor (FN-079 UC-079-26)
+**Tela/rota:** Leitor360, modo servidor (FN-079 UC-079-26); `mockups/financeiro.html`, tela 4, situação "Aplicativo financeiro indisponível"
 
 **Fluxo principal:**
 1. O Gabarito360 pede autorização e não recebe resposta no prazo.
@@ -292,3 +292,4 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 | 2 | 2026-11-11 | Subfase 0.2 de adequação: citações aos documentos antigos trocadas pelos destinos do mapa; RN-015 passou a RN-GER-09 e as regras da escola autônoma a RN-EIN; UC-068-09 (compra avulsa de créditos) e UC-068-10 (catálogo) acrescentados; fronteira com a FN-081 declarada | lucasgenial |
 | 3 | 2026-11-12 | Reorientação para o aplicativo financeiro externo: UC-068-05 a UC-068-10 superados; UC-068-11 ajustado; UC-068-12 a UC-068-15 acrescentados (experiência limitada, ação financeira, simulador e indisponibilidade) | lucasgenial |
 | 4 | 2026-11-12 | UC-068-14 reescrito: teste de ponta a ponta com o simulador genérico, processamento real e estado fictício | lucasgenial |
+| 5 | 2026-11-12 | UC-068-12, UC-068-13 e UC-068-15 ligados ao mockup funcional `mockups/financeiro.html` (subfase 2.0, em revisão) | lucasgenial |

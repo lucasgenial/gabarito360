@@ -50,7 +50,7 @@ O processamento no aparelho do usuário não custa nada ao Gabarito360. O proces
 - Financeiro externo: [ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md). Contrato: [14 Integração com o aplicativo financeiro](../../arquitetura/14-integracao-financeira.md).
 - Identidade da cobrança e modo servidor: [ADR-0058](../../decisoes/0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md), item 8; [FN-079 §6.12 e §8](../079-leitor360/planejamento.md); [FN-080 §8.3](../080-ia-local-transcricao/planejamento.md).
 - Registro histórico da sessão de decisão de 11/11/2026: [Decisões de billing, créditos e M3 Core](../../historico/2026-11-11-decisoes-billing.md). Ele não é norma.
-- Telas: mockup aprovado `mockups/leitor360.html`, tela H (`data-tela="sem-ia"`) e modal "Usar a correção no servidor". As telas próprias de saldo e extrato vão ao mockup na subfase 0.1, com a FN-068. A compra de créditos acontece no aplicativo financeiro (FN-068 UC-068-13) ([ADR-0056](../../decisoes/0056-app-atual-como-referencia-visual.md) e [ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-faixas.md)).
+- Telas: mockup aprovado `mockups/leitor360.html`, tela H (`data-tela="sem-ia"`) e modal "Usar a correção no servidor". As telas próprias de saldo, extrato, limite do professor e recusas no modo servidor estão no mockup funcional compartilhado [`mockups/financeiro.html`](../../../mockups/financeiro.html) (FN-068 subfase 2.0), em revisão. A compra de créditos acontece no aplicativo financeiro (FN-068 UC-068-13) ([ADR-0056](../../decisoes/0056-app-atual-como-referencia-visual.md) e [ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-faixas.md)).
 - Financeiro: [FN-068](../068-financeiro/planejamento.md).
 - Perfis e permissões: [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md).
 - Casos de uso: [casos-de-uso.md](casos-de-uso.md).
@@ -74,7 +74,7 @@ O processamento no aparelho do usuário não custa nada ao Gabarito360. O proces
 
 | Subfase | Entrega | Critério de pronto | Status | Evidência |
 |---|---|---|---|---|
-| 0.1 | Planejamento, casos de uso e mockups aprovados para desenvolvimento e homologação | O responsável aprova os documentos e o mockup das telas de saldo e extrato. **D-3, D-4 e os detalhes comerciais da D-2 não bloqueiam esta subfase** | Pendente | |
+| 0.1 | Planejamento, casos de uso e mockups aprovados para desenvolvimento e homologação | O responsável aprova os documentos e o mockup das telas de saldo e extrato. **D-3, D-4 e os detalhes comerciais da D-2 não bloqueiam esta subfase** | **Em andamento.** Mockup compartilhado com a FN-068 2.0, aguardando aprovação | `mockups/financeiro.html` |
 | 1.0 | Identidade da submissão (`correction_subject_id`) | A pendência técnica do §8 está resolvida, com unicidade de aluno + aplicação no banco do Gabarito360 | Pendente | |
 | 1.1 | Ciclo de consumo da correção pela porta `BillingClient`, contra o simulador genérico (FN-068 1.1), com processamento educacional real | Os testes A, C a H do §6.7 passam; um teste de ponta a ponta vai do envio à conferência com o simulador; a concorrência no MariaDB não gera dois pedidos de consumo definitivo; nenhuma migration financeira | Pendente | |
 | 1.2 | Consumo integrado ao modo servidor (FN-079 4.3) | Sem franquia e sem crédito, o envio é recusado antes de entrar na fila; o `COMMIT` só ocorre em `READY_FOR_REVIEW` | Pendente | |
@@ -174,7 +174,7 @@ O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-f
 
 Regra do mockup ([ADR-0056](../../decisoes/0056-app-atual-como-referencia-visual.md)): cada tela usa a casca, os componentes e o CSS reais de `apps/web`, e o design system de `style-system/`.
 
-Telas previstas (mockup na subfase 0.1): saldo no Leitor360 (já no modal do modo servidor), página de saldo e extrato, aviso de limite do professor e alerta de saldo baixo. A compra avulsa e a gestão de limites são ações financeiras humanas: o lugar delas está pendente na [FN-068 §8](../068-financeiro/planejamento.md).
+Telas no mockup funcional compartilhado `mockups/financeiro.html` (subfase 0.1, com a FN-068 2.0): créditos do contexto, histórico, limite do professor e recusas no modo servidor. O alerta de saldo baixo continua proposta. A compra avulsa e a gestão de limites são ações financeiras humanas: o lugar delas está pendente na [FN-068 §8](../068-financeiro/planejamento.md).
 
 A interface mostra o saldo recebido do aplicativo financeiro. Ela não calcula saldo. A exibição é temporária: o aparelho não persiste dados financeiros (ADR-0061). O desenho histórico mostrava o saldo comercial total, mesmo em contingência.
 
@@ -219,3 +219,4 @@ Nenhum ainda.
 | 2026-11-12 | Reorientação para o aplicativo financeiro externo ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md), revisão de 12/11/2026): a autoridade sobre saldo, reserva e contabilização passou ao aplicativo financeiro; o Gabarito360 guarda só o registro operacional; regras da correção preservadas; D-2 decidida em parte (limites mensais por professor); testes F, G e H; evidência da pendência aluno + aplicação trazida para o §8 | lucasgenial |
 | 2026-11-12 | §5.1: requisitos de teste separados dos de ativação comercial. D-3, D-4 e os detalhes comerciais da D-2 não bloqueiam desenvolvimento e homologação; a identidade aluno + aplicação continua dependência técnica real. Subfase 1.1 com o simulador genérico e processamento real | lucasgenial |
 | 2026-11-12 | Regra do aparelho alinhada ao ADR-0061: exibição temporária, sem persistir dados financeiros | lucasgenial |
+| 2026-11-12 | Subfase 0.1 alinhada à FN-068 2.0: mockup funcional compartilhado `mockups/financeiro.html`, em revisão; a implementação espera a aprovação | lucasgenial |

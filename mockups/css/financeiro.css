@@ -1,0 +1,86 @@
+/* ============================================================
+   Mockup funcional da experiência financeira limitada (FN-068 subfase 2.0; FN-081 subfase 0.1).
+   A casca, os cards, os indicadores, os avisos, as tabelas, as abas e os modais vêm do CSS real
+   de apps/web/public/css (carregado no HTML, na ordem de layouts/app.blade.php).
+   Prefixos: mk- = barra do mockup (não faz parte da tela); fi- = novidade desta tela.
+   Só tokens existentes. Cortes canônicos do ADR-0057: 720/721 (tabelas), 767/768 (celular).
+   ============================================================ */
+
+/* ---------- Barra do mockup (não faz parte da tela; mesma barra de mockups/css/leitor360.css) ---------- */
+.mk-barra { position: sticky; top: 0; z-index: 2000; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 8px 12px; background: var(--faixa); color: #fff; font: 13px/1.3 system-ui, sans-serif; }
+.mk-barra strong { margin-right: 8px; }
+.mk-barra label { display: inline-flex; gap: 6px; align-items: center; }
+.mk-barra select, .mk-barra button { min-height: 44px; font: inherit; border-radius: 6px; border: 1px solid #ffffff66; background: #ffffff1f; color: #fff; padding: 6px 10px; cursor: pointer; }
+.mk-barra select option { color: #111; }
+.mk-barra button[aria-pressed="true"] { background: #fff; color: var(--faixa); }
+.mk-barra :is(select, button):focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.mk-barra .mk-nota { opacity: .9; margin-left: auto; }
+.mk-barra output { font-weight: 600; }
+.mk-quadro { padding: 16px; background: var(--surface-2); min-height: calc(100dvh - 52px); overflow: hidden; }
+.mk-quadro iframe { display: block; border: 1px solid var(--border); background: var(--bg); box-shadow: var(--shadow-md); transform-origin: 0 0; }
+.mk-oculto { display: none !important; }
+@media (max-width: 767px) { .mk-barra .mk-nota { margin-left: 0; } }
+
+/* ---------- Selo de pendência: texto + ícone, nunca só cor ---------- */
+.fi-pendente { display: inline-flex; gap: 6px; align-items: center; max-width: 100%; font-size: 12px; font-weight: 600; line-height: 1.35;
+  padding: 2px 8px; border-radius: 99px; background: var(--warn-light); color: var(--warn-fg); border: 1px dashed var(--warn-fg); white-space: normal; }
+.fi-pendente-rotulo { font-weight: 700; white-space: nowrap; }
+.fi-pendencias { margin: 0 0 16px; padding: 10px 12px; border: 1px dashed var(--warn-fg); border-radius: var(--radius-md); background: var(--surface); }
+.fi-pendencias summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 600; color: var(--fg-2); }
+.fi-pendencias .page-sub { margin-top: 4px; }
+.fi-pendentes { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+
+/* ---------- Conteúdo ---------- */
+.fi-secao { margin-top: 16px; }
+.fi-h2 { font-size: 17px; margin-bottom: 8px; }
+.fi-sem-topo { margin-top: 0; }
+.fi-centro { justify-content: center; }
+.fi-cabecalho-lista { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.fi-cabecalho-lista .fi-h2 { margin-bottom: 0; }
+.fi-filtros-aplicados { margin: 0 0 12px; }
+.fi-estado-titulo { font-size: clamp(20px, 2vw, 26px); line-height: 1.3; }
+.fi-leitor { margin-top: 16px; }
+.fi-leitor .page-sub:first-of-type { margin-top: 0; }
+#fi-titulo:focus { outline: none; }
+.fi-origem { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.fi-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.fi-acoes .btn { min-height: 44px; }
+.g-pagina-acoes .btn { min-height: 44px; }
+.fi-valor-indisponivel .g-indicador-valor { font-size: var(--text-lg); color: var(--muted); }
+.fi-dados { display: grid; grid-template-columns: minmax(0, 40%) minmax(0, 1fr); gap: 8px 16px; margin: 0; font-size: 14px; }
+.fi-dados dt { color: var(--muted); font-weight: 600; }
+.fi-dados dd { margin: 0; overflow-wrap: anywhere; }
+.fi-restrito { color: var(--muted); font-style: italic; }
+.fi-lista-curta { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.fi-lista-curta li { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; padding: 10px 12px; border: 1px solid var(--border-soft); border-radius: var(--radius-md); font-size: 14px; }
+.fi-qtd-menos { color: var(--fg); font-variant-numeric: tabular-nums; }
+.fi-qtd-mais { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.fi-modal-aviso { margin-top: 12px; }
+.modal-body .g-aviso { margin-top: 0; }
+.modal-body .g-aviso + .g-aviso, .modal-body .g-aviso + p, .modal-body p + .g-aviso { margin-top: 12px; }
+.modal-foot .btn { min-height: 44px; }
+.fi-campos { display: grid; gap: 12px; }
+
+/* Abas: mesmas regras de .tela-turma .tu1-abas (apps/web/public/css/turma-detalhe.css), que só valem na turma.
+   Cópia fiel para esta tela; a promoção a componente compartilhado é decisão da implementação (subfase 2.1). */
+.fi-abas { display: flex; gap: 4px; overflow-x: auto; max-width: 100%; border-bottom: 1px solid var(--border); margin-block: 8px 16px; padding: 4px 0 8px; scroll-padding-inline: 8px; }
+.fi-abas a { display: flex; align-items: center; justify-content: center; flex: 0 0 auto; min-height: 44px; padding: 10px 16px; color: var(--muted); text-decoration: none; font-weight: 600; border-radius: 8px; border: 1px solid transparent; white-space: nowrap; }
+.fi-abas a[aria-selected="true"] { color: var(--accent); background: var(--accent-light); border-color: var(--border); box-shadow: inset 0 -3px currentColor; }
+.fi-abas a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+@media (max-width: 767px) { .fi-abas a { padding-inline: 12px; } }
+
+/* Toque: 44 px nos botões desta tela em telas de toque e até 1023 px (ADR-0057) */
+@media (pointer: coarse), (max-width: 1023px) { .tela-creditos #conteudo-principal .btn, .tela-creditos .modal-foot .btn { min-height: 44px; } }
+
+/* Estado de tela dentro do conteúdo (x-estado-tela fora da página de erro) */
+.fi-estado { display: flex; justify-content: center; padding: 32px 16px; }
+
+/* ---------- Telas do mockup ---------- */
+.tela-mk { display: none; }
+.tela-mk.ativa { display: block; }
+
+@media (max-width: 400px) {
+  .fi-dados { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .fi-dados dd { margin-bottom: 8px; }
+}
