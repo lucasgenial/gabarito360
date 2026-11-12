@@ -103,7 +103,7 @@ As regras de código usam a [linha de base](linha-de-base.json) das violações 
 | [ADR-0058](0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md) | A leitura de provas roda no aparelho, com paridade total; o aparelho sem capacidade usa o modo servidor, com fila e créditos | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md), [FN-080](../funcionalidades/080-ia-local-transcricao/planejamento.md) |
 | [ADR-0059](0059-aplicador-ve-a-leitura-sem-corrigir.md) | O aplicador vê a leitura da folha atual, antes de salvar, sem corrigir | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md) |
 | [ADR-0060](0060-arquitetura-de-execucao-da-leitura.md) | Arquitetura de execução da leitura (objetivas e Escriba) no aparelho e no servidor | 11/11/2026 | Aceita | [FN-079](../funcionalidades/079-leitor360/planejamento.md), [FN-080](../funcionalidades/080-ia-local-transcricao/planejamento.md) |
-| [ADR-0061](0061-arquitetura-de-billing-e-porta-billingclient.md) | Arquitetura de billing: o M3 Core é a fonte da verdade futura e o Gabarito360 fala com ele pela porta `BillingClient` | 11/11/2026 | Aceita | [FN-068](../funcionalidades/068-financeiro/planejamento.md), [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md) |
+| [ADR-0061](0061-arquitetura-de-billing-e-porta-billingclient.md) | O financeiro é um aplicativo externo independente, e o Gabarito360 fala com ele pela porta `BillingClient` (revisão de 12/11/2026 superou o `LocalBillingAdapter`) | 11/11/2026 | Aceita | [FN-068](../funcionalidades/068-financeiro/planejamento.md), [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md) |
 
 ## Origem dos identificadores antigos
 

@@ -1,12 +1,14 @@
-# 068 — Financeiro (contratos, faturas, pagamentos) — Casos de uso
+# 068 — Financeiro (experiência limitada, integração e legado) — Casos de uso
 
 **Natureza:** evolução de existente (o legado de assinatura do MP-027 é documentado a partir do código)
-**Perfis envolvidos:** Financeiro, Desenvolvedor e Suporte (contexto interno); titular de assinatura legada; provedor de pagamento (sistema externo). Ver [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md) §9.1.
-**Atualizado em:** 2026-11-11
+**Perfis envolvidos:** usuário com acesso ao contexto financeiro (pessoal, escola ou núcleo); responsável financeiro institucional; Financeiro, Desenvolvedor e Suporte (contexto interno); titular de assinatura legada; aplicativo financeiro e Mercado Pago (sistemas externos). Ver [04 Identidade, acesso e permissões](../../arquitetura/04-identidade-acesso-e-permissoes.md) §9.1.
+**Atualizado em:** 2026-11-12
 
-Os casos 01 a 04 descrevem o legado do MP-027 como está no código. Os demais são propostos para as fases F1 a F3 do [planejamento](planejamento.md).
+Os casos 01 a 04 descrevem o legado do MP-027 como está no código. Nada neles é desligado sem tarefa própria (planejamento §6.3).
 
-O consumo de créditos tem casos de uso próprios na [FN-081](../081-creditos-correcao/casos-de-uso.md). Esta funcionalidade cobra; a FN-081 credita e consome.
+Os casos 05 a 10 foram superados em 12/11/2026. Eles punham contratos, faturas, gateway, compra de créditos e catálogo no Gabarito360. Essa direção é do aplicativo financeiro externo ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md)). Os números não são reutilizados. O texto anterior está no commit `ca6109d5` do PR #274.
+
+Os casos 12 a 15 descrevem a experiência financeira limitada e a integração. O contrato é o [14 Integração com o aplicativo financeiro](../../arquitetura/14-integracao-financeira.md). O consumo da correção tem casos próprios na [FN-081](../081-creditos-correcao/casos-de-uso.md).
 
 Cada caso de uso é verificável: os critérios viram testes ou conferências registradas por texto.
 
@@ -33,7 +35,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 
 **Critérios de aceite:**
 - [x] Nenhuma cobrança é criada (`ContratacaoContatoTest`).
-- [ ] ⚠ As páginas de retorno e os textos de checkout permanecem. Resolve: decisão do §8 do planejamento e subfase 3.1.
+- [ ] ⚠ As páginas de retorno e os textos de checkout permanecem. Resolve: subfase 3.1 (destino do legado), em tarefa própria.
 
 **Situação:** Implementado (legado, checkout desativado) — evidência: `AssinaturaController::checkout`, `CheckoutController`
 
@@ -58,7 +60,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 
 **Critérios de aceite:**
 - [x] Só a assinatura do próprio titular.
-- [ ] ⚠ A assinatura está ligada a um usuário titular, não a um cliente. Os valores são `decimal`. Os estados são `trial`, `ativa`, `atrasada` e `cancelada`. Resolve: subfase 1.1 (F1), com os estados do planejamento §6.3.
+- [ ] ⚠ A assinatura está ligada a um usuário titular, não a um cliente. Os valores são `decimal`. Os estados são `trial`, `ativa`, `atrasada` e `cancelada`. Resolve: subfase 3.1 (destino do legado). O legado não vira o novo financeiro.
 
 **Situação:** Implementado (legado) — evidência: `AssinaturaController::minha`
 
@@ -83,7 +85,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Regras de negócio:** [RN-GER-09](../../arquitetura/08-regras-de-negocio.md).
 
 **Critérios de aceite:**
-- [ ] ⚠ A chamada ao `MercadoPagoService` é direta, sem interface de gateway, fila ou auditoria. Resolve: subfase 3.1 (F3).
+- [ ] ⚠ A chamada ao `MercadoPagoService` é direta, sem interface de gateway, fila ou auditoria. Resolve: subfase 3.1 (destino do legado).
 
 **Situação:** Implementado (legado) — evidência: `AssinaturaController::cancelar`
 
@@ -108,179 +110,24 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 **Regras de negócio:** [RN-GER-09](../../arquitetura/08-regras-de-negocio.md).
 
 **Critérios de aceite:**
-- [ ] ⚠ O processamento ocorre dentro da requisição, sem fila. A rota está ativa, embora não haja checkout. Resolve: subfase 3.1 (F3) e a decisão do §8 do planejamento.
+- [ ] ⚠ O processamento ocorre dentro da requisição, sem fila. A rota está ativa, embora não haja checkout. Resolve: subfase 3.1 (destino do legado). Não desligar sem autorização.
 
 **Situação:** Implementado (legado) — evidência: `WebhookController`, `MercadoPagoService::validarWebhook`
 
 ---
 
-## UC-068-05 — Registrar contrato de um cliente
+## UC-068-05 a UC-068-10 — Superados (12/11/2026)
 
-**Ator:** Financeiro (ou Desenvolvedor)
-**Permissão:** chave financeira a aprovar, no contexto interno
-**Escopo:** cliente
-**Pré-condições:** cliente cadastrado (FN-023); F1 entregue
-**Pós-condições:** contrato com itens, vigência e modalidade gravado e auditado
-**Tela/rota:** cadastro do cliente, contexto interno (mockup na subfase 2.0)
+| Caso | Título anterior | Novo destino |
+|---|---|---|
+| UC-068-05 | Registrar contrato de um cliente | Aplicativo financeiro externo. ⚠ Interpretação a confirmar (planejamento §8) |
+| UC-068-06 | Emitir fatura e registrar pagamento manual | Aplicativo financeiro externo. ⚠ Interpretação a confirmar (planejamento §8) |
+| UC-068-07 | Acompanhar recebimentos e inadimplência | Aplicativo financeiro externo. A regra "nenhum bloqueio sem regra aprovada" continua (planejamento §8) |
+| UC-068-08 | Cobrar por um provedor de pagamento | Aplicativo financeiro externo (meios de pagamento) |
+| UC-068-09 | Cobrar a compra avulsa de créditos | Aplicativo financeiro externo. A ação humana tem identidade e permissão próprias (UC-068-13) |
+| UC-068-10 | Publicar plano, preço e franquia no catálogo | Aplicativo financeiro externo (catálogo comercial) |
 
-**Fluxo principal:**
-1. O Financeiro informa itens, valores em centavos, vigência, desconto ou cortesia.
-2. Para cliente público, ele informa processo, empenho e vigência.
-3. Ele salva. A operação é auditada.
-
-**Fluxos alternativos e de erro:**
-- 1a. Modalidade `presenteado`: contrato sem cobrança, com registro da cortesia.
-
-**Regras de negócio:** planejamento §2 (F1) e §6.
-
-**Critérios de aceite:**
-- [ ] Testes de contrato com itens, desconto e cortesia.
-- [ ] Nenhum dado de aluno acessível nas telas.
-- [ ] Nenhum preço fica fixo no código ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md)).
-
-**Situação:** Não implementado — subfases 1.1 e 2.1.
-
----
-
-## UC-068-06 — Emitir fatura e registrar pagamento manual
-
-**Ator:** Financeiro
-**Permissão:** chave financeira a aprovar
-**Escopo:** cliente
-**Pré-condições:** contrato vigente
-**Pós-condições:** fatura e cobrança criadas; pagamento baixado manualmente; nota fiscal referenciada
-**Tela/rota:** cadastro do cliente (mockup na subfase 2.0)
-
-**Fluxo principal:**
-1. O Financeiro gera a fatura do período.
-2. Ao receber, ele registra a baixa manual com data, valor e meio.
-3. Ele registra a nota fiscal.
-
-**Fluxos alternativos e de erro:**
-- 2a. Valor diferente da fatura: o sistema exige justificativa.
-- 2b. Estorno: lançamento novo, sem apagar o anterior.
-
-**Regras de negócio:** planejamento §6.1 (append-only).
-
-**Critérios de aceite:**
-- [ ] Testes de fatura e pagamento manual.
-- [ ] Toda baixa e todo estorno são auditados.
-- [ ] Nenhum registro financeiro é alterado ou apagado.
-
-**Situação:** Não implementado — subfases 1.1 e 2.1.
-
----
-
-## UC-068-07 — Acompanhar recebimentos e inadimplência
-
-**Ator:** Financeiro
-**Permissão:** chave financeira a aprovar
-**Escopo:** todos os clientes
-**Pré-condições:** faturas existentes
-**Pós-condições:** nenhuma
-**Tela/rota:** painel de recebimentos (mockup na subfase 2.0)
-
-**Fluxo principal:**
-1. O Financeiro vê recebido, a receber e vencido, com filtro por período e cliente.
-2. Ele abre o cliente inadimplente para agir.
-
-**Fluxos alternativos e de erro:**
-- 2a. Bloqueio de acesso por inadimplência: indisponível até o responsável aprovar a regra.
-
-**Regras de negócio:** planejamento §8 (bloqueio por inadimplência). O estado `past_due` não implica bloqueio total imediato.
-
-**Critérios de aceite:**
-- [ ] Nenhum bloqueio automático sem regra aprovada.
-- [ ] A falta de saldo de créditos bloqueia só o recurso tarifado, nunca o resto do sistema (FN-081).
-
-**Situação:** Não implementado — subfase 2.1.
-
----
-
-## UC-068-08 — Cobrar por um provedor de pagamento
-
-**Ator:** Financeiro; provedor (webhook)
-**Permissão:** chave financeira a aprovar; webhook com assinatura verificada
-**Escopo:** cliente
-**Pré-condições:** F3 entregue
-**Pós-condições:** cobrança criada no provedor; eventos processados pela fila sem repetir efeito
-**Tela/rota:** serviço `GatewayPagamento`; webhook único por provedor
-
-**Fluxo principal:**
-1. O Financeiro cria a cobrança pela interface do gateway (manual ou provedor).
-2. O provedor notifica por webhook. A API valida a assinatura e enfileira o evento.
-3. O evento atualiza cobrança e pagamento uma única vez.
-
-**Fluxos alternativos e de erro:**
-- 1a. Cancelar e estornar seguem a mesma interface.
-- 2a. Evento repetido: ignorado pela chave de idempotência.
-
-**Regras de negócio:** planejamento §2 (F3). Billing não é Payments: o gateway só emite eventos ([ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) §2). Nunca guardar número de cartão ou CVV.
-
-**Critérios de aceite:**
-- [ ] Um provedor falso de teste passa por todo o fluxo.
-- [ ] Teste de evento repetido.
-- [ ] Os eventos do gateway são `payment_confirmed`, `payment_failed`, `refund_confirmed` e `chargeback`.
-
-**Situação:** Não implementado — subfase 3.1.
-
----
-
-## UC-068-09 — Cobrar a compra avulsa de créditos
-
-**Ator:** Financeiro ou sistema; responsável pelo contexto de cobrança (comprador)
-**Permissão:** chave financeira a aprovar
-**Escopo:** cliente e contexto de cobrança
-**Pré-condições:** D-4 decidida (formato do pacote, [FN-081 §8](../081-creditos-correcao/planejamento.md)); F3 entregue
-**Pós-condições:** cobrança gerada e paga; a FN-081 credita o lote `PURCHASED`
-**Tela/rota:** a desenhar na subfase 2.0
-
-**Fluxo principal:**
-1. A FN-081 pede a cobrança de um pacote de créditos (UC-081-05).
-2. A FN-068 gera a fatura e a cobrança.
-3. Com o pagamento confirmado, a FN-068 emite o evento `payment_confirmed`.
-4. A FN-081 concede o lote na carteira do contexto.
-
-**Fluxos alternativos e de erro:**
-- 3a. Evento repetido: a FN-068 não gera cobrança nova e o crédito não entra duas vezes.
-- 3b. Pagamento recusado: nenhum crédito é concedido.
-
-**Regras de negócio:** planejamento §6.3, regra 3. A FN-068 nunca escreve em tabela `billing_`.
-
-**Critérios de aceite:**
-- [ ] Nenhum crédito entra antes da confirmação do pagamento.
-- [ ] A FN-068 não grava saldo nem lote de carteira.
-- [ ] ⚠ O direito de arrependimento, o reembolso e o pacote parcialmente consumido dependem da pendência jurídica 1 (planejamento §8).
-
-**Situação:** Não implementado — subfases 1.1 e 3.1.
-
----
-
-## UC-068-10 — Publicar plano, preço e franquia no catálogo
-
-**Ator:** Financeiro (ou Desenvolvedor)
-**Permissão:** chave financeira a aprovar
-**Escopo:** catálogo comercial
-**Pré-condições:** D-3 decidida (quantidade de franquia por plano, [FN-081 §8](../081-creditos-correcao/planejamento.md)); F1 entregue
-**Pós-condições:** produto, recurso, plano, preço e entitlement disponíveis para assinatura
-**Tela/rota:** a desenhar na subfase 2.0
-
-**Fluxo principal:**
-1. O Financeiro cadastra o produto e o recurso tarifado.
-2. Ele cadastra o plano, o preço em centavos e a franquia do recurso por ciclo.
-3. O plano fica disponível para assinatura.
-
-**Fluxos alternativos e de erro:**
-- 2a. Preço ou franquia ausentes: o plano não é publicado.
-
-**Regras de negócio:** [ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) §1 e §5. O catálogo é orientado a produto: um produto novo entra como registro, não como código.
-
-**Critérios de aceite:**
-- [ ] Nenhum preço, franquia ou regra comercial crítica fica fixo no código.
-- [ ] Um produto novo não exige código novo.
-- [ ] A franquia publicada aqui é a que a FN-081 consome no ciclo.
-
-**Situação:** Não implementado — subfase 1.1.
+**Situação:** Superados. Não implementar no Gabarito360.
 
 ---
 
@@ -295,7 +142,7 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 
 **Fluxo principal:**
 1. A instância superior formaliza a assunção.
-2. O Financeiro registra alcance e vigência. O sistema audita.
+2. O fato financeiro da assunção é registrado no aplicativo financeiro. O Gabarito360 recebe a confirmação pela integração e audita a mudança de acesso.
 3. Só então a autorização de acesso prevista na [RN-EIN-07](../../arquitetura/08-regras-de-negocio.md) pode ser concedida (FN-029).
 
 **Fluxos alternativos e de erro:**
@@ -308,7 +155,119 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 - [ ] Dados, autoria e documentos emitidos são preservados.
 - [ ] ⚠ A RN-EIN-08 ("o sistema não devolve valores já pagos") vale neste fluxo. Ela não vale como regra do novo billing. O conflito com a pendência jurídica 1 está registrado no planejamento §8.
 
+- [ ] ⚠ Como o Gabarito360 recebe a confirmação da assunção é pendência do contrato ([14](../../arquitetura/14-integracao-financeira.md) §12).
+
 **Situação:** Não implementado — depende das decisões do §8.
+
+---
+
+## UC-068-12 — Ver saldo, limites e histórico do contexto
+
+**Ator:** usuário com acesso ao contexto financeiro; responsável financeiro institucional
+**Permissão:** a definir (planejamento §8); o aplicativo financeiro confere a permissão
+**Escopo:** só o contexto do vínculo ativo (pessoal, escola ou núcleo)
+**Pré-condições:** subfases 1.1 e 2.1 entregues
+**Pós-condições:** nenhuma; nada é gravado como saldo no Gabarito360
+**Tela/rota:** a desenhar na subfase 2.0
+
+**Fluxo principal:**
+1. O usuário abre a área financeira do contexto.
+2. O Gabarito360 consulta o aplicativo financeiro pela porta `BillingClient`.
+3. A tela mostra o saldo, os limites e o histórico recebidos, com o momento da consulta.
+
+**Fluxos alternativos e de erro:**
+- 2a. O aplicativo financeiro não responde: a tela mostra o estado de erro, sem saldo calculado localmente.
+- 2b. O aplicativo financeiro recusa a consulta: a tela informa que o usuário não tem acesso a esse contexto.
+- 3a. Professor com limite institucional: ele vê o próprio limite e o consumo dele. Ele não vê o saldo da instituição sem permissão própria.
+
+**Regras de negócio:** contrato [14](../../arquitetura/14-integracao-financeira.md) §1, §4 e §7.
+
+**Critérios de aceite:**
+- [ ] O Gabarito360 não calcula nem guarda saldo.
+- [ ] O usuário não vê o contexto de outra pessoa ou de outra instituição.
+- [ ] O perfil Financeiro interno não vê nomes de alunos.
+
+**Situação:** Não implementado — subfases 1.1, 2.0 e 2.1.
+
+---
+
+## UC-068-13 — Ir a uma ação financeira (comprar créditos ou definir limites)
+
+**Ator:** responsável financeiro do contexto
+**Permissão:** identidade e permissão próprias no aplicativo financeiro
+**Escopo:** contexto do vínculo ativo
+**Pré-condições:** decidido o lugar das ações humanas (planejamento §8)
+**Pós-condições:** a ação acontece no aplicativo financeiro; o Gabarito360 só mostra o resultado
+**Tela/rota:** a definir
+
+**Fluxo principal:**
+1. O responsável escolhe comprar créditos para a entidade ou ajustar o limite mensal de um professor.
+2. O Gabarito360 encaminha a ação ao aplicativo financeiro, sem usar a credencial técnica dele.
+3. O aplicativo financeiro valida a identidade, o vínculo e a permissão, e executa a ação.
+
+**Fluxos alternativos e de erro:**
+- 3a. Sem permissão financeira: o aplicativo financeiro recusa. O Gabarito360 não contorna a recusa.
+
+**Regras de negócio:** contrato [14](../../arquitetura/14-integracao-financeira.md) §4 e §8. O limite por professor não transfere crédito para a carteira pessoal. Renovar o limite não cria créditos.
+
+**Critérios de aceite:**
+- [ ] A credencial técnica do Gabarito360 não consegue comprar créditos nem alterar limites (teste de isolamento).
+- [ ] ⚠ O formato da compra (D-4), o arrependimento e o reembolso dependem das pendências da [FN-081 §8](../081-creditos-correcao/planejamento.md) e do planejamento §8.
+
+**Situação:** Não implementado — depende das decisões do §8.
+
+---
+
+## UC-068-14 — Testar a integração com o simulador
+
+**Ator:** desenvolvedor; CI
+**Permissão:** ambiente de teste
+**Escopo:** testes automatizados e homologação, por configuração explícita
+**Pré-condições:** subfase 1.1
+**Pós-condições:** nenhuma cobrança real nem dívida retroativa
+**Tela/rota:** não se aplica
+
+**Fluxo principal:**
+1. O ambiente de teste liga o simulador por configuração explícita.
+2. O teste escolhe o cenário: autorizado, recusado sem saldo, limite do professor atingido, contexto sem permissão, repetição, conflito ou indisponível.
+3. O Gabarito360 reage como reagiria à resposta real.
+
+**Regras de negócio:** contrato [14](../../arquitetura/14-integracao-financeira.md) §9.
+
+**Critérios de aceite:**
+- [ ] O simulador não tem carteira, ledger nem débito.
+- [ ] O simulador não muda nenhuma permissão educacional.
+- [ ] Um consumo feito no simulador nunca vira cobrança real.
+
+**Situação:** Não implementado — subfase 1.1.
+
+---
+
+## UC-068-15 — Recusar o consumo quando a API financeira está indisponível
+
+**Ator:** sistema
+**Permissão:** não se aplica
+**Escopo:** envio ao modo servidor
+**Pré-condições:** o cliente da API real está configurado; o aplicativo financeiro não responde
+**Pós-condições:** nenhum consumo autorizado sem resposta válida
+**Tela/rota:** Leitor360, modo servidor (FN-079 UC-079-26)
+
+**Fluxo principal:**
+1. O Gabarito360 pede autorização e não recebe resposta no prazo.
+2. O Gabarito360 repete com a mesma referência, dentro do limite configurado.
+3. Sem resposta válida, o envio ao modo servidor é recusado. A leitura no aparelho e a revisão manual continuam.
+
+**Fluxos alternativos e de erro:**
+- 1a. Existe concessão válida para contingência: segue o protocolo aprovado. ⚠ O protocolo está pendente (contrato §10).
+
+**Regras de negócio:** [ADR-0061](../../decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md) §6; contrato [14](../../arquitetura/14-integracao-financeira.md) §10.
+
+**Critérios de aceite:**
+- [ ] A falha da API não ativa o simulador (teste).
+- [ ] A falha da API não autoriza o consumo (teste).
+- [ ] As funções pedagógicas continuam disponíveis.
+
+**Situação:** Não implementado — subfases 1.1 e 1.2.
 
 ---
 
@@ -318,3 +277,4 @@ Cada caso de uso é verificável: os critérios viram testes ou conferências re
 |---|---|---|---|
 | 1 | 2026-11-10 | Casos de uso criados a partir do código e do tronco original | lucasgenial |
 | 2 | 2026-11-11 | Subfase 0.2 de adequação: citações aos documentos antigos trocadas pelos destinos do mapa; RN-015 passou a RN-GER-09 e as regras da escola autônoma a RN-EIN; UC-068-09 (compra avulsa de créditos) e UC-068-10 (catálogo) acrescentados; fronteira com a FN-081 declarada | lucasgenial |
+| 3 | 2026-11-12 | Reorientação para o aplicativo financeiro externo: UC-068-05 a UC-068-10 superados; UC-068-11 ajustado; UC-068-12 a UC-068-15 acrescentados (experiência limitada, ação financeira, simulador e indisponibilidade) | lucasgenial |

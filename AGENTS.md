@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 17.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 18.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -36,10 +36,10 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 - A CSP libera `'unsafe-eval'` e `'wasm-unsafe-eval'` só no Worker do leitor, nunca na página inteira.
 - O Escriba parte do Qwen3.5-0.8B (reserva: 2B), em ONNX, com transformers.js no navegador (WebGPU) e no servidor (Node). O mesmo arquivo de modelo, com hash, roda nos dois lados.
 - Paridade do Escriba: mesmo arquivo, mesmo pré-processamento, mesmo prompt e decodificação gulosa, com meta medida de saídas idênticas e de CER. Igualdade total entre GPU e CPU não é exigida. ([ADR-0060](docs/decisoes/0060-arquitetura-de-execucao-da-leitura.md))
-- O M3 Core é a futura fonte da verdade do billing do ecossistema (catálogo, assinaturas, franquias, créditos, reservas, consumo e auditoria). Ele é futuro e não bloqueia o Gabarito360. O Core é orientado a catálogo: nenhum código é específico por produto.
-- O Gabarito360 fala com o billing só pela porta `BillingClient` (`authorize`, `reserve`, `commit`, `release`, `getBalance`). Hoje vale o `LocalBillingAdapter`, no banco do Gabarito360; depois, o `M3CoreBillingAdapter` por HTTP. O resto do Gabarito360 não muda na troca. Billing não é Payments: gateways ficam atrás de um adaptador e só emitem eventos.
-- As tabelas de billing usam o prefixo `billing_`, com esquema definitivo compatível com o Core. Os registros financeiros e de consumo são append-only: sem UPDATE nem DELETE pela credencial da aplicação. Nenhum preço, franquia ou regra comercial crítica fica fixo no código.
-- Cada operação tarifada tem um único contexto de cobrança (professor, escola ou núcleo), sem recurso automático a outro contexto; o núcleo delega franquia à escola por alocação explícita. Sem franquia e sem crédito, o envio ao servidor é recusado. Na indisponibilidade do Core, o backend autoriza só dentro de capacidade destacada antes (lease); nada de billing fica no aparelho e a carteira nunca fica negativa. ([ADR-0061](docs/decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md))
+- O financeiro (catálogo, planos, assinaturas, pagamentos, créditos, franquias, reservas, consumo e auditoria financeira) é um aplicativo externo independente, com código, banco, credenciais e implantação próprios. Nome de trabalho: M3 Core. Ele é futuro e não bloqueia o Gabarito360.
+- O Gabarito360 fala com o financeiro só pela porta `BillingClient`, por integração. O contrato está em `docs/arquitetura/14-integracao-financeira.md`. Não crie no Gabarito360 carteira, ledger, lotes, saldo autoritativo, preço nem esquema financeiro local. O `LocalBillingAdapter` foi superado.
+- O Gabarito360 não acessa o banco financeiro nem guarda credencial administrativa ou segredo de gateway. O aplicativo financeiro autentica o Gabarito360 e autoriza cada ação. Ações humanas financeiras exigem identidade e permissão próprias.
+- Cada operação tarifada tem um único contexto (professor, escola ou núcleo), sem recurso automático a outro. Sem autorização válida, o envio ao servidor é recusado. A queda da API financeira nunca ativa o simulador nem libera tudo. Os testes usam um simulador explícito, sem cobrança real nem retroativa e sem liberar permissões educacionais. Nada de billing fica no aparelho. Não desligue o legado do MP-027 sem tarefa própria. ([ADR-0061](docs/decisoes/0061-arquitetura-de-billing-e-porta-billingclient.md))
 
 ## Princípios executáveis
 

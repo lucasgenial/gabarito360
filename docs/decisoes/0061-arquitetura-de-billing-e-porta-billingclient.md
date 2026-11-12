@@ -1,142 +1,142 @@
 ---
 id: ADR-0061
-titulo: Arquitetura de billing com o M3 Core como fonte da verdade futura e a porta BillingClient no Gabarito360
+titulo: O financeiro é um aplicativo externo independente, e o Gabarito360 fala com ele pela porta BillingClient
 estado: Aceita
 substituida_por: []
 data: 2026-11-11
 afeta_funcionalidades: [FN-068, FN-081]
-afeta_caminhos: ["apps/api/**"]
+afeta_caminhos: ["apps/api/**", "apps/web/**"]
 verificacao: revisao-ia
 regras: []
 agents_secao: Planejamento
 agents_ordem: 70
 agents_resumo:
-  - "O M3 Core é a futura fonte da verdade do billing do ecossistema (catálogo, assinaturas, franquias, créditos, reservas, consumo e auditoria). Ele é futuro e não bloqueia o Gabarito360. O Core é orientado a catálogo: nenhum código é específico por produto."
-  - "O Gabarito360 fala com o billing só pela porta `BillingClient` (`authorize`, `reserve`, `commit`, `release`, `getBalance`). Hoje vale o `LocalBillingAdapter`, no banco do Gabarito360; depois, o `M3CoreBillingAdapter` por HTTP. O resto do Gabarito360 não muda na troca. Billing não é Payments: gateways ficam atrás de um adaptador e só emitem eventos."
-  - "As tabelas de billing usam o prefixo `billing_`, com esquema definitivo compatível com o Core. Os registros financeiros e de consumo são append-only: sem UPDATE nem DELETE pela credencial da aplicação. Nenhum preço, franquia ou regra comercial crítica fica fixo no código."
-  - "Cada operação tarifada tem um único contexto de cobrança (professor, escola ou núcleo), sem recurso automático a outro contexto; o núcleo delega franquia à escola por alocação explícita. Sem franquia e sem crédito, o envio ao servidor é recusado. Na indisponibilidade do Core, o backend autoriza só dentro de capacidade destacada antes (lease); nada de billing fica no aparelho e a carteira nunca fica negativa."
+  - "O financeiro (catálogo, planos, assinaturas, pagamentos, créditos, franquias, reservas, consumo e auditoria financeira) é um aplicativo externo independente, com código, banco, credenciais e implantação próprios. Nome de trabalho: M3 Core. Ele é futuro e não bloqueia o Gabarito360."
+  - "O Gabarito360 fala com o financeiro só pela porta `BillingClient`, por integração. O contrato está em `docs/arquitetura/14-integracao-financeira.md`. Não crie no Gabarito360 carteira, ledger, lotes, saldo autoritativo, preço nem esquema financeiro local. O `LocalBillingAdapter` foi superado."
+  - "O Gabarito360 não acessa o banco financeiro nem guarda credencial administrativa ou segredo de gateway. O aplicativo financeiro autentica o Gabarito360 e autoriza cada ação. Ações humanas financeiras exigem identidade e permissão próprias."
+  - "Cada operação tarifada tem um único contexto (professor, escola ou núcleo), sem recurso automático a outro. Sem autorização válida, o envio ao servidor é recusado. A queda da API financeira nunca ativa o simulador nem libera tudo. Os testes usam um simulador explícito, sem cobrança real nem retroativa e sem liberar permissões educacionais. Nada de billing fica no aparelho. Não desligue o legado do MP-027 sem tarefa própria."
 ---
-# ADR-0061 — O billing do ecossistema tem o M3 Core como fonte da verdade futura, e o Gabarito360 fala com ele por uma porta
+# ADR-0061 — O financeiro é um aplicativo externo independente, e o Gabarito360 fala com ele pela porta `BillingClient`
 
+**Atualizado em:** 12/11/2026, por lucasgenial (revisão: financeiro externo; `LocalBillingAdapter` superado)
 **Data:** 2026-11-11
 **Estado:** Aceita
 **Decisor:** responsável (lucasgenial)
-**Origem:** sessão de decisão do responsável em 11/11/2026. Registro histórico: [Decisões de billing, créditos e M3 Core (11/11/2026)](../historico/2026-11-11-decisoes-billing.md)
-**Afeta:** [FN-068](../funcionalidades/068-financeiro/planejamento.md), [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md); [03 Modelo de dados](../arquitetura/03-modelo-de-dados.md)
+**Origem:** sessão de decisão do responsável em 11/11/2026 ([registro histórico](../historico/2026-11-11-decisoes-billing.md)); diretriz do responsável de 12/11/2026, que retoma a intenção de 06/11/2026 de ter o billing em outro aplicativo
+**Afeta:** [FN-068](../funcionalidades/068-financeiro/planejamento.md), [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md); [14 Integração com o aplicativo financeiro](../arquitetura/14-integracao-financeira.md); [01 Contexto e containers](../arquitetura/01-contexto-e-containers.md)
 
 ## Contexto
 
-O modo servidor da correção consome processamento pago ([ADR-0058](0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md)). O Gabarito360 precisa cobrar esse consumo antes de publicar o modo servidor. O responsável também planeja o M3 Core, a plataforma comercial do ecossistema (Gabarito360, ECOAR, Vizor.ai e outros). O Core ainda não existe e não pode atrasar o Gabarito360. Uma implementação local feita sem cuidado criaria um segundo sistema comercial, incompatível com o Core. Ela também obrigaria a reinterpretar o histórico na migração. Esta decisão define onde mora a verdade do billing hoje, onde ela vai morar depois, e qual é a fronteira entre os dois.
+O modo servidor da correção consome processamento pago ([ADR-0058](0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md)). O Gabarito360 precisa de controle de consumo antes de publicar esse modo.
+
+A primeira versão desta decisão (11/11/2026) punha o billing no banco do Gabarito360, pelo `LocalBillingAdapter`, e previa migrar depois para o M3 Core. Essa versão criava carteira, ledger e esquema financeiro locais.
+
+O responsável já planejava, desde 06/11/2026, um aplicativo separado para o billing, com API e infraestrutura próprias. Em 12/11/2026, ele restabeleceu essa direção. Ele quer preservar a finalidade educacional e o desempenho do Gabarito360.
 
 ## Decisão
 
-### 1. O M3 Core é a fonte da verdade futura
+As marcas usadas abaixo são as do [contrato](../arquitetura/14-integracao-financeira.md) §0: **[Diretriz]**, **[Histórico]**, **[Proposto]** e **[Pendente]**.
 
-O M3 Core é a futura plataforma comercial do ecossistema. Ele é a fonte da verdade sobre catálogo, assinaturas, franquias, créditos, reservas, consumo e auditoria.
+### 1. O financeiro é um aplicativo externo independente **[Diretriz]**
 
-O Core é futuro e não bloqueia o Gabarito360.
+O aplicativo financeiro tem código-fonte, banco, serviço, credenciais e implantação separados do Gabarito360. O Gabarito360 o acessa só por integração. Ele não acessa o banco financeiro.
 
-O Core é orientado a catálogo. Nenhum código é específico por produto: não existe um `Gabarito360BillingService`. Um produto novo entra como registros novos no catálogo.
+A direção funcional reservada a esse aplicativo é: catálogo comercial, planos, assinaturas, pagamentos, créditos, bônus, franquias, recompensas, autorização de consumo, reservas, contabilização, reversões, regras de distribuição institucional e auditoria financeira.
 
-A interface administrativa do M3 Core segue o loop do projeto: mockup antes de código. Ela fica fora desta decisão.
+Esta decisão define a fronteira. Ela não define a arquitetura interna do aplicativo financeiro. Ela não cria agora o repositório, as tabelas, a stack nem os meios de pagamento dele.
 
-### 2. Billing não é Payments
+O nome de trabalho encontrado na documentação é M3 Core. A marca definitiva não está escolhida. O aplicativo é futuro e não bloqueia o Gabarito360.
 
-Billing e meios de pagamento são camadas separadas. Os gateways ficam atrás de um adaptador e só emitem eventos: `payment_confirmed`, `payment_failed`, `refund_confirmed` e `chargeback`.
+### 2. O módulo financeiro do Gabarito360 é limitado **[Diretriz]**
 
-Gateways e NFSe ficam fora do MVP.
+O módulo dá acesso contextual às capacidades financeiras que o produto precisa. Ele não é um sistema financeiro completo. Ele não administra o aplicativo externo.
 
-### 3. A porta `BillingClient`
+O Gabarito360 tem:
 
-O Gabarito360 fala com o billing somente pela porta `BillingClient`. As operações mínimas são `authorize`, `reserve`, `commit`, `release` e `getBalance`.
+- a porta `BillingClient` e o cliente da API do aplicativo financeiro;
+- a identidade da correção (`correction_subject_id`) e o registro operacional dela;
+- referências externas opacas (conta e operação no aplicativo financeiro);
+- a exibição de saldo, limites e histórico recebidos do aplicativo financeiro.
 
-| Fase | Implementação | Onde o dado mora |
-|---|---|---|
-| Agora | `LocalBillingAdapter` | Banco do Gabarito360, em tabelas com o prefixo `billing_` |
-| Futuro | `M3CoreBillingAdapter` | M3 Core, por HTTP |
+O Gabarito360 não tem carteira, ledger, lotes, saldo autoritativo, preço, motor de consumo nem esquema financeiro local.
 
-O esquema local das tabelas `billing_` é **definitivo** e compatível com o Core. Ele não é um protótipo.
+### 3. O contrato tem um dono
 
-Na troca do adaptador, o resto do Gabarito360 não muda. A migração futura é copiar, validar e reconciliar identificadores. Ela não reinterpreta o histórico.
+O contrato de integração está em [14 Integração com o aplicativo financeiro](../arquitetura/14-integracao-financeira.md). Ele define capacidades, contextos, dados mínimos, consumo, idempotência, respostas, notificações e falhas. Ele não inventa endpoints, tecnologias nem números.
 
-A regra de recusa vale já na fase local: sem franquia e sem crédito suficientes, o envio ao servidor é recusado.
+### 4. Fronteira de confiança **[Diretriz]**
 
-### 4. Contexto de cobrança
+- O aplicativo financeiro autentica o Gabarito360 e autoriza cada ação no contexto permitido.
+- A credencial técnica do Gabarito360 não administra o financeiro.
+- Ações humanas financeiras exigem identidade, vínculo e permissão próprios, validados pelo aplicativo financeiro.
+- Os produtos não compartilham banco, usuário administrativo de banco nem segredos de gateway.
 
-A terminologia do produto é Núcleo, Escola e Professor. O Core pode usar abstrações internas (conta, tenant), mas a integração preserva os termos do produto.
+Os controles técnicos que concretizam estes pontos são **[Proposto]** e estão no contrato, §8.
 
-Cada operação tem um único contexto de cobrança (`billing_context`): professor, escola ou núcleo. **Não existe recurso automático de um contexto a outro.** Crédito pessoal não financia operação institucional.
+### 5. Contexto de cobrança **[Histórico]**
 
-A escola não consome recursos do núcleo de forma automática. O núcleo faz uma alocação explícita de franquia para a escola. Isso é delegação de franquia, não transferência de créditos.
+- Os termos do produto são Núcleo, Escola e Professor.
+- Cada operação tem um único contexto de cobrança. Não existe recurso automático de um contexto a outro.
+- As carteiras pessoal e institucional ficam isoladas. A hierarquia não autoriza consumo implícito do saldo de outro contexto.
+- O núcleo delega franquia à escola só por alocação explícita.
 
-Esgotado o contexto, o sistema bloqueia só o consumo tarifado daquele contexto. Ele oferece ao responsável três caminhos: comprar créditos, pedir alocação ao núcleo ou alterar o plano.
+**[Diretriz]** O responsável financeiro institucional pode comprar créditos para a entidade e administrar limites mensais de consumo por professor. Isso é governança do consumo institucional. Não é transferência para a carteira pessoal.
 
-### 5. Carteira, franquia e registros append-only
+### 6. Disponibilidade e testes **[Diretriz]**
 
-Crédito é a unidade comercial **comum** de consumo de recurso tarifado do ecossistema. Ele não é "custo de IA". O preço de cada recurso em créditos fica no catálogo.
+- Sem autorização válida, o envio ao modo servidor é recusado.
+- A indisponibilidade da API financeira nunca ativa o simulador nem um modo "autoriza tudo".
+- Não existe autorização sem serviço disponível ou sem concessão válida.
+- Os testes usam um simulador de integração explícito, sem cobrança real nem retroativa. O simulador não libera permissões educacionais.
+- Nada de billing fica no aparelho do usuário.
 
-Franquia (allowance) é por recurso e por ciclo, vinculada ao plano. **Franquia não é carteira.**
+### 7. Legado **[Diretriz]**
 
-| Assunto | Regra |
+Esta decisão é só de documentação. Ela não remove nem desliga o legado do MP-027 (checkout, assinaturas, webhook do Mercado Pago, dados e tabelas). A situação do legado é da [FN-068](../funcionalidades/068-financeiro/planejamento.md).
+
+## Revisão de 12/11/2026: o que foi superado
+
+A versão de 11/11/2026 desta decisão continua no [registro histórico](../historico/2026-11-11-decisoes-billing.md) e no commit `ca6109d5` do PR #274. A tabela abaixo diz o que dela foi superado e o que continua.
+
+| Item da versão de 11/11/2026 | Situação |
 |---|---|
-| Origem dos lotes da carteira | `PROMOTIONAL`, `REWARD` e `PURCHASED` |
-| Validade | Comprado sem expiração por padrão (`expires_at = null`); promocional e recompensa com validade por política; franquia vence no fim do ciclo |
-| Ordem de consumo | 1) franquia do recurso; 2) promocional; 3) recompensa; 4) comprado. Dentro da categoria, usa primeiro o lote que vence antes |
-| Tipos de transação | `RESERVE`, `RELEASE`, `CONSUME`, `GRANT`, `REVERSAL`, `REFUND`, `EXPIRE` e `ADJUSTMENT`. Eles não são origens |
-| Natureza dos créditos | Não são sacáveis, conversíveis em dinheiro, transferíveis nem negociáveis |
-
-Os registros financeiros e de consumo são **append-only**, no padrão que o projeto já usa ([03 Modelo de dados](../arquitetura/03-modelo-de-dados.md), item 6, e FN-025). A credencial da aplicação não faz `UPDATE` nem `DELETE` neles. Uma correção entra como evento compensatório. A operação administrativa usa credencial e trilha separadas. A regra vale para carteira, franquias, consumo, reservas, reversões, ajustes e reconciliação.
-
-A separação dos registros é esta:
-
-- `billing_usage_events` guarda exatamente um evento lógico de consumo por operação, qualquer que seja a fonte do pagamento.
-- `billing_ledger_entries` guarda somente movimentações da carteira.
-- As franquias têm registros de consumo próprios, referenciados pelo evento de consumo.
-- Pago por franquia: há evento de consumo e nenhuma entrada na carteira. Pago por crédito: há evento de consumo e entrada append-only na carteira.
-- O saldo é derivado do ledger, ou materializado a partir dele.
-- `REVERSAL` devolve à origem consumida, com a validade original. Se a origem já venceu, o sistema gera uma compensação `PROMOTIONAL`, com `reason = reversal_after_expiration`, no valor do preço registrado na operação original.
-- Toda operação sensível registra quem, quando, produto, contexto, recurso, quantidade, origem, motivo e referência. A concessão manual exige quem concedeu, por quê e quando.
-
-Esquema local mínimo (nomes equivalentes são aceitos): `products`, `resources`, `plans`, `plan_entitlements/allowances`, `prices`, `subscriptions`, `billing_operations`, `billing_reservations`, `billing_usage_events`, `billing_allowances`, `billing_wallets`, `billing_wallet_lots`, `billing_ledger_entries` e `billing_contingency_leases`.
-
-Nenhum preço, franquia ou regra comercial crítica fica fixo no código.
-
-### 6. Contingência quando o Core está indisponível
-
-O Core é a fonte da verdade. Na indisponibilidade dele, o **backend** do Gabarito360 autoriza de forma provisória, e só dentro da capacidade que o Core destacou antes: `ALLOWANCE_LEASE` ou `CREDIT_LEASE`. **Nada de billing fica no aparelho.**
-
-Exemplo: saldo 73 e lease de 10. O Core mantém 63 disponíveis e 10 delegados. O consumo em contingência gera evento de consumo local e um registro de saída (outbox). Na reconexão, o consumido vira `COMMIT` e o restante vira `RELEASE`.
-
-A interface mostra o saldo comercial total (73), não 63.
-
-Com o Core disponível, o sistema recolhe o lease não consumido antes de negar saldo. Enquanto houver saldo comercial efetivo, a contingência não causa recusa.
-
-Uma divergência excepcional (erro de programa, corrupção, concessão conflitante ou reconciliação duplicada) vira `RECONCILIATION_EXCEPTION` e é resolvida pela via administrativa. A carteira do usuário nunca fica negativa por falha técnica.
-
-### 7. O que fica no Gabarito360 depois do Core
-
-O perfil interno Financeiro e o cadastro comercial de clientes continuam como interface ([FN-013](../funcionalidades/013-acessos-internos/planejamento.md) e [FN-023](../funcionalidades/023-cadastro-clientes/planejamento.md); regras em [04 Identidade, acesso e permissões](../arquitetura/04-identidade-acesso-e-permissoes.md) §9.1).
-
-Como fonte de dados comerciais, eles são transitórios. Com o Core em operação, o Gabarito360 guarda apenas o `m3_core_account_id`.
+| `LocalBillingAdapter` no banco do Gabarito360, como fase "agora" | **Superado.** Não serve nem como etapa temporária para migrar saldos depois. |
+| Esquema `billing_` "definitivo" no Gabarito360 (`products`, `plans`, `subscriptions`, `billing_wallets`, `billing_ledger_entries`, `billing_contingency_leases` e outros) | **Superado.** O Gabarito360 não cria esquema financeiro. |
+| Migração futura por cópia e reconciliação de ids entre o Gabarito360 e o Core | **Superado.** Não há base local a migrar. |
+| Lease de contingência guardado no backend do Gabarito360, com evento de consumo local e outbox | **Superado como implementação.** A intenção (capacidade concedida antes e reconciliação, sem saldo negativo) continua. O protocolo está pendente (contrato §10). |
+| Recomendação de o Gabarito360 ser dono temporário do esquema `billing_` (FN-068 §8) | **Superado.** A recomendação nunca foi aprovada. |
+| Porta `BillingClient` e capacidades `authorize`, `reserve`, `commit`, `release` e `getBalance` | **Continua**, como porta do cliente da API. |
+| `M3CoreBillingAdapter` por HTTP | **Continua**, com outro nome: cliente da API do aplicativo financeiro. |
+| Billing não é Payments; gateways atrás de adaptador | **Continua**, dentro do aplicativo financeiro. |
+| Core orientado a catálogo, sem código por produto | **Continua**, como requisito do aplicativo financeiro. |
+| Origens dos lotes, validade, ordem de consumo, tipos de transação, append-only, reversão e compensação | **Continuam** como requisitos do aplicativo financeiro. Elas não são implementadas no Gabarito360. |
+| Contexto único de cobrança e alocação explícita de franquia | **Continuam** (§5). |
+| Recusa sem franquia e sem crédito | **Continua** (§6). |
+| Perfil interno Financeiro e cadastro comercial como interface; guardar só a referência da conta | **Continua em parte.** O Gabarito360 guarda referências externas. O papel do perfil Financeiro depois do aplicativo externo está pendente (FN-068 §8). |
 
 ## Consequências
 
-- Todo consumo tarifado passa pela porta `BillingClient`. É proibido ler ou escrever tabelas `billing_` fora do adaptador.
-- É proibido criar serviço de billing com nome ou regra de um produto específico.
-- É proibido guardar saldo, franquia, lease ou reserva no aparelho do usuário.
-- É proibido `UPDATE` ou `DELETE` em registro financeiro ou de consumo pela credencial da aplicação.
-- É proibido fixar preço, franquia ou regra comercial crítica no código.
-- O esquema `billing_` nasce definitivo. Uma mudança nele depois da primeira publicação exige migração e reconciliação.
-- As regras operacionais dos créditos de correção não ficam aqui. Elas são da [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md).
-- Planos, assinaturas, pagamentos, contratos e faturas, e a conciliação deles com o esquema `billing_`, são da [FN-068](../funcionalidades/068-financeiro/planejamento.md).
-- A identidade da cobrança da correção passou a ser `correction_subject_id` (aluno × aplicação). O [ADR-0058](0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md), item 8, foi corrigido.
-- ⚠ Qual componente é a fonte da verdade do esquema `billing_` durante a transição, e depois do Core, é uma pendência do responsável. Ela está na [FN-068 §8](../funcionalidades/068-financeiro/planejamento.md).
-- Esta decisão não substitui ADR anterior.
+- Todo consumo tarifado passa pela porta `BillingClient`, segundo o [contrato](../arquitetura/14-integracao-financeira.md).
+- É proibido criar no Gabarito360 carteira, ledger, lotes, saldo autoritativo, preço, motor de consumo ou esquema financeiro local.
+- É proibido conectar o Gabarito360 ao banco do aplicativo financeiro.
+- É proibido guardar no Gabarito360 credencial administrativa do aplicativo financeiro ou segredo de gateway.
+- É proibido ativar o simulador, ou liberar o consumo, porque a API financeira caiu.
+- É proibido guardar saldo, franquia, concessão ou reserva no aparelho do usuário.
+- As regras funcionais da correção são da [FN-081](../funcionalidades/081-creditos-correcao/planejamento.md).
+- A experiência financeira limitada, a integração e o legado são da [FN-068](../funcionalidades/068-financeiro/planejamento.md).
+- A identidade da cobrança da correção é `correction_subject_id` (aluno × aplicação) ([ADR-0058](0058-leitura-no-aparelho-com-paridade-e-servidor-com-creditos.md), item 8).
+- O aplicativo financeiro e a documentação interna dele não são criados neste repositório. Eles são dependência externa.
+- Esta decisão não substitui ADR anterior. A revisão de 12/11/2026 substitui a versão de 11/11/2026 desta mesma decisão, que nunca chegou à `main`.
 
 ## Verificação
 
-Revisão de IA (`revisao-ia`): em cada PR da FN-068 e da FN-081, o agente de conformidade confere quatro pontos. O código usa só a porta `BillingClient`. Nenhuma regra comercial está fixa no código. Nenhum dado de billing vai ao aparelho. Nenhuma rotina altera ou apaga registro financeiro.
+Revisão de IA (`revisao-ia`): em cada PR da FN-068 e da FN-081, o agente de conformidade confere seis pontos.
 
-O percurso de aceite do MVP de billing prova a arquitetura de ponta a ponta: cadastrar produto, recurso e plano; atribuir entitlement; criar conta e assinatura; gerar franquia; adicionar créditos; consultar saldo; reservar; executar; confirmar; cancelar ou expirar a reserva; estornar; conceder bônus e recompensa; consultar o ledger; auditar; operar em contingência; e reconciliar. O caso de validação é "corrigir a prova de um aluno usando 1 crédito".
+1. O código fala com o financeiro só pela porta `BillingClient`.
+2. Nenhuma migration do Gabarito360 cria carteira, ledger, lotes, saldo, preço ou tabela financeira nova.
+3. Nenhuma configuração do Gabarito360 tem conexão ao banco financeiro, credencial administrativa ou segredo de gateway.
+4. Nenhum caminho de código ativa o simulador, ou autoriza consumo, quando a API financeira falha.
+5. Nenhum dado de billing vai ao aparelho.
+6. O legado do MP-027 só muda em tarefa própria, autorizada.
 
-Os testes obrigatórios do consumo da correção estão na [FN-081 §6](../funcionalidades/081-creditos-correcao/planejamento.md).
+Os testes obrigatórios do consumo da correção estão na [FN-081 §6.7](../funcionalidades/081-creditos-correcao/planejamento.md).
