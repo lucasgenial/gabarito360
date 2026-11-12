@@ -136,7 +136,7 @@ Toda consulta tem estas propriedades **[Proposto]**:
 1. **Por vínculo, resolvido no servidor.** A API do Gabarito360 resolve o contexto de cobrança a partir do vínculo ativo da sessão. O middleware `contexto_vinculo` reconstrói esse vínculo a partir do token (`apps/api/bootstrap/app.php:22`). Um ID enviado em header, query ou payload nunca seleciona o contexto ([04](04-identidade-acesso-e-permissoes.md) §4.2, item 4). Nenhum identificador vindo do navegador escolhe vínculo, contexto ou conta contratante.
 2. **Unidade por recurso, sem soma.** Cada recurso tem a própria unidade. Unidades de recursos diferentes nunca são somadas. Franquia, adicional, limite do professor e operações em processamento ficam em campos separados.
 3. **Limite não é saldo.** O limite aparece como teto de uso do período. Ele não é saldo nem carteira.
-4. **Percentual só onde se aplica.** O percentual não se aplica à referência de uso livre ([ADR-0062](../decisoes/0062-plano-e-uso-e-central-do-cliente.md) §3). O aplicativo financeiro informa se cada quantidade admite percentual. O Gabarito360 não deduz isso.
+4. **Percentual só onde se aplica.** O percentual não se aplica à referência de uso livre ([ADR-0062](../decisoes/0062-plano-e-uso-e-central-do-cliente.md) §3). O aplicativo financeiro informa se cada quantidade admite percentual. O Gabarito360 não deduz isso. **[Pendente]** O contrato prevê o aviso "não se aplica" só para o percentual. Falta definir como o aplicativo financeiro informa que outro dado não se aplica ao recurso ou à modalidade. Exemplo: as operações em processamento ([FN-068](../funcionalidades/068-financeiro/planejamento.md) §6.4.2). Até a definição, o Gabarito360 também não deduz isso.
 5. **Hora da atualização.** Toda resposta traz o momento em que o aplicativo financeiro produziu o dado. A tela mostra esse momento.
 6. **Sem dado velho como atual.** Na falha, a tela mostra o estado de indisponibilidade. Ela não mostra o último valor como se fosse atual (§10).
 7. **Ordem e paginação estáveis** no extrato. **[Pendente]** A paginação e o intervalo máximo do extrato, no contrato externo.
@@ -237,7 +237,7 @@ As regras funcionais da correção são da [FN-081](../funcionalidades/081-credi
 |---|---|
 | Autorizado | O envio ao modo servidor segue |
 | Recusado por falta de franquia e de crédito | O envio é recusado antes da fila; a tela mostra os caminhos permitidos |
-| Recusado por limite do professor | O envio é recusado; a tela informa o limite, sem expor o saldo da instituição a quem não pode ver |
+| Recusado por limite do professor (só na capacidade limitada, §4, item 9) | O envio é recusado; a tela informa o limite, sem expor o saldo da instituição a quem não pode ver |
 | Recusado por falta de cobertura | O envio é recusado; a tela explica que o vínculo não cobre o recurso |
 | Recusado por contexto ou permissão | O envio é recusado; nada é cobrado |
 | Repetição reconhecida | O Gabarito360 usa o resultado anterior |
@@ -302,8 +302,8 @@ O simulador aceita cenários configuráveis. Cada cenário produz a resposta do 
 
 1. Autorizado.
 2. Sem saldo (sem franquia e sem crédito).
-3. Limite da instituição atingido.
-4. Limite do professor atingido.
+3. Limite da instituição atingido (capacidade limitada).
+4. Limite do professor atingido (capacidade limitada).
 5. Permissão ou contexto recusado.
 6. Repetição idempotente (mesma chave, mesmo efeito).
 7. Reserva, `COMMIT` e `RELEASE`, inclusive reserva que expira.
@@ -398,6 +398,7 @@ O código atual tem o legado do MP-027. A situação dele é da [FN-068](../func
 | Valor monetário do plano vigente | FN-068 §8. Não é proibido nem exigido |
 | Cache das consultas externas (§3.2) | Planejamento de implementação, com medição de 1.000 usuários |
 | Paginação e intervalo máximo do extrato (§3.2) | Contrato externo |
+| Aviso de "não se aplica" para dados além do percentual (§3.2, item 4) | Contrato externo |
 | Protocolo de contingência (§10) | Decisão do responsável |
 | Entidade de aplicação e formato do `correction_subject_id` | [FN-081 §8](../funcionalidades/081-creditos-correcao/planejamento.md) |
 | Quantidades por plano (D-3) e formato da compra avulsa (D-4) | [FN-081 §8](../funcionalidades/081-creditos-correcao/planejamento.md) |

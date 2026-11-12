@@ -28,7 +28,7 @@ O processamento no aparelho do usuário não custa nada ao Gabarito360. O proces
   - Consumo do recurso tarifado `correction.server.student`, ao preço histórico de 1 crédito por submissão. O preço vigente vem do aplicativo financeiro.
   - Identidade da cobrança por `correction_subject_id` (um aluno em uma aplicação de prova). O Gabarito360 pede reserva, confirmação (`COMMIT`) e liberação (`RELEASE`) pela porta `BillingClient`.
   - Idempotência: o mesmo `correction_subject_id` nunca cobra duas vezes, qualquer que seja o número de páginas, de reenvios ou de mensagens repetidas da fila.
-  - Recusa do envio sem autorização do aplicativo financeiro (sem franquia e sem crédito, limite do professor atingido ou serviço indisponível), com mensagem.
+  - Recusa do envio sem autorização do aplicativo financeiro (sem franquia e sem crédito, limite do professor atingido na capacidade limitada ou serviço indisponível), com mensagem. No uso livre monitorado, a referência de acompanhamento não recusa o envio (§6.2, item 10a).
   - Aviso prévio de consumo no Leitor360 (o texto já está decidido na FN-079).
   - Registro operacional da correção (identidade, correlação e resultado da integração). Ele não é débito financeiro.
   - Exibição do saldo e do extrato de consumo recebidos do aplicativo financeiro, no contexto de cobrança da operação.
@@ -76,7 +76,7 @@ O processamento no aparelho do usuário não custa nada ao Gabarito360. O proces
 |---|---|---|---|---|
 | 0.1 | Planejamento, casos de uso e mockups aprovados para desenvolvimento e homologação | O responsável aprova os documentos e o mockup de referência, que passa a ser o de **Plano e uso** ([FN-068](../068-financeiro/planejamento.md), subfase 2.3). A aprovação dele **não prioriza a implementação da FN-081** (decisão do responsável de 12/11/2026, no [plano mestre](../../planejamento/00-plano-mestre.md) §4.1). **D-3, D-4 e os detalhes comerciais da D-2 não bloqueiam esta subfase** | Pendente | |
 | 1.0 | Identidade da submissão (`correction_subject_id`) | A pendência técnica do §8 está resolvida, com unicidade de aluno + aplicação no banco do Gabarito360 | Pendente | |
-| 1.1 | Ciclo de consumo da correção pela porta `BillingClient`, contra o simulador genérico (FN-068 1.1), com processamento educacional real | Os testes A, C a H do §6.7 passam; um teste de ponta a ponta vai do envio à conferência com o simulador; a concorrência no MariaDB não gera dois pedidos de consumo definitivo; nenhuma migration financeira | Pendente | |
+| 1.1 | Ciclo de consumo da correção pela porta `BillingClient`, contra o simulador genérico (FN-068 1.1), com processamento educacional real | Os testes A e C a I do §6.7 passam; um teste de ponta a ponta vai do envio à conferência com o simulador; a concorrência no MariaDB não gera dois pedidos de consumo definitivo; nenhuma migration financeira | Pendente | |
 | 1.2 | Consumo integrado ao modo servidor (FN-079 4.3) | Sem franquia e sem crédito, o envio é recusado antes de entrar na fila; o `COMMIT` só ocorre em `READY_FOR_REVIEW` | Pendente | |
 | 2.1 | Telas de saldo e extrato (em Plano e uso; entrega coordenada com a FN-068, subfase 2.4) | Conforme mockup aprovado; dados recebidos do aplicativo financeiro; responsivo em todas as faixas (ADR-0057) | Pendente | |
 | 3.1 | Integração com o aplicativo financeiro real (franquia, compra avulsa e limites por professor executados por ele) | O aplicativo financeiro existe; a FN-068 1.2 está entregue; o teste B do §6.7 segue o protocolo aprovado | Pendente (bloqueada pela dependência externa) | |
@@ -119,7 +119,14 @@ Toda consulta e todo ciclo de consumo passam pela porta `BillingClient`, segundo
 8. A reserva existe apenas no trecho envio → fila → processamento. Ela fica no aplicativo financeiro. O worker do Gabarito360 pede a renovação enquanto processa (o desenho histórico usava heartbeat).
 9. O tempo de vida (TTL) da reserva é configuração operacional, não regra de negócio.
 10. Sem autorização do aplicativo financeiro para o contexto de cobrança, o envio é recusado antes de entrar na fila. A queda da API financeira nunca autoriza o envio nem ativa o simulador. **[Diretriz]**
-10a. O limite mensal de consumo por professor, definido pelo responsável financeiro institucional, é aplicado pelo aplicativo financeiro. Ao atingir o limite, o envio é recusado, mesmo com saldo na instituição. **[Diretriz]**
+
+    10a. **Limite bloqueante por professor: só na capacidade limitada.** **[Diretriz]** ([ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md) §3; [contrato](../../arquitetura/14-integracao-financeira.md) §4, item 9; D-2 decidida em parte, §8)
+
+    - **Alcance.** A regra vale só na modalidade e na política que preveem o limite: a instituição com capacidade limitada. Ela não vale em todas as modalidades.
+    - **Capacidade limitada.** O financeiro institucional autorizado define e administra o limite mensal por professor na Central do cliente, no aplicativo externo. O aplicativo financeiro aplica o limite. Ao atingir o limite, o envio é recusado, mesmo com saldo na instituição. A relação entre o limite e o saldo institucional está no [contrato](../../arquitetura/14-integracao-financeira.md) §4, item 9.
+    - **Uso livre monitorado.** A referência de acompanhamento não é esse limite. O Gabarito360 não recusa o envio por ela e não infere bloqueio nem esgotamento. Só o Financeiro do aplicativo externo ajusta, depois de conferir o contrato. **[Pendente]** O comportamento além da referência.
+    - **Todas as modalidades.** O item 10 continua valendo: sem autorização do aplicativo financeiro, o envio é recusado. O uso livre não dispensa essa autorização.
+    - **[Pendente]** Quem é o financeiro institucional autorizado em cada contexto, o padrão para professor sem limite definido e o fim do ciclo (§8, D-2).
 
 ### 6.3 Quando cobra (`COMMIT`)
 
@@ -163,10 +170,18 @@ Toda consulta e todo ciclo de consumo passam pela porta `BillingClient`, segundo
 | D | A mesma mensagem da fila entregue duas vezes | Um único `COMMIT` |
 | E | O worker morre depois do `RESERVE` e antes do resultado | A reserva expira e libera; nenhum crédito é perdido |
 | F | A API financeira não responde no envio | O envio é recusado; o simulador não é ativado; nada é autorizado |
-| G | Professor no limite mensal, com saldo na instituição | O envio é recusado; nenhum crédito passa à carteira pessoal |
+| G | Capacidade limitada: professor no limite mensal, com saldo na instituição | O envio é recusado; nenhum crédito passa à carteira pessoal |
 | H | Consumo feito com o simulador | Nenhuma cobrança real nem dívida retroativa; as permissões educacionais não mudam |
+| I | Uso livre monitorado: consumo acima da referência de acompanhamento | O Gabarito360 não recusa nem bloqueia por conta própria e não mostra esgotamento; o envio segue só a resposta do aplicativo financeiro (item 10). Este teste não decide o comportamento além da referência (**[Pendente]**, item 10a) |
 
-Os testes A e C a H rodam contra o simulador genérico (FN-068 1.1), com processamento educacional real: só a resposta financeira é simulada. O teste B depende do protocolo de contingência.
+Os testes A e C a I rodam contra o simulador genérico (FN-068 1.1), com processamento educacional real: só a resposta financeira é simulada. O teste B depende do protocolo de contingência.
+
+O teste I não tem cenário próprio no simulador. Um cenário de uso livre decidiria o comportamento além da referência, que está **[Pendente]**. O teste I usa dois cenários existentes do [contrato](../../arquitetura/14-integracao-financeira.md) §9.2, numa configuração de uso livre monitorado:
+
+- **Autorizado (cenário 1).** O envio segue.
+- **Permissão ou contexto recusado (cenário 5).** O envio é recusado pelo item 10.
+
+Nos dois cenários, a tela não mostra esgotamento.
 
 ## 7. Interface
 
@@ -174,13 +189,13 @@ O app é responsivo ([ADR-0057](../../decisoes/0057-app-responsivo-em-todas-as-f
 
 Regra do mockup ([ADR-0056](../../decisoes/0056-app-atual-como-referencia-visual.md)): cada tela usa a casca, os componentes e o CSS reais de `apps/web`, e o design system de `style-system/`.
 
-Telas previstas: saldo no Leitor360 (já no modal do modo servidor), aviso de limite do professor e alerta de saldo baixo. O alerta é **[Proposto]**, só para capacidade limitada e plano pessoal, e nunca aparece no uso livre. As telas de saldo e extrato são de **Plano e uso**, com mockup na [FN-068](../068-financeiro/planejamento.md), subfase 2.3. A compra avulsa e a gestão de limites são ações humanas da Central do cliente, no aplicativo externo ([FN-068 §8](../068-financeiro/planejamento.md); [ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md)).
+Telas previstas: saldo ou franquia no Leitor360 (já no modal do modo servidor), aviso de limite do professor e alerta de saldo baixo. O aviso de limite do professor existe só na capacidade limitada, onde o limite bloqueante vale (item 10a). O alerta de saldo baixo é **[Proposto]**, só para capacidade limitada e plano pessoal. No uso livre monitorado, não há aviso de limite, alerta de saldo baixo nem indicador de esgotamento ([ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md) §3). As telas de saldo e extrato são de **Plano e uso**, com mockup na [FN-068](../068-financeiro/planejamento.md), subfase 2.3. A compra avulsa e a gestão de limites são ações humanas da Central do cliente, no aplicativo externo ([FN-068 §8](../068-financeiro/planejamento.md); [ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md)).
 
-A interface mostra o saldo recebido do aplicativo financeiro. Ela não calcula saldo. A exibição é temporária: o aparelho não persiste dados financeiros (ADR-0061). O desenho histórico mostrava o saldo comercial total, mesmo em contingência.
+A interface mostra o saldo, a franquia ou o consumo recebidos do aplicativo financeiro, conforme a modalidade. Ela não calcula saldo, percentual nem esgotamento. A exibição é temporária: o aparelho não persiste dados financeiros (ADR-0061). O desenho histórico mostrava o saldo comercial total, mesmo em contingência.
 
 ## 8. Riscos e decisões pendentes do responsável
 
-O responsável respondeu as decisões D-1 a D-9 em 11/11/2026. O registro da sessão está no [histórico](../../historico/2026-11-11-decisoes-billing.md). D-2, D-3 e D-4 continuam abertas.
+O responsável respondeu as decisões D-1 a D-9 em 11/11/2026. O registro da sessão está no [histórico](../../historico/2026-11-11-decisoes-billing.md). D-2 foi decidida em parte. D-3 e D-4 continuam abertas.
 
 | Item | Opções | Recomendação | Decisão |
 |---|---|---|---|
@@ -221,3 +236,4 @@ Nenhum ainda.
 | 2026-11-12 | Regra do aparelho alinhada ao ADR-0061: exibição temporária, sem persistir dados financeiros | lucasgenial |
 | 2026-11-12 | Adequação derivada da reorientação da FN-068 ([ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md)): telas de saldo e extrato passam a Plano e uso (FN-068 2.3); mockup de referência da subfase 0.1 trocado, sem priorizar a implementação desta FN (plano mestre §4.1); D-2 refinada por modalidade; frase sobre a visão de totais do perfil Financeiro trocada (B3). Revisão independente da subfase 2.2: regra B4 completa no §6.5, item 19; casos de uso citados corrigidos (UC-068-19 e UC-068-20); alerta de saldo baixo marcado **[Proposto]**, nunca no uso livre. Regras de consumo inalteradas. "Conforme princípios" fica na versão 18 | lucasgenial |
 | 2026-11-12 | Revalidação de acesso, dados pessoais e privacidade por `seguranca-privacidade` na segunda leitura ("Pode subir", independente de agente, não de fornecedor); `qualidade-testes` aprovou com ressalvas (meios de prova da UC-081-09 corrigidos). "Conforme princípios" subiu de 18 para 19, versão que o ADR-0062 gera. Esta FN não tem subfase de adequação no §5. Prioridade e etapa inalteradas: a revalidação não prioriza a implementação | lucasgenial |
+| 2026-11-12 | Ajuste da revisão do responsável: item 10a (§6.2) limita o bloqueio por professor à capacidade limitada; o item 10 vale em todas as modalidades e a referência do uso livre não é esse limite. Teste I (§6.7) cobre o uso livre acima da referência. Remissões ao item 10a no escopo (§2) e no §7. D-2 decidida em parte e D-3 e D-4 abertas, na abertura do §8. "Conforme princípios" continua na versão 19 | lucasgenial |

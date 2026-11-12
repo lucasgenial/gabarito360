@@ -208,8 +208,8 @@ Nos textos de uso livre, os termos "dívida", "excedido", "devendo", "atraso" e 
 
 | Caso | Título anterior | Novo destino |
 |---|---|---|
-| UC-068-05 | Registrar contrato de um cliente | Aplicativo financeiro externo. ⚠ Interpretação a confirmar (planejamento §8) |
-| UC-068-06 | Emitir fatura e registrar pagamento manual | Aplicativo financeiro externo. ⚠ Interpretação a confirmar (planejamento §8) |
+| UC-068-05 | Registrar contrato de um cliente | Aplicativo financeiro externo. Contratos ficam no aplicativo externo ([planejamento](planejamento.md) §2; [ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md) §1). A emissão fiscal e o funcionamento interno da Central ficam fora do escopo do Gabarito360 (planejamento §8) |
+| UC-068-06 | Emitir fatura e registrar pagamento manual | Aplicativo financeiro externo. Faturas e pagamentos ficam no aplicativo externo (planejamento §2; ADR-0062 §1). A emissão fiscal e o funcionamento interno da Central ficam fora do escopo do Gabarito360 (planejamento §8) |
 | UC-068-07 | Acompanhar recebimentos e inadimplência | Aplicativo financeiro externo. A regra "nenhum bloqueio sem regra aprovada" continua (planejamento §8) |
 | UC-068-08 | Cobrar por um provedor de pagamento | Aplicativo financeiro externo (meios de pagamento) |
 | UC-068-09 | Cobrar a compra avulsa de créditos | Aplicativo financeiro externo. A ação humana tem identidade e permissão próprias; o Gabarito360 só oferece a entrada contextual (UC-068-19) |
@@ -285,7 +285,7 @@ As regras que continuam valendo vieram para os casos novos:
 6. O testador confere a correção e vê o saldo e o extrato fictícios, marcados como simulação.
 
 **Fluxos alternativos e de erro:**
-- 3a. Cenário sem saldo, limite atingido ou permissão recusada: o envio é recusado antes da fila.
+- 3a. Cenário sem saldo, sem autorização, permissão recusada ou limite do professor atingido (só na capacidade limitada; no uso livre o Gabarito360 não recusa pela referência): o envio é recusado antes da fila.
 - 3b. Cenário de timeout ou indisponibilidade: o envio é recusado (UC-068-15).
 - 4a. A submissão falha: o Gabarito360 pede o `RELEASE`, e o estado fictício devolve a reserva.
 - 2a. Reenvio da mesma submissão: o simulador reconhece a repetição e não consome de novo.
@@ -368,7 +368,8 @@ Em todos os casos:
 - 2b. Serviço externo indisponível: estado 5 (UC-068-25).
 - 2c. Sem cobertura no vínculo: estado 6 (UC-068-26).
 - 2d. Sem permissão: estado 4.
-- 4a. Período sem uso: estado 2.
+- 2e. Campo "operações em processamento" ausente ou não aplicável: o indicador não aparece. A tela não afirma que não há operações.
+- 4a. Período sem uso confirmado pelo aplicativo externo: estado 2.
 
 **Dados mínimos:** nome do vínculo; plano vigente; recursos incluídos; ciclo; quantidades e percentuais aplicáveis; disponibilidade; operações em processamento; período; tipo de evento; unidade; situação; hora da atualização.
 
@@ -380,6 +381,10 @@ Em todos os casos:
 - [ ] Perfil sem permissão: a API nega na resposta. Esconder a tela não basta (T).
 - [ ] Com dois vínculos A e B, a resposta do vínculo A não contém nenhuma operação do B (T).
 - [ ] Com falha da consulta, nenhum número aparece (M, T).
+- [ ] **Operações em processamento.** A tela segue a linha "Operações em processamento" e o parágrafo abaixo da tabela de indicadores ([planejamento](planejamento.md) §6.4.2), que são o dono da regra (M, T, E). Este critério vale também para o UC-068-23. Itens próprios de prova:
+  - A resposta da API omite o campo ausente e não o preenche com `0` (T).
+  - O Gabarito360 não conta reservas do registro operacional para preencher o indicador (T, R).
+  - Como o aplicativo externo informa "não aplicável" é **[Pendente]** no contrato externo (E).
 - [ ] Cada operação aparece em uma única linha, com a situação: em processamento, confirmado ou não cobrado. Reserva e confirmação nunca contam como dois débitos (M, T, E).
 - [ ] Benefício ou crédito recebido é um evento próprio, sem sinal de débito (M, E).
 - [ ] O extrato de uso não mostra compra, fatura nem pagamento. Eles estão na Central do cliente (M, R).
@@ -642,7 +647,7 @@ Em todos os casos:
 - 1b. Limite individual ou institucional alcançado: estado 8.
 - 4a. Confirmação atrasada: estado 10.
 
-**Dados mínimos:** instituição; disponibilidade; operações em processamento; situação da tarefa; hora da atualização.
+**Dados mínimos:** instituição; disponibilidade; operações em processamento (quando informado); situação da tarefa; hora da atualização.
 
 **Regras de negócio:** [ADR-0062](../../decisoes/0062-plano-e-uso-e-central-do-cliente.md) §3 e §4. A capacidade não passa do contratado. Consumo confirmado e reservas em processamento não são apagados. Distribuição, reservas, fim de ciclo e professor sem limite são **[Pendente]**.
 
@@ -652,6 +657,7 @@ Em todos os casos:
 - [ ] O texto diz que a capacidade só muda depois da confirmação externa (M).
 - [ ] Depois do retorno, a disponibilidade exibida é a da última consulta externa, nunca a do retorno (T).
 - [ ] Não se cria capacidade acima do contratado. Consumo confirmado e reservas não são apagados (E).
+- [ ] O indicador "operações em processamento" segue todos os itens do critério correspondente do UC-068-16 (M, T, E).
 
 **Nota de situação:** os critérios de visibilidade e de permissão ficam **não verificáveis até a decisão** sobre o perfil do representante.
 
@@ -787,7 +793,7 @@ Em todos os casos:
 **Fluxos alternativos e de erro:**
 - 4a. Sem a autorização local validada, ou na dúvida: o detalhe mostra "Dado restrito". A linha de consumo continua visível. O detalhe é negado.
 - 2a. Serviço externo indisponível: estado 5.
-- 2b. Sem uso no período: estado 2.
+- 2b. Período sem uso confirmado pelo aplicativo externo: estado 2.
 
 **Dados mínimos:** referência opaca da operação; situação; unidade; hora da atualização. O aplicativo externo não recebe nem devolve nome de aluno, resposta, nota ou outro detalhe pedagógico.
 
@@ -815,3 +821,4 @@ Em todos os casos:
 | 4 | 2026-11-12 | UC-068-14 reescrito: teste de ponta a ponta com o simulador genérico, processamento real e estado fictício | lucasgenial |
 | 5 | 2026-11-12 | Reorientação para Plano e uso (ADR-0062): título e perfis atualizados; UC-068-12 e UC-068-13 superados; UC-068-16 a UC-068-27 acrescentados (jornadas J1 a J12, com 14 estados, critérios comuns e meio de prova por critério); nota do legado em UC-068-02 (conta de acesso como titular) | lucasgenial |
 | 6 | 2026-11-12 | Correções da revisão: estado 8 sem validade no uso livre sem decisão; estado 12 com `status` proposto; critérios de API para perfil sem permissão (UC-068-16 e 22) e para o uso livre (UC-068-22); notas de situação no lugar de pseudo-critérios (UC-068-21 a 23); UC-068-24 com a API conferindo a correlação; CC-6 com prova na subfase 2.4; UC-068-11 com ator Financeiro pendente; rótulos de conversa trocados por links ao ADR-0062 | lucasgenial |
+| 7 | 2026-11-12 | Três ajustes: critério de "operações em processamento" (UC-068-16, com remissão ao planejamento §6.4.2 e ao UC-068-23; fluxo alternativo 2e para campo ausente); "período sem uso confirmado pelo aplicativo externo" (UC-068-16 e UC-068-27); UC-068-05 e UC-068-06 sem "interpretação a confirmar" (contratos, faturas e pagamentos ficam no aplicativo externo); UC-068-14, fluxo 3a, com a modalidade do limite | lucasgenial |
