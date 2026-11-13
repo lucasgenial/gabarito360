@@ -19,8 +19,8 @@
 .g360i--duo::after{content:var(--g);position:absolute;inset:0;font-family:"G360 Icones"}
 
 .g360i--azul{--icone-1:var(--accent);--icone-2:var(--accent-light);color:var(--icone-1)}
-.g360i--verde{--icone-1:var(--texto-sucesso);--icone-2:var(--success-light);color:var(--icone-1)}
-.g360i--vermelho{--icone-1:var(--texto-erro);--icone-2:var(--danger-light);color:var(--icone-1)}
+.g360i--verde{--icone-1:var(--texto-sucesso,var(--success));--icone-2:var(--success-light);color:var(--icone-1)}
+.g360i--vermelho{--icone-1:var(--texto-erro,var(--danger));--icone-2:var(--danger-light);color:var(--icone-1)}
 .g360i--amarelo{--icone-1:var(--warn-fg);--icone-2:var(--warn-light);color:var(--icone-1)}
 .g360i--laranja{--icone-1:var(--serie-5);--icone-2:color-mix(in srgb, var(--serie-5) 16%, transparent);color:var(--icone-1)}
 .g360i--lilas{--icone-1:var(--purple-fg);--icone-2:var(--purple-light);color:var(--icone-1)}

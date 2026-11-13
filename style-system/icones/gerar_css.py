@@ -16,8 +16,8 @@ reg = json.loads((BASE / "registro.json").read_text(encoding="utf-8"))
 # o laranja não tem token claro, então o fundo sai do próprio token por color-mix.
 TONS = {
     "azul": ("var(--accent)", "var(--accent-light)"),
-    "verde": ("var(--texto-sucesso)", "var(--success-light)"),
-    "vermelho": ("var(--texto-erro)", "var(--danger-light)"),
+    "verde": ("var(--texto-sucesso,var(--success))", "var(--success-light)"),
+    "vermelho": ("var(--texto-erro,var(--danger))", "var(--danger-light)"),
     "amarelo": ("var(--warn-fg)", "var(--warn-light)"),
     "laranja": ("var(--serie-5)", "color-mix(in srgb, var(--serie-5) 16%, transparent)"),
     "lilas": ("var(--purple-fg)", "var(--purple-light)"),
