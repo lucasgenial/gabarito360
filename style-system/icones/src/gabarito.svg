@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path class="corpo" d="M7 3 H17 A2 2 0 0 1 19 5 V19 A2 2 0 0 1 17 21 H7 A2 2 0 0 1 5 19 V5 A2 2 0 0 1 7 3 Z"/>
+<circle cx="9.25" cy="7.25" r="0.95" fill="currentColor" stroke="none"/><circle cx="13.5" cy="7.25" r="1.5" fill="currentColor" stroke="none"/>
+<circle cx="9.25" cy="11.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="13.5" cy="11.5" r="0.95" fill="currentColor" stroke="none"/>
+<circle cx="9.25" cy="15.75" r="1.5" fill="currentColor" stroke="none"/>
+<circle class="folga" cx="17.5" cy="17.5" r="6.2" fill="#000" stroke="none"/>
+<circle class="selo" cx="15.25" cy="17.5" r="1.75"/>
+<path class="selo" d="M17 17.5 H21 M19.75 17.5 V19.5"/></svg>

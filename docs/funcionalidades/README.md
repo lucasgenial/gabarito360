@@ -1,6 +1,6 @@
 # Catálogo de funcionalidades do Gabarito360
 
-**Atualizado em:** 12/11/2026
+**Atualizado em:** 13/11/2026
 
 ## Para que serve este catálogo
 
@@ -72,7 +72,7 @@ Em 10/11/2026, todos os documentos estão em rascunho e aguardam aprovação. Po
 Faça estes passos com o agente `gerente-projetos`:
 
 1. Verifique se a funcionalidade já existe neste catálogo. Se existe, use a funcionalidade existente.
-2. Use o próximo número livre de FN. A numeração continua a partir de FN-082.
+2. Use o próximo número livre de FN. A numeração continua a partir de FN-083.
 3. Adicione uma linha nesta tabela. Use Implementação "Candidata" e Etapa "Candidata".
 4. Crie a pasta `NNN-slug/` com os dois documentos, a partir dos modelos.
 5. No `planejamento.md`, registre a origem (por exemplo, "surgiu na entrega dos painéis").
@@ -165,3 +165,4 @@ Faça estes passos com o agente `gerente-projetos`:
 | FN-079 | Leitor360: motor de leitura de provas | — (nova, 11/11/2026) | Correção e OMR | Pendente | Planejamento aprovado | [planejamento](079-leitor360/planejamento.md) · [casos de uso](079-leitor360/casos-de-uso.md) |
 | FN-080 | Escriba: IA local de transcrição de respostas manuscritas | — (nova, 11/11/2026) | Correção e OMR | Pendente | Planejamento aprovado | [planejamento](080-ia-local-transcricao/planejamento.md) · [casos de uso](080-ia-local-transcricao/casos-de-uso.md) |
 | FN-081 | Créditos de correção (consumo no modo servidor) | — (nova, 11/11/2026) | Financeiro | Candidata | Candidata | [planejamento](081-creditos-correcao/planejamento.md) · [casos de uso](081-creditos-correcao/casos-de-uso.md) |
+| FN-082 | Família de ícones G360 | — (nova, ADR-0063) | Qualidade transversal | Parcial | Em execução | [planejamento](082-familia-icones-g360/planejamento.md) · [casos de uso](082-familia-icones-g360/casos-de-uso.md) |

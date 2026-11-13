@@ -1,6 +1,6 @@
 # Interface e design system
 
-**Atualizado em:** 11/11/2026, por lucasgenial
+**Atualizado em:** 13/11/2026, por lucasgenial
 
 Este documento descreve a interface do Gabarito360 como ela existe na branch atual: fontes de verdade visuais, identidade, Tailwind, layout, tabelas, carregamento, gráficos, acessibilidade e inventário das telas por perfil. Os painéis de turmas e o editor têm documento próprio: [Painéis e editor](10-paineis-e-editor.md).
 
@@ -67,6 +67,8 @@ Os tokens vivem em `apps/web/public/css/app.css` (`:root`). O tema escuro redefi
 Decisões de design registradas em 30/10/2026:
 
 - Sem degradê azul decorativo nas páginas internas, sem emojis como ícones e sem frases de efeito.
+- Ícones: uma família só, a G360 Icones, própria e entregue como fonte ([ADR-0063](../decisoes/0063-familia-de-icones-propria-em-fonte.md), 13/11/2026). Ela tem contorno e preenchido com os mesmos códigos, e a cor vem só de token. A especificação e o modo de adicionar um ícone estão no `style-system/` (seção Iconografia).
+- Proibido usar emoji, caractere Unicode ou SVG avulso como ícone. Não há exceção: o Fechar do visor da câmera usa o ícone `fechar`.
 - Um título por bloco. Nada de rótulo pequeno sobre outro título.
 - Cartão só onde ele separa algo. Tabelas e listas ficam direto na página.
 - Contraste mínimo de 4,5:1 para texto normal. O azul sobre branco tem 7,9:1.
@@ -263,7 +265,7 @@ Ficam em `apps/web/resources/views/components/`.
 | `estado-tela`, `carregando` | Estados da seção 6 |
 | `contexto-ativo`, `revisao-acesso` | Contexto de vínculo e revisão da sessão em formulários |
 | `painel-secao`, `painel-widget`, `painel-mover-grupo` | Blocos dos painéis personalizáveis |
-| `arquivamento`, `orientacao`, `erro-campo`, `icone`, `icone-estrutura` | Diálogo de arquivar, escolha de orientação do PDF, erro de campo e ícones |
+| `arquivamento`, `orientacao`, `erro-campo`, `icone`, `icone-estrutura` | Diálogo de arquivar, escolha de orientação do PDF, erro de campo e ícones (SVG inline até a migração para a fonte G360 Icones, ADR-0063) |
 | `menu-publico`, `rodape-publico` | Páginas públicas |
 
 A página interna `/referencia-visual` (rota `referencia`, view `referencia.index`) é a vitrine dos componentes base.

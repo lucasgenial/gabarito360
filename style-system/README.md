@@ -123,7 +123,36 @@ Não use "gabarito" para o cartão do aluno. O botão "Visualizar gabarito" da r
 
 ## Iconografia
 
-O app usa dois conjuntos de ícones em SVG inline, gerados por componentes Blade. Não há arquivos de ícone neste sistema. Copie o SVG das fontes abaixo; não redesenhe.
+O Gabarito360 usa **uma família de ícones só**: a G360 Icones, própria e entregue como fonte ([ADR-0063](../docs/decisoes/0063-familia-de-icones-propria-em-fonte.md)).
+
+### A família G360 Icones
+
+- **Duas variantes, os mesmos códigos:** G360 Icones (contorno, padrão) e G360 Icones Preenchido (item ativo do menu e destaque).
+- **Arquivos do app:** `apps/web/public/fonts/icones/` (WOFF2 para o app, TTF para instalar no Windows e no CorelDRAW) e `apps/web/public/css/g360-icones.css`.
+- **Fonte única:** `style-system/icones/`. Os desenhos de traço ficam em `src/`. A especificação fica em [`DIRETRIZ.md`](icones/DIRETRIZ.md). O catálogo de ids fica em `catalogo.json`.
+- **Especificação:** grade 24 × 24, área útil 2..22, traço 1,8 com pontas e junções redondas, folga mínima de 1,2 px entre traços.
+- **Marcação:** `<span class="g360i g360i-<id>" aria-hidden="true"></span>`. Para a variante cheia, acrescente `g360i--preenchido`.
+- **Duotônico:** a classe `g360i--duo` põe o preenchido no tom claro sob o contorno no tom forte.
+- **Cor só por token.** O padrão é `currentColor`. Os tons são `g360i--azul` (`--accent`), `--verde` (`--texto-sucesso`), `--vermelho` (`--texto-erro`), `--amarelo` (`--warn-fg`), `--laranja` (`--serie-5`), `--lilas` (`--purple-fg`) e `--marca` (`--g360-blue`). Não há token rosa. Não ponha cor fixa em regra de `.g360i`.
+- **Códigos fixos:** cada id tem um código na área de uso privado, a partir de U+E001, em `style-system/icones/registro.json`. Não mude um código existente. Um ícone novo entra no fim do registro.
+- **Um conceito, um desenho, um id.** Cada item do menu tem o próprio ícone.
+- **Proibido:** emoji, caractere Unicode (✕, ×, ←, →, ✓ e outros) ou SVG avulso como ícone. Não há exceção. O Fechar do visor da câmera usa o ícone `fechar`.
+- Ficam fora da fonte o símbolo da marca (SVG próprio, seção Marca) e as formas CSS que não são ícone, como o ponto de situação e a amostra de cor da legenda.
+- Tamanhos: 16 px em ações de página e tabela; 18 px em `.btn` legado e no alternador de tema; 20 px na navegação; 22 px no conteúdo; 36 px no estado vazio; 40 px em `.icone-grande`.
+- Acessibilidade: todo ícone tem `aria-hidden="true"`. Quando o ícone é o único conteúdo do controle, o nome acessível fica no controle.
+
+### Como adicionar um ícone
+
+Siga [`style-system/icones/COMO-ADICIONAR.md`](icones/COMO-ADICIONAR.md). Resumo:
+
+1. Procure o conceito no `catalogo.json` e no mapa de metáforas da diretriz.
+2. Desenhe no lote do assunto, com os motivos de `motivos.py`.
+3. Confira na prancha, nas duas variantes e nos dois temas.
+4. Compile a fonte e o CSS. Copie os arquivos compilados para `apps/web/public/`.
+
+### Estado atual do app (migração pendente)
+
+As telas ainda usam os dois conjuntos antigos em SVG inline. A troca pelo glifo da fonte é de outra funcionalidade. Até lá, `x-icone` e `x-icone-estrutura` continuam como abaixo. Não crie ícone novo nesses componentes.
 
 | Componente | Desenho | Marcação | Fonte |
 |---|---|---|---|
@@ -132,11 +161,7 @@ O app usa dois conjuntos de ícones em SVG inline, gerados por componentes Blade
 
 - Ícones de estrutura (17): menu, mais, casa, prova, camera, turma, aluno, escola, equipe, grafico, ajustes, cadeado, compartilhar, lanterna, transferir, sair, fechar. Uso: casca (cabeçalho, lateral, navegação inferior, menu da conta).
 - Ícones de traço (35 e o padrão "três pontos"): casa, prova, lanterna, camera, turma, aluno, escola, equipe, grafico, imprimir, ajustes, lixeira, cadeado, compartilhar, editar, adicionar, seta, atualizar, voltar, fechar, confirmar, salvar, transferir, arrastar, fixar, altura-livre, barras-horizontais, barras-verticais, filtro, limpar, ver, arquivo, situacao, pdf. Uso: conteúdo, ações e estados vazios.
-- Tamanhos: 16 px em ações de página e tabela; 18 px em `.btn` legado e no alternador de tema; 20 px na navegação; 22 px padrão de `x-icone`; 36 px no estado vazio; 40 px em `.icone-grande`.
-- Cor: `currentColor`. O ícone herda a cor do texto do controle.
-- Acessibilidade: todo ícone tem `aria-hidden="true"`. O nome acessível fica no controle (ADR-0033).
 - Alternador de tema: lua (claro) e sol (escuro), traço 2, 18 px, injetados por `public/js/app.js:162-163`.
-- Não use emoji como ícone. Exceção registrada: o Fechar do visor da câmera usa o caractere ✕.
 
 ## Marca
 
