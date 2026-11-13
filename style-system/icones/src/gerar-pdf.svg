@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path class="corpo" d="M14 3 H7 A2 2 0 0 0 5 5 V19 A2 2 0 0 0 7 21 H17 A2 2 0 0 0 19 19 V8 Z"/>
+<path d="M14 3 V8 H19"/>
+<path d="M8.5 11.5 H13"/>
+<circle class="folga" cx="17.5" cy="17.5" r="6.2" fill="#000" stroke="none"/>
+<path class="selo" d="M14 17.5 H20.5 M17.75 14.75 L20.5 17.5 L17.75 20.25"/></svg>

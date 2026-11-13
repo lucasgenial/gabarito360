@@ -1,0 +1,170 @@
+/**
+ * Arquivo: public/css/g360-icones.css
+ * Função: família de ícones própria do Gabarito360 (fonte). Gerado por gerar_css.py; não editar à mão.
+ * Uso: <span class="g360i g360i-cobertura-plano" aria-hidden="true"></span>
+ *      variantes: g360i--preenchido | g360i--duo (+ tom: g360i--azul, --verde, --vermelho, --amarelo, --laranja, --lilas, --marca)
+ */
+@font-face{font-family:"G360 Icones";src:url("../fonts/icones/g360-icones.woff2") format("woff2");font-display:block}
+@font-face{font-family:"G360 Icones Preenchido";src:url("../fonts/icones/g360-icones-preenchido.woff2") format("woff2");font-display:block}
+
+.g360i{--icone-1:currentColor;--icone-2:transparent;position:relative;display:inline-block;width:1em;height:1em;
+  font-family:"G360 Icones";font-style:normal;font-weight:400;font-size:1.5rem;line-height:1;vertical-align:-0.125em;
+  color:var(--icone-1);speak:never;text-transform:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;flex-shrink:0}
+.g360i::before{content:var(--g);display:block}
+.g360i--preenchido{font-family:"G360 Icones Preenchido"}
+
+/* Duotônico: ::before = preenchido no tom claro, ::after = contorno no tom forte, sobrepostos */
+.g360i--duo{--icone-2:color-mix(in srgb, currentColor 16%, transparent)}
+.g360i--duo::before{font-family:"G360 Icones Preenchido";color:var(--icone-2)}
+.g360i--duo::after{content:var(--g);position:absolute;inset:0;font-family:"G360 Icones"}
+
+.g360i--azul{--icone-1:var(--accent);--icone-2:var(--accent-light);color:var(--icone-1)}
+.g360i--verde{--icone-1:var(--texto-sucesso);--icone-2:var(--success-light);color:var(--icone-1)}
+.g360i--vermelho{--icone-1:var(--texto-erro);--icone-2:var(--danger-light);color:var(--icone-1)}
+.g360i--amarelo{--icone-1:var(--warn-fg);--icone-2:var(--warn-light);color:var(--icone-1)}
+.g360i--laranja{--icone-1:var(--serie-5);--icone-2:color-mix(in srgb, var(--serie-5) 16%, transparent);color:var(--icone-1)}
+.g360i--lilas{--icone-1:var(--purple-fg);--icone-2:var(--purple-light);color:var(--icone-1)}
+.g360i--marca{--icone-1:var(--g360-blue);--icone-2:color-mix(in srgb, var(--g360-blue) 14%, transparent);color:var(--icone-1)}
+
+/* Glifos (códigos fixos: ver registro.json) */
+.g360i-adicionais{--g:"\e001"}
+.g360i-beneficio{--g:"\e002"}
+.g360i-cobertura-plano{--g:"\e003"}
+.g360i-consumo-ciclo{--g:"\e004"}
+.g360i-consumo-operacao{--g:"\e005"}
+.g360i-contratacao{--g:"\e006"}
+.g360i-correcoes-disponiveis{--g:"\e007"}
+.g360i-franquia-ciclo{--g:"\e008"}
+.g360i-galeria{--g:"\e009"}
+.g360i-leitura-pendente{--g:"\e00a"}
+.g360i-lote-pdf{--g:"\e00b"}
+.g360i-operacoes-processamento{--g:"\e00c"}
+.g360i-pagina-faltando{--g:"\e00d"}
+.g360i-reenvio{--g:"\e00e"}
+.g360i-referencia-acompanhamento{--g:"\e00f"}
+.g360i-teto-operacao{--g:"\e010"}
+.g360i-teto-periodo{--g:"\e011"}
+.g360i-tipo-desenho{--g:"\e012"}
+.g360i-tipo-formula{--g:"\e013"}
+.g360i-tipo-objetiva{--g:"\e014"}
+.g360i-tipo-texto{--g:"\e015"}
+.g360i-webcam{--g:"\e016"}
+.g360i-painel{--g:"\e017"}
+.g360i-usuarios-configuracao{--g:"\e018"}
+.g360i-clientes{--g:"\e019"}
+.g360i-acessos-internos{--g:"\e01a"}
+.g360i-instituicoes-cadastro{--g:"\e01b"}
+.g360i-pedidos-titulares{--g:"\e01c"}
+.g360i-exportacoes-titulares{--g:"\e01d"}
+.g360i-prova{--g:"\e01e"}
+.g360i-corrigir{--g:"\e01f"}
+.g360i-turma{--g:"\e020"}
+.g360i-disciplina{--g:"\e021"}
+.g360i-instituicao{--g:"\e022"}
+.g360i-solicitacao{--g:"\e023"}
+.g360i-instituicao-gestao{--g:"\e024"}
+.g360i-relatorio{--g:"\e025"}
+.g360i-escola{--g:"\e026"}
+.g360i-aluno{--g:"\e027"}
+.g360i-equipe{--g:"\e028"}
+.g360i-copias{--g:"\e029"}
+.g360i-menu{--g:"\e02a"}
+.g360i-mais-vertical{--g:"\e02b"}
+.g360i-sair{--g:"\e02c"}
+.g360i-perfil{--g:"\e02d"}
+.g360i-configuracoes{--g:"\e02e"}
+.g360i-trocar-vinculo{--g:"\e02f"}
+.g360i-plano-e-uso{--g:"\e030"}
+.g360i-tema-claro{--g:"\e031"}
+.g360i-tema-escuro{--g:"\e032"}
+.g360i-adicionar{--g:"\e033"}
+.g360i-editar{--g:"\e034"}
+.g360i-salvar{--g:"\e035"}
+.g360i-excluir{--g:"\e036"}
+.g360i-arquivar{--g:"\e037"}
+.g360i-copiar{--g:"\e038"}
+.g360i-imprimir{--g:"\e039"}
+.g360i-baixar{--g:"\e03a"}
+.g360i-enviar-arquivo{--g:"\e03b"}
+.g360i-compartilhar{--g:"\e03c"}
+.g360i-buscar{--g:"\e03d"}
+.g360i-filtro{--g:"\e03e"}
+.g360i-limpar-filtro{--g:"\e03f"}
+.g360i-ordenar{--g:"\e040"}
+.g360i-ordenar-crescente{--g:"\e041"}
+.g360i-ordenar-decrescente{--g:"\e042"}
+.g360i-ver{--g:"\e043"}
+.g360i-ocultar{--g:"\e044"}
+.g360i-atualizar{--g:"\e045"}
+.g360i-desfazer{--g:"\e046"}
+.g360i-arrastar{--g:"\e047"}
+.g360i-mover{--g:"\e048"}
+.g360i-fixar{--g:"\e049"}
+.g360i-redimensionar{--g:"\e04a"}
+.g360i-ampliar{--g:"\e04b"}
+.g360i-diminuir{--g:"\e04c"}
+.g360i-tela-cheia{--g:"\e04d"}
+.g360i-gerar-pdf{--g:"\e04e"}
+.g360i-exibir-tabela{--g:"\e04f"}
+.g360i-exibir-cards{--g:"\e050"}
+.g360i-opcoes{--g:"\e051"}
+.g360i-abrir-painel{--g:"\e052"}
+.g360i-voltar{--g:"\e053"}
+.g360i-avancar{--g:"\e054"}
+.g360i-chevron-esquerda{--g:"\e055"}
+.g360i-chevron-direita{--g:"\e056"}
+.g360i-chevron-cima{--g:"\e057"}
+.g360i-chevron-baixo{--g:"\e058"}
+.g360i-rolar-horizontal{--g:"\e059"}
+.g360i-link-externo{--g:"\e05a"}
+.g360i-transferir{--g:"\e05b"}
+.g360i-confirmar{--g:"\e05c"}
+.g360i-fechar{--g:"\e05d"}
+.g360i-sucesso{--g:"\e05e"}
+.g360i-erro{--g:"\e05f"}
+.g360i-alerta{--g:"\e060"}
+.g360i-informacao{--g:"\e061"}
+.g360i-ajuda{--g:"\e062"}
+.g360i-carregando{--g:"\e063"}
+.g360i-aguardando{--g:"\e064"}
+.g360i-periodo-teste{--g:"\e065"}
+.g360i-tendencia-alta{--g:"\e066"}
+.g360i-tendencia-baixa{--g:"\e067"}
+.g360i-tendencia-estavel{--g:"\e068"}
+.g360i-cadeado{--g:"\e069"}
+.g360i-desbloqueado{--g:"\e06a"}
+.g360i-leitura-conferida{--g:"\e06b"}
+.g360i-notificacao{--g:"\e06c"}
+.g360i-sem-conexao{--g:"\e06d"}
+.g360i-situacao{--g:"\e06e"}
+.g360i-camera{--g:"\e06f"}
+.g360i-lanterna{--g:"\e070"}
+.g360i-pdf{--g:"\e071"}
+.g360i-documento{--g:"\e072"}
+.g360i-rascunho{--g:"\e073"}
+.g360i-calendario{--g:"\e074"}
+.g360i-relogio{--g:"\e075"}
+.g360i-email{--g:"\e076"}
+.g360i-telefone{--g:"\e077"}
+.g360i-local{--g:"\e078"}
+.g360i-inep{--g:"\e079"}
+.g360i-grafico-barras{--g:"\e07a"}
+.g360i-grafico-barras-horizontais{--g:"\e07b"}
+.g360i-grafico-linha{--g:"\e07c"}
+.g360i-senha{--g:"\e07d"}
+.g360i-qr-code{--g:"\e07e"}
+.g360i-cartao-resposta{--g:"\e07f"}
+.g360i-questao{--g:"\e080"}
+.g360i-banco-questoes{--g:"\e081"}
+.g360i-gabarito{--g:"\e082"}
+.g360i-simulado{--g:"\e083"}
+.g360i-aplicacao{--g:"\e084"}
+.g360i-nota{--g:"\e085"}
+.g360i-acerto{--g:"\e086"}
+.g360i-erro-questao{--g:"\e087"}
+.g360i-anulada{--g:"\e088"}
+.g360i-em-branco{--g:"\e089"}
+.g360i-marcacao-dupla{--g:"\e08a"}
+.g360i-escriba{--g:"\e08b"}
+.g360i-curadoria{--g:"\e08c"}
+.g360i-olimpiada{--g:"\e08d"}

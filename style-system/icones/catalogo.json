@@ -1,0 +1,879 @@
+{
+  "lotes": {
+    "1 · Plano e uso e Leitor360 (feito)": [
+      {
+        "id": "adicionais",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "beneficio",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "cobertura-plano",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "consumo-ciclo",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "consumo-operacao",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "contratacao",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "correcoes-disponiveis",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "franquia-ciclo",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "galeria",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "leitura-pendente",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "lote-pdf",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "operacoes-processamento",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "pagina-faltando",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "reenvio",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "referencia-acompanhamento",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "teto-operacao",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "teto-periodo",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "tipo-desenho",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "tipo-formula",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "tipo-objetiva",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "tipo-texto",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      },
+      {
+        "id": "webcam",
+        "significado": "",
+        "origem": "mockup",
+        "nota": "lote 1 entregue"
+      }
+    ],
+    "2 · Menu e casca": [
+      {
+        "id": "painel",
+        "significado": "Painel (início)",
+        "origem": "menu",
+        "nota": "item painel; hoje casa"
+      },
+      {
+        "id": "usuarios-configuracao",
+        "significado": "Configurações de usuários",
+        "origem": "menu",
+        "nota": "item funcoes; hoje equipe"
+      },
+      {
+        "id": "clientes",
+        "significado": "Clientes",
+        "origem": "menu",
+        "nota": "item clientes; hoje equipe"
+      },
+      {
+        "id": "acessos-internos",
+        "significado": "Acessos internos",
+        "origem": "menu",
+        "nota": "item internos; hoje equipe"
+      },
+      {
+        "id": "instituicoes-cadastro",
+        "significado": "Cadastro de instituições (atendimento)",
+        "origem": "menu",
+        "nota": "item catalogo_atendimento; hoje escola"
+      },
+      {
+        "id": "pedidos-titulares",
+        "significado": "Pedidos de titulares (LGPD)",
+        "origem": "menu",
+        "nota": "item pedidos; hoje equipe"
+      },
+      {
+        "id": "exportacoes-titulares",
+        "significado": "Exportações de titulares",
+        "origem": "menu",
+        "nota": "item exportacoes; hoje equipe"
+      },
+      {
+        "id": "prova",
+        "significado": "Provas",
+        "origem": "menu",
+        "nota": "item provas; 20 usos no app, 5 desenhos"
+      },
+      {
+        "id": "corrigir",
+        "significado": "Corrigir",
+        "origem": "menu",
+        "nota": "item corrigir; hoje camera"
+      },
+      {
+        "id": "turma",
+        "significado": "Turmas",
+        "origem": "menu",
+        "nota": "item turmas"
+      },
+      {
+        "id": "disciplina",
+        "significado": "Disciplinas",
+        "origem": "menu",
+        "nota": "item disciplinas; hoje prova"
+      },
+      {
+        "id": "instituicao",
+        "significado": "Minhas instituições",
+        "origem": "menu",
+        "nota": "item instituicoes; hoje escola"
+      },
+      {
+        "id": "solicitacao",
+        "significado": "Minhas solicitações",
+        "origem": "menu",
+        "nota": "item catalogo_pedidos; hoje escola"
+      },
+      {
+        "id": "instituicao-gestao",
+        "significado": "Cadastro institucional",
+        "origem": "menu",
+        "nota": "item catalogo_gestao; hoje escola"
+      },
+      {
+        "id": "relatorio",
+        "significado": "Relatórios",
+        "origem": "menu",
+        "nota": "item relatorios; hoje grafico"
+      },
+      {
+        "id": "escola",
+        "significado": "Escolas",
+        "origem": "menu",
+        "nota": "item escolas; prédio x capelo hoje"
+      },
+      {
+        "id": "aluno",
+        "significado": "Alunos",
+        "origem": "menu",
+        "nota": "item alunos"
+      },
+      {
+        "id": "equipe",
+        "significado": "Equipe",
+        "origem": "menu",
+        "nota": "item equipe; 7 desenhos hoje"
+      },
+      {
+        "id": "copias",
+        "significado": "Cópias",
+        "origem": "menu",
+        "nota": "item copias; hoje prova"
+      },
+      {
+        "id": "menu",
+        "significado": "Abrir / recolher menu",
+        "origem": "menu",
+        "nota": "casca"
+      },
+      {
+        "id": "mais-vertical",
+        "significado": "Mais (navegação inferior)",
+        "origem": "menu",
+        "nota": "casca, celular"
+      },
+      {
+        "id": "sair",
+        "significado": "Sair da conta",
+        "origem": "menu",
+        "nota": "casca"
+      },
+      {
+        "id": "perfil",
+        "significado": "Meu perfil",
+        "origem": "menu",
+        "nota": "casca; hoje aluno"
+      },
+      {
+        "id": "configuracoes",
+        "significado": "Configurações",
+        "origem": "menu",
+        "nota": "casca; engrenagem"
+      },
+      {
+        "id": "trocar-vinculo",
+        "significado": "Trocar vínculo / acesso",
+        "origem": "menu",
+        "nota": "casca; hoje transferir"
+      },
+      {
+        "id": "plano-e-uso",
+        "significado": "Plano e uso (menu da conta)",
+        "origem": "mockup",
+        "nota": "item novo; hoje grafico"
+      },
+      {
+        "id": "tema-claro",
+        "significado": "Mudar para tema claro",
+        "origem": "app",
+        "nota": "sol"
+      },
+      {
+        "id": "tema-escuro",
+        "significado": "Mudar para tema escuro",
+        "origem": "app",
+        "nota": "lua"
+      }
+    ],
+    "3 · Ações": [
+      {
+        "id": "adicionar",
+        "significado": "Adicionar / novo",
+        "origem": "app",
+        "nota": "19 usos; inclui o '+ ' dos botões"
+      },
+      {
+        "id": "editar",
+        "significado": "Editar",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "salvar",
+        "significado": "Salvar",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "excluir",
+        "significado": "Excluir",
+        "origem": "app",
+        "nota": "lixeira, hoje sem uso"
+      },
+      {
+        "id": "arquivar",
+        "significado": "Arquivar / desarquivar",
+        "origem": "app",
+        "nota": "hoje arquivo; colide com lote"
+      },
+      {
+        "id": "copiar",
+        "significado": "Copiar",
+        "origem": "previsto",
+        "nota": "FA: interface"
+      },
+      {
+        "id": "imprimir",
+        "significado": "Imprimir / cartões em PDF",
+        "origem": "app",
+        "nota": "11 usos"
+      },
+      {
+        "id": "baixar",
+        "significado": "Baixar",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "enviar-arquivo",
+        "significado": "Enviar arquivo (upload)",
+        "origem": "previsto",
+        "nota": "FA: arquivos"
+      },
+      {
+        "id": "compartilhar",
+        "significado": "Compartilhar",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "buscar",
+        "significado": "Buscar",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "filtro",
+        "significado": "Filtrar",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "limpar-filtro",
+        "significado": "Limpar filtros",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "ordenar",
+        "significado": "Ordenar (neutro)",
+        "origem": "app",
+        "nota": "hoje ↕"
+      },
+      {
+        "id": "ordenar-crescente",
+        "significado": "Ordem crescente",
+        "origem": "app",
+        "nota": "hoje ↑"
+      },
+      {
+        "id": "ordenar-decrescente",
+        "significado": "Ordem decrescente",
+        "origem": "app",
+        "nota": "hoje ↓"
+      },
+      {
+        "id": "ver",
+        "significado": "Ver / detalhes",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "ocultar",
+        "significado": "Ocultar",
+        "origem": "previsto",
+        "nota": "par de ver; senha"
+      },
+      {
+        "id": "atualizar",
+        "significado": "Atualizar / tentar de novo",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "desfazer",
+        "significado": "Desfazer",
+        "origem": "previsto",
+        "nota": "FA: interface"
+      },
+      {
+        "id": "arrastar",
+        "significado": "Arrastar (alça)",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "mover",
+        "significado": "Mover / reordenar",
+        "origem": "app",
+        "nota": "hoje seta girada"
+      },
+      {
+        "id": "fixar",
+        "significado": "Fixar",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "redimensionar",
+        "significado": "Redimensionar",
+        "origem": "app",
+        "nota": "cor fixa hoje"
+      },
+      {
+        "id": "ampliar",
+        "significado": "Ampliar (zoom +)",
+        "origem": "app",
+        "nota": "hoje +"
+      },
+      {
+        "id": "diminuir",
+        "significado": "Diminuir (zoom −)",
+        "origem": "app",
+        "nota": "hoje −"
+      },
+      {
+        "id": "tela-cheia",
+        "significado": "Tela cheia",
+        "origem": "previsto",
+        "nota": "leitor de folha"
+      },
+      {
+        "id": "gerar-pdf",
+        "significado": "Gerar PDF",
+        "origem": "app",
+        "nota": "hoje pdf"
+      },
+      {
+        "id": "exibir-tabela",
+        "significado": "Exibir como tabela",
+        "origem": "app",
+        "nota": "hoje prova"
+      },
+      {
+        "id": "exibir-cards",
+        "significado": "Exibir como cards",
+        "origem": "app",
+        "nota": "hoje turma"
+      },
+      {
+        "id": "opcoes",
+        "significado": "Mais opções (horizontal)",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "abrir-painel",
+        "significado": "Abrir painel atual",
+        "origem": "app",
+        "nota": ""
+      }
+    ],
+    "4 · Setas e navegação": [
+      {
+        "id": "voltar",
+        "significado": "Voltar",
+        "origem": "app",
+        "nota": "13 usos"
+      },
+      {
+        "id": "avancar",
+        "significado": "Avançar / continuar",
+        "origem": "app",
+        "nota": "hoje →"
+      },
+      {
+        "id": "chevron-esquerda",
+        "significado": "Anterior",
+        "origem": "app",
+        "nota": "hoje ‹"
+      },
+      {
+        "id": "chevron-direita",
+        "significado": "Próxima / expandir",
+        "origem": "app",
+        "nota": "hoje › e avulso"
+      },
+      {
+        "id": "chevron-cima",
+        "significado": "Recolher",
+        "origem": "app",
+        "nota": "hoje ▲"
+      },
+      {
+        "id": "chevron-baixo",
+        "significado": "Expandir",
+        "origem": "app",
+        "nota": "hoje ▼"
+      },
+      {
+        "id": "rolar-horizontal",
+        "significado": "Dica de rolagem lateral",
+        "origem": "app",
+        "nota": "hoje ↔"
+      },
+      {
+        "id": "link-externo",
+        "significado": "Abrir em nova aba",
+        "origem": "previsto",
+        "nota": "Central do cliente externa"
+      },
+      {
+        "id": "transferir",
+        "significado": "Transferir",
+        "origem": "app",
+        "nota": "conceito diferente de trocar-vinculo"
+      }
+    ],
+    "5 · Estados e avisos": [
+      {
+        "id": "confirmar",
+        "significado": "Confirmar / concluído",
+        "origem": "app",
+        "nota": "hoje ✓"
+      },
+      {
+        "id": "fechar",
+        "significado": "Fechar / cancelar",
+        "origem": "app",
+        "nota": "21 usos; hoje ✕ ×"
+      },
+      {
+        "id": "sucesso",
+        "significado": "Sucesso (check em círculo)",
+        "origem": "app",
+        "nota": "situacao-ativa e toast"
+      },
+      {
+        "id": "erro",
+        "significado": "Erro",
+        "origem": "app",
+        "nota": "toast"
+      },
+      {
+        "id": "alerta",
+        "significado": "Atenção",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "informacao",
+        "significado": "Informação",
+        "origem": "previsto",
+        "nota": "FA: alertas"
+      },
+      {
+        "id": "ajuda",
+        "significado": "Ajuda",
+        "origem": "previsto",
+        "nota": "FA: alertas"
+      },
+      {
+        "id": "carregando",
+        "significado": "Em andamento",
+        "origem": "app",
+        "nota": "toast"
+      },
+      {
+        "id": "aguardando",
+        "significado": "Aguardando pagamento / pendente",
+        "origem": "app",
+        "nota": "hoje ⏳"
+      },
+      {
+        "id": "periodo-teste",
+        "significado": "Período de teste",
+        "origem": "app",
+        "nota": "hoje ⏱"
+      },
+      {
+        "id": "tendencia-alta",
+        "significado": "Alta",
+        "origem": "app",
+        "nota": "hoje ▲ ↑"
+      },
+      {
+        "id": "tendencia-baixa",
+        "significado": "Queda",
+        "origem": "app",
+        "nota": "hoje ▼ ↓"
+      },
+      {
+        "id": "tendencia-estavel",
+        "significado": "Estável",
+        "origem": "app",
+        "nota": "hoje →"
+      },
+      {
+        "id": "cadeado",
+        "significado": "Bloqueado / correção fechada",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "desbloqueado",
+        "significado": "Desbloqueado / reabrir",
+        "origem": "previsto",
+        "nota": "par do cadeado"
+      },
+      {
+        "id": "leitura-conferida",
+        "significado": "Leitura conferida",
+        "origem": "mockup",
+        "nota": "hoje ✓"
+      },
+      {
+        "id": "notificacao",
+        "significado": "Notificações",
+        "origem": "previsto",
+        "nota": "fila do modo servidor avisa no fim"
+      },
+      {
+        "id": "sem-conexao",
+        "significado": "Sem conexão",
+        "origem": "previsto",
+        "nota": "o app exige internet"
+      },
+      {
+        "id": "situacao",
+        "significado": "Ligado / desligado",
+        "origem": "app",
+        "nota": "sem uso hoje"
+      }
+    ],
+    "6 · Conteúdo e dados": [
+      {
+        "id": "camera",
+        "significado": "Fotografar",
+        "origem": "app",
+        "nota": "10 usos"
+      },
+      {
+        "id": "lanterna",
+        "significado": "Lanterna",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "pdf",
+        "significado": "Arquivo PDF",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "documento",
+        "significado": "Documento",
+        "origem": "app",
+        "nota": "hoje documento-linhas, sentido variável"
+      },
+      {
+        "id": "rascunho",
+        "significado": "Rascunho",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "calendario",
+        "significado": "Calendário / agenda",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "relogio",
+        "significado": "Horário / prazo",
+        "origem": "previsto",
+        "nota": "FA: tempo"
+      },
+      {
+        "id": "email",
+        "significado": "E-mail",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "telefone",
+        "significado": "Telefone",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "local",
+        "significado": "Endereço",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "inep",
+        "significado": "Código INEP",
+        "origem": "app",
+        "nota": "hoje monitor"
+      },
+      {
+        "id": "grafico-barras",
+        "significado": "Gráfico de barras",
+        "origem": "app",
+        "nota": "barras-verticais"
+      },
+      {
+        "id": "grafico-barras-horizontais",
+        "significado": "Gráfico de barras horizontais",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "grafico-linha",
+        "significado": "Evolução",
+        "origem": "app",
+        "nota": ""
+      },
+      {
+        "id": "senha",
+        "significado": "Senha / chave",
+        "origem": "previsto",
+        "nota": "hoje cadeado avulso"
+      },
+      {
+        "id": "qr-code",
+        "significado": "QR code do cartão",
+        "origem": "previsto",
+        "nota": "cartão-resposta tem QR"
+      },
+      {
+        "id": "cartao-resposta",
+        "significado": "Cartão-resposta",
+        "origem": "previsto",
+        "nota": "núcleo do produto; hoje sem ícone"
+      }
+    ],
+    "7 · Avaliação e questões (previsto)": [
+      {
+        "id": "questao",
+        "significado": "Questão",
+        "origem": "previsto",
+        "nota": "banco de questões"
+      },
+      {
+        "id": "banco-questoes",
+        "significado": "Banco de questões",
+        "origem": "previsto",
+        "nota": ""
+      },
+      {
+        "id": "gabarito",
+        "significado": "Gabarito oficial",
+        "origem": "previsto",
+        "nota": "comparação da leitura"
+      },
+      {
+        "id": "simulado",
+        "significado": "Simulado",
+        "origem": "previsto",
+        "nota": "branch dc1-simulados"
+      },
+      {
+        "id": "aplicacao",
+        "significado": "Aplicação de prova",
+        "origem": "previsto",
+        "nota": "identidade da cobrança"
+      },
+      {
+        "id": "nota",
+        "significado": "Nota / resultado",
+        "origem": "previsto",
+        "nota": ""
+      },
+      {
+        "id": "acerto",
+        "significado": "Acerto",
+        "origem": "previsto",
+        "nota": "relatórios"
+      },
+      {
+        "id": "erro-questao",
+        "significado": "Erro de questão",
+        "origem": "previsto",
+        "nota": "relatórios"
+      },
+      {
+        "id": "anulada",
+        "significado": "Questão anulada",
+        "origem": "previsto",
+        "nota": "leitura: anulada"
+      },
+      {
+        "id": "em-branco",
+        "significado": "Em branco",
+        "origem": "previsto",
+        "nota": "leitura: branco"
+      },
+      {
+        "id": "marcacao-dupla",
+        "significado": "Marcação dupla",
+        "origem": "previsto",
+        "nota": "leitura: dupla"
+      },
+      {
+        "id": "escriba",
+        "significado": "Recursos do Escriba",
+        "origem": "previsto",
+        "nota": "nunca 'IA' na tela"
+      },
+      {
+        "id": "curadoria",
+        "significado": "Curadoria de questões",
+        "origem": "previsto",
+        "nota": "recompensa após curadoria"
+      },
+      {
+        "id": "olimpiada",
+        "significado": "Olimpíada (OBMEP)",
+        "origem": "previsto",
+        "nota": "origem do produto"
+      }
+    ]
+  },
+  "fora_da_fonte": [
+    {
+      "id": "indicador-situacao",
+      "motivo": "Ponto ● de situação: forma CSS, não glifo"
+    },
+    {
+      "id": "legenda-cor",
+      "motivo": "Amostra de cor na legenda: forma CSS, não glifo"
+    },
+    {
+      "id": "marca",
+      "motivo": "Símbolo da marca: continua SVG próprio, fora da fonte"
+    }
+  ],
+  "total": 141
+}
