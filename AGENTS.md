@@ -5,7 +5,7 @@ Este arquivo resume as regras vigentes do Gabarito360. Ele vale para todos os ag
 O histórico e as justificativas estão nos [registros de decisão](docs/decisoes/README.md). Em conflito entre este resumo e um ADR, vale o ADR.
 A porta de entrada da documentação é [docs/README.md](docs/README.md).
 
-**Versão dos princípios: 18.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
+**Versão dos princípios: 19.** Os princípios podem mudar a qualquer momento. Uma mudança vale para todas as fases futuras ([ADR-0053](docs/decisoes/0053-principios-executaveis-e-mutaveis.md)).
 Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python scripts/verificar_principios.py --atualizar` e `python scripts/gerar_agents.py`.
 
 
@@ -93,6 +93,10 @@ Para mudar uma regra deste arquivo, altere o ADR correspondente e rode `python s
 - Use o TailwindCSS com a paleta Gabarito360 como base visual. ([ADR-0026](docs/decisoes/0026-tailwindcss-como-base-visual.md))
 - As telas ocupam toda a área útil. ([ADR-0021](docs/decisoes/0021-telas-ocupam-toda-a-area-util.md))
 - Tabelas usam `x-tabela`, dentro do card principal. ([ADR-0022](docs/decisoes/0022-tabelas-cards-de-registros-e-avisos.md))
+- Use só a fonte G360 Icones para ícones de interface: <span class=\"g360i g360i-<id>\" aria-hidden=\"true\">.
+- Não use emoji, caractere Unicode nem SVG avulso como ícone; ícone que falta entra na família pelo registro.
+- Não mude o código de um glifo existente; ícone novo entra no fim de registro.json.
+- Cor de ícone só por token (currentColor ou as classes de tom); nenhuma cor fixa. ([ADR-0063](docs/decisoes/0063-familia-de-icones-propria-em-fonte.md))
 - Em toda tabela, a coluna Ações fica à direita, como última coluna, com conteúdo centralizado. ([ADR-0039](docs/decisoes/0039-coluna-de-acoes-a-direita-e-ordenacao.md))
 - JavaScript executável fica em arquivos externos. Sem `<script>` inline nem `onclick`. ([ADR-0023](docs/decisoes/0023-javascript-em-arquivos-externos.md))
 - Confirmações usam modal da aplicação, nunca `confirm`, `alert` ou `prompt`. ([ADR-0025](docs/decisoes/0025-confirmacoes-em-modal-e-acoes-de-turma.md))
